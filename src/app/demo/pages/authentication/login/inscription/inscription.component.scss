@@ -364,3 +364,77 @@ nav {
     transform: translateY(0);
   }
 }
+
+// Style pour les temoignage
+
+.container_temoignage {
+  background-color: #0672E4;
+  height: 60vh;
+}
+
+.content_temoignage {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  align-items: center;
+}
+
+.temoignage_left {
+  margin-left: 90px;
+}
+
+.temoignage_right {
+  margin-left: 20px;
+  margin-right: 50px;
+}
+
+.temoignage_right .title{
+  color: #fff;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+
+.temoignage_right .contenue {
+  color: #f0eeee;
+  letter-spacing: 1px;
+  line-height: 20px;
+}
+
+.temoignage_right .contenue ul {
+  margin-top: 10px;
+  width: 90%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Style pour footer 
+
+.mes_footer {
+  height: 10vh;
+  background-color: #202020;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.copyRight {
+  color: #fff;
+  // text-align: center;
+  font-size: 12px;
+}
