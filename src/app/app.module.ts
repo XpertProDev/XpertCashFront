@@ -1,5 +1,5 @@
 import { LOCALE_ID, NgModule } from '@angular/core';
-import { CommonModule, registerLocaleData } from '@angular/common';
+import {CommonModule, registerLocaleData } from '@angular/common';
 
 // importation de DATE
 import * as fr from '@angular/common/locales/fr';

@@ -25,6 +25,10 @@ const routes: Routes = [
         loadComponent: () => import('./demo/pages/authentication/login/inscription/inscription.component').then(m => m.InscriptionComponent)
       },
       {
+        path: 'connexion',
+        loadComponent: () => import('./demo/pages/authentication/login/connexion-page/connexion-page.component').then(m => m.ConnexionPageComponent)
+      },
+      {
         path: 'auth/signup',
         loadComponent: () => import('./demo/pages/authentication/sign-up/sign-up.component')
       },

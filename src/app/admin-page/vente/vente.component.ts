@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
 
 
@@ -6,6 +5,7 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 
 

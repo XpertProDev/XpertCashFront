@@ -229,6 +229,15 @@ export const NavigationItems: NavigationItem[] = [
         breadcrumbs: false
       },
       {
+        id: 'connexion',
+        title: 'Connection',
+        type: 'item',
+        url: '/auth/connexion',
+        icon: 'feather icon-at-sign',
+        target: true,
+        breadcrumbs: false
+      },
+      {
         id: 'signup',
         title: 'Sign up',
         type: 'item',

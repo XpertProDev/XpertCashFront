@@ -1,1 +1,143 @@
-<p>connexion-page works!</p>
+<div class="container_global">
+    <div class="container_global_content">
+        <!--=========================== NAVIGATION ===========================-->
+        <header class="navbar">
+            <nav id="nav">
+                <!--========= LOGO ========-->
+                <div class="logo">
+                    <h2>Xpert<span>Cash</span></h2>
+                </div>
+                <section class="nav-menu" id="nav-menu">
+                    
+                    <!--========= LIST ========-->
+                        <ul class="nav-list">
+                            <li class="nav-items"><a class="nav__link">Se connecter</a></li>
+                        
+                    <!--========= NEMU-BARS-CLOSE ========-->
+                            <li class="menu-close" id="menu-close">
+                                <i class="fas fa-xmark"></i>
+                            </li>
+                        </ul>
+        
+                </section>
+            
+                <!--========= NEMU-BARS-TOGGLE ========-->
+                <div class="menu-bars" id="menu-bars">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </nav>
+        </header>
+    
+        <!-- Page -->
+        <div class="content_page">
+
+
+          <div class="title_form">
+            <h2>Connexion</h2>
+          </div>
+
+            <section class="formulaire_img">
+                <div class="info_form_left">
+                    <form [formGroup]="loginForm" (ngSubmit)="submitForm()">
+                        <div class="formulaire">
+                          <!-- Nom complet -->
+                          <div class="champ_input ">
+                            <input type="email" formControlName="email" class="input_focus" placeholder="Saisis votre email">
+                            <label class="label">Votre email</label>
+                            <div *ngIf="f['email'].touched && f['email'].invalid" class="error-message">
+                              <span *ngIf="f['email'].errors?.['required']">Email est vide.</span>
+                              <span *ngIf="f['email'].errors?.['email']">Email n'est pas valide.</span>
+                            </div>
+                          </div>
+
+                          <div class="champ_input">
+                            <input type="password" formControlName="password" class="input_focus" placeholder="****************">
+                            <label class="label">Mot de passe</label>
+                            <div *ngIf="f['password'].touched && f['password'].invalid" class="error-message">
+                                <span *ngIf="f['password'].errors?.['required']">Mot de passe est vide.</span>
+                                <span *ngIf="f['password'].errors?.['minlength']">Au moins 8 caractères.</span>
+                            </div>
+                         </div>
+
+                         <div class="resetPassword">
+                          <p>Mot de passe oublié</p>
+                         </div>
+                      
+                          <!-- Message d'erreur global -->
+                          <div *ngIf="errorMessage" class="error-message">
+                            {{ errorMessage }}
+                          </div>
+                      
+                          <!-- Bouton de soumission -->
+                          <div class="btn_contact">
+                            <button type="submit">Se connecter</button>
+                          </div>
+                        </div>
+
+                        <!-- Popup de confirmation / d'erreur -->
+                        <div class="modal-overlay" *ngIf="showPopup">
+                            <div class="modal-content" [ngClass]="{'error': popupType === 'error'}">
+                              <div class="popup-header">
+                                <div class="popup-img">
+                                    <img [src]="popupImage" alt="Icone" class="popup-icon">
+                                </div>
+                                <h2>{{ popupTitle }}</h2>
+                              </div>
+                              <p>{{ popupMessage }}</p>
+                              <button (click)="closePopup()">OK</button>
+                            </div>
+                        </div>
+                        
+  
+                      </form>                
+                </div>
+
+                <div class="info_form_right">
+                    <div class="image_header">
+                        <img src="assets/img/logout_img.png" alt="">
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+</div>
+
+<!-- Les diffrenet temoignage -->
+<div class="container_temoignage">
+
+  <div class="content_temoignage">
+    <!-- temoignage left image -->
+    <div class="temoignage_left">
+      <div class="image_temoignage">
+        <img src="assets/img/temoignage1.png" alt="Image de temoignage">
+      </div>
+    </div>
+    <!-- temoignage right contenue -->
+    <div class="temoignage_right">
+      <h2 class="title">Une Expérience Exceptionnelle !</h2>
+      <div class="contenue">
+        J’ai été impressionné par la qualité du service et l’attention portée aux détails. Dès le premier contact, j’ai ressenti un réel professionnalisme et une écoute attentive.
+        <ul>
+          <li>
+            Le processus a été fluide, rapide et parfaitement adapté à mes besoins.
+          </li>
+          <li>
+            Je recommande vivement à toute personne cherchant une expérience fiable et de grande qualité. Merci encore pour cette belle prestation !
+          </li>
+        </ul>
+      </div>
+      
+    </div>
+  </div>
+
+ </div>
+
+
+ <!-- Page footer -->
+
+ <footer class="mes_footer">
+  <p class="copyRight">
+    © Copyright Groupe XpertPro
+  </p>
+ </footer>
