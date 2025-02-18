@@ -59,9 +59,101 @@ export class ConnexionPageComponent {
   }
 
   submitForm(): void {
-    
+    if (this.loginForm.invalid) {
+      this.errorMessage = "Veuillez vérifier les informations saisies.";
+      return;
+    }
+  
+    // Récupérer les valeurs du formulaire
+    const credentials = this.loginForm.value;
+  
+    this.usersService.ccc(credentials).subscribe({
+      next: (response) => {
+        if (response.token) {
+          // ✅ Stocker le token dans le localStorage ou sessionStorage
+          localStorage.setItem('authToken', response.token);
+  
+          // ✅ Ouvrir la popup de succès
+          this.openPopup("Connexion réussie !", response.message ?? "Connexion réussie.", 'success');
+
+  
+          // ✅ Redirection après la fermeture de la popup
+          setTimeout(() => {
+            this.router.navigate(['/analytics']); // 🔄 Change "/dashboard" par ta page d'accueil après connexion
+          }, 1500);
+        } else {
+          this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
+          this.openPopup("Erreur de connexion", this.errorMessage, 'error');
+        }
+      },
+      error: (error) => {
+        console.log("Erreur complète :", error);
+        console.log("Réponse API :", error.error);
+  
+        let message = "Une erreur est survenue lors de la connexion.";
+  
+        if (error.status === 400 || error.status === 401) {
+          if (typeof error.error === "string") {
+            message = error.error;
+          } else if (error.error?.error) {
+            message = error.error.error;
+          }
+        }
+  
+        this.openPopup("❌ Oups, une erreur !", message, "error");
+      }
+    });
   }
+  
+
+  // submitForm(): void {
+  //   if (this.loginForm.invalid) {
+  //     this.errorMessage = "Veuillez vérifier les informations saisies.";
+  //     return;
+  //   }
+  
+  //   const credentials = this.loginForm.value;
+  
+  //   this.usersService.ccc(credentials).subscribe({
+  //     next: (response) => {
+  //       if (response && response.token) {
+  //         // Stocker le token dans le localStorage ou sessionStorage
+  //         localStorage.setItem('token', response.token);
+  
+  //         // Afficher la popup de succès
+  //         this.openPopup("Connexion réussie !", "Bienvenue sur votre espace.", 'success');
+  //       } else {
+  //         this.errorMessage = response.error || "Erreur de connexion.";
+  //         this.openPopup("Erreur de connexion", this.errorMessage, 'error');
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.log("Erreur complète :", error);
+  //       console.log("Réponse API :", error.error);
+  
+  //       let message = "Une erreur est survenue lors de la connexion.";
+  
+  //       if (error.status === 400 || error.status === 401) {
+  //         if (typeof error.error === "string") {
+  //           // Extraction avancée du message d'erreur
+  //           const match = error.error.match(/interpolatedMessage='([^']+)'/);
+  //           message = match ? match[1] : error.error;
+  //         } else if (error.error?.error) {
+  //           message = error.error.error;
+  //         }
+  //       }
+  
+  //       this.openPopup("❌ Oups, une erreur !", message, "error");
+  //     }
+  //   });
+  // }
+  
 
   // Getter pour faciliter l'accès aux contrôles dans le template
+
+
+  goToregister() {
+    this.router.navigate(['/inscription']);
+  }
   get f() { return this.loginForm.controls; }
 }
