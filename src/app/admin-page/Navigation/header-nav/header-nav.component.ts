@@ -12,8 +12,8 @@ export class HeaderNavComponent {
   constructor(private router: Router) {}
 
 
-goToInscription() {
-  this.router.navigate(['/inscription']);
+  goTologin() {
+  this.router.navigate(['/connexion']);
 }
 
 }
