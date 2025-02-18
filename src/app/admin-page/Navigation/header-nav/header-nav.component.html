@@ -1,0 +1,22 @@
+<header class="navbar">
+    <nav id="nav">
+        <!--========= LOGO ========-->
+        <div class="logo">
+            <h2>Xpert<span>Cash</span></h2>
+        </div>
+
+        <!--========= NAVIGATION ========-->
+        <ul class="nav">
+            <li class="nav-items"><a routerLink="/accueil" class="nav__link">Accueil</a></li>
+            <li class="nav-items"><a routerLink="/apropos" class="nav__link">À propos</a></li>
+            <li class="nav-items"><a routerLink="/services" class="nav__link">Services</a></li>
+            <li class="nav-items"><a routerLink="/contact" class="nav__link">Contact</a></li>
+
+            <!-- Nouvelle item "Connexion" -->
+            <li class="nav-items nav__connexion" (click)="goToInscription()">
+                <a class="nav__link">Connexion</a>
+              </li>
+              
+        </ul>
+    </nav>
+</header>
