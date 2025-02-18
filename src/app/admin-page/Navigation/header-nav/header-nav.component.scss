@@ -1,0 +1,109 @@
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+    background-color: #0672E4;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    border-bottom: 1px solid #dcdcdc;
+    width: 100%;
+    left: 10px;
+  }
+  
+  #nav {
+    position: fixed;
+    width: 100%;
+  }
+  
+  .menu-bars {
+    color: #141414e0;
+    display: none;
+  }
+  
+  .logo h2 {
+    color: #fff;
+    font-size: 20px;
+    margin-left: 30px;
+  }
+  
+  .logo span {
+    color: #E9D421;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 30px;
+  }
+  
+  .nav {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+    padding: 0;
+    margin-left: 20px;  /* Décale tous les items un peu plus à droite */
+  }
+  
+  .nav-items {
+    display: inline-block;
+    padding: 10px 20px;
+  }
+  
+  .nav__link {
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: bold;
+  }
+  
+  
+  
+  /* Nouveau style pour "Connexion" */
+  .nav__connexion {
+    background-color: #FF8C00;  
+    border-radius: 5px;
+    width: auto;  
+    margin-right: 18px;
+    cursor: pointer;
+  }
+  
+  .nav__connexion .nav__link {
+    color: white;  
+    font-weight: normal;
+    padding: 5px 15px;  
+  }
+  
+
+  
+  /* Mobile menu bars (cacher par défaut) */
+  .menu-bars {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    .menu-bars {
+      display: block;
+      cursor: pointer;
+    }
+  
+    .nav {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 80px;
+      right: 0;
+      background-color: #0672E4;
+      width: 100%;
+      gap: 15px;
+      padding: 10px 0;
+    }
+  
+    .nav-items {
+      text-align: center;
+      width: 100%;
+    }
+  
+    .nav.open {
+      display: flex;
+    }
+  }
+  
