@@ -79,7 +79,7 @@ export class InscriptionComponent implements OnInit {
   closePopup(): void {
     this.showPopup = false;
     if (this.popupType === 'success') {
-      this.router.navigate(['/accueilll']);
+      this.router.navigate(['/connexion']);
     }
   }
 
