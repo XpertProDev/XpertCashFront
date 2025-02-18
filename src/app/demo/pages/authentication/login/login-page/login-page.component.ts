@@ -2,12 +2,14 @@ import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
+import { HeaderNavComponent } from "src/app/admin-page/Navigation/header-nav/header-nav.component";
 
 @Component({
   selector: 'app-login-page',
-  imports: [RouterModule, FormsModule, CommonModule],
+  imports: [RouterModule, FormsModule, CommonModule,HeaderNavComponent],
   templateUrl: './login-page.component.html',
-  styleUrl: './login-page.component.scss'
+  styleUrl: './login-page.component.scss',
+
 })
 export class LoginPageComponent {
 
