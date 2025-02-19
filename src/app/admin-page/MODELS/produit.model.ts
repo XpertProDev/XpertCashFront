@@ -9,10 +9,11 @@ export class Produit {
   photo?: string;
   prixAchat?: number;
   quantite?: number;
-  uniteMesure?: UniteMesure;
   alertSeuil?: number;
   createdAt?: Date;
-  category?: CategoryProduit;
+  // Ajoutez ces propriétés pour correspondre au backend
+  uniteMesure?: UniteMesure;
+  categoryProduit?: CategoryProduit;
 
   constructor(init?: Partial<Produit>) {
     Object.assign(this, init);
@@ -28,4 +29,3 @@ export interface CategoryProduit {
   id: number;
   nomCategory: string;
 }
-

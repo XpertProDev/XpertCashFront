@@ -50,7 +50,8 @@
         <td style="font-size: 10px;" [innerHTML]="highlightMatch(task.codeProduit)"></td>
         <td>
           <div class="imgProduit">
-            <img [src]="task.photo || 'assets/img/lait.jpeg'" alt="photo produit">
+            <!-- <img [src]="task.photo || 'assets/img/lait.jpeg'" alt="img"> -->
+            <img [src]="getSafeUrl(task.photo)" alt="Photo produit">
           </div>
         </td> 
         <td [innerHTML]="highlightMatch(task.nomProduit)"></td>

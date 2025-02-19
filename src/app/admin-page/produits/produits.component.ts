@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import jsPDF from 'jspdf';
@@ -13,6 +13,7 @@ import { Categorie } from '../MODELS/categorie.model';
 import { CategorieService } from '../SERVICES/categorie.service';
 import { ProduitService } from '../SERVICES/produit.service';
 import { Produit } from '../MODELS/produit.model';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-produits',
@@ -29,32 +30,46 @@ import { Produit } from '../MODELS/produit.model';
   templateUrl: './produits.component.html',
   styleUrls: ['./produits.component.scss']
 })
-export class ProduitsComponent {
+export class ProduitsComponent implements OnInit {
+  // Recherche et affichage des produits
   searchText: string = '';
-  tasks = [
-    { codeProduit: 'P-0000', photo: 'assets/logo/logoxpertpro.png', nomProduit: 'Riz', nomCategory: 'Alimentation', description: 'Description de produit', prix: '300', prixAchat: 'Facture des ventes', quantite: '200', nomUnite: '60 000', alertSeuil: '60 000' , createdAt: '60 000' },
-  ];
-  
+  // Liste des produits récupérés depuis le backend
+  tasks: any[] = [];
+
+
+
+  constructor(
+    private categorieService: CategorieService,
+    private produitService: ProduitService,
+    private sanitizer: DomSanitizer
+  ) {}
+
+  // pour photo url
+  getSafeUrl(url: string): SafeUrl {
+    return this.sanitizer.bypassSecurityTrustUrl(url);
+  }
+
+  // Méthode de filtrage pour la recherche dans le tableau
   filteredTasks() {
     return this.tasks.filter(task => 
-      task.nomCategory.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.nomProduit.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.codeProduit.toLowerCase().includes(this.searchText.toLowerCase())
+      task.nomCategory?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
     );
   }
 
+  // Mise en évidence du texte recherché dans le tableau
   highlightMatch(text: string): string {
     if (!this.searchText) return text;
     const regex = new RegExp(`(${this.searchText})`, 'gi');
     return text.replace(regex, '<strong>$1</strong>');
   }
 
+  // Gestion du dropdown d'export
   showExportDropdown = false;
-
   toggleExportDropdown() {
     this.showExportDropdown = !this.showExportDropdown;
   }
-
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) { 
     const target = event.target as HTMLElement;
@@ -63,21 +78,22 @@ export class ProduitsComponent {
     }
   }
 
+  // Méthodes pour télécharger en Excel, PDF et CSV
   downloadExcel() {
     const worksheet = XLSX.utils.json_to_sheet(this.tasks);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Tasks');
-    XLSX.writeFile(workbook, 'Facture des produits.xlsx');
+    XLSX.writeFile(workbook, 'Facture_des_produits.xlsx');
   }
 
   downloadPDF() {
     const doc = new jsPDF();
     doc.setFontSize(18);
-    doc.text('Liste des tâches', 14, 22);
+    doc.text('Liste des produits', 14, 22);
     
-    const columns = ['Code', 'Photo', 'Nom du produit', 'Categorie', 'Description', 'Prix', 'Prix achat', 'Quantité', 'Unité', 'Alert seuil', 'Date & heure'];
+    const columns = ['Code', 'Photo', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Prix achat', 'Quantité', 'Unité', 'Alert seuil', 'Date & heure'];
     const rows = this.tasks.map(task => [
-      task.codeProduit, task.nomProduit, task.nomCategory, task.photo,
+      task.codeProduit, task.photo, task.nomProduit, task.nomCategory,
       task.description, task.prix, task.prixAchat, task.quantite, 
       task.nomUnite, task.alertSeuil, task.createdAt
     ]);
@@ -88,11 +104,11 @@ export class ProduitsComponent {
       startY: 30
     });
 
-    doc.save('Facture des ventes.pdf');
+    doc.save('Facture_des_produits.pdf');
   }
 
   downloadCSV() {
-    const headers = ['Code', 'Photo', 'Nom du produit', 'Categorie', 'Description', 'Prix', 'Prix achat', 'Quantité', 'Unité', 'Alert seuil', 'Date & heure'];
+    const headers = ['Code', 'Photo', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Prix achat', 'Quantité', 'Unité', 'Alert seuil', 'Date & heure'];
     const rows = this.tasks.map(task => [
       task.codeProduit, task.photo, task.nomProduit, task.nomCategory,
       task.description, task.prix, task.prixAchat, task.quantite, 
@@ -107,10 +123,11 @@ export class ProduitsComponent {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'Facture des produits.csv';
+    link.download = 'Facture_des_produits.csv';
     link.click();
   }
 
+  // Gestion du fichier sélectionné dans le formulaire d'ajout de produit
   selectedFile: File | null = null;
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -119,19 +136,21 @@ export class ProduitsComponent {
     }
   }
 
+  // Gestion du popup d'ajout de produit
   showPopup: boolean = false;
   openPopup() {
     this.showPopup = true;
   }
-
   closePopup() {
     this.showPopup = false;
   }
 
+  // Pour l'autocomplete des catégories
   control = new FormControl('');
   categories: Categorie[] = [];
   filteredCategories!: Observable<Categorie[]>;
 
+  // Objet produit utilisé dans le formulaire d'ajout
   produit = {
     nomProduit: '',
     description: '',
@@ -143,11 +162,6 @@ export class ProduitsComponent {
     category: { id: 0, nomCategory: '' },
     photo: ''
   };
-
-  constructor(
-    private categorieService: CategorieService,
-    private produitService: ProduitService
-  ) {}
 
   ngOnInit() {
     const token = localStorage.getItem('authToken') || '';
@@ -167,13 +181,36 @@ export class ProduitsComponent {
     } else {
       console.error("Aucun token trouvé, vérifiez la connexion !");
     }
+    // Initialisation de l'autocomplete (au cas où)
     this.filteredCategories = this.control.valueChanges.pipe(
       startWith(''),
       map(value => this._filter(value || ''))
     );
-    
+    // Charger la liste des produits de l'entreprise
+    this.loadProduits();
   }
 
+  // Méthode pour récupérer les produits via le service et mapper les données pour l'affichage
+  loadProduits(): void {
+    this.produitService.getProduitsEntreprise().subscribe({
+      next: (produits: Produit[]) => {
+        console.log("Liste des produits récupérés :", produits); // 🔍 Vérifie les données dans la console
+        
+        this.tasks = produits.map(prod => ({
+          ...prod,
+          // Pour simplifier l'affichage dans le tableau
+          nomCategory: prod.categoryProduit?.nomCategory,
+          nomUnite: prod.uniteMesure?.nomUnite
+        }));
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des produits", err);
+      }
+    });
+}
+
+
+  // Méthode de filtrage utilisée pour l'autocomplete des catégories
   private _filter(value: string | Categorie): Categorie[] {
     let filterValue: string;
     if (typeof value === 'string') {
@@ -187,20 +224,22 @@ export class ProduitsComponent {
       category.nomCategory.toLowerCase().replace(/\s/g, '').includes(filterValue)
     );
   }
-  
 
+  // Lorsqu'une catégorie est sélectionnée dans l'autocomplete
   onCategorySelected(event: any): void {
     const selectedCategory = event.option.value;
     this.produit.category = selectedCategory;
   }
 
+  // Fonction d'affichage pour l'autocomplete
   displayFn(category: Categorie): string {
     return category ? category.nomCategory : '';
   }
 
+  // Méthode pour sauvegarder un produit via le service
   saveProduit() {
     if (this.selectedFile) {
-      // Construire l'objet produit en respectant le nom de propriété attendu
+      // Construire l'objet produit en respectant le nom de propriété attendu par le backend
       const produitToSave: any = {
         nomProduit: this.produit.nomProduit,
         description: this.produit.description,
@@ -209,18 +248,19 @@ export class ProduitsComponent {
         quantite: this.produit.quantite,
         alertSeuil: this.produit.alertSeuil,
         uniteMesure: { nomUnite: this.produit.uniteMesure.nomUnite },
-        // Remplacer "category" par "categoryProduit"
+        // Le backend attend "categoryProduit" et non "category"
         categoryProduit: { 
           id: this.produit.category.id, 
           nomCategory: this.produit.category.nomCategory 
         },
-        photo: '' // sera mis à jour côté serveur
+        photo: '' // Ce champ sera mis à jour côté serveur après le traitement de l'image
       };
   
       this.produitService.ajouterProduit(produitToSave, this.selectedFile).subscribe({
         next: (response) => {
           console.log('Produit ajouté avec succès : ', response);
-          // Mettez à jour votre liste ou réinitialisez le formulaire
+          // Vous pouvez rafraîchir la liste des produits après l'ajout
+          this.loadProduits();
           this.closePopup();
         },
         error: (err) => {
@@ -231,7 +271,4 @@ export class ProduitsComponent {
       console.error("Aucun fichier sélectionné !");
     }
   }
-  
-  
-  
 }

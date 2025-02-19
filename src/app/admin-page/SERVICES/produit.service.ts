@@ -13,12 +13,7 @@ export class ProduitService {
 
   constructor(private http: HttpClient) { }
 
-  /**
-   * Envoie une requête POST pour ajouter un nouveau produit.
-   * @param produit L'objet produit à ajouter.
-   * @param file Le fichier image associé au produit.
-   * @returns Un Observable du produit créé.
-   */
+  // Envoie une requête POST pour ajouter un nouveau produit.
   ajouterProduit(produit: Produit, file: File): Observable<Produit> {
     const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({
@@ -32,5 +27,15 @@ export class ProduitService {
     formData.append('photo', file, file.name);
 
     return this.http.post<Produit>(`${this.apiUrl}/add/produit`, formData, { headers });
+  }
+
+  // Nouvelle méthode pour récupérer la liste des produits de l'entreprise
+  getProduitsEntreprise(): Observable<Produit[]> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.get<Produit[]>(`${this.apiUrl}/entreprise/produits`, { headers });
   }
 }
