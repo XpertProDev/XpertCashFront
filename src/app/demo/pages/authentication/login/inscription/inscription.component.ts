@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Users } from 'src/app/admin-page/MODELS/utilisateur.model';
+import { HeaderNavComponent } from 'src/app/admin-page/Navigation/header-nav/header-nav.component';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 
 @Component({
   selector: 'app-inscription',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, HeaderNavComponent],
   templateUrl: './inscription.component.html',
   styleUrls: ['./inscription.component.scss']
 })

@@ -1,135 +1,422 @@
-.toast-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 15px 20px;
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.title {
+  font-size: 18px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #ddd;
+}
+
+.containerTable {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.tasks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+}
+
+.actions i{
+  color: #000;
+}
+
+.add-task {
+  padding: 10px 30px;
+  background-color: #0672E4;
+  color: #ffffff;
   border-radius: 5px;
-  color: white;
-  font-weight: bold;
-  animation: fadeOut 3s forwards;
+  border: none;
 }
 
-.success {
-  background-color: #28a745;
-}
-
-.error {
-  background-color: #dc3545;
-}
-
-@keyframes fadeOut {
-  0% { opacity: 1; }
-  80% { opacity: 1; }
-  100% { opacity: 0; }
+.contentIcon {
+  margin: 0 10px;
+  display: flex;
+  align-items: center;
 }
 
 
+.contentIcon i{
+  padding: 0 15px;
+  font-size: 20px;
+  cursor: pointer;
+}
 
-.form-overlay {
+.contentIcon i:hover {
+  color: #0672E4;
+  transition: all 0.5s ease;
+}
+
+.bare {
+  width: 2px;
+  height: 30px;
+  background-color: #eee;
+}
+
+.inputSearch {
+  position: relative;
+  width: 250px;
+  height: 40px;
+  //background-color: red;
+  display: flex;
+  align-items: center;
+}
+
+.inputSearch input {
+  width: 100%;
+  height: 100%;
+  padding-left: 10px;
+  border-radius: 5px;
+}
+
+.inputSearch i {
+  position: absolute;
+  right: 0;
+  margin-right: 15px;
+  font-size: 17px;
+}
+
+// drop domw 
+
+.export-container {
+  position: relative;
+  display: inline-block;
+}
+
+.export-dropdown {
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 180px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.389);
+  z-index: 1;
+  top: 100%;
+  left: 0;
+  border-radius: 5px;
+}
+
+.export-dropdown .export-option {
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.export-dropdown .export-option:hover {
+  background-color: #f1f1f1;
+}
+
+.iconDrop {
+  display: flex;
+  align-items: center;
+}
+
+.iconMontreArrow {
+  margin-left: -30px;
+}
+
+.iconMontreArrow i{
+  font-size: 12px;
+}
+
+.imgProduit {
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+}
+
+.imgProduit img{
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+
+/* Overlay du modal */
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 1000;
 }
 
-.form-container {
+/* Contenu du modal */
+.modal-content {
   background: #fff;
-  padding: 30px;
-  border-radius: 8px;
-  width: 400px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-h2 {
-  margin-bottom: 20px;
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-}
-
-label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #555;
-  text-align: left;
-}
-
-select, input {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
-  transition: all 0.3s ease;
+  max-width: 600px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
-select:focus, input:focus {
-  border-color: #007bff;
+/* En-tête du modal */
+.modal-header {
+  padding: 16px;
+  background-color: #f1f1f1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.modal-close {
+  cursor: pointer;
+  font-size: 24px;
+}
+
+/* Corps du modal */
+.modal-body {
+  padding: 16px;
+}
+
+/* Pied de page du modal */
+.modal-footer {
+  padding: 16px;
+  background-color: #f1f1f1;
+  text-align: right;
+}
+
+/* formulaire */
+
+.champ_input {
+  position: relative;
+}
+
+.inpuemail {
+  margin-top: 20px;
+}
+
+.input_focus {
+  width: 100%;
+  min-width: 250px;
+  height: 49px;
   outline: none;
+  border-bottom: 1px solid rgb(53, 50, 50);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  margin: 10px 0px;
+  transition: all 0.3s;
+  font-size: 18px;
+  //padding-left: 10px;
+  background: none;
+  color: #695c5c;
 }
 
-button {
+.add_category {
+  border: none;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.input_focus:hover {
+  border-bottom: 1px solid #0672E4;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.champ_input .label {
+  position: absolute;
+  top: 22px;
+  left: 4px;
+  pointer-events: none;
+  color: rgb(107, 102, 102);
+}
+
+.input_focus:not(:placeholder-shown) + .label,
+.input_focus:focus + .label {
+  color: #0672E4;
+  top: -6px;
+  left: 0;
+  transition: all 0.3s ease-in-out;
+  background: none;
+  font-size: 14px;
+  padding: 0;
+}
+
+.input_focus::placeholder {
+  opacity: 0;
+}
+
+.input_focus:focus::placeholder {
+  opacity: 1;
+  animation-delay: 1s;
+  font-size: 15px;
+  transition: all 0.2s ease-in-out;
+}
+
+.double_input {
+  display: flex; 
+  align-items: center;
+}
+
+.input_focus2 {
+  width: 100%;
+  min-width: 250px;
+  height: 60px;
+  outline: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
   margin-top: 10px;
-  padding: 8px 15px;
+  transition: all 0.3s;
+  font-size: 18px;
+  padding-left: 10px;
+  background-color: #dcdcdc4c;
+  color: #777474;
+  resize: none;
+  border-radius: 5px;
+  padding-top: 10px;
+  border-bottom: 1px solid rgb(53, 50, 50);
+}
+
+.input_focus2:hover {
+  border-bottom: 1px solid #0672E4;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.champ_input2 .label {
+  position: absolute;
+  top: 0px;
+  left: 15px;
+  pointer-events: none;
+  color: rgb(66, 56, 56);
+}
+
+.input_focus2:not(:placeholder-shown) + .label,
+.input_focus2:focus + .label {
+  color: #0672E4;
+  top: -10px;
+  left: 0;
+  transition: all 0.3s ease-in-out;
+  background: none;
+  font-size: 14px;
+  padding: 0;
+}
+
+.input_focus2::placeholder {
+  opacity: 0;
+}
+
+.input_focus2:focus::placeholder {
+  opacity: 1;
+  animation-delay: 1s;
+  font-size: 15px;
+  transition: all 0.2s ease-in-out;
+}
+
+.champ_input_margin {
+  margin-left: 50px;
+}
+
+// image 
+.input_file {
+  display: inline-block;
+  width: 300px;
+  margin-top: 10px;
+}
+
+.custom-file-label {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+  width: 100%;
+  cursor: pointer;
+}
+
+.custom-file-button {
+  background-color: #0672E4;
+  color: white;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.custom-file-text {
+  flex: 1;
+  padding: 8px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #555;
+}
+
+.btn-save {
+  padding: 8px 20px;
+  margin-right: 10px;
+  background-color: #0672E4;
+  color: #fff;
   border: none;
   border-radius: 5px;
-  cursor: pointer;
 }
 
-.btn-add-produit {
-  background: #007bff;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-
-
-
-
-.btn-primary {
-  background-color: #007bff; 
-  color: white;
-  padding: 10px 16px;
+.btn-cancel {
+  padding: 8px 20px;
+  margin-right: 10px;
+  background-color: #ff0000b3;
+  color: #fff;
   border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-  margin-right: 10px; 
+  border-radius: 5px;
 }
 
-.btn-primary:hover {
-  background-color: #58ea0f; 
+.btn-save:hover {
+  background-color: #0465cd;
+  transition: all .5s;
 }
 
-.btn-secondary {
-  background-color: #dc3545; 
-  color: white;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+.btn-cancel:hover {
+  background-color: #ff0000;
+  transition: all .5s;
 }
 
-.btn-secondary:hover {
-  background-color: #5a6268; 
+.iconArrow i{
+  position: absolute;
+  right: 10px;
+  top: 20px;
 }
 
+.iconArrow {
+  font-size: 20px;
+}

@@ -6,7 +6,7 @@ import { HeaderNavComponent } from "src/app/admin-page/Navigation/header-nav/hea
 
 @Component({
   selector: 'app-login-page',
-  imports: [RouterModule, FormsModule, CommonModule,HeaderNavComponent],
+  imports: [RouterModule, FormsModule, CommonModule, HeaderNavComponent],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
 

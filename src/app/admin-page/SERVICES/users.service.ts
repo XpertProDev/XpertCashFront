@@ -17,9 +17,14 @@ export class UsersService {
       return this.http.post<{ message?: string; error?: string }>(`${this.apiUrl}/register`, user);
     }
 
-  // Connexion
-    ccc(credentials: { email: string; password: string }): Observable<{ message?: string; token?: string; error?: string }> {
+    // Connexion
+    connexionUser(credentials: { email: string; password: string }): Observable<{ message?: string; token?: string; error?: string }> {
       return this.http.post<{ message?: string; token?: string; error?: string }>(`${this.apiUrl}/login`, credentials);
-  }
+    }
+
+  // // Connexion
+  //   ccc(credentials: { email: string; password: string }): Observable<{ message?: string; token?: string; error?: string }> {
+  //     return this.http.post<{ message?: string; token?: string; error?: string }>(`${this.apiUrl}/login`, credentials);
+  // }
   
 }

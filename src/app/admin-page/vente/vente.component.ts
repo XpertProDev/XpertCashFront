@@ -1,6 +1,5 @@
 import { Component, HostListener } from '@angular/core';
 
-
 import * as XLSX from 'xlsx';
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
@@ -61,6 +60,7 @@ export class VenteComponent {
     }
   }
 
+  // Télécharger en format Excel
   downloadExcel() {
     console.log('Télécharger en format Excel');
     // Logique pour Excel
@@ -69,9 +69,6 @@ export class VenteComponent {
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Tasks');
     XLSX.writeFile(workbook, 'Facture des ventes.xlsx');
   }
-
-  
-
   // Télécharger en format PDF
   downloadPDF() {
     console.log("Téléchargement PDF en cours..."); 
@@ -99,8 +96,6 @@ export class VenteComponent {
   
     doc.save('Facture des ventes.pdf');
   }
-  
-
   // Télécharger en format CSV
   downloadCSV() {
     const headers = ['Date & heure', 'Categorie', 'Journalier', 'Nom du produit', 'Quantite', 'Quantite prix', 'Prix unitaire', 'Prix Total'];

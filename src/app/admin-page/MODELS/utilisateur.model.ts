@@ -6,7 +6,7 @@ export class Users {
     phone?: string;
     pays?: string;
     nomEntreprise?: string;
-  confirmPassword: any;
+    confirmPassword: any;
     
 
     constructor(

@@ -13,7 +13,7 @@ export class HeaderNavComponent {
 
 
   goTologin() {
-  this.router.navigate(['/connexion']);
-}
+    this.router.navigate(['/connexion']);
+  }
 
 }

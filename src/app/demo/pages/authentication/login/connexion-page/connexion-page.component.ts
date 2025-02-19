@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Users } from 'src/app/admin-page/MODELS/utilisateur.model';
+import { HeaderNavComponent } from 'src/app/admin-page/Navigation/header-nav/header-nav.component';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 
 @Component({
   selector: 'app-connexion-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, HeaderNavComponent],
   templateUrl: './connexion-page.component.html',
   styleUrl: './connexion-page.component.scss'
 })
@@ -67,7 +68,7 @@ export class ConnexionPageComponent {
     // Récupérer les valeurs du formulaire
     const credentials = this.loginForm.value;
   
-    this.usersService.ccc(credentials).subscribe({
+    this.usersService.connexionUser(credentials).subscribe({
       next: (response) => {
         if (response.token) {
           // ✅ Stocker le token dans le localStorage ou sessionStorage

@@ -11,6 +11,9 @@ import { AppComponent } from './app.component';
 import { VenteComponent } from './admin-page/vente/vente.component';
 import { InscriptionComponent } from './demo/pages/authentication/login/inscription/inscription.component';
 import { provideHttpClient } from '@angular/common/http';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 
 @NgModule({
@@ -22,8 +25,11 @@ import { provideHttpClient } from '@angular/common/http';
     BrowserModule,
     FormsModule,
     AppComponent, 
-    VenteComponent,
+    // VenteComponent,
     ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
   ],
   providers: [
     provideHttpClient(),
