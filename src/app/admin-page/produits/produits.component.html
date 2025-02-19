@@ -46,12 +46,12 @@
     </thead>
     
     <tbody>
-      <tr *ngFor="let task of filteredTasks()">
+      <!-- <tr *ngFor="let task of filteredTasks()"> -->
+        <tr *ngFor="let task of filteredTasks(); let i = index">
         <td style="font-size: 10px;" [innerHTML]="highlightMatch(task.codeProduit)"></td>
         <td>
           <div class="imgProduit">
-            <!-- <img [src]="task.photo || 'assets/img/lait.jpeg'" alt="img"> -->
-            <img [src]="getSafeUrl(task.photo)" alt="Photo produit">
+            <img [src]="task.photo || 'assets/img/lait.jpeg'" alt="photo image">
           </div>
         </td> 
         <td [innerHTML]="highlightMatch(task.nomProduit)"></td>
@@ -70,6 +70,17 @@
   <div *ngIf="filteredTasks().length === 0" style="text-align: center; margin-top: 20px;">
       <p style="color: red;">Aucun résultat trouvé pour "{{ searchText }}"</p>
   </div>
+
+  <!-- // Pagination -->
+
+  <div class="pagination">
+    <mat-paginator [length]="tasks.length"
+              [pageSize]="pageSize"
+              [pageSizeOptions]="[5, 10, 25, 100]"
+              (page)="onPageChange($event)">
+    </mat-paginator>
+  </div>
+
 </div>
 
 <!-- Pop-up Formulaire d'ajout de produit -->

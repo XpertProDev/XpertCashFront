@@ -420,3 +420,13 @@ tr:hover {
 .iconArrow {
   font-size: 20px;
 }
+
+.pagination {
+  justify-content: right;
+  margin-top: 20px;
+}
+
+mat-paginator {
+  background-color: #dcdcdc51;
+  border-radius: 5px;
+}

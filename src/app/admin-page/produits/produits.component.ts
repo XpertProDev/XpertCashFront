@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import jsPDF from 'jspdf';
@@ -13,7 +13,10 @@ import { Categorie } from '../MODELS/categorie.model';
 import { CategorieService } from '../SERVICES/categorie.service';
 import { ProduitService } from '../SERVICES/produit.service';
 import { Produit } from '../MODELS/produit.model';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
+
 
 @Component({
   selector: 'app-produits',
@@ -26,6 +29,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
     MatAutocompleteModule,
     MatInputModule,
     AsyncPipe,
+    MatPaginatorModule,
   ],
   templateUrl: './produits.component.html',
   styleUrls: ['./produits.component.scss']
@@ -41,22 +45,17 @@ export class ProduitsComponent implements OnInit {
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
-    private sanitizer: DomSanitizer
   ) {}
 
-  // pour photo url
-  getSafeUrl(url: string): SafeUrl {
-    return this.sanitizer.bypassSecurityTrustUrl(url);
-  }
 
   // Méthode de filtrage pour la recherche dans le tableau
-  filteredTasks() {
-    return this.tasks.filter(task => 
-      task.nomCategory?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
-    );
-  }
+  // filteredTasks() {
+  //   return this.tasks.filter(task => 
+  //     task.nomCategory?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+  //     task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+  //     task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
+  //   );
+  // }
 
   // Mise en évidence du texte recherché dans le tableau
   highlightMatch(text: string): string {
@@ -191,26 +190,28 @@ export class ProduitsComponent implements OnInit {
   }
 
   // Méthode pour récupérer les produits via le service et mapper les données pour l'affichage
-  loadProduits(): void {
-    this.produitService.getProduitsEntreprise().subscribe({
-      next: (produits: Produit[]) => {
-        console.log("Liste des produits récupérés :", produits); // 🔍 Vérifie les données dans la console
-        
-        this.tasks = produits.map(prod => ({
-          ...prod,
-          // Pour simplifier l'affichage dans le tableau
-          nomCategory: prod.categoryProduit?.nomCategory,
-          nomUnite: prod.uniteMesure?.nomUnite
-        }));
-      },
-      error: (err) => {
-        console.error("Erreur lors de la récupération des produits", err);
-      }
-    });
-}
+  // loadProduits(): void {
+  //   this.produitService.getProduitsEntreprise().subscribe({
+  //     next: (produits: Produit[]) => {
+  //       console.log("Liste des produits récupérés :", produits);
+  
+  //       this.dataSource.data = produits.map(prod => ({
+  //         ...prod,
+  //         nomCategory: prod.categoryProduit?.nomCategory,
+  //         nomUnite: prod.uniteMesure?.nomUnite
+  //       }));
+  
+  //       this.dataSource.paginator = this.paginator;
+  //     },
+  //     error: (err) => {
+  //       console.error("Erreur lors de la récupération des produits", err);
+  //     }
+  //   });
+  // }  
 
 
   // Méthode de filtrage utilisée pour l'autocomplete des catégories
+  
   private _filter(value: string | Categorie): Categorie[] {
     let filterValue: string;
     if (typeof value === 'string') {
@@ -271,4 +272,52 @@ export class ProduitsComponent implements OnInit {
       console.error("Aucun fichier sélectionné !");
     }
   }
+
+  dataSource = new MatTableDataSource<any>(); // Gère les données avec pagination
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  loadProduits(): void {
+    this.produitService.getProduitsEntreprise().subscribe({
+      next: (produits: Produit[]) => {
+        this.tasks = produits.map(prod => ({
+          ...prod,
+          nomCategory: prod.categoryProduit?.nomCategory,
+          nomUnite: prod.uniteMesure?.nomUnite
+        }));
+        
+        this.dataSource.data = this.tasks;
+        this.dataSource.paginator = this.paginator;
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des produits", err);
+      }
+    });
+  }
+
+
+  // tasks: any[] = [];
+  paginatedTasks: any[] = []; // Liste des produits affichés selon la pagination
+  pageSize = 5; // Nombre de produits par page (modifiable)
+  currentPage = 0; // Page actuelle
+
+  
+  filteredTasks(): any[] {
+    const filtered = this.tasks.filter(task => 
+      task.nomCategory?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
+    );
+  
+    const startIndex = this.currentPage * this.pageSize;
+    return filtered.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  onPageChange(event: any): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+  }
+  
+  
+  
+
 }
