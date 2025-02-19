@@ -1,81 +1,77 @@
 <div class="containerTable">
   <div class="tasks-header">
-      <h1 class="title">Produits Stocks</h1>
-      
-      <div class="actions">
-        <button class="add-task" (click)="openPopup()">Ajouter un produit</button>
-        <!--Mes icon-->
-        <div class="contentIcon">
-          <i class="ri-refresh-line"></i>
-          <div class="bare"></div>
-          <div class="export-container">
-            <!-- Icône d'exportation avec un clic -->
-            <div class="iconDrop">
-              <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
-            </div>
-            <!-- Dropdown avec *ngIf pour l'affichage conditionnel -->
-            <div class="export-dropdown" *ngIf="showExportDropdown">
-              <div class="export-option" (click)="downloadExcel()">Télécharger en Excel</div>
-              <div class="export-option" (click)="downloadPDF()">Télécharger en PDF</div>
-              <div class="export-option" (click)="downloadCSV()">Télécharger en CSV</div>
-            </div>
+    <h1 class="title">Produits Stocks</h1>
+    
+    <div class="actions">
+      <button class="add-task" (click)="openPopup()">Ajouter un produit</button>
+      <!-- Icônes -->
+      <div class="contentIcon">
+        <i class="ri-refresh-line"></i>
+        <div class="bare"></div>
+        <div class="export-container">
+          <div class="iconDrop">
+            <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
+          </div>
+          <div class="export-dropdown" *ngIf="showExportDropdown">
+            <div class="export-option" (click)="downloadExcel()">Télécharger en Excel</div>
+            <div class="export-option" (click)="downloadPDF()">Télécharger en PDF</div>
+            <div class="export-option" (click)="downloadCSV()">Télécharger en CSV</div>
           </div>
         </div>
-        <!--Les recherche-->
-        <div class="inputSearch">
-          <i class="ri-search-2-line"></i>
-          <input type="text" [(ngModel)]="searchText" placeholder="Recherche...." />
-        </div>
       </div>
+      <!-- Recherche -->
+      <div class="inputSearch">
+        <i class="ri-search-2-line"></i>
+        <input type="text" [(ngModel)]="searchText" placeholder="Recherche...." />
+      </div>
+    </div>
   </div>
     
-  <!-- Tableau des tâches -->
+  <!-- Tableau des produits -->
   <table>
-  <thead>
-    <tr>
-      <th>Code</th>
-      <th>Photo<i class="icon-sort"></i></th>
-      <th>Nom produit <i class="icon-sort"></i></th>
-      <th>Categorie<i class="icon-sort"></i></th>
-      <th>Description <i class="icon-sort"></i></th>
-      <th>Prix <i class="icon-sort"></i></th>
-      <th>Prix achat <i class="icon-sort"></i></th>
-      <th>Quantité <i class="icon-sort"></i></th>
-      <th>Unité<i class="icon-sort"></i></th>
-      <th>Alert seuil <i class="icon-sort"></i></th>
-      <th>Date & heure <i class="icon-sort"></i></th>
-    </tr>
-  </thead>
-  
-  <tbody>
-    <!-- Utilisation du *ngFor pour afficher les éléments filtrés -->
-    <tr *ngFor="let task of filteredTasks()">
-      <td style="font-size: 10px;" [innerHTML]="highlightMatch(task.codeProduit)"></td>
-      <td>
-        <div class="imgProduit">
-          <img src="assets/img/lait.jpeg" alt="photo produit">
-        </div>
-      </td> 
-      <td [innerHTML]="highlightMatch(task.nomProduit)"></td>
-      <td [innerHTML]="highlightMatch(task.nomCategory)"></td>
-      <td>{{task.description }}</td>
-      <td>{{task.prix}}</td> 
-      <td>{{task.prixAchat }}</td>
-      <td [innerHTML]="highlightMatch(task.quantite)"></td>
-      <td>{{task.nomUnite }}</td>
-      <td>{{task.alertSeuil }}</td>
-      <td>{{task.createdAt }}</td>
-    </tr>
-  </tbody>
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Photo<i class="icon-sort"></i></th>
+        <th>Nom produit <i class="icon-sort"></i></th>
+        <th>Categorie<i class="icon-sort"></i></th>
+        <th>Description <i class="icon-sort"></i></th>
+        <th>Prix <i class="icon-sort"></i></th>
+        <th>Prix achat <i class="icon-sort"></i></th>
+        <th>Quantité <i class="icon-sort"></i></th>
+        <th>Unité<i class="icon-sort"></i></th>
+        <th>Alert seuil <i class="icon-sort"></i></th>
+        <th>Date & heure <i class="icon-sort"></i></th>
+      </tr>
+    </thead>
+    
+    <tbody>
+      <tr *ngFor="let task of filteredTasks()">
+        <td style="font-size: 10px;" [innerHTML]="highlightMatch(task.codeProduit)"></td>
+        <td>
+          <div class="imgProduit">
+            <img [src]="task.photo || 'assets/img/lait.jpeg'" alt="photo produit">
+          </div>
+        </td> 
+        <td [innerHTML]="highlightMatch(task.nomProduit)"></td>
+        <td [innerHTML]="highlightMatch(task.nomCategory)"></td>
+        <td>{{ task.description }}</td>
+        <td>{{ task.prix }}</td> 
+        <td>{{ task.prixAchat }}</td>
+        <td [innerHTML]="highlightMatch(task.quantite)"></td>
+        <td>{{ task.nomUnite }}</td>
+        <td>{{ task.alertSeuil }}</td>
+        <td>{{ task.createdAt }}</td>
+      </tr>
+    </tbody>
   </table>
 
-  <!-- Message si aucun résultat -->
   <div *ngIf="filteredTasks().length === 0" style="text-align: center; margin-top: 20px;">
       <p style="color: red;">Aucun résultat trouvé pour "{{ searchText }}"</p>
   </div>
-    
 </div>
-<!-- Pop-up Formulaire -->
+
+<!-- Pop-up Formulaire d'ajout de produit -->
 <div class="modal-overlay" *ngIf="showPopup">
   <div class="modal-content">
     <div class="modal-header">
@@ -84,97 +80,101 @@
     </div>
     <div class="modal-body">
       <form class="container_formulaire" id="myForm">
-
-        <!-- Nom  -->
         <div class="formulaire">
-
+          
+          <!-- Ligne 1 : Nom produit et Prix -->
           <div class="double_input">
-
-              <div class="champ_input">
-                  <input type="text" class="input_focus" required id="nomProduit"
-                      placeholder="Saisis le nom de produit">
-                  <label for="nom" class="label">Nom produit</label>
-              </div>
-
-              <div class="champ_input champ_input_margin">
-                  <input type="text" class="input_focus" required id="prix"
-                      placeholder="Saisis le montant">
-                  <label for="nom" class="label">Prix</label>
-              </div>
-
+            <div class="champ_input">
+              <input type="text" class="input_focus" required id="nomProduit"
+                     name="nomProduit"
+                     placeholder="Saisis le nom de produit"
+                     [(ngModel)]="produit.nomProduit">
+              <label for="nomProduit" class="label">Nom produit</label>
+            </div>
+            <div class="champ_input champ_input_margin">
+              <input type="number" class="input_focus" required id="prix"
+                     name="prix"
+                     placeholder="Saisis le montant"
+                     [(ngModel)]="produit.prix">
+              <label for="prix" class="label">Prix</label>
+            </div>
           </div>
-
+          
+          <!-- Ligne 2 : Catégorie avec autocomplete -->
           <div class="champ_input">
             <input type="text"
-              placeholder="Saisis le nom de catégorie"
-              [formControl]="control"
-              [matAutocomplete]="auto"
-              class="input_focus">
-            <label for="nomCategorie" class="label">Categorie</label>
-            <div class="iconArrow">
-              <i class="ri-arrow-down-s-line"></i>
-            </div>
-            <mat-autocomplete #auto="matAutocomplete">
-              <mat-option *ngFor="let category of filteredCategories | async" [value]="category.nomCategory">
+                  placeholder="Saisis le nom de catégorie"
+                  [formControl]="control"
+                  [matAutocomplete]="auto"
+                  class="input_focus"
+                  [value]="displayFn(produit.category)"
+                  name="categorie">
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategorySelected($event)">
+              <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
                 {{ category.nomCategory }}
               </mat-option>
             </mat-autocomplete>
-          </div>          
-
-
-          <div class="double_input">
-
-              <div class="champ_input">
-                  <input type="text" class="input_focus" required id="nom"
-                      placeholder="Saisis le nom de produit">
-                  <label for="nom" class="label">Prix achat</label>
-              </div>
-
-              <div class="champ_input champ_input_margin">
-                  <input type="text" class="input_focus" required id="prenom"
-                      placeholder="Saisis le montant">
-                  <label for="nom" class="label">Quantité</label>
-              </div>
-
           </div>
-
+          
+          <!-- Ligne 3 : Prix achat et Quantité -->
           <div class="double_input">
-
-              <div class="champ_input">
-                  <input type="text" class="input_focus" required id="nom"
-                      placeholder="Saisis le nom de produit">
-                  <label for="nom" class="label">Alert seuil</label>
-              </div>
-
-              <div class="champ_input champ_input_margin">
-                  <input type="text" class="input_focus" required id="prenom"
-                      placeholder="Saisis le montant">
-                  <label for="nom" class="label">Unité</label>
-              </div>
-
+            <div class="champ_input">
+              <input type="number" class="input_focus" required id="prixAchat"
+                     name="prixAchat"
+                     placeholder="Saisis le montant"
+                     [(ngModel)]="produit.prixAchat">
+              <label for="prixAchat" class="label">Prix achat</label>
+            </div>
+            <div class="champ_input champ_input_margin">
+              <input type="number" class="input_focus" required id="quantite"
+                     name="quantite"
+                     placeholder="Saisis le montant"
+                     [(ngModel)]="produit.quantite">
+              <label for="quantite" class="label">Quantité</label>
+            </div>
           </div>
-
-            <div class="champ_input" style="margin-top: 20px;">
-                <textarea type="email" class="input_focus2" required id="description"
-                    placeholder="Saisis quelque choise"></textarea>
-                <label for="nom" class="label" style="padding-left: 10px;">Description</label>
+          
+          <!-- Ligne 4 : Alert seuil et Unité -->
+          <div class="double_input">
+            <div class="champ_input">
+              <input type="number" class="input_focus" required id="alertSeuil"
+                     name="alertSeuil"
+                     placeholder="Saisis le nom de produit"
+                     [(ngModel)]="produit.alertSeuil">
+              <label for="alertSeuil" class="label">Alert seuil</label>
             </div>
-
-            <div class="input_file">
-              <label for="file" class="custom-file-label">
-                <span class="custom-file-button">Choisir un fichier</span>
-                <span class="custom-file-text">{{ selectedFile?.name ?? "Aucun fichier choisi" }}</span>
-              </label>
-              <input type="file" accept="image/*" id="file" (change)="onFileSelected($event)" hidden>
+            <div class="champ_input champ_input_margin">
+              <input type="text" class="input_focus" required id="unite"
+                     name="unite"
+                     placeholder="Saisis le montant"
+                     [(ngModel)]="produit.uniteMesure.nomUnite">
+              <label for="unite" class="label">Unité</label>
             </div>
-            
-
+          </div>
+          
+          <!-- Ligne 5 : Description -->
+          <div class="champ_input" style="margin-top: 20px;">
+            <textarea class="input_focus2" required id="description"
+                      name="description"
+                      placeholder="Saisis quelque chose"
+                      [(ngModel)]="produit.description"></textarea>
+            <label for="description" class="label" style="padding-left: 10px;">Description</label>
+          </div>
+          
+          <!-- Ligne 6 : Sélection du fichier image -->
+          <div class="input_file">
+            <label for="file" class="custom-file-label">
+              <span class="custom-file-button">Choisir un fichier</span>
+              <span class="custom-file-text">{{ selectedFile?.name ?? "Aucun fichier choisi" }}</span>
+            </label>
+            <input type="file" accept="image/*" id="file" (change)="onFileSelected($event)" hidden>
+          </div>
+          
         </div>
-
-    </form>
+      </form>
     </div>
     <div class="modal-footer">
-      <button class="btn-save">Sauvegarder</button>
+      <button class="btn-save" (click)="saveProduit()">Sauvegarder</button>
       <button class="btn-cancel" (click)="closePopup()">Annuler</button>
     </div>
   </div>

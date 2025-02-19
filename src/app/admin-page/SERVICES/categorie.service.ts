@@ -14,11 +14,15 @@ export class CategorieService {
 
   getCategories(token: string): Observable<Categorie[]> {
     if (!token) {
-      console.error('Token vide ou non défini');
+      console.error('⚠️ Token vide ou non défini ! Vérifiez que l\'utilisateur est bien connecté.');
+      return new Observable<Categorie[]>();  // Retourner un observable vide
     }
-    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
-    console.log('Headers envoyés : ', headers);
+  
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    console.log("🔹 En-têtes envoyés :", headers);
+  
     return this.http.get<Categorie[]>(`${this.apiUrl}/allCategory`, { headers });
   }
+  
 
 }

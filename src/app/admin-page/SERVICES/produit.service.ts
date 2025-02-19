@@ -1,31 +1,36 @@
+// produit.service.ts
+
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { Produit } from '../MODELS/produit.model';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProduitService {
-  private apiUrl: string = "http://localhost:8080/api/auth";
-  
+  private apiUrl = 'http://localhost:8080/api/auth';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  // Ajouter un produit
-  ajouterProduit(token: string, produit: Produit, fichier: File): Observable<any> {
-    // Préparer le FormData : on y ajoute le JSON du produit et le fichier image
-    const formData: FormData = new FormData();
-    // La clé "produit" doit correspondre à celle attendue dans le controller côté backend
-    formData.append('produit', new Blob([JSON.stringify(produit)], { type: 'application/json' }));
-    formData.append('photo', fichier);
-
+  /**
+   * Envoie une requête POST pour ajouter un nouveau produit.
+   * @param produit L'objet produit à ajouter.
+   * @param file Le fichier image associé au produit.
+   * @returns Un Observable du produit créé.
+   */
+  ajouterProduit(produit: Produit, file: File): Observable<Produit> {
+    const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
-      // Pas de Content-Type ici, le navigateur le gère automatiquement pour du multipart/form-data
+      // Note : Le Content-Type n'est pas défini ici car Angular le gère automatiquement pour FormData
     });
 
-    return this.http.post(`${this.apiUrl}/add/produit`, formData, { headers });
+    const formData: FormData = new FormData();
+    // On stringify l'objet produit pour l'envoyer en tant que chaîne JSON
+    formData.append('produit', JSON.stringify(produit));
+    formData.append('photo', file, file.name);
+
+    return this.http.post<Produit>(`${this.apiUrl}/add/produit`, formData, { headers });
   }
-  
 }

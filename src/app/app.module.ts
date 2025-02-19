@@ -10,10 +10,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
 import { VenteComponent } from './admin-page/vente/vente.component';
 import { InscriptionComponent } from './demo/pages/authentication/login/inscription/inscription.component';
-import { provideHttpClient } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient } from '@angular/common/http';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { AuthInterceptor } from './admin-page/SERVICES/auth.interceptor';
 
 
 @NgModule({
@@ -33,7 +34,7 @@ import { MatInputModule } from '@angular/material/input';
   ],
   providers: [
     provideHttpClient(),
-    
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: LOCALE_ID, useValue: 'fr-FR',  },
     // provideCharts(withDefaultRegisterables())
   ],

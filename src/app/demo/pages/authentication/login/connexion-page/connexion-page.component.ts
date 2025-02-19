@@ -1,17 +1,18 @@
-import { CommonModule } from '@angular/common';
+// connexion-page.component.ts
 import { Component } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { Users } from 'src/app/admin-page/MODELS/utilisateur.model';
-import { HeaderNavComponent } from 'src/app/admin-page/Navigation/header-nav/header-nav.component';
+import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { AuthService } from 'src/app/admin-page/SERVICES/auth.service';
+import { HeaderNavComponent } from 'src/app/admin-page/Navigation/header-nav/header-nav.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-connexion-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HeaderNavComponent],
   templateUrl: './connexion-page.component.html',
-  styleUrl: './connexion-page.component.scss'
+  styleUrls: ['./connexion-page.component.scss']
 })
 export class ConnexionPageComponent {
   loginForm!: FormGroup;
@@ -27,6 +28,7 @@ export class ConnexionPageComponent {
   constructor(
     private fb: FormBuilder,
     private usersService: UsersService,
+    private authService: AuthService, // Injection du AuthService
     private router: Router
   ) { }
 
@@ -37,25 +39,20 @@ export class ConnexionPageComponent {
     });
   }
 
-  // Ouvre la popup avec titre, message et type (success ou error)
   openPopup(title: string, message: string, type: 'success' | 'error'): void {
     this.popupTitle = title;
     this.popupMessage = message;
     this.popupType = type;
-    // Choix de l'image en fonction du type
-    if (type === 'success') {
-      this.popupImage = 'assets/img/succcccc.png'; // Remplacez par le chemin de votre image de succès
-    } else {
-      this.popupImage = 'assets/img/error.png'; // Remplacez par le chemin de votre image d'erreur
-    }
+    this.popupImage = type === 'success'
+      ? 'assets/img/succcccc.png'
+      : 'assets/img/error.png';
     this.showPopup = true;
   }
 
-  // Ferme la popup et redirige si l'inscription a réussi
   closePopup(): void {
     this.showPopup = false;
     if (this.popupType === 'success') {
-      this.router.navigate(['/accueilll']);
+      this.router.navigate(['/produit']);
     }
   }
 
@@ -65,22 +62,21 @@ export class ConnexionPageComponent {
       return;
     }
   
-    // Récupérer les valeurs du formulaire
     const credentials = this.loginForm.value;
   
     this.usersService.connexionUser(credentials).subscribe({
       next: (response) => {
         if (response.token) {
-          // ✅ Stocker le token dans le localStorage ou sessionStorage
-          localStorage.setItem('authToken', response.token);
+          // ✅ Afficher le token dans la console
+          console.log("Token généré :", response.token);
+          
+          // ✅ Stocker le token via AuthService
+          this.authService.saveToken(response.token);
   
-          // ✅ Ouvrir la popup de succès
           this.openPopup("Connexion réussie !", response.message ?? "Connexion réussie.", 'success');
-
   
-          // ✅ Redirection après la fermeture de la popup
           setTimeout(() => {
-            this.router.navigate(['/analytics']); // 🔄 Change "/dashboard" par ta page d'accueil après connexion
+            this.router.navigate(['/produit']); 
           }, 1500);
         } else {
           this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
@@ -107,49 +103,5 @@ export class ConnexionPageComponent {
   }
   
 
-  // submitForm(): void {
-  //   if (this.loginForm.invalid) {
-  //     this.errorMessage = "Veuillez vérifier les informations saisies.";
-  //     return;
-  //   }
-  
-  //   const credentials = this.loginForm.value;
-  
-  //   this.usersService.ccc(credentials).subscribe({
-  //     next: (response) => {
-  //       if (response && response.token) {
-  //         // Stocker le token dans le localStorage ou sessionStorage
-  //         localStorage.setItem('token', response.token);
-  
-  //         // Afficher la popup de succès
-  //         this.openPopup("Connexion réussie !", "Bienvenue sur votre espace.", 'success');
-  //       } else {
-  //         this.errorMessage = response.error || "Erreur de connexion.";
-  //         this.openPopup("Erreur de connexion", this.errorMessage, 'error');
-  //       }
-  //     },
-  //     error: (error) => {
-  //       console.log("Erreur complète :", error);
-  //       console.log("Réponse API :", error.error);
-  
-  //       let message = "Une erreur est survenue lors de la connexion.";
-  
-  //       if (error.status === 400 || error.status === 401) {
-  //         if (typeof error.error === "string") {
-  //           // Extraction avancée du message d'erreur
-  //           const match = error.error.match(/interpolatedMessage='([^']+)'/);
-  //           message = match ? match[1] : error.error;
-  //         } else if (error.error?.error) {
-  //           message = error.error.error;
-  //         }
-  //       }
-  
-  //       this.openPopup("❌ Oups, une erreur !", message, "error");
-  //     }
-  //   });
-  // }
-  
-
-  // Getter pour faciliter l'accès aux contrôles dans le template
   get f() { return this.loginForm.controls; }
 }
