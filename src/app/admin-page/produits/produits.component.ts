@@ -62,20 +62,22 @@ export class ProduitsComponent implements OnInit {
   ) {}
 
 
-  // Méthode de filtrage pour la recherche dans le tableau
-  // filteredTasks() {
-  //   return this.tasks.filter(task => 
-  //     task.nomCategory?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-  //     task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-  //     task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
-  //   );
-  // }
-
   // Mise en évidence du texte recherché dans le tableau
   highlightMatch(text: string): string {
     if (!this.searchText) return text;
     const regex = new RegExp(`(${this.searchText})`, 'gi');
     return text.replace(regex, '<strong>$1</strong>');
+  }
+
+  filteredTasks(): any[] {
+    const filtered = this.tasks.filter(task => 
+      // task.nomCategory?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
+    );
+  
+    const startIndex = this.currentPage * this.pageSize;
+    return filtered.slice(startIndex, startIndex + this.pageSize);
   }
 
   // Gestion du dropdown d'export
@@ -276,17 +278,6 @@ export class ProduitsComponent implements OnInit {
   pageSize = 5; // Nombre de produits par page (modifiable)
   currentPage = 0; // Page actuelle
 
-  
-  filteredTasks(): any[] {
-    const filtered = this.tasks.filter(task => 
-      task.nomCategory?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
-    );
-  
-    const startIndex = this.currentPage * this.pageSize;
-    return filtered.slice(startIndex, startIndex + this.pageSize);
-  }
 
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex;
@@ -311,7 +302,8 @@ export class ProduitsComponent implements OnInit {
   closePopup2(): void {
     this.showPopup2 = false;
     if (this.popupType === 'success') {
-      this.router.navigate(['/connexion']);
+      //this.router.navigate(['/produit']);
+      this.showPopup = false;
     }
   }
 
@@ -332,7 +324,7 @@ export class ProduitsComponent implements OnInit {
       quantite: formValues.quantite,
       alertSeuil: formValues.alertSeuil,
       uniteMesure: { nomUnite: formValues.uniteMesure },
-      categoryProduit: {  
+      category: {  
         id: formValues.category?.id, 
         nomCategory: formValues.category?.nomCategory
       },
@@ -356,7 +348,7 @@ export class ProduitsComponent implements OnInit {
 
         const produitFormate = {
           ...response,
-          nomCategory: response.categoryProduit?.nomCategory,
+          nomCategory: response.category?.nomCategory,
           nomUnite: response.uniteMesure?.nomUnite
         };
 
@@ -385,6 +377,11 @@ export class ProduitsComponent implements OnInit {
     });
   }
 
+  // onCreateCategory() {
+  //   console.log("Créer une nouvelle catégorie");
+  //   // Ajoute ici la logique pour ouvrir une boîte de dialogue ou un formulaire
+  // }
+  
 
 
   // Getter pour faciliter l'accès aux contrôles dans le template

@@ -206,8 +206,9 @@ tr:hover {
 /* Pied de page du modal */
 .modal-footer {
   padding: 16px;
-  background-color: #f1f1f1;
+  //background-color: #f1f1f1;
   text-align: right;
+
 }
 
 /* formulaire */
@@ -284,6 +285,11 @@ tr:hover {
   display: flex; 
   align-items: center;
 }
+
+// .double_input2 {
+//   display: flex;
+//   align-items: center;
+// }
 
 .input_focus2 {
   width: 100%;
@@ -458,9 +464,27 @@ mat-paginator {
   justify-content: center;
 }
 
+.btn_add_categoryDiv2 {
+  margin: 10px 0;
+  justify-content: center;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.double_input2 {
+  position: relative;
+}
+
 .btn_add_category {
   border: none;
   padding-left: 15px;
+}
+
+.btn_add_category2 {
+  border: none;
+  //padding-left: 15px;
+  border-radius: 2px;
 }
 
 .btn_add_category:hover {

@@ -1,35 +1,23 @@
-// produit.model.ts
-
-export class Produit {
-  category: any;
-  message(arg0: string, message: any, arg2: string) {
-    throw new Error('Method not implemented.');
-  }
-  id?: number;
-  codeProduit?: string;
-  nomProduit?: string;
-  description?: string;
-  prix?: number;
-  photo?: string;
-  prixAchat?: number;
-  quantite?: number;
-  alertSeuil?: number;
-  createdAt?: Date;
-  // Ajoutez ces propriétés pour correspondre au backend
-  uniteMesure?: UniteMesure;
-  categoryProduit?: CategoryProduit;
-
-  constructor(init?: Partial<Produit>) {
-    Object.assign(this, init);
-  }
-}
-
-export interface UniteMesure {
-  id?: number;
-  nomUnite: string;
-}
-
-export interface CategoryProduit {
+export interface Produit {
   id: number;
-  nomCategory: string;
+  codeProduit?: string;
+  nomProduit: string;
+  description: string;
+  prix: number;
+  photo: string;
+  prixAchat: number;
+  quantite: number;
+  alertSeuil: number;
+  createdAt: string; // ou Date, selon vos préférences
+  category: {
+    id: number;
+    nomCategory: string;
+  };
+  uniteMesure: {
+    id: number;
+    nomUnite: string;
+  };
+  // Propriétés ajoutées pour simplifier l'affichage dans le composant
+  nomCategory?: string;
+  nomUnite?: string;
 }

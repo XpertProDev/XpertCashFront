@@ -67,9 +67,20 @@
     </tbody>
   </table>
 
-  <div *ngIf="filteredTasks().length === 0" style="text-align: center; margin-top: 20px;">
+  <!-- <div *ngIf="filteredTasks().length === 0" style="text-align: center; margin-top: 20px;">
       <p style="color: red;">Aucun résultat trouvé pour "{{ searchText }}"</p>
+  </div> -->
+
+  <!-- Si la liste de produits est vide -->
+  <div *ngIf="tasks.length === 0" style="text-align: center; margin-top: 20px;">
+    <p style="color: red;">Vous n'avez pas de produit</p>
   </div>
+
+  <!-- Si la liste de produits n'est pas vide, mais qu'aucun résultat ne correspond à la recherche -->
+  <div *ngIf="tasks.length > 0 && filteredTasks().length === 0" style="text-align: center; margin-top: 20px;">
+    <p style="color: red;">Aucun résultat trouvé pour "{{ searchText }}"</p>
+  </div>
+
 
   <!-- // Pagination -->
 
@@ -118,25 +129,31 @@
           </div>
           
           <!-- Ligne 2 : Catégorie avec autocomplete -->
-          <div class="champ_input">
-            <input type="text"
-                [formControl]="control"
-                [matAutocomplete]="auto"
-                class="input_focus"
-                placeholder="Saisis le nom de catégorie" [value]="displayFn(produit.category)">
-                
-
-              <label for="category" class="label">Categorie</label>
-            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategorySelected($event)">
-              <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
-                {{ category.nomCategory }}
-              </mat-option>
-              <div class="btn_add_categoryDiv">
-                <button class="btn_add_category">Créer un categorie</button>
+          <div class="double_input2">
+            <div class="champ_input">
+              <input type="text"
+                  [formControl]="control"
+                  [matAutocomplete]="auto"
+                  class="input_focus"
+                  placeholder="Saisis le nom de catégorie" [value]="displayFn(produit.category)">
+                  
+  
+                <label for="category" class="label">Categorie</label>
+              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategorySelected($event)">
+                <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
+                  {{ category.nomCategory}}
+                </mat-option>
+                <div class="btn_add_categoryDiv">
+                  <button class="btn_add_category">Créer un categorie</button>
+                </div>
+              </mat-autocomplete>
+              <div *ngIf="f['category'].touched && f['category'].invalid" class="error-message">
+                Le categorie est vide.
               </div>
-            </mat-autocomplete>
-            <div *ngIf="f['category'].touched && f['category'].invalid" class="error-message">
-              Le categorie est vide.
+            </div>
+  
+            <div class="btn_add_categoryDiv2">
+              <button class="btn_add_category2">Créer un categorie</button>
             </div>
           </div>
           
@@ -223,7 +240,7 @@
     </div>
 
      <!-- Popup de confirmation / d'erreur -->
-     <div class="modal-overlay2" *ngIf="showPopup2">
+    <div class="modal-overlay2" *ngIf="showPopup2">
       <div class="modal-content2" [ngClass]="{'error': popupType === 'error'}">
         <div class="popup-header2">
           <div class="popup-img2">
@@ -233,8 +250,8 @@
         </div>
         <p>{{ popupMessage }}</p>
         <button (click)="closePopup2()">OK</button>
-      </div>
-  </div>
+     </div>
+    </div>
   </div>
 </div>
 
