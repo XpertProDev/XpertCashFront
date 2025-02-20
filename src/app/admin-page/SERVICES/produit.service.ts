@@ -18,7 +18,6 @@ export class ProduitService {
     const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
-      // Note : Le Content-Type n'est pas défini ici car Angular le gère automatiquement pour FormData
     });
 
     const formData: FormData = new FormData();

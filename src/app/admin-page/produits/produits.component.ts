@@ -44,11 +44,15 @@ export class ProduitsComponent implements OnInit {
 
 
   ajouteProduitForm!: FormGroup;
+  ajouteCategoryForm!: FormGroup;
   errorMessage: string = '';
+  errorMessageCategory: string = '';
 
   // Propriétés pour la popup
   showPopup: boolean = false;
   showPopup2: boolean = false;
+  showPopupCategory: boolean = false;
+  showPopupCategory2: boolean = false;
   popupTitle: string = '';
   popupMessage: string = '';
   popupImage: string = '';
@@ -216,6 +220,10 @@ export class ProduitsComponent implements OnInit {
         category: ['', Validators.required]
     });
 
+    this.ajouteCategoryForm = this.fb.group({
+      categoryName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]]
+    });
+
     // 🔹 Lier control au FormControl existant
     this.control = this.ajouteProduitForm.controls['category'] as FormControl;
   }
@@ -271,7 +279,6 @@ export class ProduitsComponent implements OnInit {
       }
     });
   }
-  
 
   // tasks: any[] = [];
   paginatedTasks: any[] = []; // Liste des produits affichés selon la pagination
@@ -282,6 +289,20 @@ export class ProduitsComponent implements OnInit {
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
+  }
+  
+  // Ouvre la popup avec titre, message et type (success ou error)
+  openPopupCategory2(title: string, message: string, type: 'success' | 'error'): void {
+    this.popupTitle = title;
+    this.popupMessage = message;
+    this.popupType = type;
+    // Choix de l'image en fonction du type
+    if (type === 'success') {
+      this.popupImage = 'assets/img/succcccc.png'; // Remplacez par le chemin de votre image de succès
+    } else {
+      this.popupImage = 'assets/img/error.png'; // Remplacez par le chemin de votre image d'erreur
+    }
+    this.showPopupCategory2 = true;
   }
   
   // Ouvre la popup avec titre, message et type (success ou error)
@@ -296,6 +317,15 @@ export class ProduitsComponent implements OnInit {
       this.popupImage = 'assets/img/error.png'; // Remplacez par le chemin de votre image d'erreur
     }
     this.showPopup2 = true;
+  }
+
+  // Ferme la popup et redirige si l'inscription a réussi
+  closePopupCategory2(): void {
+    this.showPopupCategory2 = false;
+    if (this.popupType === 'success') {
+      //this.router.navigate(['/produit']);
+      this.showPopupCategory = false;
+    }
   }
 
   // Ferme la popup et redirige si l'inscription a réussi
@@ -377,14 +407,59 @@ export class ProduitsComponent implements OnInit {
     });
   }
 
-  // onCreateCategory() {
-  //   console.log("Créer une nouvelle catégorie");
-  //   // Ajoute ici la logique pour ouvrir une boîte de dialogue ou un formulaire
-  // }
-  
+  isPopupOpen = false;
 
+  submitFormCategory(): void {
+    if (this.ajouteCategoryForm.invalid) {
+      this.errorMessageCategory = "Veuillez remplir correctement le formulaire.";
+      return;
+    }
+
+    const categoryData = { nomCategory: this.ajouteCategoryForm.value.categoryName };
+
+    this.categorieService.ajouterCategorie(categoryData).subscribe({
+      next: (response: any) => {
+        console.log('Categorie ajouté avec succès : ', response);
+
+        if (response && response.id) {
+          const successMessage = response.message || "Le category a été créé avec succès.";
+          this.openPopupCategory2("Ajout de category réussi !", successMessage, 'success');
+        }
+
+        // console.log("Catégorie ajoutée avec succès :", response);
+        // this.closePopupCategory();
+        // this.ajouteCategoryForm.reset();
+      },
+      error: (error) => {
+        console.log("Erreur complète :", error);
+        console.log("Réponse API :", error.error);
+        let message = "Une erreur est survenue lors de la création du produit.";
+
+        if (error.status === 400 || error.status === 500) {
+          if (typeof error.error === "string") {
+            const match = error.error.match(/interpolatedMessage='([^']+)'/);
+            message = match ? match[1] : error.error;
+          } else if (error.error?.error) {
+            message = error.error.error;
+          }
+        }
+
+        this.openPopupCategory2("❌ Oups, une erreur !", message, "error");
+      }
+    });
+  }
+
+  openPopupCategory() {
+    this.showPopupCategory = true;
+  }
+
+  closePopupCategory() {
+    this.showPopupCategory = false;
+    this.errorMessage = '';
+  }
 
   // Getter pour faciliter l'accès aux contrôles dans le template
   get f() { return this.ajouteProduitForm.controls; }
+  get c() { return this.ajouteCategoryForm.controls; }
 
 }
