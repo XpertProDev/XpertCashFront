@@ -3,6 +3,13 @@
 
 <div class="container_global">
     <div class="container_global_content">
+      <div *ngIf="isLoading" class="loading-overlay">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <p>Inscription en cours...</p>
+        </div>
+      </div>
+
         <!-- Page -->
         <div class="content_page">
             <section class="welcome">
@@ -105,7 +112,7 @@
                       
                           <!-- Bouton de soumission -->
                           <div class="btn_contact">
-                            <button type="submit">Continuer</button>
+                            <button type="submit" (click)="submitForm()" [disabled]="isLoading">Continuer</button>
                           </div>
                         </div>
 

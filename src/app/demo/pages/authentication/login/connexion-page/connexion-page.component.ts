@@ -24,6 +24,7 @@ export class ConnexionPageComponent {
   popupMessage: string = '';
   popupImage: string = '';
   popupType: 'success' | 'error' = 'success';
+  isLoading: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -37,6 +38,10 @@ export class ConnexionPageComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]]
     });
+  }
+
+  goToInscription() {
+    this.router.navigate(['/inscription']);
   }
 
   openPopup(title: string, message: string, type: 'success' | 'error'): void {
@@ -62,45 +67,50 @@ export class ConnexionPageComponent {
       return;
     }
   
+    this.isLoading = true; // Début du chargement
     const credentials = this.loginForm.value;
   
-    this.usersService.connexionUser(credentials).subscribe({
-      next: (response) => {
-        if (response.token) {
-          // ✅ Afficher le token dans la console
-          console.log("Token généré :", response.token);
-          
-          // ✅ Stocker le token via AuthService
-          this.authService.saveToken(response.token);
+    setTimeout(() => { // ici on retarde l'exécution de la requête pour 2 secondes
+      this.usersService.connexionUser(credentials).subscribe({
+        next: (response) => {
+          this.isLoading = false; 
   
-          this.openPopup("Connexion réussie !", response.message ?? "Connexion réussie.", 'success');
+          if (response.token) {
+            console.log("Token généré :", response.token);
+            this.authService.saveToken(response.token);
   
-          setTimeout(() => {
-            this.router.navigate(['/produit']); 
-          }, 1500);
-        } else {
-          this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
-          this.openPopup("Erreur de connexion", this.errorMessage, 'error');
-        }
-      },
-      error: (error) => {
-        console.log("Erreur complète :", error);
-        console.log("Réponse API :", error.error);
+            this.openPopup("Connexion réussie !", response.message ?? "Connexion réussie.", 'success');
   
-        let message = "Une erreur est survenue lors de la connexion.";
-  
-        if (error.status === 400 || error.status === 401) {
-          if (typeof error.error === "string") {
-            message = error.error;
-          } else if (error.error?.error) {
-            message = error.error.error;
+            setTimeout(() => {
+              this.router.navigate(['/produit']); 
+            }, 1500);
+          } else {
+            this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
+            this.openPopup("Erreur de connexion", this.errorMessage, 'error');
           }
-        }
+        },
+        error: (error) => {
+          this.isLoading = false; 
   
-        this.openPopup("❌ Oups, une erreur !", message, "error");
-      }
-    });
+          console.log("Erreur complète :", error);
+          console.log("Réponse API :", error.error);
+  
+          let message = "Une erreur est survenue lors de la connexion.";
+  
+          if (error.status === 400 || error.status === 401) {
+            if (typeof error.error === "string") {
+              message = error.error;
+            } else if (error.error?.error) {
+              message = error.error.error;
+            }
+          }
+  
+          this.openPopup("❌ Oups, une erreur !", message, "error");
+        }
+      });
+    }, 2000); 
   }
+  
   
 
   get f() { return this.loginForm.controls; }
