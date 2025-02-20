@@ -25,6 +25,8 @@ export class InscriptionComponent implements OnInit {
   popupImage: string = '';
   popupType: 'success' | 'error' = 'success';
 
+  isLoading: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private usersService: UsersService,
@@ -89,40 +91,47 @@ export class InscriptionComponent implements OnInit {
       return;
     }
   
+    this.isLoading = true; // Début du chargement
+  
     // Exclure 'confirmPassword' des données envoyées
     const { confirmPassword, ...userData } = this.registerForm.value;
     const user: Users = userData;
   
-    this.usersService.registerUser(user).subscribe({
-      next: (response) => {
-        if (response && response.message) {
-          this.openPopup("Inscription réussie !", response.message, 'success');
-        } else {
-          this.errorMessage = response.error || "Erreur d'inscription, veuillez vérifier les champs.";
-          this.openPopup("Erreur d'inscription", this.errorMessage, 'error');
-        }
-      },
-      error: (error) => {
-        console.log("Erreur complète :", error);
-        console.log("Réponse API :", error.error); // Ajout du log pour voir l'erreur exacte
-      
-        let message = "Une erreur est survenue lors de l'inscription.";
-      
-        if (error.status === 400 || error.status === 500) {
-          if (typeof error.error === "string") {
-            // Extraction avancée du message dans une erreur sous forme de texte brut
-            const match = error.error.match(/interpolatedMessage='([^']+)'/);
-            message = match ? match[1] : error.error;
-          } else if (error.error?.error) {
-            message = error.error.error;
+    setTimeout(() => { // retard de request en 2 secondes 
+      this.usersService.registerUser(user).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+  
+          if (response && response.message) {
+            this.openPopup("Inscription réussie !", response.message, 'success');
+          } else {
+            this.errorMessage = response.error || "Erreur d'inscription, veuillez vérifier les champs.";
+            this.openPopup("Erreur d'inscription", this.errorMessage, 'error');
           }
+        },
+        error: (error) => {
+          this.isLoading = false;
+  
+          console.log("Erreur complète :", error);
+          console.log("Réponse API :", error.error);
+  
+          let message = "Une erreur est survenue lors de l'inscription.";
+  
+          if (error.status === 400 || error.status === 500) {
+            if (typeof error.error === "string") {
+              const match = error.error.match(/interpolatedMessage='([^']+)'/);
+              message = match ? match[1] : error.error;
+            } else if (error.error?.error) {
+              message = error.error.error;
+            }
+          }
+  
+          this.openPopup("❌ Oups, une erreur !", message, "error");
         }
-      
-        this.openPopup("❌ Oups, une erreur !", message, "error");
-      } 
-    });
+      });
+    }, 2000);
   }
+  
 
-  // Getter pour faciliter l'accès aux contrôles dans le template
   get f() { return this.registerForm.controls; }
 }

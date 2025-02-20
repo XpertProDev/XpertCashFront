@@ -50,9 +50,20 @@
         <tr *ngFor="let task of filteredTasks(); let i = index">
         <td style="font-size: 10px;" [innerHTML]="highlightMatch(task.codeProduit)"></td>
         <td>
-          <div class="imgProduit">
-            <img [src]="task.photo || 'assets/img/lait.jpeg'" alt="photo image">
+          <div class="imgProduit" (click)="openImage(task.photo)">
+            <img [src]="task.photo || 'assets/img/lait.jpeg'" alt="Produit">
           </div>
+          
+          
+          <div class="modal" *ngIf="imagePopup" (click)="closeImage()">
+            <div class="modal-content" (click)="$event.stopPropagation()">
+              <img [src]="imagePopup" alt="Produit">
+            </div>
+          </div>
+        
+          
+          
+          
         </td> 
         <td [innerHTML]="highlightMatch(task.nomProduit)"></td>
         <td [innerHTML]="highlightMatch(task.nomCategory)"></td>

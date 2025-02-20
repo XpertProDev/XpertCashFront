@@ -3,6 +3,14 @@
 
 <div class="container_global">
     <div class="container_global_content">
+
+      <div *ngIf="isLoading" class="loading-overlay">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <p>Connexion en cours...</p>
+        </div>
+      </div>
+      
         <!-- Page -->
         <div class="content_page">
 
@@ -45,11 +53,14 @@
                       
                           <!-- Bouton de soumission -->
                           <div class="btn_contact">
-                            <button type="submit">Se connecter</button>
+                            <button type="submit" (click)="submitForm()" [disabled]="isLoading">
+                              <span ></span> 
+                              <span >Se connecter</span>
+                            </button>
                           </div>
 
                           <div class="registerPage">
-                            <p>Vous n’avez pas encore de compte ? <a class="logout" routerLink="/inscription">Inscription</a></p>
+                            <p>Vous n’avez pas encore de compte ? <a class="logout" (click)="goToInscription()">Inscription</a></p>
                           </div>
                         </div>
 
