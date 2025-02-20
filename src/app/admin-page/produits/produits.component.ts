@@ -17,6 +17,10 @@ import { Produit } from '../MODELS/produit.model';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
+import autoTable from 'jspdf-autotable';
+import { UsersService } from '../SERVICES/users.service';
+
+
 
 
 @Component({
@@ -55,23 +59,18 @@ export class ProduitsComponent implements OnInit {
   popupType: 'success' | 'error' = 'success';
 
   imagePopup: string | null = null;
+  nomEntreprise: string = '';
+  adresseEntreprise: string = '';
+  logoEntreprise: string =''
 
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
         private fb: FormBuilder,
-        private router: Router
+        private router: Router,
+        private usersService: UsersService,
   ) {}
 
-
-  // Méthode de filtrage pour la recherche dans le tableau
-  // filteredTasks() {
-  //   return this.tasks.filter(task => 
-  //     task.nomCategory?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-  //     task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-  //     task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
-  //   );
-  // }
 
   // Mise en évidence du texte recherché dans le tableau
   highlightMatch(text: string): string {
@@ -79,6 +78,21 @@ export class ProduitsComponent implements OnInit {
     const regex = new RegExp(`(${this.searchText})`, 'gi');
     return text.replace(regex, '<strong>$1</strong>');
   }
+
+  filteredTasks(): any[] {
+    const sortedTasks = [...this.tasks] // Copie du tableau pour éviter de modifier l'original
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  
+    const filtered = sortedTasks.filter(task => 
+      task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
+    );
+  
+    const startIndex = this.currentPage * this.pageSize;
+    return filtered.slice(startIndex, startIndex + this.pageSize);
+  }
+  
+  
 
   // Gestion du dropdown d'export
   showExportDropdown = false;
@@ -93,6 +107,28 @@ export class ProduitsComponent implements OnInit {
     }
   }
 
+  getImageBase64(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          resolve(reader.result as string);
+        };
+        reader.readAsDataURL(xhr.response);
+      };
+      xhr.onerror = function () {
+        reject(new Error('Erreur lors du chargement de l\'image'));
+      };
+      xhr.open('GET', url);
+      xhr.responseType = 'blob';
+      xhr.send();
+    });
+  }
+  
+  
+  
+
   // Méthodes pour télécharger en Excel, PDF et CSV
   downloadExcel() {
     const worksheet = XLSX.utils.json_to_sheet(this.tasks);
@@ -102,25 +138,91 @@ export class ProduitsComponent implements OnInit {
   }
 
   downloadPDF() {
+    if (!this.tasks || this.tasks.length === 0) {
+      console.error("Aucun produit à afficher dans le PDF !");
+      return;
+    }
+  
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('Liste des produits', 14, 22);
-    
-    const columns = ['Code', 'Photo', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Prix achat', 'Quantité', 'Unité', 'Alert seuil', 'Date & heure'];
-    const rows = this.tasks.map(task => [
-      task.codeProduit, task.photo, task.nomProduit, task.nomCategory,
-      task.description, task.prix, task.prixAchat, task.quantite, 
-      task.nomUnite, task.alertSeuil, task.createdAt
-    ]);
-
-    (doc as any).autoTable({
-      head: [columns],
-      body: rows,
-      startY: 30
+  
+    // Définir l'URL du logo (par défaut ou dynamique)
+    const logoUrl = this.logoEntreprise
+      ? `http://localhost:8080/logoUpload/${this.logoEntreprise}`
+      : `http://localhost:8080/logoUpload/651.jpg`;
+  
+    // Récupérer les informations de l’entreprise
+    const entreprise = this.nomEntreprise ? this.nomEntreprise : "Nom non disponible";
+    const adress = this.adresseEntreprise ? this.adresseEntreprise : "Adresse non disponible";
+  
+    // Charger le logo avant de générer le PDF
+    this.getImageBase64(logoUrl).then((logoBase64) => {
+      // Ajouter le logo
+      doc.addImage(logoBase64, 'PNG', 14, 5, 30, 30);
+  
+      // Ajouter les informations de l'entreprise
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Nom de l'entreprise: ${entreprise}`, 60, 20);
+      doc.text('Liste des produits', 60, 30);
+  
+      // Ligne de séparation
+      doc.setLineWidth(0.5);
+      doc.line(14, 35, 195, 35);
+  
+      // Colonnes du tableau
+      const columns = ['Code', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Quantité', 'Date & heure'];
+  
+      // Récupérer uniquement les produits de la page actuelle
+      const startIndex = this.currentPage * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      const pageTasks = this.tasks.slice(startIndex, endIndex);
+  
+      if (!Array.isArray(pageTasks) || pageTasks.length === 0) {
+        console.error("Aucun produit trouvé sur cette page !");
+        return;
+      }
+  
+      // Mapper les données des produits
+      const rows = pageTasks.map(task => [
+        task.codeProduit, task.nomProduit, task.nomCategory,
+        task.description, task.prix, task.quantite, task.createdAt
+      ]);
+  
+      // Ajouter le tableau des produits
+      autoTable(doc, {
+        head: [columns],
+        body: rows,
+        startY: 40,
+        theme: 'grid',
+        headStyles: { fillColor: [100, 100, 255], textColor: [255, 255, 255], fontSize: 12 },
+        bodyStyles: { fontSize: 10 }
+      });
+  
+      // Récupérer la dernière position Y après le tableau
+      const finalY = (doc as any).lastAutoTable?.finalY || 60;
+  
+      // Ajouter une ligne de séparation après le tableau
+      doc.setLineWidth(0.5);
+      doc.line(14, finalY + 5, 195, finalY + 5);
+  
+      // Ajouter un pied de page
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic');
+      doc.text(`Adresse: ${adress}`, 14, finalY + 10);
+      doc.text('Contact: 123-456-7890 | email@entreprise.com', 14, finalY + 15);
+  
+      // Sauvegarder le PDF
+      doc.save('Facture_des_produits.pdf');
+    }).catch((error) => {
+      console.error("Erreur lors du chargement du logo :", error);
     });
-
-    doc.save('Facture_des_produits.pdf');
   }
+  
+  
+  
+  
+  
+  
 
   downloadCSV() {
     const headers = ['Code', 'Photo', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Prix achat', 'Quantité', 'Unité', 'Alert seuil', 'Date & heure'];
@@ -218,6 +320,19 @@ export class ProduitsComponent implements OnInit {
 
     // 🔹 Lier control au FormControl existant
     this.control = this.ajouteProduitForm.controls['category'] as FormControl;
+
+    // Récupérer les infos de l'utilisateur et le nom de l'entreprise
+      this.usersService.getUserInfo().subscribe({
+        next: (userInfo) => {
+          this.nomEntreprise = userInfo.nomEntreprise; 
+          this.adresseEntreprise = userInfo.adresseEntreprise;
+          this.logoEntreprise = userInfo.logoEntreprise
+          console.log('infol\'entreprise:', this.nomEntreprise, this.adresseEntreprise, this.loadProduits);
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération dinfol\'entreprise', err);
+        }
+      });
   }
 
   private _filter(value: string | Categorie): Categorie[] {
@@ -254,18 +369,25 @@ export class ProduitsComponent implements OnInit {
       next: (produits: Produit[]) => {
         console.log('Produits récupérés:', produits);
   
-        this.tasks = produits.map(prod => {
-          // Créer l'URL complète de l'image
-          const fullImageUrl = `http://localhost:8080${prod.photo}`;
-          console.log('Image URL:', fullImageUrl);  // Affiche l'URL de l'image dans la console
+        this.tasks = produits
+          .map(prod => {
+            const fullImageUrl = `http://localhost:8080${prod.photo}`;
+            console.log('Image URL:', fullImageUrl);
   
-          return {
-            ...prod,
-            photo: fullImageUrl, // Passe l'URL complète
-            nomCategory: prod.category?.nomCategory ?? 'Catégorie inconnue',
-            nomUnite: prod.uniteMesure?.nomUnite
-          };
-        });
+            // Nettoyer et transformer `createdAt` en un objet Date valide
+            const createdAtFormatted = prod.createdAt.replace(' à ', 'T'); 
+            const createdAtDate = new Date(createdAtFormatted); 
+  
+            return {
+              ...prod,
+              photo: fullImageUrl,
+              nomCategory: prod.category?.nomCategory ?? 'Catégorie inconnue',
+              nomUnite: prod.uniteMesure?.nomUnite,
+              createdAtDate
+            };
+          })
+          // **Trier du plus récent au plus ancien**
+          .sort((a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime());
   
         this.dataSource.data = this.tasks;
         this.dataSource.paginator = this.paginator;
@@ -277,23 +399,13 @@ export class ProduitsComponent implements OnInit {
   }
   
   
-
-  // tasks: any[] = [];
-  paginatedTasks: any[] = []; // Liste des produits affichés selon la pagination
-  pageSize = 5; // Nombre de produits par page (modifiable)
-  currentPage = 0; // Page actuelle
-
   
-  filteredTasks(): any[] {
-    const filtered = this.tasks.filter(task => 
-      task.nomCategory?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
-    );
-  
-    const startIndex = this.currentPage * this.pageSize;
-    return filtered.slice(startIndex, startIndex + this.pageSize);
-  }
+
+
+  paginatedTasks: any[] = []; 
+  pageSize = 5; 
+  currentPage = 0; 
+
 
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex;
@@ -318,7 +430,8 @@ export class ProduitsComponent implements OnInit {
   closePopup2(): void {
     this.showPopup2 = false;
     if (this.popupType === 'success') {
-      this.router.navigate(['/produit']);
+      //this.router.navigate(['/produit']);
+      this.showPopup = false;
     }
   }
 
@@ -339,11 +452,11 @@ export class ProduitsComponent implements OnInit {
       quantite: formValues.quantite,
       alertSeuil: formValues.alertSeuil,
       uniteMesure: { nomUnite: formValues.uniteMesure },
-      categoryProduit: {  
+      category: {  
         id: formValues.category?.id, 
         nomCategory: formValues.category?.nomCategory
       },
-      photo: '' // Photo
+      photo: '' 
     };    
 
     this.produitService.ajouterProduit(produitToSave, this.selectedFile!).subscribe({
@@ -363,8 +476,9 @@ export class ProduitsComponent implements OnInit {
 
         const produitFormate = {
           ...response,
-          nomCategory: response.categoryProduit?.nomCategory,
-          nomUnite: response.uniteMesure?.nomUnite
+          nomCategory: response.category?.nomCategory,
+          nomUnite: response.uniteMesure?.nomUnite,
+          photo: response.photo ? `http://localhost:8080${response.photo}` : 'assets/img/lait.jpeg'
         };
 
         // Ajouter le produit en haut de la liste
@@ -392,6 +506,11 @@ export class ProduitsComponent implements OnInit {
     });
   }
 
+  // onCreateCategory() {
+  //   console.log("Créer une nouvelle catégorie");
+  //   // Ajoute ici la logique pour ouvrir une boîte de dialogue ou un formulaire
+  // }
+  
 
 
   // Getter pour faciliter l'accès aux contrôles dans le template
