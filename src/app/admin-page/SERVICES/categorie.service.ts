@@ -23,6 +23,16 @@ export class CategorieService {
   
     return this.http.get<Categorie[]>(`${this.apiUrl}/allCategory`, { headers });
   }
+
+  // 🌟 Ajouter une catégorie
+  ajouterCategorie(category: Categorie): Observable<Categorie> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.post<Categorie>(`${this.apiUrl}/add/categoryProduit`, category, { headers });
+  }
   
 
 }
