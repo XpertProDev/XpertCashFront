@@ -54,6 +54,8 @@ export class ProduitsComponent implements OnInit {
   popupImage: string = '';
   popupType: 'success' | 'error' = 'success';
 
+  imagePopup: string | null = null;
+
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
@@ -250,12 +252,16 @@ export class ProduitsComponent implements OnInit {
   loadProduits(): void {
     this.produitService.getProduitsEntreprise().subscribe({
       next: (produits: Produit[]) => {
-        console.log('Produits récupérés:', produits); // Vérifiez la structure de la réponse ici
+        console.log('Produits récupérés:', produits);
   
         this.tasks = produits.map(prod => {
-          console.log('Produit:', prod); // Affichez chaque produit individuellement
+          // Créer l'URL complète de l'image
+          const fullImageUrl = `http://localhost:8080${prod.photo}`;
+          console.log('Image URL:', fullImageUrl);  // Affiche l'URL de l'image dans la console
+  
           return {
             ...prod,
+            photo: fullImageUrl, // Passe l'URL complète
             nomCategory: prod.category?.nomCategory ?? 'Catégorie inconnue',
             nomUnite: prod.uniteMesure?.nomUnite
           };
@@ -269,6 +275,7 @@ export class ProduitsComponent implements OnInit {
       }
     });
   }
+  
   
 
   // tasks: any[] = [];
@@ -311,7 +318,7 @@ export class ProduitsComponent implements OnInit {
   closePopup2(): void {
     this.showPopup2 = false;
     if (this.popupType === 'success') {
-      this.router.navigate(['/connexion']);
+      this.router.navigate(['/produit']);
     }
   }
 
@@ -389,5 +396,13 @@ export class ProduitsComponent implements OnInit {
 
   // Getter pour faciliter l'accès aux contrôles dans le template
   get f() { return this.ajouteProduitForm.controls; }
+
+  openImage(imageUrl: string): void {
+    this.imagePopup = imageUrl;
+  }
+  
+  closeImage(): void {
+    this.imagePopup = null;
+  }
 
 }
