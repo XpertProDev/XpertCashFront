@@ -1,6 +1,10 @@
 // produit.model.ts
 
 export class Produit {
+  category: any;
+  message(arg0: string, message: any, arg2: string) {
+    throw new Error('Method not implemented.');
+  }
   id?: number;
   codeProduit?: string;
   nomProduit?: string;

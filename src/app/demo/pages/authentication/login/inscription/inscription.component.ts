@@ -119,8 +119,7 @@ export class InscriptionComponent implements OnInit {
         }
       
         this.openPopup("❌ Oups, une erreur !", message, "error");
-      }      
-      
+      } 
     });
   }
 

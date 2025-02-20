@@ -430,3 +430,143 @@ mat-paginator {
   background-color: #dcdcdc51;
   border-radius: 5px;
 }
+
+
+.error-message {
+  font-size: 13px;
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+
+// .btn_add_category {
+//   width: 40%;
+//   padding: 10px 0;
+//   border-radius: 5px;
+//   border: none;
+//   background-color: #0672E4;
+//   color: #fff;
+// }
+
+// .btn_add_category:hover {
+//   background-color: #0465cd;
+// }
+
+.btn_add_categoryDiv {
+  margin: 10px 0;
+  justify-content: center;
+}
+
+.btn_add_category {
+  border: none;
+  padding-left: 15px;
+}
+
+.btn_add_category:hover {
+  background-color: #f2efef;
+  transition: all .5s;
+}
+  
+
+.messageCate p {
+  color: red;
+}
+
+// Pop up
+
+/* Overlay de la popup */
+.modal-overlay2 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Contenu de la popup */
+.modal-content2 {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  animation: fadeInDown 0.3s ease;
+  position: relative;
+}
+
+/* Header de la popup avec l'image et le titre */
+.popup-header2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.popup-img2 {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+}
+
+.popup-icon2 {
+  width: 100%;
+  height: 100%;
+  margin-bottom: 10px;
+}
+
+.modal-content2 h2 {
+  margin: 0;
+  font-size: 1.5em;
+  color: #333;
+}
+
+.modal-content2 p {
+  font-size: 1em;
+  color: #555;
+  margin: 20px 0;
+}
+
+/* Style du bouton */
+.modal-content2 button {
+  background-color: #0672E4;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.modal-content2.error button {
+  background-color: #e53935;
+}
+
+.modal-content2 button:hover {
+  background-color: #0863c5;
+}
+
+.modal-content2.error button:hover {
+  background-color: #d32f2f;
+}
+
+/* Animation d'apparition */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

@@ -91,86 +91,110 @@
       <span class="modal-close" (click)="closePopup()">&times;</span>
     </div>
     <div class="modal-body">
-      <form class="container_formulaire" id="myForm">
+      <form [formGroup]="ajouteProduitForm" class="container_formulaire" (ngSubmit)="submitForm()">
         <div class="formulaire">
           
           <!-- Ligne 1 : Nom produit et Prix -->
           <div class="double_input">
             <div class="champ_input">
-              <input type="text" class="input_focus" required id="nomProduit"
+              <input formControlName="nomProduit" type="text" class="input_focus" required id="nomProduit"
                      name="nomProduit"
-                     placeholder="Saisis le nom de produit"
-                     [(ngModel)]="produit.nomProduit">
+                     placeholder="Saisis le nom de produit">
               <label for="nomProduit" class="label">Nom produit</label>
+              <div *ngIf="f['nomProduit'].touched && f['nomProduit'].invalid" class="error-message">
+                Le nom produit est vide.
+              </div>
             </div>
+
             <div class="champ_input champ_input_margin">
-              <input type="number" class="input_focus" required id="prix"
+              <input formControlName="prix" type="number" class="input_focus" required id="prix"
                      name="prix"
-                     placeholder="Saisis le montant"
-                     [(ngModel)]="produit.prix">
+                     placeholder="Saisis le montant">
               <label for="prix" class="label">Prix</label>
+              <div *ngIf="f['prix'].touched && f['prix'].invalid" class="error-message">
+                Le prix est vide.
+              </div>
             </div>
           </div>
           
           <!-- Ligne 2 : Catégorie avec autocomplete -->
           <div class="champ_input">
             <input type="text"
-                  placeholder="Saisis le nom de catégorie"
-                  [formControl]="control"
-                  [matAutocomplete]="auto"
-                  class="input_focus"
-                  [value]="displayFn(produit.category)"
-                  name="categorie">
+                [formControl]="control"
+                [matAutocomplete]="auto"
+                class="input_focus"
+                placeholder="Saisis le nom de catégorie" [value]="displayFn(produit.category)">
+                
+
+              <label for="category" class="label">Categorie</label>
             <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategorySelected($event)">
               <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
                 {{ category.nomCategory }}
               </mat-option>
+              <div class="btn_add_categoryDiv">
+                <button class="btn_add_category">Créer un categorie</button>
+              </div>
             </mat-autocomplete>
+            <div *ngIf="f['category'].touched && f['category'].invalid" class="error-message">
+              Le categorie est vide.
+            </div>
           </div>
           
           <!-- Ligne 3 : Prix achat et Quantité -->
           <div class="double_input">
             <div class="champ_input">
-              <input type="number" class="input_focus" required id="prixAchat"
+              <input formControlName="prixAchat" type="number" class="input_focus" required id="prixAchat"
                      name="prixAchat"
-                     placeholder="Saisis le montant"
-                     [(ngModel)]="produit.prixAchat">
+                     placeholder="Saisis le montant">
               <label for="prixAchat" class="label">Prix achat</label>
+              <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message">
+                Le prix achat est vide.
+              </div>
             </div>
+
             <div class="champ_input champ_input_margin">
-              <input type="number" class="input_focus" required id="quantite"
+              <input formControlName="quantite" type="number" class="input_focus" required id="quantite"
                      name="quantite"
-                     placeholder="Saisis le montant"
-                     [(ngModel)]="produit.quantite">
+                     placeholder="Saisis le montant">
               <label for="quantite" class="label">Quantité</label>
+              <div *ngIf="f['quantite'].touched && f['quantite'].invalid" class="error-message">
+                Le quantité est vide.
+              </div>
             </div>
           </div>
           
           <!-- Ligne 4 : Alert seuil et Unité -->
           <div class="double_input">
             <div class="champ_input">
-              <input type="number" class="input_focus" required id="alertSeuil"
+              <input formControlName="alertSeuil" type="number" class="input_focus" required id="alertSeuil"
                      name="alertSeuil"
-                     placeholder="Saisis le nom de produit"
-                     [(ngModel)]="produit.alertSeuil">
+                     placeholder="Saisis le nom de produit">
               <label for="alertSeuil" class="label">Alert seuil</label>
+              <div *ngIf="f['alertSeuil'].touched && f['alertSeuil'].invalid" class="error-message">
+                Le alert seuil est vide.
+              </div>
             </div>
+
             <div class="champ_input champ_input_margin">
-              <input type="text" class="input_focus" required id="unite"
+              <input formControlName="uniteMesure" type="text" class="input_focus" required id="unite"
                      name="unite"
-                     placeholder="Saisis le montant"
-                     [(ngModel)]="produit.uniteMesure.nomUnite">
-              <label for="unite" class="label">Unité</label>
+                     placeholder="Saisis le montant">
+              <label for="unite" class="label">Unité de mesure</label>
+              <div *ngIf="f['uniteMesure'].touched && f['uniteMesure'].invalid" class="error-message">
+                Le nom unité est vide.
+              </div>
             </div>
           </div>
           
           <!-- Ligne 5 : Description -->
           <div class="champ_input" style="margin-top: 20px;">
-            <textarea class="input_focus2" required id="description"
+            <textarea formControlName="description" class="input_focus2" required id="description"
                       name="description"
-                      placeholder="Saisis quelque chose"
-                      [(ngModel)]="produit.description"></textarea>
+                      placeholder="Saisis quelque chose"></textarea>
             <label for="description" class="label" style="padding-left: 10px;">Description</label>
+            <div *ngIf="f['description'].touched && f['description'].invalid" class="error-message">
+              Le description est vide.
+            </div>
           </div>
           
           <!-- Ligne 6 : Sélection du fichier image -->
@@ -179,15 +203,38 @@
               <span class="custom-file-button">Choisir un fichier</span>
               <span class="custom-file-text">{{ selectedFile?.name ?? "Aucun fichier choisi" }}</span>
             </label>
-            <input type="file" accept="image/*" id="file" (change)="onFileSelected($event)" hidden>
+            <div *ngIf="f['photo'].touched && f['photo'].invalid" class="error-message">
+              Le photo unité est vide.
+            </div>
+            <input formControlName="photo" type="file" accept="image/*" id="file" (change)="onFileSelected($event)" hidden>
+          </div>
+                      
+          <!-- Message d'erreur global -->
+          <div *ngIf="errorMessage" class="error-message">
+            {{ errorMessage }}
           </div>
           
         </div>
+        <div class="modal-footer">
+          <button class="btn-save" type="submit" >Sauvegarder</button>
+          <button class="btn-cancel" (click)="closePopup()">Annuler</button>
+        </div>
       </form>
     </div>
-    <div class="modal-footer">
-      <button class="btn-save" (click)="saveProduit()">Sauvegarder</button>
-      <button class="btn-cancel" (click)="closePopup()">Annuler</button>
-    </div>
+
+     <!-- Popup de confirmation / d'erreur -->
+     <div class="modal-overlay2" *ngIf="showPopup2">
+      <div class="modal-content2" [ngClass]="{'error': popupType === 'error'}">
+        <div class="popup-header2">
+          <div class="popup-img2">
+              <img [src]="popupImage" alt="Icone" class="popup-icon2">
+          </div>
+          <h2>{{ popupTitle }}</h2>
+        </div>
+        <p>{{ popupMessage }}</p>
+        <button (click)="closePopup2()">OK</button>
+      </div>
+  </div>
   </div>
 </div>
+

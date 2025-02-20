@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import { map, Observable, startWith } from 'rxjs';
@@ -16,10 +16,12 @@ import { Produit } from '../MODELS/produit.model';
 
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { Router } from '@angular/router';
 
 
 @Component({
   selector: 'app-produits',
+  standalone: true,
   imports: [ 
     CommonModule, 
     ReactiveFormsModule, 
@@ -41,10 +43,22 @@ export class ProduitsComponent implements OnInit {
   tasks: any[] = [];
 
 
+  ajouteProduitForm!: FormGroup;
+  errorMessage: string = '';
+
+  // Propriétés pour la popup
+  showPopup: boolean = false;
+  showPopup2: boolean = false;
+  popupTitle: string = '';
+  popupMessage: string = '';
+  popupImage: string = '';
+  popupType: 'success' | 'error' = 'success';
 
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
+        private fb: FormBuilder,
+        private router: Router
   ) {}
 
 
@@ -136,7 +150,7 @@ export class ProduitsComponent implements OnInit {
   }
 
   // Gestion du popup d'ajout de produit
-  showPopup: boolean = false;
+  //showPopup: boolean = false;
   openPopup() {
     this.showPopup = true;
   }
@@ -187,31 +201,23 @@ export class ProduitsComponent implements OnInit {
     );
     // Charger la liste des produits de l'entreprise
     this.loadProduits();
+
+    this.ajouteProduitForm = this.fb.group({
+        nomProduit: ['', Validators.required],
+        description: ['', Validators.required],
+        prix: ['', [Validators.required]],
+        prixAchat: ['', Validators.required],
+        photo: ['', Validators.required],
+        quantite: ['', Validators.required],
+        alertSeuil: ['', Validators.required],
+        uniteMesure: ['', Validators.required],
+        category: ['', Validators.required]
+    });
+
+    // 🔹 Lier control au FormControl existant
+    this.control = this.ajouteProduitForm.controls['category'] as FormControl;
   }
 
-  // Méthode pour récupérer les produits via le service et mapper les données pour l'affichage
-  // loadProduits(): void {
-  //   this.produitService.getProduitsEntreprise().subscribe({
-  //     next: (produits: Produit[]) => {
-  //       console.log("Liste des produits récupérés :", produits);
-  
-  //       this.dataSource.data = produits.map(prod => ({
-  //         ...prod,
-  //         nomCategory: prod.categoryProduit?.nomCategory,
-  //         nomUnite: prod.uniteMesure?.nomUnite
-  //       }));
-  
-  //       this.dataSource.paginator = this.paginator;
-  //     },
-  //     error: (err) => {
-  //       console.error("Erreur lors de la récupération des produits", err);
-  //     }
-  //   });
-  // }  
-
-
-  // Méthode de filtrage utilisée pour l'autocomplete des catégories
-  
   private _filter(value: string | Categorie): Categorie[] {
     let filterValue: string;
     if (typeof value === 'string') {
@@ -237,41 +243,6 @@ export class ProduitsComponent implements OnInit {
     return category ? category.nomCategory : '';
   }
 
-  // Méthode pour sauvegarder un produit via le service
-  saveProduit() {
-    if (this.selectedFile) {
-      // Construire l'objet produit en respectant le nom de propriété attendu par le backend
-      const produitToSave: any = {
-        nomProduit: this.produit.nomProduit,
-        description: this.produit.description,
-        prix: this.produit.prix,
-        prixAchat: this.produit.prixAchat,
-        quantite: this.produit.quantite,
-        alertSeuil: this.produit.alertSeuil,
-        uniteMesure: { nomUnite: this.produit.uniteMesure.nomUnite },
-        // Le backend attend "categoryProduit" et non "category"
-        categoryProduit: { 
-          id: this.produit.category.id, 
-          nomCategory: this.produit.category.nomCategory 
-        },
-        photo: '' // Ce champ sera mis à jour côté serveur après le traitement de l'image
-      };
-  
-      this.produitService.ajouterProduit(produitToSave, this.selectedFile).subscribe({
-        next: (response) => {
-          console.log('Produit ajouté avec succès : ', response);
-          // Vous pouvez rafraîchir la liste des produits après l'ajout
-          this.loadProduits();
-          this.closePopup();
-        },
-        error: (err) => {
-          console.error('Erreur lors de l’ajout du produit : ', err);
-        }
-      });
-    } else {
-      console.error("Aucun fichier sélectionné !");
-    }
-  }
 
   dataSource = new MatTableDataSource<any>(); // Gère les données avec pagination
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -279,12 +250,17 @@ export class ProduitsComponent implements OnInit {
   loadProduits(): void {
     this.produitService.getProduitsEntreprise().subscribe({
       next: (produits: Produit[]) => {
-        this.tasks = produits.map(prod => ({
-          ...prod,
-          nomCategory: prod.categoryProduit?.nomCategory,
-          nomUnite: prod.uniteMesure?.nomUnite
-        }));
-        
+        console.log('Produits récupérés:', produits); // Vérifiez la structure de la réponse ici
+  
+        this.tasks = produits.map(prod => {
+          console.log('Produit:', prod); // Affichez chaque produit individuellement
+          return {
+            ...prod,
+            nomCategory: prod.category?.nomCategory ?? 'Catégorie inconnue',
+            nomUnite: prod.uniteMesure?.nomUnite
+          };
+        });
+  
         this.dataSource.data = this.tasks;
         this.dataSource.paginator = this.paginator;
       },
@@ -293,7 +269,7 @@ export class ProduitsComponent implements OnInit {
       }
     });
   }
-
+  
 
   // tasks: any[] = [];
   paginatedTasks: any[] = []; // Liste des produits affichés selon la pagination
@@ -317,7 +293,101 @@ export class ProduitsComponent implements OnInit {
     this.pageSize = event.pageSize;
   }
   
-  
-  
+  // Ouvre la popup avec titre, message et type (success ou error)
+  openPopup2(title: string, message: string, type: 'success' | 'error'): void {
+    this.popupTitle = title;
+    this.popupMessage = message;
+    this.popupType = type;
+    // Choix de l'image en fonction du type
+    if (type === 'success') {
+      this.popupImage = 'assets/img/succcccc.png'; // Remplacez par le chemin de votre image de succès
+    } else {
+      this.popupImage = 'assets/img/error.png'; // Remplacez par le chemin de votre image d'erreur
+    }
+    this.showPopup2 = true;
+  }
+
+  // Ferme la popup et redirige si l'inscription a réussi
+  closePopup2(): void {
+    this.showPopup2 = false;
+    if (this.popupType === 'success') {
+      this.router.navigate(['/connexion']);
+    }
+  }
+
+  // Méthode pour sauvegarder un produit via le service
+  submitForm(): void {
+    if (this.ajouteProduitForm.invalid) {
+      this.errorMessage = "Veuillez vérifier les informations saisies.";
+      return;
+    }
+
+    const formValues = this.ajouteProduitForm.value;
+
+    const produitToSave: any = {
+      nomProduit: formValues.nomProduit,
+      description: formValues.description,
+      prix: formValues.prix,
+      prixAchat: formValues.prixAchat,
+      quantite: formValues.quantite,
+      alertSeuil: formValues.alertSeuil,
+      uniteMesure: { nomUnite: formValues.uniteMesure },
+      categoryProduit: {  
+        id: formValues.category?.id, 
+        nomCategory: formValues.category?.nomCategory
+      },
+      photo: '' // Photo
+    };    
+
+    this.produitService.ajouterProduit(produitToSave, this.selectedFile!).subscribe({
+      next: (response: any) => {
+        console.log('Produit ajouté avec succès : ', response);
+
+        // Vérification basée sur l'existence d'un id ou autre propriété confirmant la création
+        if (response && response.id) {
+          // Utilisation d'un message par défaut si response.message n'est pas défini
+          const successMessage = response.message || "Le produit a été créé avec succès.";
+          this.openPopup2("Ajout de produit réussi !", successMessage, 'success');
+        } else {
+          this.errorMessage = response.error || "Erreur de l'ajout de produit, veuillez vérifier les champs.";
+          this.openPopup2("Erreur de l'ajout de produit", this.errorMessage, 'error');
+          return;
+        }
+
+        const produitFormate = {
+          ...response,
+          nomCategory: response.categoryProduit?.nomCategory,
+          nomUnite: response.uniteMesure?.nomUnite
+        };
+
+        // Ajouter le produit en haut de la liste
+        this.tasks.unshift(produitFormate);
+
+        // Mettre à jour Angular Material Table (dataSource)
+        this.dataSource.data = [...this.tasks];
+      },
+      error: (error) => {
+        console.log("Erreur complète :", error);
+        console.log("Réponse API :", error.error);
+        let message = "Une erreur est survenue lors de la création du produit.";
+
+        if (error.status === 400 || error.status === 500) {
+          if (typeof error.error === "string") {
+            const match = error.error.match(/interpolatedMessage='([^']+)'/);
+            message = match ? match[1] : error.error;
+          } else if (error.error?.error) {
+            message = error.error.error;
+          }
+        }
+
+        this.openPopup2("❌ Oups, une erreur !", message, "error");
+      }
+    });
+  }
+
+
+
+  // Getter pour faciliter l'accès aux contrôles dans le template
+  get f() { return this.ajouteProduitForm.controls; }
 
 }
