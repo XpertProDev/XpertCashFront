@@ -36,6 +36,17 @@ export class UsersService {
       return this.http.post<{ message?: string; token?: string; error?: string }>(`${this.apiUrl}/login`, credentials);
     }
 
+    // Déconnexion
+    logoutUser(): void {
+      localStorage.removeItem('authToken');  
+      localStorage.removeItem('refreshToken');
+    
+      history.pushState(null, '', '/connexion');
+      window.location.href = "/connexion";
+    }
+    
+
+
     //Information sur User
     getUserInfo(): Observable<UserRequest> {
       const token = localStorage.getItem('authToken');

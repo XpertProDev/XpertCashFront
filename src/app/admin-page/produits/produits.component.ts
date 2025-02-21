@@ -174,7 +174,7 @@ export class ProduitsComponent implements OnInit {
       doc.line(14, 35, 195, 35);
   
       // Colonnes du tableau
-      const columns = ['Code', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Quantité', 'Date & heure'];
+      const columns = ['Code', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Quantité'];
   
       // Récupérer uniquement les produits de la page actuelle
       const startIndex = this.currentPage * this.pageSize;
