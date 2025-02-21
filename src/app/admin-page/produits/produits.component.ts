@@ -17,6 +17,10 @@ import { Produit } from '../MODELS/produit.model';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
+import autoTable from 'jspdf-autotable';
+import { UsersService } from '../SERVICES/users.service';
+
+
 
 
 @Component({
@@ -59,12 +63,16 @@ export class ProduitsComponent implements OnInit {
   popupType: 'success' | 'error' = 'success';
 
   imagePopup: string | null = null;
+  nomEntreprise: string = '';
+  adresseEntreprise: string = '';
+  logoEntreprise: string =''
 
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
         private fb: FormBuilder,
-        private router: Router
+        private router: Router,
+        private usersService: UsersService,
   ) {}
 
 
@@ -76,8 +84,10 @@ export class ProduitsComponent implements OnInit {
   }
 
   filteredTasks(): any[] {
-    const filtered = this.tasks.filter(task => 
-      // task.nomCategory?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+    const sortedTasks = [...this.tasks] // Copie du tableau pour éviter de modifier l'original
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  
+    const filtered = sortedTasks.filter(task => 
       task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
       task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
     );
@@ -85,6 +95,8 @@ export class ProduitsComponent implements OnInit {
     const startIndex = this.currentPage * this.pageSize;
     return filtered.slice(startIndex, startIndex + this.pageSize);
   }
+  
+  
 
   // Gestion du dropdown d'export
   showExportDropdown = false;
@@ -99,6 +111,28 @@ export class ProduitsComponent implements OnInit {
     }
   }
 
+  getImageBase64(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          resolve(reader.result as string);
+        };
+        reader.readAsDataURL(xhr.response);
+      };
+      xhr.onerror = function () {
+        reject(new Error('Erreur lors du chargement de l\'image'));
+      };
+      xhr.open('GET', url);
+      xhr.responseType = 'blob';
+      xhr.send();
+    });
+  }
+  
+  
+  
+
   // Méthodes pour télécharger en Excel, PDF et CSV
   downloadExcel() {
     const worksheet = XLSX.utils.json_to_sheet(this.tasks);
@@ -108,25 +142,91 @@ export class ProduitsComponent implements OnInit {
   }
 
   downloadPDF() {
+    if (!this.tasks || this.tasks.length === 0) {
+      console.error("Aucun produit à afficher dans le PDF !");
+      return;
+    }
+  
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('Liste des produits', 14, 22);
-    
-    const columns = ['Code', 'Photo', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Prix achat', 'Quantité', 'Unité', 'Alert seuil', 'Date & heure'];
-    const rows = this.tasks.map(task => [
-      task.codeProduit, task.photo, task.nomProduit, task.nomCategory,
-      task.description, task.prix, task.prixAchat, task.quantite, 
-      task.nomUnite, task.alertSeuil, task.createdAt
-    ]);
-
-    (doc as any).autoTable({
-      head: [columns],
-      body: rows,
-      startY: 30
+  
+    // Définir l'URL du logo (par défaut ou dynamique)
+    const logoUrl = this.logoEntreprise
+      ? `http://localhost:8080/logoUpload/${this.logoEntreprise}`
+      : `http://localhost:8080/logoUpload/651.jpg`;
+  
+    // Récupérer les informations de l’entreprise
+    const entreprise = this.nomEntreprise ? this.nomEntreprise : "Nom non disponible";
+    const adress = this.adresseEntreprise ? this.adresseEntreprise : "Adresse non disponible";
+  
+    // Charger le logo avant de générer le PDF
+    this.getImageBase64(logoUrl).then((logoBase64) => {
+      // Ajouter le logo
+      doc.addImage(logoBase64, 'PNG', 14, 5, 30, 30);
+  
+      // Ajouter les informations de l'entreprise
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Nom de l'entreprise: ${entreprise}`, 60, 20);
+      doc.text('Liste des produits', 60, 30);
+  
+      // Ligne de séparation
+      doc.setLineWidth(0.5);
+      doc.line(14, 35, 195, 35);
+  
+      // Colonnes du tableau
+      const columns = ['Code', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Quantité', 'Date & heure'];
+  
+      // Récupérer uniquement les produits de la page actuelle
+      const startIndex = this.currentPage * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      const pageTasks = this.tasks.slice(startIndex, endIndex);
+  
+      if (!Array.isArray(pageTasks) || pageTasks.length === 0) {
+        console.error("Aucun produit trouvé sur cette page !");
+        return;
+      }
+  
+      // Mapper les données des produits
+      const rows = pageTasks.map(task => [
+        task.codeProduit, task.nomProduit, task.nomCategory,
+        task.description, task.prix, task.quantite, task.createdAt
+      ]);
+  
+      // Ajouter le tableau des produits
+      autoTable(doc, {
+        head: [columns],
+        body: rows,
+        startY: 40,
+        theme: 'grid',
+        headStyles: { fillColor: [100, 100, 255], textColor: [255, 255, 255], fontSize: 12 },
+        bodyStyles: { fontSize: 10 }
+      });
+  
+      // Récupérer la dernière position Y après le tableau
+      const finalY = (doc as any).lastAutoTable?.finalY || 60;
+  
+      // Ajouter une ligne de séparation après le tableau
+      doc.setLineWidth(0.5);
+      doc.line(14, finalY + 5, 195, finalY + 5);
+  
+      // Ajouter un pied de page
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic');
+      doc.text(`Adresse: ${adress}`, 14, finalY + 10);
+      doc.text('Contact: 123-456-7890 | email@entreprise.com', 14, finalY + 15);
+  
+      // Sauvegarder le PDF
+      doc.save('Facture_des_produits.pdf');
+    }).catch((error) => {
+      console.error("Erreur lors du chargement du logo :", error);
     });
-
-    doc.save('Facture_des_produits.pdf');
   }
+  
+  
+  
+  
+  
+  
 
   downloadCSV() {
     const headers = ['Code', 'Photo', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Prix achat', 'Quantité', 'Unité', 'Alert seuil', 'Date & heure'];
@@ -157,6 +257,8 @@ export class ProduitsComponent implements OnInit {
   }
   closePopup() {
     this.showPopup = false;
+    this.ajouteProduitForm.reset();
+
   }
 
   // Pour l'autocomplete des catégories
@@ -179,7 +281,9 @@ export class ProduitsComponent implements OnInit {
 
   ngOnInit() {
     const token = localStorage.getItem('authToken') || '';
+    
     if (token) {
+      // Charger les catégories initiales via le service
       this.categorieService.getCategories(token).subscribe({
         next: (data: Categorie[]) => {
           this.categories = data;
@@ -192,36 +296,67 @@ export class ProduitsComponent implements OnInit {
           console.error("Erreur lors de la récupération des catégories :", err);
         }
       });
+  
+      // Souscrire à categories$ pour que la liste se mette à jour en temps réel
+      this.categorieService.categories$.subscribe((updatedCategories: Categorie[]) => {
+        this.categories = updatedCategories;
+        console.log("Catégories mises à jour : ", this.categories);
+        
+        // Mettre à jour le filtre après ajout de catégorie
+        this.filteredCategories = this.control.valueChanges.pipe(
+          startWith(''),
+          map(value => this._filter(value || ''))
+        );
+      });
+  
     } else {
       console.error("Aucun token trouvé, vérifiez la connexion !");
     }
+  
     // Initialisation de l'autocomplete (au cas où)
     this.filteredCategories = this.control.valueChanges.pipe(
       startWith(''),
       map(value => this._filter(value || ''))
     );
+  
     // Charger la liste des produits de l'entreprise
     this.loadProduits();
-
+  
+    // Formulaire pour ajouter un produit
     this.ajouteProduitForm = this.fb.group({
-        nomProduit: ['', Validators.required],
-        description: ['', Validators.required],
-        prix: ['', [Validators.required]],
-        prixAchat: ['', Validators.required],
-        photo: ['', Validators.required],
-        quantite: ['', Validators.required],
-        alertSeuil: ['', Validators.required],
-        uniteMesure: ['', Validators.required],
-        category: ['', Validators.required]
+      nomProduit: ['', Validators.required],
+      description: ['', Validators.required],
+      prix: ['', [Validators.required]],
+      prixAchat: ['', Validators.required],
+      photo: ['', Validators.required],
+      quantite: ['', Validators.required],
+      alertSeuil: ['', Validators.required],
+      uniteMesure: ['', Validators.required],
+      category: ['', Validators.required]
     });
-
+  
+    // Formulaire pour ajouter une catégorie
     this.ajouteCategoryForm = this.fb.group({
       categoryName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]]
     });
-
+  
     // 🔹 Lier control au FormControl existant
     this.control = this.ajouteProduitForm.controls['category'] as FormControl;
+  
+    // Récupérer les infos de l'utilisateur et le nom de l'entreprise
+    this.usersService.getUserInfo().subscribe({
+      next: (userInfo) => {
+        this.nomEntreprise = userInfo.nomEntreprise; 
+        this.adresseEntreprise = userInfo.adresseEntreprise;
+        this.logoEntreprise = userInfo.logoEntreprise;
+        console.log('infol\'entreprise:', this.nomEntreprise, this.adresseEntreprise, this.loadProduits);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération d\'info entreprise', err);
+      }
+    });
   }
+  
 
   private _filter(value: string | Categorie): Categorie[] {
     let filterValue: string;
@@ -257,18 +392,25 @@ export class ProduitsComponent implements OnInit {
       next: (produits: Produit[]) => {
         console.log('Produits récupérés:', produits);
   
-        this.tasks = produits.map(prod => {
-          // Créer l'URL complète de l'image
-          const fullImageUrl = `http://localhost:8080${prod.photo}`;
-          console.log('Image URL:', fullImageUrl);  // Affiche l'URL de l'image dans la console
+        this.tasks = produits
+          .map(prod => {
+            const fullImageUrl = `http://localhost:8080${prod.photo}`;
+            console.log('Image URL:', fullImageUrl);
   
-          return {
-            ...prod,
-            photo: fullImageUrl, // Passe l'URL complète
-            nomCategory: prod.category?.nomCategory ?? 'Catégorie inconnue',
-            nomUnite: prod.uniteMesure?.nomUnite
-          };
-        });
+            // Nettoyer et transformer `createdAt` en un objet Date valide
+            const createdAtFormatted = prod.createdAt.replace(' à ', 'T'); 
+            const createdAtDate = new Date(createdAtFormatted); 
+  
+            return {
+              ...prod,
+              photo: fullImageUrl,
+              nomCategory: prod.category?.nomCategory ?? 'Catégorie inconnue',
+              nomUnite: prod.uniteMesure?.nomUnite,
+              createdAtDate
+            };
+          })
+          // **Trier du plus récent au plus ancien**
+          .sort((a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime());
   
         this.dataSource.data = this.tasks;
         this.dataSource.paginator = this.paginator;
@@ -279,10 +421,10 @@ export class ProduitsComponent implements OnInit {
     });
   }
 
-  // tasks: any[] = [];
-  paginatedTasks: any[] = []; // Liste des produits affichés selon la pagination
-  pageSize = 5; // Nombre de produits par page (modifiable)
-  currentPage = 0; // Page actuelle
+
+  paginatedTasks: any[] = []; 
+  pageSize = 5; 
+  currentPage = 0; 
 
 
   onPageChange(event: any): void {
@@ -324,6 +466,8 @@ export class ProduitsComponent implements OnInit {
     if (this.popupType === 'success') {
       //this.router.navigate(['/produit']);
       this.showPopupCategory = false;
+      this.ajouteCategoryForm.reset();
+      this.errorMessageCategory = '';
     }
   }
 
@@ -357,7 +501,7 @@ export class ProduitsComponent implements OnInit {
         id: formValues.category?.id, 
         nomCategory: formValues.category?.nomCategory
       },
-      photo: '' // Photo
+      photo: '' 
     };    
 
     this.produitService.ajouterProduit(produitToSave, this.selectedFile!).subscribe({
@@ -378,7 +522,8 @@ export class ProduitsComponent implements OnInit {
         const produitFormate = {
           ...response,
           nomCategory: response.category?.nomCategory,
-          nomUnite: response.uniteMesure?.nomUnite
+          nomUnite: response.uniteMesure?.nomUnite,
+          photo: response.photo ? `http://localhost:8080${response.photo}` : 'assets/img/lait.jpeg'
         };
 
         // Ajouter le produit en haut de la liste
@@ -413,27 +558,23 @@ export class ProduitsComponent implements OnInit {
       this.errorMessageCategory = "Veuillez remplir correctement le formulaire.";
       return;
     }
-
+  
     const categoryData = { nomCategory: this.ajouteCategoryForm.value.categoryName };
-
+  
     this.categorieService.ajouterCategorie(categoryData).subscribe({
       next: (response: any) => {
         console.log('Categorie ajouté avec succès : ', response);
-
+  
         if (response && response.id) {
           const successMessage = response.message || "Le category a été créé avec succès.";
           this.openPopupCategory2("Ajout de category réussi !", successMessage, 'success');
         }
-
-        // console.log("Catégorie ajoutée avec succès :", response);
-        // this.closePopupCategory();
-        // this.ajouteCategoryForm.reset();
       },
       error: (error) => {
         console.log("Erreur complète :", error);
         console.log("Réponse API :", error.error);
         let message = "Une erreur est survenue lors de la création du produit.";
-
+  
         if (error.status === 400 || error.status === 500) {
           if (typeof error.error === "string") {
             const match = error.error.match(/interpolatedMessage='([^']+)'/);
@@ -442,7 +583,7 @@ export class ProduitsComponent implements OnInit {
             message = error.error.error;
           }
         }
-
+  
         this.openPopupCategory2("❌ Oups, une erreur !", message, "error");
       }
     });

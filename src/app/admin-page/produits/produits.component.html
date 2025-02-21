@@ -36,12 +36,12 @@
         <th>Nom produit <i class="icon-sort"></i></th>
         <th>Categorie<i class="icon-sort"></i></th>
         <th>Description <i class="icon-sort"></i></th>
-        <th>Prix <i class="icon-sort"></i></th>
+        <th>PrixDeVente<i class="icon-sort"></i></th>
         <th>Prix achat <i class="icon-sort"></i></th>
         <th>Quantité <i class="icon-sort"></i></th>
         <th>Unité<i class="icon-sort"></i></th>
         <th>Alert seuil <i class="icon-sort"></i></th>
-        <th>Date & heure <i class="icon-sort"></i></th>
+       <!--  <th>Date & heure <i class="icon-sort"></i></th>-->
       </tr>
     </thead>
     
@@ -73,7 +73,7 @@
         <td [innerHTML]="highlightMatch(task.quantite)"></td>
         <td>{{ task.nomUnite }}</td>
         <td>{{ task.alertSeuil }}</td>
-        <td>{{ task.createdAt }}</td>
+        <!-- <td>{{ task.createdAt }}</td>-->
       </tr>
     </tbody>
   </table>
