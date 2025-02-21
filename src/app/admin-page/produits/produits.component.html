@@ -1,6 +1,6 @@
 <div class="containerTable">
   <div class="tasks-header">
-    <h1 class="title">Produits Stocks</h1>
+    <h1 class="title">Produits</h1>
     
     <div class="actions">
       <button class="add-task" (click)="openPopup()">Ajouter un produit</button>
@@ -30,25 +30,25 @@
   <!-- Tableau des produits -->
   <table>
     <thead>
-      <tr>
+      <tr class="titleTableProduit">
         <th>Code</th>
         <th>Photo<i class="icon-sort"></i></th>
         <th>Nom produit <i class="icon-sort"></i></th>
-        <th>Categorie<i class="icon-sort"></i></th>
         <th>Description <i class="icon-sort"></i></th>
-        <th>PrixDeVente<i class="icon-sort"></i></th>
+        <th>Categorie<i class="icon-sort"></i></th>
+        <th>Prix de vente<i class="icon-sort"></i></th>
         <th>Prix achat <i class="icon-sort"></i></th>
         <th>Quantité <i class="icon-sort"></i></th>
         <th>Unité<i class="icon-sort"></i></th>
-        <th>Alert seuil <i class="icon-sort"></i></th>
+        <th>Seuils d'alerte <i class="icon-sort"></i></th>
        <!--  <th>Date & heure <i class="icon-sort"></i></th>-->
       </tr>
     </thead>
     
     <tbody>
       <!-- <tr *ngFor="let task of filteredTasks()"> -->
-        <tr *ngFor="let task of filteredTasks(); let i = index" class="tableProduit">
-        <td style="font-size: 10px;" [innerHTML]="highlightMatch(task.codeProduit)"></td>
+        <tr style="font-size: 10px;" *ngFor="let task of filteredTasks(); let i = index" class="tableProduit">
+        <td [innerHTML]="highlightMatch(task.codeProduit)"></td>
         <td>
           <div class="imgProduit" (click)="openImage(task.photo)">
             <img [src]="task.photo || 'assets/img/lait.jpeg'" alt="Produit">
@@ -63,8 +63,8 @@
         
         </td> 
         <td [innerHTML]="highlightMatch(task.nomProduit)"></td>
-        <td [innerHTML]="highlightMatch(task.nomCategory)"></td>
         <td>{{ task.description }}</td>
+        <td [innerHTML]="highlightMatch(task.nomCategory)"></td>
         <td>{{ task.prix }}</td> 
         <td>{{ task.prixAchat }}</td>
         <td [innerHTML]="highlightMatch(task.quantite)"></td>
@@ -129,7 +129,7 @@
               <input formControlName="prix" type="number" class="input_focus" required id="prix"
                      name="prix"
                      placeholder="Saisis le montant">
-              <label for="prix" class="label">Prix</label>
+              <label for="prix" class="label">Prix de vente</label>
               <div *ngIf="f['prix'].touched && f['prix'].invalid" class="error-message">
                 Le prix est vide.
               </div>
@@ -191,8 +191,8 @@
             <div class="champ_input">
               <input formControlName="alertSeuil" type="number" class="input_focus" required id="alertSeuil"
                      name="alertSeuil"
-                     placeholder="Saisis le nom de produit">
-              <label for="alertSeuil" class="label">Alert seuil</label>
+                     placeholder="Saisis le montant d'alerte">
+              <label for="alertSeuil" class="label">Seuil d'alerte</label>
               <div *ngIf="f['alertSeuil'].touched && f['alertSeuil'].invalid" class="error-message">
                 Le alert seuil est vide.
               </div>
@@ -212,8 +212,8 @@
           <div class="champ_input">
             <input formControlName="codebar" type="text" class="input_focus" id="codebar"
                    name="codebar"
-                   placeholder="Saisis le code bar">
-            <label for="codebar" class="label">Code bar</label>
+                   placeholder="Saisis le numéro code bar">
+            <label for="codebar" class="label">Numéro code bar</label>
             <div *ngIf="f['codebar'].touched && f['codebar'].invalid" class="error-message">
               <span *ngIf="f['codebar'].errors?.['minlength']">Le nom doit avoir au moins 8 caractères.</span>
               <span *ngIf="f['codebar'].errors?.['maxlength']">Le nom ne doit pas dépasser 14 caractères.</span>

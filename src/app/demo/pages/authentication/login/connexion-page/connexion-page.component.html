@@ -2,95 +2,91 @@
 <app-header-nav></app-header-nav>
 
 <div class="container_global">
-    <div class="container_global_content">
-
-      <div *ngIf="isLoading" class="loading-overlay">
-        <div class="loading-content">
-          <div class="spinner"></div>
-          <p>Connexion en cours...</p>
-        </div>
+  <div class="container_global_content">
+    <div *ngIf="isLoading" class="loading-overlay">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Connexion en cours...</p>
       </div>
-      
-        <!-- Page -->
-        <div class="content_page">
-
-
-          <div class="title_form">
-            <h2>Connexion</h2>
-          </div>
-
-            <section class="formulaire_img">
-                <div class="info_form_left">
-                    <form [formGroup]="loginForm" (ngSubmit)="submitForm()">
-                        <div class="formulaire">
-                          <!-- Nom complet -->
-                          <div class="champ_input ">
-                            <input type="email" formControlName="email" class="input_focus" placeholder="Saisis votre email">
-                            <label class="label">Votre email</label>
-                            <div *ngIf="f['email'].touched && f['email'].invalid" class="error-message">
-                              <span *ngIf="f['email'].errors?.['required']">Email est vide.</span>
-                              <span *ngIf="f['email'].errors?.['email']">Email n'est pas valide.</span>
-                            </div>
-                          </div>
-
-                          <div class="champ_input">
-                            <input type="password" formControlName="password" class="input_focus" placeholder="****************">
-                            <label class="label">Mot de passe</label>
-                            <div *ngIf="f['password'].touched && f['password'].invalid" class="error-message">
-                                <span *ngIf="f['password'].errors?.['required']">Mot de passe est vide.</span>
-                                <span *ngIf="f['password'].errors?.['minlength']">Au moins 8 caractères.</span>
-                            </div>
-                         </div>
-
-                         <div class="resetPassword">
-                          <p>Mot de passe oublié</p>
-                         </div>
-                      
-                          <!-- Message d'erreur global -->
-                          <div *ngIf="errorMessage" class="error-message">
-                            {{ errorMessage }}
-                          </div>
-                      
-                          <!-- Bouton de soumission -->
-                          <div class="btn_contact">
-                            <button type="submit" (click)="submitForm()" [disabled]="isLoading">
-                              <span ></span> 
-                              <span >Se connecter</span>
-                            </button>
-                          </div>
-
-                          <div class="registerPage">
-                            <p>Vous n’avez pas encore de compte ? <a class="logout" (click)="goToInscription()">Inscription</a></p>
-                          </div>
-                        </div>
-
-                        <!-- Popup de confirmation / d'erreur -->
-                        <div class="modal-overlay" *ngIf="showPopup">
-                            <div class="modal-content" [ngClass]="{'error': popupType === 'error'}">
-                              <div class="popup-header">
-                                <div class="popup-img">
-                                    <img [src]="popupImage" alt="Icone" class="popup-icon">
-                                </div>
-                                <h2>{{ popupTitle }}</h2>
-                              </div>
-                              <p>{{ popupMessage }}</p>
-                              <button (click)="closePopup()">OK</button>
-                            </div>
-                        </div>
-                        
-  
-                      </form>                
-                </div>
-
-                <div class="info_form_right">
-                    <div class="image_header">
-                        <img src="assets/img/logout_img.png" alt="">
-                    </div>
-                </div>
-            </section>
-        </div>
     </div>
-
+    
+    <!-- Page -->
+    <div class="content_page">
+      <div class="title_form">
+        <h2>Connexion</h2>
+      </div>
+  
+      <section class="formulaire_img">
+        <div class="info_form_left">
+          <form [formGroup]="loginForm" (ngSubmit)="submitForm()">
+            <div class="formulaire">
+              <!-- Champ email -->
+              <div class="champ_input">
+                <input type="email" formControlName="email" class="input_focus" placeholder="Saisis votre email">
+                <label class="label">Votre email</label>
+                <div *ngIf="f['email'].touched && f['email'].invalid" class="error-message">
+                  <span *ngIf="f['email'].errors?.['required']">Email est vide.</span>
+                  <span *ngIf="f['email'].errors?.['email']">Email n'est pas valide.</span>
+                </div>
+              </div>
+  
+              <!-- Champ mot de passe -->
+              <div class="champ_input">
+                <input type="password" formControlName="password" class="input_focus" placeholder="****************">
+                <label class="label">Mot de passe</label>
+                <div *ngIf="f['password'].touched && f['password'].invalid" class="error-message">
+                  <span *ngIf="f['password'].errors?.['required']">Mot de passe est vide.</span>
+                  <span *ngIf="f['password'].errors?.['minlength']">Au moins 8 caractères.</span>
+                </div>
+              </div>
+  
+              <div class="resetPassword">
+                <p>Mot de passe oublié</p>
+              </div>
+          
+              <!-- Message d'erreur global -->
+              <div *ngIf="errorMessage" class="error-message">
+                {{ errorMessage }}
+              </div>
+          
+              <!-- Bouton de soumission -->
+              <div class="btn_contact">
+                <button type="submit" (click)="submitForm()" [disabled]="isLoading">
+                  <span></span> 
+                  <span>Se connecter</span>
+                </button>
+              </div>
+  
+              <div class="registerPage">
+                <p>Vous n’avez pas encore de compte ? <a class="logout" (click)="goToInscription()">Inscription</a></p>
+              </div>
+            </div>
+  
+            <!-- Popup d'erreur (affichée uniquement en cas d'erreur) -->
+            <div class="modal-overlay" *ngIf="showPopup">
+              <div class="modal-content" [ngClass]="{'error': popupType === 'error'}">
+                <div class="popup-header">
+                  <div class="popup-img">
+                    <img [src]="popupImage" alt="Icone" class="popup-icon">
+                  </div>
+                  <h2>{{ popupTitle }}</h2>
+                </div>
+                <p>{{ popupMessage }}</p>
+                <button (click)="closePopup()">OK</button>
+              </div>
+            </div>
+          </form>                
+        </div>
+  
+        <div class="info_form_right">
+          <div class="image_header">
+            <img src="assets/img/logout_img.png" alt="">
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  
 </div>
 
 <!-- Les diffrenet temoignage -->

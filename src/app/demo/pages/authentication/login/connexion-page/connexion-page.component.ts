@@ -1,4 +1,3 @@
-// connexion-page.component.ts
 import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,18 +17,19 @@ export class ConnexionPageComponent {
   loginForm!: FormGroup;
   errorMessage: string = '';
 
-  // Propriétés pour la popup
+  // Propriétés pour la popup (utilisées uniquement en cas d'erreur)
   showPopup: boolean = false;
   popupTitle: string = '';
   popupMessage: string = '';
   popupImage: string = '';
   popupType: 'success' | 'error' = 'success';
+
   isLoading: boolean = false;
 
   constructor(
     private fb: FormBuilder,
     private usersService: UsersService,
-    private authService: AuthService, // Injection du AuthService
+    private authService: AuthService,
     private router: Router
   ) { }
 
@@ -56,9 +56,6 @@ export class ConnexionPageComponent {
 
   closePopup(): void {
     this.showPopup = false;
-    if (this.popupType === 'success') {
-      this.router.navigate(['/produit']);
-    }
   }
 
   submitForm(): void {
@@ -67,36 +64,31 @@ export class ConnexionPageComponent {
       return;
     }
   
-    this.isLoading = true; // Début du chargement
+    this.isLoading = true;
     const credentials = this.loginForm.value;
   
-    setTimeout(() => { // ici on retarde l'exécution de la requête pour 2 secondes
+    setTimeout(() => {
       this.usersService.connexionUser(credentials).subscribe({
         next: (response) => {
-          this.isLoading = false; 
+          this.isLoading = false;
   
           if (response.token) {
             console.log("Token généré :", response.token);
             this.authService.saveToken(response.token);
-  
-            this.openPopup("Connexion réussie !", response.message ?? "Connexion réussie.", 'success');
-  
-            setTimeout(() => {
-              this.router.navigate(['/analytics']); 
-            }, 1500);
+            // Connexion réussie : pas de popup, navigation directe
+            this.router.navigate(['/analytics']);
           } else {
             this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
+            // Affichage de la popup en cas d'erreur
             this.openPopup("Erreur de connexion", this.errorMessage, 'error');
           }
         },
         error: (error) => {
-          this.isLoading = false; 
-  
+          this.isLoading = false;
           console.log("Erreur complète :", error);
           console.log("Réponse API :", error.error);
   
           let message = "Une erreur est survenue lors de la connexion.";
-  
           if (error.status === 400 || error.status === 401) {
             if (typeof error.error === "string") {
               message = error.error;
@@ -104,14 +96,12 @@ export class ConnexionPageComponent {
               message = error.error.error;
             }
           }
-  
+          // Affichage de la popup en cas d'erreur
           this.openPopup("❌ Oups, une erreur !", message, "error");
         }
       });
-    }, 2000); 
+    }, 2000);
   }
   
-  
-
   get f() { return this.loginForm.controls; }
 }
