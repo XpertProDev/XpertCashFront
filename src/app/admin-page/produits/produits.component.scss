@@ -183,7 +183,7 @@ tr:hover {
 
 .modal-content {
   background: white;
-  padding: 10px;
+  //padding: 10px;
   border-radius: 10px;
   max-width: 80%;
   max-height: 80%;
@@ -206,7 +206,7 @@ tr:hover {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
@@ -231,6 +231,7 @@ tr:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin: 0;
 }
 
 .modal-header h2 {
@@ -246,6 +247,31 @@ tr:hover {
 /* Corps du modal */
 .modal-body {
   padding: 16px;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+}
+
+/* Style de la scrollbar (pour Chrome, Edge et Safari) */
+.modal-body::-webkit-scrollbar {
+  width: 4px; /* Largeur de la scrollbar */
+}
+
+/* Style du track (arrière-plan de la scrollbar) */
+.modal-body::-webkit-scrollbar-track {
+  background: #e9d52132; /* Couleur de fond */
+  border-radius: 10px; /* Coins arrondis */
+}
+
+/* Style du thumb (la partie qui bouge) */
+.modal-body::-webkit-scrollbar-thumb {
+  background: #0671e43e; /* Couleur du curseur */
+  border-radius: 10px;
+}
+
+/* Changement de couleur au survol */
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #0465cd56;
 }
 
 /* Pied de page du modal */
@@ -289,6 +315,13 @@ tr:hover {
   margin-top: 5px;
   cursor: pointer;
 }
+.champ_input .label {
+  position: absolute;
+  top: 22px;
+  left: 4px;
+  pointer-events: none;
+  color: rgb(107, 102, 102);
+}
 
 .input_focus:hover {
   border-bottom: 1px solid #0672E4;
@@ -297,13 +330,6 @@ tr:hover {
   border-right: none;
 }
 
-.champ_input .label {
-  position: absolute;
-  top: 22px;
-  left: 4px;
-  pointer-events: none;
-  color: rgb(107, 102, 102);
-}
 
 .input_focus:not(:placeholder-shown) + .label,
 .input_focus:focus + .label {
@@ -488,9 +514,8 @@ mat-paginator {
   font-size: 13px;
   color: red;
   font-weight: bold;
-  margin-top: 10px;
+  margin-top: -6px;
 }
-
 
 // .btn_add_category {
 //   width: 40%;
@@ -521,6 +546,7 @@ mat-paginator {
 .double_input2 {
   position: relative;
 }
+
 
 .btn_add_category {
   border: none;
@@ -583,7 +609,7 @@ mat-paginator {
 
 .popup-img2 {
   width: 80px;
-  height: 80px;
+  height: 85px;
   margin-bottom: 10px;
 }
 
@@ -729,4 +755,8 @@ img.roudel{
   object-fit: cover;
   border-radius: 2px;
   transition: transform 0.2s;
+}
+
+.tableProduit {
+  cursor: pointer;
 }

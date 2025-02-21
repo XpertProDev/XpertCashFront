@@ -47,7 +47,7 @@
     
     <tbody>
       <!-- <tr *ngFor="let task of filteredTasks()"> -->
-        <tr *ngFor="let task of filteredTasks(); let i = index">
+        <tr *ngFor="let task of filteredTasks(); let i = index" class="tableProduit">
         <td style="font-size: 10px;" [innerHTML]="highlightMatch(task.codeProduit)"></td>
         <td>
           <div class="imgProduit" (click)="openImage(task.photo)">
@@ -61,9 +61,6 @@
             </div>
           </div>
         
-          
-          
-          
         </td> 
         <td [innerHTML]="highlightMatch(task.nomProduit)"></td>
         <td [innerHTML]="highlightMatch(task.nomCategory)"></td>
@@ -173,7 +170,7 @@
                      name="prixAchat"
                      placeholder="Saisis le montant">
               <label for="prixAchat" class="label">Prix achat</label>
-              <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message">
+              <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
                 Le prix achat est vide.
               </div>
             </div>
@@ -212,6 +209,17 @@
             </div>
           </div>
           
+          <div class="champ_input">
+            <input formControlName="codebar" type="text" class="input_focus" id="codebar"
+                   name="codebar"
+                   placeholder="Saisis le code bar">
+            <label for="codebar" class="label">Code bar</label>
+            <div *ngIf="f['codebar'].touched && f['codebar'].invalid" class="error-message">
+              <span *ngIf="f['codebar'].errors?.['minlength']">Le nom doit avoir au moins 8 caractères.</span>
+              <span *ngIf="f['codebar'].errors?.['maxlength']">Le nom ne doit pas dépasser 14 caractères.</span>
+            </div>
+          </div>
+
           <!-- Ligne 5 : Description -->
           <div class="champ_input" style="margin-top: 20px;">
             <textarea formControlName="description" class="input_focus2" required id="description"
