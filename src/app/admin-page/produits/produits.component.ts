@@ -148,14 +148,7 @@ export class ProduitsComponent implements OnInit {
     link.click();
   }
 
-  // Gestion du fichier sélectionné dans le formulaire d'ajout de produit
-  selectedFile: File | null = null;
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-    }
-  }
+  
 
   // Gestion du popup d'ajout de produit
   //showPopup: boolean = false;
@@ -475,5 +468,26 @@ export class ProduitsComponent implements OnInit {
   closeImage(): void {
     this.imagePopup = null;
   }
+
+    // Côte de mon image pour que l'utilisateur ajouter une photo
+
+  urllink: string = "assets/img/appareil.jpg";
+  selectedFile: File | null = null;
+  
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+  
+      // Lire le fichier et mettre à jour `urllink`
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.urllink = e.target?.result as string;
+      };
+      reader.readAsDataURL(this.selectedFile);
+    }
+  }
+    
+  
 
 }
