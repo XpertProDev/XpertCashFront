@@ -306,14 +306,14 @@
 
       <div class="modal-overlay-category" *ngIf="showPopupCategory2">
         <div class="modal-content-category" [ngClass]="{'error': popupType === 'error'}">
-          <div class="popup-header-category">
+          <div class="popup-header2">
             <div class="popup-img2">
                 <img [src]="popupImage" alt="Icone" class="popup-icon2">
             </div>
             <h2>{{ popupTitle }}</h2>
           </div>
           <p>{{ popupMessage }}</p>
-          <button (click)="closePopupCategory2()">OK</button>
+          <button class="btnOKOK" (click)="closePopupCategory2()">OK</button>
        </div>
       </div>
       

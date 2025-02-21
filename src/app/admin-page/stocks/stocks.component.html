@@ -1,1 +1,131 @@
-<p>La page de mes stocks</p>
+<div class="containerTable">
+    <div class="tasks-header">
+      <h1 class="title">Mes Stocks</h1>
+      
+      <div class="actions">
+        <button class="add-task">Ajouter un produit</button>
+        <!-- Icônes -->
+        <div class="contentIcon">
+          <i class="ri-refresh-line"></i>
+          <div class="bare"></div>
+          <div class="export-container">
+            <div class="iconDrop">
+              <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
+            </div>
+            <div class="export-dropdown" *ngIf="showExportDropdown">
+              <div class="export-option" (click)="downloadExcel()">Télécharger en Excel</div>
+              <div class="export-option" (click)="downloadPDF()">Télécharger en PDF</div>
+              <div class="export-option" (click)="downloadCSV()">Télécharger en CSV</div>
+            </div>
+          </div>
+        </div>
+        <!-- Recherche -->
+        <div class="inputSearch">
+          <i class="ri-search-2-line"></i>
+          <input type="text" [(ngModel)]="searchText" placeholder="Recherche...." />
+        </div>
+      </div>
+    </div>
+      
+    <!-- Tableau des produits -->
+    <table>
+      <thead>
+        <tr>
+            <th>Code </th>
+            <th>Photo </th>
+            <th>Nom produit </th>
+            <th>Categorie </th>
+            <th>Date création </th>
+            <th>Date expiration </th>
+            <th>Enter </th>
+            <th>Sortir </th>
+            <th>Prix </th>
+            <th>Prix achat </th>
+            <th>Quantité </th>
+            <th>Alert seuil </th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        <!-- <tr *ngFor="let task of filteredTasks()"> -->
+        <tr>
+            <td style="font-size: 10px;" >P-0000</td>
+            <td>
+                <div class="imgProduit">
+                <img src="assets/img/lait.jpeg" alt="Produit">
+                </div>
+            </td> 
+            <td>Lait</td>
+            <td>Alimentation</td>
+            <td>20-02-2025 à 10:00</td>
+            <td>20-02-2026 à 22:00</td>
+            <td>Entrer</td>
+            <td>Sortir</td>
+            <td>900</td>
+            <td>200 000</td>
+            <td>30</td>
+            <td>3</td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <!-- <div *ngIf="filteredTasks().length === 0" style="text-align: center; margin-top: 20px;">
+        <p style="color: red;">Aucun résultat trouvé pour "{{ searchText }}"</p>
+    </div> -->
+  
+    <!-- Si la liste de produits est vide -->
+    <!-- <div *ngIf="tasks.length === 0" style="text-align: center; margin-top: 20px;">
+      <p style="color: red;">Vous n'avez pas de produit</p>
+    </div> -->
+  
+    <!-- Si la liste de produits n'est pas vide, mais qu'aucun résultat ne correspond à la recherche -->
+    <div *ngIf="tasks.length > 0 && filteredTasks().length === 0" style="text-align: center; margin-top: 20px;">
+      <p style="color: red;">Aucun résultat trouvé pour "{{ searchText }}"</p>
+    </div>
+  
+  
+    <!-- // Pagination -->
+  
+    <div class="pagination">
+      <mat-paginator [length]="tasks.length"
+                [pageSize]="pageSize"
+                [pageSizeOptions]="[5, 10, 25, 100]"
+                (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+  
+  </div>
+  
+  <!-- Pop-up Formulaire d'ajout de produit -->
+  
+  
+  
+
+  <!-- <tr *ngFor="let task of filteredTasks(); let i = index">
+    <td style="font-size: 10px;" [innerHTML]="highlightMatch(task.codeProduit)"></td>
+    <td>
+      <div class="imgProduit" (click)="openImage(task.photo)">
+        <img [src]="task.photo || 'assets/img/lait.jpeg'" alt="Produit">
+      </div>
+      
+      
+      <div class="modal" *ngIf="imagePopup" (click)="closeImage()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <img [src]="imagePopup" alt="Produit">
+        </div>
+      </div>
+    
+    </td> 
+  <td [innerHTML]="highlightMatch(task.nomProduit)"></td>
+  <td [innerHTML]="highlightMatch(task.nomCategory)"></td>
+  <td>{{ task.dateCreation }}</td>
+  <td>{{ task.dateExpiration }}</td>
+  <td>{{ task.entrer }}</td> 
+  <td>{{ task.sortir }}</td>
+  <td>{{ task.prix }}</td>
+  <td>{{ task.prixAchat }}</td>
+  <td>{{ task.prixAchat }}</td>
+  <td>{{ task.quantité }}</td>
+  <td>{{ task.alertSeuil }}</td>
+  <td></td>
+  </tr> -->
