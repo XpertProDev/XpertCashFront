@@ -1,5 +1,5 @@
 // angular import
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
 
 // bootstrap import
@@ -9,7 +9,7 @@ import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { ChatUserListComponent } from './chat-user-list/chat-user-list.component';
 import { ChatMsgComponent } from './chat-msg/chat-msg.component';
-
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 @Component({
   selector: 'app-nav-right',
   imports: [SharedModule, ],
@@ -27,22 +27,39 @@ import { ChatMsgComponent } from './chat-msg/chat-msg.component';
     ])
   ]
 })
-export class NavRightComponent {
+export class NavRightComponent implements OnInit{
   // public props
   visibleUserList: boolean;
   chatMessage: boolean;
   friendId!: number;
+  userName: string = '';
 
   // constructor
-  constructor() {
+  constructor(private userService: UsersService) {
     this.visibleUserList = false;
     this.chatMessage = false;
+    
   }
 
-  // public method
+  ngOnInit(): void {
+    this.getUserInfo();
+  }
+
+  // public method 
   // eslint-disable-next-line
   onChatToggle(friendID: any) {
     this.friendId = friendID;
     this.chatMessage = !this.chatMessage;
+  }
+
+  getUserInfo(): void {
+    this.userService.getUserInfo().subscribe({
+      next: (user) => {
+        this.userName = user.nomComplet; // Récupération du nom
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des infos utilisateur :", err);
+      }
+    });
   }
 }

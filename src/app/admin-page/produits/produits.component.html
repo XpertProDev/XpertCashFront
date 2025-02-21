@@ -224,6 +224,7 @@
           </div>
           
           <!-- Ligne 6 : Sélection du fichier image -->
+         <div class="img_input">
           <div class="input_file">
             <label for="file" class="custom-file-label">
               <span class="custom-file-button">Choisir un fichier</span>
@@ -232,8 +233,13 @@
             <div *ngIf="f['photo'].touched && f['photo'].invalid" class="error-message">
               Le photo est vide.
             </div>
-            <input formControlName="photo" type="file" accept="image/*" id="file" (change)="onFileSelected($event)" hidden>
+            <input formControlName="photo" type="file" accept="image/*" id="file" (change)="onFileSelected($event)"  hidden>
           </div>
+
+          <div class="roudel_img">
+            <img class="roudel" [src]="urllink">
+          </div>
+         </div>
                       
           <!-- Message d'erreur global -->
           <div *ngIf="errorMessage" class="error-message">
