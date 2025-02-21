@@ -8,12 +8,12 @@
       <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end notification">
         <div class="noti-head">
           <h6 class="d-inline-block m-b-0">Notifications</h6>
-          <div class="float-end">
+          <!-- <div class="float-end">
             <a href="javascript:" class="m-r-10">mark as read</a>
             <a href="javascript:">clear all</a>
-          </div>
+          </div> -->
         </div>
-        <ul class="noti-body">
+        <!-- <ul class="noti-body">
           <li class="n-title">
             <p class="m-b-0">NEW</p>
           </li>
@@ -65,9 +65,9 @@
               </div>
             </div>
           </li>
-        </ul>
+        </ul> -->
         <div class="noti-footer">
-          <a href="javascript:">show all</a>
+          <a href="javascript:">Voir tout</a>
         </div>
       </div>
     </div>
@@ -83,12 +83,12 @@
   <li>
     <div class="dropdown drp-user" ngbDropdown placement="auto">
       <a href="javascript:" ngbDropdownToggle>
-        <img src="assets/images/user/avatar-1.jpg" class="img-radius wid-40" alt="User-Profile-Image" />
+        <img src="assets/img/profil.png" class="img-radius wid-40" alt="User-Profile-Image" />
       </a>
       <div class="dropdown-menu dropdown-menu-end profile-notification" ngbDropdownMenu>
         <div class="pro-head">
-          <img src="assets/images/user/avatar-1.jpg" class="img-radius" alt="User-Profile-Image" />
-          <span>John Doe</span>
+          <img src="assets/img/profil.png" class="img-radius" alt="User-Profile-Image" />
+          <span>Diakaridia SY</span>
           <a href="javascript:" class="dud-logout" title="Logout">
             <i class="feather icon-log-out"></i>
           </a>
@@ -97,25 +97,25 @@
           <li>
             <a href="javascript:" class="dropdown-item">
               <i class="feather icon-user"></i>
-              Profile
+              Profil
             </a>
           </li>
-          <li>
+          <!-- <li>
             <a href="javascript:" class="dropdown-item">
               <i class="feather icon-mail"></i>
               My Messages
             </a>
-          </li>
-          <li>
+          </li> -->
+          <!-- <li>
             <a href="javascript:" class="dropdown-item">
               <i class="feather icon-lock"></i>
               Lock Screen
             </a>
-          </li>
+          </li> -->
           <li>
             <a href="javascript:" class="dropdown-item">
               <i class="feather icon-lock"></i>
-              Logout
+              Déconnexion
             </a>
           </li>
         </ul>
@@ -124,7 +124,7 @@
   </li>
 </ul>
 
-@if (visibleUserList) {
+<!-- @if (visibleUserList) {
   <section class="header-user-list" [ngClass]="{ open: visibleUserList }" [@slideInOutLeft]>
     <app-chat-user-list
       (ChatToggle)="onChatToggle($event)"
@@ -149,4 +149,4 @@
   <section class="header-chat" [ngClass]="{ open: chatMessage }" [@slideInOutRight]>
     <app-chat-msg (ChatToggle)="this.chatMessage = !this.chatMessage" [friendId]="friendId" />
   </section>
-}
+} -->

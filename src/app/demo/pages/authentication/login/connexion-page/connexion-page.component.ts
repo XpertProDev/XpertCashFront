@@ -82,7 +82,7 @@ export class ConnexionPageComponent {
             this.openPopup("Connexion réussie !", response.message ?? "Connexion réussie.", 'success');
   
             setTimeout(() => {
-              this.router.navigate(['/produit']); 
+              this.router.navigate(['/analytics']); 
             }, 1500);
           } else {
             this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
