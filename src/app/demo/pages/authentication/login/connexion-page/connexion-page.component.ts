@@ -67,24 +67,24 @@ export class ConnexionPageComponent {
       return;
     }
   
-    this.isLoading = true; // Début du chargement
+    this.isLoading = true;
     const credentials = this.loginForm.value;
   
-    setTimeout(() => { // ici on retarde l'exécution de la requête pour 2 secondes
+    setTimeout(() => {  
       this.usersService.connexionUser(credentials).subscribe({
         next: (response) => {
-          this.isLoading = false; 
+          this.isLoading = false;
   
           if (response.token) {
             console.log("Token généré :", response.token);
             this.authService.saveToken(response.token);
   
-            this.openPopup("Connexion réussie !", response.message ?? "Connexion réussie.", 'success');
+            // Optionnel : Affichage d'un popup de succès
+            //this.openPopup("Connexion réussie !", response.message ?? "Connexion réussie.", 'success');
   
-            setTimeout(() => {
-              this.router.navigate(['/analytics']); 
-            }, 1500);
+            this.router.navigate(['/analytics']);
           } else {
+            // Si la réponse ne contient pas de token, on affiche l'erreur
             this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
             this.openPopup("Erreur de connexion", this.errorMessage, 'error');
           }
@@ -97,6 +97,7 @@ export class ConnexionPageComponent {
   
           let message = "Une erreur est survenue lors de la connexion.";
   
+          // Gérer les erreurs spécifiques
           if (error.status === 400 || error.status === 401) {
             if (typeof error.error === "string") {
               message = error.error;
@@ -108,8 +109,10 @@ export class ConnexionPageComponent {
           this.openPopup("❌ Oups, une erreur !", message, "error");
         }
       });
-    }, 2000); 
+    }, 2000);
   }
+  
+  
   
   
 

@@ -10,6 +10,7 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { ChatUserListComponent } from './chat-user-list/chat-user-list.component';
 import { ChatMsgComponent } from './chat-msg/chat-msg.component';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-nav-right',
   imports: [SharedModule, ],
@@ -33,9 +34,12 @@ export class NavRightComponent implements OnInit{
   chatMessage: boolean;
   friendId!: number;
   userName: string = '';
+  nomEntreprise = '';
 
   // constructor
-  constructor(private userService: UsersService) {
+  constructor(private userService: UsersService,
+    private router: Router
+  ) {
     this.visibleUserList = false;
     this.chatMessage = false;
     
@@ -56,10 +60,19 @@ export class NavRightComponent implements OnInit{
     this.userService.getUserInfo().subscribe({
       next: (user) => {
         this.userName = user.nomComplet; // Récupération du nom
+        this.nomEntreprise = user.nomEntreprise
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
       }
     });
+  }
+
+  goToCompte() {
+    this.router.navigate(['/compte']);
+  }
+
+  onLogout(): void {
+    this.userService.logoutUser();
   }
 }

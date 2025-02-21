@@ -332,7 +332,8 @@ export class ProduitsComponent implements OnInit {
       quantite: ['', Validators.required],
       alertSeuil: ['', Validators.required],
       uniteMesure: ['', Validators.required],
-      category: ['', Validators.required]
+      category: ['', Validators.required],
+      codeBarre: ['']
     });
   
     // Formulaire pour ajouter une catégorie
@@ -501,7 +502,7 @@ export class ProduitsComponent implements OnInit {
         id: formValues.category?.id, 
         nomCategory: formValues.category?.nomCategory
       },
-      photo: '' 
+      photo: ''
     };    
 
     this.produitService.ajouterProduit(produitToSave, this.selectedFile!).subscribe({

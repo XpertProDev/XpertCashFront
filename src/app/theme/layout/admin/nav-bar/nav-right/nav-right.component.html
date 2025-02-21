@@ -91,7 +91,7 @@
   <li>
     <div class="dropdown drp-user" ngbDropdown placement="auto">
       <a class="nameBoutiqueHover" href="javascript:" ngbDropdownToggle>
-        Diakaridia SY
+        {{ nomEntreprise }}
       </a>
     </div>
   </li>
@@ -105,7 +105,7 @@
         <!--pro-head-->
         <div class="nameBoutiqueDrop">
           <!--<img src="assets/logo/logoxpertpro.png" class="img-radius wid-60" alt="User-Profile-Image" />-->
-          <span>Diakaridia SY</span>
+          <span>{{ userName }}</span>
           <a class="dud-logout" title="Logout">
             <i class="feather icon-log-out"></i>
           </a>
@@ -117,12 +117,12 @@
             </a>
           </li>
           <li>
-            <a style="cursor: pointer;" routerLink="['/compte']" class="dropdown-item">
+            <a style="cursor: pointer;" (click)="goToCompte()" class="dropdown-item">
               <i class="feather icon-users"></i> Comptes
             </a>
           </li>
           <li>
-            <a class="dropdown-item">
+            <a class="dropdown-item" (click)="onLogout()" style="cursor: pointer;">
               <i class="feather icon-lock"></i> Déconnexion
             </a>
           </li>

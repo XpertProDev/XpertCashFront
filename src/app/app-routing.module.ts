@@ -5,6 +5,8 @@ import { Routes, RouterModule } from '@angular/router';
 // project import
 import { AdminComponent } from './theme/layout/admin/admin.component';
 import { GuestComponent } from './theme/layout/guest/guest.component';
+import { authGuard } from './admin-page/guards/auth.guard';
+
 
 const routes: Routes = [
   {
@@ -56,82 +58,96 @@ const routes: Routes = [
 
       {
         path: 'analytics',
-        loadComponent: () => import('./demo/dashboard/dash-analytics.component')
+        loadComponent: () => import('./demo/dashboard/dash-analytics.component'),
+        canActivate: [authGuard]
       },
       {
         path: 'component',
-        loadChildren: () => import('./demo/ui-element/ui-basic.module').then((m) => m.UiBasicModule)
+        loadChildren: () => import('./demo/ui-element/ui-basic.module').then((m) => m.UiBasicModule),
+        canActivate: [authGuard]
       },
       {
         path: 'chart',
-        loadComponent: () => import('./demo/chart-maps/core-apex.component')
+        loadComponent: () => import('./demo/chart-maps/core-apex.component'),
+        canActivate: [authGuard]
       },
       {
         path: 'forms',
-        loadComponent: () => import('./demo/forms/form-elements/form-elements.component')
+        loadComponent: () => import('./demo/forms/form-elements/form-elements.component'),
+        canActivate: [authGuard]
       },
       {
         path: 'tables',
-        loadComponent: () => import('./demo/tables/tbl-bootstrap/tbl-bootstrap.component')
+        loadComponent: () => import('./demo/tables/tbl-bootstrap/tbl-bootstrap.component'),
+        canActivate: [authGuard]
       },
       {
         path: 'sample-page',
-        loadComponent: () => import('./demo/other/sample-page/sample-page.component')
+        loadComponent: () => import('./demo/other/sample-page/sample-page.component'),
+        canActivate: [authGuard]
       },
 
       // Ce que j'ai commencer a faire
       // La routing de produits
       {
         path: 'produit',
-        loadComponent: () => import('./admin-page/produits/produits.component').then(m => m.ProduitsComponent)
+        loadComponent: () => import('./admin-page/produits/produits.component').then(m => m.ProduitsComponent),
+        canActivate: [authGuard]
 
       },
 
       // La routing de entrer
       {
         path: 'entrer',
-        loadComponent: () => import('./admin-page/entrer/entrer.component').then(m => m.EntrerComponent)
+        loadComponent: () => import('./admin-page/entrer/entrer.component').then(m => m.EntrerComponent),
+        canActivate: [authGuard]
 
       },
 
       // La routing de produits 
       {
         path: 'vente',
-        loadComponent: () => import('./admin-page/vente/vente.component').then(m => m.VenteComponent)
+        loadComponent: () => import('./admin-page/vente/vente.component').then(m => m.VenteComponent),
+        canActivate: [authGuard]
 
       },
 
       // La routing de stocks
       {
         path: 'stocks',
-        loadComponent: () => import('./admin-page/stocks/stocks.component').then(m => m.StocksComponent)
+        loadComponent: () => import('./admin-page/stocks/stocks.component').then(m => m.StocksComponent),
+        canActivate: [authGuard]
 
       },
 
       // La routing de Revenue
       {
         path: 'revenue',
-        loadComponent: () => import('./admin-page/revenue/revenue.component').then(m => m.RevenueComponent)
+        loadComponent: () => import('./admin-page/revenue/revenue.component').then(m => m.RevenueComponent),
+        canActivate: [authGuard]
 
       },
 
       // La routing de Facture
       {
         path: 'facture',
-        loadComponent: () => import('./admin-page/facture/facture.component').then(m => m.FactureComponent)
+        loadComponent: () => import('./admin-page/facture/facture.component').then(m => m.FactureComponent),
+        canActivate: [authGuard]
 
       },
 
       // La routing de Compte
       {
         path: 'compte',
-        loadComponent: () => import('./admin-page/compte/compte.component').then(m => m.CompteComponent)
+        loadComponent: () => import('./admin-page/compte/compte.component').then(m => m.CompteComponent),
+        canActivate: [authGuard]
       },
 
       // La routing de Compte
       {
         path: 'profil',
-        loadComponent: () => import('./admin-page/profil/profil.component').then(m => m.ProfilComponent)
+        loadComponent: () => import('./admin-page/profil/profil.component').then(m => m.ProfilComponent),
+        canActivate: [authGuard]
       },
 
     ]
