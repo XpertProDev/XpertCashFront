@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Categorie } from '../MODELS/categorie.model';
 
 @Injectable({
@@ -9,7 +9,8 @@ import { Categorie } from '../MODELS/categorie.model';
 export class CategorieService {
   private apiUrl: string = "http://localhost:8080/api/auth";
   
-
+  private categoriesSubject = new BehaviorSubject<Categorie[]>([]);
+  public categories$ = this.categoriesSubject.asObservable();
   constructor(private http: HttpClient) {}
 
   getCategories(token: string): Observable<Categorie[]> {
@@ -21,17 +22,27 @@ export class CategorieService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     console.log("🔹 En-têtes envoyés :", headers);
   
-    return this.http.get<Categorie[]>(`${this.apiUrl}/allCategory`, { headers });
+    return this.http.get<Categorie[]>(`${this.apiUrl}/allCategory`, { headers }).pipe(
+      tap((data) => {
+        this.categoriesSubject.next(data);  // Émettre les nouvelles catégories
+      })
+    );
   }
 
-  // 🌟 Ajouter une catégorie
+  // Ajouter une catégorie
   ajouterCategorie(category: Categorie): Observable<Categorie> {
     const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
 
-    return this.http.post<Categorie>(`${this.apiUrl}/add/categoryProduit`, category, { headers });
+    return this.http.post<Categorie>(`${this.apiUrl}/add/categoryProduit`, category, { headers }).pipe(
+      tap((newCategory) => {
+        // Dès qu'une nouvelle catégorie est ajoutée, on met à jour le BehaviorSubject
+        const currentCategories = this.categoriesSubject.value;
+        this.categoriesSubject.next([...currentCategories, newCategory]);  // Ajouter la nouvelle catégorie à la liste
+      })
+    );
   }
   
 

@@ -264,6 +264,8 @@ export class ProduitsComponent implements OnInit {
   }
   closePopup() {
     this.showPopup = false;
+    this.ajouteProduitForm.reset();
+
   }
 
   // Pour l'autocomplete des catégories
@@ -286,7 +288,9 @@ export class ProduitsComponent implements OnInit {
 
   ngOnInit() {
     const token = localStorage.getItem('authToken') || '';
+    
     if (token) {
+      // Charger les catégories initiales via le service
       this.categorieService.getCategories(token).subscribe({
         next: (data: Categorie[]) => {
           this.categories = data;
@@ -299,49 +303,67 @@ export class ProduitsComponent implements OnInit {
           console.error("Erreur lors de la récupération des catégories :", err);
         }
       });
+  
+      // Souscrire à categories$ pour que la liste se mette à jour en temps réel
+      this.categorieService.categories$.subscribe((updatedCategories: Categorie[]) => {
+        this.categories = updatedCategories;
+        console.log("Catégories mises à jour : ", this.categories);
+        
+        // Mettre à jour le filtre après ajout de catégorie
+        this.filteredCategories = this.control.valueChanges.pipe(
+          startWith(''),
+          map(value => this._filter(value || ''))
+        );
+      });
+  
     } else {
       console.error("Aucun token trouvé, vérifiez la connexion !");
     }
+  
     // Initialisation de l'autocomplete (au cas où)
     this.filteredCategories = this.control.valueChanges.pipe(
       startWith(''),
       map(value => this._filter(value || ''))
     );
+  
     // Charger la liste des produits de l'entreprise
     this.loadProduits();
-
+  
+    // Formulaire pour ajouter un produit
     this.ajouteProduitForm = this.fb.group({
-        nomProduit: ['', Validators.required],
-        description: ['', Validators.required],
-        prix: ['', [Validators.required]],
-        prixAchat: ['', Validators.required],
-        photo: ['', Validators.required],
-        quantite: ['', Validators.required],
-        alertSeuil: ['', Validators.required],
-        uniteMesure: ['', Validators.required],
-        category: ['', Validators.required]
+      nomProduit: ['', Validators.required],
+      description: ['', Validators.required],
+      prix: ['', [Validators.required]],
+      prixAchat: ['', Validators.required],
+      photo: ['', Validators.required],
+      quantite: ['', Validators.required],
+      alertSeuil: ['', Validators.required],
+      uniteMesure: ['', Validators.required],
+      category: ['', Validators.required]
     });
-
+  
+    // Formulaire pour ajouter une catégorie
     this.ajouteCategoryForm = this.fb.group({
       categoryName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]]
     });
-
+  
     // 🔹 Lier control au FormControl existant
     this.control = this.ajouteProduitForm.controls['category'] as FormControl;
-
+  
     // Récupérer les infos de l'utilisateur et le nom de l'entreprise
-      this.usersService.getUserInfo().subscribe({
-        next: (userInfo) => {
-          this.nomEntreprise = userInfo.nomEntreprise; 
-          this.adresseEntreprise = userInfo.adresseEntreprise;
-          this.logoEntreprise = userInfo.logoEntreprise
-          console.log('infol\'entreprise:', this.nomEntreprise, this.adresseEntreprise, this.loadProduits);
-        },
-        error: (err) => {
-          console.error('Erreur lors de la récupération dinfol\'entreprise', err);
-        }
-      });
+    this.usersService.getUserInfo().subscribe({
+      next: (userInfo) => {
+        this.nomEntreprise = userInfo.nomEntreprise; 
+        this.adresseEntreprise = userInfo.adresseEntreprise;
+        this.logoEntreprise = userInfo.logoEntreprise;
+        console.log('infol\'entreprise:', this.nomEntreprise, this.adresseEntreprise, this.loadProduits);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération d\'info entreprise', err);
+      }
+    });
   }
+  
 
   private _filter(value: string | Categorie): Categorie[] {
     let filterValue: string;
@@ -451,6 +473,8 @@ export class ProduitsComponent implements OnInit {
     if (this.popupType === 'success') {
       //this.router.navigate(['/produit']);
       this.showPopupCategory = false;
+      this.ajouteCategoryForm.reset();
+      this.errorMessageCategory = '';
     }
   }
 
@@ -541,27 +565,23 @@ export class ProduitsComponent implements OnInit {
       this.errorMessageCategory = "Veuillez remplir correctement le formulaire.";
       return;
     }
-
+  
     const categoryData = { nomCategory: this.ajouteCategoryForm.value.categoryName };
-
+  
     this.categorieService.ajouterCategorie(categoryData).subscribe({
       next: (response: any) => {
         console.log('Categorie ajouté avec succès : ', response);
-
+  
         if (response && response.id) {
           const successMessage = response.message || "Le category a été créé avec succès.";
           this.openPopupCategory2("Ajout de category réussi !", successMessage, 'success');
         }
-
-        // console.log("Catégorie ajoutée avec succès :", response);
-        // this.closePopupCategory();
-        // this.ajouteCategoryForm.reset();
       },
       error: (error) => {
         console.log("Erreur complète :", error);
         console.log("Réponse API :", error.error);
         let message = "Une erreur est survenue lors de la création du produit.";
-
+  
         if (error.status === 400 || error.status === 500) {
           if (typeof error.error === "string") {
             const match = error.error.match(/interpolatedMessage='([^']+)'/);
@@ -570,7 +590,7 @@ export class ProduitsComponent implements OnInit {
             message = error.error.error;
           }
         }
-
+  
         this.openPopupCategory2("❌ Oups, une erreur !", message, "error");
       }
     });
