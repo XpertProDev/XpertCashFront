@@ -72,50 +72,58 @@
       </div>
     </div>
   </li>
-  <li (click)="this.visibleUserList = !this.visibleUserList">
+  <!-- <li (click)="this.visibleUserList = !this.visibleUserList">
     <div class="dropdown">
       <a href="javascript:" class="displayChatbox dropdown-toggle">
         <i class="icon feather icon-mail" title="Mail InBox"></i>
         <span class="badge bg-success"><span class="sr-only"></span></span>
       </a>
     </div>
+  </li> -->
+
+  <li>
+    <div class="bare_vertical">
+      <div class="bare"></div>
+    </div>
   </li>
+
+  <!-- Pour le nom de ta société -->
+  <li>
+    <div class="dropdown drp-user" ngbDropdown placement="auto">
+      <a class="nameBoutiqueHover" href="javascript:" ngbDropdownToggle>
+        Diakaridia SY
+      </a>
+    </div>
+  </li>
+
   <li>
     <div class="dropdown drp-user" ngbDropdown placement="auto">
       <a href="javascript:" ngbDropdownToggle>
         <img src="assets/img/profil.png" class="img-radius wid-40" alt="User-Profile-Image" />
       </a>
       <div class="dropdown-menu dropdown-menu-end profile-notification" ngbDropdownMenu>
-        <div class="pro-head">
-          <img src="assets/img/profil.png" class="img-radius" alt="User-Profile-Image" />
+        <!--pro-head-->
+        <div class="nameBoutiqueDrop">
+          <!--<img src="assets/logo/logoxpertpro.png" class="img-radius wid-60" alt="User-Profile-Image" />-->
           <span>Diakaridia SY</span>
-          <a href="javascript:" class="dud-logout" title="Logout">
+          <a class="dud-logout" title="Logout">
             <i class="feather icon-log-out"></i>
           </a>
         </div>
         <ul class="pro-body">
           <li>
-            <a href="javascript:" class="dropdown-item">
-              <i class="feather icon-user"></i>
-              Profil
+            <a style="cursor: pointer;" routerLink="/profil" class="dropdown-item">
+              <i class="feather icon-user"></i> Profile
             </a>
           </li>
-          <!-- <li>
-            <a href="javascript:" class="dropdown-item">
-              <i class="feather icon-mail"></i>
-              My Messages
-            </a>
-          </li> -->
-          <!-- <li>
-            <a href="javascript:" class="dropdown-item">
-              <i class="feather icon-lock"></i>
-              Lock Screen
-            </a>
-          </li> -->
           <li>
-            <a href="javascript:" class="dropdown-item">
-              <i class="feather icon-lock"></i>
-              Déconnexion
+            <a style="cursor: pointer;" routerLink="['/compte']" class="dropdown-item">
+              <i class="feather icon-users"></i> Comptes
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item">
+              <i class="feather icon-lock"></i> Déconnexion
             </a>
           </li>
         </ul>

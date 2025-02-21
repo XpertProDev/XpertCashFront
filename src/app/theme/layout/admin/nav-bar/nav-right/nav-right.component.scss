@@ -1,0 +1,63 @@
+/*.lien_name_entreprise {
+    color: white;
+    font-size: 18px;
+    text-transform: capitalize;
+}
+
+.espace {
+    margin: 0 1px 0 50px;
+}
+
+.lien_name_entreprise:hover {
+    color: #ffffffb7!important;
+}*/
+
+
+
+.pro-head {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.name_content {
+    padding-left: 10px;
+}
+
+.lien_content a {
+    color: red;
+    font-weight: bold;
+}
+
+.bare_vertical {
+    position: relative;
+}
+
+.bare_vertical .bare {
+    width: 1px;
+    height: 30px;
+    background-color: rgba(238, 238, 238, 0.306);
+    position: relative;
+    top: 10px;
+}
+
+.nameBoutiqueHover:hover {
+    color: #ffffffb7!important;
+}
+
+.nameBoutiqueHover {
+    margin-right: -10px;
+}
+
+.nameBoutiqueDrop {
+    background-color: #4099ff;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #ffffff;
+}
+
+.nameBoutiqueDrop i {
+    color: #ffffff;
+}
