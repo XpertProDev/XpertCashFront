@@ -632,22 +632,36 @@ export class ProduitsComponent implements OnInit {
 
     // Côte de mon image pour que l'utilisateur ajouter une photo
 
-  urllink: string = "assets/img/appareil.jpg";
-  selectedFile: File | null = null;
-  
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-  
-      // Lire le fichier et mettre à jour `urllink`
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.urllink = e.target?.result as string;
-      };
-      reader.readAsDataURL(this.selectedFile);
-    }
-  }
+    urllink: string = "assets/img/appareil.jpg";
+    newPhotoUrl: string | null = null;
+    selectedFile: File | null = null;
+
+    onFileSelected(event: Event): void {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files.length > 0) {
+        this.selectedFile = input.files[0];
+    
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.newPhotoUrl = e.target?.result as string;
+        };
+        reader.readAsDataURL(this.selectedFile);
+      }
+    }    
+    
+    // onFileSelected(event: Event): void {
+    //   const input = event.target as HTMLInputElement;
+    //   if (input.files && input.files.length > 0) {
+    //     this.selectedFile = input.files[0];
+    
+    //     const reader = new FileReader();
+    //     reader.onload = (e) => {
+    //       this.newPhotoUrl = e.target?.result as string;
+    //     };
+    //     reader.readAsDataURL(this.selectedFile);
+    //   }
+    // }
+    
   
 
   // Contrôle de l'affichage du pop-up
@@ -668,15 +682,19 @@ export class ProduitsComponent implements OnInit {
   closeProductDetail() {
     this.showProductDetail = false;
     this.selectedProduct = null;
+    this.newPhotoUrl = null;
+    this.selectedFile = null;
   }
 
   // Méthode pour activer l'édition
   toggleEditMode() {
     this.isEditing = !this.isEditing;
+    this.newPhotoUrl = null;
+    this.selectedFile = null;
   }
 
   saveChanges() {
-    console.log("Produit modifié :", this.selectedProduct);
+    //console.log("Produit modifié :", this.selectedProduct);
     this.isEditing = false; 
   }
 
