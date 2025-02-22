@@ -14,6 +14,8 @@ import { UsersService } from '../SERVICES/users.service';
 import { map, startWith } from 'rxjs';
 import { Produit } from '../MODELS/produit.model';
 import { StocksService } from '../SERVICES/stocks.service';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-stocks',
@@ -41,10 +43,16 @@ export class StocksComponent implements OnInit {
   logoEntreprise: string ='';
   stocks: any = [];
   errorMessage: string = '';
+  totalQuantity: number = 0;
+  totalPrice: number = 0;
+  
+  calculateTotals() {
+    this.totalQuantity = this.stocks.reduce((acc: any, stock: { quantite: any; }) => acc + stock.quantite, 0);
+    this.totalPrice = this.stocks.reduce((acc: number, stock: { produit: { prix: number; }; quantite: number; }) => acc + (stock.produit.prix * stock.quantite), 0);
+  }
+
 
   downloadExcel() {}
-
-  downloadPDF() {}
 
   downloadCSV() {}
 
@@ -89,73 +97,177 @@ export class StocksComponent implements OnInit {
     // Récupérer tout le stock via le service
     this.stocksService.getAllStock(token).subscribe(
       (data) => {
+        // Trier les stocks en inversant l'ordre pour que le dernier ajout soit en haut
         this.stocks = data.map(stock => ({
           ...stock,
           produit: {
             ...stock.produit,  // On garde les données du produit existantes
-            codeProduit: stock.produit?.codeProduit || 'Code inconnu',  // On s'assure que le code produit existe
-            nomProduit: stock.produit?.nomProduit || 'Nom inconnu',  // Nom du produit
+            codeProduit: stock.produit?.codeProduit || 'Code inconnu',  
+            nomProduit: stock.produit?.nomProduit || 'Nom inconnu',  
             photo: stock.produit?.photo ? `http://localhost:8080${stock.produit.photo}` : 'assets/img/lait.jpeg',
-            prix: stock.produit?.prix || 0,  // Prix
-            prixAchat: stock.produit?.prixAchat || 0,  // Prix d'achat
-            alertSeuil: stock.produit?.alertSeuil || 0,  // Seuil d'alerte
-            category: stock.produit?.category || { nomCategory: 'Catégorie inconnue' },  // Catégorie du produit
+            prix: stock.produit?.prix || 0,  
+            prixAchat: stock.produit?.prixAchat || 0,  
+            alertSeuil: stock.produit?.alertSeuil || 0,
+            category: stock.produit?.category || { nomCategory: 'Catégorie inconnue' },
           }
         }));
+        this.calculateTotals();
+        // Inverser l'ordre des stocks pour que les plus récents soient en haut
+        this.stocks = this.stocks.reverse();
+  
+        this.dataSource = new MatTableDataSource(this.stocks);
+        this.dataSource.paginator = this.paginator;
       },
+      
       (error) => {
         this.errorMessage = error.message || 'Erreur lors de la récupération du stock';
         console.error(this.errorMessage);
       }
     );
-  }
-  
-  
-
-  // Charger la liste des produits
-  loadProduits(): void {
-    this.produitService.getProduitsEntreprise().subscribe({
-      next: (produits: Produit[]) => {
-        console.log('Produits récupérés:', produits);
-
-        this.tasks = produits.map(prod => {
-          const fullImageUrl = `http://localhost:8080${prod.photo}`;
-          return {
-            ...prod,
-            photo: fullImageUrl,
-            nomCategory: prod.category?.nomCategory ?? 'Catégorie inconnue',
-            nomUnite: prod.uniteMesure?.nomUnite
-          };
-        });
-
+    this.usersService.getUserInfo().subscribe({
+      next: (userInfo) => {
+        this.nomEntreprise = userInfo.nomEntreprise; 
+        this.adresseEntreprise = userInfo.adresseEntreprise;
+        this.logoEntreprise = userInfo.logoEntreprise;
+        console.log('infol\'entreprise:', this.nomEntreprise, this.adresseEntreprise);
       },
       error: (err) => {
-        console.error('Erreur lors de la récupération des produits', err);
+        console.error('Erreur lors de la récupération d\'info entreprise', err);
       }
     });
   }
+  
+  
+  
 
   
-  // Mise en évidence du texte recherché dans le tableau
-  highlightMatch(text: string): string {
-    if (!this.searchText) return text;
-    const regex = new RegExp(`(${this.searchText})`, 'gi');
-    return text.replace(regex, '<strong>$1</strong>');
+// Mise en évidence du texte recherché dans le tableau
+    highlightMatch(text: string): string {
+      if (!this.searchText) return text;
+      const regex = new RegExp(`(${this.searchText})`, 'gi');
+      return text.replace(regex, '<strong>$1</strong>');
+    }
+
+    filteredStocks(): any[] {
+      const sortedStocks = [...this.stocks]  
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); 
+
+      const filtered = sortedStocks.filter(stock => 
+        stock.produit.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+        stock.produit.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
+      );
+
+      const startIndex = this.currentPage * this.pageSize; 
+      return filtered.slice(startIndex, startIndex + this.pageSize);
+    }
+
+  
+ 
+  
+
+
+  paginatedTasks: any[] = []; 
+  pageSize = 5; 
+  currentPage = 0;  
+
+  onPageChange(event: any): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
   }
 
-  filteredTasks(): any[] {
-    const sortedTasks = [...this.tasks] // Copie du tableau pour éviter de modifier l'original
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  
-    const filtered = sortedTasks.filter(task => 
-      task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
-    );
-  
-    const startIndex = this.currentPage * this.pageSize;
-    return filtered.slice(startIndex, startIndex + this.pageSize);
+
+
+  downloadPDF() {
+    if (!this.stocks || this.stocks.length === 0) {
+      console.error("Aucun stock à afficher dans le PDF !");
+      return;
+    }
+
+    const doc = new jsPDF();
+
+    // Définir l'URL du logo (par défaut ou dynamique)
+    const logoUrl = this.logoEntreprise
+      ? `http://localhost:8080/logoUpload/${this.logoEntreprise}`
+      : `http://localhost:8080/logoUpload/651.jpg`;
+
+    // Récupérer les informations de l’entreprise
+    const entreprise = this.nomEntreprise ? this.nomEntreprise : "Nom non disponible";
+    const adress = this.adresseEntreprise ? this.adresseEntreprise : "Adresse non disponible";
+    const dateGenerated = new Date();
+    const formattedDate = dateGenerated.toLocaleString();
+
+    // Charger le logo avant de générer le PDF
+    this.getImageBase64(logoUrl).then((logoBase64) => {
+      // Ajouter le logo
+      doc.addImage(logoBase64, 'PNG', 14, 5, 30, 30);
+
+      // Ajouter les informations de l'entreprise
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Nom de l'entreprise: ${entreprise}`, 60, 20);
+      doc.text('Stocks', 60, 30);
+
+      // Ligne de séparation
+      doc.setLineWidth(0.5);
+      doc.line(14, 35, 195, 35);
+
+      // Colonnes du tableau
+      const columns = ['Code', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Quantité'];
+
+      // Récupérer uniquement les stocks de la page actuelle
+      const startIndex = this.currentPage * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      const pageStocks = this.stocks.slice(startIndex, endIndex);
+
+      if (!Array.isArray(pageStocks) || pageStocks.length === 0) {
+        console.error("Aucun stock trouvé sur cette page !");
+        return;
+      }
+
+      // Mapper les données des produits
+      const rows = pageStocks.map(stock => [
+        stock.produit.codeProduit, 
+        stock.produit.nomProduit, 
+        stock.produit.category?.nomCategory || 'Catégorie inconnue',
+        stock.produit.description || 'Description non disponible', 
+        stock.produit.prix, 
+        stock.quantite
+      ]);
+
+      // Ajouter le tableau des produits
+      autoTable(doc, {
+        head: [columns],
+        body: rows,
+        startY: 40,
+        theme: 'grid',
+        headStyles: { fillColor: [100, 100, 255], textColor: [255, 255, 255], fontSize: 12 },
+        bodyStyles: { fontSize: 10 }
+      });
+
+      // Récupérer la dernière position Y après le tableau
+      const finalY = (doc as any).lastAutoTable?.finalY || 60;
+
+      // Ajouter une ligne de séparation après le tableau
+      doc.setLineWidth(0.5);
+      doc.line(14, finalY + 5, 195, finalY + 5);
+
+      // Ajouter un pied de page
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic');
+      doc.text(`Adresse: ${adress}`, 14, finalY + 10);
+      doc.text('Contact: 123-456-7890 | email@entreprise.com', 14, finalY + 15);
+      
+      doc.setFontSize(8);  
+      doc.text(`Date de génération: ${formattedDate}`, 14, finalY + 25);
+
+      // Sauvegarder le PDF
+      doc.save('Facture_des_produits.pdf');
+    }).catch((error) => {
+      console.error("Erreur lors du chargement du logo :", error);
+    });
   }
-  
+
+  // Méthode pour charger l'image en base64
   getImageBase64(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -174,15 +286,5 @@ export class StocksComponent implements OnInit {
       xhr.send();
     });
   }
-  
 
-
-  paginatedTasks: any[] = []; 
-  pageSize = 5; 
-  currentPage = 0;  
-
-  onPageChange(event: any): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-  }
 }

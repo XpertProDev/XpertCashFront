@@ -67,6 +67,23 @@ table {
     cursor: pointer;
   }
   
+  .totals {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 20px;
+  }
+  
+  .totals {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  .red-text {
+    color: red;
+  }
+
+  
   .contentIcon i:hover {
     color: #0672E4;
     transition: all 0.5s ease;

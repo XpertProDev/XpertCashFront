@@ -67,6 +67,7 @@ export class ProduitsComponent implements OnInit {
   adresseEntreprise: string = '';
   logoEntreprise: string =''
 
+
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
@@ -221,12 +222,6 @@ export class ProduitsComponent implements OnInit {
       console.error("Erreur lors du chargement du logo :", error);
     });
   }
-  
-  
-  
-  
-  
-  
 
   downloadCSV() {
     const headers = ['Code', 'Photo', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Prix achat', 'Quantité', 'Unité', 'Alert seuil', 'Date & heure'];
@@ -258,6 +253,12 @@ export class ProduitsComponent implements OnInit {
   closePopup() {
     this.showPopup = false;
     this.ajouteProduitForm.reset();
+    this.selectedFile = null;
+    this.urllink = "assets/img/appareil.jpg";
+    const fileInput = document.getElementById('file') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
 
   }
 
@@ -276,7 +277,8 @@ export class ProduitsComponent implements OnInit {
     alertSeuil: 0,
     uniteMesure: { id: 0, nomUnite: '' },
     category: { id: 0, nomCategory: '' },
-    photo: ''
+    photo: '',
+    codebar: ''
   };
 
   ngOnInit() {
@@ -333,7 +335,8 @@ export class ProduitsComponent implements OnInit {
       alertSeuil: ['', Validators.required],
       uniteMesure: ['', Validators.required],
       category: ['', Validators.required],
-      codeBarre: ['']
+      codebar: ['', [Validators.minLength(8), Validators.maxLength(18)]]
+      // codebar: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(14)]],
     });
   
     // Formulaire pour ajouter une catégorie
@@ -357,7 +360,6 @@ export class ProduitsComponent implements OnInit {
       }
     });
   }
-  
 
   private _filter(value: string | Categorie): Categorie[] {
     let filterValue: string;
@@ -383,7 +385,6 @@ export class ProduitsComponent implements OnInit {
   displayFn(category: Categorie): string {
     return category ? category.nomCategory : '';
   }
-
 
   dataSource = new MatTableDataSource<any>(); // Gère les données avec pagination
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -421,7 +422,6 @@ export class ProduitsComponent implements OnInit {
       }
     });
   }
-
 
   paginatedTasks: any[] = []; 
   pageSize = 5; 
@@ -469,6 +469,7 @@ export class ProduitsComponent implements OnInit {
       this.showPopupCategory = false;
       this.ajouteCategoryForm.reset();
       this.errorMessageCategory = '';
+      
     }
   }
 
@@ -486,8 +487,12 @@ export class ProduitsComponent implements OnInit {
     if (this.ajouteProduitForm.invalid) {
       this.errorMessage = "Veuillez vérifier les informations saisies.";
       return;
-    }
+    } 
 
+    if (this.ajouteProduitForm.value.codebar === '') {
+      this.ajouteProduitForm.patchValue({ codebar: null });
+    }
+    
     const formValues = this.ajouteProduitForm.value;
 
     const produitToSave: any = {
@@ -497,12 +502,15 @@ export class ProduitsComponent implements OnInit {
       prixAchat: formValues.prixAchat,
       quantite: formValues.quantite,
       alertSeuil: formValues.alertSeuil,
+      // codebar: this.produit.codebar && this.produit.codebar.trim() !== '' ? this.produit.codebar : 'GEN-' + Date.now(),
+      // codebar: formValues.codebar && formValues.codebar.trim() !== '' ? formValues.codebar : null,
+      codebar: formValues.codebar,      
       uniteMesure: { nomUnite: formValues.uniteMesure },
       category: {  
         id: formValues.category?.id, 
         nomCategory: formValues.category?.nomCategory
       },
-      photo: ''
+      photo: formValues.photo
     };    
 
     this.produitService.ajouterProduit(produitToSave, this.selectedFile!).subscribe({
@@ -514,6 +522,13 @@ export class ProduitsComponent implements OnInit {
           // Utilisation d'un message par défaut si response.message n'est pas défini
           const successMessage = response.message || "Le produit a été créé avec succès.";
           this.openPopup2("Ajout de produit réussi !", successMessage, 'success');
+          this.ajouteProduitForm.reset();
+          this.selectedFile = null;
+          this.urllink = "assets/img/appareil.jpg";
+          const fileInput = document.getElementById('file') as HTMLInputElement;
+          if (fileInput) {
+            fileInput.value = '';
+          }
         } else {
           this.errorMessage = response.error || "Erreur de l'ajout de produit, veuillez vérifier les champs.";
           this.openPopup2("Erreur de l'ajout de produit", this.errorMessage, 'error');
@@ -569,6 +584,8 @@ export class ProduitsComponent implements OnInit {
         if (response && response.id) {
           const successMessage = response.message || "Le category a été créé avec succès.";
           this.openPopupCategory2("Ajout de category réussi !", successMessage, 'success');
+          this.ajouteProduitForm.reset();
+
         }
       },
       error: (error) => {

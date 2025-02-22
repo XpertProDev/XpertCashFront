@@ -8,7 +8,8 @@ export interface Produit {
   prixAchat: number;
   quantite: number;
   alertSeuil: number;
-  createdAt: string; // ou Date, selon vos préférences
+  codebar?: string;
+  createdAt: string; 
   category: {
     id: number;
     nomCategory: string;

@@ -1,31 +1,42 @@
 <div class="containerTable">
-    <div class="tasks-header">
-      <h1 class="title">Mes Stocks</h1>
-      
-      <div class="actions">
-        <button class="add-task">Ajouter un produit</button>
-        <!-- Icônes -->
-        <div class="contentIcon">
-          <i class="ri-refresh-line"></i>
-          <div class="bare"></div>
-          <div class="export-container">
-            <div class="iconDrop">
-              <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
-            </div>
-            <div class="export-dropdown" *ngIf="showExportDropdown">
-              <div class="export-option" (click)="downloadExcel()">Télécharger en Excel</div>
-              <div class="export-option" (click)="downloadPDF()">Télécharger en PDF</div>
-              <div class="export-option" (click)="downloadCSV()">Télécharger en CSV</div>
-            </div>
+  <div class="tasks-header">
+    <h1 class="title">Mes Stocks</h1>
+  
+    <div class="actions">
+      <button class="add-task">Ajouter un produit</button>
+  
+      <!-- Icônes -->
+      <div class="contentIcon">
+        <i class="ri-refresh-line"></i>
+        <div class="bare"></div>
+        <div class="export-container">
+          <div class="iconDrop">
+            <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
+          </div>
+          <div class="export-dropdown" *ngIf="showExportDropdown">
+            <div class="export-option" (click)="downloadExcel()">Télécharger en Excel</div>
+            <div class="export-option" (click)="downloadPDF()">Télécharger en PDF</div>
+            <div class="export-option" (click)="downloadCSV()">Télécharger en CSV</div>
           </div>
         </div>
-        <!-- Recherche -->
-        <div class="inputSearch">
-          <i class="ri-search-2-line"></i>
-          <input type="text" [(ngModel)]="searchText" placeholder="Recherche...." />
-        </div>
       </div>
+  
+      <!-- Recherche -->
+      <div class="inputSearch">
+        <i class="ri-search-2-line"></i>
+        <input type="text" [(ngModel)]="searchText" placeholder="Recherche...." />
+      </div>
+  
+      <!-- Quantité et Prix Total -->
+      <div class="totals">
+        <span><strong>Quantité Totale :</strong> {{ totalQuantity }}</span>
+        <span><strong>Prix Total :</strong> <span class="red-text"> {{ totalPrice | number:'1.0-0' }}</span></span>
+      </div>
+      
+      
     </div>
+  </div>
+  
       
     <!-- Tableau des produits -->
     <table>
@@ -46,8 +57,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let stock of stocks">
+        <tr *ngFor="let stock of filteredStocks()">
           <td style="font-size: 10px;" [innerHTML]="highlightMatch(stock.produit.codeProduit)"></td>
+        
           <td>
             <div class="imgProduit" (click)="openImage(stock.produit.photo)">
               <img [src]="stock.produit.photo || 'assets/img/lait.jpeg'" alt="Produit">
@@ -58,7 +70,8 @@
               </div>
             </div>
           </td>
-          <td>{{ stock.produit.nomProduit }}</td>
+          
+          <td [innerHTML]="highlightMatch(stock.produit.nomProduit)"></td>
           <td>{{ stock.produit.category?.nomCategory || 'Catégorie inconnue' }}</td>
           <td>{{ stock.dateAjout | date:'dd/MM/yyyy' }}</td>
           <td>{{ stock.dateExpiration | date:'dd/MM/yyyy' }}</td>
@@ -69,6 +82,7 @@
           <td>{{ stock.quantite }}</td>
           <td>{{ stock.produit.alertSeuil }}</td>
         </tr>
+        
       </tbody>
     </table>
     
@@ -84,9 +98,10 @@
     </div> -->
   
     <!-- Si la liste de produits n'est pas vide, mais qu'aucun résultat ne correspond à la recherche -->
-    <div *ngIf="tasks.length > 0 && filteredTasks().length === 0" style="text-align: center; margin-top: 20px;">
+    <div *ngIf="stocks.length > 0 && filteredStocks().length === 0 && searchText" style="text-align: center; margin-top: 20px;">
       <p style="color: red;">Aucun résultat trouvé pour "{{ searchText }}"</p>
     </div>
+    
   
   
     <!-- // Pagination -->
