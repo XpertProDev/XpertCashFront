@@ -648,16 +648,19 @@ export class ProduitsComponent implements OnInit {
       reader.readAsDataURL(this.selectedFile);
     }
   }
+  
 
   // Contrôle de l'affichage du pop-up
   showProductDetail: boolean = false;
   selectedProduct: any = null;
+  isEditing: boolean = false;
     
   openProductDetail(productId: string) {
     // Rechercher le produit dans la liste
     this.selectedProduct = this.tasks.find(task => task.codeProduit === productId);
     if (this.selectedProduct) {
       this.showProductDetail = true;
+      this.isEditing = false;
     }
   }
 
@@ -666,6 +669,15 @@ export class ProduitsComponent implements OnInit {
     this.showProductDetail = false;
     this.selectedProduct = null;
   }
-  
+
+  // Méthode pour activer l'édition
+  toggleEditMode() {
+    this.isEditing = !this.isEditing;
+  }
+
+  saveChanges() {
+    console.log("Produit modifié :", this.selectedProduct);
+    this.isEditing = false; 
+  }
 
 }
