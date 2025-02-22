@@ -78,6 +78,7 @@ export class ConnexionPageComponent {
             // Connexion réussie : pas de popup, navigation directe
             this.router.navigate(['/analytics']);
           } else {
+            // Si la réponse ne contient pas de token, on affiche l'erreur
             this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
             // Affichage de la popup en cas d'erreur
             this.openPopup("Erreur de connexion", this.errorMessage, 'error');

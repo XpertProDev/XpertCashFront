@@ -411,29 +411,37 @@
             <textarea formControlName="description" class="input_focus2" required id="description"
                       name="description"
                       placeholder="Saisis quelque chose"></textarea>
-            <label for="description" class="label" style="padding-left: 10px;">Description</label>
+            <label for="description" class="label" style="padding-left: 10px;">Description du produit</label>
             <div *ngIf="f['description'].touched && f['description'].invalid" class="error-message">
               Le description est vide.
             </div>
           </div>
           
           <!-- Ligne 6 : Sélection du fichier image -->
-         <div class="img_input">
-          <div class="input_file">
-            <label for="file" class="custom-file-label">
-              <span class="custom-file-button">Choisir un fichier</span>
-              <span class="custom-file-text">{{ selectedFile?.name ?? "Aucun fichier choisi" }}</span>
-            </label>
-            <div *ngIf="f['photo'].touched && f['photo'].invalid" class="error-message">
-              Le photo est vide.
+          <div class="img_input">
+            <div class="input_file">
+              <label for="file" class="custom-file-label">
+                <span class="custom-file-button">Choisir un fichier</span>
+                <span class="custom-file-text">{{ selectedFile?.name ?? "Aucun fichier choisi" }}</span>
+              </label>
+              <div *ngIf="f['photo'].touched && f['photo'].invalid" class="error-message">
+                Le photo est vide.
+              </div>
+              <input formControlName="photo" type="file" accept="image/*" id="file" (change)="onFileSelected($event)" hidden>
             </div>
-            <input formControlName="photo" type="file" accept="image/*" id="file" (change)="onFileSelected($event)"  hidden>
+          
+            <div class="roudel_img" (click)="openImage(urllink)">
+              <img class="roudel" [src]="urllink" alt="Aperçu de l'image">
+            </div>
           </div>
-
-          <div class="roudel_img">
-            <img class="roudel" [src]="urllink">
+          
+          <!-- Modal pour afficher l'image en grand -->
+          <div class="modal" *ngIf="imagePopup" (click)="closeImage()">
+            <div class="modal-content" (click)="$event.stopPropagation()">
+              <img [src]="imagePopup" alt="Aperçu de l'image">
+            </div>
           </div>
-         </div>
+          
                       
           <!-- Message d'erreur global -->
           <div *ngIf="errorMessage" class="error-message">

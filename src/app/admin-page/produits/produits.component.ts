@@ -67,6 +67,7 @@ export class ProduitsComponent implements OnInit {
   adresseEntreprise: string = '';
   logoEntreprise: string =''
 
+
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
@@ -174,7 +175,7 @@ export class ProduitsComponent implements OnInit {
       doc.line(14, 35, 195, 35);
   
       // Colonnes du tableau
-      const columns = ['Code', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Quantité', 'Date & heure'];
+      const columns = ['Code', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Quantité'];
   
       // Récupérer uniquement les produits de la page actuelle
       const startIndex = this.currentPage * this.pageSize;
@@ -252,6 +253,12 @@ export class ProduitsComponent implements OnInit {
   closePopup() {
     this.showPopup = false;
     this.ajouteProduitForm.reset();
+    this.selectedFile = null;
+    this.urllink = "assets/img/appareil.jpg";
+    const fileInput = document.getElementById('file') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
 
   }
 
@@ -462,6 +469,7 @@ export class ProduitsComponent implements OnInit {
       this.showPopupCategory = false;
       this.ajouteCategoryForm.reset();
       this.errorMessageCategory = '';
+      
     }
   }
 
@@ -511,6 +519,13 @@ export class ProduitsComponent implements OnInit {
         if (response && response.id) {
           const successMessage = response.message || "Le produit a été créé avec succès.";
           this.openPopup2("Ajout de produit réussi !", successMessage, 'success');
+          this.ajouteProduitForm.reset();
+          this.selectedFile = null;
+          this.urllink = "assets/img/appareil.jpg";
+          const fileInput = document.getElementById('file') as HTMLInputElement;
+          if (fileInput) {
+            fileInput.value = '';
+          }
         } else {
           this.errorMessage = response.error || "Erreur de l'ajout de produit, veuillez vérifier les champs.";
           this.openPopup2("Erreur de l'ajout de produit", this.errorMessage, 'error');
@@ -571,6 +586,8 @@ export class ProduitsComponent implements OnInit {
         if (response && response.id) {
           const successMessage = response.message || "Le category a été créé avec succès.";
           this.openPopupCategory2("Ajout de category réussi !", successMessage, 'success');
+          this.ajouteProduitForm.reset();
+
         }
       },
       error: (error) => {
