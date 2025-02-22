@@ -80,6 +80,8 @@ export class StocksComponent implements OnInit {
             category: stock.produit?.category || { nomCategory: 'Catégorie inconnue' },
           }
         }));
+      sort((a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime());
+
         
         this.calculateTotals();
         this.stocks = this.stocks.reverse(); // Inverser pour afficher les derniers en premier
@@ -101,6 +103,7 @@ export class StocksComponent implements OnInit {
         this.adresseEntreprise = userInfo.adresseEntreprise;
         this.logoEntreprise = userInfo.logoEntreprise;
       },
+      
       error: (err) => {
         console.error('Erreur lors de la récupération d\'info entreprise', err);
       }
@@ -120,21 +123,18 @@ export class StocksComponent implements OnInit {
   downloadCSV() {}
   // Calcul des Totaux : Quantité Totale et Prix Total
   calculateTotals() {
-    // Afficher les données pour diagnostiquer le problème
     console.log('Stocks:', this.stocks);
   
-    // Calcul de la quantité totale avec gestion des valeurs nulles ou indéfinies
     this.totalQuantity = this.stocks.reduce((acc: number, stock: { quantite: number }) => {
-      const quantite = stock.quantite || 0; // S'assurer que quantite est valide
-      console.log(`Quantité: ${quantite}`); // Vérifier chaque quantité
+      const quantite = stock.quantite || 0;
+      console.log(`Quantité: ${quantite}`); 
       return acc + quantite;
     }, 0);
   
-    // Calcul du prix total avec vérification des données
     this.totalPrice = this.stocks.reduce((acc: number, stock: { produit: { prix: number }, quantite: number }) => {
-      const prix = stock.produit.prix || 0; // S'assurer que prix est valide
-      const quantite = stock.quantite || 0; // S'assurer que quantite est valide
-      console.log(`Prix: ${prix}, Quantité: ${quantite}`); // Vérifier chaque prix et quantité
+      const prix = stock.produit.prix || 0;
+      const quantite = stock.quantite || 0; 
+      console.log(`Prix: ${prix}, Quantité: ${quantite}`); 
       return acc + (prix * quantite);
     }, 0);
     
@@ -274,5 +274,9 @@ export class StocksComponent implements OnInit {
       xhr.send();
     });
   }
+}
+
+function sort(arg0: (a: any, b: any) => number) {
+  throw new Error('Function not implemented.');
 }
 
