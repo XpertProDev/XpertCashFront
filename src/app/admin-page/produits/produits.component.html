@@ -516,7 +516,8 @@
             </div>
           
             <div class="roudel_img" (click)="openImage(urllink)">
-              <img class="roudel" [src]="urllink" alt="Aperçu de l'image">
+              <!-- <img class="roudel" [src]="urllink" alt="Aperçu de l'image"> -->
+              <img class="roudel" [src]="newPhotoUrl ? newPhotoUrl : (selectedProduct?.photo ?? urllink)" alt="Aperçu de l'image">
             </div>
           </div>
           
