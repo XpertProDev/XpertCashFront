@@ -96,7 +96,7 @@
                 {{ isEditing ? 'Modification de produit :' : 'Details de produit :' }}
                 {{ selectedProduct?.nomProduit }}
               </h2>
-              <div class="iconEdit" *ngIf="!isEditing" (click)="toggleEditMode()">
+              <div class="iconEdit" *ngIf="!isEditing" (click)="toggleEditMode()" style="cursor: pointer;">
                 <i class="ri-edit-box-line"></i>
               </div>
             </div>
@@ -139,7 +139,9 @@
                 <!-- From Uiverse.io by Yaya12085 --> 
                 <div class="container_file"> 
                   <div class="header_file"> 
-                    <img class="roudel" [src]="selectedProduct?.photo" alt="Aperçu de l'image">
+                    <!-- <img class="roudel" [src]="selectedProduct?.photo ?? urllink" alt="Aperçu de l'image"> -->
+                    <!-- <img class="roudel" [src]="newPhotoUrl || selectedProduct?.photo || urllink" alt="Aperçu de l'image"> -->
+                    <img class="roudel" [src]="newPhotoUrl ? newPhotoUrl : (selectedProduct?.photo ?? urllink)" alt="Aperçu de l'image">
                   </div> 
                 
                   <!-- Affichage du champ fichier seulement en mode édition -->
@@ -206,9 +208,7 @@
                 <div class="double_input">
                   <div class="champ_input">
                     <input class="input_focus input_focus_taille input_focus_detail" 
-                        [disabled]="!isEditing" 
-                        [value]="selectedProduct?.codeProduit"
-                        [ngStyle]="{'cursor': isEditing ? 'text' : 'no-drop'}">
+                        disabled [value]="selectedProduct?.codeProduit" style="cursor: no-drop;">
                     <label for="codeProduit" class="label">Code produit</label>
                   </div>
 
