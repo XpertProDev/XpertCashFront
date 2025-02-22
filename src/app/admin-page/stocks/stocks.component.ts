@@ -182,48 +182,68 @@ export class StocksComponent implements OnInit {
       console.error("Aucun stock à afficher dans le PDF !");
       return;
     }
-
+  
     const doc = new jsPDF();
-
+  
     // Définir l'URL du logo (par défaut ou dynamique)
     const logoUrl = this.logoEntreprise
       ? `http://localhost:8080/logoUpload/${this.logoEntreprise}`
       : `http://localhost:8080/logoUpload/651.jpg`;
-
+  
     // Récupérer les informations de l’entreprise
     const entreprise = this.nomEntreprise ? this.nomEntreprise : "Nom non disponible";
     const adress = this.adresseEntreprise ? this.adresseEntreprise : "Adresse non disponible";
+  
+    // Récupérer la date et l'heure actuelles
     const dateGenerated = new Date();
-    const formattedDate = dateGenerated.toLocaleString();
-
+    const formattedDate = dateGenerated.toLocaleString();  // Format "12/02/2025, 10:30:45"
+  
+    // Calculer les Totaux : Quantité Totale et Prix Total
+    const totalQuantity = this.stocks.reduce((total: any, stock: { quantite: any; }) => total + stock.quantite, 0);
+    const totalPrice = this.stocks.reduce((total: number, stock: { produit: { prix: number; }; quantite: number; }) => total + (stock.produit.prix * stock.quantite), 0);
+  
     // Charger le logo avant de générer le PDF
     this.getImageBase64(logoUrl).then((logoBase64) => {
       // Ajouter le logo
       doc.addImage(logoBase64, 'PNG', 14, 5, 30, 30);
-
+  
       // Ajouter les informations de l'entreprise
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
       doc.text(`Nom de l'entreprise: ${entreprise}`, 60, 20);
       doc.text('Stocks', 60, 30);
-
+  
+      // --- Ajout des totaux en haut à droite ---
+      doc.setFontSize(9); // Réduire la taille des totaux
+      doc.setFont('helvetica', 'bold');
+  
+      // Déplacer les totaux plus haut (au lieu de 40, les mettre à ~27-30)
+      doc.text(`Quantité Totale: ${totalQuantity}`, 140, 25); 
+  
+      // Mettre le prix total en rouge
+      doc.setTextColor(255, 0, 0); // Couleur rouge
+      doc.text(`Prix Total: ${totalPrice.toFixed(2)} €`, 140, 30);
+  
+      // Réinitialiser la couleur pour le texte suivant
+      doc.setTextColor(0, 0, 0); // Retour à la couleur noire
+  
       // Ligne de séparation
       doc.setLineWidth(0.5);
       doc.line(14, 35, 195, 35);
-
+  
       // Colonnes du tableau
       const columns = ['Code', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Quantité'];
-
+  
       // Récupérer uniquement les stocks de la page actuelle
       const startIndex = this.currentPage * this.pageSize;
       const endIndex = startIndex + this.pageSize;
       const pageStocks = this.stocks.slice(startIndex, endIndex);
-
+  
       if (!Array.isArray(pageStocks) || pageStocks.length === 0) {
         console.error("Aucun stock trouvé sur cette page !");
         return;
       }
-
+  
       // Mapper les données des produits
       const rows = pageStocks.map(stock => [
         stock.produit.codeProduit, 
@@ -233,7 +253,7 @@ export class StocksComponent implements OnInit {
         stock.produit.prix, 
         stock.quantite
       ]);
-
+  
       // Ajouter le tableau des produits
       autoTable(doc, {
         head: [columns],
@@ -243,29 +263,33 @@ export class StocksComponent implements OnInit {
         headStyles: { fillColor: [100, 100, 255], textColor: [255, 255, 255], fontSize: 12 },
         bodyStyles: { fontSize: 10 }
       });
-
+  
       // Récupérer la dernière position Y après le tableau
       const finalY = (doc as any).lastAutoTable?.finalY || 60;
-
+  
       // Ajouter une ligne de séparation après le tableau
       doc.setLineWidth(0.5);
       doc.line(14, finalY + 5, 195, finalY + 5);
-
-      // Ajouter un pied de page
+  
+      // Ajouter un pied de page avec la date et l'heure de génération
       doc.setFontSize(10);
       doc.setFont('helvetica', 'italic');
       doc.text(`Adresse: ${adress}`, 14, finalY + 10);
       doc.text('Contact: 123-456-7890 | email@entreprise.com', 14, finalY + 15);
-      
-      doc.setFontSize(8);  
-      doc.text(`Date de génération: ${formattedDate}`, 14, finalY + 25);
-
+  
+      // Ajouter la date en bas
+      doc.setFontSize(8);  // Plus petit
+      doc.text(`Date de génération: ${formattedDate}`, 14, finalY + 25); 
+  
       // Sauvegarder le PDF
       doc.save('Facture_des_produits.pdf');
     }).catch((error) => {
       console.error("Erreur lors du chargement du logo :", error);
     });
   }
+  
+  
+  
 
   // Méthode pour charger l'image en base64
   getImageBase64(url: string): Promise<string> {

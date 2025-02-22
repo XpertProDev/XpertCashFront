@@ -38,7 +38,7 @@
                           <div class="double_input">
                             <div class="afficheEntreprise">
                               <div class="champ_input">
-                                <input type="text" formControlName="nomEntreprise" class="input_focus" placeholder="Votre nom entreprise" (input)="updateEntrepriseName($event)">
+                                <input type="text" formControlName="nomEntreprise" class="input_focus" style="text-transform: capitalize;" placeholder="Votre nom entreprise" (input)="updateEntrepriseName($event)">
                                 <label class="label">Nom entreprise</label>
                                 <div *ngIf="f['nomEntreprise'].touched && f['nomEntreprise'].invalid" class="error-message">
                                     Le nom entreprise est vide.

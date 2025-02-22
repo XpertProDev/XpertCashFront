@@ -516,10 +516,7 @@ export class ProduitsComponent implements OnInit {
     this.produitService.ajouterProduit(produitToSave, this.selectedFile!).subscribe({
       next: (response: any) => {
         console.log('Produit ajouté avec succès : ', response);
-
-        // Vérification basée sur l'existence d'un id ou autre propriété confirmant la création
         if (response && response.id) {
-          // Utilisation d'un message par défaut si response.message n'est pas défini
           const successMessage = response.message || "Le produit a été créé avec succès.";
           this.openPopup2("Ajout de produit réussi !", successMessage, 'success');
           this.ajouteProduitForm.reset();
@@ -534,19 +531,24 @@ export class ProduitsComponent implements OnInit {
           this.openPopup2("Erreur de l'ajout de produit", this.errorMessage, 'error');
           return;
         }
-
+      
         const produitFormate = {
           ...response,
           nomCategory: response.category?.nomCategory,
           nomUnite: response.uniteMesure?.nomUnite,
           photo: response.photo ? `http://localhost:8080${response.photo}` : 'assets/img/lait.jpeg'
         };
-
+      
         // Ajouter le produit en haut de la liste
         this.tasks.unshift(produitFormate);
-
+      
         // Mettre à jour Angular Material Table (dataSource)
         this.dataSource.data = [...this.tasks];
+      
+        // Réinitialiser le formulaire et la sélection de photo
+        this.ajouteProduitForm.reset();
+        this.urllink = "assets/img/appareil.jpg"; // Remet l'image par défaut
+        this.selectedFile = null;
       },
       error: (error) => {
         console.log("Erreur complète :", error);
@@ -646,7 +648,24 @@ export class ProduitsComponent implements OnInit {
       reader.readAsDataURL(this.selectedFile);
     }
   }
+
+  // Contrôle de l'affichage du pop-up
+  showProductDetail: boolean = false;
+  selectedProduct: any = null;
     
+  openProductDetail(productId: string) {
+    // Rechercher le produit dans la liste
+    this.selectedProduct = this.tasks.find(task => task.codeProduit === productId);
+    if (this.selectedProduct) {
+      this.showProductDetail = true;
+    }
+  }
+
+  // Méthode pour fermer le pop-up
+  closeProductDetail() {
+    this.showProductDetail = false;
+    this.selectedProduct = null;
+  }
   
 
 }

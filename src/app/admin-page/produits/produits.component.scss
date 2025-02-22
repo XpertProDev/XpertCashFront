@@ -8,7 +8,7 @@ table {
 }
 
 th, td {
-  border: 1px solid #ddd;
+  border-bottom: 1px solid #dddddd94;
   padding: 8px;
 }
 
@@ -769,3 +769,65 @@ img.roudel{
   font-size: 11px;
 }
 
+// Detail
+
+.input_focus_taille {
+  font-size: 14px;
+  cursor: pointer;
+  color: #0672E4;
+}
+
+
+
+.img_input_detail {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+
+.roudel_img_detail {
+  //margin-left: 20px;
+  width: 120px;
+  height: 120px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  position: relative;
+  top: 4px;
+}
+
+img.roudel_detail{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+  transition: transform 0.2s;
+}
+
+.input_focus_detail:not(:placeholder-shown) + .label,
+.input_focus_detail:focus + .label {
+  color: #000;
+}
+
+// title_produit_detail
+
+.title_produit_detail {
+  display: flex;
+  align-items: center;
+}
+
+.iconEdit {
+  margin-left: 30px;
+}
+
+.iconEdit i {
+  font-size: 18px;
+  color: #0672E4;
+  cursor: pointer;
+}
