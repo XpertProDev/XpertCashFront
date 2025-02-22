@@ -259,6 +259,8 @@ export class ProduitsComponent implements OnInit {
     if (fileInput) {
       fileInput.value = '';
     }
+    this.newPhotoUrl = null;
+    this.selectedFile = null;
 
   }
 
