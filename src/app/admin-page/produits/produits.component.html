@@ -139,7 +139,9 @@
                 <!-- From Uiverse.io by Yaya12085 --> 
                 <div class="container_file"> 
                   <div class="header_file"> 
-                    <img class="roudel" [src]="selectedProduct?.photo" alt="Aperçu de l'image">
+                    <!-- <img class="roudel" [src]="selectedProduct?.photo ?? urllink" alt="Aperçu de l'image"> -->
+                    <!-- <img class="roudel" [src]="newPhotoUrl || selectedProduct?.photo || urllink" alt="Aperçu de l'image"> -->
+                    <img class="roudel" [src]="newPhotoUrl ? newPhotoUrl : (selectedProduct?.photo ?? urllink)" alt="Aperçu de l'image">
                   </div> 
                 
                   <!-- Affichage du champ fichier seulement en mode édition -->
