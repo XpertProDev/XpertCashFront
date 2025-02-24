@@ -60,13 +60,15 @@ export class StocksComponent implements OnInit {
     private stocksService: StocksService
   ) {}
 
+
+
   ngOnInit() {
     const token = localStorage.getItem('authToken') || '';
-    
+  
     // Récupérer tout le stock via le service
     this.stocksService.getAllStock(token).subscribe(
       (data) => {
-        // Map stocks data et enrichissement des produits
+        // Map stocks data and enrich them with additional product details
         this.stocks = data.map(stock => ({
           ...stock,
           produit: {
@@ -78,53 +80,59 @@ export class StocksComponent implements OnInit {
             prixAchat: stock.produit?.prixAchat || 0,
             alertSeuil: stock.produit?.alertSeuil || 0,
             category: stock.produit?.category || { nomCategory: 'Catégorie inconnue' },
-          },
-          // Assurer que createdAt est bien une date valide
-          createdAtDate: new Date(stock.createdAt)
+            
+          }
         }));
+        console.log('Stocks après map :', this.stocks);
+
   
-        // Trier par date de création (le plus récent en haut)
-        this.stocks.sort((a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime());
+        // Vérification des dates avant le tri
+        console.log("Avant tri:", this.stocks.map(stock => stock.dateAjout));
   
-        this.calculateTotals();
+        // Trier les stocks par date d'ajout (du plus récent au plus ancien)
+        this.stocks.sort((a, b) => {
+          const dateA = new Date(a.dateAjout);  // Créer un objet Date
+          const dateB = new Date(b.dateAjout);  // Créer un objet Date
+          
+          console.log(`Comparaison: ${dateA} vs ${dateB} => ${dateA.getTime() - dateB.getTime()}`);
   
-        // Mettre à jour le DataSource avec les stocks et activer la pagination
+          return dateB.getTime() - dateA.getTime();  // Tri du plus récent au plus ancien
+        });
+  
+        // Vérification après le tri
+        console.log("Après tri:", this.stocks.map(stock => stock.dateAjout));
+  
+        // Mise à jour du DataSource avec les stocks et activation de la pagination
         this.dataSource = new MatTableDataSource(this.stocks);
         this.dataSource.paginator = this.paginator;
+  
+        // Vérifier si le tri est correctement effectué
+        console.log("DataSource mise à jour:", this.dataSource.data);
+        
+        // Calculer les totaux si nécessaire
+        this.calculateTotals();
       },
       (error) => {
         this.errorMessage = error.message || 'Erreur lors de la récupération du stock';
         console.error(this.errorMessage);
       }
     );
-    
-    // Récupération des infos de l'entreprise
+  
     this.usersService.getUserInfo().subscribe({
       next: (userInfo) => {
         this.nomEntreprise = userInfo.nomEntreprise;
         this.adresseEntreprise = userInfo.adresseEntreprise;
         this.logoEntreprise = userInfo.logoEntreprise;
       },
+  
       error: (err) => {
         console.error('Erreur lors de la récupération d\'info entreprise', err);
       }
     });
   }
   
-
-  openImage(imageUrl: string): void {
-    this.imagePopup = imageUrl;
-  }
-  
-  closeImage(): void {
-    this.imagePopup = null;
-  }
-
-  downloadExcel() {}
-
-  downloadCSV() {}
-  // Calcul des Totaux : Quantité Totale et Prix Total
-  calculateTotals() {
+   // Calcul des Totaux : Quantité Totale et Prix Total
+   calculateTotals() {
     console.log('Stocks:', this.stocks);
   
     this.totalQuantity = this.stocks.reduce((acc: number, stock: { quantite: number }) => {
@@ -143,6 +151,21 @@ export class StocksComponent implements OnInit {
     console.log(`Total Quantité: ${this.totalQuantity}`);
     console.log(`Total Prix: ${this.totalPrice}`);
   }
+  
+  
+
+  openImage(imageUrl: string): void {
+    this.imagePopup = imageUrl;
+  }
+  
+  closeImage(): void {
+    this.imagePopup = null;
+  }
+
+  downloadExcel() {}
+
+  downloadCSV() {}
+ 
   
 
   // Gestion du dropdown d'export
@@ -281,4 +304,3 @@ export class StocksComponent implements OnInit {
 function sort(arg0: (a: any, b: any) => number) {
   throw new Error('Function not implemented.');
 }
-

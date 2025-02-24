@@ -28,7 +28,7 @@
       </div>
   
       <!-- Quantité et Prix Total -->
-      <div class="totals" >
+      <div class="totals">
         <span><strong>Quantité Totale :</strong> {{ totalQuantity }}</span>
         <span><strong>Prix Total :</strong> <span class="red-text"> {{ totalPrice | number:'1.0-0' }}</span></span>
       </div>
@@ -79,7 +79,7 @@
           <td>{{ stock.sortie }}</td>
           <td>{{ stock.produit.prix | number:'1.0-0' }}</td>
           <td>{{ stock.produit.prixAchat | number:'1.0-0' }}</td>
-          <td>{{ stock.produit.quantite }}</td>
+          <td>{{ stock.quantite }}</td>
           <td>{{ stock.produit.alertSeuil }}</td>
         </tr>
         
