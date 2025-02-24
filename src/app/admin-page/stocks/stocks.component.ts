@@ -66,7 +66,7 @@ export class StocksComponent implements OnInit {
     // Récupérer tout le stock via le service
     this.stocksService.getAllStock(token).subscribe(
       (data) => {
-        // Map stocks data and enrich them with additional product details
+        // Map stocks data et enrichissement des produits
         this.stocks = data.map(stock => ({
           ...stock,
           produit: {
@@ -78,15 +78,16 @@ export class StocksComponent implements OnInit {
             prixAchat: stock.produit?.prixAchat || 0,
             alertSeuil: stock.produit?.alertSeuil || 0,
             category: stock.produit?.category || { nomCategory: 'Catégorie inconnue' },
-          }
+          },
+          // Assurer que createdAt est bien une date valide
+          createdAtDate: new Date(stock.createdAt)
         }));
-      sort((a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime());
-
-        
+  
+        // Trier par date de création (le plus récent en haut)
+        this.stocks.sort((a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime());
+  
         this.calculateTotals();
-        this.stocks = this.stocks.reverse(); // Inverser pour afficher les derniers en premier
-        
-
+  
         // Mettre à jour le DataSource avec les stocks et activer la pagination
         this.dataSource = new MatTableDataSource(this.stocks);
         this.dataSource.paginator = this.paginator;
@@ -97,18 +98,19 @@ export class StocksComponent implements OnInit {
       }
     );
     
+    // Récupération des infos de l'entreprise
     this.usersService.getUserInfo().subscribe({
       next: (userInfo) => {
         this.nomEntreprise = userInfo.nomEntreprise;
         this.adresseEntreprise = userInfo.adresseEntreprise;
         this.logoEntreprise = userInfo.logoEntreprise;
       },
-      
       error: (err) => {
         console.error('Erreur lors de la récupération d\'info entreprise', err);
       }
     });
   }
+  
 
   openImage(imageUrl: string): void {
     this.imagePopup = imageUrl;
