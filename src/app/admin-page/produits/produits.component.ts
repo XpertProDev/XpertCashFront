@@ -625,7 +625,7 @@ export class ProduitsComponent implements OnInit {
   get c() { return this.ajouteCategoryForm.controls; }
 
   openImage(imageUrl: string): void {
-    this.imagePopup = imageUrl;
+    this.imagePopup = this.newPhotoUrl;
   }
   
   closeImage(): void {

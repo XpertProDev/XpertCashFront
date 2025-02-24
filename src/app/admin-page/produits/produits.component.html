@@ -96,7 +96,7 @@
                 {{ isEditing ? 'Modification de produit :' : 'Details de produit :' }}
                 {{ selectedProduct?.nomProduit }}
               </h2>
-              <div class="iconEdit" *ngIf="!isEditing" (click)="toggleEditMode()">
+              <div class="iconEdit" *ngIf="!isEditing" (click)="toggleEditMode()" style="cursor: pointer;">
                 <i class="ri-edit-box-line"></i>
               </div>
             </div>
@@ -208,9 +208,7 @@
                 <div class="double_input">
                   <div class="champ_input">
                     <input class="input_focus input_focus_taille input_focus_detail" 
-                        [disabled]="!isEditing" 
-                        [value]="selectedProduct?.codeProduit"
-                        [ngStyle]="{'cursor': isEditing ? 'text' : 'no-drop'}">
+                        disabled [value]="selectedProduct?.codeProduit" style="cursor: no-drop;">
                     <label for="codeProduit" class="label">Code produit</label>
                   </div>
 
@@ -518,7 +516,8 @@
             </div>
           
             <div class="roudel_img" (click)="openImage(urllink)">
-              <img class="roudel" [src]="urllink" alt="Aperçu de l'image">
+              <!-- <img class="roudel" [src]="urllink" alt="Aperçu de l'image"> -->
+              <img class="roudel" [src]="newPhotoUrl ? newPhotoUrl : (selectedProduct?.photo ?? urllink)" alt="Aperçu de l'image">
             </div>
           </div>
           
@@ -618,4 +617,3 @@
     
   </div>
 </div>
-
