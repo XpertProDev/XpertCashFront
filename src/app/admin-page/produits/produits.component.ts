@@ -48,6 +48,7 @@ export class ProduitsComponent implements OnInit {
 
 
   ajouteProduitForm!: FormGroup;
+  modifierProduitForm!: FormGroup;
   ajouteCategoryForm!: FormGroup;
   errorMessage: string = '';
   errorMessageCategory: string = '';
@@ -67,7 +68,6 @@ export class ProduitsComponent implements OnInit {
   adresseEntreprise: string = '';
   logoEntreprise: string =''
 
-
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
@@ -75,7 +75,6 @@ export class ProduitsComponent implements OnInit {
         private router: Router,
         private usersService: UsersService,
   ) {}
-
 
   // Mise en évidence du texte recherché dans le tableau
   highlightMatch(text: string): string {
@@ -96,8 +95,6 @@ export class ProduitsComponent implements OnInit {
     const startIndex = this.currentPage * this.pageSize;
     return filtered.slice(startIndex, startIndex + this.pageSize);
   }
-  
-  
 
   // Gestion du dropdown d'export
   showExportDropdown = false;
@@ -131,9 +128,6 @@ export class ProduitsComponent implements OnInit {
     });
   }
   
-  
-  
-
   // Méthodes pour télécharger en Excel, PDF et CSV
   downloadExcel() {
     const worksheet = XLSX.utils.json_to_sheet(this.tasks);
@@ -243,8 +237,6 @@ export class ProduitsComponent implements OnInit {
     link.click();
   }
 
-  
-
   // Gestion du popup d'ajout de produit
   //showPopup: boolean = false;
   openPopup() {
@@ -340,6 +332,19 @@ export class ProduitsComponent implements OnInit {
       codebar: ['', [Validators.minLength(8), Validators.maxLength(18)]]
       // codebar: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(14)]],
     });
+
+    this.modifierProduitForm = this.fb.group({
+      nomProduit: ['', Validators.required],
+      description: ['', Validators.required],
+      prix: ['', [Validators.required]],
+      prixAchat: ['', Validators.required],
+      photo: ['', Validators.required],
+      quantite: ['', Validators.required],
+      alertSeuil: ['', Validators.required],
+      uniteMesure: ['', Validators.required],
+      category: ['', Validators.required],
+      codebar: ['', [Validators.minLength(8), Validators.maxLength(18)]]
+    })
   
     // Formulaire pour ajouter une catégorie
     this.ajouteCategoryForm = this.fb.group({
@@ -623,6 +628,7 @@ export class ProduitsComponent implements OnInit {
   // Getter pour faciliter l'accès aux contrôles dans le template
   get f() { return this.ajouteProduitForm.controls; }
   get c() { return this.ajouteCategoryForm.controls; }
+  get m() { return this.modifierProduitForm.controls; }
 
   openImage(imageUrl: string): void {
     this.imagePopup = imageUrl;
@@ -669,16 +675,31 @@ export class ProduitsComponent implements OnInit {
   // Contrôle de l'affichage du pop-up
   showProductDetail: boolean = false;
   selectedProduct: any = null;
-  isEditing: boolean = false;
+  // isEditing: boolean = false;
     
   openProductDetail(productId: string) {
     // Rechercher le produit dans la liste
     this.selectedProduct = this.tasks.find(task => task.codeProduit === productId);
+  
     if (this.selectedProduct) {
       this.showProductDetail = true;
-      this.isEditing = false;
+  
+      // Mettre à jour le formulaire avec les infos du produit sélectionné
+      this.modifierProduitForm.patchValue({
+        nomProduit: this.selectedProduct.nomProduit,
+        prix: this.selectedProduct.prix,
+        nomCategory: this.selectedProduct.category.nomCategory,
+        prixAchat: this.selectedProduct.prixAchat,
+        quantite: this.selectedProduct.quantite,
+        alertSeuil: this.selectedProduct.alertSeuil,
+        uniteMesure: this.selectedProduct.uniteMesure.nomUnite,
+        codeProduit: this.selectedProduct.codeProduit,
+        codebar: this.selectedProduct.codebar,
+        description: this.selectedProduct.description,
+      });
     }
   }
+  
 
   // Méthode pour fermer le pop-up
   closeProductDetail() {
@@ -689,15 +710,15 @@ export class ProduitsComponent implements OnInit {
   }
 
   // Méthode pour activer l'édition
-  toggleEditMode() {
-    this.isEditing = !this.isEditing;
-    this.newPhotoUrl = null;
-    this.selectedFile = null;
-  }
+  // toggleEditMode() {
+  //   this.isEditing = !this.isEditing;
+  //   this.newPhotoUrl = null;
+  //   this.selectedFile = null;
+  // }
 
-  saveChanges() {
-    //console.log("Produit modifié :", this.selectedProduct);
-    this.isEditing = false; 
-  }
+  // saveChanges() {
+  //   //console.log("Produit modifié :", this.selectedProduct);
+  //   this.isEditing = false; 
+  // }
 
 }
