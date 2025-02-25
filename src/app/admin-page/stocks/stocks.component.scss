@@ -511,3 +511,37 @@ tr:hover {
     font-weight: bold;
     margin-top: 10px;
   }
+
+/* Produit expirant bientôt (<= 5 jours) */
+.expiring-soon {
+  color: #f1940f;
+}
+
+/* Produit expirant aujourd’hui : clignote */
+.expiring-today {
+  color: red;
+  animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* Produit expirant demain : secoue */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+}
+
+.shake {
+  animation: shake 0.2s ease-in-out infinite;
+}
+
+/* Produit expiré : texte grisé */
+.expired {
+  color: red;
+  font-style: italic;
+  opacity: 0.7;
+}
