@@ -41,6 +41,9 @@ import { UsersService } from '../SERVICES/users.service';
   styleUrls: ['./produits.component.scss']
 })
 export class ProduitsComponent implements OnInit {
+
+  backendUrl: string = 'http://localhost:8080';
+
   // Recherche et affichage des produits
   searchText: string = '';
   // Liste des produits récupérés depuis le backend
@@ -83,18 +86,19 @@ export class ProduitsComponent implements OnInit {
     return text.replace(regex, '<strong>$1</strong>');
   }
 
-  filteredTasks(): any[] {
-    const sortedTasks = [...this.tasks] // Copie du tableau pour éviter de modifier l'original
+  filteredProducts(): any[] {
+    const sortedProducts = [...this.tasks] // Copie pour éviter de modifier l'original
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  
-    const filtered = sortedTasks.filter(task => 
-      task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
+
+    const filtered = sortedProducts.filter(product => 
+      product.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      product.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
     );
-  
+
     const startIndex = this.currentPage * this.pageSize;
     return filtered.slice(startIndex, startIndex + this.pageSize);
   }
+  
 
   // Gestion du dropdown d'export
   showExportDropdown = false;
@@ -338,11 +342,11 @@ export class ProduitsComponent implements OnInit {
       description: ['', Validators.required],
       prix: ['', [Validators.required]],
       prixAchat: ['', Validators.required],
-      photo: ['', Validators.required],
+      photo: [''],
       quantite: ['', Validators.required],
       alertSeuil: ['', Validators.required],
       uniteMesure: ['', Validators.required],
-      category: ['', Validators.required],
+      category: [''],
       codebar: ['', [Validators.minLength(8), Validators.maxLength(18)]]
     })
   
@@ -642,7 +646,7 @@ export class ProduitsComponent implements OnInit {
 
     urllink: string = "assets/img/appareil.jpg";
     newPhotoUrl: string | null = null;
-    selectedFile: File | null = null;
+    selectedFile: File | null | undefined = null;
 
     onFileSelected(event: Event): void {
       const input = event.target as HTMLInputElement;
@@ -677,27 +681,27 @@ export class ProduitsComponent implements OnInit {
   selectedProduct: any = null;
   // isEditing: boolean = false;
     
-  openProductDetail(productId: string) {
-    // Rechercher le produit dans la liste
-    this.selectedProduct = this.tasks.find(task => task.codeProduit === productId);
-  
-    if (this.selectedProduct) {
-      this.showProductDetail = true;
-  
-      // Mettre à jour le formulaire avec les infos du produit sélectionné
-      this.modifierProduitForm.patchValue({
-        nomProduit: this.selectedProduct.nomProduit,
-        prix: this.selectedProduct.prix,
-        nomCategory: this.selectedProduct.category.nomCategory,
-        prixAchat: this.selectedProduct.prixAchat,
-        quantite: this.selectedProduct.quantite,
-        alertSeuil: this.selectedProduct.alertSeuil,
-        uniteMesure: this.selectedProduct.uniteMesure.nomUnite,
-        codeProduit: this.selectedProduct.codeProduit,
-        codebar: this.selectedProduct.codebar,
-        description: this.selectedProduct.description,
-      });
-    }
+  openProductDetail(productId: number) {
+    this.produitService.getProduitById(productId).subscribe(
+      (product: Produit) => {
+        this.selectedProduct = product;
+        this.showProductDetail = true;
+        this.modifierProduitForm.patchValue({
+          nomProduit: product.nomProduit,
+          description: product.description,
+          prix: product.prix,
+          prixAchat: product.prixAchat,
+          quantite: product.quantite,
+          alertSeuil: product.alertSeuil,
+          uniteMesure: product.uniteMesure?.nomUnite,
+          codebar: product.codebar,
+          photo: product.photo
+        });
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération du détail du produit', error);
+      }
+    );
   }
   
 
@@ -709,6 +713,28 @@ export class ProduitsComponent implements OnInit {
     this.selectedFile = null;
   }
 
+  submitUpdateForm(): void {
+
+  }
+  
+  
+  showSuccessPopup(message: string) {
+    this.popupType = "success";
+    this.popupTitle = "Succès";
+    this.popupMessage = message;
+    this.popupImage = "assets/img/succcccc.png";
+    this.showPopup2 = true;
+  }
+  
+  showErrorPopup(message: string) {
+    this.popupType = "error";
+    this.popupTitle = "Erreur";
+    this.popupMessage = message;
+    this.popupImage = "assets/img/error.png";
+    this.showPopup2 = true;
+  }
+  
+}
   // Méthode pour activer l'édition
   // toggleEditMode() {
   //   this.isEditing = !this.isEditing;
@@ -721,4 +747,43 @@ export class ProduitsComponent implements OnInit {
   //   this.isEditing = false; 
   // }
 
-}
+    // submitUpdateForm()
+  // submitUpdateForm(): void {
+  //   if (this.modifierProduitForm.invalid) {
+  //     this.errorMessage = "Veuillez remplir tous les champs obligatoires.";
+  //     return;
+  //   }
+  
+  //   // Récupérer les valeurs du formulaire
+  //   const formValues = this.modifierProduitForm.getRawValue();
+  
+  //   // Construire l'objet produit à envoyer
+  //   // On conserve la catégorie existante (this.selectedProduct.category)
+  //   const produitModifie: Produit = {
+  //     ...this.selectedProduct, // On garde l'objet complet existant, notamment category
+  //     ...formValues,
+  //     // Forcer la catégorie à ne pas être modifiée
+  //     // category: this.selectedProduct.category,
+  //     // Pour l'unité de mesure, si nécessaire, on la transforme en objet
+  //     // uniteMesure: typeof formValues.uniteMesure === 'string'
+  //     //   ? { nomUnite: formValues.uniteMesure }
+  //     //   : formValues.uniteMesure
+  //   };
+  
+  //   console.log("Données envoyées:", produitModifie);
+  
+  //   this.produitService.modifierProduit(produitModifie, this.selectedFil).subscribe(
+  //     (updatedProduct) => {
+  //       const index = this.tasks.findIndex(p => p.id === updatedProduct.id);
+  //       if (index !== -1) {
+  //         this.tasks[index] = updatedProduct;
+  //       }
+  //       this.closeProductDetail();
+  //       this.showSuccessPopup("Le produit a été modifié avec succès.");
+  //     },
+  //     (error) => {
+  //       this.showErrorPopup("Erreur lors de la modification du produit. Veuillez réessayer.");
+  //       console.error("Erreur modification produit:", error);
+  //     }
+  //   );
+  // }

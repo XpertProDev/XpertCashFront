@@ -37,4 +37,27 @@ export class ProduitService {
 
     return this.http.get<Produit[]>(`${this.apiUrl}/entreprise/produits`, { headers });
   }
+
+  modifierProduit(produit: Produit, file: File): Observable<Produit> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    const formData: FormData = new FormData();
+    // On stringify l'objet produit pour l'envoyer en tant que chaîne JSON
+    formData.append('produit', JSON.stringify(produit));
+    formData.append('photo', file, file.name);
+
+    return this.http.patch<Produit>(`${this.apiUrl}/update/produit/${produit.id}`, formData, { headers });
+  }
+
+  // Nouvelle méthode pour récupérer les détails d'un produit par son ID
+  getProduitById(productId: number): Observable<Produit> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return this.http.get<Produit>(`${this.apiUrl}/produits/${productId}`, { headers });
+  }
+  
+  
 }
