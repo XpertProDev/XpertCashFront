@@ -42,6 +42,10 @@ import { UsersService } from '../SERVICES/users.service';
 })
 export class ProduitsComponent implements OnInit {
 
+  goToAddProduit() {
+    this.router.navigate(['/addProduit']);
+  }
+
   backendUrl: string = 'http://localhost:8080';
 
   // Recherche et affichage des produits
@@ -340,15 +344,14 @@ export class ProduitsComponent implements OnInit {
     this.modifierProduitForm = this.fb.group({
       nomProduit: ['', Validators.required],
       description: ['', Validators.required],
-      prix: ['', [Validators.required]],
-      prixAchat: ['', Validators.required],
-      photo: [''],
-      quantite: ['', Validators.required],
-      alertSeuil: ['', Validators.required],
+      prix: ['', [Validators.required, Validators.min(0)]],
+      prixAchat: ['', [Validators.required, Validators.min(0)]],
+      quantite: ['', [Validators.required, Validators.min(0)]],
+      alertSeuil: ['', [Validators.required, Validators.min(0)]],
       uniteMesure: ['', Validators.required],
-      category: [''],
+      category: ['', Validators.required],
       codebar: ['', [Validators.minLength(8), Validators.maxLength(18)]]
-    })
+    });
   
     // Formulaire pour ajouter une catégorie
     this.ajouteCategoryForm = this.fb.group({
@@ -642,39 +645,24 @@ export class ProduitsComponent implements OnInit {
     this.imagePopup = null;
   }
 
-    // Côte de mon image pour que l'utilisateur ajouter une photo
+  // Côte de mon image pour que l'utilisateur ajouter une photo
 
-    urllink: string = "assets/img/appareil.jpg";
-    newPhotoUrl: string | null = null;
-    selectedFile: File | null | undefined = null;
+  urllink: string = "assets/img/appareil.jpg";
+  newPhotoUrl: string | null = null;
+  selectedFile: File | null | undefined = null;
 
-    onFileSelected(event: Event): void {
-      const input = event.target as HTMLInputElement;
-      if (input.files && input.files.length > 0) {
-        this.selectedFile = input.files[0];
-    
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.newPhotoUrl = e.target?.result as string;
-        };
-        reader.readAsDataURL(this.selectedFile);
-      }
-    }    
-    
-    // onFileSelected(event: Event): void {
-    //   const input = event.target as HTMLInputElement;
-    //   if (input.files && input.files.length > 0) {
-    //     this.selectedFile = input.files[0];
-    
-    //     const reader = new FileReader();
-    //     reader.onload = (e) => {
-    //       this.newPhotoUrl = e.target?.result as string;
-    //     };
-    //     reader.readAsDataURL(this.selectedFile);
-    //   }
-    // }
-    
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
   
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newPhotoUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(this.selectedFile);
+    }
+  }    
 
   // Contrôle de l'affichage du pop-up
   showProductDetail: boolean = false;
@@ -695,7 +683,8 @@ export class ProduitsComponent implements OnInit {
           alertSeuil: product.alertSeuil,
           uniteMesure: product.uniteMesure?.nomUnite,
           codebar: product.codebar,
-          photo: product.photo
+          category: product.category?.nomCategory,
+          codeProduit: product.codeProduit
         });
       },
       (error) => {
@@ -704,7 +693,7 @@ export class ProduitsComponent implements OnInit {
     );
   }
   
-
+  
   // Méthode pour fermer le pop-up
   closeProductDetail() {
     this.showProductDetail = false;
@@ -714,8 +703,44 @@ export class ProduitsComponent implements OnInit {
   }
 
   submitUpdateForm(): void {
-
+    if (this.modifierProduitForm.valid && this.selectedProduct) {
+      // Exclure le champ createdAt pour laisser le backend définir la date de modification
+      const { createdAt, ...baseProduit } = this.selectedProduct;
+      
+      const updatedProduct: Produit = {
+        ...baseProduit, // reprend les autres données existantes
+        // Mise à jour des champs modifiables à partir du formulaire
+        nomProduit: this.modifierProduitForm.value.nomProduit,
+        description: this.modifierProduitForm.value.description,
+        prix: this.modifierProduitForm.value.prix,
+        prixAchat: this.modifierProduitForm.value.prixAchat,
+        quantite: this.modifierProduitForm.value.quantite,
+        alertSeuil: this.modifierProduitForm.value.alertSeuil,
+        // Reconstruction de l'unité de mesure en fonction du format attendu par le backend
+        uniteMesure: { nomUnite: this.modifierProduitForm.value.uniteMesure },
+        codebar: this.modifierProduitForm.value.codebar,
+        // Modification autorisée pour la catégorie et le codeProduit
+        category: { nomCategory: this.modifierProduitForm.value.category },
+        codeProduit: this.modifierProduitForm.value.codeProduit,
+        // Pour la photo, on garde l'actuelle; elle sera mise à jour via le FormData si un nouveau fichier est sélectionné
+        photo: this.selectedProduct.photo
+      };
+  
+      this.produitService.modifierProduit(updatedProduct, this.selectedFile!).subscribe(
+        (res: Produit) => {
+          this.selectedProduct = res;
+          this.closeProductDetail();
+          // Optionnel : afficher une notification de succès
+        },
+        (error) => {
+          this.errorMessage = error.error.error || "Erreur lors de la modification du produit.";
+        }
+      );
+    } else {
+      this.modifierProduitForm.markAllAsTouched();
+    }
   }
+  
   
   
   showSuccessPopup(message: string) {
@@ -787,3 +812,19 @@ export class ProduitsComponent implements OnInit {
   //     }
   //   );
   // }
+
+
+
+    // onFileSelected(event: Event): void {
+    //   const input = event.target as HTMLInputElement;
+    //   if (input.files && input.files.length > 0) {
+    //     this.selectedFile = input.files[0];
+    
+    //     const reader = new FileReader();
+    //     reader.onload = (e) => {
+    //       this.newPhotoUrl = e.target?.result as string;
+    //     };
+    //     reader.readAsDataURL(this.selectedFile);
+    //   }
+    // }
+    

@@ -1,0 +1,389 @@
+.content_formulaire {
+  display: flex;
+}
+
+// .formulaire {
+//   width: 100px;
+//   height: 200px;
+//   background-color: black;
+// }
+
+.modal-body {
+  // background-color: antiquewhite;
+  margin-right: 30px;
+}
+
+/* formulaire */
+
+.champ_input {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+.formulaire {
+  position: relative;
+}
+
+.Title h3 {
+  font-size: 18px;
+}
+
+.input_focus {
+  width: 100%;
+  min-width: 250px;
+  height: 49px;
+  outline: none;
+  border-bottom: 1px solid rgb(53, 50, 50);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  margin: 10px 0 0;
+  transition: all 0.3s;
+  font-size: 14px;
+  //padding-left: 10px;
+  background: none;
+  color: #695c5c;
+}
+
+.champ_input .label {
+  position: absolute;
+  top: 22px;
+  left: 4px;
+  pointer-events: none;
+  color: rgb(107, 102, 102);
+}
+
+.input_focus:hover {
+  border-bottom: 1px solid #0672E4;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+
+.input_focus:not(:placeholder-shown) + .label,
+.input_focus:focus + .label {
+  color: #0672E4;
+  top: 0;
+  left: 0;
+  transition: all 0.3s ease-in-out;
+  background: none;
+  font-size: 11px;
+  padding: 0;
+}
+
+.input_focus::placeholder {
+  opacity: 0;
+}
+
+.input_focus:focus::placeholder {
+  opacity: 1;
+  animation-delay: 1s;
+  font-size: 15px;
+  transition: all 0.2s ease-in-out;
+}
+
+.input_focus2 {
+  width: 100%;
+  min-width: 250px;
+  height: 70px;
+  outline: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  margin: 10px 0 0;
+  transition: all 0.3s;
+  font-size: 14px;
+  padding-left: 10px;
+  background: none;
+  color: #777474;
+  border-radius: 5px;
+  padding-top: 10px;
+  border-bottom: 1px solid rgb(53, 50, 50);
+}
+
+.input_focus2:hover {
+  border-bottom: 1px solid #0672E4;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.champ_input2 .label {
+  position: absolute;
+  top: 22px;
+  left: 15px;
+  pointer-events: none;
+  color: rgb(66, 56, 56);
+}
+
+.input_focus2:not(:placeholder-shown) + .label,
+.input_focus2:focus + .label {
+  color: #0672E4;
+  top: 0;
+  left: 0;
+  transition: all 0.3s ease-in-out;
+  background: none;
+  font-size: 11px;
+  padding: 0;
+}
+
+.input_focus2::placeholder {
+  opacity: 0;
+}
+
+.input_focus2:focus::placeholder {
+  opacity: 1;
+  animation-delay: 1s;
+  font-size: 15px;
+  transition: all 0.2s ease-in-out;
+}
+
+.info_titre_input {
+  padding: 20px; 
+}
+
+.info_titre_input h4 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  letter-spacing: 0.60px;
+}
+
+// <!-- Les information des magasin  -->
+.information_cadre {
+  width: 100%;
+  height: auto;
+  background-color: #fff;
+  box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.108);
+  border-radius: 5px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.input_focus_magasin {
+  width: 100%;
+  //min-width: 100px!important;
+}
+
+.input_focus_petit {
+  width: 50%;
+}
+
+// .champ_input_margin {
+//   margin-left: 20px;
+// }
+
+.double_input {
+  display: flex; 
+  align-items: center;
+  gap: 20px;
+}
+
+
+
+.champ_input2 {
+  display: inline-block;
+  width: 50%;
+  box-sizing: border-box;
+  vertical-align: top;
+}
+
+
+// .input_focus_large{
+//   //min-width: 380px;
+//   width: 100%;
+// }
+
+
+.champ_input_inventaire {
+  display: flex; 
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+
+}
+
+.champ_input_inventaire p {
+  margin: 0;
+}
+
+// Toggle 
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+/* Masquer l'input checkbox original */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Le « slider » */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px; 
+  width: 18px;
+  left: 3px; 
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+/* Quand le checkbox est coché */
+input:checked + .slider {
+  background-color: #0672E4; /* Couleur au choix */
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* From Uiverse.io by Yaya12085 */ 
+.container_file {
+  // height: 150px;
+  width: 150px;
+  border-radius: 10px;
+  box-shadow: 4px 4px 30px rgba(0, 0, 0, .2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  gap: 5px;
+  background-color: rgba(0, 110, 255, 0.041);
+  margin-bottom: 10px;
+  margin-top: 20px;
+}
+
+.header_file {
+  // flex: 1;
+  height: 140px;
+  width: 140px;
+  border: 1px dashed #0671e49d;
+  border-radius: 10px;
+  flex-direction: column;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.header_file img{
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 0.2s;
+}
+
+.header_file svg {
+  height: 100px;
+}
+
+.header_file p {
+  text-align: center;
+  color: black;
+}
+
+.footer_file {
+  background-color: rgba(0, 110, 255, 0.075);
+  width: 140px;
+  height: 35px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  // justify-content: flex-end;
+  color: black;
+  border: none;
+  margin-top: 3px;
+}
+
+.footer_file p {
+  margin: 0!important;
+  font-size: 10px;
+}
+
+.footer_file i {
+  font-size: 16px;
+  margin-right: 7px;
+}
+
+#file {
+  display: none;
+}
+
+.header_file img {
+  width: 100%;
+  height: 100%;
+}
+
+.info_titre_input_btn {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 20px;
+}
+
+// button annuler
+.btn_annuler .btn_cancel {
+  padding: 8px 30px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff0000;
+  color: #fff;
+}
+
+// button annuler hover
+.btn_annuler .btn_cancel:hover {
+  background-color: #d80101;
+  transition: all ease-in .5s;
+}
+
+// button ajouter 
+.btn_ajouter .btn_save {
+  padding: 8px 30px;
+  border: none;
+  border-radius: 5px;
+  background-color: #0672E4;
+  color: #fff;
+}
+
+// button ajouter hover
+.btn_ajouter .btn_save:hover {
+  background-color: #0863c5;
+  transition: all .5s;
+}
+
+
+
+///////////////// PARTIR LEFT
+
+
+.ajout_bool_form {
+  //width: 100%;
+  width: 250px;
+  height: 400px;
+  background-color: #fff;
+  margin-top: 40px;
+  border-radius: 5px;
+  box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.108);
+}
+
