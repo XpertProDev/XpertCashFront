@@ -48,10 +48,31 @@
                 </div>
 
                 <!-- Input de categorie  -->
-                <div class="champ_input">
+                <!-- <div class="champ_input">
                   <input type="text" class="input_focus " required id="category" name="category" placeholder="Saisis le nom de categorie">
                   <label for="category" class="label labelColor">Catégorie (Facultatif)</label>
+                </div> -->
+
+                <div class="double_input2">
+                  <div class="champ_input">
+                    <input type="text" placeholder="Saisis le nom de catégorie" 
+                           class="input_focus" style="cursor: pointer;"
+                           matInput [formControl]="myControl" 
+                           [matAutocomplete]="auto">
+                    <label for="category" class="label labelCategory">Categorie</label>
+                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategorySelected($event)">
+                      <mat-option *ngFor="let option of filteredOptions | async" [value]="option.name">
+                        {{ option.name }}
+                      </mat-option>                      
+                    </mat-autocomplete>
+                  </div>
+                
+                  <div class="btn_add_categoryDiv2">
+                    <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer</button>
+                  </div>
                 </div>
+                
+
 
                 <div class="double_input">
                   <!-- Input de prixAchat  -->
@@ -75,11 +96,30 @@
                   </div>
 
                   <!-- Input de Unité de mesure  -->
-                  <div class="champ_input champ_input2">
+                  <!-- <div class="champ_input champ_input2">
                     <input type="text" class="input_focus " required id="unite" name="unite" placeholder="Saisis l'unité de mesure'">
                     <label for="unite" class="label labelColor">Unité de mesure</label>
+                  </div> -->
+
+                </div>
+
+                <div class="double_input2">
+                  <div class="champ_input">
+                    <input type="text" placeholder="Saisis l'unité de mesure" 
+                           matInput [formControl]="UniterControl" class="input_focus"
+                           [matAutocomplete]="autoUnite" style="cursor: pointer;">
+                    <label for="category" class="label labelCategory">Unité de mesure</label>
+                    <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete">
+                      <mat-option *ngFor="let optionNomUnite of filteredNomUnite | async" [value]="optionNomUnite">
+                        {{ optionNomUnite }}
+                      </mat-option>
+                    </mat-autocomplete>
+                  </div>
+                  <div class="btn_add_categoryDiv2">
+                    <button class="btn_add_category2" (click)="onCreateUniteClick()">Créer</button>
                   </div>
                 </div>
+                
               </div>
             </div>
             
@@ -105,20 +145,19 @@
             <!-- Les information des produit Inventaire  -->
             <div class="information_cadre">
               <div class="info_titre_input">
-              <h4>Inventaire</h4>
+                <h4>Inventaire</h4>
 
-              <!-- Input de produits inventaire -->
-              <div class="champ_input_inventaire">
-                <p>Ajouter dans les stocks</p>
+                <!-- Input de produits inventaire -->
+                <div class="champ_input_inventaire">
+                  <p>Ajouter dans les stocks</p>
 
-                <label class="switch">
-                  <input type="checkbox" [(ngModel)]="isChecked" (change)="onToggleChange($event)" />
-                  <span class="slider round"></span>
-                </label>
-                
-              </div>
-                
-              </div>
+                  <label class="switch">
+                    <input type="checkbox" [(ngModel)]="isChecked" (change)="onToggleChange($event)" [ngModelOptions]="{standalone: true}"/>
+                    <span class="slider round"></span>
+                  </label>
+                  
+                </div>
+              </div>    
             </div>
             
             <!-- Les information des produit Photo  -->
@@ -171,11 +210,47 @@
     </div>
 
     <!-- Cadre ou on cree  -->
-     <div class="ajout_bool_form">
+    <div class="ajout_bool_form">
 
-     </div>
+      <!-- Pour cree un category -->
+      <div *ngIf="showCategoryCreation" class="info_titre_input ajouter_cadre_cree_c_u">
+        <h4>Créer un catégorie</h4>
+        <!-- Input de nom de catégorie -->
+        <div class="champ_input" style="margin-top: 15px;">
+          <input type="text" class="input_focus input_focus_cree_cate" required id="creatCategory" name="nomCategory" placeholder="Saisis le nom de catégorie">
+          <label for="nomCategory" class="label labelColor">Nom catégorie</label>
+        </div>
+        <div class="btn-c-s">
+          <!-- Bouton Annuler -->
+          <div class="btn_cancel_category">
+            <button class="btn_c_category" (click)="cancelCategoryCreation()">Annuler</button>
+          </div>
+          <!-- Bouton Ajouter -->
+          <div class="btn_save_category">
+            <button class="btn_s_category">Ajouter</button>
+          </div>
+        </div>
+      </div>
+      
 
-  </div>
+     <!-- Pour cree un category -->
+     <div *ngIf="showUniteCreation" class="info_titre_input ajouter_cadre_cree_c_u">
+      <h4>Créer un unité</h4>
+      <div class="champ_input" style="margin-top: 15px;">
+        <input type="text" class="input_focus input_focus_cree_cate" required id="creatUnite" name="creatUnite" placeholder="Saisis le nom de unité">
+        <label for="creatUnite" class="label labelColor">Nom unité</label>
+      </div>
+      <div class="btn-c-s">
+        <div class="btn_cancel_category">
+          <button class="btn_c_category" (click)="cancelUniteCreation()">Annuler</button>
+        </div>
+        <div class="btn_save_category">
+          <button class="btn_s_category">Ajouter</button>
+        </div>
+      </div>
+    </div>    
+
+    </div>
 
 </div>
 

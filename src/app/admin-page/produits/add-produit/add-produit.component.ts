@@ -1,11 +1,29 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, HostListener } from '@angular/core';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { map, Observable, of, startWith } from 'rxjs';
+
+export interface CategorySelect {
+  name: string;
+}
+
+export interface UniteSelect {
+  name: string;
+}
 
 @Component({
   selector: 'app-add-produit',
   standalone: true,
   imports: [
     FormsModule,
+    CommonModule,
+    ReactiveFormsModule,
+    MatAutocompleteModule,
+    MatFormFieldModule,
+    MatInputModule
   ],
   templateUrl: './add-produit.component.html',
   styleUrl: './add-produit.component.scss'
@@ -38,4 +56,89 @@ export class AddProduitComponent {
     }
   }   
 
+
+  //////// FOCUS CATEGORUY
+  
+  myControl = new FormControl();
+  uniteControl = new FormControl();
+  // Categorie
+  options: CategorySelect[] = [
+    {name: 'Cate 1'},
+    {name: 'Cate 2'},
+    {name: 'Cate 3'}
+  ];
+  // unite
+
+  filteredOptions: Observable<CategorySelect[]> = of([]);
+
+  ngOnInit() {
+    // 🟢 Filtrage des catégories (OK)
+    this.filteredOptions = this.myControl.valueChanges.pipe(
+      startWith<string | CategorySelect>(''),
+      map(value => (typeof value === 'string' ? value : value.name)),
+      map(name => (name ? this._filter(name) : this.options.slice()))
+    );
+
+    // Filtrage des unités 
+    this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterUnite(value))
+    );
+  }
+  
+
+  // POUR CATEGORY
+   // Lorsqu'une catégorie est sélectionnée dans l'autocomplete
+   onCategorySelected(event: any): void {
+    const selectedCategory = event.option.value;
+    // this.produit.category = selectedCategory;
+  }
+
+  displayFn(acte?: CategorySelect): string {
+    return acte ? acte.name : '';
+  }  
+
+  private _filter(name: string): CategorySelect[] {
+    const filterValue = name.toLowerCase();
+
+    return this.options.filter(option => option.name.toLowerCase().indexOf(filterValue) === 0);
+  }
+
+  // POUR UNITE
+  UniterControl = new FormControl();
+  nomUnite: string[] = ['One', 'Two', 'Three'];
+  filteredNomUnite: Observable<string[]> = of([]);
+
+  private _filterUnite(value: string): string[] {
+    const filterValue = value.toLowerCase();
+
+    return this.nomUnite.filter(optionNomUnite => optionNomUnite.toLowerCase().indexOf(filterValue) === 0);
+  }
+
+
+
+
+  showCategoryCreation: boolean = false;
+  showUniteCreation: boolean = false;
+
+  // Lorsque l'utilisateur clique sur "Créer" pour une catégorie
+  onCreateCategoryClick() {
+    this.showCategoryCreation = true;
+    this.showUniteCreation = false; // Facultatif si vous ne voulez afficher qu'un seul formulaire à la fois
+  }
+
+  // Lorsque l'utilisateur clique sur "Créer" pour une unité
+  onCreateUniteClick() {
+    this.showUniteCreation = true;
+    this.showCategoryCreation = false;
+  }
+
+  // Méthodes pour annuler la création
+  cancelCategoryCreation() {
+    this.showCategoryCreation = false;
+  }
+
+  cancelUniteCreation() {
+    this.showUniteCreation = false;
+  }
 }
