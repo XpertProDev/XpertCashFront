@@ -34,7 +34,7 @@ import { UsersService } from '../SERVICES/users.service';
     MatFormFieldModule, 
     MatAutocompleteModule,
     MatInputModule,
-    AsyncPipe,
+    // AsyncPipe,
     MatPaginatorModule,
   ],
   templateUrl: './produits.component.html',
@@ -379,13 +379,13 @@ export class ProduitsComponent implements OnInit {
     let filterValue: string;
     if (typeof value === 'string') {
       filterValue = value.toLowerCase().replace(/\s/g, '');
-    } else if (value && typeof value === 'object' && value.nomCategory) {
-      filterValue = value.nomCategory.toLowerCase().replace(/\s/g, '');
+    } else if (value && typeof value === 'object' && value.nom) {
+      filterValue = value.nom.toLowerCase().replace(/\s/g, '');
     } else {
       filterValue = '';
     }
     return this.categories.filter(category =>
-      category.nomCategory.toLowerCase().replace(/\s/g, '').includes(filterValue)
+      category.nom.toLowerCase().replace(/\s/g, '').includes(filterValue)
     );
   }
 
@@ -397,7 +397,7 @@ export class ProduitsComponent implements OnInit {
 
   // Fonction d'affichage pour l'autocomplete
   displayFn(category: Categorie): string {
-    return category ? category.nomCategory : '';
+    return category ? category.nom : '';
   }
 
   dataSource = new MatTableDataSource<any>(); // Gère les données avec pagination
@@ -591,7 +591,7 @@ export class ProduitsComponent implements OnInit {
       return;
     }
   
-    const categoryData = { nomCategory: this.ajouteCategoryForm.value.categoryName };
+    const categoryData = { nom: this.ajouteCategoryForm.value.categoryName };
   
     this.categorieService.ajouterCategorie(categoryData).subscribe({
       next: (response: any) => {

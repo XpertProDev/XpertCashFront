@@ -6,6 +6,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { map, Observable, of, startWith } from 'rxjs';
 import { SharedDataService } from '../../SERVICES/shared-data.service';
+import { CategorieService } from '../../SERVICES/categorie.service';
+import { Categorie } from '../../MODELS/categorie.model';
+import { UniteMesure } from '../../MODELS/unite.model';
+import { UniteMesureService } from '../../SERVICES/unite.service';
 
 export interface CategorySelect {
   name: string;
@@ -33,7 +37,11 @@ export class AddProduitComponent {
   isChecked = false;
   boutiqueName: string = '';
 
-  constructor(private sharedDataService: SharedDataService) {}
+  constructor(
+    private sharedDataService: SharedDataService,
+    private categorieService: CategorieService,
+    private uniteMesureService: UniteMesureService,
+  ) {}
 
   onToggleChange(event: Event) {
     // event.target permet d’accéder au checkbox
@@ -60,20 +68,24 @@ export class AddProduitComponent {
     }
   }   
 
-
   //////// FOCUS CATEGORUY
   
   myControl = new FormControl();
   uniteControl = new FormControl();
   // Categorie
-  options: CategorySelect[] = [
-    {name: 'Cate 1'},
-    {name: 'Cate 2'},
-    {name: 'Cate 3'}
-  ];
+  // options: CategorySelect[] = [
+  //   {name: 'Cate 1'},
+  //   {name: 'Cate 2'},
+  //   {name: 'Cate 3'}
+  // ];
   // unite
 
-  filteredOptions: Observable<CategorySelect[]> = of([]);
+  options: Categorie[] = []; // Liste des catégories récupérées
+  optionsUnite: UniteMesure[] = []; // Liste des unites récupérées
+  filteredOptions: Observable<Categorie[]> = of([]);
+  filteredNomUnite: Observable<UniteMesure[]> = of([]);
+
+  // filteredOptions: Observable<CategorySelect[]> = of([]);
 
   ngOnInit(): void  {
 
@@ -84,17 +96,50 @@ export class AddProduitComponent {
     });
 
     // 🟢 Filtrage des catégories (OK)
-    this.filteredOptions = this.myControl.valueChanges.pipe(
-      startWith<string | CategorySelect>(''),
-      map(value => (typeof value === 'string' ? value : value.name)),
-      map(name => (name ? this._filter(name) : this.options.slice()))
+    const token = localStorage.getItem('authToken'); // ou via un service d'authentification
+  if (token) {
+    this.categorieService.getCategories(token).subscribe(
+      (categories) => {
+        console.log('Catégories reçues depuis l\'API :', categories); // Debug ici
+        this.options = categories;
+        this.filteredOptions = this.myControl.valueChanges.pipe(
+          startWith<string | Categorie>(''),
+          map(value => (typeof value === 'string' ? value : value.nom)),
+          map(name => (name ? this._filter(name) : this.options.slice()))
+        );
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des catégories :', error);
+      }
     );
+  } else {
+    console.error('Aucun token trouvé !');
+  }
+
+  if (token) {
+    this.uniteMesureService.getUniteMesure(token).subscribe(
+      (uniteMesures) => {
+        console.log('Unité de mesure reçues depuis l\'API :', uniteMesures); // Debug ici
+        this.optionsUnite = uniteMesures;
+        this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
+          startWith<string | UniteMesure>(''),
+          map(value => (typeof value === 'string' ? value : value.nom)),
+          map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
+        );
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des catégories :', error);
+      }
+    );
+  } else {
+    console.error('Aucun token trouvé !');
+  }
 
     // Filtrage des unités 
-    this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
-      startWith(''),
-      map(value => this._filterUnite(value))
-    );
+    // this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
+    //   startWith(''),
+    //   map(value => this._filterUnite(value))
+    // );
 
   
   }
@@ -107,27 +152,32 @@ export class AddProduitComponent {
     // this.produit.category = selectedCategory;
   }
 
-  displayFn(acte?: CategorySelect): string {
-    return acte ? acte.name : '';
-  }  
+  // displayFn(acte?: CategorySelect): string {
+  //   return acte ? acte.name : '';
+  // }  
 
-  private _filter(name: string): CategorySelect[] {
+  // Pour categorie 
+  private _filter(name: string): Categorie[] {
     const filterValue = name.toLowerCase();
-
-    return this.options.filter(option => option.name.toLowerCase().indexOf(filterValue) === 0);
+    return this.options.filter(option => option.nom.toLowerCase().includes(filterValue));
+  }
+  
+  displayFn(category?: Categorie): string {
+    return category ? category.nom : '';
+  }
+  
+  // Pour unite
+  private _filterUnite(name: string): UniteMesure[] {
+    const filterValue = name.toLowerCase();
+    return this.optionsUnite.filter(optionNomUnite => optionNomUnite.nom.toLowerCase().includes(filterValue));
+  }
+  
+  displayFnUnite(unityMesure?: UniteMesure): string {
+    return unityMesure ? unityMesure.nom : '';
   }
 
   // POUR UNITE
   UniterControl = new FormControl();
-  nomUnite: string[] = ['One', 'Two', 'Three'];
-  filteredNomUnite: Observable<string[]> = of([]);
-
-  private _filterUnite(value: string): string[] {
-    const filterValue = value.toLowerCase();
-
-    return this.nomUnite.filter(optionNomUnite => optionNomUnite.toLowerCase().indexOf(filterValue) === 0);
-  }
-
 
   showCategoryCreation: boolean = false;
   showUniteCreation: boolean = false;

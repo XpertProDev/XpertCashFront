@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Produit } from "./add-produit-model";
+import { Produit } from "../MODELS/add-produit-model";
 import { Observable } from "rxjs";
 
 

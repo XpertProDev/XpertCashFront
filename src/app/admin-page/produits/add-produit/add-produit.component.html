@@ -57,22 +57,20 @@
                 <div class="double_input2">
                   <div class="champ_input">
                     <input type="text" placeholder="Saisis le nom de catégorie" 
-                           class="input_focus" style="cursor: pointer;"
-                           matInput [formControl]="myControl" 
+                           class="input_focus" matInput [formControl]="myControl" 
                            [matAutocomplete]="auto">
-                    <label for="category" class="label labelCategory">Categorie</label>
-                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategorySelected($event)">
-                      <mat-option *ngFor="let option of filteredOptions | async" [value]="option.name">
-                        {{ option.name }}
-                      </mat-option>                      
+                    <label for="category" class="label labelCategory">Catégorie</label>
+                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                      <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+                        {{ option.nom }}
+                      </mat-option>
                     </mat-autocomplete>
-                  </div>
-                
+                  </div>                  
+                  
                   <div class="btn_add_categoryDiv2">
                     <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer</button>
                   </div>
-                </div>
-                
+                </div>                
 
 
                 <div class="double_input">
@@ -110,9 +108,9 @@
                            matInput [formControl]="UniterControl" class="input_focus"
                            [matAutocomplete]="autoUnite" style="cursor: pointer;">
                     <label for="category" class="label labelCategory">Unité de mesure</label>
-                    <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete">
-                      <mat-option *ngFor="let optionNomUnite of filteredNomUnite | async" [value]="optionNomUnite">
-                        {{ optionNomUnite }}
+                    <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete" [displayWith]="displayFnUnite">
+                      <mat-option *ngFor="let optionUnite of filteredNomUnite | async" [value]="optionUnite">
+                        {{ optionUnite.nom }}
                       </mat-option>
                     </mat-autocomplete>
                   </div>
@@ -253,5 +251,6 @@
 
     </div>
 
+</div>
 </div>
 
