@@ -15,6 +15,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthInterceptor } from './admin-page/SERVICES/auth.interceptor';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 
 @NgModule({
@@ -31,6 +32,7 @@ import { AuthInterceptor } from './admin-page/SERVICES/auth.interceptor';
     MatFormFieldModule,
     MatInputModule,
     MatAutocompleteModule,
+    MatSlideToggleModule,
   ],
   providers: [
     provideHttpClient(),

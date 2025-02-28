@@ -41,6 +41,13 @@ import { UsersService } from '../SERVICES/users.service';
   styleUrls: ['./produits.component.scss']
 })
 export class ProduitsComponent implements OnInit {
+
+  goToAddProduit() {
+    this.router.navigate(['/addProduit']);
+  }
+
+  backendUrl: string = 'http://localhost:8080';
+
   // Recherche et affichage des produits
   searchText: string = '';
   // Liste des produits récupérés depuis le backend
@@ -48,6 +55,7 @@ export class ProduitsComponent implements OnInit {
 
 
   ajouteProduitForm!: FormGroup;
+  modifierProduitForm!: FormGroup;
   ajouteCategoryForm!: FormGroup;
   errorMessage: string = '';
   errorMessageCategory: string = '';
@@ -67,7 +75,6 @@ export class ProduitsComponent implements OnInit {
   adresseEntreprise: string = '';
   logoEntreprise: string =''
 
-
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
@@ -76,7 +83,6 @@ export class ProduitsComponent implements OnInit {
         private usersService: UsersService,
   ) {}
 
-
   // Mise en évidence du texte recherché dans le tableau
   highlightMatch(text: string): string {
     if (!this.searchText) return text;
@@ -84,19 +90,18 @@ export class ProduitsComponent implements OnInit {
     return text.replace(regex, '<strong>$1</strong>');
   }
 
-  filteredTasks(): any[] {
-    const sortedTasks = [...this.tasks] // Copie du tableau pour éviter de modifier l'original
+  filteredProducts(): any[] {
+    const sortedProducts = [...this.tasks] // Copie pour éviter de modifier l'original
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  
-    const filtered = sortedTasks.filter(task => 
-      task.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      task.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
+
+    const filtered = sortedProducts.filter(product => 
+      product.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      product.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
     );
-  
+
     const startIndex = this.currentPage * this.pageSize;
     return filtered.slice(startIndex, startIndex + this.pageSize);
   }
-  
   
 
   // Gestion du dropdown d'export
@@ -131,9 +136,6 @@ export class ProduitsComponent implements OnInit {
     });
   }
   
-  
-  
-
   // Méthodes pour télécharger en Excel, PDF et CSV
   downloadExcel() {
     const worksheet = XLSX.utils.json_to_sheet(this.tasks);
@@ -243,8 +245,6 @@ export class ProduitsComponent implements OnInit {
     link.click();
   }
 
-  
-
   // Gestion du popup d'ajout de produit
   //showPopup: boolean = false;
   openPopup() {
@@ -339,6 +339,18 @@ export class ProduitsComponent implements OnInit {
       category: ['', Validators.required],
       codebar: ['', [Validators.minLength(8), Validators.maxLength(18)]]
       // codebar: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(14)]],
+    });
+
+    this.modifierProduitForm = this.fb.group({
+      nomProduit: ['', Validators.required],
+      description: ['', Validators.required],
+      prix: ['', [Validators.required, Validators.min(0)]],
+      prixAchat: ['', [Validators.required, Validators.min(0)]],
+      quantite: ['', [Validators.required, Validators.min(0)]],
+      alertSeuil: ['', [Validators.required, Validators.min(0)]],
+      uniteMesure: ['', Validators.required],
+      category: ['', Validators.required],
+      codebar: ['', [Validators.minLength(8), Validators.maxLength(18)]]
     });
   
     // Formulaire pour ajouter une catégorie
@@ -640,6 +652,7 @@ export class ProduitsComponent implements OnInit {
   // Getter pour faciliter l'accès aux contrôles dans le template
   get f() { return this.ajouteProduitForm.controls; }
   get c() { return this.ajouteCategoryForm.controls; }
+  get m() { return this.modifierProduitForm.controls; }
 
   openImage(imageUrl: string): void {
     this.imagePopup = this.newPhotoUrl;
@@ -649,25 +662,176 @@ export class ProduitsComponent implements OnInit {
     this.imagePopup = null;
   }
 
-    // Côte de mon image pour que l'utilisateur ajouter une photo
+  // Côte de mon image pour que l'utilisateur ajouter une photo
 
-    urllink: string = "assets/img/appareil.jpg";
-    newPhotoUrl: string | null = null;
-    selectedFile: File | null = null;
+  urllink: string = "assets/img/appareil.jpg";
+  newPhotoUrl: string | null = null;
+  selectedFile: File | null | undefined = null;
 
-    onFileSelected(event: Event): void {
-      const input = event.target as HTMLInputElement;
-      if (input.files && input.files.length > 0) {
-        this.selectedFile = input.files[0];
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+  
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newPhotoUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(this.selectedFile);
+    }
+  }    
+
+  // Contrôle de l'affichage du pop-up
+  showProductDetail: boolean = false;
+  selectedProduct: any = null;
+  // isEditing: boolean = false;
     
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.newPhotoUrl = e.target?.result as string;
-        };
-        reader.readAsDataURL(this.selectedFile);
+  openProductDetail(productId: number) {
+    this.produitService.getProduitById(productId).subscribe(
+      (product: Produit) => {
+        this.selectedProduct = product;
+        this.showProductDetail = true;
+        this.modifierProduitForm.patchValue({
+          nomProduit: product.nomProduit,
+          description: product.description,
+          prix: product.prix,
+          prixAchat: product.prixAchat,
+          quantite: product.quantite,
+          alertSeuil: product.alertSeuil,
+          uniteMesure: product.uniteMesure?.nomUnite,
+          codebar: product.codebar,
+          category: product.category?.nomCategory,
+          codeProduit: product.codeProduit
+        });
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération du détail du produit', error);
       }
-    }    
-    
+    );
+  }
+  
+  
+  // Méthode pour fermer le pop-up
+  closeProductDetail() {
+    this.showProductDetail = false;
+    this.selectedProduct = null;
+    this.newPhotoUrl = null;
+    this.selectedFile = null;
+  }
+
+  submitUpdateForm(): void {
+    if (this.modifierProduitForm.valid && this.selectedProduct) {
+      // Exclure le champ createdAt pour laisser le backend définir la date de modification
+      const { createdAt, ...baseProduit } = this.selectedProduct;
+      
+      const updatedProduct: Produit = {
+        ...baseProduit, // reprend les autres données existantes
+        // Mise à jour des champs modifiables à partir du formulaire
+        nomProduit: this.modifierProduitForm.value.nomProduit,
+        description: this.modifierProduitForm.value.description,
+        prix: this.modifierProduitForm.value.prix,
+        prixAchat: this.modifierProduitForm.value.prixAchat,
+        quantite: this.modifierProduitForm.value.quantite,
+        alertSeuil: this.modifierProduitForm.value.alertSeuil,
+        // Reconstruction de l'unité de mesure en fonction du format attendu par le backend
+        uniteMesure: { nomUnite: this.modifierProduitForm.value.uniteMesure },
+        codebar: this.modifierProduitForm.value.codebar,
+        // Modification autorisée pour la catégorie et le codeProduit
+        category: { nomCategory: this.modifierProduitForm.value.category },
+        codeProduit: this.modifierProduitForm.value.codeProduit,
+        // Pour la photo, on garde l'actuelle; elle sera mise à jour via le FormData si un nouveau fichier est sélectionné
+        photo: this.selectedProduct.photo
+      };
+  
+      this.produitService.modifierProduit(updatedProduct, this.selectedFile!).subscribe(
+        (res: Produit) => {
+          this.selectedProduct = res;
+          this.closeProductDetail();
+          // Optionnel : afficher une notification de succès
+        },
+        (error) => {
+          this.errorMessage = error.error.error || "Erreur lors de la modification du produit.";
+        }
+      );
+    } else {
+      this.modifierProduitForm.markAllAsTouched();
+    }
+  }
+  
+  
+  
+  showSuccessPopup(message: string) {
+    this.popupType = "success";
+    this.popupTitle = "Succès";
+    this.popupMessage = message;
+    this.popupImage = "assets/img/succcccc.png";
+    this.showPopup2 = true;
+  }
+  
+  showErrorPopup(message: string) {
+    this.popupType = "error";
+    this.popupTitle = "Erreur";
+    this.popupMessage = message;
+    this.popupImage = "assets/img/error.png";
+    this.showPopup2 = true;
+  }
+  
+}
+  // Méthode pour activer l'édition
+  // toggleEditMode() {
+  //   this.isEditing = !this.isEditing;
+  //   this.newPhotoUrl = null;
+  //   this.selectedFile = null;
+  // }
+
+  // saveChanges() {
+  //   //console.log("Produit modifié :", this.selectedProduct);
+  //   this.isEditing = false; 
+  // }
+
+    // submitUpdateForm()
+  // submitUpdateForm(): void {
+  //   if (this.modifierProduitForm.invalid) {
+  //     this.errorMessage = "Veuillez remplir tous les champs obligatoires.";
+  //     return;
+  //   }
+  
+  //   // Récupérer les valeurs du formulaire
+  //   const formValues = this.modifierProduitForm.getRawValue();
+  
+  //   // Construire l'objet produit à envoyer
+  //   // On conserve la catégorie existante (this.selectedProduct.category)
+  //   const produitModifie: Produit = {
+  //     ...this.selectedProduct, // On garde l'objet complet existant, notamment category
+  //     ...formValues,
+  //     // Forcer la catégorie à ne pas être modifiée
+  //     // category: this.selectedProduct.category,
+  //     // Pour l'unité de mesure, si nécessaire, on la transforme en objet
+  //     // uniteMesure: typeof formValues.uniteMesure === 'string'
+  //     //   ? { nomUnite: formValues.uniteMesure }
+  //     //   : formValues.uniteMesure
+  //   };
+  
+  //   console.log("Données envoyées:", produitModifie);
+  
+  //   this.produitService.modifierProduit(produitModifie, this.selectedFil).subscribe(
+  //     (updatedProduct) => {
+  //       const index = this.tasks.findIndex(p => p.id === updatedProduct.id);
+  //       if (index !== -1) {
+  //         this.tasks[index] = updatedProduct;
+  //       }
+  //       this.closeProductDetail();
+  //       this.showSuccessPopup("Le produit a été modifié avec succès.");
+  //     },
+  //     (error) => {
+  //       this.showErrorPopup("Erreur lors de la modification du produit. Veuillez réessayer.");
+  //       console.error("Erreur modification produit:", error);
+  //     }
+  //   );
+  // }
+
+
+
     // onFileSelected(event: Event): void {
     //   const input = event.target as HTMLInputElement;
     //   if (input.files && input.files.length > 0) {
@@ -681,40 +845,3 @@ export class ProduitsComponent implements OnInit {
     //   }
     // }
     
-  
-
-  // Contrôle de l'affichage du pop-up
-  showProductDetail: boolean = false;
-  selectedProduct: any = null;
-  isEditing: boolean = false;
-    
-  openProductDetail(productId: string) {
-    // Rechercher le produit dans la liste
-    this.selectedProduct = this.tasks.find(task => task.codeProduit === productId);
-    if (this.selectedProduct) {
-      this.showProductDetail = true;
-      this.isEditing = false;
-    }
-  }
-
-  // Méthode pour fermer le pop-up
-  closeProductDetail() {
-    this.showProductDetail = false;
-    this.selectedProduct = null;
-    this.newPhotoUrl = null;
-    this.selectedFile = null;
-  }
-
-  // Méthode pour activer l'édition
-  toggleEditMode() {
-    this.isEditing = !this.isEditing;
-    this.newPhotoUrl = null;
-    this.selectedFile = null;
-  }
-
-  saveChanges() {
-    //console.log("Produit modifié :", this.selectedProduct);
-    this.isEditing = false; 
-  }
-
-}

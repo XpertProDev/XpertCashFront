@@ -288,6 +288,7 @@ tr:hover {
 
 .champ_input {
   position: relative;
+  margin-bottom: 10px;
 }
 
 .formulaire {
@@ -325,7 +326,6 @@ tr:hover {
   top: 22px;
   left: 4px;
   pointer-events: none;
-  color: rgb(107, 102, 102);
 }
 
 .input_focus:hover {
@@ -514,12 +514,18 @@ mat-paginator {
   border-radius: 5px;
 }
 
-
 .error-message {
-  font-size: 13px;
+  font-size: 12px;
   color: red;
   font-weight: bold;
   margin-top: -6px;
+}
+
+.error-message2 {
+  font-size: 13px;
+  color: red;
+  font-weight: bold;
+  margin-top: 7px;
 }
 
 // .btn_add_category {
@@ -552,6 +558,9 @@ mat-paginator {
   position: relative;
 }
 
+.martopBottom {
+  height: 90px;
+}
 
 .btn_add_category {
   border: none;
@@ -859,7 +868,7 @@ img.roudel_detail{
   padding: 10px;
   gap: 5px;
   background-color: rgba(0, 110, 255, 0.041);
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
 .header_file {
@@ -971,4 +980,17 @@ img.roudel_detail{
 .btn_save_edit .annule_edit:hover {
   background-color: rgb(255, 0, 0);
   transition: all .5s;
+}
+
+.inputSize {
+  font-size: 15px;
+  color: #0672E4;
+}
+
+.labelColor {
+  color: #000!important;
+}
+
+.updateDate {
+  float: right;
 }

@@ -8,6 +8,8 @@ import { ProductSaleComponent } from './product-sale/product-sale.component';
 // 3rd party import
 
 import { ApexOptions, ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-dash-analytics',
   standalone: true,
@@ -25,7 +27,7 @@ export default class DashAnalyticsComponent {
   chartOptions_3!: Partial<ApexOptions>;
 
   // constructor
-  constructor() {
+  constructor(private usersService: UsersService,private http: HttpClient) {
     this.chartOptions = {
       chart: {
         height: 205,
@@ -214,9 +216,9 @@ export default class DashAnalyticsComponent {
   cards = [
     {
       background: 'bg-c-blue',
-      title: 'Orders Received',
+      title: 'Total Produits',
       icon: 'icon-shopping-cart',
-      text: 'Completed Orders',
+      text: 'Pour Categories',
       number: '486',
       no: '351'
     },

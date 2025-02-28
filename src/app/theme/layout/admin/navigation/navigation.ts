@@ -55,6 +55,13 @@ export const NavigationItems: NavigationItem[] = [
             url: '/produit',
             //classes: 'nav-item',
           },
+          // {
+          //   id: 'addProduit',
+          //   title: 'Ajouter produit',
+          //   type: 'item',
+          //   url: '/addProduit',
+          //   //classes: 'nav-item',
+          // },
           {
             id: 'entrer',
             title: 'Entrer',
