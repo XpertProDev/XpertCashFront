@@ -20,9 +20,10 @@
             <div class="information_cadre">
               <div class="info_titre_input">
                 <h4>Magasin</h4>
+                <!-- <p>Nom boutique: {{ boutiqueName }}</p> -->
                 <!-- Input de nom magasin  -->
                 <div class="champ_input">
-                  <input type="text" class="input_focus input_focus_petit" required id="nomMagasin" name="nomMagasin" placeholder="Saisis le nom de magasin">
+                  <input type="text" class="input_focus input_focus_petit" [value]="boutiqueName" disabled required id="nomMagasin" name="nomMagasin" placeholder="Saisis le nom de magasin">
                   <label for="nomMagasin" class="label labelColor">Nom magasin</label>
                 </div>
               </div>

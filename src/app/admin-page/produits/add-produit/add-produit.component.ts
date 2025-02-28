@@ -5,6 +5,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { map, Observable, of, startWith } from 'rxjs';
+import { SharedDataService } from '../../SERVICES/shared-data.service';
 
 export interface CategorySelect {
   name: string;
@@ -30,6 +31,9 @@ export interface UniteSelect {
 })
 export class AddProduitComponent {
   isChecked = false;
+  boutiqueName: string = '';
+
+  constructor(private sharedDataService: SharedDataService) {}
 
   onToggleChange(event: Event) {
     // event.target permet d’accéder au checkbox
@@ -71,7 +75,14 @@ export class AddProduitComponent {
 
   filteredOptions: Observable<CategorySelect[]> = of([]);
 
-  ngOnInit() {
+  ngOnInit(): void  {
+
+    // Partage de donner de user
+    this.sharedDataService.boutiqueName$.subscribe(name => {
+      console.log("AddProduitComponent - Nom boutique récupéré :", name);
+      this.boutiqueName = name;
+    });
+
     // 🟢 Filtrage des catégories (OK)
     this.filteredOptions = this.myControl.valueChanges.pipe(
       startWith<string | CategorySelect>(''),
@@ -84,6 +95,8 @@ export class AddProduitComponent {
       startWith(''),
       map(value => this._filterUnite(value))
     );
+
+  
   }
   
 
@@ -114,8 +127,6 @@ export class AddProduitComponent {
 
     return this.nomUnite.filter(optionNomUnite => optionNomUnite.toLowerCase().indexOf(filterValue) === 0);
   }
-
-
 
 
   showCategoryCreation: boolean = false;
