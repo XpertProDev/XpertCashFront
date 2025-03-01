@@ -1,5 +1,4 @@
-export class Categorie {
+export class UniteMesure {
     id?: number;
     nom!: string;
 }
-  

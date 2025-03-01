@@ -113,7 +113,7 @@
               </div>
             </div> -->
 
-            <div class="double_input2">
+            <!-- <div class="double_input2">
               <div class="champ_input">
                 <input type="text"
                     [formControl]="control"
@@ -123,11 +123,8 @@
                 <label for="category" class="label">Categorie</label>
                 <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategorySelected($event)">
                   <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
-                    {{ category.nomCategory}}
+                    {{ category.nom}}
                   </mat-option>
-                  <!-- <div class="btn_add_categoryDiv">
-                    <button class="btn_add_category" (click)="openPopupCategory()">Créer un categorie</button>
-                  </div> -->
                 </mat-autocomplete>
                 <div *ngIf="f['category'].touched && f['category'].invalid" class="error-message">
                   Le categorie est vide.
@@ -137,7 +134,7 @@
               <div class="btn_add_categoryDiv2">
                 <button class="btn_add_category2" (click)="openPopupCategory()">Créer un categorie</button>
               </div>
-            </div>
+            </div> -->
     
             <!-- Ligne 3 : Prix d'achat et Quantité -->
             <div class="double_input">
@@ -317,21 +314,18 @@
             </div>
             
             <!-- Ligne 2 : Catégorie avec autocomplete -->
-            <div class="double_input2">
+            <!-- <div class="double_input2">
               <div class="champ_input">
                 <input type="text"
                     [formControl]="control"
                     [matAutocomplete]="auto"
                     class="input_focus"
-                    placeholder="Saisis le nom de catégorie" [value]="displayFn(produit.category)">
+                    placeholder="Saisis le nom de catégorie" [value]="displayFn(produit.nom)">
                 <label for="category" class="label">Categorie</label>
                 <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategorySelected($event)">
                   <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
-                    {{ category.nomCategory}}
+                    {{ category.nom}}
                   </mat-option>
-                  <!-- <div class="btn_add_categoryDiv">
-                    <button class="btn_add_category" (click)="openPopupCategory()">Créer un categorie</button>
-                  </div> -->
                 </mat-autocomplete>
                 <div *ngIf="f['category'].touched && f['category'].invalid" class="error-message">
                   Le categorie est vide.
@@ -342,7 +336,7 @@
                 <button class="btn_add_category2" (click)="openPopupCategory()">Créer un categorie</button>
               </div>
             </div>
-            
+             -->
             <!-- Ligne 3 : Prix achat et Quantité -->
             <div class="double_input">
               <div class="champ_input">
@@ -498,6 +492,7 @@
               <div *ngIf="errorMessage" class="error-message-category">
                 {{ errorMessageCategory }}
               </div>
+
               
             </div>
             <div class="modal-footer">

@@ -20,6 +20,10 @@
   margin-bottom: 25px;
 }
 
+.champ_input_Categorie {
+  margin-bottom: 15px!important;
+}
+
 .formulaire {
   position: relative;
 }
@@ -424,10 +428,10 @@ input:checked + .slider:before {
 ///////////////// PARTIR LEFT
 
 
-.ajout_bool_form {
-  //width: 100%;
+// .ajout_bool_form {
+//   //width: 100%;
   
-}
+// }
 
 .ajouter_cadre_cree_c_u {
   width: 250px;
@@ -481,4 +485,42 @@ input:checked + .slider:before {
 .btn_c_category:hover {
   background-color: #ff0000;
   transition: all ease .5s;
+}
+
+// Category 
+
+.error-message-category {
+  font-size: 10px;
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.error-message span {
+  font-style: 10px;
+}
+
+.error-message {
+  font-size: 10px;
+  color: red;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.errorAPI {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  margin-top: -9px;
+}
+
+.errorAPI img{
+  width: 12px;
+  height: 12px;
+}
+
+.errorAPI span {
+  font-size: 10px;
+  padding-left: 5px;
 }

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModul
 import { Router } from '@angular/router';
 import { Users } from 'src/app/admin-page/MODELS/utilisateur.model';
 import { HeaderNavComponent } from 'src/app/admin-page/Navigation/header-nav/header-nav.component';
+import { SharedDataService } from 'src/app/admin-page/SERVICES/shared-data.service';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 
 @Component({
@@ -30,7 +31,8 @@ export class InscriptionComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private usersService: UsersService,
-    private router: Router
+    private router: Router,
+    private sharedDataService: SharedDataService
   ) { }
 
   ngOnInit(): void {
@@ -41,7 +43,8 @@ export class InscriptionComponent implements OnInit {
       pays: ['', Validators.required],
       phone: ['', [Validators.required, Validators.minLength(8)]], 
       password: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', Validators.required]
+      confirmPassword: ['', Validators.required],
+      nomBoutique: ['']
     }, { validator: this.passwordMatchValidator });
   }
 
@@ -91,18 +94,27 @@ export class InscriptionComponent implements OnInit {
       return;
     }
   
-    this.isLoading = true; // Début du chargement
-  
+    this.isLoading = true;
     // Exclure 'confirmPassword' des données envoyées
     const { confirmPassword, ...userData } = this.registerForm.value;
-    const user: Users = userData;
   
-    setTimeout(() => { // retard de request en 2 secondes 
+    // On suppose que l'interface Users correspond aux champs attendus par le back-end
+    const user = userData;
+  
+    setTimeout(() => { // Simuler un délai de 2 secondes
       this.usersService.registerUser(user).subscribe({
-        next: (response) => {
+        next: (response: any) => {
+          console.log("Réponse API :", response); 
           this.isLoading = false;
   
           if (response && response.message) {
+            // Mettre à jour le service partagé avec le nom de la boutique reçu (response.nomBoutique)
+            if(response.nomBoutique) {
+              console.log("Boutique dans la réponse :", response.nomBoutique);
+              this.sharedDataService.setBoutiqueName(response.nomBoutique);
+            } else {
+              console.error("La réponse ne contient pas 'nomBoutique'.");
+            }
             this.openPopup("Inscription réussie !", response.message, 'success');
           } else {
             this.errorMessage = response.error || "Erreur d'inscription, veuillez vérifier les champs.";
@@ -111,10 +123,7 @@ export class InscriptionComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-  
-          console.log("Erreur complète :", error);
-          console.log("Réponse API :", error.error);
-  
+          console.error("Erreur complète :", error);
           let message = "Une erreur est survenue lors de l'inscription.";
   
           if (error.status === 400 || error.status === 500) {
@@ -131,7 +140,6 @@ export class InscriptionComponent implements OnInit {
       });
     }, 2000);
   }
-  
 
   get f() { return this.registerForm.controls; }
 }

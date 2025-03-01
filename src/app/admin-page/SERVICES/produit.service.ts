@@ -23,7 +23,7 @@ export class ProduitService {
     const formData: FormData = new FormData();
     // On stringify l'objet produit pour l'envoyer en tant que chaîne JSON
     formData.append('produit', JSON.stringify(produit));
-    formData.append('photo', file, file.name);
+    formData.append('image', file, file.name);
 
     return this.http.post<Produit>(`${this.apiUrl}/add/produit`, formData, { headers });
   }
