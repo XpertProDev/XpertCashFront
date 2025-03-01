@@ -413,9 +413,21 @@ export class ProduitsComponent implements OnInit {
             const fullImageUrl = `http://localhost:8080${prod.photo}`;
             console.log('Image URL:', fullImageUrl);
   
-            // Nettoyer et transformer `createdAt` en un objet Date valide
-            const createdAtFormatted = prod.createdAt.replace(' à ', 'T'); 
-            const createdAtDate = new Date(createdAtFormatted); 
+            // Vérifier si `createdAt` est défini
+            let createdAtDate: Date | null = null;
+            if (prod.createdAt) {
+              const cleanedDateStr = prod.createdAt.replace(' à ', ' '); // Remplacer "à" par un espace
+              const dateParts = cleanedDateStr.match(/^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})$/);
+              
+              if (dateParts) {
+                const [, day, month, year, hours, minutes] = dateParts.map(Number);
+                createdAtDate = new Date(year, month - 1, day, hours, minutes);
+              } else {
+                console.warn("Format de date invalide pour:", prod.createdAt);
+              }
+            }
+            console.log("Date récupérée:", prod.createdAt);
+
   
             return {
               ...prod,
@@ -425,8 +437,12 @@ export class ProduitsComponent implements OnInit {
               createdAtDate
             };
           })
-          // **Trier du plus récent au plus ancien**
-          .sort((a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime());
+          // **Trier du plus récent au plus ancien (éviter les valeurs nulles)**
+          .sort((a, b) => {
+            const dateA = a.createdAtDate ? a.createdAtDate.getTime() : 0;
+            const dateB = b.createdAtDate ? b.createdAtDate.getTime() : 0;
+            return dateB - dateA;
+          });
   
         this.dataSource.data = this.tasks;
         this.dataSource.paginator = this.paginator;
@@ -436,6 +452,7 @@ export class ProduitsComponent implements OnInit {
       }
     });
   }
+  
 
   paginatedTasks: any[] = []; 
   pageSize = 5; 
@@ -638,7 +655,7 @@ export class ProduitsComponent implements OnInit {
   get m() { return this.modifierProduitForm.controls; }
 
   openImage(imageUrl: string): void {
-    this.imagePopup = imageUrl;
+    this.imagePopup = this.newPhotoUrl;
   }
   
   closeImage(): void {

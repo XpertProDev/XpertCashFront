@@ -13,6 +13,7 @@ import { UniteMesureService } from '../../SERVICES/unite.service';
 import { Router } from '@angular/router';
 import { ProduitService } from '../../SERVICES/add-produit-service';
 import { PopupData } from '../../MODELS/PopUp/popup-data';
+import { UsersService } from '../../SERVICES/users.service';
 
 // export interface CategorySelect {
 //   name: string;
@@ -114,6 +115,8 @@ export class AddProduitComponent {
     private produitService: ProduitService,
     private fb: FormBuilder,
     private router: Router,
+    private usersService: UsersService,
+    
   ) {}
 
   onToggleChange(event: Event) {
@@ -147,6 +150,20 @@ export class AddProduitComponent {
       // Affecter directement à imageFile au lieu de selectedFile
       this.imageFile = input.files[0];
 
+      const file = input.files[0]; // Récupère le fichier sélectionné
+
+      // Vérification de la taille du fichier (2 Mo = 2 * 1024 * 1024 octets)
+      const maxSize = 2 * 1024 * 1024;
+      if (file.size > maxSize) {
+        this.errorMessage = 'Le fichier est trop volumineux. Veuillez choisir un fichier de moins de 2 Mo.';
+        this.selectedFile = null;
+        this.newPhotoUrl = null;
+        return;
+      }
+
+        // Si le fichier est correct, on continue
+      this.errorMessage = '';
+      this.selectedFile = file;
       const reader = new FileReader();
       reader.onload = (e) => {
         this.newPhotoUrl = e.target?.result as string;
@@ -167,6 +184,7 @@ export class AddProduitComponent {
   // filteredOptions: Observable<CategorySelect[]> = of([]);
 
   ngOnInit(): void  {
+    this.getBoutiqueName();
     // Partage de donner de user
     this.sharedDataService.boutiqueName$.subscribe(name => {
       console.log("AddProduitComponent - Nom boutique récupéré :", name);
@@ -252,7 +270,31 @@ export class AddProduitComponent {
       this.messageAPI = '';
       this.apiMessageType = '';
     });
+
+    
   }
+
+  getBoutiqueName() {
+    this.usersService.getUserInfo().subscribe(
+      (userInfo) => {
+        console.log(userInfo);
+        if (userInfo && userInfo.boutiques && userInfo.boutiques.length > 0) {
+          console.log(userInfo.boutiques[0]);
+  
+          this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
+        } else {
+          console.error('Aucune boutique trouvée pour cet utilisateur');
+          this.boutiqueName = 'Aucune boutique';
+        }
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des informations utilisateur', error);
+      }
+    );
+  }
+  
+  
+
 
   // Getter pour faciliter l'accès aux contrôles dans le template
   get c() { return this.ajouteCategoryForm.controls; }
@@ -344,35 +386,40 @@ export class AddProduitComponent {
   // }
 
   submitFormCategory(): void {
-    // if (this.ajouteCategoryForm.invalid) {
-    //   this.errorMessageCategory = "Veuillez remplir correctement le formulaire.";
-    //   return;
-    // }
-  
     const categoryData = { nom: this.ajouteCategoryForm.value.categoryName };
   
     this.categorieService.ajouterCategorie(categoryData).subscribe({
       next: (response: any) => {
-        console.log('Categorie ajouté avec succès : ', response);
+        console.log('Catégorie ajoutée avec succès : ', response);
         if (response && response.id) {
+          // Réinitialiser le formulaire
           this.ajouteCategoryForm.get('categoryName')!.setValue('');
+  
+          // Ajouter la nouvelle catégorie à la liste des catégories
+          const newCategory: Categorie = { id: response.id, nom: categoryData.nom };
+          this.options.push(newCategory);
+  
+          // Mettre à jour les options filtrées pour inclure la nouvelle catégorie
+          this.filteredOptions = this.myControl.valueChanges.pipe(
+            startWith<string | Categorie>(''),
+            map(value => (typeof value === 'string' ? value : value.nom)),
+            map(name => (name ? this._filter(name) : this.options.slice()))
+          );
+  
+          // Afficher un message de succès
           this.apiMessageType = 'success';
           this.messageAPI = response.message || "La catégorie a été créée avec succès.";
         }
-        
       },
       error: (error) => {
         console.log("Erreur complète :", error);
         console.log("Réponse API :", error.error);
-        let message = "Une erreur est survenue lors de la création du produit.";
+        let message = "Une erreur est survenue lors de la création de la catégorie.";
   
         if (error.error) {
-          // Si error.error est un objet contenant une propriété "error"
           if (typeof error.error === "object" && error.error.error) {
             message = error.error.error;
-          }
-          // Si error.error est une chaîne, on l'utilise directement
-          else if (typeof error.error === "string") {
+          } else if (typeof error.error === "string") {
             message = error.error;
           }
         }
@@ -381,34 +428,44 @@ export class AddProduitComponent {
         this.messageAPI = message;
       }
     });
-  }  
+  }
+  
 
   submitFormUnity(): void {
-
     const unityData = { nom: this.ajouteUniteForm.value.unityName };
   
     this.uniteMesureService.ajouterUnite(unityData).subscribe({
       next: (response: any) => {
         console.log('Unité ajouté avec succès : ', response);
         if (response && response.id) {
+          // Réinitialiser le formulaire
           this.ajouteUniteForm.get('unityName')!.setValue('');
+          
+          // Ajouter l'unité créée à la liste des unités
+          const newUnity: UniteMesure = { id: response.id, nom: unityData.nom };
+          this.optionsUnite.push(newUnity);
+  
+          // Mettre à jour les options filtrées pour afficher la nouvelle unité
+          this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
+            startWith<string | UniteMesure>(''),
+            map(value => (typeof value === 'string' ? value : value.nom)),
+            map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
+          );
+  
+          // Afficher un message de succès
           this.apiMessageType = 'success';
-          this.messageAPI = response.message || "La unité a été créée avec succès.";
+          this.messageAPI = response.message || "L'unité a été créée avec succès.";
         }
-        
       },
       error: (error) => {
         console.log("Erreur complète :", error);
         console.log("Réponse API :", error.error);
-        let message = "Une erreur est survenue lors de la création de unité.";
+        let message = "Une erreur est survenue lors de la création de l'unité.";
   
         if (error.error) {
-          // Si error.error est un objet contenant une propriété "error"
           if (typeof error.error === "object" && error.error.error) {
             message = error.error.error;
-          }
-          // Si error.error est une chaîne, on l'utilise directement
-          else if (typeof error.error === "string") {
+          } else if (typeof error.error === "string") {
             message = error.error;
           }
         }
@@ -474,5 +531,6 @@ export class AddProduitComponent {
         });
     }
 
+  
   
 }

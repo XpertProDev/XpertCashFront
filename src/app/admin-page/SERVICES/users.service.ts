@@ -11,7 +11,8 @@ interface UserRequest {
   phone: string;
   pays: string;
   adresseEntreprise: string;
-  logoEntreprise : string
+  logoEntreprise : string,
+  boutiques : any
 }
 
 

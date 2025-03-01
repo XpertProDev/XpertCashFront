@@ -26,6 +26,8 @@
                   <input type="text" class="input_focus input_focus_petit" [value]="boutiqueName" disabled required id="nomMagasin" name="nomMagasin" placeholder="Saisis le nom de magasin">
                   <label for="nomMagasin" class="label labelColor">Nom magasin</label>
                 </div>
+                
+                
               </div>
             </div>
             
@@ -186,7 +188,8 @@
                 <h4>Ajouter un image</h4>
 
 
-                <p style="font-size: 12px; float: right;">Taille : 2 Mo max</p>
+                <p *ngIf="!errorMessage" style="font-size: 12px; float: right;">Taille : 2 Mo max</p>
+                <p *ngIf="errorMessage" style="font-size: 12px; float: right; color: red;">{{ errorMessage }}</p>
 
                 <!-- Input de produits photo -->
                 <!-- Section pour la gestion de l'image du produit -->

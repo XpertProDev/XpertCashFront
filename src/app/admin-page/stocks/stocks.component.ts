@@ -16,7 +16,7 @@ import { Produit } from '../MODELS/produit.model';
 import { StocksService } from '../SERVICES/stocks.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-
+import { ChangeDetectorRef } from '@angular/core';
 @Component({
   selector: 'app-stocks',
   imports: [
@@ -57,16 +57,47 @@ export class StocksComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private usersService: UsersService,
-    private stocksService: StocksService
+    private stocksService: StocksService,
+    private changeDetectorRef: ChangeDetectorRef
   ) {}
+
+
 
   ngOnInit() {
     const token = localStorage.getItem('authToken') || '';
+  
+    const isExpiringSoon = (dateExpiration: string): boolean => {
+      const expirationDate = new Date(dateExpiration).setHours(0, 0, 0, 0);
+      const currentDate = new Date().setHours(0, 0, 0, 0);
+      const diffDays = (expirationDate - currentDate) / (1000 * 3600 * 24);
+      return diffDays <= 5 && diffDays > 1; // Produit expire dans ≤ 5 jours
+    };
     
+    const isExpiringInOneDay = (dateExpiration: string): boolean => {
+      const expirationDate = new Date(dateExpiration).setHours(0, 0, 0, 0);
+      const currentDate = new Date().setHours(0, 0, 0, 0);
+      return (expirationDate - currentDate) / (1000 * 3600 * 24) === 1; // Expire demain
+    };
+    
+    const isExpiringToday = (dateExpiration: string): boolean => {
+      const expirationDate = new Date(dateExpiration).setHours(0, 0, 0, 0);
+      const currentDate = new Date().setHours(0, 0, 0, 0);
+      return expirationDate === currentDate; // Expire aujourd’hui
+    };
+    
+    const isExpired = (dateExpiration: string): boolean => {
+      const expirationDate = new Date(dateExpiration).setHours(0, 0, 0, 0);
+      const currentDate = new Date().setHours(0, 0, 0, 0);
+      return expirationDate < currentDate; // Produit expiré
+    };
+    
+    
+    
+  
     // Récupérer tout le stock via le service
     this.stocksService.getAllStock(token).subscribe(
       (data) => {
-        // Map stocks data and enrich them with additional product details
+        // Mapper les données des stocks et enrichir les produits avec les détails supplémentaires
         this.stocks = data.map(stock => ({
           ...stock,
           produit: {
@@ -78,51 +109,59 @@ export class StocksComponent implements OnInit {
             prixAchat: stock.produit?.prixAchat || 0,
             alertSeuil: stock.produit?.alertSeuil || 0,
             category: stock.produit?.category || { nomCategory: 'Catégorie inconnue' },
+            // Vérification des dates d'expiration
+          isExpiringSoon: isExpiringSoon(stock.dateExpiration),
+          isExpiringInOneDay: isExpiringInOneDay(stock.dateExpiration),
+          isExpiringToday: isExpiringToday(stock.dateExpiration),
+          isExpired: isExpired(stock.dateExpiration),
+            
           }
         }));
-      sort((a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime());
-
-        
-        this.calculateTotals();
-        this.stocks = this.stocks.reverse(); // Inverser pour afficher les derniers en premier
-        
-
-        // Mettre à jour le DataSource avec les stocks et activer la pagination
+  
+        console.log('Stocks après map :', this.stocks);
+  
+        // Vérification des dates avant le tri
+        console.log("Avant tri:", this.stocks.map(stock => stock.dateAjout));
+  
+        // Trier les stocks par date d'ajout (du plus récent au plus ancien)
+        this.stocks.sort((a, b) => {
+          const dateA = new Date(a.dateAjout);
+          const dateB = new Date(b.dateAjout);
+          return dateB.getTime() - dateA.getTime();
+        });
+  
+        // Mise à jour du DataSource avec les stocks et activation de la pagination
         this.dataSource = new MatTableDataSource(this.stocks);
         this.dataSource.paginator = this.paginator;
+  
+        // Vérifier si le tri est correctement effectué
+        console.log("DataSource mise à jour:", this.dataSource.data);
+  
+        // Calculer les totaux si nécessaire
+        this.calculateTotals();
       },
       (error) => {
         this.errorMessage = error.message || 'Erreur lors de la récupération du stock';
         console.error(this.errorMessage);
       }
     );
-    
+  
     this.usersService.getUserInfo().subscribe({
       next: (userInfo) => {
         this.nomEntreprise = userInfo.nomEntreprise;
         this.adresseEntreprise = userInfo.adresseEntreprise;
         this.logoEntreprise = userInfo.logoEntreprise;
       },
-      
+  
       error: (err) => {
         console.error('Erreur lors de la récupération d\'info entreprise', err);
       }
     });
   }
-
-  openImage(imageUrl: string): void {
-    this.imagePopup = imageUrl;
-  }
   
-  closeImage(): void {
-    this.imagePopup = null;
-  }
-
-  downloadExcel() {}
-
-  downloadCSV() {}
-  // Calcul des Totaux : Quantité Totale et Prix Total
-  calculateTotals() {
+  
+   // Calcul des Totaux : Quantité Totale et Prix Total
+   calculateTotals() {
     console.log('Stocks:', this.stocks);
   
     this.totalQuantity = this.stocks.reduce((acc: number, stock: { quantite: number }) => {
@@ -137,10 +176,28 @@ export class StocksComponent implements OnInit {
       console.log(`Prix: ${prix}, Quantité: ${quantite}`); 
       return acc + (prix * quantite);
     }, 0);
+
+    this.changeDetectorRef.detectChanges();
+
     
     console.log(`Total Quantité: ${this.totalQuantity}`);
     console.log(`Total Prix: ${this.totalPrice}`);
   }
+  
+  
+
+  openImage(imageUrl: string): void {
+    this.imagePopup = imageUrl;
+  }
+  
+  closeImage(): void {
+    this.imagePopup = null;
+  }
+
+  downloadExcel() {}
+
+  downloadCSV() {}
+ 
   
 
   // Gestion du dropdown d'export
@@ -279,4 +336,3 @@ export class StocksComponent implements OnInit {
 function sort(arg0: (a: any, b: any) => number) {
   throw new Error('Function not implemented.');
 }
-

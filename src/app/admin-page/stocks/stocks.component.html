@@ -74,12 +74,23 @@
           <td [innerHTML]="highlightMatch(stock.produit.nomProduit)"></td>
           <td>{{ stock.produit.category?.nomCategory || 'Catégorie inconnue' }}</td>
           <td>{{ stock.dateAjout | date:'dd/MM/yyyy' }}</td>
-          <td>{{ stock.dateExpiration | date:'dd/MM/yyyy' }}</td>
+          <td [ngClass]="{
+            'expiring-soon': stock.produit.isExpiringSoon,
+            'shake': stock.produit.isExpiringInOneDay,
+            'expiring-today': stock.produit.isExpiringToday,
+            'expired': stock.produit.isExpired
+        }">
+          <span *ngIf="!stock.produit.isExpired">
+            {{ stock.dateExpiration | date:'dd/MM/yyyy' }}
+          </span>
+          <span *ngIf="stock.produit.isExpired">⚠️ Produit Expiré</span>
+        </td>
+        
           <td>{{ stock.entree }}</td>
           <td>{{ stock.sortie }}</td>
           <td>{{ stock.produit.prix | number:'1.0-0' }}</td>
           <td>{{ stock.produit.prixAchat | number:'1.0-0' }}</td>
-          <td>{{ stock.produit.quantite }}</td>
+          <td>{{ stock.quantite }}</td>
           <td>{{ stock.produit.alertSeuil }}</td>
         </tr>
         
