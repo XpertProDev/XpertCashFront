@@ -11,6 +11,7 @@ import { Categorie } from '../../MODELS/categorie.model';
 import { UniteMesure } from '../../MODELS/unite.model';
 import { UniteMesureService } from '../../SERVICES/unite.service';
 import { Router } from '@angular/router';
+import { ProduitService } from '../../SERVICES/add-produit-service';
 
 // export interface CategorySelect {
 //   name: string;
@@ -63,10 +64,14 @@ export class AddProduitComponent {
   adresseEntreprise: string = '';
   logoEntreprise: string =''
 
+  // produitForm: FormGroup;
+  imageFile: File | null = null;
+
   constructor(
     private sharedDataService: SharedDataService,
     private categorieService: CategorieService,
     private uniteMesureService: UniteMesureService,
+    private produitService: ProduitService,
     private fb: FormBuilder,
     private router: Router,
   ) {}
@@ -83,18 +88,32 @@ export class AddProduitComponent {
   newPhotoUrl: string | null = null;
   selectedFile: File | null | undefined = null;
 
+  // onFileSelected(event: Event): void {
+  //   const input = event.target as HTMLInputElement;
+  //   if (input.files && input.files.length > 0) {
+  //     this.selectedFile = input.files[0];
+  
+  //     const reader = new FileReader();
+  //     reader.onload = (e) => {
+  //       this.newPhotoUrl = e.target?.result as string;
+  //     };
+  //     reader.readAsDataURL(this.selectedFile);
+  //   }
+  // }
+  // Remplacez cette méthode :
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-  
+      // Affecter directement à imageFile au lieu de selectedFile
+      this.imageFile = input.files[0];
+
       const reader = new FileReader();
       reader.onload = (e) => {
         this.newPhotoUrl = e.target?.result as string;
       };
-      reader.readAsDataURL(this.selectedFile);
+      reader.readAsDataURL(this.imageFile);
     }
-  }   
+  }
 
   //////// FOCUS CATEGORY
   myControl = new FormControl();
@@ -122,7 +141,8 @@ export class AddProduitComponent {
           this.options = categories;
           this.filteredOptions = this.myControl.valueChanges.pipe(
             startWith<string | Categorie>(''),
-            map(value => (typeof value === 'string' ? value : value.nom)),
+            // map(value => (typeof value === 'string' ? value : value.nom)),
+            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
             map(name => (name ? this._filter(name) : this.options.slice()))
           );
         },
@@ -141,7 +161,8 @@ export class AddProduitComponent {
           this.optionsUnite = uniteMesures;
           this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
             startWith<string | UniteMesure>(''),
-            map(value => (typeof value === 'string' ? value : value.nom)),
+            // map(value => (typeof value === 'string' ? value : value.nom)),
+            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
             map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
           );
         },
@@ -152,6 +173,18 @@ export class AddProduitComponent {
     } else {
       console.error('Aucun token trouvé !');
     }
+
+    this.ajouteProduitForm = this.fb.group({
+      nom: ['', [Validators.required, Validators.minLength(2)]],
+      prixVente: ['', Validators.required],
+      prixAchat: ['', Validators.required],
+      quantite: ['', Validators.required],
+      seuilAlert: ['', Validators.required],
+      description: [''],
+      codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],
+      categorieId: [''],
+      uniteId: ['']
+    });
 
     // Formulaire pour ajouter une catégorie
     this.ajouteCategoryForm = this.fb.group({
@@ -181,6 +214,7 @@ export class AddProduitComponent {
   // Getter pour faciliter l'accès aux contrôles dans le template
   get c() { return this.ajouteCategoryForm.controls; }
   get u() { return this.ajouteUniteForm.controls; }
+  get f() { return this.ajouteProduitForm.controls; }
   
   // Lorsqu'une catégorie est sélectionnée dans l'autocomplete
   onCategorySelected(event: any): void {
@@ -341,5 +375,51 @@ export class AddProduitComponent {
       }
     });
   } 
+
+  onSubmit() {
+    if (this.ajouteProduitForm.invalid) {
+      return;
+    }
+  
+    // Récupérer et patcher l'ID de la catégorie sélectionnée
+    const categorieSelected = this.myControl.value;
+    if (categorieSelected && typeof categorieSelected === 'object') {
+      this.ajouteProduitForm.patchValue({ categorieId: categorieSelected.id });
+    }
+  
+    // Récupérer et patcher l'ID de l'unité sélectionnée
+    const uniteSelected = this.uniteControl.value;
+    if (uniteSelected && typeof uniteSelected === 'object') {
+      this.ajouteProduitForm.patchValue({ uniteId: uniteSelected.id });
+    }
+  
+    // Récupérer les données du formulaire
+    const produit = this.ajouteProduitForm.value;
+    const boutiqueId = 1;
+  
+    // Récupérer un token valide depuis le localStorage (ou via un service d'authentification)
+    const tokenStored = localStorage.getItem('authToken');
+    if (!tokenStored) {
+      console.error('Aucun token trouvé !');
+      return;
+    }
+    const token = `Bearer ${tokenStored}`;
+  
+    const addToStock = this.isChecked;
+  
+    this.produitService.ajouterProduit(boutiqueId, produit, this.imageFile, addToStock, token)
+      .subscribe({
+        next: data => {
+          console.log('Produit créé avec succès', data);
+          // Réinitialiser le formulaire et les contrôles d'autocomplétion
+          this.ajouteProduitForm.reset();
+          this.myControl.reset();
+          this.uniteControl.reset();
+        },
+        error: error => {
+          console.error('Erreur lors de la création du produit', error);
+        }
+      });
+  }  
   
 }
