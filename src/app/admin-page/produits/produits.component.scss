@@ -705,6 +705,9 @@ mat-paginator {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Contenu de la popup */
@@ -734,12 +737,12 @@ mat-paginator {
   color: #333;
 }
 
-.error-message-category {
-  font-size: 13px;
-  color: red;
-  font-weight: bold;
-  margin-top: 10px;
-}
+// .error-message-category {
+//   font-size: 13px;
+//   color: red;
+//   font-weight: bold;
+//   margin-top: 10px;
+// }
 
 .img_input {
   display: flex;

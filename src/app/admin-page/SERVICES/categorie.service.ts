@@ -36,7 +36,7 @@ export class CategorieService {
       'Authorization': `Bearer ${token}`
     });
 
-    return this.http.post<Categorie>(`${this.apiUrl}/add/categoryProduit`, category, { headers }).pipe(
+    return this.http.post<Categorie>(`${this.apiUrl}/createCategory`, category, { headers }).pipe(
       tap((newCategory) => {
         // Dès qu'une nouvelle catégorie est ajoutée, on met à jour le BehaviorSubject
         const currentCategories = this.categoriesSubject.value;

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,14 +10,15 @@ import { CategorieService } from '../../SERVICES/categorie.service';
 import { Categorie } from '../../MODELS/categorie.model';
 import { UniteMesure } from '../../MODELS/unite.model';
 import { UniteMesureService } from '../../SERVICES/unite.service';
+import { Router } from '@angular/router';
 
-export interface CategorySelect {
-  name: string;
-}
+// export interface CategorySelect {
+//   name: string;
+// }
 
-export interface UniteSelect {
-  name: string;
-}
+// export interface UniteSelect {
+//   name: string;
+// }
 
 @Component({
   selector: 'app-add-produit',
@@ -36,11 +37,36 @@ export interface UniteSelect {
 export class AddProduitComponent {
   isChecked = false;
   boutiqueName: string = '';
+  messageAPI: string = '';
+  apiMessageType: 'success' | 'error' | '' = '';
+
+  ajouteProduitForm!: FormGroup;
+  modifierProduitForm!: FormGroup;
+  ajouteCategoryForm!: FormGroup;
+  errorMessage: string = '';
+  errorMessageCategory: string = '';
+
+  // Propriétés pour la popup
+  showPopup: boolean = false;
+  showPopup2: boolean = false;
+  showPopupCategory: boolean = false;
+  showPopupCategory2: boolean = false;
+  popupTitle: string = '';
+  popupMessage: string = '';
+  popupImage: string = '';
+  popupType: 'success' | 'error' = 'success';
+
+  imagePopup: string | null = null;
+  nomEntreprise: string = '';
+  adresseEntreprise: string = '';
+  logoEntreprise: string =''
 
   constructor(
     private sharedDataService: SharedDataService,
     private categorieService: CategorieService,
     private uniteMesureService: UniteMesureService,
+    private fb: FormBuilder,
+    private router: Router,
   ) {}
 
   onToggleChange(event: Event) {
@@ -68,17 +94,9 @@ export class AddProduitComponent {
     }
   }   
 
-  //////// FOCUS CATEGORUY
-  
+  //////// FOCUS CATEGORY
   myControl = new FormControl();
   uniteControl = new FormControl();
-  // Categorie
-  // options: CategorySelect[] = [
-  //   {name: 'Cate 1'},
-  //   {name: 'Cate 2'},
-  //   {name: 'Cate 3'}
-  // ];
-  // unite
 
   options: Categorie[] = []; // Liste des catégories récupérées
   optionsUnite: UniteMesure[] = []; // Liste des unites récupérées
@@ -88,73 +106,72 @@ export class AddProduitComponent {
   // filteredOptions: Observable<CategorySelect[]> = of([]);
 
   ngOnInit(): void  {
-
     // Partage de donner de user
     this.sharedDataService.boutiqueName$.subscribe(name => {
       console.log("AddProduitComponent - Nom boutique récupéré :", name);
       this.boutiqueName = name;
     });
-
     // 🟢 Filtrage des catégories (OK)
     const token = localStorage.getItem('authToken'); // ou via un service d'authentification
-  if (token) {
-    this.categorieService.getCategories(token).subscribe(
-      (categories) => {
-        console.log('Catégories reçues depuis l\'API :', categories); // Debug ici
-        this.options = categories;
-        this.filteredOptions = this.myControl.valueChanges.pipe(
-          startWith<string | Categorie>(''),
-          map(value => (typeof value === 'string' ? value : value.nom)),
-          map(name => (name ? this._filter(name) : this.options.slice()))
-        );
-      },
-      (error) => {
-        console.error('Erreur lors de la récupération des catégories :', error);
-      }
-    );
-  } else {
-    console.error('Aucun token trouvé !');
+    if (token) {
+      this.categorieService.getCategories(token).subscribe(
+        (categories) => {
+          console.log('Catégories reçues depuis l\'API :', categories); // Debug ici
+          this.options = categories;
+          this.filteredOptions = this.myControl.valueChanges.pipe(
+            startWith<string | Categorie>(''),
+            map(value => (typeof value === 'string' ? value : value.nom)),
+            map(name => (name ? this._filter(name) : this.options.slice()))
+          );
+        },
+        (error) => {
+          console.error('Erreur lors de la récupération des catégories :', error);
+        }
+      );
+    } else {
+      console.error('Aucun token trouvé !');
+    }
+    // 🟢 Filtrage des unité de mesure (OK)
+    if (token) {
+      this.uniteMesureService.getUniteMesure(token).subscribe(
+        (uniteMesures) => {
+          console.log('Unité de mesure reçues depuis l\'API :', uniteMesures); // Debug ici
+          this.optionsUnite = uniteMesures;
+          this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
+            startWith<string | UniteMesure>(''),
+            map(value => (typeof value === 'string' ? value : value.nom)),
+            map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
+          );
+        },
+        (error) => {
+          console.error('Erreur lors de la récupération des catégories :', error);
+        }
+      );
+    } else {
+      console.error('Aucun token trouvé !');
+    }
+
+    // Formulaire pour ajouter une catégorie
+    this.ajouteCategoryForm = this.fb.group({
+      categoryName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]]
+    });
+
+    // À chaque changement de valeur dans le champ "categoryName", on réinitialise l'erreur
+    this.ajouteCategoryForm.get('categoryName')?.valueChanges.subscribe(() => {
+      this.errorMessageCategory = '';
+      this.messageAPI = '';
+      this.apiMessageType = '';
+    });
   }
 
-  if (token) {
-    this.uniteMesureService.getUniteMesure(token).subscribe(
-      (uniteMesures) => {
-        console.log('Unité de mesure reçues depuis l\'API :', uniteMesures); // Debug ici
-        this.optionsUnite = uniteMesures;
-        this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
-          startWith<string | UniteMesure>(''),
-          map(value => (typeof value === 'string' ? value : value.nom)),
-          map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
-        );
-      },
-      (error) => {
-        console.error('Erreur lors de la récupération des catégories :', error);
-      }
-    );
-  } else {
-    console.error('Aucun token trouvé !');
-  }
-
-    // Filtrage des unités 
-    // this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
-    //   startWith(''),
-    //   map(value => this._filterUnite(value))
-    // );
-
+  // Getter pour faciliter l'accès aux contrôles dans le template
+  get c() { return this.ajouteCategoryForm.controls; }
   
-  }
-  
-
-  // POUR CATEGORY
-   // Lorsqu'une catégorie est sélectionnée dans l'autocomplete
-   onCategorySelected(event: any): void {
+  // Lorsqu'une catégorie est sélectionnée dans l'autocomplete
+  onCategorySelected(event: any): void {
     const selectedCategory = event.option.value;
     // this.produit.category = selectedCategory;
   }
-
-  // displayFn(acte?: CategorySelect): string {
-  //   return acte ? acte.name : '';
-  // }  
 
   // Pour categorie 
   private _filter(name: string): Categorie[] {
@@ -178,7 +195,6 @@ export class AddProduitComponent {
 
   // POUR UNITE
   UniterControl = new FormControl();
-
   showCategoryCreation: boolean = false;
   showUniteCreation: boolean = false;
 
@@ -202,4 +218,74 @@ export class AddProduitComponent {
   cancelUniteCreation() {
     this.showUniteCreation = false;
   }
+
+
+  //////////////////////////////////////// CREATION DE CATEGORIES
+
+  // Ouvre la popup avec titre, message et type (success ou error)
+  // openPopupCategory2(title: string, message: string, type: 'success' | 'error'): void {
+  //   this.popupTitle = title;
+  //   this.popupMessage = message;
+  //   this.popupType = type;
+  //   // Choix de l'image en fonction du type
+  //   if (type === 'success') {
+  //     this.popupImage = 'assets/img/succcccc.png'; // Remplacez par le chemin de votre image de succès
+  //   } else {
+  //     this.popupImage = 'assets/img/error.png'; // Remplacez par le chemin de votre image d'erreur
+  //   }
+  //   this.showPopupCategory2 = true;
+  // }
+
+  // // Ferme la popup et redirige si l'inscription a réussi
+  // closePopupCategory2(): void {
+  //   this.showPopupCategory2 = false;
+  //   if (this.popupType === 'success') {
+  //     //this.router.navigate(['/produit']);
+  //     this.showPopupCategory = false;
+  //     this.ajouteCategoryForm.reset();
+  //     this.errorMessageCategory = '';
+      
+  //   }
+  // }
+
+  submitFormCategory(): void {
+    // if (this.ajouteCategoryForm.invalid) {
+    //   this.errorMessageCategory = "Veuillez remplir correctement le formulaire.";
+    //   return;
+    // }
+  
+    const categoryData = { nom: this.ajouteCategoryForm.value.categoryName };
+  
+    this.categorieService.ajouterCategorie(categoryData).subscribe({
+      next: (response: any) => {
+        console.log('Categorie ajouté avec succès : ', response);
+        if (response && response.id) {
+          this.apiMessageType = 'success';
+          this.messageAPI = response.message || "La catégorie a été créée avec succès.";
+          this.ajouteCategoryForm.reset();
+        }
+        
+      },
+      error: (error) => {
+        console.log("Erreur complète :", error);
+        console.log("Réponse API :", error.error);
+        let message = "Une erreur est survenue lors de la création du produit.";
+  
+        if (error.error) {
+          // Si error.error est un objet contenant une propriété "error"
+          if (typeof error.error === "object" && error.error.error) {
+            message = error.error.error;
+          }
+          // Si error.error est une chaîne, on l'utilise directement
+          else if (typeof error.error === "string") {
+            message = error.error;
+          }
+        }
+  
+        this.apiMessageType = 'error';
+        this.messageAPI = message;
+      }
+    });
+  }  
+  
 }
