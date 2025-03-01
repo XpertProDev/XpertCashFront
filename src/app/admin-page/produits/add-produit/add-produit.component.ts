@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { ProduitService } from '../../SERVICES/add-produit-service';
 import { PopupData } from '../../MODELS/PopUp/popup-data';
 import { UsersService } from '../../SERVICES/users.service';
+import { UsersService } from '../../SERVICES/users.service';
 
 // export interface CategorySelect {
 //   name: string;
@@ -168,7 +169,7 @@ export class AddProduitComponent {
       reader.onload = (e) => {
         this.newPhotoUrl = e.target?.result as string;
       };
-      reader.readAsDataURL(this.imageFile);
+      reader.readAsDataURL(this.selectedFile);
     }
   }
 
