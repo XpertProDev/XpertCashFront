@@ -198,9 +198,6 @@ tr:hover {
   border-radius: 10px;
 }
 
-
-
-
 /* Overlay du modal */
 .modal-overlay {
   position: fixed;
@@ -657,16 +654,16 @@ mat-paginator {
   transition: background 0.3s ease;
 }
 /* Style du bouton */
-.btnOKOK {
-  background-color: #0672E4;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  font-size: 1em;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
+// .btnOKOK {
+//   background-color: #0672E4;
+//   color: #fff;
+//   border: none;
+//   padding: 10px 20px;
+//   font-size: 1em;
+//   border-radius: 5px;
+//   cursor: pointer;
+//   transition: background 0.3s ease;
+// }
 
 .modal-content2.error button {
   background-color: #e53935;

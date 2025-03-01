@@ -206,7 +206,15 @@
             </div>
 
             <!-- Buttom ajouter et annuler  -->
-            <div class="information_cadre">
+            <div class="information_cadre information_cadre_save">
+
+              <!-- Message d'erreur global -->
+              <div class="container_error_message">
+                <div *ngIf="errorMessage" class="error-message">
+                  {{ errorMessage }}
+                </div>
+              </div>
+
               <div class="info_titre_input info_titre_input_btn">
 
                 <!-- Input de produits  -->
@@ -218,6 +226,20 @@
                   <button class="btn_save">Sauvegarder</button>
                 </div>
                 
+              </div>
+            </div>
+
+            <!-- Popup de confirmation / d'erreur -->
+            <div class="modal-overlay" *ngIf="showPopup">
+              <div class="modal-content" [ngClass]="{'error': popupData.type === 'error'}">
+                <div class="popup-header">
+                  <div class="popup-img">
+                      <img [src]="popupData.image" alt="Icone" class="popup-icon2">
+                  </div>
+                  <h2>{{ popupData.title }}</h2>
+                </div>
+                <p>{{ popupData.message }}</p>
+                <button (click)="closePopup()">OK</button>
               </div>
             </div>
 

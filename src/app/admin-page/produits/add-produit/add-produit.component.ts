@@ -12,6 +12,7 @@ import { UniteMesure } from '../../MODELS/unite.model';
 import { UniteMesureService } from '../../SERVICES/unite.service';
 import { Router } from '@angular/router';
 import { ProduitService } from '../../SERVICES/add-produit-service';
+import { PopupData } from '../../MODELS/PopUp/popup-data';
 
 // export interface CategorySelect {
 //   name: string;
@@ -36,8 +37,47 @@ import { ProduitService } from '../../SERVICES/add-produit-service';
   styleUrl: './add-produit.component.scss'
 })
 export class AddProduitComponent {
+
+  // boutiqueId: number | null = null;
+
+  // Variable pour gérer l'affichage du popup
+  showPopup: boolean = false;
+
+   // Variable regroupant toutes les informations du popup
+   popupData: PopupData = {
+    title: '',
+    message: '',
+    image: '',
+    type: 'success'
+  };
+  
+  // Exemple d'utilisation lors d'une réponse du backend
+  onResponseFromBackend(response: any): void {
+    // Par exemple, si response contient { message, type } et que vous souhaitez afficher une image par défaut
+    const defaultImage = response.type === 'success' ? 'assets/img/succes.png' : 'assets/img/error.png';
+    this.showPopupMessage({
+      title: response.type === 'success' ? 'Succès' : 'Erreur',
+      message: response.message,
+      image: defaultImage,
+      type: response.type
+    });
+  }
+  
+  // Méthode pour afficher le popup avec des données passées en paramètre
+  showPopupMessage(data: PopupData): void {
+    this.popupData = data;
+    this.showPopup = true;
+  }
+
+  // Méthode pour fermer le popup
+  closePopup(): void {
+    this.showPopup = false;
+  }
+
+
   isChecked = false;
   boutiqueName: string = '';
+  boutiqueId: number = 1; 
   messageAPI: string = '';
   apiMessageType: 'success' | 'error' | '' = '';
 
@@ -50,10 +90,10 @@ export class AddProduitComponent {
   errorMessageUnity: string = '';
 
   // Propriétés pour la popup
-  showPopup: boolean = false;
-  showPopup2: boolean = false;
-  showPopupCategory: boolean = false;
-  showPopupCategory2: boolean = false;
+  // showPopup: boolean = false;
+  // showPopup2: boolean = false;
+  // showPopupCategory: boolean = false;
+  // showPopupCategory2: boolean = false;
   popupTitle: string = '';
   popupMessage: string = '';
   popupImage: string = '';
@@ -173,7 +213,6 @@ export class AddProduitComponent {
     } else {
       console.error('Aucun token trouvé !');
     }
-
     this.ajouteProduitForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prixVente: ['', Validators.required],
@@ -184,6 +223,10 @@ export class AddProduitComponent {
       codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],
       categorieId: [''],
       uniteId: ['']
+    });
+    // Abonnement pour récupérer l'ID de la boutique active
+    this.sharedDataService.boutiqueId$.subscribe(id => {
+      this.boutiqueId = id;
     });
 
     // Formulaire pour ajouter une catégorie
@@ -376,50 +419,60 @@ export class AddProduitComponent {
     });
   } 
 
-  onSubmit() {
+  /*
+
     if (this.ajouteProduitForm.invalid) {
+      this.errorMessage = "Veuillez vérifier les informations saisies.";
       return;
     }
+  */
+
+
+    onSubmit() {
+      if (this.ajouteProduitForm.invalid) {
+        this.errorMessage = "Veuillez vérifier les informations saisies.";
+        return;
+      }
+      
+      // (patch des catégories et unités comme précédemment)
   
-    // Récupérer et patcher l'ID de la catégorie sélectionnée
-    const categorieSelected = this.myControl.value;
-    if (categorieSelected && typeof categorieSelected === 'object') {
-      this.ajouteProduitForm.patchValue({ categorieId: categorieSelected.id });
+      const produit = this.ajouteProduitForm.value;
+      const tokenStored = localStorage.getItem('authToken');
+      if (!tokenStored) {
+        this.showPopupMessage({
+          title: 'Erreur',
+          message: 'Aucun token trouvé !',
+          image: 'assets/img/error.png',
+          type: 'error'
+        });
+        return;
+      }
+      const token = `Bearer ${tokenStored}`;
+      const addToStock = this.isChecked;
+  
+      this.produitService.ajouterProduit(this.boutiqueId, produit, this.imageFile, addToStock, token)
+        .subscribe({
+          next: data => {
+            this.showPopupMessage({
+              title: 'Succès',
+              message: 'Produit créé avec succès',
+              image: 'assets/img/succcccc.png',
+              type: 'success'
+            });
+            this.ajouteProduitForm.reset();
+            this.myControl.reset();
+            this.uniteControl.reset();
+          },
+          error: error => {
+            this.showPopupMessage({
+              title: 'Erreur',
+              message: error.error ? error.error : 'Erreur lors de la création du produit',
+              image: 'assets/img/error.png',
+              type: 'error'
+            });
+          }
+        });
     }
-  
-    // Récupérer et patcher l'ID de l'unité sélectionnée
-    const uniteSelected = this.uniteControl.value;
-    if (uniteSelected && typeof uniteSelected === 'object') {
-      this.ajouteProduitForm.patchValue({ uniteId: uniteSelected.id });
-    }
-  
-    // Récupérer les données du formulaire
-    const produit = this.ajouteProduitForm.value;
-    const boutiqueId = 1;
-  
-    // Récupérer un token valide depuis le localStorage (ou via un service d'authentification)
-    const tokenStored = localStorage.getItem('authToken');
-    if (!tokenStored) {
-      console.error('Aucun token trouvé !');
-      return;
-    }
-    const token = `Bearer ${tokenStored}`;
-  
-    const addToStock = this.isChecked;
-  
-    this.produitService.ajouterProduit(boutiqueId, produit, this.imageFile, addToStock, token)
-      .subscribe({
-        next: data => {
-          console.log('Produit créé avec succès', data);
-          // Réinitialiser le formulaire et les contrôles d'autocomplétion
-          this.ajouteProduitForm.reset();
-          this.myControl.reset();
-          this.uniteControl.reset();
-        },
-        error: error => {
-          console.error('Erreur lors de la création du produit', error);
-        }
-      });
-  }  
+
   
 }
