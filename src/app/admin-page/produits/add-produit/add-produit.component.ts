@@ -11,6 +11,8 @@ import { Categorie } from '../../MODELS/categorie.model';
 import { UniteMesure } from '../../MODELS/unite.model';
 import { UniteMesureService } from '../../SERVICES/unite.service';
 import { Router } from '@angular/router';
+import { ProduitService } from '../../SERVICES/add-produit-service';
+import { PopupData } from '../../MODELS/PopUp/popup-data';
 import { UsersService } from '../../SERVICES/users.service';
 
 // export interface CategorySelect {
@@ -36,8 +38,47 @@ import { UsersService } from '../../SERVICES/users.service';
   styleUrl: './add-produit.component.scss'
 })
 export class AddProduitComponent {
+
+  // boutiqueId: number | null = null;
+
+  // Variable pour gérer l'affichage du popup
+  showPopup: boolean = false;
+
+   // Variable regroupant toutes les informations du popup
+   popupData: PopupData = {
+    title: '',
+    message: '',
+    image: '',
+    type: 'success'
+  };
+  
+  // Exemple d'utilisation lors d'une réponse du backend
+  onResponseFromBackend(response: any): void {
+    // Par exemple, si response contient { message, type } et que vous souhaitez afficher une image par défaut
+    const defaultImage = response.type === 'success' ? 'assets/img/succes.png' : 'assets/img/error.png';
+    this.showPopupMessage({
+      title: response.type === 'success' ? 'Succès' : 'Erreur',
+      message: response.message,
+      image: defaultImage,
+      type: response.type
+    });
+  }
+  
+  // Méthode pour afficher le popup avec des données passées en paramètre
+  showPopupMessage(data: PopupData): void {
+    this.popupData = data;
+    this.showPopup = true;
+  }
+
+  // Méthode pour fermer le popup
+  closePopup(): void {
+    this.showPopup = false;
+  }
+
+
   isChecked = false;
   boutiqueName: string = '';
+  boutiqueId: number = 1; 
   messageAPI: string = '';
   apiMessageType: 'success' | 'error' | '' = '';
 
@@ -50,10 +91,10 @@ export class AddProduitComponent {
   errorMessageUnity: string = '';
 
   // Propriétés pour la popup
-  showPopup: boolean = false;
-  showPopup2: boolean = false;
-  showPopupCategory: boolean = false;
-  showPopupCategory2: boolean = false;
+  // showPopup: boolean = false;
+  // showPopup2: boolean = false;
+  // showPopupCategory: boolean = false;
+  // showPopupCategory2: boolean = false;
   popupTitle: string = '';
   popupMessage: string = '';
   popupImage: string = '';
@@ -64,10 +105,14 @@ export class AddProduitComponent {
   adresseEntreprise: string = '';
   logoEntreprise: string =''
 
+  // produitForm: FormGroup;
+  imageFile: File | null = null;
+
   constructor(
     private sharedDataService: SharedDataService,
     private categorieService: CategorieService,
     private uniteMesureService: UniteMesureService,
+    private produitService: ProduitService,
     private fb: FormBuilder,
     private router: Router,
     private usersService: UsersService,
@@ -86,6 +131,19 @@ export class AddProduitComponent {
   newPhotoUrl: string | null = null;
   selectedFile: File | null | undefined = null;
 
+  // onFileSelected(event: Event): void {
+  //   const input = event.target as HTMLInputElement;
+  //   if (input.files && input.files.length > 0) {
+  //     this.selectedFile = input.files[0];
+  
+  //     const reader = new FileReader();
+  //     reader.onload = (e) => {
+  //       this.newPhotoUrl = e.target?.result as string;
+  //     };
+  //     reader.readAsDataURL(this.selectedFile);
+  //   }
+  // }
+  // Remplacez cette méthode :
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -109,7 +167,7 @@ export class AddProduitComponent {
       };
       reader.readAsDataURL(this.selectedFile);
     }
-  }   
+  }
 
   //////// FOCUS CATEGORY
   myControl = new FormControl();
@@ -138,7 +196,8 @@ export class AddProduitComponent {
           this.options = categories;
           this.filteredOptions = this.myControl.valueChanges.pipe(
             startWith<string | Categorie>(''),
-            map(value => (typeof value === 'string' ? value : value.nom)),
+            // map(value => (typeof value === 'string' ? value : value.nom)),
+            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
             map(name => (name ? this._filter(name) : this.options.slice()))
           );
         },
@@ -157,7 +216,8 @@ export class AddProduitComponent {
           this.optionsUnite = uniteMesures;
           this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
             startWith<string | UniteMesure>(''),
-            map(value => (typeof value === 'string' ? value : value.nom)),
+            // map(value => (typeof value === 'string' ? value : value.nom)),
+            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
             map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
           );
         },
@@ -168,6 +228,21 @@ export class AddProduitComponent {
     } else {
       console.error('Aucun token trouvé !');
     }
+    this.ajouteProduitForm = this.fb.group({
+      nom: ['', [Validators.required, Validators.minLength(2)]],
+      prixVente: ['', Validators.required],
+      prixAchat: ['', Validators.required],
+      quantite: ['', Validators.required],
+      seuilAlert: ['', Validators.required],
+      description: [''],
+      codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],
+      categorieId: [''],
+      uniteId: ['']
+    });
+    // Abonnement pour récupérer l'ID de la boutique active
+    this.sharedDataService.boutiqueId$.subscribe(id => {
+      this.boutiqueId = id;
+    });
 
     // Formulaire pour ajouter une catégorie
     this.ajouteCategoryForm = this.fb.group({
@@ -221,6 +296,7 @@ export class AddProduitComponent {
   // Getter pour faciliter l'accès aux contrôles dans le template
   get c() { return this.ajouteCategoryForm.controls; }
   get u() { return this.ajouteUniteForm.controls; }
+  get f() { return this.ajouteProduitForm.controls; }
   
   // Lorsqu'une catégorie est sélectionnée dans l'autocomplete
   onCategorySelected(event: any): void {
@@ -395,7 +471,62 @@ export class AddProduitComponent {
         this.messageAPI = message;
       }
     });
-  }
+  } 
+
+  /*
+
+    if (this.ajouteProduitForm.invalid) {
+      this.errorMessage = "Veuillez vérifier les informations saisies.";
+      return;
+    }
+  */
+
+
+    onSubmit() {
+      if (this.ajouteProduitForm.invalid) {
+        this.errorMessage = "Veuillez vérifier les informations saisies.";
+        return;
+      }
+      
+      // (patch des catégories et unités comme précédemment)
   
+      const produit = this.ajouteProduitForm.value;
+      const tokenStored = localStorage.getItem('authToken');
+      if (!tokenStored) {
+        this.showPopupMessage({
+          title: 'Erreur',
+          message: 'Aucun token trouvé !',
+          image: 'assets/img/error.png',
+          type: 'error'
+        });
+        return;
+      }
+      const token = `Bearer ${tokenStored}`;
+      const addToStock = this.isChecked;
+  
+      this.produitService.ajouterProduit(this.boutiqueId, produit, this.imageFile, addToStock, token)
+        .subscribe({
+          next: data => {
+            this.showPopupMessage({
+              title: 'Succès',
+              message: 'Produit créé avec succès',
+              image: 'assets/img/succcccc.png',
+              type: 'success'
+            });
+            this.ajouteProduitForm.reset();
+            this.myControl.reset();
+            this.uniteControl.reset();
+          },
+          error: error => {
+            this.showPopupMessage({
+              title: 'Erreur',
+              message: error.error ? error.error : 'Erreur lors de la création du produit',
+              image: 'assets/img/error.png',
+              type: 'error'
+            });
+          }
+        });
+    }
+
   
 }
