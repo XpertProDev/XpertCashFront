@@ -3,7 +3,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Produit } from '../MODELS/produit.model';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -60,6 +60,21 @@ export class ProduitService {
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     return this.http.get<Produit>(`${this.apiUrl}/produits/${productId}`, { headers });
   }
+
+    // Fonction pour récupérer les totaux des produits de la boutique
+    getProduitBoutique(boutiqueId: number): Observable<Map<string, number>> {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError('Aucun token trouvé');
+      }
+  
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`,
+      });
+  
+      return this.http.get<Map<string, number>>(`${this.apiUrl}/produits/${boutiqueId}/totaux-stock`, { headers });
+    }
   
   
 }

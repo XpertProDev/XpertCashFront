@@ -10,6 +10,7 @@ import { ProductSaleComponent } from './product-sale/product-sale.component';
 import { ApexOptions, ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { HttpClient } from '@angular/common/http';
+import { ProduitService } from 'src/app/admin-page/SERVICES/produit.service';
 @Component({
   selector: 'app-dash-analytics',
   standalone: true,
@@ -27,7 +28,7 @@ export default class DashAnalyticsComponent {
   chartOptions_3!: Partial<ApexOptions>;
 
   // constructor
-  constructor(private usersService: UsersService,private http: HttpClient) {
+  constructor(private userService: UsersService,private http: HttpClient, private produitService: ProduitService) {
     this.chartOptions = {
       chart: {
         height: 205,
@@ -213,40 +214,231 @@ export default class DashAnalyticsComponent {
       }
     };
   }
-  cards = [
-    {
-      background: 'bg-c-blue',
-      title: 'Total Produits',
-      icon: 'icon-shopping-cart',
-      text: 'Pour Categories',
-      number: '486',
-      no: '351'
+  cards: any[] = [];
+  carde2: any[] = [];
+
+
+  ngOnInit() {
+    this.updateTotalProduits();
+    this.getBoutiqueInfo();
+    
+  }
+
+
+ updateTotalProduits() {
+  // Récupérer d'abord les informations utilisateur
+  this.userService.getUserInfo().subscribe(
+    (userInfo) => {
+      console.log(userInfo);
+
+      // Vérifiez si l'utilisateur a des boutiques
+      if (userInfo.boutiques && userInfo.boutiques.length > 0) {
+        const boutiqueId = userInfo.boutiques[0].id;
+
+        if (!boutiqueId) {
+          console.error("L'ID de la boutique est introuvable");
+          return;
+        }
+
+        // Si l'ID de la boutique est trouvé, on peut appeler l'API pour les totaux
+        this.produitService.getProduitBoutique(boutiqueId).subscribe(
+          (totaux: any) => {
+            console.log(totaux);
+
+            const totalEnStock = totaux.totalEnStock || 0;
+            const totalNonEnStock = totaux.totalNonEnStock || 0;
+
+            const totalProduits = totalEnStock + totalNonEnStock;
+
+            this.carde2 = [
+              {
+                background: 'bg-c-blue',
+                title: 'Produits en Totals',
+                icon: 'icon-shopping-cart',
+                text: 'Produits non Stock',
+                number: totalProduits.toString(),
+                no: ''
+              },
+              {
+                background: 'bg-c-blue',
+                title: 'Total des Produits',
+                icon: 'icon-shopping-cart',
+                text: 'XpertCash',
+                number: totaux.totalEnStock.toString(),  
+                no: totalNonEnStock.toString()
+              },
+            ];
+            // Configuration du graphique (apx-chart)
+            this.chartOptions_1 = {
+              chart: {
+                height: 150,
+                type: 'donut'
+              },
+              dataLabels: {
+                enabled: false
+              },
+              plotOptions: {
+                pie: {
+                  donut: {
+                    size: '75%'
+                  }
+                }
+              },
+              labels: ['Produits en Stock', 'Produits Non en Stock'],
+              series: [totalEnStock, totalNonEnStock], 
+              legend: {
+                show: false
+              },
+              tooltip: {
+                theme: 'dark'
+              },
+              grid: {
+                padding: {
+                  top: 20,
+                  right: 0,
+                  bottom: 0,
+                  left: 0
+                }
+              },
+              colors: ['#4680ff', '#2ed8b6'],
+              fill: {
+                opacity: [1, 1]
+              },
+              stroke: {
+                width: 0
+              }
+            };
+          },
+          (error) => {
+            console.error('Erreur lors de la récupération des totaux des produits', error);
+          }
+        );
+      } else {
+        console.error('Aucune boutique trouvée pour cet utilisateur');
+      }
     },
-    {
-      background: 'bg-c-green',
-      title: 'Total Sales',
-      icon: 'icon-tag',
-      text: 'This Month',
-      number: '1641',
-      no: '213'
-    },
-    {
-      background: 'bg-c-yellow',
-      title: 'Revenue',
-      icon: 'icon-repeat',
-      text: 'This Month',
-      number: '$42,56',
-      no: '$5,032'
-    },
-    {
-      background: 'bg-c-red',
-      title: 'Total Profit',
-      icon: 'icon-shopping-cart',
-      text: 'This Month',
-      number: '$9,562',
-      no: '$542'
+    (error) => {
+      console.error('Erreur lors de la récupération des informations utilisateur', error);
     }
-  ];
+  );
+}
+
+getBoutiqueInfo() {
+  this.userService.getUserInfo().subscribe(
+    (userInfo) => {
+      console.log(userInfo);  // Affichez la réponse complète dans la console pour vérifier sa structure
+
+      // Vérifiez si l'utilisateur a des boutiques
+      if (userInfo.boutiques && userInfo.boutiques.length > 0) {
+        const boutiqueId = userInfo.boutiques[0].id;
+
+        if (!boutiqueId) {
+          console.error('L\'ID de la boutique est introuvable');
+          return; 
+        }
+
+        // Si l'ID de la boutique est trouvé, on peut appeler l'API pour les totaux
+        this.produitService.getProduitBoutique(boutiqueId).subscribe(
+          (totaux: any) => {
+            console.log(totaux);
+
+           
+            const totalEnStock = totaux.totalEnStock || 0; 
+            const totalNonEnStock = totaux.totalNonEnStock || 0; 
+
+            const totalProduits = totalEnStock + totalNonEnStock;
+
+            // Mise à jour des cartes avec les totaux des produits
+            this.cards = [
+              {
+                background: 'bg-c-blue',
+                title: 'Total des Produits',
+                icon: 'icon-shopping-cart',
+                text: 'XpertCash',
+                number: totalProduits.toString(),  
+                no: ""
+              },
+              {
+                background: 'bg-c-green',
+                title: 'Vente du jour',
+                icon: 'icon-tag',
+                text: 'du mois',
+                number: '1641',
+                no: '213'
+              },
+              {
+                background: 'bg-c-yellow',
+                title: 'Revenue du jour',
+                icon: 'icon-repeat',
+                text: 'du mois',
+                number: '42,56',
+                no: '5,032'
+              },
+              {
+                background: 'bg-c-red',
+                title: 'Total Profit',
+                icon: 'icon-shopping-cart',
+                text: 'This Month',
+                number: '9,562', 
+                no: '542'
+              },
+             
+            ];
+
+            // Configuration du graphique (apx-chart)
+            this.chartOptions_1 = {
+              chart: {
+                height: 150,
+                type: 'donut'
+              },
+              dataLabels: {
+                enabled: false
+              },
+              plotOptions: {
+                pie: {
+                  donut: {
+                    size: '75%'
+                  }
+                }
+              },
+              labels: ['Produits en Stock', 'Produits Non en Stock'],
+              series: [totalEnStock, totalNonEnStock], 
+              legend: {
+                show: false
+              },
+              tooltip: {
+                theme: 'dark'
+              },
+              grid: {
+                padding: {
+                  top: 20,
+                  right: 0,
+                  bottom: 0,
+                  left: 0
+                }
+              },
+              colors: ['#4680ff', '#2ed8b6'],
+              fill: {
+                opacity: [1, 1]
+              },
+              stroke: {
+                width: 0
+              }
+            };
+          },
+          (error) => {
+            console.error('Erreur lors de la récupération des totaux des produits', error);
+          }
+        );
+      } else {
+        console.error('Aucune boutique trouvée pour cet utilisateur');
+      }
+    },
+    (error) => {
+      console.error('Erreur lors de la récupération des informations utilisateur', error);
+    }
+  );
+}
 
   images = [
     {
@@ -265,4 +457,8 @@ export default class DashAnalyticsComponent {
       size: 'PNG-150KB'
     }
   ];
+
+
+ 
+  
 }
