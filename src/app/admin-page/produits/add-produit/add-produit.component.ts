@@ -14,7 +14,6 @@ import { Router } from '@angular/router';
 import { ProduitService } from '../../SERVICES/add-produit-service';
 import { PopupData } from '../../MODELS/PopUp/popup-data';
 import { UsersService } from '../../SERVICES/users.service';
-import { UsersService } from '../../SERVICES/users.service';
 
 // export interface CategorySelect {
 //   name: string;
