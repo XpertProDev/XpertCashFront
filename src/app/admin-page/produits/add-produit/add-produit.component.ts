@@ -219,7 +219,6 @@ export class AddProduitComponent {
     this.showUniteCreation = false;
   }
 
-
   //////////////////////////////////////// CREATION DE CATEGORIES
 
   // Ouvre la popup avec titre, message et type (success ou error)
@@ -262,7 +261,7 @@ export class AddProduitComponent {
         if (response && response.id) {
           this.apiMessageType = 'success';
           this.messageAPI = response.message || "La catégorie a été créée avec succès.";
-          this.ajouteCategoryForm.reset();
+          // this.ajouteCategoryForm.reset();
         }
         
       },

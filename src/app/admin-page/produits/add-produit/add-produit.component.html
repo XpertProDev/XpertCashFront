@@ -239,7 +239,7 @@
           <div class="errorAPI" *ngIf="messageAPI">
             <img [src]="apiMessageType === 'success' ? 'assets/img/succcccc.png' : 'assets/img/error.png'" alt="Message API">
             <span>{{ messageAPI }}</span>
-          </div>                   
+          </div>                         
               
           <div class="btn-c-s">
             <!-- Bouton Annuler -->
@@ -248,14 +248,13 @@
             </div>
             <!-- Bouton Ajouter -->
             <div class="btn_save_category">
-              <button class="btn_s_category">Ajouter</button>
+              <button type="submit" class="btn_s_category">Ajouter</button>
             </div>
           </div>
         </form>
 
       </div>
       
-
      <!-- Pour cree un category -->
      <div *ngIf="showUniteCreation" class="info_titre_input ajouter_cadre_cree_c_u">
       <h4>Créer un unité</h4>
