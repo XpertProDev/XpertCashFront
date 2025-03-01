@@ -30,5 +30,21 @@ export class UniteMesureService {
     );
   }
 
+   // Ajouter une catégorie
+    ajouterUnite(unity: UniteMesure): Observable<UniteMesure> {
+      const token = localStorage.getItem('authToken') || '';
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      });
+  
+      return this.http.post<UniteMesure>(`${this.apiUrl}/createUnite`, unity, { headers }).pipe(
+        tap((newUnity) => {
+          // Dès qu'une nouvelle catégorie est ajoutée, on met à jour le BehaviorSubject
+          const currentCategories = this.uniteMesuresSubject.value;
+          this.uniteMesuresSubject.next([...currentCategories, newUnity]);  // Ajouter la nouvelle catégorie à la liste
+        })
+      );
+    }
+
   
 }

@@ -43,8 +43,10 @@ export class AddProduitComponent {
   ajouteProduitForm!: FormGroup;
   modifierProduitForm!: FormGroup;
   ajouteCategoryForm!: FormGroup;
+  ajouteUniteForm!: FormGroup;
   errorMessage: string = '';
   errorMessageCategory: string = '';
+  errorMessageUnity: string = '';
 
   // Propriétés pour la popup
   showPopup: boolean = false;
@@ -153,7 +155,12 @@ export class AddProduitComponent {
 
     // Formulaire pour ajouter une catégorie
     this.ajouteCategoryForm = this.fb.group({
-      categoryName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]]
+      categoryName: ['', [/*Validators.required,*/ Validators.minLength(3), Validators.maxLength(20)]]
+    });
+
+    // Formulaire pour ajouter une unite
+    this.ajouteUniteForm = this.fb.group({
+      unityName: ['', [ Validators.minLength(3), Validators.maxLength(20)]]
     });
 
     // À chaque changement de valeur dans le champ "categoryName", on réinitialise l'erreur
@@ -162,10 +169,18 @@ export class AddProduitComponent {
       this.messageAPI = '';
       this.apiMessageType = '';
     });
+
+    // À chaque changement de valeur dans le champ "uniteName", on réinitialise l'erreur
+    this.ajouteUniteForm.get('unityName')?.valueChanges.subscribe(() => {
+      this.errorMessageUnity = '';
+      this.messageAPI = '';
+      this.apiMessageType = '';
+    });
   }
 
   // Getter pour faciliter l'accès aux contrôles dans le template
   get c() { return this.ajouteCategoryForm.controls; }
+  get u() { return this.ajouteUniteForm.controls; }
   
   // Lorsqu'une catégorie est sélectionnée dans l'autocomplete
   onCategorySelected(event: any): void {
@@ -201,13 +216,17 @@ export class AddProduitComponent {
   // Lorsque l'utilisateur clique sur "Créer" pour une catégorie
   onCreateCategoryClick() {
     this.showCategoryCreation = true;
-    this.showUniteCreation = false; // Facultatif si vous ne voulez afficher qu'un seul formulaire à la fois
+    this.showUniteCreation = false; 
+    // this.ajouteUniteForm.get('unityName')!.setValue('');
+    this.ajouteCategoryForm.get('categoryName')!.setValue('');
   }
 
   // Lorsque l'utilisateur clique sur "Créer" pour une unité
   onCreateUniteClick() {
     this.showUniteCreation = true;
     this.showCategoryCreation = false;
+    this.ajouteUniteForm.get('unityName')!.setValue('');
+    // this.ajouteCategoryForm.get('categoryName')!.setValue('');
   }
 
   // Méthodes pour annuler la création
@@ -259,9 +278,9 @@ export class AddProduitComponent {
       next: (response: any) => {
         console.log('Categorie ajouté avec succès : ', response);
         if (response && response.id) {
+          this.ajouteCategoryForm.get('categoryName')!.setValue('');
           this.apiMessageType = 'success';
           this.messageAPI = response.message || "La catégorie a été créée avec succès.";
-          // this.ajouteCategoryForm.reset();
         }
         
       },
@@ -286,5 +305,41 @@ export class AddProduitComponent {
       }
     });
   }  
+
+  submitFormUnity(): void {
+
+    const unityData = { nom: this.ajouteUniteForm.value.unityName };
+  
+    this.uniteMesureService.ajouterUnite(unityData).subscribe({
+      next: (response: any) => {
+        console.log('Unité ajouté avec succès : ', response);
+        if (response && response.id) {
+          this.ajouteUniteForm.get('unityName')!.setValue('');
+          this.apiMessageType = 'success';
+          this.messageAPI = response.message || "La unité a été créée avec succès.";
+        }
+        
+      },
+      error: (error) => {
+        console.log("Erreur complète :", error);
+        console.log("Réponse API :", error.error);
+        let message = "Une erreur est survenue lors de la création de unité.";
+  
+        if (error.error) {
+          // Si error.error est un objet contenant une propriété "error"
+          if (typeof error.error === "object" && error.error.error) {
+            message = error.error.error;
+          }
+          // Si error.error est une chaîne, on l'utilise directement
+          else if (typeof error.error === "string") {
+            message = error.error;
+          }
+        }
+  
+        this.apiMessageType = 'error';
+        this.messageAPI = message;
+      }
+    });
+  } 
   
 }

@@ -68,7 +68,7 @@
                   </div>                  
                   
                   <div class="btn_add_categoryDiv2">
-                    <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer</button>
+                    <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer une catégorie</button>
                   </div>
                 </div>
 
@@ -114,7 +114,7 @@
                     </mat-autocomplete>
                   </div>
                   <div class="btn_add_categoryDiv2">
-                    <button class="btn_add_category2" (click)="onCreateUniteClick()">Créer</button>
+                    <button class="btn_add_category2" (click)="onCreateUniteClick()">Créer une unité</button>
                   </div>
                 </div>
                 
@@ -220,7 +220,7 @@
             <label for="categoryName" class="label labelColor">Nom catégorie</label>
             <!-- Message d'erreur dynamique -->
             <div *ngIf="c['categoryName'].touched && c['categoryName'].invalid" class="error-message">
-              <span *ngIf="c['categoryName'].errors?.['required']">Le nom de la catégorie est obligatoire.</span>
+              <!-- <span *ngIf="c['categoryName'].errors?.['required']">Le nom de la catégorie est obligatoire.</span> -->
               <span *ngIf="c['categoryName'].errors?.['minlength']">Le nom doit avoir au moins 3 caractères.</span>
               <span *ngIf="c['categoryName'].errors?.['maxlength']">Le nom ne doit pas dépasser 20 caractères.</span>
             </div>
@@ -258,18 +258,37 @@
      <!-- Pour cree un category -->
      <div *ngIf="showUniteCreation" class="info_titre_input ajouter_cadre_cree_c_u">
       <h4>Créer un unité</h4>
-      <div class="champ_input" style="margin-top: 15px;">
-        <input type="text" class="input_focus input_focus_cree_cate" required id="creatUnite" name="creatUnite" placeholder="Saisis le nom de unité">
-        <label for="creatUnite" class="label labelColor">Nom unité</label>
-      </div>
-      <div class="btn-c-s">
-        <div class="btn_cancel_category">
-          <button class="btn_c_category" (click)="cancelUniteCreation()">Annuler</button>
+      <form [formGroup]="ajouteUniteForm" (ngSubmit)="submitFormUnity()">
+        <div class="champ_input" style="margin-top: 15px;">
+          <input formControlName="unityName" type="text" class="input_focus input_focus_cree_cate" required id="unityName" name="unityName" placeholder="Saisis le nom de unité">
+          <label for="unityName" class="label labelColor">Nom unité</label>
+          <!-- Message d'erreur dynamique -->
+          <div *ngIf="u['unityName'].touched && u['unityName'].invalid" class="error-message">
+            <!-- <span *ngIf="u['unityName'].errors?.['required']">Le nom de la unité est obligatoire.</span> -->
+            <span *ngIf="u['unityName'].errors?.['minlength']">Le nom doit avoir au moins 3 caractères.</span>
+            <span *ngIf="u['unityName'].errors?.['maxlength']">Le nom ne doit pas dépasser 20 caractères.</span>
+          </div>
         </div>
-        <div class="btn_save_category">
-          <button class="btn_s_category">Ajouter</button>
+
+        <div *ngIf="errorMessage" class="error-message-category">
+          {{ errorMessageUnity }}
         </div>
-      </div>
+
+        <div class="errorAPI" *ngIf="messageAPI">
+          <img [src]="apiMessageType === 'success' ? 'assets/img/succcccc.png' : 'assets/img/error.png'" alt="Message API">
+          <span>{{ messageAPI }}</span>
+        </div>        
+
+
+        <div class="btn-c-s">
+          <div class="btn_cancel_category">
+            <button class="btn_c_category" (click)="cancelUniteCreation()">Annuler</button>
+          </div>
+          <div class="btn_save_category">
+            <button type="submit" class="btn_s_category">Ajouter</button>
+          </div>
+        </div>
+      </form>
     </div>    
 
     </div>
