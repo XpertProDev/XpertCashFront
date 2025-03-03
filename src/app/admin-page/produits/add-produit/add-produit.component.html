@@ -322,7 +322,7 @@
           <!-- Message d'erreur dynamique -->
           <div *ngIf="u['unityName'].touched && u['unityName'].invalid" class="error-message">
             <!-- <span *ngIf="u['unityName'].errors?.['required']">Le nom de la unité est obligatoire.</span> -->
-            <span *ngIf="u['unityName'].errors?.['minlength']">Le nom doit avoir au moins 3 caractères.</span>
+            <span *ngIf="u['unityName'].errors?.['minlength']">Le nom doit avoir au moins 2 caractères.</span>
             <span *ngIf="u['unityName'].errors?.['maxlength']">Le nom ne doit pas dépasser 20 caractères.</span>
           </div>
         </div>

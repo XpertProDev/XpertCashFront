@@ -259,7 +259,7 @@ export class AddProduitComponent {
 
     // Formulaire pour ajouter une unite
     this.ajouteUniteForm = this.fb.group({
-      unityName: ['', [ Validators.minLength(3), Validators.maxLength(20)]]
+      unityName: ['', [ Validators.minLength(2), Validators.maxLength(20)]]
     });
 
     // À chaque changement de valeur dans le champ "categoryName", on réinitialise l'erreur
@@ -508,68 +508,82 @@ onUniteSelected(event: any): void {
   */
 
 
-    onSubmit() {
+  onSubmit() {
 
-      if (this.ajouteProduitForm.invalid) {
-        this.errorMessage = "Veuillez vérifier les informations saisies.";
-        return;
-      }
-      
-      this.isLoading = true;
-      
-      // (patch des catégories et unités comme précédemment)
-  
-      const produit = this.ajouteProduitForm.value;
-      console.log('Produit soumis:', produit);
-      const tokenStored = localStorage.getItem('authToken');
-      if (!tokenStored) {
-        this.showPopupMessage({
-          title: 'Erreur',
-          message: 'Aucun token trouvé !',
-          image: 'assets/img/error.png',
-          type: 'error'
-        });
-        this.isLoading = false;
-        return;
-      }
-      const token = `Bearer ${tokenStored}`;
-      const addToStock = this.isChecked;
-  
-      setTimeout(() => { 
-
-        this.produitService.ajouterProduit(this.boutiqueId, produit, this.imageFile, addToStock, token)
-        .subscribe({
-          next: data => {
-            this.showPopupMessage({
-              title: 'Succès',
-              message: 'Produit créé avec succès',
-              image: 'assets/img/succcccc.png',
-              type: 'success',
-              
-            });
-            this.ajouteProduitForm.reset();
-            this.myControl.reset();
-            this.uniteControl.reset();
-
-            this.imageFile = null;
-            this.selectedFile = null;
-            this.newPhotoUrl = null;
-
-            this.isLoading = false;
-          },
-          error: error => {
-            this.showPopupMessage({
-              title: 'Erreur',
-              message: error.error ? error.error : 'Erreur lors de la création du produit',
-              image: 'assets/img/error.png',
-              type: 'error'
-            });
-            this.isLoading = false;
-          }
-        });
-      }, 100);
-      
+    if (this.ajouteProduitForm.invalid) {
+      this.errorMessage = "Veuillez vérifier les informations saisies.";
+      return;
     }
+    
+    this.isLoading = true;
+    
+    // (patch des catégories et unités comme précédemment)
+
+    const produit = this.ajouteProduitForm.value;
+    console.log('Produit soumis:', produit);
+    const tokenStored = localStorage.getItem('authToken');
+    if (!tokenStored) {
+      this.showPopupMessage({
+        title: 'Erreur',
+        message: 'Aucun token trouvé !',
+        image: 'assets/img/error.png',
+        type: 'error'
+      });
+      this.isLoading = false;
+      return;
+    }
+    const token = `Bearer ${tokenStored}`;
+    const addToStock = this.isChecked;
+
+    setTimeout(() => { 
+
+      this.produitService.ajouterProduit(this.boutiqueId, produit, this.imageFile, addToStock, token)
+      .subscribe({
+        next: data => {
+          this.showPopupMessage({
+            title: 'Succès',
+            message: 'Produit créé avec succès',
+            image: 'assets/img/succcccc.png',
+            type: 'success',
+            
+          });
+          this.ajouteProduitForm.reset();
+          this.myControl.reset();
+          this.uniteControl.reset();
+
+          this.imageFile = null;
+          this.selectedFile = null;
+          this.newPhotoUrl = null;
+
+          this.isLoading = false;
+        },
+        error: error => {
+          let errorMessage = 'Erreur lors de la création du produit';
+          
+          if (error.error) {
+            if (typeof error.error === 'object' && error.error.error) {
+              errorMessage = error.error.error;
+            } else if (typeof error.error === 'string') {
+              errorMessage = error.error;
+            }
+          }
+          
+          // Optionnel : supprimer le préfixe "Une erreur est survenue :"
+          errorMessage = errorMessage.replace('Une erreur est survenue : ', '');
+          
+          this.showPopupMessage({
+            title: 'Erreur',
+            message: errorMessage,
+            image: 'assets/img/error.png',
+            type: 'error'
+          });
+          this.isLoading = false;
+        }        
+        
+      });
+    }, 100);
+    
+  }
 
   
   
