@@ -67,7 +67,8 @@ export class AddProduitComponent {
   // Méthode pour afficher le popup avec des données passées en paramètre
   showPopupMessage(data: PopupData): void {
     this.popupData = data;
-    this.showPopup = true;
+    this.showPopup = true; 
+    
   }
 
   // Méthode pour fermer le popup
@@ -107,6 +108,7 @@ export class AddProduitComponent {
 
   // produitForm: FormGroup;
   imageFile: File | null = null;
+  isLoading: boolean = false;
 
   constructor(
     private sharedDataService: SharedDataService,
@@ -144,30 +146,35 @@ export class AddProduitComponent {
   //   }
   // }
   // Remplacez cette méthode :
+ 
   onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0]; // Récupère le fichier sélectionné
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0]; // Récupère le fichier sélectionné
 
-      // Vérification de la taille du fichier (2 Mo = 2 * 1024 * 1024 octets)
-      const maxSize = 2 * 1024 * 1024;
-      if (file.size > maxSize) {
-        this.errorMessage = 'Le fichier est trop volumineux. Veuillez choisir un fichier de moins de 2 Mo.';
-        this.selectedFile = null;
-        this.newPhotoUrl = null;
-        return;
-      }
-
-        // Si le fichier est correct, on continue
-      this.errorMessage = '';
-      this.selectedFile = file;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.newPhotoUrl = e.target?.result as string;
-      };
-      reader.readAsDataURL(this.selectedFile);
+    // Vérification de la taille du fichier (2 Mo = 2 * 1024 * 1024 octets)
+    const maxSize = 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.errorMessage = 'Le fichier est trop volumineux. Veuillez choisir un fichier de moins de 2 Mo.';
+      this.selectedFile = null;
+      this.imageFile = null;  // Réinitialise l'image si le fichier est trop grand
+      this.newPhotoUrl = null;
+      return;
     }
+
+    // Si le fichier est correct, on continue
+    this.errorMessage = '';
+    this.selectedFile = file;
+    this.imageFile = file; // ✅ Associe le fichier sélectionné à imageFile
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.newPhotoUrl = e.target?.result as string;
+    };
+    reader.readAsDataURL(this.selectedFile);
   }
+}
+
 
   //////// FOCUS CATEGORY
   myControl = new FormControl();
@@ -182,6 +189,7 @@ export class AddProduitComponent {
 
   ngOnInit(): void  {
     this.getBoutiqueName();
+    
     // Partage de donner de user
     this.sharedDataService.boutiqueName$.subscribe(name => {
       console.log("AddProduitComponent - Nom boutique récupéré :", name);
@@ -298,11 +306,29 @@ export class AddProduitComponent {
   get u() { return this.ajouteUniteForm.controls; }
   get f() { return this.ajouteProduitForm.controls; }
   
-  // Lorsqu'une catégorie est sélectionnée dans l'autocomplete
-  onCategorySelected(event: any): void {
-    const selectedCategory = event.option.value;
-    // this.produit.category = selectedCategory;
+ // Méthode pour la sélection d'une catégorie
+ onCategorySelected(event: any): void {
+  console.log('Option sélectionnée :', event.option.value);  // Ajoutez ce log pour vérifier la sélection
+  if (event.option && event.option.value) {
+    this.ajouteProduitForm.get('categorieId')?.setValue(event.option.value.id);
+  } else {
+    this.ajouteProduitForm.get('categorieId')?.setValue(null);
   }
+}
+
+
+
+onUniteSelected(event: any): void {
+  console.log('Unité sélectionnée :', event.option.value);
+  if (event.option && event.option.value) {
+    this.ajouteProduitForm.get('uniteId')?.setValue(event.option.value.id);
+  } else {
+    this.ajouteProduitForm.get('uniteId')?.setValue(null);
+  }
+}
+
+
+  
 
   // Pour categorie 
   private _filter(name: string): Categorie[] {
@@ -483,14 +509,18 @@ export class AddProduitComponent {
 
 
     onSubmit() {
+
       if (this.ajouteProduitForm.invalid) {
         this.errorMessage = "Veuillez vérifier les informations saisies.";
         return;
       }
       
+      this.isLoading = true;
+      
       // (patch des catégories et unités comme précédemment)
   
       const produit = this.ajouteProduitForm.value;
+      console.log('Produit soumis:', produit);
       const tokenStored = localStorage.getItem('authToken');
       if (!tokenStored) {
         this.showPopupMessage({
@@ -499,23 +529,33 @@ export class AddProduitComponent {
           image: 'assets/img/error.png',
           type: 'error'
         });
+        this.isLoading = false;
         return;
       }
       const token = `Bearer ${tokenStored}`;
       const addToStock = this.isChecked;
   
-      this.produitService.ajouterProduit(this.boutiqueId, produit, this.imageFile, addToStock, token)
+      setTimeout(() => { 
+
+        this.produitService.ajouterProduit(this.boutiqueId, produit, this.imageFile, addToStock, token)
         .subscribe({
           next: data => {
             this.showPopupMessage({
               title: 'Succès',
               message: 'Produit créé avec succès',
               image: 'assets/img/succcccc.png',
-              type: 'success'
+              type: 'success',
+              
             });
             this.ajouteProduitForm.reset();
             this.myControl.reset();
             this.uniteControl.reset();
+
+            this.imageFile = null;
+            this.selectedFile = null;
+            this.newPhotoUrl = null;
+
+            this.isLoading = false;
           },
           error: error => {
             this.showPopupMessage({
@@ -524,8 +564,11 @@ export class AddProduitComponent {
               image: 'assets/img/error.png',
               type: 'error'
             });
+            this.isLoading = false;
           }
         });
+      }, 100);
+      
     }
 
   

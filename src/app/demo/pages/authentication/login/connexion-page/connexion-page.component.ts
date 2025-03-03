@@ -67,7 +67,7 @@ export class ConnexionPageComponent {
     this.isLoading = true;
     const credentials = this.loginForm.value;
   
-    setTimeout(() => {
+    setTimeout(() => { 
       this.usersService.connexionUser(credentials).subscribe({
         next: (response) => {
           this.isLoading = false;
