@@ -49,6 +49,8 @@ export class UsersService {
 
 
     //Information sur User
+   
+    //Information sur User
     getUserInfo(): Observable<UserRequest> {
       const token = localStorage.getItem('authToken');
       
