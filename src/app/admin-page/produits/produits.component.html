@@ -1,10 +1,9 @@
 <div class="containerTable">
+  <!-- En-tête : titre, actions et barre de recherche -->
   <div class="tasks-header">
     <h1 class="title">Produits</h1>
-    
     <div class="actions">
       <button class="add-task" (click)="goToAddProduit()">Ajouter un produit</button>
-      <!-- Icônes -->
       <div class="contentIcon">
         <i class="ri-refresh-line"></i>
         <div class="bare"></div>
@@ -19,40 +18,37 @@
           </div>
         </div>
       </div>
-      <!-- Recherche -->
       <div class="inputSearch">
         <i class="ri-search-2-line"></i>
         <input type="text" [(ngModel)]="searchText" placeholder="Recherche...." />
       </div>
     </div>
   </div>
-    
+
   <!-- Tableau des produits -->
   <table>
     <thead>
       <tr class="titleTableProduit">
         <th>Code</th>
-        <th>Photo<i class="icon-sort"></i></th>
-        <th>Nom produit <i class="icon-sort"></i></th>
-        <th>Description <i class="icon-sort"></i></th>
-        <th>Categorie<i class="icon-sort"></i></th>
-        <th>Prix de vente<i class="icon-sort"></i></th>
-        <th>Prix achat <i class="icon-sort"></i></th>
-        <th>Quantité <i class="icon-sort"></i></th>
-        <th>Unité<i class="icon-sort"></i></th>
-        <th>Seuils d'alerte <i class="icon-sort"></i></th>
-       <!--  <th>Date & heure <i class="icon-sort"></i></th>-->
+        <th>Photo</th>
+        <th>Nom produit</th>
+        <th>Description</th>
+        <th>Catégorie</th>
+        <th>Prix Vente</th>
+        <th>Prix Achat</th>
+        <th>Quantité</th>
+        <th>Unité</th>
+        <th>Seuil Alerte</th>
       </tr>
     </thead>
-    
     <tbody>
-      <!-- Boucle sur la liste des produits filtrés récupérée depuis le backend -->
-      <tr style="font-size: 10px;" *ngFor="let product of filteredProducts(); let i = index" 
-    (click)="openProductDetail(product.id)">
-        <td [innerHTML]="highlightMatch(product.codeProduit)"></td>
+      <!-- Boucle sur la liste filtrée et paginée -->
+      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;">
+        <td [innerHTML]="highlightMatch(product.codeGenerique || '')"></td>
         <td>
           <div class="imgProduit">
-            <img [src]="product.photo || 'assets/img/lait.jpeg'" alt="Produit">
+            <img [src]="product.photo || 'assets/img/image_product.png'">
+            <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/lait.jpeg' : product.photo"> -->
           </div>
           <div class="modal" *ngIf="imagePopup">
             <div class="modal-content" (click)="$event.stopPropagation()">
@@ -60,492 +56,34 @@
             </div>
           </div>
         </td>
-        <td [innerHTML]="highlightMatch(product.nomProduit)"></td>
+        <!-- <td>{{product | json}}</td> -->
+        <td [innerHTML]="highlightMatch(product.nom)"></td>
         <td>{{ product.description }}</td>
-        <td [innerHTML]="highlightMatch(product.nomCategory)"></td>
-        <td>{{ product.prix }}</td>
+        <td [innerHTML]="highlightMatch(product.nomCategorie || '')"></td>
+        <td>{{ product.prixVente }}</td>
         <td>{{ product.prixAchat }}</td>
-        <td [innerHTML]="highlightMatch(product.quantite)"></td>
-        <td>{{ product.nomUnite }}</td>
-        <td>{{ product.alertSeuil }}</td>
+        <td [innerHTML]="highlightMatch(product.quantite.toString())"></td>
+        <td>{{ product.nomUnite || '' }}</td>
+        <td>{{ product.seuilAlert }}</td>
       </tr>
-      <!-- Si la liste de produits n'est pas vide, mais qu'aucun résultat ne correspond à la recherche -->
-      <div *ngIf="tasks.length > 0 && filteredProducts().length === 0" style="text-align: center; margin-top: 20px;">
-        Aucun produit trouvé.
-      </div>
+      <!-- Message si aucun produit ne correspond à la recherche -->
+      <tr *ngIf="tasks.length > 0 && filteredProducts().length === 0">
+        <td colspan="10" style="text-align: center;">Aucun produit trouvé.</td>
+      </tr>
     </tbody>
-    
-    <!-- Modal de détail et modification du produit -->
-    <div class="modal-overlay" *ngIf="showProductDetail">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h2>Détails du produit : {{ selectedProduct?.nomProduit }}</h2>
-          <span class="modal-close" (click)="closeProductDetail()">&times;</span>
-        </div>
-        <div class="modal-body">
-          <form [formGroup]="modifierProduitForm" class="container_formulaire" (ngSubmit)="submitUpdateForm()">
-            <!-- Ligne 1 : Nom produit et Prix -->
-            <div class="double_input">
-              <div class="champ_input">
-                <input formControlName="nomProduit" type="text" class="input_focus inputSize" required id="nomProduit"
-                       name="nomProduit" placeholder="Saisis le nom de produit">
-                <label for="nomProduit" class="label labelColor">Nom produit</label>
-                <div *ngIf="modifierProduitForm.get('nomProduit')?.touched && modifierProduitForm.get('nomProduit')?.invalid" class="error-message">
-                  Le nom du produit est vide.
-                </div>
-              </div>
-              <div class="champ_input champ_input_margin">
-                <input formControlName="prix" type="number" class="input_focus inputSize" required id="prix"
-                       name="prix" placeholder="Saisis le montant">
-                <label for="prix" class="label labelColor">Prix de vente</label>
-                <div *ngIf="modifierProduitForm.get('prix')?.touched && modifierProduitForm.get('prix')?.invalid" class="error-message">
-                  Le prix est vide.
-                </div>
-              </div>
-            </div>
-    
-            <!-- Ligne 2 : Affichage de la catégorie en lecture seule -->
-            <!-- <div class="double_input2">
-              <div class="champ_input">
-                <input type="text" disabled [value]="selectedProduct?.category?.nomCategory || ''"
-                       class="input_focus inputSize" style="cursor: no-drop;">
-                <label for="category" class="label labelColor">Catégorie</label>
-              </div>
-            </div> -->
-
-            <!-- <div class="double_input2">
-              <div class="champ_input">
-                <input type="text"
-                    [formControl]="control"
-                    [matAutocomplete]="auto"
-                    class="input_focus"
-                    placeholder="Saisis le nom de catégorie" [value]="displayFn(produit.category)">
-                <label for="category" class="label">Categorie</label>
-                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategorySelected($event)">
-                  <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
-                    {{ category.nom}}
-                  </mat-option>
-                </mat-autocomplete>
-                <div *ngIf="f['category'].touched && f['category'].invalid" class="error-message">
-                  Le categorie est vide.
-                </div>
-              </div>
-    
-              <div class="btn_add_categoryDiv2">
-                <button class="btn_add_category2" (click)="openPopupCategory()">Créer un categorie</button>
-              </div>
-            </div> -->
-    
-            <!-- Ligne 3 : Prix d'achat et Quantité -->
-            <div class="double_input">
-              <div class="champ_input">
-                <input formControlName="prixAchat" type="number" class="input_focus inputSize" required id="prixAchat"
-                       name="prixAchat" placeholder="Saisis le montant">
-                <label for="prixAchat" class="label labelColor">Prix achat</label>
-                <div *ngIf="modifierProduitForm.get('prixAchat')?.touched && modifierProduitForm.get('prixAchat')?.invalid" class="error-message">
-                  Le prix d'achat est vide.
-                </div>
-              </div>
-              <div class="champ_input champ_input_margin">
-                <input formControlName="quantite" type="number" class="input_focus inputSize" required id="quantite"
-                       name="quantite" placeholder="Saisis le montant">
-                <label for="quantite" class="label labelColor">Quantité</label>
-                <div *ngIf="modifierProduitForm.get('quantite')?.touched && modifierProduitForm.get('quantite')?.invalid" class="error-message">
-                  La quantité est vide.
-                </div>
-              </div>
-            </div>
-    
-            <!-- Ligne 4 : Seuil d'alerte et Unité de mesure -->
-            <div class="double_input">
-              <div class="champ_input">
-                <input formControlName="alertSeuil" type="number" class="input_focus inputSize" required id="alertSeuil"
-                       name="alertSeuil" placeholder="Saisis le montant d'alerte">
-                <label for="alertSeuil" class="label labelColor">Seuil d'alerte</label>
-                <div *ngIf="modifierProduitForm.get('alertSeuil')?.touched && modifierProduitForm.get('alertSeuil')?.invalid" class="error-message">
-                  Le seuil d'alerte est vide.
-                </div>
-              </div>
-              <div class="champ_input champ_input_margin">
-                <input formControlName="uniteMesure" type="text" class="input_focus inputSize" required id="unite"
-                       name="unite" placeholder="Saisis l'unité de mesure">
-                <label for="unite" class="label labelColor">Unité de mesure</label>
-                <div *ngIf="modifierProduitForm.get('uniteMesure')?.touched && modifierProduitForm.get('uniteMesure')?.invalid" class="error-message">
-                  L'unité de mesure est vide.
-                </div>
-              </div>
-            </div>
-    
-            <!-- Ligne 5 : Code barre (et affichage du code produit en lecture seule) -->
-            <div class="double_input">
-              <div class="champ_input">
-                <input type="text" class="input_focus inputSize" disabled id="codeProduit"
-                       name="codeProduit" [value]="selectedProduct?.codeProduit" style="cursor: no-drop;">
-                <label for="codeProduit" class="label labelColor">Code produit</label>
-              </div>
-              <div class="champ_input champ_input_margin">
-                <input formControlName="codebar" type="text" class="input_focus inputSize" id="codebar"
-                       name="codebar" placeholder="Saisis le numéro code barre">
-                <label for="codebar" class="label labelColor">Numéro code barre</label>
-                <div *ngIf="modifierProduitForm.get('codebar')?.touched && modifierProduitForm.get('codebar')?.invalid" class="error-message">
-                  <!-- Gestion des erreurs sur le code barre -->
-                </div>
-              </div>
-            </div>
-    
-            <!-- Ligne 6 : Description -->
-            <div class="champ_input" style="margin-top: 20px;">
-              <textarea formControlName="description" class="input_focus2 inputSize" required id="description"
-                        name="description" placeholder="Saisis quelque chose"></textarea>
-              <label for="description" class="label labelColor" style="padding-left: 10px;">Description du produit</label>
-              <div *ngIf="modifierProduitForm.get('description')?.touched && modifierProduitForm.get('description')?.invalid" class="error-message">
-                La description est vide.
-              </div>
-            </div>
-    
-            <!-- Affichage de la date de création (optionnel, à formater si nécessaire) -->
-            <div class="updateDate">
-              <p>{{ selectedProduct?.createdAt }}</p>
-            </div>
-    
-            <!-- Section pour la gestion de l'image du produit -->
-            <div class="container_file"> 
-              <div class="header_file"> 
-                <img class="roudel" 
-                  [src]="newPhotoUrl ? newPhotoUrl : (selectedProduct?.photo ? (backendUrl + selectedProduct.photo) : urllink)" 
-                  alt="Aperçu de l'image" 
-                  style="max-width:200px;">
-              </div> 
-              <div>
-                <label for="file" class="footer_file"> 
-                  <i class="ri-file-3-fill"></i>
-                  <p>Choisir un fichier</p>
-                </label> 
-                <input type="file" accept="image/*" id="file" (change)="onFileSelected($event)" hidden>
-              </div>
-            </div>
-    
-            <!-- Message d'erreur global -->
-            <div *ngIf="errorMessage" class="error-message2">
-              {{ errorMessage }}
-            </div>
-            
-            <div class="modal-footer">
-              <button class="btn-save" type="submit">Modifier</button>
-              <button class="btn-cancel" (click)="closeProductDetail()">Annuler</button>
-            </div>
-          </form>
-        </div>
-    
-        <!-- Popup de confirmation / d'erreur -->
-        <div class="modal-overlay2" *ngIf="showPopup2">
-          <div class="modal-content2" [ngClass]="{'error': popupType === 'error'}">
-            <div class="popup-header2">
-              <div class="popup-img2">
-                <img [src]="popupImage" alt="Icone" class="popup-icon2">
-              </div>
-              <h2>{{ popupTitle }}</h2>
-            </div>
-            <p>{{ popupMessage }}</p>
-            <button (click)="closePopup2()">OK</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    
   </table>
 
-  <!-- <div *ngIf="filteredTasks().length === 0" style="text-align: center; margin-top: 20px;">
-      <p style="color: red;">Aucun résultat trouvé pour "{{ searchText }}"</p>
-  </div> -->
-
-  <!-- Si la liste de produits est vide -->
+  <!-- Message si aucun produit n'est présent -->
   <div *ngIf="tasks.length === 0" style="text-align: center; margin-top: 20px;">
     <p style="color: red;">Vous n'avez pas de produit</p>
   </div>
 
-  
-
-
-  <!-- // Pagination -->
-
+  <!-- Pagination -->
   <div class="pagination">
     <mat-paginator [length]="tasks.length"
-              [pageSize]="pageSize"
-              [pageSizeOptions]="[5, 10, 25, 100]"
-              (page)="onPageChange($event)">
+                   [pageSize]="pageSize"
+                   [pageSizeOptions]="[5, 10, 25, 100]"
+                   (page)="onPageChange($event)">
     </mat-paginator>
   </div>
-
 </div>
-
-  <!-- Pop-up Formulaire d'ajout de produit -->
-  <div class="modal-overlay" *ngIf="showPopup">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Ajouter un produit</h2>
-        <span class="modal-close" (click)="closePopup()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <form [formGroup]="ajouteProduitForm" class="container_formulaire" (ngSubmit)="submitForm()">
-          <div class="formulaire">
-            
-            <!-- Ligne 1 : Nom produit et Prix -->
-            <div class="double_input">
-              <div class="champ_input">
-                <input formControlName="nomProduit" type="text" class="input_focus" required id="nomProduit"
-                      name="nomProduit"
-                      placeholder="Saisis le nom de produit">
-                <label for="nomProduit" class="label">Nom produit</label>
-                <div *ngIf="f['nomProduit'].touched && f['nomProduit'].invalid" class="error-message">
-                  Le nom produit est vide.
-                </div>
-              </div>
-
-              <div class="champ_input champ_input_margin">
-                <input formControlName="prix" type="number" class="input_focus" required id="prix"
-                      name="prix"
-                      placeholder="Saisis le montant">
-                <label for="prix" class="label">Prix de vente</label>
-                <div *ngIf="f['prix'].touched && f['prix'].invalid" class="error-message">
-                  Le prix est vide.
-                </div>
-              </div>
-            </div>
-            
-            <!-- Ligne 2 : Catégorie avec autocomplete -->
-            <!-- <div class="double_input2">
-              <div class="champ_input">
-                <input type="text"
-                    [formControl]="control"
-                    [matAutocomplete]="auto"
-                    class="input_focus"
-                    placeholder="Saisis le nom de catégorie" [value]="displayFn(produit.nom)">
-                <label for="category" class="label">Categorie</label>
-                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategorySelected($event)">
-                  <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
-                    {{ category.nom}}
-                  </mat-option>
-                </mat-autocomplete>
-                <div *ngIf="f['category'].touched && f['category'].invalid" class="error-message">
-                  Le categorie est vide.
-                </div>
-              </div>
-    
-              <div class="btn_add_categoryDiv2">
-                <button class="btn_add_category2" (click)="openPopupCategory()">Créer un categorie</button>
-              </div>
-            </div>
-             -->
-            <!-- Ligne 3 : Prix achat et Quantité -->
-            <div class="double_input">
-              <div class="champ_input">
-                <input formControlName="prixAchat" type="number" class="input_focus" required id="prixAchat"
-                      name="prixAchat"
-                      placeholder="Saisis le montant">
-                <label for="prixAchat" class="label">Prix achat</label>
-                <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
-                  Le prix achat est vide.
-                </div>
-              </div>
-
-              <div class="champ_input champ_input_margin">
-                <input formControlName="quantite" type="number" class="input_focus" required id="quantite"
-                      name="quantite"
-                      placeholder="Saisis le montant">
-                <label for="quantite" class="label">Quantité</label>
-                <div *ngIf="f['quantite'].touched && f['quantite'].invalid" class="error-message">
-                  Le quantité est vide.
-                </div>
-              </div>
-            </div>
-            
-            <!-- Ligne 4 : Alert seuil et Unité -->
-            <div class="double_input">
-              <div class="champ_input">
-                <input formControlName="alertSeuil" type="number" class="input_focus" required id="alertSeuil"
-                      name="alertSeuil"
-                      placeholder="Saisis le montant d'alerte">
-                <label for="alertSeuil" class="label">Seuil d'alerte</label>
-                <div *ngIf="f['alertSeuil'].touched && f['alertSeuil'].invalid" class="error-message">
-                  Le alert seuil est vide.
-                </div>
-              </div>
-
-              <div class="champ_input champ_input_margin">
-                <input formControlName="uniteMesure" type="text" class="input_focus" required id="unite"
-                      name="unite"
-                      placeholder="Saisis le montant">
-                <label for="unite" class="label">Unité de mesure</label>
-                <div *ngIf="f['uniteMesure'].touched && f['uniteMesure'].invalid" class="error-message">
-                  Le nom unité est vide.
-                </div>
-              </div>
-            </div>
-            
-            <div class="champ_input">
-              <input formControlName="codebar" type="text" class="input_focus" id="codebar"
-                    name="codebar"
-                    placeholder="Saisis le numéro code barre">
-              <label for="codebar" class="label">Numéro code barre</label>
-              <div *ngIf="f['codebar'].touched && f['codebar'].invalid" class="error-message">
-                <span *ngIf="f['codebar'].errors?.['minlength']">Le nom doit avoir au moins 8 caractères.</span>
-                <span *ngIf="f['codebar'].errors?.['maxlength']">Le nom ne doit pas dépasser 14 caractères.</span>
-              </div>
-            </div>
-
-            <!-- Ligne 5 : Description -->
-            <div class="champ_input" style="margin-top: 20px;">
-              <textarea formControlName="description" class="input_focus2" required id="description"
-                        name="description"
-                        placeholder="Saisis quelque chose"></textarea>
-              <label for="description" class="label" style="padding-left: 10px;">Description du produit</label>
-              <div *ngIf="f['description'].touched && f['description'].invalid" class="error-message">
-                Le description est vide.
-              </div>
-            </div>
-            
-            <!-- Ligne 6 : Sélection du fichier image -->
-            <div class="img_input">
-              <div class="input_file">
-                <label for="file" class="custom-file-label">
-                  <span class="custom-file-button">Choisir un fichier</span>
-                  <span class="custom-file-text">{{ selectedFile?.name ?? "Aucun fichier choisi" }}</span>
-                </label>
-                <div *ngIf="f['photo'].touched && f['photo'].invalid" class="error-message">
-                  Le photo est vide.
-                </div>
-                <input formControlName="photo" type="file" accept="image/*" id="file" (change)="onFileSelected($event)" hidden>
-              </div>
-            
-              <div class="roudel_img" (click)="openImage(urllink)">
-                <!-- <img class="roudel" [src]="urllink" alt="Aperçu de l'image"> -->
-                <img class="roudel" [src]="newPhotoUrl ? newPhotoUrl : (selectedProduct?.photo ?? urllink)" alt="Aperçu de l'image">
-              </div>
-            </div>
-            
-            <!-- Modal pour afficher l'image en grand -->
-            <div class="modal" *ngIf="imagePopup" (click)="closeImage()">
-              <div class="modal-content" (click)="$event.stopPropagation()">
-                <img [src]="imagePopup" alt="Aperçu de l'image">
-              </div>
-            </div>
-            
-                        
-            <!-- Message d'erreur global -->
-            <div *ngIf="errorMessage" class="error-message">
-              {{ errorMessage }}
-            </div>
-            
-          </div>
-          <div class="modal-footer">
-            <button class="btn-save" type="submit" >Sauvegarder</button>
-            <button class="btn-cancel" (click)="closePopup()">Annuler</button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Popup de confirmation / d'erreur -->
-      <div class="modal-overlay2" *ngIf="showPopup2">
-        <div class="modal-content2" [ngClass]="{'error': popupType === 'error'}">
-          <div class="popup-header2">
-            <div class="popup-img2">
-                <img [src]="popupImage" alt="Icone" class="popup-icon2">
-            </div>
-            <h2>{{ popupTitle }}</h2>
-          </div>
-          <p>{{ popupMessage }}</p>
-          <button (click)="closePopup2()">OK</button>
-      </div>
-      </div>
-
-    <!-- POUR Categorie -->
-
-    <div class="modal-overlay-category" *ngIf="showPopupCategory" >
-      <div class="modal-content-category">
-        <div class="modal-header-category">
-          <h2>Ajouter un Categorie</h2>
-          <!-- <span class="modal-close" (click)="closePopup()">&times;</span> -->
-        </div>
-        <div class="modal-body">
-          <form [formGroup]="ajouteCategoryForm" class="container_formulaire" (ngSubmit)="submitFormCategory()">
-            <div class="formulaire">
-              
-              <!-- Ligne 6 : Sélection du fichier image -->
-              <div class="champ_input">
-                <input formControlName="categoryName" type="text" class="input_focus" required id="categoryName"
-                      name="categoryName"
-                      placeholder="Entrez une catégorie">
-                <label for="categoryName" class="label">Nom Categorie</label>
-                <!-- Message d'erreur dynamique -->
-                <div *ngIf="c['categoryName'].touched && c['categoryName'].invalid" class="error-message">
-                  <span *ngIf="c['categoryName'].errors?.['required']">Le nom de la catégorie est obligatoire.</span>
-                  <span *ngIf="c['categoryName'].errors?.['minlength']">Le nom doit avoir au moins 3 caractères.</span>
-                  <span *ngIf="c['categoryName'].errors?.['maxlength']">Le nom ne doit pas dépasser 20 caractères.</span>
-                </div>
-                <!-- <div *ngIf="f['nomProduit'].touched && f['nomProduit'].invalid" class="error-message">
-                  Le nom produit est vide.
-                </div> -->
-              </div>
-                          
-              <!-- Message d'erreur global -->
-              <div *ngIf="errorMessage" class="error-message-category">
-                {{ errorMessageCategory }}
-              </div>
-
-              
-            </div>
-            <div class="modal-footer">
-              <button class="btn-save">Ajouter</button>
-              <button class="btn-cancel" (click)="closePopupCategory()">Annuler</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="modal-overlay-category" *ngIf="showPopupCategory2">
-          <div class="modal-content-category" [ngClass]="{'error': popupType === 'error'}">
-            <div class="popup-header2">
-              <div class="popup-img2">
-                  <img [src]="popupImage" alt="Icone" class="popup-icon2">
-              </div>
-              <h2>{{ popupTitle }}</h2>
-            </div>
-            <p>{{ popupMessage }}</p>
-            <button class="btnOKOK" (click)="closePopupCategory2()">OK</button>
-        </div>
-        </div>
-        
-      </div>
-    </div>
-      
-      
-    </div>
-  </div>
-
-
-                
-  <!-- Ligne 6 : Sélection du fichier image -->
-  <!-- <div class="img_input">
-    <div class="input_file">
-      <label for="file" class="custom-file-label">
-        <span class="custom-file-button">Choisir un fichier</span>
-        <span class="custom-file-text">{{ selectedFile?.name ?? "Aucun fichier choisi" }}</span>
-      </label>
-      <div *ngIf="m['photo'].touched && m['photo'].invalid" class="error-message">
-        Le photo est vide.
-      </div>
-      <input formControlName="photo" type="file" accept="image/*" id="file" (change)="onFileSelected($event)" hidden>
-    </div>
-  
-    <div class="roudel_img" (click)="openImage(urllink)">
-      <img class="roudel" [src]="urllink" alt="Aperçu de l'image"> 
-      <img class="roudel" [src]="newPhotoUrl ? newPhotoUrl : (selectedProduct?.photo ?? urllink)" alt="Aperçu de l'image">
-    </div>
-  </div> -->
-  
-  <!-- Modal pour afficher l'image en grand -->
-  <!-- <div class="modal" *ngIf="imagePopup" (click)="closeImage()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <img [src]="imagePopup" alt="Aperçu de l'image">
-    </div>
-  </div> -->

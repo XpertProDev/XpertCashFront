@@ -1,24 +1,19 @@
 export interface Produit {
   id: number;
-  codeProduit?: string;
-  nomProduit: string;
+  nom: string;
+  prixVente: number;
   description: string;
-  prix: number;
-  photo: string;
+  codeGenerique: string;
   prixAchat: number;
   quantite: number;
-  alertSeuil: number;
-  codebar?: string;
-  createdAt: string; 
-  category: {
-    id: number;
-    nomCategory: string;
-  };
-  uniteMesure: {
-    id: number;
-    nomUnite: string;
-  };
-  // Propriétés ajoutées pour simplifier l'affichage dans le composant
-  nomCategory?: string;
-  nomUnite?: string;
+  seuilAlert: number;
+  categorieId: number | null;
+  uniteId: number | null;
+  codeBare: string;
+  photo: string;
+  enStock: boolean;
+  // Nouveaux champs issus du DTO
+  nomCategorie?: string; // ex: "Catégorie inconnue" ou la valeur réelle
+  nomUnite?: string;     // ex: "" ou la valeur réelle
+  createdAt?: string;
 }

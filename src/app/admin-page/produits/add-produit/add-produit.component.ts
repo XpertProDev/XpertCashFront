@@ -297,38 +297,31 @@ export class AddProduitComponent {
       }
     );
   }
-  
-  
-
 
   // Getter pour faciliter l'accès aux contrôles dans le template
   get c() { return this.ajouteCategoryForm.controls; }
   get u() { return this.ajouteUniteForm.controls; }
   get f() { return this.ajouteProduitForm.controls; }
   
- // Méthode pour la sélection d'une catégorie
- onCategorySelected(event: any): void {
-  console.log('Option sélectionnée :', event.option.value);  // Ajoutez ce log pour vérifier la sélection
-  if (event.option && event.option.value) {
-    this.ajouteProduitForm.get('categorieId')?.setValue(event.option.value.id);
-  } else {
-    this.ajouteProduitForm.get('categorieId')?.setValue(null);
+  // Méthode pour la sélection d'une catégorie
+  onCategorySelected(event: any): void {
+    console.log('Option sélectionnée :', event.option.value);  // Ajoutez ce log pour vérifier la sélection
+    if (event.option && event.option.value) {
+      this.ajouteProduitForm.get('categorieId')?.setValue(event.option.value.id);
+    } else {
+      this.ajouteProduitForm.get('categorieId')?.setValue(null);
+    }
   }
-}
 
-
-
-onUniteSelected(event: any): void {
-  console.log('Unité sélectionnée :', event.option.value);
-  if (event.option && event.option.value) {
-    this.ajouteProduitForm.get('uniteId')?.setValue(event.option.value.id);
-  } else {
-    this.ajouteProduitForm.get('uniteId')?.setValue(null);
+  onUniteSelected(event: any): void {
+    console.log('Unité sélectionnée :', event.option.value);
+    if (event.option && event.option.value) {
+      this.ajouteProduitForm.get('uniteId')?.setValue(event.option.value.id);
+    } else {
+      this.ajouteProduitForm.get('uniteId')?.setValue(null);
+    }
   }
-}
 
-
-  
 
   // Pour categorie 
   private _filter(name: string): Categorie[] {
@@ -379,34 +372,6 @@ onUniteSelected(event: any): void {
   cancelUniteCreation() {
     this.showUniteCreation = false;
   }
-
-  //////////////////////////////////////// CREATION DE CATEGORIES
-
-  // Ouvre la popup avec titre, message et type (success ou error)
-  // openPopupCategory2(title: string, message: string, type: 'success' | 'error'): void {
-  //   this.popupTitle = title;
-  //   this.popupMessage = message;
-  //   this.popupType = type;
-  //   // Choix de l'image en fonction du type
-  //   if (type === 'success') {
-  //     this.popupImage = 'assets/img/succcccc.png'; // Remplacez par le chemin de votre image de succès
-  //   } else {
-  //     this.popupImage = 'assets/img/error.png'; // Remplacez par le chemin de votre image d'erreur
-  //   }
-  //   this.showPopupCategory2 = true;
-  // }
-
-  // // Ferme la popup et redirige si l'inscription a réussi
-  // closePopupCategory2(): void {
-  //   this.showPopupCategory2 = false;
-  //   if (this.popupType === 'success') {
-  //     //this.router.navigate(['/produit']);
-  //     this.showPopupCategory = false;
-  //     this.ajouteCategoryForm.reset();
-  //     this.errorMessageCategory = '';
-      
-  //   }
-  // }
 
   submitFormCategory(): void {
     const categoryData = { nom: this.ajouteCategoryForm.value.categoryName };
@@ -497,16 +462,7 @@ onUniteSelected(event: any): void {
         this.messageAPI = message;
       }
     });
-  } 
-
-  /*
-
-    if (this.ajouteProduitForm.invalid) {
-      this.errorMessage = "Veuillez vérifier les informations saisies.";
-      return;
-    }
-  */
-
+  }
 
   onSubmit() {
 
@@ -556,6 +512,9 @@ onUniteSelected(event: any): void {
           this.newPhotoUrl = null;
 
           this.isLoading = false;
+          
+          // Redirection vers la page '/produit'
+          this.router.navigate(['/produit']);
         },
         error: error => {
           let errorMessage = 'Erreur lors de la création du produit';
@@ -585,6 +544,4 @@ onUniteSelected(event: any): void {
     
   }
 
-  
-  
 }

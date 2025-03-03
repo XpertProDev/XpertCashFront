@@ -100,6 +100,23 @@ export class UsersService {
       const refreshToken = localStorage.getItem('refreshToken');
       return this.http.post<{ token: string }>(`${this.apiUrl}/refresh-token`, { refreshToken });
     }
+
+    getUserBoutiqueId(): number | null {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      console.log('Utilisateur récupéré de localStorage:', user); // Vérification du contenu de 'user'
+    
+      // Si l'utilisateur et la liste des boutiques existent
+      if (user && user.boutiques && user.boutiques.length > 0) {
+        // Si l'utilisateur a plusieurs boutiques, choisir celle par défaut (par exemple la première)
+        const boutiqueId = user.boutiques[0].id; // Id de la première boutique
+        console.log('ID de la boutique récupéré:', boutiqueId);
+        return boutiqueId;
+      } else {
+        console.error('Aucune boutique trouvée pour cet utilisateur');
+        return null;
+      }
+    }
+    
     
     
     

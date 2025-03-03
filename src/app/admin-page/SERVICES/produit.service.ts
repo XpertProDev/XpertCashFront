@@ -29,14 +29,14 @@ export class ProduitService {
   }
 
   // Nouvelle méthode pour récupérer la liste des produits de l'entreprise
-  getProduitsEntreprise(): Observable<Produit[]> {
-    const token = localStorage.getItem('authToken') || '';
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
+  // getProduitsEntreprise(boutiqueId: number): Observable<Produit[]> {
+  //   const token = localStorage.getItem('authToken') || '';
+  //   const headers = new HttpHeaders({
+  //     'Authorization': `Bearer ${token}`
+  //   });
 
-    return this.http.get<Produit[]>(`${this.apiUrl}/entreprise/produits`, { headers });
-  }
+  //   return this.http.get<Produit[]>(`${this.apiUrl}/produits/${boutiqueId}/stock`, { headers });
+  // }
 
   modifierProduit(produit: Produit, file?: File): Observable<Produit> {
     const token = localStorage.getItem('authToken') || '';
@@ -61,20 +61,32 @@ export class ProduitService {
     return this.http.get<Produit>(`${this.apiUrl}/produits/${productId}`, { headers });
   }
 
-    // Fonction pour récupérer les totaux des produits de la boutique
-    getProduitBoutique(boutiqueId: number): Observable<Map<string, number>> {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        console.error('Aucun token trouvé');
-        return throwError('Aucun token trouvé');
-      }
-  
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${token}`,
-      });
-  
-      return this.http.get<Map<string, number>>(`${this.apiUrl}/produits/${boutiqueId}/totaux-stock`, { headers });
+  // Méthode pour récupérer la liste des produits d'une boutique
+  getProduitsEntreprise(boutiqueId: number): Observable<Produit[]> {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.error('Aucun token trouvé');
+      return throwError('Aucun token trouvé');
     }
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    // Remplacez l'endpoint par celui défini dans votre API backend pour récupérer les produits
+    return this.http.get<Produit[]>(`${this.apiUrl}/produits/${boutiqueId}/stock`, { headers });
+  }
+
+  // Méthode pour récupérer les totaux des produits en stock (déjà existante)
+  getProduitBoutique(boutiqueId: number): Observable<Map<string, number>> {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.error('Aucun token trouvé');
+      return throwError('Aucun token trouvé');
+    }
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get<Map<string, number>>(`${this.apiUrl}/produits/${boutiqueId}/totaux-stock`, { headers });
+  }
   
   
 }
