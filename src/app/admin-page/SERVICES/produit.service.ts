@@ -29,13 +29,13 @@ export class ProduitService {
   }
 
   // Nouvelle méthode pour récupérer la liste des produits de l'entreprise
-  getProduitsEntreprise(): Observable<Produit[]> {
+  getProduitsEntreprise(boutiqueId: number): Observable<Produit[]> {
     const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
 
-    return this.http.get<Produit[]>(`${this.apiUrl}/entreprise/produits`, { headers });
+    return this.http.get<Produit[]>(`${this.apiUrl}/produits/${boutiqueId}/stock`, { headers });
   }
 
   modifierProduit(produit: Produit, file?: File): Observable<Produit> {

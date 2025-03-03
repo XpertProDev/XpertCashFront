@@ -41,6 +41,7 @@ import { UsersService } from '../SERVICES/users.service';
   styleUrls: ['./produits.component.scss']
 })
 export class ProduitsComponent implements OnInit {
+  boutiqueId!: number
 
   goToAddProduit() {
     this.router.navigate(['/addProduit']);
@@ -284,6 +285,7 @@ export class ProduitsComponent implements OnInit {
   };
 
   ngOnInit() {
+    this.getUserBoutiqueId();
     const token = localStorage.getItem('authToken') || '';
     
     if (token) {
@@ -364,15 +366,28 @@ export class ProduitsComponent implements OnInit {
     // Récupérer les infos de l'utilisateur et le nom de l'entreprise
     this.usersService.getUserInfo().subscribe({
       next: (userInfo) => {
-        this.nomEntreprise = userInfo.nomEntreprise; 
-        this.adresseEntreprise = userInfo.adresseEntreprise;
-        this.logoEntreprise = userInfo.logoEntreprise;
-        console.log('infol\'entreprise:', this.nomEntreprise, this.adresseEntreprise, this.loadProduits);
+        // Assurez-vous que l'ID de la boutique est dans les données utilisateur
+        console.log('Informations utilisateur récupérées:', userInfo);
+        
+        // Stocker les informations utilisateur dans localStorage
+        localStorage.setItem('user', JSON.stringify(userInfo));
+        
+        // Maintenant que les informations sont stockées, on peut essayer de récupérer l'ID de la boutique
+        const boutiqueId = this.usersService.getUserBoutiqueId();
+        console.log('ID de la boutique:', boutiqueId);
+        
+        // Vous pouvez appeler loadProduits si l'ID de la boutique est trouvé
+        if (boutiqueId) {
+          this.loadProduits();
+        } else {
+          console.error('L\'ID de la boutique est manquant');
+        }
       },
       error: (err) => {
-        console.error('Erreur lors de la récupération d\'info entreprise', err);
+        console.error('Erreur lors de la récupération des informations utilisateur', err);
       }
     });
+    
   }
 
   private _filter(value: string | Categorie): Categorie[] {
@@ -404,7 +419,15 @@ export class ProduitsComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   loadProduits(): void {
-    this.produitService.getProduitsEntreprise().subscribe({
+    const boutiqueId = this.usersService.getUserBoutiqueId();  // Récupérer l'ID de la boutique
+    if (!boutiqueId) {
+      console.error('L\'ID de la boutique est manquant');
+      return;  // Arrêter si l'ID est manquant
+    }
+
+    this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
+     
+      
       next: (produits: Produit[]) => {
         console.log('Produits récupérés:', produits);
   
@@ -774,9 +797,27 @@ export class ProduitsComponent implements OnInit {
     this.popupMessage = message;
     this.popupImage = "assets/img/error.png";
     this.showPopup2 = true;
+    
+  }
+  getUserBoutiqueId(): number | null {
+    // Vérifier si l'objet utilisateur existe dans localStorage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    console.log('Utilisateur récupéré de localStorage:', user);
+  
+    // Vérification si l'utilisateur a des boutiques et si la première boutique a un ID
+    if (user && user.boutiques && user.boutiques.length > 0) {
+      const boutiqueId = user.boutiques[0]?.id;  // ID de la première boutique
+      console.log('ID de la boutique récupéré:', boutiqueId);
+      return boutiqueId || null;  // Retourne l'ID ou null si l'ID est inexistant
+    } else {
+      console.error('Aucune boutique trouvée pour cet utilisateur');
+      return null;  // Si aucune boutique n'est trouvée, retourner null
+    }
   }
   
+  
 }
+
   // Méthode pour activer l'édition
   // toggleEditMode() {
   //   this.isEditing = !this.isEditing;
