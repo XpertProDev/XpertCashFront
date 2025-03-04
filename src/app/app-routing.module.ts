@@ -101,6 +101,12 @@ const routes: Routes = [
         canActivate: [authGuard]
 
       },
+      {
+        path: 'detail-produit/:id',
+        loadComponent: () => import('./admin-page/produits/list-produit/list-produit.component').then(m => m.ListProduitComponent),
+        canActivate: [authGuard]
+
+      },
 
       // La routing de entrer
       {

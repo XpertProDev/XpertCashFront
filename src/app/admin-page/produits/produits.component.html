@@ -43,7 +43,7 @@
     </thead>
     <tbody>
       <!-- Boucle sur la liste filtrée et paginée -->
-      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;">
+      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;" (click)="openProduitDetail(product.id)" >
         <td [innerHTML]="highlightMatch(product.codeGenerique || '')"></td>
         <td>
           <div class="imgProduit">
@@ -63,7 +63,7 @@
         <td>{{ product.prixVente }}</td>
         <td>{{ product.prixAchat }}</td>
         <td [innerHTML]="highlightMatch(product.quantite.toString())"></td>
-        <td>{{ product.nomUnite || '' }}</td>
+        <td>{{ product.nomUnite }}</td>
         <td>{{ product.seuilAlert }}</td>
       </tr>
       <!-- Message si aucun produit ne correspond à la recherche -->

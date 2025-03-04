@@ -275,7 +275,6 @@ export class AddProduitComponent {
       this.messageAPI = '';
       this.apiMessageType = '';
     });
-
     
   }
 

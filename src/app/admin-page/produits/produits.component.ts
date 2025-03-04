@@ -12,7 +12,7 @@ import { ProduitService } from '../SERVICES/produit.service';
 import { Produit } from '../MODELS/produit.model';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import autoTable from 'jspdf-autotable';
 import { UsersService } from '../SERVICES/users.service';
 import { ColorFormats } from 'ngx-color-picker/lib/formats';
@@ -27,6 +27,7 @@ import { ColorFormats } from 'ngx-color-picker/lib/formats';
     MatSelectModule,
     MatFormFieldModule,
     MatAutocompleteModule,
+    // RouterLink,
     MatInputModule,
     MatPaginatorModule,
   ],
@@ -162,7 +163,7 @@ export class ProduitsComponent implements OnInit {
       doc.setLineWidth(0.5);
       doc.line(14, 35, 195, 35);
       
-      const columns = ['Code', 'Nom produit', 'Description', 'Catégorie', 'Prix vente', 'Quantité'];
+      const columns = ['Code', 'Nom produit', 'Description', 'Catégorie', 'Prix vente', 'Prix achat', 'Unité', 'Seuil Alerte'];
       const startIndex = this.currentPage * this.pageSize;
       const pageTasks = this.tasks.slice(startIndex, startIndex + this.pageSize);
       
@@ -175,9 +176,11 @@ export class ProduitsComponent implements OnInit {
         task.codeGenerique || '',
         task.nom || '',
         task.description || '',
-        task.nomCategorie ? `Catégorie ${task.nomCategorie}` : 'Catégorie inconnue',
+        task.nomCategorie ? `${task.nomCategorie}` : 'Non catégorie',
         task.prixVente ?? 0,
-        task.quantite ?? 0
+        task.prixAchat ?? 0,
+        task.quantite ?? 0,
+        task.nomUnite ? `${task.nomUnite}` : 'Non Unité',
       ]);
       
       
@@ -344,5 +347,11 @@ export class ProduitsComponent implements OnInit {
     });
   }
   
+  // Detail de produit 
+  // openProductDetail(productId: number) {}
+
+  openProduitDetail(productId: number): void {
+    this.router.navigate(['/detail-produit', productId]);
+  }
   
 }

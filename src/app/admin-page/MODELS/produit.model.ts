@@ -16,4 +16,5 @@ export interface Produit {
   nomCategorie?: string; // ex: "Catégorie inconnue" ou la valeur réelle
   nomUnite?: string;     // ex: "" ou la valeur réelle
   createdAt?: string;
+  lastUpdated?: string;
 }

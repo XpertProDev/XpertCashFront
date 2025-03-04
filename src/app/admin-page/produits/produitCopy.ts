@@ -720,9 +720,9 @@ export class ProduitsComponent implements OnInit {
           prixAchat: product.prixAchat,
           quantite: product.quantite,
           alertSeuil: product.seuilAlert,
-          uniteMesure: product.uniteMesure?.nomUnite,
+          uniteMesure: product.nomUnite,
           codebar: product.codeBare,
-          category: product.category?.nomCategory,
+          category: product.nomCategorie,
           codeProduit: product.codeGenerique
         });
       },

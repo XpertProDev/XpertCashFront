@@ -52,7 +52,6 @@ export class ProduitService {
   
     return this.http.patch<Produit>(`${this.apiUrl}/update/produit/${produit.id}`, formData, { headers });
   }
-  
 
   // Nouvelle méthode pour récupérer les détails d'un produit par son ID
   getProduitById(productId: number): Observable<Produit> {
