@@ -210,6 +210,7 @@ export class ListProduitComponent {
     ngOnInit(): void  {
       this.getBoutiqueName();
       this.getProduit();
+      // this.updateProduct();
       
       // Partage de donner de user
       this.sharedDataService.boutiqueName$.subscribe(name => {
@@ -298,6 +299,20 @@ export class ListProduitComponent {
       });
       
     }
+
+    // updateProduct(): void {
+    //   this.modifierProduitForm = this.fb.group({
+    //     nom: ['', [Validators.required, Validators.minLength(2)]],
+    //     prixVente: ['', Validators.required],
+    //     prixAchat: ['', Validators.required],
+    //     quantite: ['', Validators.required],
+    //     seuilAlert: ['', Validators.required],
+    //     description: [''],
+    //     codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],
+    //     categorieId: [''],
+    //     uniteId: ['']
+    //   });
+    // }
 
     // Fonction pour récupérer le produit
     getProduit(): void {
@@ -503,6 +518,50 @@ export class ListProduitComponent {
     }
   
   
+    submitUpdateForm(): void {
+      // Vérifier que le formulaire est valide
+      if (this.ajouteProduitForm.invalid) {
+        this.errorMessage = "Veuillez remplir les champs obligatoires.";
+        return;
+      }
+    
+      // Fusionner les valeurs du formulaire avec le produit existant
+      const updatedProduct: Produit = {
+        ...this.produit,             // conserve les propriétés existantes (id, codeGenerique, etc.)
+        ...this.ajouteProduitForm.value  // met à jour avec les valeurs saisies
+      };
+    
+      // Appel du service pour modifier le produit (en passant le fichier sélectionné s'il existe)
+      this.produitService.modifierProduit(updatedProduct, this.selectedFile ?? undefined)
+        .subscribe({
+          next: (response: Produit) => {
+            console.log("Produit modifié avec succès", response);
+            // Mettez à jour l'objet produit avec les données renvoyées par l'API
+            this.produit = response;
+            
+            // Afficher une popup de succès
+            this.showPopupMessage({
+              title: 'Succès',
+              message: 'Le produit a été modifié avec succès.',
+              image: 'assets/img/succcccc.png',
+              type: 'success'
+            });
+            // Optionnel : rediriger vers la liste des produits ou autre page
+            // this.router.navigate(['/produits']);
+          },
+          error: (error) => {
+            console.error("Erreur lors de la modification du produit", error);
+            // Afficher une popup d'erreur
+            this.showPopupMessage({
+              title: 'Erreur',
+              message: "Une erreur est survenue lors de la modification du produit.",
+              image: 'assets/img/error.png',
+              type: 'error'
+            });
+          }
+        });
+    }
+    
 
  
 }

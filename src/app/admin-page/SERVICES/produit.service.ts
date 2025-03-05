@@ -45,13 +45,22 @@ export class ProduitService {
     });
   
     const formData: FormData = new FormData();
-    formData.append('produit', JSON.stringify(produit));
+  
+    // Optionnel : supprimer le champ "id" si non requis
+    const { id, ...productData } = produit;
+    formData.append('produit', JSON.stringify(productData));
+  
+    // Ajout du paramètre addToStock attendu par le backend
+    formData.append('addToStock', produit.enStock ? 'true' : 'false');
+  
+    // Envoyer le fichier sous le nom "image" (car le backend attend "image")
     if (file) {
-      formData.append('photo', file, file.name);
+      formData.append('image', file, file.name);
     }
   
-    return this.http.patch<Produit>(`${this.apiUrl}/update/produit/${produit.id}`, formData, { headers });
-  }
+    return this.http.patch<Produit>(`${this.apiUrl}/updateProduit/${produit.id}`, formData, { headers });
+  }  
+  
 
   // Nouvelle méthode pour récupérer les détails d'un produit par son ID
   getProduitById(productId: number): Observable<Produit> {

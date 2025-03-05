@@ -45,10 +45,6 @@ export class UsersService {
       history.pushState(null, '', '/connexion');
       window.location.href = "/connexion";
     }
-    
-
-
-    //Information sur User
    
     //Information sur User
     getUserInfo(): Observable<UserRequest> {

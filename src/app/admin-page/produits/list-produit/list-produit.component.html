@@ -11,7 +11,7 @@
   
       <div class="modal-body">
   
-        <form class="container_formulaire" [formGroup]="ajouteProduitForm">
+        <form class="container_formulaire" [formGroup]="ajouteProduitForm" (ngSubmit)="submitUpdateForm()">
   
           <!-- Titre d'ajout de produits  -->
           <div class="Title">
@@ -232,9 +232,7 @@
                     <div class="header_file"> 
                         <img class="roudel"
                             [src]="newPhotoUrl ? newPhotoUrl : (produit.photo ? backendUrl + produit.photo : urllink)"
-                            alt="Aperçu de l'image"
-                            style="max-width:200px;">
-
+                            alt="Aperçu de l'image" style="max-width:200px;">
                     </div> 
                     <div>
                       <label for="file" class="footer_file"> 
@@ -265,7 +263,7 @@
                   </div>
   
                   <div class="btn_ajouter">
-                    <button class="btn_save">Modifier</button>
+                    <button class="btn_save" type="submit">Modifier</button>
                   </div>
                   
                 </div>

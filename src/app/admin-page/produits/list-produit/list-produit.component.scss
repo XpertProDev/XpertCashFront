@@ -480,3 +480,137 @@
     background-color: #ff0000;
     transition: all ease .5s;
   }
+
+  // Pop up
+
+/* Overlay de la popup */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+
+/* Contenu de la popup */
+.modal-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  animation: fadeInDown 0.3s ease;
+  position: relative;
+}
+
+/* Header de la popup avec l'image et le titre */
+.popup-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.popup-img img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+}
+
+.popup-icon {
+  width: 100%;
+  height: 100%;
+  margin-bottom: 10px;
+}
+
+.modal-content h2 {
+  margin: 0;
+  font-size: 1.5em;
+  color: #333;
+}
+
+.modal-content p {
+  font-size: 1em;
+  color: #555;
+  margin: 20px 0;
+}
+
+/* Style du bouton */
+.modal-content button {
+  background-color: #0672E4;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+/* Style du bouton */
+// .btnOKOK {
+//   background-color: #0672E4;
+//   color: #fff;
+//   border: none;
+//   padding: 10px 20px;
+//   font-size: 1em;
+//   border-radius: 5px;
+//   cursor: pointer;
+//   transition: background 0.3s ease;
+// }
+
+.modal-content.error button {
+  background-color: #e53935;
+}
+
+.modal-content button:hover {
+  background-color: #0863c5;
+}
+
+.modal-content.error button:hover {
+  background-color: #d32f2f;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 18px;
+  z-index: 1000;
+}
+
+
+.loading-content {
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  gap: 10px; 
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
