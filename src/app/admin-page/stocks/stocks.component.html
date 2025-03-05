@@ -1,11 +1,9 @@
 <div class="containerTable">
+  <!-- En-tête : titre, actions et barre de recherche -->
   <div class="tasks-header">
     <h1 class="title">Mes Stocks</h1>
-  
     <div class="actions">
-      <button class="add-task">Ajouter un produit</button>
-  
-      <!-- Icônes -->
+      <button class="add-task" >Ajouter un produit</button>
       <div class="contentIcon">
         <i class="ri-refresh-line"></i>
         <div class="bare"></div>
@@ -20,143 +18,72 @@
           </div>
         </div>
       </div>
-  
-      <!-- Recherche -->
       <div class="inputSearch">
         <i class="ri-search-2-line"></i>
         <input type="text" [(ngModel)]="searchText" placeholder="Recherche...." />
       </div>
-  
-      <!-- Quantité et Prix Total -->
-      <div class="totals">
-        <span><strong>Quantité Totale :</strong> {{ totalQuantity }}</span>
-        <span><strong>Prix Total :</strong> <span class="red-text"> {{ totalPrice | number:'1.0-0' }}</span></span>
-      </div>
-      
-      
     </div>
   </div>
-  
-      
-    <!-- Tableau des produits -->
-    <table>
-      <thead>
-        <tr>
-          <th>Code</th>
-          <th>Photo</th>
-          <th>Nom produit</th>
-          <th>Catégorie</th>
-          <th>Date création</th>
-          <th>Date expiration</th>
-          <th>Entrée</th>
-          <th>Sortie</th>
-          <th>Prix</th>
-          <th>Prix achat</th>
-          <th>Quantité</th>
-          <th>Alert seuil</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let stock of filteredStocks()">
-          <td style="font-size: 10px;" [innerHTML]="highlightMatch(stock.produit.codeProduit)"></td>
-        
-          <td>
-            <div class="imgProduit" (click)="openImage(stock.produit.photo)">
-              <img [src]="stock.produit.photo || 'assets/img/lait.jpeg'" alt="Produit">
-            </div>
-            <div class="modal" *ngIf="imagePopup" (click)="closeImage()">
-              <div class="modal-content" (click)="$event.stopPropagation()">
-                <img [src]="imagePopup" alt="Produit">
-              </div>
-            </div>
-          </td>
-          
-          <td [innerHTML]="highlightMatch(stock.produit.nomProduit)"></td>
-          <td>{{ stock.produit.category?.nomCategory || 'Catégorie inconnue' }}</td>
-          <td>{{ stock.dateAjout | date:'dd/MM/yyyy' }}</td>
-          <td [ngClass]="{
-            'expiring-soon': stock.produit.isExpiringSoon,
-            'shake': stock.produit.isExpiringInOneDay,
-            'expiring-today': stock.produit.isExpiringToday,
-            'expired': stock.produit.isExpired
-        }">
-          <span *ngIf="!stock.produit.isExpired">
-            {{ stock.dateExpiration | date:'dd/MM/yyyy' }}
-          </span>
-          <span *ngIf="stock.produit.isExpired">⚠️ Produit Expiré</span>
-        </td>
-        
-          <td>{{ stock.entree }}</td>
-          <td>{{ stock.sortie }}</td>
-          <td>{{ stock.produit.prix | number:'1.0-0' }}</td>
-          <td>{{ stock.produit.prixAchat | number:'1.0-0' }}</td>
-          <td>{{ stock.quantite }}</td>
-          <td>{{ stock.produit.alertSeuil }}</td>
-        </tr>
-        
-      </tbody>
-    </table>
-    
-    
-  
-    <!-- <div *ngIf="filteredTasks().length === 0" style="text-align: center; margin-top: 20px;">
-        <p style="color: red;">Aucun résultat trouvé pour "{{ searchText }}"</p>
-    </div> -->
-  
-    <!-- Si la liste de produits est vide -->
-    <!-- <div *ngIf="tasks.length === 0" style="text-align: center; margin-top: 20px;">
-      <p style="color: red;">Vous n'avez pas de produit</p>
-    </div> -->
-  
-    <!-- Si la liste de produits n'est pas vide, mais qu'aucun résultat ne correspond à la recherche -->
-    <div *ngIf="stocks.length > 0 && filteredStocks().length === 0 && searchText" style="text-align: center; margin-top: 20px;">
-      <p style="color: red;">Aucun résultat trouvé pour "{{ searchText }}"</p>
-    </div>
-    
-  
-  
-    <!-- // Pagination -->
-  
-    <div class="pagination">
-      <mat-paginator [length]="tasks.length"
-                [pageSize]="pageSize"
-                [pageSizeOptions]="[5, 10, 25, 100]"
-                (page)="onPageChange($event)">
-      </mat-paginator>
-    </div>
-  
-  </div>
-  
-  <!-- Pop-up Formulaire d'ajout de produit -->
-  
-  
-  
 
-  <!-- <tr *ngFor="let task of filteredTasks(); let i = index">
-    <td style="font-size: 10px;" [innerHTML]="highlightMatch(task.codeProduit)"></td>
-    <td>
-      <div class="imgProduit" (click)="openImage(task.photo)">
-        <img [src]="task.photo || 'assets/img/lait.jpeg'" alt="Produit">
-      </div>
-      
-      
-      <div class="modal" *ngIf="imagePopup" (click)="closeImage()">
-        <div class="modal-content" (click)="$event.stopPropagation()">
-          <img [src]="imagePopup" alt="Produit">
-        </div>
-      </div>
-    
-    </td> 
-  <td [innerHTML]="highlightMatch(task.nomProduit)"></td>
-  <td [innerHTML]="highlightMatch(task.nomCategory)"></td>
-  <td>{{ task.dateCreation }}</td>
-  <td>{{ task.dateExpiration }}</td>
-  <td>{{ task.entrer }}</td> 
-  <td>{{ task.sortir }}</td>
-  <td>{{ task.prix }}</td>
-  <td>{{ task.prixAchat }}</td>
-  <td>{{ task.prixAchat }}</td>
-  <td>{{ task.quantité }}</td>
-  <td>{{ task.alertSeuil }}</td>
-  <td></td>
-  </tr> -->
+  <!-- Tableau des produits -->
+  <table>
+    <thead>
+      <tr class="titleTableProduit">
+        <th>Code</th>
+        <th>Photo</th>
+        <th>Nom produit</th>
+        <th>Description</th>
+        <th>Catégorie</th>
+        <th>Prix Vente</th>
+        <th>Prix Achat</th>
+        <th>Quantité</th>
+        <th>Unité</th>
+        <th>Seuil Alerte</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Boucle sur la liste filtrée et paginée -->
+      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;">
+        <td [innerHTML]="highlightMatch(product.codeGenerique || '')"></td>
+        <td>
+          <div class="imgProduit">
+            <img [src]="product.photo || 'assets/img/image_product.png'">
+            <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/lait.jpeg' : product.photo"> -->
+          </div>
+          <div class="modal" *ngIf="imagePopup">
+            <div class="modal-content" (click)="$event.stopPropagation()">
+              <img [src]="imagePopup" alt="Produit">
+            </div>
+          </div>
+        </td>
+        <!-- <td>{{product | json}}</td> -->
+        <td [innerHTML]="highlightMatch(product.nom)"></td>
+        <td>{{ product.description }}</td>
+        <td [innerHTML]="highlightMatch(product.nomCategorie || '')"></td>
+        <td>{{ product.prixVente }}</td>
+        <td>{{ product.prixAchat }}</td>
+        <td [innerHTML]="highlightMatch(product.quantite.toString())"></td>
+        <td>{{ product.nomUnite || '' }}</td>
+        <td>{{ product.seuilAlert }}</td>
+      </tr>
+      <!-- Message si aucun produit ne correspond à la recherche -->
+      <tr *ngIf="tasks.length > 0 && filteredProducts().length === 0">
+        <td colspan="10" style="text-align: center;">Aucun produit trouvé.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Message si aucun produit n'est présent -->
+  <div *ngIf="tasks.length === 0" style="text-align: center; margin-top: 20px;">
+    <p style="color: red;">Vous n'avez pas de produit</p>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <mat-paginator [length]="tasks.length"
+                   [pageSize]="pageSize"
+                   [pageSizeOptions]="[5, 10, 25, 100]"
+                   (page)="onPageChange($event)">
+    </mat-paginator>
+  </div>
+</div>

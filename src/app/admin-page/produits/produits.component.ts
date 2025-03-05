@@ -42,6 +42,9 @@ export class ProduitsComponent implements OnInit {
   nomEntreprise: string = '';
   adresseEntreprise: string = '';
   logoEntreprise: string = '';
+  userName: string = '';
+  boutiqueName: string = '';
+  addressBoutique : string = '';
 
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();
@@ -151,7 +154,6 @@ export class ProduitsComponent implements OnInit {
       ? `${this.backendUrl}/logoUpload/${this.logoEntreprise}`
       : `${this.backendUrl}/logoUpload/651.jpg`;
     const entreprise = this.nomEntreprise || "Nom non disponible";
-    const adress = this.adresseEntreprise || "Adresse non disponible";
     
     this.getImageBase64(logoUrl).then((logoBase64) => {
       doc.addImage(logoBase64, 'PNG', 14, 5, 30, 30);
@@ -195,8 +197,8 @@ export class ProduitsComponent implements OnInit {
       doc.line(14, finalY + 5, 195, finalY + 5);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'italic');
-      doc.text(`Adresse: ${adress}`, 14, finalY + 10);
-      doc.text('Contact: 123-456-7890 | email@entreprise.com', 14, finalY + 15);
+      doc.text(`Nom de Boutique: ${this.boutiqueName}`, 14, finalY + 10);
+      doc.text(`Adress: ${this.addressBoutique}`, 14, finalY + 15);
       
       doc.save('Produits.pdf');
     }).catch((error) => {
@@ -264,22 +266,30 @@ export class ProduitsComponent implements OnInit {
   }
 
   // Récupère les informations utilisateur et stocke les données dans le localStorage
-  getUserInfo() {
+  getUserInfo(): void {
     this.usersService.getUserInfo().subscribe({
-      next: (userInfo) => {
-        localStorage.setItem('user', JSON.stringify(userInfo));
+      next: (user) => {
+        localStorage.setItem('user', JSON.stringify(user));
+        this.userName = user.nomComplet;
+        this.nomEntreprise = user.nomEntreprise;
+        this.boutiqueName = user.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
+        this.addressBoutique = user.boutiques[0].adresse|| 'Adresse de la boutique non trouvé';
+  
         const boutiqueId = this.usersService.getUserBoutiqueId();
         if (boutiqueId) {
           this.loadProduits();
         } else {
-          console.error('L\'ID de la boutique est manquant');
+          console.error("L'ID de la boutique est manquant");
         }
       },
       error: (err) => {
-        console.error('Erreur lors de la récupération des informations utilisateur', err);
+        console.error("Erreur lors de la récupération des informations utilisateur :", err);
       }
     });
   }
+  
+
+  
   
 
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
@@ -329,10 +339,11 @@ export class ProduitsComponent implements OnInit {
             nomCategorie: prod.nomCategorie || 'Non catégorie',
             nomUnite: prod.nomUnite || 'Non unité',
             createdAt: prod.createdAt || new Date().toISOString(),
-            categorieId: prod.categorieId, // Ajouté
-            uniteId: prod.uniteId         // Ajouté
+            categorieId: prod.categorieId,
+            uniteId: prod.uniteId 
           };
-        }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         
         
         this.dataSource.data = this.tasks;

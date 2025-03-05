@@ -15,6 +15,7 @@ import { map, startWith } from 'rxjs';
 import { Produit } from '../MODELS/produit.model';
 import { StocksService } from '../SERVICES/stocks.service';
 import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
 import { ChangeDetectorRef } from '@angular/core';
 @Component({
@@ -34,22 +35,31 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrl: './stocks.component.scss'
 })
 export class StocksComponent implements OnInit {
+  boutiqueId!: number;
+  backendUrl: string = 'http://localhost:8080';
   searchText: string = '';
-  tasks: any[] = [];
+  tasks: Produit[] = [];
   imagePopup: string | null = null;
   nomEntreprise: string = '';
   adresseEntreprise: string = '';
   logoEntreprise: string = '';
-  stocks: any[] = [];
-  errorMessage: string = '';
-  totalQuantity: number = 0;
-  totalPrice: number = 0;
+  userName: string = '';
+  boutiqueName: string = '';
+  addressBoutique : string = '';
 
-  // Pagination
+  // Pagination et tableau de données
+  dataSource = new MatTableDataSource<Produit>();
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   pageSize = 5;
   currentPage = 0;
-  dataSource = new MatTableDataSource<any>(); // Gère les données avec pagination
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  // Dropdown pour l'export
+  showExportDropdown = false;
+
+  // Gestion de l'image uploadée
+  urllink: string = "assets/img/appareil.jpg";
+  newPhotoUrl: string | null = null;
+  selectedFile: File | null = null;
 
   constructor(
     private categorieService: CategorieService,
@@ -57,262 +67,53 @@ export class StocksComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private usersService: UsersService,
-    private stocksService: StocksService,
-    private changeDetectorRef: ChangeDetectorRef
   ) {}
 
-
-
-  ngOnInit() {
-    const token = localStorage.getItem('authToken') || '';
-  
-    const isExpiringSoon = (dateExpiration: string): boolean => {
-      const expirationDate = new Date(dateExpiration).setHours(0, 0, 0, 0);
-      const currentDate = new Date().setHours(0, 0, 0, 0);
-      const diffDays = (expirationDate - currentDate) / (1000 * 3600 * 24);
-      return diffDays <= 5 && diffDays > 1; // Produit expire dans ≤ 5 jours
-    };
-    
-    const isExpiringInOneDay = (dateExpiration: string): boolean => {
-      const expirationDate = new Date(dateExpiration).setHours(0, 0, 0, 0);
-      const currentDate = new Date().setHours(0, 0, 0, 0);
-      return (expirationDate - currentDate) / (1000 * 3600 * 24) === 1; // Expire demain
-    };
-    
-    const isExpiringToday = (dateExpiration: string): boolean => {
-      const expirationDate = new Date(dateExpiration).setHours(0, 0, 0, 0);
-      const currentDate = new Date().setHours(0, 0, 0, 0);
-      return expirationDate === currentDate; // Expire aujourd’hui
-    };
-    
-    const isExpired = (dateExpiration: string): boolean => {
-      const expirationDate = new Date(dateExpiration).setHours(0, 0, 0, 0);
-      const currentDate = new Date().setHours(0, 0, 0, 0);
-      return expirationDate < currentDate; // Produit expiré
-    };
-    
-    
-    
-  
-    // Récupérer tout le stock via le service
-    this.stocksService.getAllStock(token).subscribe(
-      (data) => {
-        // Mapper les données des stocks et enrichir les produits avec les détails supplémentaires
-        this.stocks = data.map(stock => ({
-          ...stock,
-          produit: {
-            ...stock.produit,
-            codeProduit: stock.produit?.codeProduit || 'Code inconnu',
-            nomProduit: stock.produit?.nomProduit || 'Nom inconnu',
-            photo: stock.produit?.photo ? `http://localhost:8080${stock.produit.photo}` : 'assets/img/lait.jpeg',
-            prix: stock.produit?.prix || 0,
-            prixAchat: stock.produit?.prixAchat || 0,
-            alertSeuil: stock.produit?.alertSeuil || 0,
-            category: stock.produit?.category || { nomCategory: 'Catégorie inconnue' },
-            // Vérification des dates d'expiration
-          isExpiringSoon: isExpiringSoon(stock.dateExpiration),
-          isExpiringInOneDay: isExpiringInOneDay(stock.dateExpiration),
-          isExpiringToday: isExpiringToday(stock.dateExpiration),
-          isExpired: isExpired(stock.dateExpiration),
-            
-          }
-        }));
-  
-        console.log('Stocks après map :', this.stocks);
-  
-        // Vérification des dates avant le tri
-        console.log("Avant tri:", this.stocks.map(stock => stock.dateAjout));
-  
-        // Trier les stocks par date d'ajout (du plus récent au plus ancien)
-        this.stocks.sort((a, b) => {
-          const dateA = new Date(a.dateAjout);
-          const dateB = new Date(b.dateAjout);
-          return dateB.getTime() - dateA.getTime();
-        });
-  
-        // Mise à jour du DataSource avec les stocks et activation de la pagination
-        this.dataSource = new MatTableDataSource(this.stocks);
-        this.dataSource.paginator = this.paginator;
-  
-        // Vérifier si le tri est correctement effectué
-        console.log("DataSource mise à jour:", this.dataSource.data);
-  
-        // Calculer les totaux si nécessaire
-        this.calculateTotals();
-      },
-      (error) => {
-        this.errorMessage = error.message || 'Erreur lors de la récupération du stock';
-        console.error(this.errorMessage);
-      }
-    );
-  
-    this.usersService.getUserInfo().subscribe({
-      next: (userInfo) => {
-        this.nomEntreprise = userInfo.nomEntreprise;
-        this.adresseEntreprise = userInfo.adresseEntreprise;
-        this.logoEntreprise = userInfo.logoEntreprise;
-      },
-  
-      error: (err) => {
-        console.error('Erreur lors de la récupération d\'info entreprise', err);
-      }
-    });
-  }
-  
-  
-   // Calcul des Totaux : Quantité Totale et Prix Total
-   calculateTotals() {
-    console.log('Stocks:', this.stocks);
-  
-    this.totalQuantity = this.stocks.reduce((acc: number, stock: { quantite: number }) => {
-      const quantite = stock.quantite || 0;
-      console.log(`Quantité: ${quantite}`); 
-      return acc + quantite;
-    }, 0);
-  
-    this.totalPrice = this.stocks.reduce((acc: number, stock: { produit: { prix: number }, quantite: number }) => {
-      const prix = stock.produit.prix || 0;
-      const quantite = stock.quantite || 0; 
-      console.log(`Prix: ${prix}, Quantité: ${quantite}`); 
-      return acc + (prix * quantite);
-    }, 0);
-
-    this.changeDetectorRef.detectChanges();
-
-    
-    console.log(`Total Quantité: ${this.totalQuantity}`);
-    console.log(`Total Prix: ${this.totalPrice}`);
-  }
-  
-  
-
-  openImage(imageUrl: string): void {
-    this.imagePopup = imageUrl;
-  }
-  
-  closeImage(): void {
-    this.imagePopup = null;
+  ngOnInit(): void {
+    this.getUserBoutiqueId();
+    this.getUserInfo();
+    this.loadProduits();
   }
 
-  downloadExcel() {}
 
-  downloadCSV() {}
- 
-  
-
-  // Gestion du dropdown d'export
-  showExportDropdown = false;
-  toggleExportDropdown() {
-    this.showExportDropdown = !this.showExportDropdown;
-  }
-
-  @HostListener('document:click', ['$event'])
-  onClickOutside(event: MouseEvent) { 
-    const target = event.target as HTMLElement;
-    if (!target.closest('.export-container')) {
-      this.showExportDropdown = false;
-    }
-  }
-
-  // Recherche dans le tableau avec highlight
+  // Permet de mettre en évidence le texte recherché
   highlightMatch(text: string): string {
     if (!this.searchText) return text;
     const regex = new RegExp(`(${this.searchText})`, 'gi');
     return text.replace(regex, '<strong>$1</strong>');
   }
 
-  // Filtrer les stocks en fonction du texte de recherche
-  filteredStocks(): any[] {
-    const sortedStocks = [...this.stocks].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  // Retourne la liste filtrée et paginée des produits
+  filteredProducts(): Produit[] {
+    const sortedProducts = [...this.tasks].sort((a, b) => {
+      const dateA = new Date(a.createdAt || new Date()).getTime();
+      const dateB = new Date(b.createdAt || new Date()).getTime();
 
-    const filtered = sortedStocks.filter(stock =>
-      stock.produit.nomProduit?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      stock.produit.codeProduit?.toLowerCase().includes(this.searchText.toLowerCase())
+      return dateB - dateA;
+    });
+    const filtered = sortedProducts.filter(product =>
+      (product.nom && product.nom.toLowerCase().includes(this.searchText.toLowerCase())) ||
+      (product.codeGenerique && product.codeGenerique.toLowerCase().includes(this.searchText.toLowerCase()))
     );
-
-    // Paginer les résultats filtrés
     const startIndex = this.currentPage * this.pageSize;
     return filtered.slice(startIndex, startIndex + this.pageSize);
   }
 
-  // Mise à jour de la pagination
-  onPageChange(event: any): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
+  // Affichage/Masquage du dropdown d'export
+  toggleExportDropdown() {
+    this.showExportDropdown = !this.showExportDropdown;
   }
 
-  // Méthode pour générer le PDF
-  downloadPDF() {
-    if (!this.stocks || this.stocks.length === 0) {
-      console.error("Aucun stock à afficher dans le PDF !");
-      return;
+  // Masque le dropdown si l'utilisateur clique en dehors
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.export-container')) {
+      this.showExportDropdown = false;
     }
-
-    const doc = new jsPDF();
-
-    // Définir l'URL du logo
-    const logoUrl = this.logoEntreprise ? `http://localhost:8080/logoUpload/${this.logoEntreprise}` : `http://localhost:8080/logoUpload/651.jpg`;
-
-    // Récupérer les informations de l'entreprise
-    const entreprise = this.nomEntreprise || "Nom non disponible";
-    const adress = this.adresseEntreprise || "Adresse non disponible";
-
-    const dateGenerated = new Date();
-    const formattedDate = dateGenerated.toLocaleString();
-
-    // Calculer les Totaux
-    this.calculateTotals();
-
-    // Ajouter le logo au PDF
-    this.getImageBase64(logoUrl).then((logoBase64) => {
-      doc.addImage(logoBase64, 'PNG', 14, 5, 30, 30);
-      doc.setFontSize(18);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Nom de l'entreprise: ${entreprise}`, 60, 20);
-      doc.text('Stocks', 60, 30);
-
-      // Ajouter les totaux
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Quantité Totale: ${this.totalQuantity}`, 140, 25);
-      doc.setTextColor(255, 0, 0);
-      doc.text(`Prix Total: ${this.totalPrice.toFixed(2)} €`, 140, 30);
-      doc.setTextColor(0, 0, 0);
-
-      // Tableau des stocks
-      const columns = ['Code', 'Nom du produit', 'Catégorie', 'Description', 'Prix', 'Quantité'];
-      const rows = this.filteredStocks().map(stock => [
-        stock.produit.codeProduit,
-        stock.produit.nomProduit,
-        stock.produit.category?.nomCategory || 'Catégorie inconnue',
-        stock.produit.description || 'Description non disponible',
-        stock.produit.prix,
-        stock.quantite
-      ]);
-
-      autoTable(doc, {
-        head: [columns],
-        body: rows,
-        startY: 40,
-        theme: 'grid',
-        headStyles: { fillColor: [100, 100, 255], textColor: [255, 255, 255], fontSize: 12 },
-        bodyStyles: { fontSize: 10 }
-      });
-
-      // Ajouter un pied de page
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'italic');
-      doc.text(`Adresse: ${adress}`, 14, 180);
-      doc.text(`Date de génération: ${formattedDate}`, 14, 190);
-
-      // Sauvegarder le PDF
-      doc.save('Facture_des_produits.pdf');
-    }).catch((error) => {
-      console.error("Erreur lors du chargement du logo :", error);
-    });
   }
 
-  // Charger l'image en base64
+  // Permet de convertir une image en base64 pour l'ajouter dans le PDF
   getImageBase64(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -331,8 +132,216 @@ export class StocksComponent implements OnInit {
       xhr.send();
     });
   }
+
+  // Téléchargement en Excel
+  downloadExcel() {
+    const worksheet = XLSX.utils.json_to_sheet(this.tasks);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Produits');
+    XLSX.writeFile(workbook, 'Produits.xlsx');
+  }
+
+  // Téléchargement en PDF
+  downloadPDF() {
+    if (!this.tasks || this.tasks.length === 0) {
+      console.error("Aucun produit à afficher dans le PDF !");
+      return;
+    }
+    const doc = new jsPDF();
+    const logoUrl = this.logoEntreprise
+      ? `${this.backendUrl}/logoUpload/${this.logoEntreprise}`
+      : `${this.backendUrl}/logoUpload/651.jpg`;
+    const entreprise = this.nomEntreprise || "Nom non disponible";
+    
+    this.getImageBase64(logoUrl).then((logoBase64) => {
+      doc.addImage(logoBase64, 'PNG', 14, 5, 30, 30);
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Nom de l'entreprise: ${entreprise}`, 60, 20);
+      doc.text('Liste des produits en Stock', 60, 30);
+      doc.setLineWidth(0.5);
+      doc.line(14, 35, 195, 35);
+      
+      const columns = ['Code', 'Nom produit', 'Description', 'Catégorie', 'Quantité'];
+      const startIndex = this.currentPage * this.pageSize;
+      const pageTasks = this.tasks.slice(startIndex, startIndex + this.pageSize);
+      
+      if (!Array.isArray(pageTasks) || pageTasks.length === 0) {
+        console.error("Aucun produit trouvé sur cette page !");
+        return;
+      }
+      
+      const rows = pageTasks.map(task => [
+        task.codeGenerique || '',
+        task.nom || '',
+        task.description || '',
+        task.nomCategorie ? `Catégorie ${task.nomCategorie}` : 'Catégorie inconnue',
+        //task.prixVente ?? 0,
+        task.quantite ?? 0
+      ]);
+      
+      
+      autoTable(doc, {
+        head: [columns],
+        body: rows,
+        startY: 40,
+        theme: 'grid',
+        headStyles: { fillColor: [100, 100, 255], textColor: [255, 255, 255], fontSize: 12 },
+        bodyStyles: { fontSize: 10 }
+      });
+      
+      const finalY = (doc as any).lastAutoTable?.finalY || 60;
+      doc.setLineWidth(0.5);
+      doc.line(14, finalY + 5, 195, finalY + 5);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic');
+      doc.text(`Nom de Boutique: ${this.boutiqueName}`, 14, finalY + 10);
+      doc.text(`Adress: ${this.addressBoutique}`, 14, finalY + 15);
+      
+      doc.save('Produits.pdf');
+    }).catch((error) => {
+      console.error("Erreur lors du chargement du logo :", error);
+    });
+  }
+
+  // Téléchargement en CSV
+  downloadCSV() {
+    const headers = ['Code', 'Photo', 'Nom produit', 'Catégorie', 'Description', 'Prix Vente', 'Prix Achat', 'Quantité', 'Unité', 'Seuil Alerte', 'Date & heure'];
+    const rows = this.tasks.map(task => [
+      task.codeGenerique || '',
+      task.photo,
+      task.nom,
+      task.nomCategorie || '',
+      task.description,
+      task.prixVente,
+      task.prixAchat,
+      task.quantite,
+      task.nomUnite || '',
+      task.seuilAlert,
+      task.createdAt
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(',')),
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'Produits.csv';
+    link.click();
+  }
+
+  // Gestion de la pagination
+  onPageChange(event: any): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+  }
+
+  // Gestion de l'upload d'image pour ajouter une photo
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newPhotoUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(this.selectedFile);
+    }
+  }
+
+  // Récupère l'ID de la boutique depuis le localStorage
+  getUserBoutiqueId(): number | null {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user && user.boutiques && user.boutiques.length > 0) {
+      return user.boutiques[0]?.id || null;
+    } else {
+      console.error('Aucune boutique trouvée pour cet utilisateur');
+      return null;
+    }
+  }
+
+  // Récupère les informations utilisateur et stocke les données dans le localStorage
+  getUserInfo(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        localStorage.setItem('user', JSON.stringify(user));
+        this.userName = user.nomComplet;
+        this.nomEntreprise = user.nomEntreprise;
+        this.boutiqueName = user.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
+        this.addressBoutique = user.boutiques[0].adresse|| 'Adresse de la boutique non trouvé';
+  
+        const boutiqueId = this.usersService.getUserBoutiqueId();
+        if (boutiqueId) {
+          this.loadProduits();
+        } else {
+          console.error("L'ID de la boutique est manquant");
+        }
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des informations utilisateur :", err);
+      }
+    });
+  }
+  
+
+  
+  
+
+  // Charge les produits depuis le backend et effectue le mapping pour l'affichage
+  loadProduits(): void {
+    const boutiqueId = this.usersService.getUserBoutiqueId();
+    if (!boutiqueId) {
+      console.error("L'ID de la boutique est manquant");
+      return;
+    }
+    this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
+      next: (produits: Produit[]) => {
+        console.log("Produits récupérés:", produits);
+
+        this.tasks = produits
+          .filter(prod => prod.enStock) // Garder seulement les produits en stock
+          .map(prod => {
+            const fullImageUrl =
+              prod.photo && prod.photo !== "null" && prod.photo !== "undefined"
+                ? `http://localhost:8080${prod.photo}`
+                : "";
+
+            return {
+              id: prod.id,
+              codeGenerique: prod.codeGenerique || "",
+              codeBare: prod.codeBare || "Non numéro code barre",
+              nom: prod.nom || "Nom inconnu",
+              description: prod.description || "Non description",
+              prixVente: prod.prixVente || 0,
+              prixAchat: prod.prixAchat || 0,
+              quantite: prod.quantite || 0,
+              seuilAlert: prod.seuilAlert || 0,
+              enStock: prod.enStock || false,
+              photo: fullImageUrl,
+              nomCategorie: prod.nomCategorie || "Non catégorie",
+              nomUnite: prod.nomUnite || "Non unité",
+              createdAt: prod.createdAt || new Date().toISOString(), // Assurer une valeur par défaut
+              categorieId: prod.categorieId,
+              uniteId: prod.uniteId,
+            };
+          })
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        this.dataSource.data = this.tasks;
+        this.dataSource.paginator = this.paginator;
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des produits", err);
+      },
+    });
 }
 
-function sort(arg0: (a: any, b: any) => number) {
-  throw new Error('Function not implemented.');
+
+
+
+  
+  
 }

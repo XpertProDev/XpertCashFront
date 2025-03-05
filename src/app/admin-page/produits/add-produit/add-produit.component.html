@@ -132,7 +132,7 @@
                 <div class="double_input2">
                   <div class="champ_input">
                     <input type="text" placeholder="Saisis l'unité de mesure" 
-                           matInput [formControl]="uniteControl" class="input_focus"
+                           matInput [formControl]="UniterControl" class="input_focus"
                            [matAutocomplete]="autoUnite" style="cursor: pointer;">
                     <label for="uniteId" class="label labelCategory">Unité de mesure</label>
                     <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
