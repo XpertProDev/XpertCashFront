@@ -11,7 +11,7 @@
   
       <div class="modal-body">
   
-        <form class="container_formulaire" [formGroup]="ajouteProduitForm" (ngSubmit)="submitUpdateForm()">
+        <form class="container_formulaire" [formGroup]="modifierProduitForm">
   
           <!-- Titre d'ajout de produits  -->
           <div class="Title">
@@ -222,7 +222,6 @@
                 <div class="info_titre_input">
                   <h4>Ajouter un image</h4>
   
-  
                   <p *ngIf="!errorMessage" style="font-size: 12px; float: right;">Taille : 2 Mo max</p>
                   <p *ngIf="errorMessage" style="font-size: 12px; float: right; color: red;">{{ errorMessage }}</p>
   
@@ -263,7 +262,7 @@
                   </div>
   
                   <div class="btn_ajouter">
-                    <button class="btn_save" type="submit">Modifier</button>
+                    <button class="btn_save" type="submit" (click)="submitUpdateForm()">Modifier</button>
                   </div>
                   
                 </div>

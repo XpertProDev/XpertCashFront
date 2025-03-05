@@ -84,7 +84,7 @@ export class ListProduitComponent {
     messageAPI: string = '';
     apiMessageType: 'success' | 'error' | '' = '';
   
-    ajouteProduitForm!: FormGroup;
+    // ajouteProduitForm!: FormGroup;
     modifierProduitForm!: FormGroup;
     ajouteCategoryForm!: FormGroup;
     ajouteUniteForm!: FormGroup;
@@ -259,7 +259,7 @@ export class ListProduitComponent {
       } else {
         console.error('Aucun token trouvé !');
       }
-      this.ajouteProduitForm = this.fb.group({
+      this.modifierProduitForm = this.fb.group({
         nom: ['', [Validators.required, Validators.minLength(2)]],
         prixVente: ['', Validators.required],
         prixAchat: ['', Validators.required],
@@ -325,7 +325,7 @@ export class ListProduitComponent {
         next: (data: Produit) => {
           this.produit = data;
           // Mettez à jour le formulaire avec les données du produit
-          this.ajouteProduitForm.patchValue(this.produit);
+          this.modifierProduitForm.patchValue(this.produit);
         },
         error: (err) => {
           console.error('Erreur lors de la récupération du produit', err);
@@ -356,24 +356,24 @@ export class ListProduitComponent {
     // Getter pour faciliter l'accès aux contrôles dans le template
     get c() { return this.ajouteCategoryForm.controls; }
     get u() { return this.ajouteUniteForm.controls; }
-    get f() { return this.ajouteProduitForm.controls; }
+    get f() { return this.modifierProduitForm.controls; }
     
     // Méthode pour la sélection d'une catégorie
     onCategorySelected(event: any): void {
       console.log('Option sélectionnée :', event.option.value);  // Ajoutez ce log pour vérifier la sélection
       if (event.option && event.option.value) {
-        this.ajouteProduitForm.get('categorieId')?.setValue(event.option.value.id);
+        this.modifierProduitForm.get('categorieId')?.setValue(event.option.value.id);
       } else {
-        this.ajouteProduitForm.get('categorieId')?.setValue(null);
+        this.modifierProduitForm.get('categorieId')?.setValue(null);
       }
     }
   
     onUniteSelected(event: any): void {
       console.log('Unité sélectionnée :', event.option.value);
       if (event.option && event.option.value) {
-        this.ajouteProduitForm.get('uniteId')?.setValue(event.option.value.id);
+        this.modifierProduitForm.get('uniteId')?.setValue(event.option.value.id);
       } else {
-        this.ajouteProduitForm.get('uniteId')?.setValue(null);
+        this.modifierProduitForm.get('uniteId')?.setValue(null);
       }
     }
   
@@ -521,7 +521,7 @@ export class ListProduitComponent {
   
     submitUpdateForm(): void {
       // Vérifier que le formulaire est valide
-      if (this.ajouteProduitForm.invalid) {
+      if (this.modifierProduitForm.invalid) {
         this.errorMessage = "Veuillez remplir les champs obligatoires.";
         return;
       }
@@ -529,7 +529,7 @@ export class ListProduitComponent {
       // Fusionner les valeurs du formulaire avec le produit existant
       const updatedProduct: Produit = {
         ...this.produit,             // conserve les propriétés existantes (id, codeGenerique, etc.)
-        ...this.ajouteProduitForm.value  // met à jour avec les valeurs saisies
+        ...this.modifierProduitForm.value  // met à jour avec les valeurs saisies
       };
     
       // Appel du service pour modifier le produit (en passant le fichier sélectionné s'il existe)
