@@ -74,6 +74,7 @@ export class ListProduitComponent {
     // Méthode pour fermer le popup
     closePopup(): void {
       this.showPopup = false;
+      this.router.navigate(['/produit']);
     }
   
   
@@ -547,7 +548,7 @@ export class ListProduitComponent {
               type: 'success'
             });
             // Optionnel : rediriger vers la liste des produits ou autre page
-            this.router.navigate(['/produit']);
+            // this.router.navigate(['/produit']);
           },
           error: (error) => {
             console.error("Erreur lors de la modification du produit", error);
