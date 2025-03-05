@@ -35,7 +35,66 @@ export const NavigationItems: NavigationItem[] = [
     ]
   },
 
+  {
+    id: 'page',
+    title: 'Page',
+    type: 'group',
+    icon: 'icon-group',
+    children: [
+      {
+        id: 'produit',
+        title: 'Ventes',
+        type: 'item',
+        url: '/vente',
+        classes: 'nav-item',
+        icon: 'feather icon-shopping-cart'
+      },
+      {
+        id: 'produit',
+        title: 'Produits',
+        type: 'item',
+        url: '/produit',
+        icon: 'feather icon-tag'
+        //classes: 'nav-item',
+      },
+      {
+        id: 'stock',
+        title: 'Mes Stocks',
+        type: 'item',
+        url: '/stocks',
+        classes: 'nav-item',
+        icon: 'feather icon-clipboard'
+      },
+      {
+        id: 'revenue',
+        title: 'Clients',
+        type: 'item',
+        url: '/revenue',
+        classes: 'nav-item',
+        icon: 'feather icon-users'
+      },
+      {
+        id: 'facture',
+        title: 'Fournisseurs',
+        type: 'item',
+        url: '/facture',
+        classes: 'nav-item',
+        icon: 'feather icon-briefcase'
+      },
+      // Pour les compte
+      /*{
+        id: 'compte',
+        title: 'Comptes',
+        type: 'item',
+        url: '/compte',
+        classes: 'nav-item',
+        icon: 'feather icon-bell'
+      },*/
+    ]
+  },
+
   // Produit et entrer 
+  /*
   {
     id: 'produitentrer',
     title: 'produitentrer',
@@ -73,57 +132,9 @@ export const NavigationItems: NavigationItem[] = [
       }
     ]
   },
+  */
 
 
-  {
-    id: 'page',
-    title: 'Page',
-    type: 'group',
-    icon: 'icon-group',
-    children: [
-      {
-        id: 'produit',
-        title: 'Ventes',
-        type: 'item',
-        url: '/vente',
-        classes: 'nav-item',
-        icon: 'feather icon-file-text'
-      },
-      {
-        id: 'stock',
-        title: 'Mes Stocks',
-        type: 'item',
-        url: '/stocks',
-        classes: 'nav-item',
-        icon: 'feather icon-file-text'
-      },
-      {
-        id: 'revenue',
-        title: 'Revenue',
-        type: 'item',
-        url: '/revenue',
-        classes: 'nav-item',
-        icon: 'feather icon-file-text'
-      },
-      {
-        id: 'facture',
-        title: 'Facture',
-        type: 'item',
-        url: '/facture',
-        classes: 'nav-item',
-        icon: 'feather icon-file-text'
-      },
-      // Pour les compte
-      /*{
-        id: 'compte',
-        title: 'Comptes',
-        type: 'item',
-        url: '/compte',
-        classes: 'nav-item',
-        icon: 'feather icon-bell'
-      },*/
-    ]
-  },
 
   // COMPTE 
   {
@@ -134,7 +145,7 @@ export const NavigationItems: NavigationItem[] = [
     children: [
       {
         id: 'basic',
-        title: 'Compte & Profil',
+        title: 'Parametres',
         type: 'collapse',
         icon: 'feather icon-box',
         children: [
@@ -159,6 +170,7 @@ export const NavigationItems: NavigationItem[] = [
 
 
   // FIN 
+  /*
   {
     id: 'ui-component',
     title: 'Ui Component',
@@ -356,4 +368,5 @@ export const NavigationItems: NavigationItem[] = [
       }
     ]
   }
+    */
 ];

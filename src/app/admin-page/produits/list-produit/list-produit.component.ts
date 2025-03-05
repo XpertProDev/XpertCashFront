@@ -547,7 +547,7 @@ export class ListProduitComponent {
               type: 'success'
             });
             // Optionnel : rediriger vers la liste des produits ou autre page
-            // this.router.navigate(['/produits']);
+            this.router.navigate(['/produit']);
           },
           error: (error) => {
             console.error("Erreur lors de la modification du produit", error);
