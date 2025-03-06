@@ -1,0 +1,125 @@
+<div class="container_global">
+    <div class="content_detail_stock">
+      <div class="modal-body">
+        <!-- // hearder  -->
+        <div class="content_retour_icon">
+            <!-- Icon  -->
+            <div class="retour_icon">
+                <i class="ri-arrow-left-fill"></i>
+            </div>
+
+            <div class="icon_export">
+                <div class="export-container" style="display: flex; align-items: center;"> 
+                    <div class="iconDrop">
+                        <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
+                    </div>
+                    <div class="export-dropdown" *ngIf="showExportDropdown">
+                        <div class="export-option">Télécharger en Excel</div>
+                        <div class="export-option">Télécharger en PDF</div>
+                    </div>
+
+                    <div class="iconDrop" style="margin-left: 20px;">
+                        <i class="ri-history-line"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="container_imprimate">
+            <!-- // code de produit  -->
+            <div class="codeProduit">
+                <p class="codeId"> P-12345 </p>
+            </div>
+
+            <!-- Les info  -->
+            <div class="info_content">
+                
+                <!-- // Boutique  -->
+                 <div class="info">
+                    <p class="info_title">Boutique :</p>
+                    <p class="info_value">Nom Boutique</p>
+                 </div>
+
+                 <!-- // Type d'ajustement  -->
+                 <div class="info">
+                     <p class="info_title">Type d'ajustement :</p>
+                     <p class="info_value">Ajouter</p>
+                 </div>
+
+                 <!-- // Date de creation  -->
+                 <div class="info">
+                     <p class="info_title">Date de creation :</p>
+                     <p class="info_value">5 - 03 - 2025 à 12:00</p>
+                 </div>
+
+                 <!-- // Personne  -->
+                <div class="personne">
+                    <div class="info">
+                        <p class="info_title">Créé par :</p>
+                        <p class="info_value">Diakaridia SY</p>
+                    </div>
+
+                    <div class="info info_email">
+                        <p class="info_title">Email :</p>
+                        <p class="info_value">informatiquexpertpro2&#64;</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- // table  -->
+             <div class="containerTable">
+                <table>
+                    <div class="table_title">
+                        <p>Produit</p>
+                    </div>
+    
+                    <thead>
+                        <tr class="titleTableProduit">
+                          <th class="title_table_name">Mes produits</th>
+                          <th class="title_table_contenu">Stock actuel</th>
+                          <th class="title_table_contenu">Quantité à ajouter</th>
+                          <th class="title_table_contenu">Coût unitaire</th>
+                          <th class="title_table_contenu">Stock après</th>
+                        </tr>
+                      </thead>
+    
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="champ_input" style="margin-right: 10px;">
+                                    <input type="text" readonly class="input_table" value="Bic">
+                                </div>
+                                
+                            </td>
+                            <td>
+                                <div class="champ_input" style="margin-right: 15px;">
+                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                </div>
+                                
+                            </td>
+                            <td>
+                                <div class="champ_input" style="margin-right: 15px;">
+                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="champ_input" style="margin-right: 15px;">
+                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="champ_input">
+                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                 </table>
+             </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  

@@ -107,6 +107,12 @@ const routes: Routes = [
         canActivate: [authGuard]
 
       },
+      {
+        path: 'detail-stock',
+        loadComponent: () => import('./admin-page/detail-stock/detail-stock.component').then(m => m.DetailStockComponent),
+        canActivate: [authGuard]
+
+      },
 
       // La routing de entrer
       {
@@ -128,6 +134,14 @@ const routes: Routes = [
       {
         path: 'stocks',
         loadComponent: () => import('./admin-page/stocks/stocks.component').then(m => m.StocksComponent),
+        canActivate: [authGuard]
+
+      },
+
+      // La routing de add stocks ajustement
+      {
+        path: 'stock_ajustement',
+        loadComponent: () => import('./admin-page/add-stock-ajustement/add-stock-ajustement.component').then(m => m.AddStockAjustementComponent),
         canActivate: [authGuard]
 
       },

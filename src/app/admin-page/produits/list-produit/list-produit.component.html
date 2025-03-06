@@ -98,9 +98,9 @@
                     <div class="champ_input champ_input2">
                       <input formControlName="prixAchat" type="text" class="input_focus " required id="prixAchat" name="prixAchat" 
                       placeholder="Saisis le prix d'achat">
-                      <label for="prixAchat" class="label labelColor">Prix achat</label>
+                      <label for="prixAchat" class="label labelColor">Coût du produit</label>
                       <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
-                        Le prix achat est vide.
+                        Le Coût du produit est vide.
                       </div>
                     </div>
   
@@ -108,9 +108,9 @@
                     <div class="champ_input champ_input2">
                       <input formControlName="quantite" type="text" class="input_focus " required id="quantite" name="quantite" 
                       placeholder="Saisis le quantité">
-                      <label for="quantite" class="label labelColor">Quantité</label>
+                      <label for="quantite" class="label labelColor">En stock</label>
                       <div *ngIf="f['quantite'].touched && f['quantite'].invalid" class="error-message">
-                        Le quantité est vide.
+                        Le quantité de stock est vide.
                       </div>
                     </div>
                   </div>

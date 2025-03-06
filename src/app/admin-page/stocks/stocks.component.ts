@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CategorieService } from '../SERVICES/categorie.service';
 import { ProduitService } from '../SERVICES/produit.service';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -30,6 +30,7 @@ import { ChangeDetectorRef } from '@angular/core';
       MatInputModule,
       //AsyncPipe,
       MatPaginatorModule,
+      RouterLink,
   ],
   templateUrl: './stocks.component.html',
   styleUrl: './stocks.component.scss'
@@ -341,6 +342,9 @@ export class StocksComponent implements OnInit {
 
 
 
+// openStockDetail(productId: number): void {
+//   this.router.navigate(['/detail-produit', productId]);
+// }
 
   
   

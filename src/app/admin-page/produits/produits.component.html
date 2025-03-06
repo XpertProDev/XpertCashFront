@@ -35,8 +35,8 @@
         <th>Description</th>
         <th>Catégorie</th>
         <th>Prix Vente</th>
-        <th>Prix Achat</th>
-        <th>Quantité</th>
+        <th>Coût du produit</th>
+        <th style="background-color: #0671e44a;">En stock</th>
         <th>Unité</th>
         <th>Seuil Alerte</th>
       </tr>
@@ -62,7 +62,7 @@
         <td [innerHTML]="highlightMatch(product.nomCategorie || '')"></td>
         <td>{{ product.prixVente }}</td>
         <td>{{ product.prixAchat }}</td>
-        <td [innerHTML]="highlightMatch(product.quantite.toString())"></td>
+        <td style="background-color: #0671e410;" [innerHTML]="highlightMatch(product.quantite.toString())"></td>
         <td>{{ product.nomUnite }}</td>
         <td>{{ product.seuilAlert }}</td>
       </tr>

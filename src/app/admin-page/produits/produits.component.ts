@@ -290,10 +290,6 @@ export class ProduitsComponent implements OnInit {
       }
     });
   }
-  
-
-  
-  
 
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
   loadProduits(): void {

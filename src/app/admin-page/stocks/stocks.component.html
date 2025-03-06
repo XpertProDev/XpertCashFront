@@ -3,7 +3,7 @@
   <div class="tasks-header">
     <h1 class="title">Mes Stocks</h1>
     <div class="actions">
-      <button class="add-task" >Ajouter un produit</button>
+      <button class="add-task" routerLink="/stock_ajustement" >Créer un ajustement de stock</button>
       <div class="contentIcon">
         <i class="ri-refresh-line"></i>
         <div class="bare"></div>
@@ -35,15 +35,16 @@
         <th>Description</th>
         <th>Catégorie</th>
         <th>Prix Vente</th>
-        <th>Prix Achat</th>
-        <th>Quantité</th>
+        <th>Coût du produit</th>
+        <th style="background-color: #0671e44a;">En stock</th>
         <th>Unité</th>
         <th>Seuil Alerte</th>
       </tr>
     </thead>
     <tbody>
       <!-- Boucle sur la liste filtrée et paginée -->
-      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;">
+      <!-- (click)="openStockDetail(stock.id)"  -->
+      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;" routerLink="/detail-stock">
         <td [innerHTML]="highlightMatch(product.codeGenerique || '')"></td>
         <td>
           <div class="imgProduit">
@@ -62,7 +63,7 @@
         <td [innerHTML]="highlightMatch(product.nomCategorie || '')"></td>
         <td>{{ product.prixVente }}</td>
         <td>{{ product.prixAchat }}</td>
-        <td [innerHTML]="highlightMatch(product.quantite.toString())"></td>
+        <td style="background-color: #0671e410;" [innerHTML]="highlightMatch(product.quantite.toString())"></td>
         <td>{{ product.nomUnite || '' }}</td>
         <td>{{ product.seuilAlert }}</td>
       </tr>
