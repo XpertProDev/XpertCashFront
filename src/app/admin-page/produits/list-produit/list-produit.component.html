@@ -229,9 +229,9 @@
                   <!-- Section pour la gestion de l'image du produit -->
                   <div class="container_file"> 
                     <div class="header_file"> 
-                        <img class="roudel"
-                            [src]="newPhotoUrl ? newPhotoUrl : (produit.photo ? backendUrl + produit.photo : urllink)"
-                            alt="Aperçu de l'image" style="max-width:200px;">
+                      <img class="roudel"
+                        [src]="newPhotoUrl ? newPhotoUrl : (fullImageUrl ? fullImageUrl : urllink)"
+                        alt="Aperçu de l'image" style="max-width:200px;">
                     </div> 
                     <div>
                       <label for="file" class="footer_file"> 

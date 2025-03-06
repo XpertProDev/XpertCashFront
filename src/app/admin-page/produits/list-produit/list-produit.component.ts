@@ -153,22 +153,8 @@ export class ListProduitComponent {
     newPhotoUrl: string | null = null;
     backendUrl: string = 'http://localhost:8080';
     selectedFile: File | null | undefined = null;
-  
-    // onFileSelected(event: Event): void {
-    //   const input = event.target as HTMLInputElement;
-    //   if (input.files && input.files.length > 0) {
-    //     this.selectedFile = input.files[0];
-    
-    //     const reader = new FileReader();
-    //     reader.onload = (e) => {
-    //       this.newPhotoUrl = e.target?.result as string;
-    //     };
-    //     reader.readAsDataURL(this.selectedFile);
-    //   }
-    // }
-    // Remplacez cette méthode :
    
-    onFileSelected(event: Event): void {
+  onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0]; // Récupère le fichier sélectionné
@@ -195,6 +181,8 @@ export class ListProduitComponent {
       reader.readAsDataURL(this.selectedFile);
     }
   }
+
+
   
   
     //////// FOCUS CATEGORY
@@ -301,6 +289,20 @@ export class ListProduitComponent {
       
     }
 
+  fullImageUrl: string = ''; // Déclarez la propriété ici
+
+    // Méthode pour générer un avatar avec la première lettre du nom
+  generateLetterAvatar(nom: string): string {
+    const letter = nom ? nom.charAt(0).toUpperCase() : '?';
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+        <rect width="100" height="100" fill="#0671e4ac"/>
+        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="50">${letter}</text>
+      </svg>
+    `;
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  }
+
     // updateProduct(): void {
     //   this.modifierProduitForm = this.fb.group({
     //     nom: ['', [Validators.required, Validators.minLength(2)]],
@@ -316,42 +318,51 @@ export class ListProduitComponent {
     // }
 
     // Fonction pour récupérer le produit
-    getProduit(): void {
-      const idParam = this.route.snapshot.paramMap.get('id');
-      const productId = idParam ? +idParam : 0; // Utilise 1 par défaut si non trouvé
+  getProduit(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const productId = idParam ? +idParam : 0; // Utilise 1 par défaut si non trouvé
 
-      // Exemple dans votre composant TypeScript
-      this.produitService.getProduitById(productId).subscribe({
-        next: (data: Produit) => {
-          this.produit = data;
-          // Mettez à jour le formulaire avec les données du produit
-          this.modifierProduitForm.patchValue(this.produit);
-        },
-        error: (err) => {
-          console.error('Erreur lors de la récupération du produit', err);
-        }
-      });
+    // Exemple dans votre composant TypeScript
+    this.produitService.getProduitById(productId).subscribe({
+      next: (data: Produit) => {
+        this.produit = data;
+        this.loadProduitDetail(this.produit);
+        // Mettez à jour le formulaire avec les données du produit
+        this.modifierProduitForm.patchValue(this.produit);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération du produit', err);
+      }
+    });
+  }
 
+  // Méthode pour charger le détail du produit et construire l'URL de l'image
+  loadProduitDetail(produit: Produit): void {
+    if (produit.photo && produit.photo !== 'null' && produit.photo !== 'undefined') {
+      this.fullImageUrl = this.backendUrl + produit.photo;
+    } else {
+      this.fullImageUrl = this.generateLetterAvatar(produit.nom);
     }
+  }
   
-    getBoutiqueName() {
-      this.usersService.getUserInfo().subscribe(
-        (userInfo) => {
-          console.log(userInfo);
-          if (userInfo && userInfo.boutiques && userInfo.boutiques.length > 0) {
-            console.log(userInfo.boutiques[0]);
-    
-            this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
-          } else {
-            console.error('Aucune boutique trouvée pour cet utilisateur');
-            this.boutiqueName = 'Aucune boutique';
-          }
-        },
-        (error) => {
-          console.error('Erreur lors de la récupération des informations utilisateur', error);
+  getBoutiqueName() {
+    this.usersService.getUserInfo().subscribe(
+      (userInfo) => {
+        console.log(userInfo);
+        if (userInfo && userInfo.boutiques && userInfo.boutiques.length > 0) {
+          console.log(userInfo.boutiques[0]);
+  
+          this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
+        } else {
+          console.error('Aucune boutique trouvée pour cet utilisateur');
+          this.boutiqueName = 'Aucune boutique';
         }
-      );
-    }
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des informations utilisateur', error);
+      }
+    );
+  }
   
     // Getter pour faciliter l'accès aux contrôles dans le template
     get c() { return this.ajouteCategoryForm.controls; }
@@ -518,7 +529,6 @@ export class ListProduitComponent {
       });
     }
   
-  
     submitUpdateForm(): void {
       // Vérifier que le formulaire est valide
       if (this.modifierProduitForm.invalid) {
@@ -563,6 +573,4 @@ export class ListProduitComponent {
         });
     }
     
-
- 
 }

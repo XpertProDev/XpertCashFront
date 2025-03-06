@@ -305,10 +305,10 @@ export class StocksComponent implements OnInit {
         this.tasks = produits
           .filter(prod => prod.enStock) // Garder seulement les produits en stock
           .map(prod => {
-            const fullImageUrl =
-              prod.photo && prod.photo !== "null" && prod.photo !== "undefined"
-                ? `http://localhost:8080${prod.photo}`
-                : "";
+            // const fullImageUrl = prod.photo && prod.photo !== "null" && prod.photo !== "undefined" ? `http://localhost:8080${prod.photo}` : "";
+          // Vérifier si la photo est valide
+          const hasPhoto = prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined';
+          const fullImageUrl = hasPhoto ? `http://localhost:8080${prod.photo}` : '';
 
             return {
               id: prod.id,
@@ -321,7 +321,8 @@ export class StocksComponent implements OnInit {
               quantite: prod.quantite || 0,
               seuilAlert: prod.seuilAlert || 0,
               enStock: prod.enStock || false,
-              photo: fullImageUrl,
+              // photo: fullImageUrl,
+              photo: fullImageUrl ? fullImageUrl : this.generateLetterAvatar(prod.nom),
               nomCategorie: prod.nomCategorie || "Non catégorie",
               nomUnite: prod.nomUnite || "Non unité",
               createdAt: prod.createdAt || new Date().toISOString(), // Assurer une valeur par défaut
@@ -340,6 +341,17 @@ export class StocksComponent implements OnInit {
     });
 }
 
+generateLetterAvatar(nom: string): string {
+  const letter = nom ? nom.charAt(0).toUpperCase() : '?';
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+      <rect width="100" height="100" fill="#0671e4ac"/>
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="50">${letter}</text>
+    </svg>
+  `;
+  // Encodage du SVG en base64 pour pouvoir l'utiliser comme data URL
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
+}
 
 
 // openStockDetail(productId: number): void {

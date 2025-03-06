@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-detail-stock',
   imports: [
     CommonModule,
+    RouterLink,
   ],
   templateUrl: './detail-stock.component.html',
   styleUrl: './detail-stock.component.scss'

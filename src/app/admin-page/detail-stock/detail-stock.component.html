@@ -4,7 +4,7 @@
         <!-- // hearder  -->
         <div class="content_retour_icon">
             <!-- Icon  -->
-            <div class="retour_icon">
+            <div class="retour_icon" routerLink="/stocks">
                 <i class="ri-arrow-left-fill"></i>
             </div>
 
@@ -14,8 +14,8 @@
                         <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
                     </div>
                     <div class="export-dropdown" *ngIf="showExportDropdown">
-                        <div class="export-option">Télécharger en Excel</div>
                         <div class="export-option">Télécharger en PDF</div>
+                        <div class="export-option">Imprimer</div>
                     </div>
 
                     <div class="iconDrop" style="margin-left: 20px;">
@@ -42,10 +42,10 @@
                  </div>
 
                  <!-- // Type d'ajustement  -->
-                 <div class="info">
+                 <!-- <div class="info">
                      <p class="info_title">Type d'ajustement :</p>
                      <p class="info_value">Ajouter</p>
-                 </div>
+                 </div> -->
 
                  <!-- // Date de creation  -->
                  <div class="info">
@@ -54,33 +54,36 @@
                  </div>
 
                  <!-- // Personne  -->
-                <div class="personne">
-                    <div class="info">
-                        <p class="info_title">Créé par :</p>
-                        <p class="info_value">Diakaridia SY</p>
-                    </div>
-
-                    <div class="info info_email">
-                        <p class="info_title">Email :</p>
-                        <p class="info_value">informatiquexpertpro2&#64;</p>
-                    </div>
+                 <div class="info">
+                    <p class="info_title">Créé par :</p>
+                    <p class="info_value">Diakaridia SY</p>
                 </div>
+
+                <div class="info">
+                    <p class="info_title">Email :</p>
+                    <p class="info_value">informatiquexpertpro2&#64;</p>
+                </div>
+                <!-- info_email -->
+                <!-- <div class="personne">
+                    
+                </div> -->
             </div>
 
             <!-- // table  -->
              <div class="containerTable">
+
+                <div class="table_title">
+                    <p>Produit</p>
+                </div>
+
                 <table>
-                    <div class="table_title">
-                        <p>Produit</p>
-                    </div>
-    
                     <thead>
                         <tr class="titleTableProduit">
                           <th class="title_table_name">Mes produits</th>
                           <th class="title_table_contenu">Stock actuel</th>
                           <th class="title_table_contenu">Quantité à ajouter</th>
                           <th class="title_table_contenu">Coût unitaire</th>
-                          <th class="title_table_contenu">Stock après</th>
+                          <th class="title_table_contenu4">Stock après</th>
                         </tr>
                       </thead>
     
@@ -88,35 +91,54 @@
                         <tr>
                             <td>
                                 <div class="champ_input" style="margin-right: 10px;">
-                                    <input type="text" readonly class="input_table" value="Bic">
+                                    <input type="text" readonly class="input_table1" value="Bic">
                                 </div>
                                 
                             </td>
                             <td>
                                 <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                    <input type="text" readonly class="input_table" value="00">
                                 </div>
                                 
                             </td>
                             <td>
                                 <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                    <input type="text" readonly class="input_table" value="00">
                                 </div>
                             </td>
                             <td>
                                 <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                    <input type="text" readonly class="input_table" value="00">
                                 </div>
                             </td>
                             <td>
-                                <div class="champ_input">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                <div class="champ_input i4">
+                                    <input type="text" readonly class="input_table" value="00">
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                  </table>
              </div>
+
+             <!-- // signature  -->
+              <div class="container_signature">
+                <div class="content_signature">
+                    <!-- // Signature -->
+                    <div class="signature">
+                        <p>Signature</p>
+                        <!-- <p>...........................</p> -->
+                    </div>
+                    <!-- // Approuvé par  -->
+                     <div class="approuve">
+                        <p>Approuvé par</p>
+                     </div>
+                     <!-- // Reçu par  -->
+                      <div class="recu">
+                        <p>Reçu par</p>
+                      </div>
+                </div>
+              </div>
         </div>
 
       </div>

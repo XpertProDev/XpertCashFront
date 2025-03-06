@@ -47,7 +47,7 @@
         <td [innerHTML]="highlightMatch(product.codeGenerique || '')"></td>
         <td>
           <div class="imgProduit">
-            <img [src]="product.photo || 'assets/img/image_product.png'">
+            <img [src]="product.photo">
             <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/lait.jpeg' : product.photo"> -->
           </div>
           <div class="modal" *ngIf="imagePopup">
