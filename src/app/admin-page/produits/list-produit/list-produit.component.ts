@@ -92,11 +92,6 @@ export class ListProduitComponent {
     errorMessageCategory: string = '';
     errorMessageUnity: string = '';
   
-    // Propriétés pour la popup
-    // showPopup: boolean = false;
-    // showPopup2: boolean = false;
-    // showPopupCategory: boolean = false;
-    // showPopupCategory2: boolean = false;
     popupTitle: string = '';
     popupMessage: string = '';
     popupImage: string = '';
@@ -154,33 +149,46 @@ export class ListProduitComponent {
     backendUrl: string = 'http://localhost:8080';
     selectedFile: File | null | undefined = null;
    
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0]; // Récupère le fichier sélectionné
-  
-      // Vérification de la taille du fichier (2 Mo = 2 * 1024 * 1024 octets)
-      const maxSize = 2 * 1024 * 1024;
-      if (file.size > maxSize) {
-        this.errorMessage = 'Le fichier est trop volumineux. Veuillez choisir un fichier de moins de 2 Mo.';
-        this.selectedFile = null;
-        this.imageFile = null;  // Réinitialise l'image si le fichier est trop grand
-        this.newPhotoUrl = null;
-        return;
+    // Dans list-produit.component.ts
+    onFileSelected(event: Event): void {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files.length > 0) {
+        const file = input.files[0]; // Récupère le fichier sélectionné
+
+        // Vérification de la taille du fichier (2 Mo = 2 * 1024 * 1024 octets)
+        const maxSize = 2 * 1024 * 1024;
+        if (file.size > maxSize) {
+          this.errorMessage = 'Le fichier est trop volumineux. Veuillez choisir un fichier de moins de 2 Mo.';
+          this.selectedFile = null;
+          this.imageFile = null;  // Réinitialise l'image si le fichier est trop grand
+          this.newPhotoUrl = null;
+          return;
+        }
+
+        // Si le fichier est correct, on continue
+        this.errorMessage = '';
+        this.selectedFile = file;
+        this.imageFile = file; // ✅ Associe le fichier sélectionné à imageFile
+      
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.newPhotoUrl = e.target?.result as string;
+        };
+        reader.readAsDataURL(this.selectedFile);
       }
-  
-      // Si le fichier est correct, on continue
-      this.errorMessage = '';
-      this.selectedFile = file;
-      this.imageFile = file; // ✅ Associe le fichier sélectionné à imageFile
-  
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.newPhotoUrl = e.target?.result as string;
-      };
-      reader.readAsDataURL(this.selectedFile);
     }
-  }
+
+    getImageUrl(produit: Produit): string {
+      if (produit.photo) {
+        return this.backendUrl + produit.photo;  // Si le produit a une image, on la récupère
+      } else if (produit.nom) {
+        const firstLetter = produit.nom.charAt(0).toUpperCase();  // Si pas d'image, on prend la première lettre du nom du produit
+        return `assets/img/letters/${firstLetter}.png`;  // Assurez-vous d'avoir une image pour chaque lettre dans le dossier "assets/img/letters/"
+      } else {
+        return 'assets/img/appareil.jpg';  // Image par défaut si aucune image et nom
+      }
+    }
+
   
     //////// FOCUS CATEGORY
     myControl = new FormControl();
@@ -511,35 +519,46 @@ export class ListProduitComponent {
     
       // Fusionner les valeurs du formulaire avec le produit existant
       const updatedProduct: Produit = {
-        ...this.produit,             // conserve les propriétés existantes (id, codeGenerique, etc.)
-        ...this.modifierProduitForm.value  // met à jour avec les valeurs saisies
+        ...this.produit,                         // Conserve les propriétés existantes (id, codeGenerique, etc.)
+        ...this.modifierProduitForm.value        // Met à jour avec les valeurs saisies dans le formulaire
       };
     
-      // Appel du service qui se chargera de créer le FormData et d'envoyer la requête
-      this.produitService.modifierProduit(updatedProduct, this.selectedFile ?? undefined).subscribe({
-        next: (response: Produit) => {
-          console.log("Produit modifié avec succès", response);
-          this.produit = response;
-          this.showPopupMessage({
-            title: 'Succès',
-            message: 'Le produit a été modifié avec succès.',
-            image: 'assets/img/succcccc.png',
-            type: 'success'
-          });
-        },
-        error: (error) => {
-          console.error("Erreur lors de la modification du produit", error);
-          this.showPopupMessage({
-            title: 'Erreur',
-            message: "Une erreur est survenue lors de la modification du produit.",
-            image: 'assets/img/error.png',
-            type: 'error'
-          });
-        }
-      });
-    }    
-
+      // Ajout de logs pour le debug
+      console.log("Produit mis à jour (avant envoi) :", updatedProduct);
+      console.log("Fichier sélectionné :", this.selectedFile);
     
+      // Appel du service qui se charge de créer le FormData et d'envoyer la requête PATCH
+      this.produitService.modifierProduit(updatedProduct, this.selectedFile ?? undefined)
+        .subscribe({
+          next: (response: Produit) => {
+            console.log("Produit modifié avec succès", response);
+            this.produit = response;
+            this.showPopupMessage({
+              title: 'Succès',
+              message: 'Le produit a été modifié avec succès.',
+              image: 'assets/img/succcccc.png',
+              type: 'success'
+            });
+          },
+          error: (error) => {
+            console.error("Erreur lors de la modification du produit", error);
+            let errorMessage = "Une erreur est survenue lors de la modification du produit.";
+            if (error.error) {
+              if (typeof error.error === "object" && error.error.error) {
+                errorMessage = error.error.error;
+              } else if (typeof error.error === "string") {
+                errorMessage = error.error;
+              }
+            }
+            this.showPopupMessage({
+              title: 'Erreur',
+              message: errorMessage,
+              image: 'assets/img/error.png',
+              type: 'error'
+            });
+          }
+        });
+    }
     
     
 }

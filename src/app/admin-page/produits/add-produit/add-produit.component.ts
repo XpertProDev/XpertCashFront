@@ -264,18 +264,20 @@ export class AddProduitComponent {
 
     // Abonnement pour mettre à jour l'image par défaut en fonction du nom du produit
     this.ajouteProduitForm.get('nom')?.valueChanges.subscribe(name => {
-      if (!this.selectedFile) {
+      // Si aucun fichier n'a été sélectionné manuellement
+      // ou si le fichier actuel est le fichier généré par défaut (nommé 'default.svg')
+      if (!this.selectedFile || (this.selectedFile && this.selectedFile.name === 'default.svg')) {
         if (name && name.trim().length > 0) {
-          // Génération de l'image SVG et conversion en objet File
           this.newPhotoUrl = this.generateImageFromLetter(name.trim()[0]);
           this.selectedFile = this.dataURLtoFile(this.newPhotoUrl, 'default.svg');
-          this.imageFile = this.selectedFile; // si besoin
+          this.imageFile = this.selectedFile;
         } else {
           // Si le champ est vide, affichez l'image par défaut
           this.newPhotoUrl = this.urllink;
         }
       }
-    });    
+    });
+    
   }
 
   generateImageFromLetter(letter: string): string {

@@ -228,8 +228,9 @@
                   <!-- Input de produits photo -->
                   <!-- Section pour la gestion de l'image du produit -->
                   <div class="container_file"> 
-                    <div class="header_file"> 
-                      <img [src]="produit.photo ? (backendUrl + produit.photo) : 'assets/img/appareil.jpg'" alt="Produit">
+                    <div class="header_file">
+                      <!-- <img [src]="newPhotoUrl ? newPhotoUrl : (produit.photo ? (backendUrl + produit.photo) : 'assets/img/appareil.jpg')" alt="Produit"> -->
+                      <img [src]="newPhotoUrl ? newPhotoUrl : getImageUrl(produit)" alt="Produit">
                     </div> 
                     <div>
                       <label for="file" class="footer_file"> 
