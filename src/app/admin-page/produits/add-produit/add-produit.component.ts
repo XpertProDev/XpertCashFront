@@ -132,20 +132,6 @@ export class AddProduitComponent {
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
   selectedFile: File | null | undefined = null;
-
-  // onFileSelected(event: Event): void {
-  //   const input = event.target as HTMLInputElement;
-  //   if (input.files && input.files.length > 0) {
-  //     this.selectedFile = input.files[0];
-  
-  //     const reader = new FileReader();
-  //     reader.onload = (e) => {
-  //       this.newPhotoUrl = e.target?.result as string;
-  //     };
-  //     reader.readAsDataURL(this.selectedFile);
-  //   }
-  // }
-  // Remplacez cette méthode :
  
   onFileSelected(event: Event): void {
   const input = event.target as HTMLInputElement;
@@ -173,8 +159,7 @@ export class AddProduitComponent {
     };
     reader.readAsDataURL(this.selectedFile);
   }
-}
-
+  }
 
   //////// FOCUS CATEGORY
   myControl = new FormControl();
@@ -240,13 +225,14 @@ export class AddProduitComponent {
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prixVente: ['', Validators.required],
       prixAchat: ['', Validators.required],
-      quantite: ['', Validators.required],
+      quantite: ['00'],
       seuilAlert: ['', Validators.required],
       description: [''],
       codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],
       categorieId: [''],
       uniteId: ['']
     });
+    
     // Abonnement pour récupérer l'ID de la boutique active
     this.sharedDataService.boutiqueId$.subscribe(id => {
       this.boutiqueId = id;
@@ -275,8 +261,53 @@ export class AddProduitComponent {
       this.messageAPI = '';
       this.apiMessageType = '';
     });
-    
+
+    // Abonnement pour mettre à jour l'image par défaut en fonction du nom du produit
+    this.ajouteProduitForm.get('nom')?.valueChanges.subscribe(name => {
+      if (!this.selectedFile) {
+        if (name && name.trim().length > 0) {
+          // Génération de l'image SVG et conversion en objet File
+          this.newPhotoUrl = this.generateImageFromLetter(name.trim()[0]);
+          this.selectedFile = this.dataURLtoFile(this.newPhotoUrl, 'default.svg');
+          this.imageFile = this.selectedFile; // si besoin
+        } else {
+          // Si le champ est vide, affichez l'image par défaut
+          this.newPhotoUrl = this.urllink;
+        }
+      }
+    });    
   }
+
+  generateImageFromLetter(letter: string): string {
+    // Génération d'un SVG affichant la première lettre en majuscule
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+        <rect width="100%" height="100%" fill="#f0f0f0"/>
+        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="100" fill="#333">
+          ${letter.toUpperCase()}
+        </text>
+      </svg>
+    `;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
+    
+  dataURLtoFile(dataurl: string, filename: string): File {
+    const arr = dataurl.split(',');
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    if (!mimeMatch) {
+      throw new Error('Format de dataURL invalide');
+    }
+    const mime = mimeMatch[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+  
+  
 
   getBoutiqueName() {
     this.usersService.getUserInfo().subscribe(
@@ -464,7 +495,6 @@ export class AddProduitComponent {
   }
 
   onSubmit() {
-
     if (this.ajouteProduitForm.invalid) {
       this.errorMessage = "Veuillez vérifier les informations saisies.";
       return;
@@ -472,8 +502,6 @@ export class AddProduitComponent {
     
     this.isLoading = true;
     
-    // (patch des catégories et unités comme précédemment)
-
     const produit = this.ajouteProduitForm.value;
     console.log('Produit soumis:', produit);
     const tokenStored = localStorage.getItem('authToken');
@@ -489,58 +517,52 @@ export class AddProduitComponent {
     }
     const token = `Bearer ${tokenStored}`;
     const addToStock = this.isChecked;
-
+  
+    // Ici, this.imageFile est soit le fichier sélectionné par l'utilisateur,
+    // soit le fichier généré à partir du SVG.
     setTimeout(() => { 
-
       this.produitService.ajouterProduit(this.boutiqueId, produit, this.imageFile, addToStock, token)
-      .subscribe({
-        next: data => {
-          this.showPopupMessage({
-            title: 'Succès',
-            message: 'Produit créé avec succès',
-            image: 'assets/img/succcccc.png',
-            type: 'success',
+        .subscribe({
+          next: data => {
+            this.showPopupMessage({
+              title: 'Succès',
+              message: 'Produit créé avec succès',
+              image: 'assets/img/succcccc.png',
+              type: 'success',
+            });
+            this.ajouteProduitForm.reset();
+            this.myControl.reset();
+            this.uniteControl.reset();
+  
+            this.imageFile = null;
+            this.selectedFile = null;
+            this.newPhotoUrl = null;
+  
+            this.isLoading = false;
             
-          });
-          this.ajouteProduitForm.reset();
-          this.myControl.reset();
-          this.uniteControl.reset();
-
-          this.imageFile = null;
-          this.selectedFile = null;
-          this.newPhotoUrl = null;
-
-          this.isLoading = false;
-          
-          // Redirection vers la page '/produit'
-          this.router.navigate(['/produit']);
-        },
-        error: error => {
-          let errorMessage = 'Erreur lors de la création du produit';
-          
-          if (error.error) {
-            if (typeof error.error === 'object' && error.error.error) {
-              errorMessage = error.error.error;
-            } else if (typeof error.error === 'string') {
-              errorMessage = error.error;
+            // Redirection vers la page '/produit'
+            this.router.navigate(['/produit']);
+          },
+          error: error => {
+            let errorMessage = 'Erreur lors de la création du produit';
+            if (error.error) {
+              if (typeof error.error === 'object' && error.error.error) {
+                errorMessage = error.error.error;
+              } else if (typeof error.error === 'string') {
+                errorMessage = error.error;
+              }
             }
-          }
-          
-          // Optionnel : supprimer le préfixe "Une erreur est survenue :"
-          errorMessage = errorMessage.replace('Une erreur est survenue : ', '');
-          
-          this.showPopupMessage({
-            title: 'Erreur',
-            message: errorMessage,
-            image: 'assets/img/error.png',
-            type: 'error'
-          });
-          this.isLoading = false;
-        }        
-        
-      });
+            errorMessage = errorMessage.replace('Une erreur est survenue : ', '');
+            this.showPopupMessage({
+              title: 'Erreur',
+              message: errorMessage,
+              image: 'assets/img/error.png',
+              type: 'error'
+            });
+            this.isLoading = false;
+          }        
+        });
     }, 100);
-    
-  }
+  }  
 
 }

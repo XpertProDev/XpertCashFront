@@ -303,10 +303,9 @@ export class ProduitsComponent implements OnInit {
         console.log('Produits récupérés:', produits);
         this.tasks = produits.map(prod => {
           // const fullImageUrl = `http://localhost:8080${prod.photo}`;
-          // const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined') ? `http://localhost:8080${prod.photo}` : '';
-          // Vérifier si la photo est valide
-          const hasPhoto = prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined';
-          const fullImageUrl = hasPhoto ? `http://localhost:8080${prod.photo}` : '';
+          const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
+          ? `http://localhost:8080${prod.photo}`
+          : '';
           console.log('Image URL:', fullImageUrl);
 
           // Vérifier si `createdAt` est défini
@@ -335,8 +334,7 @@ export class ProduitsComponent implements OnInit {
             quantite: prod.quantite || 0,
             seuilAlert: prod.seuilAlert || 0,
             enStock: prod.enStock || false,
-            // photo: fullImageUrl,
-            photo: fullImageUrl ? fullImageUrl : this.generateLetterAvatar(prod.nom),
+            photo: fullImageUrl,
             nomCategorie: prod.nomCategorie || 'Non catégorie',
             nomUnite: prod.nomUnite || 'Non unité',
             createdAt: prod.createdAt || new Date().toISOString(),
@@ -362,18 +360,31 @@ export class ProduitsComponent implements OnInit {
   openProduitDetail(productId: number): void {
     this.router.navigate(['/detail-produit', productId]);
   }
-
-  generateLetterAvatar(nom: string): string {
-    const letter = nom ? nom.charAt(0).toUpperCase() : '?';
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-        <rect width="100" height="100" fill="#0671e4ac"/>
-        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="50">${letter}</text>
-      </svg>
-    `;
-    // Encodage du SVG en base64 pour pouvoir l'utiliser comme data URL
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
-  }
   
+  // Méthode qui retourne l'image à afficher pour un produit
+getImageUrl(product: Produit): string {
+  // Vérifier si une image est bien fournie
+  if (product.photo && product.photo.trim() !== '') {
+    return product.photo;
+  } else {
+    // Récupérer la première lettre du nom (par défaut 'P' si non défini)
+    const firstLetter = product.nom ? product.nom.trim().charAt(0) : 'P';
+    return this.generateInitialImage(firstLetter);
+  }
+}
+
+// Méthode qui génère une image SVG (sous forme de Data URL) avec la première lettre du nom
+generateInitialImage(letter: string): string {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+      <rect width="100%" height="100%" fill="#f0f0f0"/>
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="100" fill="#333">
+        ${letter.toUpperCase()}
+      </text>
+    </svg>
+  `;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
   
 }

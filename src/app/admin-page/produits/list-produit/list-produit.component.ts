@@ -181,9 +181,6 @@ export class ListProduitComponent {
       reader.readAsDataURL(this.selectedFile);
     }
   }
-
-
-  
   
     //////// FOCUS CATEGORY
     myControl = new FormControl();
@@ -233,7 +230,7 @@ export class ListProduitComponent {
           (uniteMesures) => {
             console.log('Unité de mesure reçues depuis l\'API :', uniteMesures); // Debug ici
             this.optionsUnite = uniteMesures;
-            this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
+            this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
               startWith<string | UniteMesure>(''),
               // map(value => (typeof value === 'string' ? value : value.nom)),
               map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
@@ -251,7 +248,7 @@ export class ListProduitComponent {
         nom: ['', [Validators.required, Validators.minLength(2)]],
         prixVente: ['', Validators.required],
         prixAchat: ['', Validators.required],
-        quantite: ['', Validators.required],
+        quantite: [''],
         seuilAlert: ['', Validators.required],
         description: [''],
         codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],
@@ -286,22 +283,7 @@ export class ListProduitComponent {
         this.messageAPI = '';
         this.apiMessageType = '';
       });
-      
     }
-
-  fullImageUrl: string = ''; // Déclarez la propriété ici
-
-    // Méthode pour générer un avatar avec la première lettre du nom
-  generateLetterAvatar(nom: string): string {
-    const letter = nom ? nom.charAt(0).toUpperCase() : '?';
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-        <rect width="100" height="100" fill="#0671e4ac"/>
-        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="50">${letter}</text>
-      </svg>
-    `;
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
-  }
 
     // updateProduct(): void {
     //   this.modifierProduitForm = this.fb.group({
@@ -318,52 +300,44 @@ export class ListProduitComponent {
     // }
 
     // Fonction pour récupérer le produit
-  getProduit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    const productId = idParam ? +idParam : 0; // Utilise 1 par défaut si non trouvé
+    getProduit(): void {
+      const idParam = this.route.snapshot.paramMap.get('id');
+      const productId = idParam ? +idParam : 0; // Utilise 1 par défaut si non trouvé
 
-    // Exemple dans votre composant TypeScript
-    this.produitService.getProduitById(productId).subscribe({
-      next: (data: Produit) => {
-        this.produit = data;
-        this.loadProduitDetail(this.produit);
-        // Mettez à jour le formulaire avec les données du produit
-        this.modifierProduitForm.patchValue(this.produit);
-      },
-      error: (err) => {
-        console.error('Erreur lors de la récupération du produit', err);
-      }
-    });
-  }
+      // Exemple dans votre composant TypeScript
+      this.produitService.getProduitById(productId).subscribe({
+        next: (data: Produit) => {
+          console.log('Donnée du produit:', data); // Vérifiez ici la valeur de data.photo
+          this.produit = data;
+          this.modifierProduitForm.patchValue(this.produit);
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération du produit', err);
+        }
+      });
+      
+    }
 
   // Méthode pour charger le détail du produit et construire l'URL de l'image
-  loadProduitDetail(produit: Produit): void {
-    if (produit.photo && produit.photo !== 'null' && produit.photo !== 'undefined') {
-      this.fullImageUrl = this.backendUrl + produit.photo;
-    } else {
-      this.fullImageUrl = this.generateLetterAvatar(produit.nom);
-    }
-  }
   
-  getBoutiqueName() {
-    this.usersService.getUserInfo().subscribe(
-      (userInfo) => {
-        console.log(userInfo);
-        if (userInfo && userInfo.boutiques && userInfo.boutiques.length > 0) {
-          console.log(userInfo.boutiques[0]);
-  
-          this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
-        } else {
-          console.error('Aucune boutique trouvée pour cet utilisateur');
-          this.boutiqueName = 'Aucune boutique';
+    getBoutiqueName() {
+      this.usersService.getUserInfo().subscribe(
+        (userInfo) => {
+          console.log(userInfo);
+          if (userInfo && userInfo.boutiques && userInfo.boutiques.length > 0) {
+            console.log(userInfo.boutiques[0]);
+    
+            this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
+          } else {
+            console.error('Aucune boutique trouvée pour cet utilisateur');
+            this.boutiqueName = 'Aucune boutique';
+          }
+        },
+        (error) => {
+          console.error('Erreur lors de la récupération des informations utilisateur', error);
         }
-      },
-      (error) => {
-        console.error('Erreur lors de la récupération des informations utilisateur', error);
-      }
-    );
-  }
-  
+      );
+    }
     // Getter pour faciliter l'accès aux contrôles dans le template
     get c() { return this.ajouteCategoryForm.controls; }
     get u() { return this.ajouteUniteForm.controls; }
@@ -387,7 +361,6 @@ export class ListProduitComponent {
         this.modifierProduitForm.get('uniteId')?.setValue(null);
       }
     }
-  
   
     // Pour categorie 
     private _filter(name: string): Categorie[] {
@@ -542,35 +515,31 @@ export class ListProduitComponent {
         ...this.modifierProduitForm.value  // met à jour avec les valeurs saisies
       };
     
-      // Appel du service pour modifier le produit (en passant le fichier sélectionné s'il existe)
-      this.produitService.modifierProduit(updatedProduct, this.selectedFile ?? undefined)
-        .subscribe({
-          next: (response: Produit) => {
-            console.log("Produit modifié avec succès", response);
-            // Mettez à jour l'objet produit avec les données renvoyées par l'API
-            this.produit = response;
-            
-            // Afficher une popup de succès
-            this.showPopupMessage({
-              title: 'Succès',
-              message: 'Le produit a été modifié avec succès.',
-              image: 'assets/img/succcccc.png',
-              type: 'success'
-            });
-            // Optionnel : rediriger vers la liste des produits ou autre page
-            // this.router.navigate(['/produit']);
-          },
-          error: (error) => {
-            console.error("Erreur lors de la modification du produit", error);
-            // Afficher une popup d'erreur
-            this.showPopupMessage({
-              title: 'Erreur',
-              message: "Une erreur est survenue lors de la modification du produit.",
-              image: 'assets/img/error.png',
-              type: 'error'
-            });
-          }
-        });
-    }
+      // Appel du service qui se chargera de créer le FormData et d'envoyer la requête
+      this.produitService.modifierProduit(updatedProduct, this.selectedFile ?? undefined).subscribe({
+        next: (response: Produit) => {
+          console.log("Produit modifié avec succès", response);
+          this.produit = response;
+          this.showPopupMessage({
+            title: 'Succès',
+            message: 'Le produit a été modifié avec succès.',
+            image: 'assets/img/succcccc.png',
+            type: 'success'
+          });
+        },
+        error: (error) => {
+          console.error("Erreur lors de la modification du produit", error);
+          this.showPopupMessage({
+            title: 'Erreur',
+            message: "Une erreur est survenue lors de la modification du produit.",
+            image: 'assets/img/error.png',
+            type: 'error'
+          });
+        }
+      });
+    }    
+
+    
+    
     
 }

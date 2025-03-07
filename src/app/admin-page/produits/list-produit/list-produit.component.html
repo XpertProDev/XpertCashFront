@@ -109,9 +109,9 @@
                       <input formControlName="quantite" type="text" class="input_focus " required id="quantite" name="quantite" 
                       placeholder="Saisis le quantité">
                       <label for="quantite" class="label labelColor">En stock</label>
-                      <div *ngIf="f['quantite'].touched && f['quantite'].invalid" class="error-message">
+                      <!-- <div *ngIf="f['quantite'].touched && f['quantite'].invalid" class="error-message">
                         Le quantité de stock est vide.
-                      </div>
+                      </div> -->
                     </div>
                   </div>
   
@@ -229,9 +229,7 @@
                   <!-- Section pour la gestion de l'image du produit -->
                   <div class="container_file"> 
                     <div class="header_file"> 
-                      <img class="roudel"
-                        [src]="newPhotoUrl ? newPhotoUrl : (fullImageUrl ? fullImageUrl : urllink)"
-                        alt="Aperçu de l'image" style="max-width:200px;">
+                      <img [src]="produit.photo ? (backendUrl + produit.photo) : 'assets/img/appareil.jpg'" alt="Produit">
                     </div> 
                     <div>
                       <label for="file" class="footer_file"> 
