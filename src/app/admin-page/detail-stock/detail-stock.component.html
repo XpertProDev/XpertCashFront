@@ -29,7 +29,7 @@
         <div class="container_imprimate">
             <!-- // code de produit  -->
             <div class="codeProduit">
-                <p class="codeId"> P-12345 </p>
+                <p class="codeId" style="letter-spacing: 2px;"> {{produit?.codeGenerique}} </p>
             </div>
 
             <!-- Les info  -->
@@ -38,7 +38,7 @@
                 <!-- // Boutique  -->
                  <div class="info">
                     <p class="info_title">Boutique :</p>
-                    <p class="info_value">Nom Boutique</p>
+                    <p class="info_value" style="color: #0672E4;">{{ boutiqueName }}</p>
                  </div>
 
                  <!-- // Type d'ajustement  -->
@@ -50,18 +50,20 @@
                  <!-- // Date de creation  -->
                  <div class="info">
                      <p class="info_title">Date de creation :</p>
-                     <p class="info_value">5 - 03 - 2025 à 12:00</p>
+                     <!-- <p>{{produit | json}}</p> -->
+                     <p class="info_value">{{produit?.createdAt | date:'dd-MM-yyyy \'à\' HH:mm'}}</p>
                  </div>
 
                  <!-- // Personne  -->
                  <div class="info">
                     <p class="info_title">Créé par :</p>
-                    <p class="info_value">Diakaridia SY</p>
+                    <p class="info_value">{{nomComplet}}</p>
                 </div>
 
                 <div class="info">
                     <p class="info_title">Email :</p>
-                    <p class="info_value">informatiquexpertpro2&#64;</p>
+                    <!-- <p class="info_value">informatiquexpertpro2&#64;</p> -->
+                    <p class="info_value">{{email}}</p>
                 </div>
                 <!-- info_email -->
                 <!-- <div class="personne">
@@ -82,7 +84,7 @@
                           <th class="title_table_name">Mes produits</th>
                           <th class="title_table_contenu">Stock actuel</th>
                           <th class="title_table_contenu">Quantité à ajouter</th>
-                          <th class="title_table_contenu">Coût unitaire</th>
+                          <th class="title_table_contenu">Coût du produit</th>
                           <th class="title_table_contenu4">Stock après</th>
                         </tr>
                       </thead>
@@ -91,7 +93,13 @@
                         <tr>
                             <td>
                                 <div class="champ_input" style="margin-right: 10px;">
-                                    <input type="text" readonly class="input_table1" value="Bic">
+                                    <input type="text" readonly class="input_table1" [value]="produit?.nom">
+                                </div>
+                                
+                            </td>
+                            <td>
+                                <div class="champ_input" style="margin-right: 15px;">
+                                    <input type="text" readonly class="input_table" [value]="produit?.quantite">
                                 </div>
                                 
                             </td>
@@ -99,16 +107,10 @@
                                 <div class="champ_input" style="margin-right: 15px;">
                                     <input type="text" readonly class="input_table" value="00">
                                 </div>
-                                
                             </td>
                             <td>
                                 <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00">
-                                </div>
-                            </td>
-                            <td>
-                                <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00">
+                                    <input type="text" readonly class="input_table" [value]="produit?.prixVente">
                                 </div>
                             </td>
                             <td>

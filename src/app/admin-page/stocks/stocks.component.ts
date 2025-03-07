@@ -341,22 +341,23 @@ export class StocksComponent implements OnInit {
     });
 }
 
-generateLetterAvatar(nom: string): string {
-  const letter = nom ? nom.charAt(0).toUpperCase() : '?';
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-      <rect width="100" height="100" fill="#0671e4ac"/>
-      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="50">${letter}</text>
-    </svg>
-  `;
-  // Encodage du SVG en base64 pour pouvoir l'utiliser comme data URL
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
-}
+  generateLetterAvatar(nom: string): string {
+    const letter = nom ? nom.charAt(0).toUpperCase() : '?';
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+        <rect width="100" height="100" fill="#0671e4ac"/>
+        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="50">${letter}</text>
+      </svg>
+    `;
+    // Encodage du SVG en base64 pour pouvoir l'utiliser comme data URL
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  }
 
 
-// openStockDetail(productId: number): void {
-//   this.router.navigate(['/detail-produit', productId]);
-// }
+  openStockDetail(productId: number): void {
+    this.router.navigate(['/detail-stock', productId]);
+  }
+
 
   
   

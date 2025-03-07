@@ -37,7 +37,8 @@ export class NavRightComponent implements OnInit{
   nomEntreprise = '';
 
   // constructor
-  constructor(private userService: UsersService,
+  constructor(
+    private userService: UsersService,
     private router: Router
   ) {
     this.visibleUserList = false;

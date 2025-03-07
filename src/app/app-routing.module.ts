@@ -108,7 +108,7 @@ const routes: Routes = [
 
       },
       {
-        path: 'detail-stock',
+        path: 'detail-stock/:id',
         loadComponent: () => import('./admin-page/detail-stock/detail-stock.component').then(m => m.DetailStockComponent),
         canActivate: [authGuard]
 
