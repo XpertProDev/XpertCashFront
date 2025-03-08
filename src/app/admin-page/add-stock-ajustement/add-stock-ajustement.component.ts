@@ -131,6 +131,8 @@ export class AddStockAjustementComponent {
   // quantiteAjoute: number = 0;
   quantiteAjoute: number | null = null; // On peut initialiser à null pour afficher le champ vide
   descriptionAjout: string = '';
+  // Ajoutez une variable pour contrôler la visibilité
+  isProductAdded: boolean = false;
   
   // Méthode pour ajouter le stock
   AjouterDesQuan(): void {
@@ -144,27 +146,26 @@ export class AddStockAjustementComponent {
       this.stockService.ajouterStock(this.selectedProduct.id, stock).subscribe({
         next: (response) => {
           console.log('Stock ajouté avec succès', response);
-          // Vous pouvez ajouter un message de succès ou naviguer ailleurs
+          // Mettre à jour la variable isProductAdded
+          this.isProductAdded = true;
         },
         error: (error) => {
           console.error('Erreur lors de l\'ajout du stock', error);
-          // Vous pouvez afficher un message d'erreur ici
         }
       });
     } else {
       console.error('Veuillez sélectionner un produit et entrer une quantité valide.');
     }
   }
-  
+
   // Getter pour calculer stockApres en temps réel
   get stockApresDisplay(): number | string {
-    // Si aucun produit n'est sélectionné ou si aucune quantité n'est saisie, renvoyer une chaîne vide
     if (!this.selectedProduct || this.quantiteAjoute === null || this.quantiteAjoute === 0) {
       return '';
     }
-    // Conversion en nombres pour être sûr d'avoir une addition numérique
     const stockActuel = Number(this.selectedProduct.quantite);
     const ajout = Number(this.quantiteAjoute);
     return stockActuel + ajout;
   }
+  
 }

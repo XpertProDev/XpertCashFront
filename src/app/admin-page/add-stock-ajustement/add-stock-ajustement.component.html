@@ -90,7 +90,7 @@
                         <th class="title_table_contenu">Stock après</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody  *ngIf="!isProductAdded">
                       <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                         <td>
                           <div class="champ_input">
@@ -178,8 +178,8 @@
                 </div>
 
                 <!-- // button de ajustement  -->
-                <div class="btn_ajuster">
-                  <button>Ajouter plus</button>
+                <div class="btn_ajuster" *ngIf="isProductAdded">
+                  <button (click)="isProductAdded = false">Ajouter plus</button>
                 </div>
               </div>
             </div>
