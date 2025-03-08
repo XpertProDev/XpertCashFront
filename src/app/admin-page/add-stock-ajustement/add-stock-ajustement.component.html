@@ -144,32 +144,35 @@
                     </tbody>
 
                     <tbody>
-                        <tr>
+                        <tr *ngFor="let stock of adjustedStocks" class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                             <td>
-                                <div class="champ_input" style="margin-right: 10px;">
-                                    <input type="text" readonly class="input_table" value="Bic">
+                                <div class="champ_input_list_stock" style="margin-right: 10px;">
+                                    <input type="text" readonly class="input_table" [value]="getProductName(stock)">
                                 </div>
                                 
                             </td>
                             <td>
-                                <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                    <input type="text" readonly class="input_table" [value]="stock.stockActuel" style="text-align: center;">
                                 </div>
                                 
                             </td>
                             <td>
-                                <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                  <input type="text" readonly class="input_table" 
+                                    [value]="stock.quantiteAjoute && stock.quantiteAjoute > 0 ? stock.quantiteAjoute : stock.quantiteRetirer" 
+                                    style="text-align: center;">
                                 </div>
                             </td>
                             <td>
-                                <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                  <input type="text" readonly class="input_table" [value]="getProductPrixVente(stock)" style="text-align: center;">
                                 </div>
                             </td>
                             <td>
-                                <div class="champ_input">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
+                                <div class="champ_input_list_stock">
+                                  <input type="text" readonly class="input_table" 
+                                  [value]="stock.stockApres" style="text-align: center;">
                                 </div>
                             </td>
                         </tr>
@@ -177,7 +180,7 @@
                   </table>
                 </div>
 
-                <!-- // button de ajustement  -->
+                <!-- // button de ajustement -->
                 <div class="btn_ajuster" *ngIf="isProductAdded">
                   <button (click)="isProductAdded = false">Ajouter plus</button>
                 </div>

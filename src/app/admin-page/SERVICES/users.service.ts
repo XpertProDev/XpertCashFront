@@ -27,15 +27,20 @@ export class UsersService {
 
   constructor(private http: HttpClient) {}
 
-  //Inscription
-    registerUser(user: Users): Observable<{ message?: string; error?: string }> {
-      return this.http.post<{ message?: string; error?: string }>(`${this.apiUrl}/register`, user);
-    }
+  // Méthode pour récupérer le token
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
+  }
 
-    // Connexion
-    connexionUser(credentials: { email: string; password: string }): Observable<{ message?: string; token?: string; error?: string }> {
-      return this.http.post<{ message?: string; token?: string; error?: string }>(`${this.apiUrl}/login`, credentials);
-    }
+  //Inscription
+  registerUser(user: Users): Observable<{ message?: string; error?: string }> {
+    return this.http.post<{ message?: string; error?: string }>(`${this.apiUrl}/register`, user);
+  }
+
+  // Connexion
+  connexionUser(credentials: { email: string; password: string }): Observable<{ message?: string; token?: string; error?: string }> {
+    return this.http.post<{ message?: string; token?: string; error?: string }>(`${this.apiUrl}/login`, credentials);
+  }
 
     // Déconnexion
     logoutUser(): void {

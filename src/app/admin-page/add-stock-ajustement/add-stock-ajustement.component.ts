@@ -7,6 +7,7 @@ import { SharedDataService } from '../SERVICES/shared-data.service';
 import { UsersService } from '../SERVICES/users.service';
 import { Produit } from '../MODELS/produit.model';
 import { StockService } from '../SERVICES/stocks.service';
+import { Stock } from '../MODELS/stock.model';
 
 @Component({
   selector: 'app-add-stock-ajustement',
@@ -23,6 +24,7 @@ export class AddStockAjustementComponent {
   boutiqueName: string = '';
   selectedAction: string = 'ajouter';
 
+
   // Contructor
   constructor(
       private sharedDataService: SharedDataService,
@@ -37,6 +39,8 @@ export class AddStockAjustementComponent {
     this.getBoutiqueName();
     this.getPartageInfoUser();
     this.loadProduits();
+    // Charger les stocks ajustés dès le chargement du composant
+    this.loadAdjustedStocks(); 
   }
 
   getBoutiqueName() {
@@ -69,6 +73,7 @@ export class AddStockAjustementComponent {
   // select de produit
   selectedProduct: Produit | null = null;
   tasks: Produit[] = [];
+
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
   loadProduits(): void {
     const boutiqueId = this.usersService.getUserBoutiqueId();
@@ -130,8 +135,8 @@ export class AddStockAjustementComponent {
   descriptionAjout: string = '';
   // Ajoutez une variable pour contrôler la visibilité
   isProductAdded: boolean = false;
-  
-  // Méthode pour ajouter le stock
+
+  // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
   AjouterDesQuan(): void {
     if (this.selectedProduct && this.quantiteAjoute! > 0) {
       const stock = {
@@ -139,12 +144,11 @@ export class AddStockAjustementComponent {
         descriptionAjout: this.descriptionAjout
       };
 
-      // Appel du service pour ajouter le stock
       this.stockService.ajouterStock(this.selectedProduct.id, stock).subscribe({
         next: (response) => {
           console.log('Stock ajouté avec succès', response);
-          // Mettre à jour la variable isProductAdded
-          this.isProductAdded = true;
+          // Mettre à jour la liste en mémoire sans changer l'état d'affichage
+          this.loadAdjustedStocks();
         },
         error: (error) => {
           console.error('Erreur lors de l\'ajout du stock', error);
@@ -163,6 +167,67 @@ export class AddStockAjustementComponent {
     const stockActuel = Number(this.selectedProduct.quantite);
     const ajout = Number(this.quantiteAjoute);
     return stockActuel + ajout;
+  }
+
+  // Liste filtrée des stocks ajustés
+  adjustedStocks: Stock[] = [];
+
+  // Méthode pour charger tous les stocks et ne conserver que ceux ajustés
+  loadAdjustedStocks(): void {
+    // Récupérer le token (ou tout autre mécanisme d'authentification que vous utilisez)
+    const token = this.usersService.getToken(); 
+    if (!token) {
+      console.error('Token introuvable');
+      return; // Vous pouvez également rediriger l'utilisateur ou afficher un message d'erreur
+    }
+    this.stockService.getAllStocks(token).subscribe({
+      next: (stocks: Stock[]) => {
+        // Filtrer pour garder uniquement les stocks ayant une quantité ajoutée ou retirée supérieure à 0
+        this.adjustedStocks = stocks.filter(stock =>
+          (stock.quantiteAjoute && stock.quantiteAjoute > 0) ||
+          (stock.quantiteRetirer && stock.quantiteRetirer > 0)
+        );
+      },
+      error: (error) => {
+        console.error("Erreur lors du chargement des stocks ajustés", error);
+      }
+    });
+  }
+
+  // qui contient les produits chargés pour retrouver le nom.
+  getProductName(stock: Stock): string {
+    if (stock.produitId) {
+      console.log('ProduitId dans stock:', stock.produitId);
+      const produit = this.tasks.find(prod => prod.id === stock.produitId);
+      if (produit) {
+        console.log('Produit trouvé:', produit);
+        return produit.nom;
+        // return `${produit.nom} - ${produit.prixVente}`;
+      } else {
+        console.warn('Produit non trouvé dans tasks pour l\'id:', stock.produitId);
+        return 'Produit inconnu';
+      }
+    }
+    console.warn('Aucun produitId présent dans le stock:', stock);
+    return 'Produit inconnu';
+  }
+
+  // qui contient les produits chargés pour retrouver le nom.
+  getProductPrixVente(stock: Stock): string {
+    if (stock.produitId) {
+      console.log('ProduitId dans stock:', stock.produitId);
+      const produit = this.tasks.find(prod => prod.id === stock.produitId);
+      if (produit) {
+        console.log('Produit trouvé:', produit);
+        // return produit.nom && produit.prixVente;
+        return `${produit.prixVente}`;
+      } else {
+        console.warn('Produit non trouvé dans tasks pour l\'id:', stock.produitId);
+        return 'Produit inconnu';
+      }
+    }
+    console.warn('Aucun produitId présent dans le stock:', stock);
+    return 'Produit inconnu';
   }
   
 }

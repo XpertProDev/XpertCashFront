@@ -13,5 +13,7 @@ export interface Stock {
     // Les dates sont généralement manipulées sous forme de string en JSON
     createdAt?: string;
     lastUpdated?: string;
+
+    produit?: { id: number; nom: string;};
   }
   
