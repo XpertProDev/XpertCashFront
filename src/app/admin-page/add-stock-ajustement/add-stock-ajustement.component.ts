@@ -24,6 +24,9 @@ export class AddStockAjustementComponent {
   boutiqueName: string = '';
   selectedAction: string = 'ajouter';
 
+  // Variable pour contrôler l'affichage des stocks ajustés après un rafraîchissement
+  stocksVisible: boolean = true;
+
 
   // Contructor
   constructor(
@@ -41,6 +44,8 @@ export class AddStockAjustementComponent {
     this.loadProduits();
     // Charger les stocks ajustés dès le chargement du composant
     this.loadAdjustedStocks(); 
+    // Vérifier si la liste doit être visible après un rafraîchissement
+    this.checkStocksVisibility();
   }
 
   getBoutiqueName() {
@@ -236,5 +241,16 @@ export class AddStockAjustementComponent {
     console.warn('Aucun produitId présent dans le stock:', stock);
     return 'Produit inconnu';
   }
+
+  // Vérifier si les stocks doivent être visibles
+  checkStocksVisibility(): void {
+    const stocksVisibility = localStorage.getItem('stocksVisibility');
+    if (stocksVisibility === 'false') {
+      this.stocksVisible = false; // Masquer la liste
+    } else {
+      this.stocksVisible = true; // Afficher la liste
+    }
+  }
+
   
 }
