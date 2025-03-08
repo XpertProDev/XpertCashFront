@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { ProduitService } from '../../SERVICES/add-produit-service';
 import { PopupData } from '../../MODELS/PopUp/popup-data';
 import { UsersService } from '../../SERVICES/users.service';
+import imageCompression from 'browser-image-compression';
 
 // export interface CategorySelect {
 //   name: string;
@@ -51,6 +52,45 @@ export class AddProduitComponent {
     image: '',
     type: 'success'
   };
+
+  async testImageCompression(file: File) {
+    if (!file) {
+      console.log('Aucun fichier sélectionné.');
+      return;
+    }
+  
+    console.log('Taille originale:', file.size / 1024, 'Ko');
+  
+    // Options de compression
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1000,
+      useWebWorker: true,
+    };
+  
+    try {
+      const compressedFile = await imageCompression(file, options);
+      console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
+  
+      // Vérifier si le fichier est bien en PNG/JPEG après compression
+      if (compressedFile.type !== 'image/png' && compressedFile.type !== 'image/jpeg') {
+        console.error('Le fichier compressé n\'est pas un format supporté (PNG ou JPEG).');
+        this.errorMessage = 'Erreur de compression : Le format de l\'image n\'est pas valide.';
+        return;
+      }
+  
+      // Lire l'image compressée et afficher l'aperçu
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newPhotoUrl = e.target?.result as string;
+        console.log('Image compressée prête à être affichée !');
+      };
+      reader.readAsDataURL(compressedFile);
+    } catch (error) {
+      console.error('Erreur lors de la compression:', error);
+    }
+  }
+
   
   // Exemple d'utilisation lors d'une réponse du backend
   onResponseFromBackend(response: any): void {
@@ -125,41 +165,38 @@ export class AddProduitComponent {
     // event.target permet d’accéder au checkbox
     const checkbox = event.target as HTMLInputElement;
     console.log('isChecked:', checkbox.checked);
-    // Faites ce que vous voulez ici avec la valeur
   }
 
-  // Gestion de l'image
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
   selectedFile: File | null | undefined = null;
  
   onFileSelected(event: Event): void {
-  const input = event.target as HTMLInputElement;
-  if (input.files && input.files.length > 0) {
-    const file = input.files[0]; // Récupère le fichier sélectionné
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+  
+      // Vérification du format du fichier
+      const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedFormats.includes(file.type)) {
+        this.errorMessage = 'Le fichier doit être une image (JPG, PNG)';
+        return;
+      }
+      this.selectedFile = file;
+      this.imageFile = file;
+  
+      // Tester la compression
+      this.testImageCompression(file);
 
-    // Vérification de la taille du fichier (2 Mo = 2 * 1024 * 1024 octets)
-    const maxSize = 2 * 1024 * 1024;
-    if (file.size > maxSize) {
-      this.errorMessage = 'Le fichier est trop volumineux. Veuillez choisir un fichier de moins de 2 Mo.';
-      this.selectedFile = null;
-      this.imageFile = null;  // Réinitialise l'image si le fichier est trop grand
-      this.newPhotoUrl = null;
-      return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newPhotoUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(this.selectedFile);
     }
-
-    // Si le fichier est correct, on continue
-    this.errorMessage = '';
-    this.selectedFile = file;
-    this.imageFile = file; // ✅ Associe le fichier sélectionné à imageFile
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      this.newPhotoUrl = e.target?.result as string;
-    };
-    reader.readAsDataURL(this.selectedFile);
   }
-  }
+  
+
 
   //////// FOCUS CATEGORY
   myControl = new FormControl();
@@ -496,16 +533,17 @@ export class AddProduitComponent {
     });
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.ajouteProduitForm.invalid) {
       this.errorMessage = "Veuillez vérifier les informations saisies.";
       return;
     }
-    
+  
     this.isLoading = true;
-    
+  
     const produit = this.ajouteProduitForm.value;
     console.log('Produit soumis:', produit);
+  
     const tokenStored = localStorage.getItem('authToken');
     if (!tokenStored) {
       this.showPopupMessage({
@@ -517,13 +555,51 @@ export class AddProduitComponent {
       this.isLoading = false;
       return;
     }
+  
     const token = `Bearer ${tokenStored}`;
     const addToStock = this.isChecked;
   
-    // Ici, this.imageFile est soit le fichier sélectionné par l'utilisateur,
-    // soit le fichier généré à partir du SVG.
-    setTimeout(() => { 
-      this.produitService.ajouterProduit(this.boutiqueId, produit, this.imageFile, addToStock, token)
+    try {
+      let finalImage: File;
+  
+      // Si une image a été sélectionnée
+      if (this.imageFile && this.imageFile.name !== 'default.svg') {
+        console.log('Compression de l\'image en cours...');
+  
+        // Options de compression
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1000,
+          useWebWorker: true,
+        };
+  
+        const compressedFile = await imageCompression(this.imageFile, options);
+        console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
+  
+        // Vérification du type MIME du fichier compressé
+        if (compressedFile.type !== 'image/png' && compressedFile.type !== 'image/jpeg') {
+          this.errorMessage = 'Le fichier compressé n\'est pas un format valide (PNG ou JPEG).';
+          this.isLoading = false;
+          return;
+        }
+  
+        // Changer le nom du fichier en fonction du type MIME
+        const extension = compressedFile.type === 'image/png' ? '.png' : '.jpeg';
+        finalImage = new File([compressedFile], this.imageFile.name.replace(/\..+$/, extension), {
+          type: compressedFile.type, // Forcer le type MIME à PNG ou JPEG
+          lastModified: Date.now()
+        });
+  
+        console.log('Final Image:', finalImage);
+      } else {
+        // Si aucune image n'a été sélectionnée, utiliser l'image SVG générée
+        const productName = produit.nom.trim()[0]; // Récupérer la première lettre du nom du produit
+        finalImage = this.dataURLtoFile(this.generateImageFromLetter(productName), 'default.svg');
+        console.log('Image par défaut utilisée:', finalImage);
+      }
+  
+      // Envoi du produit avec l'image compressée (JPEG/PNG) ou l'image SVG par défaut
+      this.produitService.ajouterProduit(this.boutiqueId, produit, finalImage, addToStock, token)
         .subscribe({
           next: data => {
             this.showPopupMessage({
@@ -541,7 +617,7 @@ export class AddProduitComponent {
             this.newPhotoUrl = null;
   
             this.isLoading = false;
-            
+  
             // Redirection vers la page '/produit'
             this.router.navigate(['/produit']);
           },
@@ -562,9 +638,17 @@ export class AddProduitComponent {
               type: 'error'
             });
             this.isLoading = false;
-          }        
+          }
         });
-    }, 100);
-  }  
+  
+    } catch (error) {
+      console.error('Erreur lors de la compression:', error);
+      this.errorMessage = 'Erreur lors de la compression de l\'image';
+      this.isLoading = false;
+    }
+  }
+  
+  
+  
 
 }
