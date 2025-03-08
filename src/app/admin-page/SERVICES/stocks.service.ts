@@ -27,9 +27,9 @@ import { Observable } from 'rxjs';
 
 
 
-  getAllStock(token: string): Observable<any[]> {
+  getAllStocks(token: string): Observable<any[]> {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<any[]>(`${this.apiUrl}/allstock`, { headers });
+    return this.http.get<any[]>(`${this.apiUrl}/getAllStock`, { headers });
   }
 
   }
