@@ -225,7 +225,7 @@ export class AddProduitComponent {
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prixVente: ['', Validators.required],
       prixAchat: ['', Validators.required],
-      quantite: ['00'],
+      quantite: ['0'],
       seuilAlert: ['', Validators.required],
       description: [''],
       codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],

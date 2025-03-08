@@ -138,17 +138,24 @@ export class AddStockAjustementComponent {
 
   // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
   AjouterDesQuan(): void {
-    if (this.selectedProduct && this.quantiteAjoute! > 0) {
+    if (this.selectedProduct && this.quantiteAjoute && this.quantiteAjoute > 0) {
+      const product = this.selectedProduct; // Stockage local pour garantir qu'il n'est pas null
       const stock = {
         quantiteAjoute: this.quantiteAjoute,
         descriptionAjout: this.descriptionAjout
       };
-
-      this.stockService.ajouterStock(this.selectedProduct.id, stock).subscribe({
+  
+      this.stockService.ajouterStock(product.id, stock).subscribe({
         next: (response) => {
           console.log('Stock ajouté avec succès', response);
-          // Mettre à jour la liste en mémoire sans changer l'état d'affichage
+          // Mise à jour locale de la quantité du produit
+          product.quantite = Number(product.quantite) + Number(this.quantiteAjoute);
+          // Recharger les stocks ajustés
           this.loadAdjustedStocks();
+          // Vider les champs de saisie
+          this.quantiteAjoute = null;
+          this.descriptionAjout = '';
+          this.selectedProduct = null;
         },
         error: (error) => {
           console.error('Erreur lors de l\'ajout du stock', error);
@@ -157,7 +164,7 @@ export class AddStockAjustementComponent {
     } else {
       console.error('Veuillez sélectionner un produit et entrer une quantité valide.');
     }
-  }
+  }  
 
   // Getter pour calculer stockApres en temps réel
   get stockApresDisplay(): number | string {
