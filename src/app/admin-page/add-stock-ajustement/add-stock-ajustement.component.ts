@@ -136,8 +136,10 @@ export class AddStockAjustementComponent {
   }  
 
   // quantiteAjoute: number = 0;
-  quantiteAjoute: number | null = null; // On peut initialiser à null pour afficher le champ vide
+  quantiteAjoute: number | null = null; 
+  quantiteRetirer: number | null = null; 
   descriptionAjout: string = '';
+  descriptionRetire: string = '';
   // Ajoutez une variable pour contrôler la visibilité
   isProductAdded: boolean = false;
 
@@ -172,6 +174,37 @@ export class AddStockAjustementComponent {
       console.error('Veuillez sélectionner un produit et entrer une quantité valide.');
     }
   }
+
+  RetirerDesQuan(): void {
+    if (this.selectedProduct && this.quantiteRetirer && this.quantiteRetirer > 0) {
+      const product = this.selectedProduct;
+      const stock = {
+        quantiteRetirer: this.quantiteRetirer,
+        descriptionRetire: this.descriptionRetire
+      };
+  
+      this.stockService.retirerStock(product.id, stock).subscribe({
+        next: (response) => {
+          console.log('Stock retirer avec succès', response);
+          // Mise à jour locale de la quantité du produit
+          product.quantite = Number(product.quantite) - Number(this.quantiteRetirer);
+          // Recharge la liste des stocks ajustés
+          this.loadAdjustedStocks();
+          // Réinitialise les champs de saisie
+          this.quantiteRetirer = null;
+          this.descriptionRetire = '';
+          this.selectedProduct = null;
+          // Affiche la liste dans la session en cours
+          this.stocksVisible = true;
+        },
+        error: (error) => {
+          console.error('Erreur lors de reduction du stock', error);
+        }
+      });
+    } else {
+      console.error('Veuillez sélectionner un produit et entrer une quantité pour reduire.');
+    }
+  }
   
   // Getter pour calculer stockApres en temps réel
   get stockApresDisplay(): number | string {
@@ -181,6 +214,16 @@ export class AddStockAjustementComponent {
     const stockActuel = Number(this.selectedProduct.quantite);
     const ajout = Number(this.quantiteAjoute);
     return stockActuel + ajout;
+  }
+  
+  // Getter pour calculer stockApres en temps réel
+  get stockApresDisplayReduire(): number | string {
+    if (!this.selectedProduct || this.quantiteRetirer === null || this.quantiteRetirer === 0) {
+      return '';
+    }
+    const stockActuel = Number(this.selectedProduct.quantite);
+    const redui = Number(this.quantiteRetirer);
+    return stockActuel - redui;
   }
 
   // Liste filtrée des stocks ajustés
