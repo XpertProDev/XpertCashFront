@@ -25,7 +25,7 @@ export class AddStockAjustementComponent {
   selectedAction: string = 'ajouter';
 
   // Variable pour contrôler l'affichage des stocks ajustés après un rafraîchissement
-  stocksVisible: boolean = true;
+  stocksVisible: boolean = false;
 
 
   // Contructor
@@ -144,7 +144,7 @@ export class AddStockAjustementComponent {
   // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
   AjouterDesQuan(): void {
     if (this.selectedProduct && this.quantiteAjoute && this.quantiteAjoute > 0) {
-      const product = this.selectedProduct; // Stockage local pour garantir qu'il n'est pas null
+      const product = this.selectedProduct;
       const stock = {
         quantiteAjoute: this.quantiteAjoute,
         descriptionAjout: this.descriptionAjout
@@ -155,12 +155,14 @@ export class AddStockAjustementComponent {
           console.log('Stock ajouté avec succès', response);
           // Mise à jour locale de la quantité du produit
           product.quantite = Number(product.quantite) + Number(this.quantiteAjoute);
-          // Recharger les stocks ajustés
+          // Recharge la liste des stocks ajustés
           this.loadAdjustedStocks();
-          // Vider les champs de saisie
+          // Réinitialise les champs de saisie
           this.quantiteAjoute = null;
           this.descriptionAjout = '';
           this.selectedProduct = null;
+          // Affiche la liste dans la session en cours
+          this.stocksVisible = true;
         },
         error: (error) => {
           console.error('Erreur lors de l\'ajout du stock', error);
@@ -169,8 +171,8 @@ export class AddStockAjustementComponent {
     } else {
       console.error('Veuillez sélectionner un produit et entrer une quantité valide.');
     }
-  }  
-
+  }
+  
   // Getter pour calculer stockApres en temps réel
   get stockApresDisplay(): number | string {
     if (!this.selectedProduct || this.quantiteAjoute === null || this.quantiteAjoute === 0) {
