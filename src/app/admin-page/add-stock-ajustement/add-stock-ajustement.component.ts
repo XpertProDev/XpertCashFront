@@ -226,6 +226,20 @@ export class AddStockAjustementComponent {
     return stockActuel - redui;
   }
 
+  /* A ne pas pas supprimer
+    get stockApres(): number | string {
+  if (!this.selectedProduct) return '';
+  const stockActuel = Number(this.selectedProduct.quantite);
+  if (this.selectedAction === 'ajouter' && this.quantiteAjoute) {
+    return stockActuel + Number(this.quantiteAjoute);
+  } else if (this.selectedAction === 'reduire' && this.quantiteRetirer) {
+    return stockActuel - Number(this.quantiteRetirer);
+  }
+  return '';
+}
+[value]="stockApres"
+  */
+
   // Liste filtrée des stocks ajustés
   adjustedStocks: Stock[] = [];
 

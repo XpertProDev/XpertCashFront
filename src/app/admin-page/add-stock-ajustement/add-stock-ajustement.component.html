@@ -58,10 +58,10 @@
                   </div>
                   <!-- // Fournisseur  -->
                   <div class="champ_input champ_input2">
-                    <div class="title_input">Fournisseur re</div>
+                    <div class="title_input">Fournisseur</div>
                     <!-- On lie le select à "selectedActionFournisseur" -->
                     <select required name="action" class="input_focus">
-                      <option value="">Choisissez-en un</option>
+                      <option value="">Choisissez-en</option>
                       <!-- <option value="ajouter">Ajouter</option> -->
                     </select>
                   </div>
@@ -249,7 +249,7 @@
                             <input type="text" disabled 
                                    class="input_focus_type" 
                                    id="stockApres" 
-                                   [value]="stockApresDisplay" 
+                                   [value]="stockApresDisplayReduire" 
                                    name="stockApres" 
                                    style="text-align: center;">
                           </div>
@@ -260,7 +260,7 @@
                     <tbody *ngIf="stocksVisible">
                         <tr *ngFor="let stock of adjustedStocks" class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                             <td>
-                                <div class="champ_input" style="margin-right: 10px;">
+                                <div class="champ_input_list_stock" style="margin-right: 10px;">
                                     <input type="text" readonly class="input_table"  [value]="getProductName(stock)">
                                 </div>
                                 
@@ -316,10 +316,10 @@
             <div class="information_cadre" *ngIf="selectedAction === 'reduire'">
               <div class="info_titre_input info_titre_input_btn">
                 <div class="btn_annuler">
-                  <button class="btn_cancel">Annuler reduire</button>
+                  <button class="btn_cancel">Annuler</button>
                 </div>
                 <div class="btn_ajouter">
-                  <button class="btn_save" (click)="RetirerDesQuan()">Ajuster reduire</button>
+                  <button class="btn_save" (click)="RetirerDesQuan()">Ajuster</button>
                 </div>
               </div>
             </div>
