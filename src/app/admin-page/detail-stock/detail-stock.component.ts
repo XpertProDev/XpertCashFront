@@ -5,11 +5,10 @@ import { UsersService } from '../SERVICES/users.service';
 import { ProduitService } from '../SERVICES/produit.service';
 import { Produit } from '../MODELS/produit.model';
 import { SharedDataService } from '../SERVICES/shared-data.service';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-
 import { StockService } from '../SERVICES/stocks.service';
 import { Stock } from '../MODELS/stock.model';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-detail-stock',
@@ -21,6 +20,14 @@ import { Stock } from '../MODELS/stock.model';
   styleUrl: './detail-stock.component.scss'
 })
 export class DetailStockComponent {
+  boutiqueName: string = '';
+  nomComplet: string = '';
+  nomEntreprise = '';
+  email: string = '';
+  produit: Produit | undefined;
+  stockHistory: any[] = [];
+
+
 
   // Dropdown pour l'export
   showExportDropdown = false;
@@ -55,6 +62,7 @@ export class DetailStockComponent {
     this.getBoutiqueName();
     this.getProduit();
     this.loadStockById();
+    this.loadStockHistory();
   }
 
   // Liste filtrée des stocks ajustés
@@ -86,41 +94,40 @@ export class DetailStockComponent {
     });
   }
 
-    // Appeler le service pour récupérer le stock par ID
-    loadStockById(): void {
-      const idParam = this.route.snapshot.paramMap.get('id');
-      const stockId = idParam ? +idParam : null;
-      
-      if (!stockId) {
-        console.error('ID du stock invalide');
-        return;
-      }
+  // Appeler le service pour récupérer le stock par ID
+  loadStockById(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const stockId = idParam ? +idParam : null;
     
-      const token = this.userService.getToken(); 
-      if (!token) {
-        console.error('Token introuvable');
-        return;
-      }
-    
-      this.stockService.getAllStocks(token).subscribe({
-        next: (stocks: Stock[]) => {
-          // Chercher le stock dont l'ID correspond
-          const selectedStock = stocks.find(stock => stock.id === stockId);
-          if (selectedStock) {
-            console.log("Stock trouvé :", selectedStock);
-            this.stock = selectedStock;
-          } else {
-            console.error(`Aucun stock trouvé avec l'ID ${stockId}`);
-          }
-        },
-        error: (error) => {
-          console.error("Erreur lors du chargement des stocks", error);
+    if (!stockId) {
+      console.error('ID du stock invalide');
+      return;
+    }
+  
+    const token = this.userService.getToken(); 
+    if (!token) {
+      console.error('Token introuvable');
+      return;
+    }
+  
+    this.stockService.getAllStocks(token).subscribe({
+      next: (stocks: Stock[]) => {
+        // Chercher le stock dont l'ID correspond
+        const selectedStock = stocks.find(stock => stock.id === stockId);
+        if (selectedStock) {
+          console.log("Stock trouvé :", selectedStock);
+          this.stock = selectedStock;
+        } else {
+          console.error(`Aucun stock trouvé avec l'ID ${stockId}`);
         }
-      });
-    }    
+      },
+      error: (error) => {
+        console.error("Erreur lors du chargement des stocks", error);
+      }
+    });
+  }    
 
-  // Nom boutique 
-  boutiqueName: string = '';
+
 
   getBoutiqueName() {
     this.userService.getUserInfo().subscribe(
@@ -149,9 +156,7 @@ export class DetailStockComponent {
     });
   }
 
-  nomComplet: string = '';
-  nomEntreprise = '';
-  email: string = '';
+
   getUserInfo(): void {
     this.userService.getUserInfo().subscribe({
       next: (user) => {
@@ -165,31 +170,66 @@ export class DetailStockComponent {
     });
   }
 
-  produit: Produit | undefined;
   getProduit(): void {
     const idParam = this.route.snapshot.paramMap.get('id'); // Récupère l'ID depuis l'URL
     const productId = idParam ? +idParam : 0; // Convertit en nombre, 0 si invalide
-
+  
     if (productId > 0) { // Vérifie si l'ID est valide
       this.produitService.getProduitById(productId).subscribe({
         next: (data: Produit) => {
           console.log('Produit récupéré:', data);
           this.produit = data; // Stocke le produit
+          this.loadStockHistory();  // Appel de l'historique une fois le produit récupéré
         },
         error: (err) => {
           console.error('Erreur lors de la récupération du produit:', err);
         }
-      }); 
+      });
     } else {
       console.error('ID du produit invalide');
     }
+  }  
+
+  loadStockHistory(): void {
+    const produitId = this.produit?.id;
+    if (!produitId) {
+      console.error('Produit non défini pour charger l\'historique');
+      return;
+    }
+    const token = this.userService.getToken();
+    if (!token) {
+      console.error('Token introuvable');
+      return;
+    }
+    this.stockService.getAllstockhistorique(produitId, token).subscribe({
+      next: (data: any[]) => {
+        console.log('Historique de stock:', data);
+        this.stockHistory = data;
+      },
+      error: (error) => {
+        console.error("Erreur lors du chargement de l'historique de stock", error);
+      }
+    });
+  }
+  
+  getLastStockAction(): string {
+    if (!this.stockHistory || this.stockHistory.length === 0) {
+      return 'Non activitité';
+    }
+    
+    const lastStock = this.stockHistory[this.stockHistory.length - 1];
+    // Vérification supplémentaire si lastStock est undefined
+    if (!lastStock) {
+      return 'Non activitité';
+    }
+    
+    return lastStock.action || 'Non activitité';
   }
 
-  
+
   downloadBoutiqueProduitPDF() {
     const doc = new jsPDF();
 
-    // Vérification des données
     if (!this.boutiqueName || !this.nomComplet || !this.email || !this.produit) {
       console.error("Informations incomplètes !");
       return;
@@ -210,7 +250,6 @@ export class DetailStockComponent {
       formattedDate = 'Date non disponible';
     }
   
-    // Ajout du titre
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text(`Fiche Produit et Stock`, 80, 15);
@@ -234,10 +273,8 @@ export class DetailStockComponent {
     doc.text(`Détails du Produit N°: ${this.produit.codeGenerique}`, 14, 75) ;
     doc.line(14, 77, 195, 77);
   
-    // Définition des colonnes du tableau
     const columns = ['Mes produits', 'Stock actuel', 'Quantité à ajouter', 'Coût du produit', 'Stock après'];
   
-    // Définition des valeurs pour le tableau
     const rows = [[
       this.produit.nom || 'N/A',
       this.produit.quantite ?? 0,
@@ -246,7 +283,6 @@ export class DetailStockComponent {
       `${(this.produit.quantite ?? 0) + 0} `
     ]];
   
-    // Génération du tableau avec autoTable
     autoTable(doc, {
       head: [columns],
       body: rows,
@@ -256,20 +292,18 @@ export class DetailStockComponent {
       bodyStyles: { fontSize: 10 }
     });
   
-    // Ligne de séparation avant la signature
     const finalY = (doc as any).lastAutoTable?.finalY || 120;
     doc.setLineWidth(0.5);
     doc.line(14, finalY + 5, 195, finalY + 5);
   
-    // Ajout des champs Signature, Approuvé par, Reçu par
     doc.setFontSize(10);
     doc.text('Signature:', 14, finalY + 15);
     doc.text('Approuvé par:', 100, finalY + 15);
     doc.text('Reçu par:', 140, finalY + 15);
   
-    // Sauvegarde du PDF
     doc.save(`Fiche_Produit_${this.produit.nom}.pdf`);
   }
+
   
 
 }

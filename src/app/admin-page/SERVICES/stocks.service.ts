@@ -38,6 +38,11 @@ import { Observable } from 'rxjs';
     return this.http.patch(`${this.apiUrl}/retirerStock/${produitId}`, formData, { headers });
   }
 
+  getAllstockhistorique(produitId: number,token: string): Observable<any[]> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any[]>(`${this.apiUrl}/stockhistorique/${produitId}`, { headers });
+  }
+
 
 
   getAllStocks(token: string): Observable<any[]> {
