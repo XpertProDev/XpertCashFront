@@ -53,6 +53,7 @@ export class DetailStockComponent {
     this.getBoutiqueName();
     this.getProduit();
     this.loadStockById();
+    this.loadStockHistory();
   }
 
   // Liste filtrée des stocks ajustés
@@ -84,38 +85,38 @@ export class DetailStockComponent {
     });
   }
 
-    // Appeler le service pour récupérer le stock par ID
-    loadStockById(): void {
-      const idParam = this.route.snapshot.paramMap.get('id');
-      const stockId = idParam ? +idParam : null;
-      
-      if (!stockId) {
-        console.error('ID du stock invalide');
-        return;
-      }
+  // Appeler le service pour récupérer le stock par ID
+  loadStockById(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const stockId = idParam ? +idParam : null;
     
-      const token = this.userService.getToken(); 
-      if (!token) {
-        console.error('Token introuvable');
-        return;
-      }
-    
-      this.stockService.getAllStocks(token).subscribe({
-        next: (stocks: Stock[]) => {
-          // Chercher le stock dont l'ID correspond
-          const selectedStock = stocks.find(stock => stock.id === stockId);
-          if (selectedStock) {
-            console.log("Stock trouvé :", selectedStock);
-            this.stock = selectedStock;
-          } else {
-            console.error(`Aucun stock trouvé avec l'ID ${stockId}`);
-          }
-        },
-        error: (error) => {
-          console.error("Erreur lors du chargement des stocks", error);
+    if (!stockId) {
+      console.error('ID du stock invalide');
+      return;
+    }
+  
+    const token = this.userService.getToken(); 
+    if (!token) {
+      console.error('Token introuvable');
+      return;
+    }
+  
+    this.stockService.getAllStocks(token).subscribe({
+      next: (stocks: Stock[]) => {
+        // Chercher le stock dont l'ID correspond
+        const selectedStock = stocks.find(stock => stock.id === stockId);
+        if (selectedStock) {
+          console.log("Stock trouvé :", selectedStock);
+          this.stock = selectedStock;
+        } else {
+          console.error(`Aucun stock trouvé avec l'ID ${stockId}`);
         }
-      });
-    }    
+      },
+      error: (error) => {
+        console.error("Erreur lors du chargement des stocks", error);
+      }
+    });
+  }    
 
   // Nom boutique 
   boutiqueName: string = '';
@@ -167,12 +168,13 @@ export class DetailStockComponent {
   getProduit(): void {
     const idParam = this.route.snapshot.paramMap.get('id'); // Récupère l'ID depuis l'URL
     const productId = idParam ? +idParam : 0; // Convertit en nombre, 0 si invalide
-
+  
     if (productId > 0) { // Vérifie si l'ID est valide
       this.produitService.getProduitById(productId).subscribe({
         next: (data: Produit) => {
           console.log('Produit récupéré:', data);
           this.produit = data; // Stocke le produit
+          this.loadStockHistory();  // Appel de l'historique une fois le produit récupéré
         },
         error: (err) => {
           console.error('Erreur lors de la récupération du produit:', err);
@@ -181,7 +183,45 @@ export class DetailStockComponent {
     } else {
       console.error('ID du produit invalide');
     }
-  }
+  }  
 
+  stockHistory: any[] = [];
+  // Méthode de chargement de l'historique
+  loadStockHistory(): void {
+    const produitId = this.produit?.id;
+    if (!produitId) {
+      console.error('Produit non défini pour charger l\'historique');
+      return;
+    }
+    const token = this.userService.getToken();
+    if (!token) {
+      console.error('Token introuvable');
+      return;
+    }
+    this.stockService.getAllstockhistorique(produitId, token).subscribe({
+      next: (data: any[]) => {
+        console.log('Historique de stock:', data);
+        this.stockHistory = data;
+      },
+      error: (error) => {
+        console.error("Erreur lors du chargement de l'historique de stock", error);
+      }
+    });
+  }
+  
+  getLastStockAction(): string {
+    if (!this.stockHistory || this.stockHistory.length === 0) {
+      return 'Non activitité';
+    }
+    
+    const lastStock = this.stockHistory[this.stockHistory.length - 1];
+    // Vérification supplémentaire si lastStock est undefined
+    if (!lastStock) {
+      return 'Non activitité';
+    }
+    
+    return lastStock.action || 'Non activitité';
+  }
+  
 
 }

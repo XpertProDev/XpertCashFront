@@ -65,15 +65,20 @@
                     <!-- <p class="info_value">informatiquexpertpro2&#64;</p> -->
                     <p class="info_value">{{email}}</p>
                 </div>
+                <div class="info">
+                    <p style="color: #9b9b9b;">Derniere activite</p>
+                </div>
+
+                <div class="info">
+                    <p>Type : </p>
+                    <p class="info_value">{{ getLastStockAction() }}</p>
+                </div>
 
                 <div class="info">
                     <!-- <p>{{ stock?.lastUpdated | date:'EEEE \'le\' dd MMMM yyyy \'à\' HH:mm' : 'fr-FR' }}</p> -->
-                    <p>{{stock?.lastUpdated | date:'dd-MM-yyyy \'à\' HH:mm'}}</p>
+                    <p class="info_value_position">{{stock?.lastUpdated | date:'dd-MM-yyyy \'à\' HH:mm'}}</p>
                 </div>
                 <!-- info_email -->
-                <!-- <div class="personne">
-                    
-                </div> -->
             </div>
 
             <!-- // table  -->
