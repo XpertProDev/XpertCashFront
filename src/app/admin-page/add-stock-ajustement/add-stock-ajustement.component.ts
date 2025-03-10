@@ -43,7 +43,7 @@ export class AddStockAjustementComponent {
     this.getPartageInfoUser();
     this.loadProduits();
     // Charger les stocks ajustés dès le chargement du composant
-    this.loadAdjustedStocks(); 
+    // this.loadAdjustedStocks(); 
     // Vérifier si la liste doit être visible après un rafraîchissement
     this.checkStocksVisibility();
   }
@@ -140,6 +140,7 @@ export class AddStockAjustementComponent {
   quantiteRetirer: number | null = null; 
   descriptionAjout: string = '';
   descriptionRetire: string = '';
+  
   // Ajoutez une variable pour contrôler la visibilité
   // isProductAdded: boolean = false;
 
@@ -154,19 +155,25 @@ export class AddStockAjustementComponent {
   
       this.stockService.ajouterStock(product.id, stock).subscribe({
         next: (response) => {
-          console.log('Stock ajouté avec succès', response);
-          // Mise à jour locale de la quantité du produit
-          product.quantite = Number(product.quantite) + Number(this.quantiteAjoute);
-          // Recharge la liste des stocks ajustés
-          this.loadAdjustedStocks();
-          // Réinitialise les champs de saisie
+          product.quantite += Number(this.quantiteAjoute);
+          // --- Début de la modification ---
+          const existingStock = this.adjustedStocks.find(s => s.produitId === product.id);
+          if (existingStock) {
+            existingStock.quantiteAjoute! += Number(this.quantiteAjoute);
+            existingStock.stockApres = product.quantite;
+          } else {
+            this.adjustedStocks.push({
+              ...response, // ou construire manuellement
+              produitId: product.id,
+              quantiteAjoute: Number(this.quantiteAjoute),
+              stockApres: product.quantite
+            });
+          }
+          // --- Fin de la modification ---
           this.quantiteAjoute = null;
           this.descriptionAjout = '';
           this.selectedProduct = null;
-          // Affiche la liste dans la session en cours
           this.stocksVisible = true;
-
-          // this.isProductAdded = true;
         },
         error: (error) => {
           console.error('Erreur lors de l\'ajout du stock', error);
@@ -187,19 +194,25 @@ export class AddStockAjustementComponent {
   
       this.stockService.retirerStock(product.id, stock).subscribe({
         next: (response) => {
-          console.log('Stock retirer avec succès', response);
-          // Mise à jour locale de la quantité du produit
-          product.quantite = Number(product.quantite) - Number(this.quantiteRetirer);
-          // Recharge la liste des stocks ajustés
-          this.loadAdjustedStocks();
-          // Réinitialise les champs de saisie
+          product.quantite -= Number(this.quantiteRetirer);
+          // --- Début de la modification ---
+          const existingStock = this.adjustedStocks.find(s => s.produitId === product.id);
+          if (existingStock) {
+            existingStock.quantiteRetirer! += Number(this.quantiteRetirer);
+            existingStock.stockApres = product.quantite;
+          } else {
+            this.adjustedStocks.push({
+              ...response, // ou construire manuellement
+              produitId: product.id,
+              quantiteRetirer: Number(this.quantiteRetirer),
+              stockApres: product.quantite
+            });
+          }
+          // --- Fin de la modification ---
           this.quantiteRetirer = null;
           this.descriptionRetire = '';
           this.selectedProduct = null;
-          // Affiche la liste dans la session en cours
           this.stocksVisible = true;
-
-          // this.isProductAdded = true;
         },
         error: (error) => {
           console.error('Erreur lors de reduction du stock', error);
