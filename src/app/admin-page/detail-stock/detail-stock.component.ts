@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, Inject, LOCALE_ID } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UsersService } from '../SERVICES/users.service';
 import { ProduitService } from '../SERVICES/produit.service';
 import { Produit } from '../MODELS/produit.model';
 import { SharedDataService } from '../SERVICES/shared-data.service';
+import { StockService } from '../SERVICES/stocks.service';
+import { Stock } from '../MODELS/stock.model';
 
 @Component({
   selector: 'app-detail-stock',
@@ -20,14 +22,17 @@ export class DetailStockComponent {
   // Dropdown pour l'export
   showExportDropdown = false;
 
-  constructor(
+  constructor(@Inject(LOCALE_ID) private locale: string,
       private userService: UsersService,
       private produitService: ProduitService,
       private sharedDataService: SharedDataService,
+      private stockService: StockService,
       private router: Router,
       private route: ActivatedRoute,
-    ) {}
-    
+    ) {
+      console.log('Langue actuelle:', this.locale);  // Devrait afficher 'fr-FR'
+    }
+
   // Affichage/Masquage du dropdown d'export
   toggleExportDropdown() {
     this.showExportDropdown = !this.showExportDropdown;
@@ -47,6 +52,36 @@ export class DetailStockComponent {
     this.getUserInfo();
     this.getBoutiqueName();
     this.getProduit();
+    this.loadAdjustedStock();
+  }
+
+  // Liste filtrée des stocks ajustés
+    adjustedStocks: Stock[] = [];
+    stock: Stock | null = null
+
+  // Méthode pour charger tous les stocks et ne conserver que ceux ajustés
+  // Charge un seul stock ajusté (par exemple le premier)
+  loadAdjustedStock(): void {
+    const token = this.userService.getToken(); 
+    if (!token) {
+      console.error('Token introuvable');
+      return;
+    }
+    this.stockService.getAllStocks(token).subscribe({
+      next: (stocks: Stock[]) => {
+        console.log("recuperer", stocks)
+        // Filtre pour garder uniquement les stocks ayant des ajustements
+        const adjustedStocks = stocks.filter(stock =>
+          (stock.quantiteAjoute && stock.quantiteAjoute > 0) ||
+          (stock.quantiteRetirer && stock.quantiteRetirer > 0)
+        );
+        // Sélectionne le premier stock ajusté (ou null s'il n'y en a pas)
+        this.stock = adjustedStocks.length > 0 ? adjustedStocks[0] : null;
+      },
+      error: (error) => {
+        console.error("Erreur lors du chargement du stock ajusté", error);
+      }
+    });
   }
 
   // Nom boutique 

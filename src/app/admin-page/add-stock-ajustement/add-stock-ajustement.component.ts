@@ -141,7 +141,7 @@ export class AddStockAjustementComponent {
   descriptionAjout: string = '';
   descriptionRetire: string = '';
   // Ajoutez une variable pour contrôler la visibilité
-  isProductAdded: boolean = false;
+  // isProductAdded: boolean = false;
 
   // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
   AjouterDesQuan(): void {
@@ -165,6 +165,8 @@ export class AddStockAjustementComponent {
           this.selectedProduct = null;
           // Affiche la liste dans la session en cours
           this.stocksVisible = true;
+
+          // this.isProductAdded = true;
         },
         error: (error) => {
           console.error('Erreur lors de l\'ajout du stock', error);
@@ -196,34 +198,52 @@ export class AddStockAjustementComponent {
           this.selectedProduct = null;
           // Affiche la liste dans la session en cours
           this.stocksVisible = true;
+
+          // this.isProductAdded = true;
         },
         error: (error) => {
           console.error('Erreur lors de reduction du stock', error);
         }
       });
-    } else {
+    } else { 
       console.error('Veuillez sélectionner un produit et entrer une quantité pour reduire.');
     }
   }
   
   // Getter pour calculer stockApres en temps réel
-  get stockApresDisplay(): number | string {
-    if (!this.selectedProduct || this.quantiteAjoute === null || this.quantiteAjoute === 0) {
-      return '';
-    }
-    const stockActuel = Number(this.selectedProduct.quantite);
-    const ajout = Number(this.quantiteAjoute);
-    return stockActuel + ajout;
-  }
+  // get stockApresDisplay(): number | string {
+  //   if (!this.selectedProduct) {
+  //     return '';
+  //   }
+  //   const stockActuel = Number(this.selectedProduct.quantite);
+  //   if (this.quantiteAjoute === null || this.quantiteAjoute === 0) {
+  //     return stockActuel;
+  //   }
+  //   const ajout = Number(this.quantiteAjoute);
+  //   return stockActuel + ajout;
+  // }
   
-  // Getter pour calculer stockApres en temps réel
-  get stockApresDisplayReduire(): number | string {
-    if (!this.selectedProduct || this.quantiteRetirer === null || this.quantiteRetirer === 0) {
-      return '';
-    }
+  
+  
+  // // Getter pour calculer stockApres en temps réel
+  // get stockApresDisplayReduire(): number | string {
+  //   if (!this.selectedProduct || this.quantiteRetirer === null || this.quantiteRetirer === 0) {
+  //     return '';
+  //   }
+  //   const stockActuel = Number(this.selectedProduct.quantite);
+  //   const redui = Number(this.quantiteRetirer);
+  //   return stockActuel - redui;
+  // }
+
+  get stockApres(): number | string {
+    if (!this.selectedProduct) return '';
     const stockActuel = Number(this.selectedProduct.quantite);
-    const redui = Number(this.quantiteRetirer);
-    return stockActuel - redui;
+    if (this.selectedAction === 'ajouter' && this.quantiteAjoute) {
+      return stockActuel + Number(this.quantiteAjoute);
+    } else if (this.selectedAction === 'reduire' && this.quantiteRetirer) {
+      return stockActuel - Number(this.quantiteRetirer);
+    }
+    return '';
   }
 
   /* A ne pas pas supprimer
@@ -304,12 +324,11 @@ export class AddStockAjustementComponent {
   // Vérifier si les stocks doivent être visibles
   checkStocksVisibility(): void {
     const stocksVisibility = localStorage.getItem('stocksVisibility');
-    if (stocksVisibility === 'false') {
-      this.stocksVisible = false; // Masquer la liste
+    if (stocksVisibility === 'true') {
+      this.stocksVisible = true;
     } else {
-      this.stocksVisible = true; // Afficher la liste
+      this.stocksVisible = false;
     }
   }
-
   
 }

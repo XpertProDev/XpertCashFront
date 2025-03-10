@@ -90,8 +90,8 @@
                         <th class="title_table_contenu">Stock après</th>
                       </tr>
                     </thead>
-                    <tbody *ngIf="!isProductAdded">
-                      <tr *ngFor="let stock of adjustedStocks" class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                    <tbody>
+                      <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                         <td>
                           <div class="champ_input">
                             <select required name="selectedProduct" class="input_focus_type input_focus_type_select" [(ngModel)]="selectedProduct">
@@ -135,7 +135,7 @@
                             <input type="text" disabled 
                                    class="input_focus_type" 
                                    id="stockApres" 
-                                   [value]="stockApresDisplay" 
+                                   [value]="stockApres" 
                                    name="stockApres" 
                                    style="text-align: center;">
                           </div>
@@ -204,8 +204,8 @@
                             <th class="title_table_contenu">Stock après</th>
                         </tr>
                     </thead>
-                    <tbody *ngIf="!isProductAdded">
-                      <tr *ngFor="let stock of adjustedStocks" class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                    <tbody>
+                      <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                         <td>
                           <div class="champ_input">
                             <select required name="selectedProduct" class="input_focus_type input_focus_type_select" [(ngModel)]="selectedProduct">
@@ -249,7 +249,7 @@
                             <input type="text" disabled 
                                    class="input_focus_type" 
                                    id="stockApres" 
-                                   [value]="stockApresDisplayReduire" 
+                                   [value]="stockApres" 
                                    name="stockApres" 
                                    style="text-align: center;">
                           </div>
