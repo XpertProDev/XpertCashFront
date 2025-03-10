@@ -9,7 +9,12 @@
             </div>
 
             <div class="icon_export">
-                <div class="export-container" style="display: flex; align-items: center;"> 
+                <div class="export-container" style="display: flex; align-items: center;">
+                    <!-- // Pour les commentaire  -->
+                    <div class="iconDrop" style="margin-right: 20px;">
+                        <i class="ri-message-3-line"></i>
+                    </div>
+                    <!-- // Pour exporter  -->
                     <div class="iconDrop">
                         <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
                     </div>
@@ -17,7 +22,7 @@
                         <div class="export-option">Télécharger en PDF</div>
                         <div class="export-option">Imprimer</div>
                     </div>
-
+                    <!-- // pour historique  -->
                     <div class="iconDrop" style="margin-left: 20px;">
                         <i class="ri-history-line"></i>
                     </div>
@@ -25,11 +30,18 @@
             </div>
 
         </div>
-
         <div class="container_imprimate">
-            <!-- // code de produit  -->
-            <div class="codeProduit">
-                <p class="codeId" style="letter-spacing: 2px;"> {{produit?.codeGenerique}} </p>
+
+            <div class="content_imprimate">
+                <!-- // code de produit  -->
+                <div class="codeProduit">
+                    <p class="codeId" style="letter-spacing: 2px;"> {{produit?.codeGenerique}} </p>
+                </div>
+
+                <!-- // Description  -->
+                 <div class="description_detail">
+                    <textarea readonly [value]="stock?.descriptionAjout">Aucune description... </textarea>
+                 </div>
             </div>
 
             <!-- Les info  -->
@@ -66,7 +78,7 @@
                     <p class="info_value">{{email}}</p>
                 </div>
                 <div class="info">
-                    <p style="color: #9b9b9b;">Derniere activite</p>
+                    <p style="color: #9b9b9b;">Dernière activité</p>
                 </div>
 
                 <div class="info">
