@@ -13,7 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { UsersService } from '../SERVICES/users.service';
 import { map, startWith } from 'rxjs';
 import { Produit } from '../MODELS/produit.model';
-import { StocksService } from '../SERVICES/stocks.service';
+import { StockService } from '../SERVICES/stocks.service';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';

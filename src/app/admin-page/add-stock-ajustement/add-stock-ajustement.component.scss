@@ -41,6 +41,11 @@ table {
     position: relative;
     margin-bottom: 30px;
   }
+  
+  .champ_input_list_stock {
+    position: relative;
+    margin-bottom: 10px;
+  }
 
   .champ_input .title_input {
     position: absolute;
@@ -799,6 +804,7 @@ table {
 .btn_ajuster {
   display: flex;
   justify-content: right;
+  margin-top: 20px;
 }
 
 .btn_ajuster button {
