@@ -242,7 +242,7 @@ export class DetailStockComponent {
       this.produit.nom || 'N/A',
       this.produit.quantite ?? 0,
       '_____',
-      `${this.produit.prixAchat ?? 0} €`,
+      `${this.produit.prixAchat ?? 0}`,
       `${(this.produit.quantite ?? 0) + 0} `
     ]];
   
