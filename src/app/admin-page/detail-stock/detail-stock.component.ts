@@ -52,7 +52,7 @@ export class DetailStockComponent {
     this.getUserInfo();
     this.getBoutiqueName();
     this.getProduit();
-    this.loadAdjustedStock();
+    this.loadStockById();
   }
 
   // Liste filtrée des stocks ajustés
@@ -83,6 +83,39 @@ export class DetailStockComponent {
       }
     });
   }
+
+    // Appeler le service pour récupérer le stock par ID
+    loadStockById(): void {
+      const idParam = this.route.snapshot.paramMap.get('id');
+      const stockId = idParam ? +idParam : null;
+      
+      if (!stockId) {
+        console.error('ID du stock invalide');
+        return;
+      }
+    
+      const token = this.userService.getToken(); 
+      if (!token) {
+        console.error('Token introuvable');
+        return;
+      }
+    
+      this.stockService.getAllStocks(token).subscribe({
+        next: (stocks: Stock[]) => {
+          // Chercher le stock dont l'ID correspond
+          const selectedStock = stocks.find(stock => stock.id === stockId);
+          if (selectedStock) {
+            console.log("Stock trouvé :", selectedStock);
+            this.stock = selectedStock;
+          } else {
+            console.error(`Aucun stock trouvé avec l'ID ${stockId}`);
+          }
+        },
+        error: (error) => {
+          console.error("Erreur lors du chargement des stocks", error);
+        }
+      });
+    }    
 
   // Nom boutique 
   boutiqueName: string = '';
