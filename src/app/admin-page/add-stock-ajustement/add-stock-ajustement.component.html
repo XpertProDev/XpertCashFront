@@ -58,10 +58,10 @@
                   </div>
                   <!-- // Fournisseur  -->
                   <div class="champ_input champ_input2">
-                    <div class="title_input">Fournisseur re</div>
+                    <div class="title_input">Fournisseur</div>
                     <!-- On lie le select à "selectedActionFournisseur" -->
                     <select required name="action" class="input_focus">
-                      <option value="">Choisissez-en un</option>
+                      <option value="">Choisissez-en</option>
                       <!-- <option value="ajouter">Ajouter</option> -->
                     </select>
                   </div>
@@ -90,7 +90,7 @@
                         <th class="title_table_contenu">Stock après</th>
                       </tr>
                     </thead>
-                    <tbody  *ngIf="!isProductAdded">
+                    <tbody>
                       <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                         <td>
                           <div class="champ_input">
@@ -135,7 +135,7 @@
                             <input type="text" disabled 
                                    class="input_focus_type" 
                                    id="stockApres" 
-                                   [value]="stockApresDisplay" 
+                                   [value]="stockApres" 
                                    name="stockApres" 
                                    style="text-align: center;">
                           </div>
@@ -143,37 +143,35 @@
                       </tr>
                     </tbody>
 
-                    <tbody>
+                    <tbody *ngIf="stocksVisible">
                         <tr *ngFor="let stock of adjustedStocks" class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                             <td>
-                                <div class="champ_input_list_stock" style="margin-right: 10px;">
-                                    <input type="text" readonly class="input_table" [value]="getProductName(stock)">
-                                </div>
-                                
+                              <div class="champ_input_list_stock" style="margin-right: 10px;">
+                                  <input type="text" readonly class="input_table" [value]="getProductName(stock)">
+                              </div>
                             </td>
                             <td>
-                                <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" [value]="stock.stockActuel" style="text-align: center;">
-                                </div>
-                                
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                  <input type="text" readonly class="input_table" [value]="stock.stockActuel" style="text-align: center;">
+                              </div>
                             </td>
                             <td>
-                                <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                  <input type="text" readonly class="input_table" 
-                                    [value]="stock.quantiteAjoute && stock.quantiteAjoute > 0 ? stock.quantiteAjoute : stock.quantiteRetirer" 
-                                    style="text-align: center;">
-                                </div>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                <input type="text" readonly class="input_table" 
+                                  [value]="stock.quantiteAjoute && stock.quantiteAjoute > 0 ? stock.quantiteAjoute : stock.quantiteRetirer" 
+                                  style="text-align: center;">
+                              </div>
                             </td>
                             <td>
-                                <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                  <input type="text" readonly class="input_table" [value]="getProductPrixVente(stock)" style="text-align: center;">
-                                </div>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                <input type="text" readonly class="input_table" [value]="getProductPrixVente(stock)" style="text-align: center;">
+                              </div>
                             </td>
                             <td>
-                                <div class="champ_input_list_stock">
-                                  <input type="text" readonly class="input_table" 
-                                  [value]="stock.stockApres" style="text-align: center;">
-                                </div>
+                              <div class="champ_input_list_stock">
+                                <input type="text" readonly class="input_table" 
+                                [value]="stock.stockApres" style="text-align: center;">
+                              </div>
                             </td>
                         </tr>
                     </tbody>
@@ -210,65 +208,85 @@
                       <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                         <td>
                           <div class="champ_input">
-                            <select required class="input_focus_type input_focus_type_select">
-                              <option value="">Sélectionner des produits</option>
-                              <option value="ajouter">Bic</option>
-                              <option value="reduire">Cahier</option>
-                              <option value="reduire">Iphone</option>
+                            <select required name="selectedProduct" class="input_focus_type input_focus_type_select" [(ngModel)]="selectedProduct">
+                              <option [ngValue]="null">Sélectionner un produit</option>
+                              <option *ngFor="let produit of tasks" [ngValue]="produit">
+                                {{ produit.nom }}
+                              </option>
                             </select>
                           </div>
                         </td>
                         <td>
+                          <!-- // Quantité  -->
                           <div class="champ_input" style="margin-right: 15px;">
-                            <input type="text" disabled class="input_focus_type" id="stockActuel" value="0" name="stockActuel" style="cursor: no-drop; text-align: center;">
-                          </div>
+                            <input type="text" disabled class="input_focus_type" id="stockActuel" 
+                              [value]="selectedProduct ? selectedProduct.quantite : 0" 
+                              name="stockActuel" style="cursor: no-drop; text-align: center;">
+                          </div>  
                         </td>
                         <td>
-                          <div class="champ_input" style="margin-right: 15px;">
-                            <input type="text" class="input_focus_type" id="reduceQuantite" value="0" name="reduceQuantite" style="text-align: center;">
-                          </div>
+                          <form>
+                            <div class="champ_input" style="margin-right: 15px;">
+                              <input type="number" class="input_focus_type"
+                                     id="quantiteRetirer"
+                                     [(ngModel)]="quantiteRetirer"
+                                     name="quantiteRetirer"
+                                     style="text-align: center;"
+                                     min="0">
+                            </div>
+                          </form>
                         </td>
                         <td>
+                          <!-- // prix Vente  -->
                           <div class="champ_input" style="margin-right: 15px;">
-                            <input type="text" class="input_focus_type" id="CoutUnitaire" value="0" name="CoutUnitaire" style="text-align: center;">
+                            <input type="text" disabled class="input_focus_type" id="CoutUnitaire" 
+                              [value]="selectedProduct ? selectedProduct.prixVente : 0" 
+                              name="CoutUnitaire" style="cursor: no-drop; text-align: center;">
                           </div>
                         </td>
                         <td>
                           <div class="champ_input">
-                            <input type="text" disabled class="input_focus_type" id="stockApres" value="0" name="stockApres" style="text-align: center;">
+                            <input type="text" disabled 
+                                   class="input_focus_type" 
+                                   id="stockApres" 
+                                   [value]="stockApres" 
+                                   name="stockApres" 
+                                   style="text-align: center;">
                           </div>
                         </td>
                       </tr>
                     </tbody>
 
-                    <tbody>
-                        <tr>
+                    <tbody *ngIf="stocksVisible">
+                        <tr *ngFor="let stock of adjustedStocks" class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                             <td>
-                                <div class="champ_input" style="margin-right: 10px;">
-                                    <input type="text" readonly class="input_table" value="Bic">
+                                <div class="champ_input_list_stock" style="margin-right: 10px;">
+                                    <input type="text" readonly class="input_table"  [value]="getProductName(stock)">
                                 </div>
                                 
                             </td>
                             <td>
-                                <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
-                                </div>
-                                
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                  <input type="text" readonly class="input_table" [value]="stock.stockActuel" style="text-align: center;">
+                              </div>
                             </td>
                             <td>
-                                <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
-                                </div>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                <input type="text" readonly class="input_table" 
+                                  [value]="stock.quantiteRetirer && stock.quantiteRetirer > 0 ? stock.quantiteRetirer : stock.quantiteAjoute" 
+                                  style="text-align: center;">
+                              </div>
                             </td>
                             <td>
-                                <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
-                                </div>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                <input type="text" readonly class="input_table" [value]="getProductPrixVente(stock)" style="text-align: center;">
+                              </div>
                             </td>
                             <td>
-                                <div class="champ_input">
-                                    <input type="text" readonly class="input_table" value="00" style="text-align: center;">
-                                </div>
+                              <div class="champ_input_list_stock">
+                                <input type="text" readonly class="input_table" 
+                                [value]="stock.stockApres" style="text-align: center;">
+                              </div>
                             </td>
                         </tr>
                     </tbody>
@@ -276,9 +294,9 @@
                 </div>
 
                 <!-- // button de ajustement  -->
-                <div class="btn_ajuster_reduire">
+                <!-- <div class="btn_ajuster_reduire">
                   <button>Reduire plus</button>
-                </div>
+                </div> -->
               </div>
             </div>
 
@@ -298,10 +316,10 @@
             <div class="information_cadre" *ngIf="selectedAction === 'reduire'">
               <div class="info_titre_input info_titre_input_btn">
                 <div class="btn_annuler">
-                  <button class="btn_cancel">Annuler re</button>
+                  <button class="btn_cancel">Annuler</button>
                 </div>
                 <div class="btn_ajouter">
-                  <button class="btn_save">Ajuster re</button>
+                  <button class="btn_save" (click)="RetirerDesQuan()">Ajuster</button>
                 </div>
               </div>
             </div>

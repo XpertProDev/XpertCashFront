@@ -25,6 +25,19 @@ import { Observable } from 'rxjs';
     return this.http.patch(`${this.apiUrl}/ajouterStock/${produitId}`, formData, { headers });
   }
 
+  retirerStock(produitId: number, stock: any): Observable<any> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    
+    // Préparation du FormData pour respecter le format multipart attendu par le back-end
+    const formData: FormData = new FormData();
+    formData.append('stock', JSON.stringify(stock));
+
+    return this.http.patch(`${this.apiUrl}/retirerStock/${produitId}`, formData, { headers });
+  }
+
 
 
   getAllStocks(token: string): Observable<any[]> {

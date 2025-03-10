@@ -25,7 +25,7 @@ export class AddStockAjustementComponent {
   selectedAction: string = 'ajouter';
 
   // Variable pour contrôler l'affichage des stocks ajustés après un rafraîchissement
-  stocksVisible: boolean = true;
+  stocksVisible: boolean = false;
 
 
   // Contructor
@@ -43,7 +43,7 @@ export class AddStockAjustementComponent {
     this.getPartageInfoUser();
     this.loadProduits();
     // Charger les stocks ajustés dès le chargement du composant
-    this.loadAdjustedStocks(); 
+    // this.loadAdjustedStocks(); 
     // Vérifier si la liste doit être visible après un rafraîchissement
     this.checkStocksVisibility();
   }
@@ -136,15 +136,18 @@ export class AddStockAjustementComponent {
   }  
 
   // quantiteAjoute: number = 0;
-  quantiteAjoute: number | null = null; // On peut initialiser à null pour afficher le champ vide
+  quantiteAjoute: number | null = null; 
+  quantiteRetirer: number | null = null; 
   descriptionAjout: string = '';
+  descriptionRetire: string = '';
+  
   // Ajoutez une variable pour contrôler la visibilité
-  isProductAdded: boolean = false;
+  // isProductAdded: boolean = false;
 
   // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
   AjouterDesQuan(): void {
     if (this.selectedProduct && this.quantiteAjoute && this.quantiteAjoute > 0) {
-      const product = this.selectedProduct; // Stockage local pour garantir qu'il n'est pas null
+      const product = this.selectedProduct;
       const stock = {
         quantiteAjoute: this.quantiteAjoute,
         descriptionAjout: this.descriptionAjout
@@ -152,15 +155,25 @@ export class AddStockAjustementComponent {
   
       this.stockService.ajouterStock(product.id, stock).subscribe({
         next: (response) => {
-          console.log('Stock ajouté avec succès', response);
-          // Mise à jour locale de la quantité du produit
-          product.quantite = Number(product.quantite) + Number(this.quantiteAjoute);
-          // Recharger les stocks ajustés
-          this.loadAdjustedStocks();
-          // Vider les champs de saisie
+          product.quantite += Number(this.quantiteAjoute);
+          // --- Début de la modification ---
+          const existingStock = this.adjustedStocks.find(s => s.produitId === product.id);
+          if (existingStock) {
+            existingStock.quantiteAjoute! += Number(this.quantiteAjoute);
+            existingStock.stockApres = product.quantite;
+          } else {
+            this.adjustedStocks.push({
+              ...response, // ou construire manuellement
+              produitId: product.id,
+              quantiteAjoute: Number(this.quantiteAjoute),
+              stockApres: product.quantite
+            });
+          }
+          // --- Fin de la modification ---
           this.quantiteAjoute = null;
           this.descriptionAjout = '';
           this.selectedProduct = null;
+          this.stocksVisible = true;
         },
         error: (error) => {
           console.error('Erreur lors de l\'ajout du stock', error);
@@ -169,17 +182,96 @@ export class AddStockAjustementComponent {
     } else {
       console.error('Veuillez sélectionner un produit et entrer une quantité valide.');
     }
-  }  
-
-  // Getter pour calculer stockApres en temps réel
-  get stockApresDisplay(): number | string {
-    if (!this.selectedProduct || this.quantiteAjoute === null || this.quantiteAjoute === 0) {
-      return '';
-    }
-    const stockActuel = Number(this.selectedProduct.quantite);
-    const ajout = Number(this.quantiteAjoute);
-    return stockActuel + ajout;
   }
+
+  RetirerDesQuan(): void {
+    if (this.selectedProduct && this.quantiteRetirer && this.quantiteRetirer > 0) {
+      const product = this.selectedProduct;
+      const stock = {
+        quantiteRetirer: this.quantiteRetirer,
+        descriptionRetire: this.descriptionRetire
+      };
+  
+      this.stockService.retirerStock(product.id, stock).subscribe({
+        next: (response) => {
+          product.quantite -= Number(this.quantiteRetirer);
+          // --- Début de la modification ---
+          const existingStock = this.adjustedStocks.find(s => s.produitId === product.id);
+          if (existingStock) {
+            existingStock.quantiteRetirer! += Number(this.quantiteRetirer);
+            existingStock.stockApres = product.quantite;
+          } else {
+            this.adjustedStocks.push({
+              ...response, // ou construire manuellement
+              produitId: product.id,
+              quantiteRetirer: Number(this.quantiteRetirer),
+              stockApres: product.quantite
+            });
+          }
+          // --- Fin de la modification ---
+          this.quantiteRetirer = null;
+          this.descriptionRetire = '';
+          this.selectedProduct = null;
+          this.stocksVisible = true;
+        },
+        error: (error) => {
+          console.error('Erreur lors de reduction du stock', error);
+        }
+      });
+    } else { 
+      console.error('Veuillez sélectionner un produit et entrer une quantité pour reduire.');
+    }
+  }
+  
+  // Getter pour calculer stockApres en temps réel
+  // get stockApresDisplay(): number | string {
+  //   if (!this.selectedProduct) {
+  //     return '';
+  //   }
+  //   const stockActuel = Number(this.selectedProduct.quantite);
+  //   if (this.quantiteAjoute === null || this.quantiteAjoute === 0) {
+  //     return stockActuel;
+  //   }
+  //   const ajout = Number(this.quantiteAjoute);
+  //   return stockActuel + ajout;
+  // }
+  
+  
+  
+  // // Getter pour calculer stockApres en temps réel
+  // get stockApresDisplayReduire(): number | string {
+  //   if (!this.selectedProduct || this.quantiteRetirer === null || this.quantiteRetirer === 0) {
+  //     return '';
+  //   }
+  //   const stockActuel = Number(this.selectedProduct.quantite);
+  //   const redui = Number(this.quantiteRetirer);
+  //   return stockActuel - redui;
+  // }
+
+  get stockApres(): number | string {
+    if (!this.selectedProduct) return '';
+    const stockActuel = Number(this.selectedProduct.quantite);
+    if (this.selectedAction === 'ajouter' && this.quantiteAjoute) {
+      return stockActuel + Number(this.quantiteAjoute);
+    } else if (this.selectedAction === 'reduire' && this.quantiteRetirer) {
+      return stockActuel - Number(this.quantiteRetirer);
+    }
+    return '';
+  }
+
+  /* A ne pas pas supprimer
+    get stockApres(): number | string {
+  if (!this.selectedProduct) return '';
+  const stockActuel = Number(this.selectedProduct.quantite);
+  if (this.selectedAction === 'ajouter' && this.quantiteAjoute) {
+    return stockActuel + Number(this.quantiteAjoute);
+  } else if (this.selectedAction === 'reduire' && this.quantiteRetirer) {
+    return stockActuel - Number(this.quantiteRetirer);
+  }
+  return '';
+}
+[value]="stockApres"
+  */
 
   // Liste filtrée des stocks ajustés
   adjustedStocks: Stock[] = [];
@@ -245,12 +337,11 @@ export class AddStockAjustementComponent {
   // Vérifier si les stocks doivent être visibles
   checkStocksVisibility(): void {
     const stocksVisibility = localStorage.getItem('stocksVisibility');
-    if (stocksVisibility === 'false') {
-      this.stocksVisible = false; // Masquer la liste
+    if (stocksVisibility === 'true') {
+      this.stocksVisible = true;
     } else {
-      this.stocksVisible = true; // Afficher la liste
+      this.stocksVisible = false;
     }
   }
-
   
 }
