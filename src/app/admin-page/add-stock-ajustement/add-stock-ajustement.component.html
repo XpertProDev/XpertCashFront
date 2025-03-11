@@ -53,7 +53,7 @@
                 <div class="double_input" *ngIf="selectedAction === 'reduire'">
                   <!-- // Description  -->
                   <div class="champ_input champ_input2">
-                    <textarea class="input_focus2" id="description" name="description" placeholder="Saisis Une description pour ce produit"></textarea>
+                    <textarea class="input_focus2" [(ngModel)]="descriptionRetire" id="description" name="description" placeholder="Saisis Une description pour ce produit"></textarea>
                     <label for="description" class="label labelColor">Description re (Facultatif)</label>
                   </div>
                   <!-- // Fournisseur  -->
