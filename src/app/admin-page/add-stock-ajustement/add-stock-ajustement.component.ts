@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProduitService } from '../SERVICES/produit.service';
 import { SharedDataService } from '../SERVICES/shared-data.service';
@@ -14,11 +14,14 @@ import { Stock } from '../MODELS/stock.model';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './add-stock-ajustement.component.html',
   styleUrl: './add-stock-ajustement.component.scss'
 })
 export class AddStockAjustementComponent {
+  ajusteForm!: FormGroup;
+  errorMessage: string = '';
 
   // Nom boutique 
   boutiqueName: string = '';
@@ -42,10 +45,8 @@ export class AddStockAjustementComponent {
     this.getBoutiqueName();
     this.getPartageInfoUser();
     this.loadProduits();
-    // Charger les stocks ajustés dès le chargement du composant
-    // this.loadAdjustedStocks(); 
-    // Vérifier si la liste doit être visible après un rafraîchissement
     this.checkStocksVisibility();
+    this.getAjusteForm();
   }
 
   getBoutiqueName() {
@@ -146,6 +147,13 @@ export class AddStockAjustementComponent {
 
   // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
   AjouterDesQuan(): void {
+
+    this.errorMessage = ''; // Réinitialiser le message d'erreur
+
+    if (!this.selectedProduct || !this.quantiteAjoute || this.quantiteAjoute <= 0) {
+      this.errorMessage = "Veuillez sélectionner un produit et entrer une quantité valide.";
+      return;
+    }
     if (this.selectedProduct && this.quantiteAjoute && this.quantiteAjoute > 0) {
       const product = this.selectedProduct;
       const stock = {
@@ -183,8 +191,16 @@ export class AddStockAjustementComponent {
       console.error('Veuillez sélectionner un produit et entrer une quantité valide.');
     }
   }
+  get a() { return this.ajusteForm.controls; }
 
   RetirerDesQuan(): void {
+    this.errorMessage = ''; // Réinitialiser le message d'erreur
+
+    if (!this.selectedProduct || !this.quantiteRetirer || this.quantiteRetirer <= 0) {
+      this.errorMessage = "Veuillez sélectionner un produit et entrer une quantité valide.";
+      return;
+    }
+
     if (this.selectedProduct && this.quantiteRetirer && this.quantiteRetirer > 0) {
       const product = this.selectedProduct;
       const stock = {
@@ -342,6 +358,12 @@ export class AddStockAjustementComponent {
     } else {
       this.stocksVisible = false;
     }
+  }
+
+  getAjusteForm() {
+    this.ajusteForm = this.fb.group({
+      descriptionAjout: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]]
+    })
   }
   
 }

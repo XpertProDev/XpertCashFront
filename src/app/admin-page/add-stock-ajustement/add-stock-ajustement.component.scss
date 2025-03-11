@@ -492,13 +492,6 @@ table {
     margin-left: 20px;
   }
   
-  .error-message {
-    font-size: 14px;
-    color: red;
-    font-weight: bold;
-    // margin-top: 7px;
-  }
-  
   
   .input_focus_cree_cate {
     //width: 50%;
@@ -831,4 +824,11 @@ table {
 .btn_ajuster_reduire button:hover {
   background-color: #db0303;
   transition: all ease-in .5;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
 }
