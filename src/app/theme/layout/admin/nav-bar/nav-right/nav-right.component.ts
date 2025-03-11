@@ -1,5 +1,5 @@
 // angular import
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
 
 // bootstrap import
@@ -11,6 +11,8 @@ import { ChatUserListComponent } from './chat-user-list/chat-user-list.component
 import { ChatMsgComponent } from './chat-msg/chat-msg.component';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { Router } from '@angular/router';
+import { StockService } from 'src/app/admin-page/SERVICES/stocks.service';
+
 @Component({
   selector: 'app-nav-right',
   imports: [SharedModule, ],
@@ -29,6 +31,7 @@ import { Router } from '@angular/router';
   ]
 })
 export class NavRightComponent implements OnInit{
+  stockHistory: any[] = [];
   // public props
   visibleUserList: boolean;
   chatMessage: boolean;
@@ -39,7 +42,9 @@ export class NavRightComponent implements OnInit{
   // constructor
   constructor(
     private userService: UsersService,
-    private router: Router
+    private router: Router,
+    private stockService: StockService,
+    private cdr: ChangeDetectorRef
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
@@ -48,6 +53,7 @@ export class NavRightComponent implements OnInit{
 
   ngOnInit(): void {
     this.getUserInfo();
+    this.getAllhistorique();
   }
 
   // public method 
@@ -60,7 +66,7 @@ export class NavRightComponent implements OnInit{
   getUserInfo(): void {
     this.userService.getUserInfo().subscribe({
       next: (user) => {
-        this.userName = user.nomComplet; // Récupération du nom
+        this.userName = user.nomComplet;
         this.nomEntreprise = user.nomEntreprise
       },
       error: (err) => {
@@ -68,6 +74,58 @@ export class NavRightComponent implements OnInit{
       }
     });
   }
+
+
+  getAllhistorique() {
+    this.stockService.getAllhistoriqueStream().subscribe(
+      (data) => {
+        this.stockHistory = data
+          .map(item => ({
+            ...item,
+            relativeTime: this.getRelativeTime(item.createdAt)
+          }))
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        this.cdr.detectChanges();
+      },
+      (error) => {
+        console.error("Erreur lors de la récupération de l'historique", error);
+      }
+    );
+  }
+
+    getRelativeTime(date: string): string {
+      const currentTime = new Date();
+      const eventTime = new Date(date);
+      const timeDiff = currentTime.getTime() - eventTime.getTime();
+    
+      const seconds = Math.floor(timeDiff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+    
+      if (seconds < 60) {
+        return `Il y a ${seconds} seconde${seconds > 1 ? 's' : ''}`;
+      } 
+      if (minutes < 60) {
+        return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
+      } 
+      if (hours < 24) {
+        return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
+      }
+      if (days === 1) {
+        return 'Hier';
+      }
+      return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+    }
+  
+  
+  
+  
+  
+  
+  
+  
 
   goToCompte() {
     this.router.navigate(['/compte']);

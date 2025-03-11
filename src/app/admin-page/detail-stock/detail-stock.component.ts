@@ -7,6 +7,8 @@ import { Produit } from '../MODELS/produit.model';
 import { SharedDataService } from '../SERVICES/shared-data.service';
 import { StockService } from '../SERVICES/stocks.service';
 import { Stock } from '../MODELS/stock.model';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-detail-stock',
@@ -18,6 +20,14 @@ import { Stock } from '../MODELS/stock.model';
   styleUrl: './detail-stock.component.scss'
 })
 export class DetailStockComponent {
+  boutiqueName: string = '';
+  nomComplet: string = '';
+  nomEntreprise = '';
+  email: string = '';
+  produit: Produit | undefined;
+  stockHistory: any[] = [];
+
+
 
   // Dropdown pour l'export
   showExportDropdown = false;
@@ -49,7 +59,6 @@ export class DetailStockComponent {
     }
   }
 
-  /////// ngOnInit()
   ngOnInit(): void {
     this.getUserInfo();
     this.getBoutiqueName();
@@ -120,8 +129,7 @@ export class DetailStockComponent {
     });
   }    
 
-  // Nom boutique 
-  boutiqueName: string = '';
+
 
   getBoutiqueName() {
     this.userService.getUserInfo().subscribe(
@@ -150,9 +158,7 @@ export class DetailStockComponent {
     });
   }
 
-  nomComplet: string = '';
-  nomEntreprise = '';
-  email: string = '';
+
   getUserInfo(): void {
     this.userService.getUserInfo().subscribe({
       next: (user) => {
@@ -166,7 +172,6 @@ export class DetailStockComponent {
     });
   }
 
-  produit: Produit | undefined;
   getProduit(): void {
     const idParam = this.route.snapshot.paramMap.get('id'); // Récupère l'ID depuis l'URL
     const productId = idParam ? +idParam : 0; // Convertit en nombre, 0 si invalide
@@ -187,8 +192,6 @@ export class DetailStockComponent {
     }
   }  
 
-  stockHistory: any[] = [];
-  // Méthode de chargement de l'historique
   loadStockHistory(): void {
     const produitId = this.produit?.id;
     if (!produitId) {
@@ -234,6 +237,85 @@ export class DetailStockComponent {
     // console.log('Dernière action stockée :', lastStock?.action);
     return lastStock?.action || 'Non activitité';
   }
+
+
+  downloadBoutiqueProduitPDF() {
+    const doc = new jsPDF();
+
+    if (!this.boutiqueName || !this.nomComplet || !this.email || !this.produit) {
+      console.error("Informations incomplètes !");
+      return;
+    }
+
+    let formattedDate = '';
+    if (this.produit.createdAt) {
+      const createdAt = new Date(this.produit.createdAt);
+      formattedDate = createdAt.toLocaleString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+    } else {
+      formattedDate = 'Date non disponible';
+    }
+  
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Fiche Produit et Stock`, 80, 15);
+    doc.setFontSize(12);
+    doc.text(`Informations de la boutique`, 14, 30);
+    doc.setLineWidth(0.5);
+    doc.line(14, 32, 195, 32); 
+  
+    // Informations sur la boutique
+    doc.setFontSize(10);
+    doc.text(`Nom de la Boutique : ${this.boutiqueName}`, 14, 40);
+    doc.text(`Adresse : Rue 414`, 14, 45);
+    doc.text(`Date de création : ${formattedDate}`, 14, 50); 
+    doc.text(`Créé par : ${this.nomComplet}`, 14, 55);
+    doc.text(`Email : ${this.email}`, 14, 60);
+  
+    doc.setLineWidth(0.5);
+    doc.line(14, 65, 195, 65);
+  
+    doc.setFontSize(12);
+    doc.text(`Détails du Produit N°: ${this.produit.codeGenerique}`, 14, 75) ;
+    doc.line(14, 77, 195, 77);
+  
+    const columns = ['Mes produits', 'Stock actuel', 'Quantité à ajouter', 'Coût du produit', 'Stock après'];
+  
+    const rows = [[
+      this.produit.nom || 'N/A',
+      this.produit.quantite ?? 0,
+      '_____',
+      `${this.produit.prixAchat ?? 0}`,
+      `${(this.produit.quantite ?? 0) + 0} `
+    ]];
+  
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 80,
+      theme: 'grid',
+      headStyles: { fillColor: [64, 153, 255], textColor: [255, 255, 255], fontSize: 12 },
+      bodyStyles: { fontSize: 10 }
+    });
+  
+    const finalY = (doc as any).lastAutoTable?.finalY || 120;
+    doc.setLineWidth(0.5);
+    doc.line(14, finalY + 5, 195, finalY + 5);
+  
+    doc.setFontSize(10);
+    doc.text('Signature:', 14, finalY + 15);
+    doc.text('Approuvé par:', 100, finalY + 15);
+    doc.text('Reçu par:', 140, finalY + 15);
+  
+    doc.save(`Fiche_Produit_${this.produit.nom}.pdf`);
+  }
+
   
   
   getDisplayedDescription(): string {

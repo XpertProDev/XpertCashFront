@@ -165,7 +165,7 @@ export class ProduitsComponent implements OnInit {
       doc.setLineWidth(0.5);
       doc.line(14, 35, 195, 35);
       
-      const columns = ['Code', 'Nom produit', 'Description', 'Catégorie', 'Prix vente', 'Prix achat', 'Unité', 'Seuil Alerte'];
+      const columns = ['Code', 'Nom produit', 'Description', 'Catégorie', 'Prix vente', 'Prix achat', 'En Stock', 'Unite', 'Seuil Alert'];
       const startIndex = this.currentPage * this.pageSize;
       const pageTasks = this.tasks.slice(startIndex, startIndex + this.pageSize);
       
@@ -183,6 +183,7 @@ export class ProduitsComponent implements OnInit {
         task.prixAchat ?? 0,
         task.quantite ?? 0,
         task.nomUnite ? `${task.nomUnite}` : 'Non Unité',
+        task.seuilAlert ?? 0,
       ]);
       
       
@@ -191,7 +192,7 @@ export class ProduitsComponent implements OnInit {
         body: rows,
         startY: 40,
         theme: 'grid',
-        headStyles: { fillColor: [100, 100, 255], textColor: [255, 255, 255], fontSize: 12 },
+        headStyles: { fillColor: [64, 153, 255], textColor: [255, 255, 255], fontSize: 12 },
         bodyStyles: { fontSize: 10 }
       });
       

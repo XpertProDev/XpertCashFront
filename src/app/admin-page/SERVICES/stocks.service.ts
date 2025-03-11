@@ -49,5 +49,29 @@ import { Observable } from 'rxjs';
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<any[]>(`${this.apiUrl}/getAllStock`, { headers });
   }
+ 
 
-  }
+ getAllhistoriqueStream(): Observable<any[]> {
+  return new Observable(observer => {
+    const eventSource = new EventSource(`${this.apiUrl}/stockhistorique`);
+
+    eventSource.onmessage = (event) => {
+      observer.next(JSON.parse(event.data));
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("Erreur SSE :", error);
+      eventSource.close();
+      observer.error(error);
+    };
+
+    return () => eventSource.close();
+  });
+}
+
+  
+  
+  
+  
+
+}
