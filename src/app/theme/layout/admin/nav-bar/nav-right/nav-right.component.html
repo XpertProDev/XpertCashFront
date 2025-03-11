@@ -72,26 +72,27 @@
                 <img class="img-radius" src="assets/images/user/avatar-1.jpg" alt="User Image" />
                 <div class="media-body">
                   <p>
-                    <strong >{{ history.nomComplet || 'Utilisateur inconnu' }} </strong>  
-                    <span style="font-size: 10px; margin: 5px; color: #ff000075;">({{ history.role}})</span>
+                    <strong>{{ history.nomComplet || 'Utilisateur inconnu' }}</strong>
+                    <span style="font-size: 10px; margin: 5px; color: #ff000075;">({{ history.role || 'Rôle inconnu' }})</span>
                     <span class="n-time text-muted">
                       <i class="icon feather icon-clock m-r-10"></i>
-                      {{ history.createdAt | date: 'HH:mm' }}
+                      {{ history.relativeTime }}
                     </span>
                   </p>
-                  <p style="font-size: 11px; margin-bottom: 5px;" >
-                    <b>{{ history.action || 'Action inconnue' }}</b> 
+                  <p style="font-size: 11px; margin-bottom: 5px;">
+                    <b>{{ history.action || 'Action inconnue' }}</b>
                     ({{ history.quantite || 0 }} unités)
                   </p>
-                  <p *ngIf="history.description">{{ history.description }}</p> 
+                  <p *ngIf="history.description">{{ history.description }}</p>
                 </div>
               </div>
             </li>
           </ul>
           
+          
         </ul> 
         <div class="noti-footer">
-          <a href="javascript:">Voir tout</a>
+          <!-- <a href="javascript:">Voir tout</a> -->
         </div>
       </div>
     </div>
