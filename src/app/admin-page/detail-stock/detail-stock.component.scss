@@ -21,6 +21,27 @@
     cursor: pointer;
 }
 
+// .content_imprimate {
+    // display: flex;
+    // justify-content: space-between;
+// }
+
+.description_detail {
+    float: right;
+}
+
+.description_detail textarea {
+  width: 100%;
+  height: 160px;
+  padding: 10px 20px 12px 8px;
+  box-sizing: border-box;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  font-size: 13px;
+  resize: none;
+}
+
 // drop domw 
 
 .export-container {

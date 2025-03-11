@@ -1,159 +1,146 @@
 <div class="container_global">
     <div class="content_detail_stock">
       <div class="modal-body">
-        <!-- // hearder  -->
+        <!-- // Header -->
         <div class="content_retour_icon">
-            <!-- Icon  -->
-            <div class="retour_icon" routerLink="/stocks">
-                <i class="ri-arrow-left-fill"></i>
-            </div>
-
-            <div class="icon_export">
-                <div class="export-container" style="display: flex; align-items: center;"> 
-                    <div class="iconDrop">
-                        <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
-                    </div>
-                    <div class="export-dropdown" *ngIf="showExportDropdown">
-                        <div class="export-option" (click)="downloadBoutiqueProduitPDF()">Télécharger en PDF</div>
-                        <div class="export-option">Imprimer</div>
-                    </div>
-
-                    <div class="iconDrop" style="margin-left: 20px;">
-                        <i class="ri-history-line"></i>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="container_imprimate">
-            <!-- // code de produit  -->
-            <div class="codeProduit">
-                <p class="codeId" style="letter-spacing: 2px;"> {{produit?.codeGenerique}} </p>
-            </div>
-
-            <!-- Les info  -->
-            <div class="info_content">
-                
-                <!-- // Boutique  -->
-                 <div class="info">
-                    <p class="info_title">Boutique :</p>
-                    <p class="info_value" style="color: #0672E4;">{{ boutiqueName }}</p>
-                 </div>
-
-                 <!-- // Type d'ajustement  -->
-                 <!-- <div class="info">
-                     <p class="info_title">Type d'ajustement :</p>
-                     <p class="info_value">Ajouter</p>
-                 </div> -->
-
-                 <!-- // Date de creation  -->
-                 <div class="info">
-                     <p class="info_title">Date de creation :</p>
-                     <!-- <p>{{stock | json}}</p> -->
-                     <p class="info_value">{{produit?.createdAt | date:'dd-MM-yyyy \'à\' HH:mm'}}</p>
-                 </div>
-
-                 <!-- // Personne  -->
-                 <div class="info">
-                    <p class="info_title">Créé par :</p>
-                    <p class="info_value">{{nomComplet}}</p>
-                </div>
-
-                <div class="info">
-                    <p class="info_title">Email :</p>
-                    <!-- <p class="info_value">informatiquexpertpro2&#64;</p> -->
-                    <p class="info_value">{{email}}</p>
-                </div>
-                <div class="info">
-                    <p style="color: #9b9b9b;">Derniere activite</p>
-                </div>
-
-                <div class="info">
-                    <p>Type : </p>
-                    <p class="info_value">{{ getLastStockAction() }}</p>
-                </div>
-
-                <div class="info">
-                    <!-- <p>{{ stock?.lastUpdated | date:'EEEE \'le\' dd MMMM yyyy \'à\' HH:mm' : 'fr-FR' }}</p> -->
-                    <p class="info_value_position">{{stock?.lastUpdated | date:'dd-MM-yyyy \'à\' HH:mm'}}</p>
-                </div>
-                <!-- info_email -->
-            </div>
-
-            <!-- // table  -->
-             <div class="containerTable">
-
-                <div class="table_title">
-                    <p>Produit</p>
-                </div>
-
-                <table>
-                    <thead>
-                        <tr class="titleTableProduit">
-                          <th class="title_table_name">Mes produits</th>
-                          <th class="title_table_contenu">Stock actuel</th>
-                          <th style="color: #0672E4;" class="title_table_contenu">Quantité à ajouter</th>
-                          <th class="title_table_contenu">Coût du produit</th>
-                          <th style="color: #ff0000;" class="title_table_contenu4">Quantité à retirer</th>
-                        </tr>
-                      </thead>
-    
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="champ_input" style="margin-right: 10px;">
-                                    <input type="text" readonly class="input_table1" [value]="produit?.nom">
-                                </div>
-                                
-                            </td>
-                            <td>
-                                <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" [value]="produit?.quantite">
-                                </div>
-                                
-                            </td>
-                            <td>
-                                <div class="champ_input" style="margin-right: 15px;">
-                                    <input style="color: #0672E4;" type="text" readonly class="input_table" [value]="stock?.quantiteAjoute">
-                                </div>
-                            </td>
-                            <td>
-                                <div class="champ_input" style="margin-right: 15px;">
-                                    <input type="text" readonly class="input_table" [value]="produit?.prixVente">
-                                </div>
-                            </td>
-                            <td>
-                                <div class="champ_input i4">
-                                    <input style="color: #ff0000;" type="text" readonly class="input_table" [value]="stock?.quantiteRetirer">
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                 </table>
-             </div>
-
-             <!-- // signature  -->
-              <div class="container_signature">
-                <!-- <p>{{stock | json}}</p> -->
-                <div class="content_signature">
-                    <!-- // Signature -->
-                    <div class="signature">
-                        <p>Signature</p>
-                        <!-- <p>...........................</p> -->
-                    </div>
-                    <!-- // Approuvé par  -->
-                     <div class="approuve">
-                        <p>Approuvé par</p>
-                     </div>
-                     <!-- // Reçu par  -->
-                      <div class="recu">
-                        <p>Reçu par</p>
-                      </div>
-                </div>
+          <!-- Icon de retour -->
+          <div class="retour_icon" routerLink="/stocks">
+            <i class="ri-arrow-left-fill"></i>
+          </div>
+  
+          <div class="icon_export">
+            <div class="export-container" style="display: flex; align-items: center;">
+              <!-- Icon pour afficher/masquer la description -->
+              <div class="iconDrop" style="margin-right: 20px;" (click)="toggleDescription()">
+                <!-- Afficher l'icône en fonction de l'état -->
+                <i class="ri-chat-check-line" *ngIf="!showDescription; else openIcon" title="Afficher la description" ></i>
+                <!-- <i class="ri-message-3-line"></i> -->
+                <ng-template #openIcon>
+                  <i class="ri-chat-off-line" title="Fermer la description"></i>
+                </ng-template>
               </div>
+              <!-- Autres icônes -->
+              <div class="iconDrop">
+                <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
+              </div>
+              <div class="export-dropdown" *ngIf="showExportDropdown">
+                <div class="export-option">Télécharger en PDF</div>
+                <div class="export-option">Imprimer</div>
+              </div>
+              <div class="iconDrop" style="margin-left: 20px;">
+                <i class="ri-history-line"></i>
+              </div>
+            </div>
+          </div>
         </div>
-
+        
+        <div class="container_imprimate">
+          <div class="content_imprimate">
+            <!-- Code de produit -->
+            <div class="codeProduit">
+              <p class="codeId" style="letter-spacing: 2px;"> {{produit?.codeGenerique}} </p>
+            </div>
+            
+            <!-- Description : affichage conditionnel -->
+            <div class="description_detail" *ngIf="showDescription">
+              <textarea readonly [value]="getDisplayedDescription()"></textarea>
+            </div>
+          </div>
+  
+          <!-- Les autres infos restent inchangées -->
+          <div class="info_content">
+            <div class="info">
+              <p class="info_title">Boutique :</p>
+              <p class="info_value" style="color: #0672E4;">{{ boutiqueName }}</p>
+            </div>
+            <div class="info">
+              <p class="info_title">Date de creation :</p>
+              <p class="info_value">{{produit?.createdAt | date:'dd-MM-yyyy \'à\' HH:mm'}}</p>
+            </div>
+            <div class="info">
+              <p class="info_title">Créé par :</p>
+              <p class="info_value">{{nomComplet}}</p>
+            </div>
+            <div class="info">
+              <p class="info_title">Email :</p>
+              <p class="info_value">{{email}}</p>
+            </div>
+            <div class="info">
+              <p style="color: #9b9b9b;">Dernière activité</p>
+            </div>
+            <div class="info">
+              <p>Type : </p>
+              <p class="info_value">{{ getLastStockAction() }}</p>
+            </div>
+            <div class="info">
+              <p class="info_value_position">{{stock?.lastUpdated | date:'dd-MM-yyyy \'à\' HH:mm'}}</p>
+            </div>
+          </div>
+  
+          <!-- Le reste du template (table, signature, etc.) -->
+          <div class="containerTable">
+            <div class="table_title">
+              <p>Produit</p>
+            </div>
+            <table>
+              <thead>
+                <tr class="titleTableProduit">
+                  <th class="title_table_name">Mes produits</th>
+                  <th class="title_table_contenu">Stock actuel</th>
+                  <th style="color: #0672E4;" class="title_table_contenu">Quantité à ajouter</th>
+                  <th class="title_table_contenu">Coût du produit</th>
+                  <th style="color: #ff0000;" class="title_table_contenu4">Quantité à retirer</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="champ_input" style="margin-right: 10px;">
+                      <input type="text" readonly class="input_table1" [value]="produit?.nom">
+                    </div>
+                  </td>
+                  <td>
+                    <div class="champ_input" style="margin-right: 15px;">
+                      <input type="text" readonly class="input_table" [value]="produit?.quantite">
+                    </div>
+                  </td>
+                  <td>
+                    <div class="champ_input" style="margin-right: 15px;">
+                      <input style="color: #0672E4;" type="text" readonly class="input_table" [value]="stock?.quantiteAjoute">
+                    </div>
+                  </td>
+                  <td>
+                    <div class="champ_input" style="margin-right: 15px;">
+                      <input type="text" readonly class="input_table" [value]="produit?.prixVente">
+                    </div>
+                  </td>
+                  <td>
+                    <div class="champ_input i4">
+                      <input style="color: #ff0000;" type="text" readonly class="input_table" [value]="stock?.quantiteRetirer">
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+  
+          <!-- Signature -->
+          <div class="container_signature">
+            <div class="content_signature">
+              <div class="signature">
+                <p>Signature</p>
+              </div>
+              <div class="approuve">
+                <p>Approuvé par</p>
+              </div>
+              <div class="recu">
+                <p>Reçu par</p>
+              </div>
+            </div>
+          </div>
+        </div>
+  
       </div>
     </div>
   </div>
+  
