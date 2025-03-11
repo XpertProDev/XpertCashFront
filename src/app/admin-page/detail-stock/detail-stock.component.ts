@@ -22,6 +22,8 @@ export class DetailStockComponent {
   // Dropdown pour l'export
   showExportDropdown = false;
 
+  showDescription = true;
+
   constructor(@Inject(LOCALE_ID) private locale: string,
       private userService: UsersService,
       private produitService: ProduitService,
@@ -209,19 +211,47 @@ export class DetailStockComponent {
     });
   }
   
+  // getLastStockAction(): string {
+  //   if (!this.stockHistory || this.stockHistory.length === 0) {
+  //     return 'Non activitité';
+  //   }
+    
+  //   const lastStock = this.stockHistory[this.stockHistory.length - 1];
+  //   // Vérification supplémentaire si lastStock est undefined
+  //   if (!lastStock) {
+  //     return 'Non activitité';
+  //   }
+    
+  //   return lastStock.action || 'Non activitité';
+  // }
+
   getLastStockAction(): string {
     if (!this.stockHistory || this.stockHistory.length === 0) {
+      // console.log('Aucune activité dans stockHistory');
       return 'Non activitité';
     }
-    
     const lastStock = this.stockHistory[this.stockHistory.length - 1];
-    // Vérification supplémentaire si lastStock est undefined
-    if (!lastStock) {
-      return 'Non activitité';
-    }
-    
-    return lastStock.action || 'Non activitité';
+    // console.log('Dernière action stockée :', lastStock?.action);
+    return lastStock?.action || 'Non activitité';
   }
   
+  
+  getDisplayedDescription(): string {
+    const lastAction = (this.getLastStockAction() || '').toLowerCase();
+    // console.log('Action en minuscule :', lastAction);
+    console.log('descriptionAjout:', this.stock?.descriptionAjout, 'descriptionRetire:', this.stock?.descriptionRetire);
+  
+    if (lastAction.includes('ajout') && this.stock?.descriptionAjout) {
+      return this.stock.descriptionAjout;
+    } else if ((lastAction.includes('retire') || lastAction.includes('reduction')) && this.stock?.descriptionRetire) {
+      return this.stock.descriptionRetire;
+    }
+    return 'Aucune description...';
+  }
+
+  // Méthode pour inverser l'état d'affichage
+  toggleDescription() {
+    this.showDescription = !this.showDescription;
+  }
 
 }
