@@ -34,7 +34,7 @@
                   <div class="double_input" *ngIf="selectedAction === 'ajouter'">
                     <!-- // Description  -->
                     <div class="champ_input champ_input2">
-                      <textarea class="input_focus2" formControlName="descriptionAjout" id="descriptionAjout" name="descriptionAjout" placeholder="Saisis Une description pour ce produit"></textarea>
+                      <textarea class="input_focus2" formControlName="descriptionAjout" [(ngModel)]="descriptionAjout" id="descriptionAjout" name="descriptionAjout" placeholder="Saisis Une description pour ce produit"></textarea>
                       <label for="descriptionAjout" class="label labelColor">Description (Facultatif)</label>
                       <div *ngIf="a['descriptionAjout'].touched && a['descriptionAjout'].invalid" class="error-message">
                         <span *ngIf="a['descriptionAjout'].errors?.['minlength']">La description doit avoir au moins 2 caractères.</span>
@@ -54,23 +54,29 @@
                   </div>
                 </form>
 
-                <div class="double_input" *ngIf="selectedAction === 'reduire'">
-                  <!-- // Description  -->
-                  <div class="champ_input champ_input2">
-                    <textarea class="input_focus2" [(ngModel)]="descriptionRetire" id="description" name="description" placeholder="Saisis Une description pour ce produit"></textarea>
-                    <label for="description" class="label labelColor">Description re (Facultatif)</label>
+                <form [formGroup]="ajusteRetirerForm">
+                  <div class="double_input" *ngIf="selectedAction === 'reduire'">
+                    <!-- // Description  -->
+                    <div class="champ_input champ_input2">
+                      <textarea class="input_focus2" formControlName="descriptionRetire" [(ngModel)]="descriptionRetire" id="descriptionRetire" name="descriptionRetire" placeholder="Saisis Une description pour ce produit"></textarea>
+                      <label for="descriptionRetire" class="label labelColor">Description (Facultatif)</label>
+                      <div *ngIf="r['descriptionRetire'].touched && r['descriptionRetire'].invalid" class="error-message">
+                        <span *ngIf="r['descriptionRetire'].errors?.['minlength']">La description doit avoir au moins 2 caractères.</span>
+                        <span *ngIf="r['descriptionRetire'].errors?.['maxlength']">La description ne doit pas dépasser 100 caractères.</span>
+                      </div>
+                    </div>
+                    <!-- // Fournisseur  -->
+                    <div class="champ_input champ_input2">
+                      <div class="title_input">Fournisseur</div>
+                      <!-- On lie le select à "selectedActionFournisseur" -->
+                      <select required name="action" class="input_focus">
+                        <option value="">Choisissez-en</option>
+                        <!-- <option value="ajouter">Ajouter</option> -->
+                      </select>
+                    </div>
+  
                   </div>
-                  <!-- // Fournisseur  -->
-                  <div class="champ_input champ_input2">
-                    <div class="title_input">Fournisseur</div>
-                    <!-- On lie le select à "selectedActionFournisseur" -->
-                    <select required name="action" class="input_focus">
-                      <option value="">Choisissez-en</option>
-                      <!-- <option value="ajouter">Ajouter</option> -->
-                    </select>
-                  </div>
-
-                </div>
+                </form>
                 
               </div>
             </div>
