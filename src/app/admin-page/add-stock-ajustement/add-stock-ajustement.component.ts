@@ -38,6 +38,10 @@ export class AddStockAjustementComponent {
       private stockService: StockService
   ) {}
 
+  goToStock() {
+    this.router.navigate(['/stocks']);
+  }
+
   ngOnInit(): void  {
     this.getBoutiqueName();
     this.getPartageInfoUser();

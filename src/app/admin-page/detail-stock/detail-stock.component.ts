@@ -32,7 +32,7 @@ export class DetailStockComponent {
   // Dropdown pour l'export
   showExportDropdown = false;
 
-  showDescription = true;
+  showDescription = false;
 
   constructor(@Inject(LOCALE_ID) private locale: string,
       private userService: UsersService,
