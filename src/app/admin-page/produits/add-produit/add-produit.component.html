@@ -46,7 +46,7 @@
                 <div class="double_input">
                   <!-- Input de nom produits  -->
                   <div class="champ_input champ_input2">
-                    <input formControlName="nom" type="text" class="input_focus " required id="nom" name="nom" placeholder="Saisis le nom de magasin">
+                    <input autocomplete="off" formControlName="nom" type="text" class="input_focus " required id="nom" name="nom" placeholder="Saisis le nom de magasin">
                     <label for="nom" class="label labelColor">Nom produit</label>
                     <div *ngIf="f['nom'].touched && f['nom'].invalid" class="error-message">
                       
@@ -57,7 +57,7 @@
 
                   <!-- Input de nom produits  -->
                   <div class="champ_input champ_input2">
-                    <input formControlName="prixVente" type="text" class="input_focus " required id="prixVente" name="prixVente" placeholder="Saisis le nom de magasin">
+                    <input autocomplete="off" formControlName="prixVente" type="number" class="input_focus " required id="prixVente" name="prixVente" placeholder="Saisis le nom de magasin">
                     <label for="prixVente" class="label labelColor">Prix de vente</label>
                     <div *ngIf="f['prixVente'].touched && f['prixVente'].invalid" class="error-message">
                       Le prix de vente est vide.
@@ -73,7 +73,7 @@
 
                 <div class="double_input2">
                   <div class="champ_input">
-                    <input type="text" placeholder="Saisis le nom de catégorie"
+                    <input autocomplete="off" type="text" placeholder="Saisis le nom de catégorie"
                            class="input_focus" matInput [formControl]="myControl" 
                            [matAutocomplete]="auto" style="cursor: pointer;">
                     <label for="categorieId" class="label labelCategory">Catégorie</label>
@@ -94,7 +94,7 @@
                 <div class="double_input">
                   <!-- Input de prixAchat  -->
                   <div class="champ_input champ_input2">
-                    <input formControlName="prixAchat" type="text" class="input_focus " required id="prixAchat" name="prixAchat" placeholder="Saisis le prix d'achat">
+                    <input autocomplete="off" formControlName="prixAchat" type="number" class="input_focus " required id="prixAchat" name="prixAchat" placeholder="Saisis le prix d'achat">
                     <label for="prixAchat" class="label labelColor">Coût du produit</label>
                     <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
                       Le coût du produit est vide.
@@ -103,7 +103,7 @@
 
                   <!-- Input de Quantité  -->
                   <div class="champ_input champ_input2">
-                    <input formControlName="quantite" type="text" class="input_focus " required id="quantite" name="quantite" placeholder="Saisis le quantité">
+                    <input autocomplete="off" formControlName="quantite" type="number" class="input_focus " required id="quantite" name="quantite" placeholder="Saisis le quantité">
                     <label for="quantite" class="label labelColor">En stock</label>
                     <!-- <div *ngIf="f['quantite'].touched && f['quantite'].invalid" class="error-message">
                       Le quantité de stock est vide.
@@ -114,7 +114,7 @@
                 <div class="double_input">
                   <!-- Input de prixAchat  -->
                   <div class="champ_input champ_input2">
-                    <input formControlName="seuilAlert" type="text" class="input_focus " required id="alertSeuil" name="alertSeuil" placeholder="Saisis le montant d'alerte">
+                    <input autocomplete="off" formControlName="seuilAlert" type="number" class="input_focus " required id="alertSeuil" name="alertSeuil" placeholder="Saisis le montant d'alerte">
                     <label for="seuilAlert" class="label labelColor">Seuil d'alerte</label>
                     <div *ngIf="f['seuilAlert'].touched && f['seuilAlert'].invalid" class="error-message">
                       Le alert seuil est vide.
@@ -131,7 +131,7 @@
 
                 <div class="double_input2">
                   <div class="champ_input">
-                    <input type="text" placeholder="Saisis l'unité de mesure" 
+                    <input autocomplete="off" type="text" placeholder="Saisis l'unité de mesure" 
                            matInput [formControl]="UniterControl" class="input_focus"
                            [matAutocomplete]="autoUnite" style="cursor: pointer;">
                     <label for="uniteId" class="label labelCategory">Unité de mesure</label>
@@ -158,7 +158,7 @@
 
                 <!-- Input de produits  -->
                 <div class="champ_input">
-                  <input formControlName="codeBare" type="text" class="input_focus " id="codeBar" name="codeBar" placeholder="Numéro code barre">
+                  <input  autocomplete="off" formControlName="codeBare" type="text" class="input_focus " id="codeBar" name="codeBar" placeholder="Numéro code barre">
                   <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
                   <div *ngIf="f['codeBare'].touched && f['codeBare'].invalid" class="error-message">
                     <span *ngIf="f['codeBare'].errors?.['minlength']">Le nom doit avoir au moins 8 caractères.</span>
@@ -273,7 +273,7 @@
         <!-- Input de nom de catégorie -->
         <form [formGroup]="ajouteCategoryForm" (ngSubmit)="submitFormCategory()">
           <div class="champ_input champ_input_Categorie" style="margin-top: 15px;">
-            <input formControlName="categoryName" type="text" class="input_focus input_focus_cree_cate" required id="categoryName" name="categoryName" placeholder="Saisis le nom de catégorie">
+            <input autocomplete="off" formControlName="categoryName" type="text" class="input_focus input_focus_cree_cate" required id="categoryName" name="categoryName" placeholder="Saisis le nom de catégorie">
             <label for="categoryName" class="label labelColor">Nom catégorie</label>
             <!-- Message d'erreur dynamique -->
             <div *ngIf="c['categoryName'].touched && c['categoryName'].invalid" class="error-message">
@@ -317,7 +317,7 @@
       <h4>Créer un unité</h4>
       <form [formGroup]="ajouteUniteForm" (ngSubmit)="submitFormUnity()">
         <div class="champ_input" style="margin-top: 15px;">
-          <input formControlName="unityName" type="text" class="input_focus input_focus_cree_cate" required id="unityName" name="unityName" placeholder="Saisis le nom de unité">
+          <input autocomplete="off" formControlName="unityName" type="text" class="input_focus input_focus_cree_cate" required id="unityName" name="unityName" placeholder="Saisis le nom de unité">
           <label for="unityName" class="label labelColor">Nom unité</label>
           <!-- Message d'erreur dynamique -->
           <div *ngIf="u['unityName'].touched && u['unityName'].invalid" class="error-message">

@@ -321,7 +321,7 @@ export class DetailStockComponent {
   getDisplayedDescription(): string {
     const lastAction = (this.getLastStockAction() || '').toLowerCase();
     // console.log('Action en minuscule :', lastAction);
-    // console.log('descriptionAjout:', this.stock?.descriptionAjout, 'descriptionRetire:', this.stock?.descriptionRetire);
+    console.log('descriptionAjout:', this.stock?.descriptionAjout, 'descriptionRetire:', this.stock?.descriptionRetire);
   
     if (lastAction.includes('ajout') && this.stock?.descriptionAjout) {
       return this.stock.descriptionAjout;
