@@ -30,12 +30,16 @@
                   </div>
                 </div>
 
-                <form>
+                <form [formGroup]="ajusteForm">
                   <div class="double_input" *ngIf="selectedAction === 'ajouter'">
                     <!-- // Description  -->
                     <div class="champ_input champ_input2">
-                      <textarea class="input_focus2" [(ngModel)]="descriptionAjout" id="description" name="description" placeholder="Saisis Une description pour ce produit"></textarea>
-                      <label for="description" class="label labelColor">Description (Facultatif)</label>
+                      <textarea class="input_focus2" formControlName="descriptionAjout" id="descriptionAjout" name="descriptionAjout" placeholder="Saisis Une description pour ce produit"></textarea>
+                      <label for="descriptionAjout" class="label labelColor">Description (Facultatif)</label>
+                      <div *ngIf="a['descriptionAjout'].touched && a['descriptionAjout'].invalid" class="error-message">
+                        <span *ngIf="a['descriptionAjout'].errors?.['minlength']">La description doit avoir au moins 2 caractères.</span>
+                        <span *ngIf="a['descriptionAjout'].errors?.['maxlength']">La description ne doit pas dépasser 100 caractères.</span>
+                      </div>
                     </div>
                     <!-- // Fournisseur  -->
                     <div class="champ_input champ_input2">
@@ -176,6 +180,10 @@
                         </tr>
                     </tbody>
                   </table>
+
+                  <div *ngIf="errorMessage" class="error-message">
+                    {{ errorMessage }}
+                  </div>
                 </div>
 
                 <!-- // button de ajustement -->
@@ -291,7 +299,11 @@
                         </tr>
                     </tbody>
                   </table>
-                </div> 
+
+                  <div *ngIf="errorMessage" class="error-message">
+                    {{ errorMessage }}
+                  </div>
+                </div>
 
                 <!-- // button de ajustement  -->
                 <!-- <div class="btn_ajuster_reduire">

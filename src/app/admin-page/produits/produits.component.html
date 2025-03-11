@@ -38,7 +38,7 @@
         <th>Coût du produit</th>
         <th style="background-color: #0671e44a;">En stock</th>
         <th>Unité</th>
-        <th>Seuil Alerte</th>
+        <!-- <th>Seuil Alerte</th> -->
       </tr>
     </thead>
     <tbody>
@@ -65,7 +65,7 @@
         <td>{{ product.prixAchat }}</td>
         <td style="background-color: #0671e410;" [innerHTML]="highlightMatch(product.quantite.toString())"></td>
         <td>{{ product.nomUnite }}</td>
-        <td>{{ product.seuilAlert }}</td>
+        <!-- <td>{{ product.seuilAlert }}</td> -->
       </tr>
       <!-- Message si aucun produit ne correspond à la recherche -->
       <tr *ngIf="tasks.length > 0 && filteredProducts().length === 0">
