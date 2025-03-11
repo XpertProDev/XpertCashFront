@@ -21,6 +21,7 @@ import { Stock } from '../MODELS/stock.model';
 })
 export class AddStockAjustementComponent {
   ajusteForm!: FormGroup;
+  ajusteRetirerForm!: FormGroup;
   errorMessage: string = '';
 
   // Nom boutique 
@@ -47,6 +48,7 @@ export class AddStockAjustementComponent {
     this.loadProduits();
     this.checkStocksVisibility();
     this.getAjusteForm();
+    this.getAjusteRetirerForm();
   }
 
   getBoutiqueName() {
@@ -192,6 +194,7 @@ export class AddStockAjustementComponent {
     }
   }
   get a() { return this.ajusteForm.controls; }
+  get r() { return this.ajusteRetirerForm.controls; }
 
   RetirerDesQuan(): void {
     this.errorMessage = ''; // Réinitialiser le message d'erreur
@@ -365,5 +368,13 @@ export class AddStockAjustementComponent {
       descriptionAjout: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]]
     })
   }
+
+  getAjusteRetirerForm() {
+    this.ajusteRetirerForm = this.fb.group({
+      descriptionRetire: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]]
+    })
+  }
+
+
   
 }
