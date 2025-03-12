@@ -148,8 +148,16 @@ const routes: Routes = [
 
       // La routing de Revenue
       {
-        path: 'revenue',
-        loadComponent: () => import('./admin-page/revenue/revenue.component').then(m => m.RevenueComponent),
+        path: 'clients',
+        loadComponent: () => import('./admin-page/clients/clients.component').then(m => m.ClientsComponent),
+        canActivate: [authGuard]
+
+      },
+
+      // La routing de Facture
+      {
+        path: 'fournisseurs',
+        loadComponent: () => import('./admin-page/fournisseurs/fournisseurs.component').then(m => m.FournisseursComponent),
         canActivate: [authGuard]
 
       },

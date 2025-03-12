@@ -5,15 +5,25 @@
   }
   
   .sidebar {
-    width: 250px;
+    width: 280px;
     background-color: #f0f0f0;
     padding: 20px;
+    // height: 50vh;
   }
   
   .profile {
     text-align: center;
   }
   
+  .profile h2 {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .profile .profil_email {
+    font-size: 12px;
+  }
+
   .profile-img {
     width: 100px;
     border-radius: 50%;
@@ -62,7 +72,7 @@
   
   .main-content {
     flex-grow: 1;
-    padding: 20px;
+    padding: 20px 20px 20px 40px;
   }
   
   header {
@@ -90,20 +100,6 @@
     cursor: pointer;
   }
   
-  .actions button {
-    padding: 8px 12px;
-    margin-left: 5px;
-    border: none;
-    background-color: #f0f0f0;
-    cursor: pointer;
-  }
-  
-  .form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  
   .form-row {
     display: flex;
     flex-direction: column;
@@ -123,3 +119,42 @@
   .form-row textarea {
     resize: vertical;
   }
+
+.container_form_profil {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px
+}
+    
+.div1 {
+    grid-column: span 2 / span 2;
+}
+
+.div3 {
+    grid-column: span 2 / span 2;
+    grid-column-start: 3;
+}
+
+.div4 {
+    grid-column: span 2 / span 2;
+    grid-row-start: 2;
+}
+
+.div5 {
+    grid-column: span 2 / span 2;
+    grid-column-start: 3;
+    grid-row-start: 2;
+}
+
+.div7 {
+    grid-column: span 2 / span 2;
+    grid-row-start: 3;
+}
+
+.div8 {
+    grid-column: span 2 / span 2;
+    grid-column-start: 3;
+    grid-row-start: 3;
+}
+        

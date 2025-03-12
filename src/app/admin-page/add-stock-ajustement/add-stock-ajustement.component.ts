@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProduitService } from '../SERVICES/produit.service';
@@ -20,9 +20,14 @@ import { Stock } from '../MODELS/stock.model';
   styleUrl: './add-stock-ajustement.component.scss'
 })
 export class AddStockAjustementComponent {
+
+  // Dans la classe du composant
+  @ViewChild('productSelect') productSelect!: ElementRef;
+
   ajusteForm!: FormGroup;
   ajusteRetirerForm!: FormGroup;
   errorMessage: string = '';
+  errorMessageError: string = '';
 
   // Nom boutique 
   boutiqueName: string = '';
@@ -31,6 +36,11 @@ export class AddStockAjustementComponent {
   // Variable pour contrôler l'affichage des stocks ajustés après un rafraîchissement
   stocksVisible: boolean = false;
 
+  // Nouvelle variable pour stocker les ajustements locaux
+  pendingAdjustments: any[] = [];
+
+  // Pop up de message
+  successMessage: string = '';
 
   // Contructor
   constructor(
@@ -39,7 +49,8 @@ export class AddStockAjustementComponent {
       private fb: FormBuilder,
       private router: Router,
       private usersService: UsersService,
-      private stockService: StockService
+      private stockService: StockService,
+      private cdRef: ChangeDetectorRef,
   ) {}
 
   goToStock() {
@@ -50,9 +61,10 @@ export class AddStockAjustementComponent {
     this.getBoutiqueName();
     this.getPartageInfoUser();
     this.loadProduits();
-    this.checkStocksVisibility();
+    // this.checkStocksVisibility();
     this.getAjusteForm();
     this.getAjusteRetirerForm();
+    // this.loadPendingAdjustments();
   }
 
   getBoutiqueName() {
@@ -152,124 +164,11 @@ export class AddStockAjustementComponent {
   // isProductAdded: boolean = false;
 
   // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
-  AjouterDesQuan(): void {
 
-    this.errorMessage = ''; // Réinitialiser le message d'erreur
-
-    if (!this.selectedProduct || !this.quantiteAjoute || this.quantiteAjoute <= 0) {
-      this.errorMessage = "Veuillez sélectionner un produit et entrer une quantité valide.";
-      return;
-    }
-    if (this.selectedProduct && this.quantiteAjoute && this.quantiteAjoute > 0) {
-      const product = this.selectedProduct;
-      const stock = {
-        quantiteAjoute: this.quantiteAjoute,
-        descriptionAjout: this.descriptionAjout
-      };
-  
-      this.stockService.ajouterStock(product.id, stock).subscribe({
-        next: (response) => {
-          product.quantite += Number(this.quantiteAjoute);
-          // --- Début de la modification ---
-          const existingStock = this.adjustedStocks.find(s => s.produitId === product.id);
-          if (existingStock) {
-            existingStock.quantiteAjoute! += Number(this.quantiteAjoute);
-            existingStock.stockApres = product.quantite;
-          } else {
-            this.adjustedStocks.push({
-              ...response, // ou construire manuellement
-              produitId: product.id,
-              quantiteAjoute: Number(this.quantiteAjoute),
-              stockApres: product.quantite
-            });
-          }
-          // --- Fin de la modification ---
-          this.quantiteAjoute = null;
-          this.descriptionAjout = '';
-          this.selectedProduct = null;
-          this.stocksVisible = true;
-        },
-        error: (error) => {
-          console.error('Erreur lors de l\'ajout du stock', error);
-        }
-      });
-    } else {
-      console.error('Veuillez sélectionner un produit et entrer une quantité valide.');
-    }
-  }
   get a() { return this.ajusteForm.controls; }
   get r() { return this.ajusteRetirerForm.controls; }
 
-  RetirerDesQuan(): void {
-    this.errorMessage = ''; // Réinitialiser le message d'erreur
 
-    if (!this.selectedProduct || !this.quantiteRetirer || this.quantiteRetirer <= 0) {
-      this.errorMessage = "Veuillez sélectionner un produit et entrer une quantité valide.";
-      return;
-    }
-
-    if (this.selectedProduct && this.quantiteRetirer && this.quantiteRetirer > 0) {
-      const product = this.selectedProduct;
-      const stock = {
-        quantiteRetirer: this.quantiteRetirer,
-        descriptionRetire: this.descriptionRetire
-      };
-  
-      this.stockService.retirerStock(product.id, stock).subscribe({
-        next: (response) => {
-          product.quantite -= Number(this.quantiteRetirer);
-          // --- Début de la modification ---
-          const existingStock = this.adjustedStocks.find(s => s.produitId === product.id);
-          if (existingStock) {
-            existingStock.quantiteRetirer! += Number(this.quantiteRetirer);
-            existingStock.stockApres = product.quantite;
-          } else {
-            this.adjustedStocks.push({
-              ...response, // ou construire manuellement
-              produitId: product.id,
-              quantiteRetirer: Number(this.quantiteRetirer),
-              stockApres: product.quantite
-            });
-          }
-          // --- Fin de la modification ---
-          this.quantiteRetirer = null;
-          this.descriptionRetire = '';
-          this.selectedProduct = null;
-          this.stocksVisible = true;
-        },
-        error: (error) => {
-          console.error('Erreur lors de reduction du stock', error);
-        }
-      });
-    } else { 
-      console.error('Veuillez sélectionner un produit et entrer une quantité pour reduire.');
-    }
-  }
-  
-  // Getter pour calculer stockApres en temps réel
-  // get stockApresDisplay(): number | string {
-  //   if (!this.selectedProduct) {
-  //     return '';
-  //   }
-  //   const stockActuel = Number(this.selectedProduct.quantite);
-  //   if (this.quantiteAjoute === null || this.quantiteAjoute === 0) {
-  //     return stockActuel;
-  //   }
-  //   const ajout = Number(this.quantiteAjoute);
-  //   return stockActuel + ajout;
-  // }
-  
-  
-  
-  // // Getter pour calculer stockApres en temps réel
-  // get stockApresDisplayReduire(): number | string {
-  //   if (!this.selectedProduct || this.quantiteRetirer === null || this.quantiteRetirer === 0) {
-  //     return '';
-  //   }
-  //   const stockActuel = Number(this.selectedProduct.quantite);
-  //   const redui = Number(this.quantiteRetirer);
-  //   return stockActuel - redui;
-  // }
 
   get stockApres(): number | string {
     if (!this.selectedProduct) return '';
@@ -281,20 +180,6 @@ export class AddStockAjustementComponent {
     }
     return '';
   }
-
-  /* A ne pas pas supprimer
-    get stockApres(): number | string {
-  if (!this.selectedProduct) return '';
-  const stockActuel = Number(this.selectedProduct.quantite);
-  if (this.selectedAction === 'ajouter' && this.quantiteAjoute) {
-    return stockActuel + Number(this.quantiteAjoute);
-  } else if (this.selectedAction === 'reduire' && this.quantiteRetirer) {
-    return stockActuel - Number(this.quantiteRetirer);
-  }
-  return '';
-}
-[value]="stockApres"
-  */
 
   // Liste filtrée des stocks ajustés
   adjustedStocks: Stock[] = [];
@@ -379,6 +264,157 @@ export class AddStockAjustementComponent {
     })
   }
 
+  // Méthode pour ajouter un ajustement à la liste
+  addToPendingAdjustments() {
+    if (this.errorMessage) return;
+  
+    if (!this.selectedProduct) {
+      this.errorMessage = 'Veuillez sélectionner un produit';
+      return;
+    }
+  
+    if (!this.quantiteAjoute || this.quantiteAjoute <= 0) {
+      this.errorMessage = 'Quantité invalide';
+      return;
+    }
+  
+    // Ajout dans la liste avec descriptionAjout incluse
+    this.pendingAdjustments = [
+      ...this.pendingAdjustments,
+      {
+        produitId: this.selectedProduct.id,
+        produitNom: this.selectedProduct.nom,
+        quantiteAjoute: this.quantiteAjoute,
+        stockActuel: this.selectedProduct.quantite,
+        stockApres: this.stockApres,
+        prixVente: this.selectedProduct.prixVente,
+        descriptionAjout: this.descriptionAjout // Ajout de la description ici
+      }
+    ];
+  
+    // Réinitialisation
+    this.selectedProduct = null;
+    this.quantiteAjoute = null;
+    this.descriptionAjout = ''; // Réinitialiser le champ de description si besoin
+  }  
+
+  // Méthode pour charger depuis localStorage
+  loadPendingAdjustments() {
+    const saved = localStorage.getItem('pendingAdjustments');
+    this.pendingAdjustments = saved ? JSON.parse(saved) : [];
+  }
+
+  checkExistingProduct() {
+    if (!this.selectedProduct) {
+      this.errorMessage = '';
+      return;
+    }
+  
+    const exists = this.pendingAdjustments.some(
+      item => item.produitNom === this.selectedProduct!.nom
+    );
+  
+    if (exists) {
+      this.errorMessage = `${this.selectedProduct.nom} est déjà dans la liste !`;
+      this.selectedProduct = null; // Désélectionne le produit
+    } else {
+      this.errorMessage = '';
+    }
+  }
+
+  clearSelections() {
+    this.errorMessage = '';
+    
+    // Réinitialisation avec nouvel objet
+    this.selectedProduct = null;
+    this.quantiteAjoute = null;
+  
+    // Force la mise à jour du cycle de changement
+    setTimeout(() => {
+      this.cdRef.detectChanges();
+      this.cdRef.markForCheck();
+    });
+
+    // Réinitialisation manuelle du DOM
+    if (this.productSelect) {
+      this.productSelect.nativeElement.selectedIndex = 0;
+    }
+  }
+
+  compareProducts(a: Produit | null, b: Produit | null): boolean {
+    // Cas où les deux valeurs sont null
+    if (a === null && b === null) return true;
+    
+    // Cas où l'une des valeurs est null
+    if (!a || !b) return false;
+    
+    // Comparaison normale par ID
+    return a.id === b.id;
+  }
+
+  // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
+  AjouterDesQuan(): void {
+    // Réinitialiser les messages
+    this.errorMessage = '';
+    this.successMessage = '';
+  
+    if (this.pendingAdjustments.length > 0) {
+      let successfulCalls = 0;
+      const totalAdjustments = this.pendingAdjustments.length;
+  
+      this.pendingAdjustments.forEach(adjustment => {
+        const stockPayload = {
+          quantiteAjoute: adjustment.quantiteAjoute,
+          descriptionAjout: adjustment.descriptionAjout
+        };
+  
+        this.stockService.ajouterStock(adjustment.produitId, stockPayload).subscribe({
+          next: (response) => {
+            // Mise à jour locale du produit concerné
+            const product = this.tasks.find(p => p.id === adjustment.produitId);
+            if (product) {
+              product.quantite = adjustment.stockApres;
+            }
+            successfulCalls++;
+  
+            if (successfulCalls === totalAdjustments) {
+              this.showSuccessModal();
+            }
+          },
+          error: (error) => {
+            console.error('Erreur lors de l’ajustement pour le produit ID:', adjustment.produitId, error);
+            // En cas d'erreur, vous pouvez également afficher une pop-up d'erreur spécifique
+            this.showErrorModal(`Erreur lors de l’ajustement pour le produit ${adjustment.produitNom}`);
+          }
+        });
+      });
+  
+      // Réinitialisation de la liste des ajustements en attente
+      this.pendingAdjustments = [];
+      this.stocksVisible = true;
+    } else {
+      // Affichage du message d'erreur si aucun ajustement n'est présent
+      this.showErrorModal("Aucun produit en attente d’être ajusté.");
+    }
+  }
+  
+  // Méthode pour afficher une pop-up de succès
+  showSuccessModal(): void {
+    this.successMessage = 'Les produits ont été ajustés avec réussite !';
+    setTimeout(() => {
+      this.successMessage = '';
+    }, 5000);
+  }
+  
+  // Méthode pour afficher une pop-up d'erreur
+  showErrorModal(message: string): void {
+    this.errorMessageError = message;
+    setTimeout(() => {
+      this.errorMessageError = '';
+    }, 3000);
+  }
+  
+  
 
   
 }

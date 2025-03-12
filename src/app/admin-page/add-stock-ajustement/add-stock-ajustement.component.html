@@ -53,43 +53,20 @@
   
                   </div>
                 </form>
-
-                <form [formGroup]="ajusteRetirerForm">
-                  <div class="double_input" *ngIf="selectedAction === 'reduire'">
-                    <!-- // Description  -->
-                    <div class="champ_input champ_input2">
-                      <textarea class="input_focus2" formControlName="descriptionRetire" [(ngModel)]="descriptionRetire" id="descriptionRetire" name="descriptionRetire" placeholder="Saisis Une description pour ce produit"></textarea>
-                      <label for="descriptionRetire" class="label labelColor">Description (Facultatif)</label>
-                      <div *ngIf="r['descriptionRetire'].touched && r['descriptionRetire'].invalid" class="error-message">
-                        <span *ngIf="r['descriptionRetire'].errors?.['minlength']">La description doit avoir au moins 2 caractères.</span>
-                        <span *ngIf="r['descriptionRetire'].errors?.['maxlength']">La description ne doit pas dépasser 100 caractères.</span>
-                      </div>
-                    </div>
-                    <!-- // Fournisseur  -->
-                    <div class="champ_input champ_input2">
-                      <div class="title_input">Fournisseur</div>
-                      <!-- On lie le select à "selectedActionFournisseur" -->
-                      <select required name="action" class="input_focus">
-                        <option value="">Choisissez-en</option>
-                        <!-- <option value="ajouter">Ajouter</option> -->
-                      </select>
-                    </div>
-  
-                  </div>
-                </form>
                 
               </div>
             </div>
 
             <!-- Cadre pour "Ajouter" -->
             <div class="information_cadre" *ngIf="selectedAction === 'ajouter'">
+
               <div class="info_titre_input">
 
                 <div class="add_new_quantite_stock">
                     <h4>Gestion des stocks</h4>
                 </div>
 
-                <div class="containerTable">
+                <div class="containerTable" style="position: relative;">
                   <table>
                     <thead>
                       <tr class="titleTableProduit">
@@ -104,7 +81,15 @@
                       <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                         <td>
                           <div class="champ_input">
-                            <select required name="selectedProduct" class="input_focus_type input_focus_type_select" [(ngModel)]="selectedProduct">
+                            <select 
+                              required 
+                              name="selectedProduct" 
+                              class="input_focus_type input_focus_type_select" 
+                              [(ngModel)]="selectedProduct"
+                              (ngModelChange)="checkExistingProduct()"
+                              [compareWith]="compareProducts"
+                              #productSelect
+                              [class.duplicate]="errorMessage.includes('est déjà dans la liste')" >
                               <option [ngValue]="null">Sélectionner un produit</option>
                               <option *ngFor="let produit of tasks" [ngValue]="produit">
                                 {{ produit.nom }}
@@ -149,176 +134,70 @@
                                    name="stockApres" 
                                    style="text-align: center;">
                           </div>
-                        </td>                                                               
+                        </td>  
+                        <td>
+                          <!-- // Button de ajouter  -->
+                          <div class="btn_ajouter" (click)="addToPendingAdjustments()">
+                            <i class="ri-add-fill"></i>
+                          </div>
+                        </td>                                                             
                       </tr>
                     </tbody>
 
-                    <tbody *ngIf="stocksVisible">
-                        <tr *ngFor="let stock of adjustedStocks" class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                    <tbody  *ngIf="pendingAdjustments.length > 0">
+                        <tr  *ngFor="let adjustment of pendingAdjustments"  class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 10px;">
-                                  <input type="text" readonly class="input_table" [value]="getProductName(stock)">
+                                  <input type="text" readonly class="input_table" [value]="adjustment.produitNom">
                               </div>
                             </td>
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                  <input type="text" readonly class="input_table" [value]="stock.stockActuel" style="text-align: center;">
+                                  <input type="text" readonly class="input_table" [value]="adjustment.stockActuel" style="text-align: center;">
                               </div>
                             </td>
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 15px;">
                                 <input type="text" readonly class="input_table" 
-                                  [value]="stock.quantiteAjoute && stock.quantiteAjoute > 0 ? stock.quantiteAjoute : stock.quantiteRetirer" 
+                                  [value]="adjustment.quantiteAjoute && adjustment.quantiteAjoute > 0 ? adjustment.quantiteAjoute : adjustment.quantiteRetirer" 
                                   style="text-align: center;">
                               </div>
                             </td>
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                <input type="text" readonly class="input_table" [value]="getProductPrixVente(stock)" style="text-align: center;">
+                                <input type="text" readonly class="input_table" [value]="adjustment.prixVente" style="text-align: center;">
                               </div>
                             </td>
                             <td>
                               <div class="champ_input_list_stock">
                                 <input type="text" readonly class="input_table" 
-                                [value]="stock.stockApres" style="text-align: center;">
+                                [value]="adjustment.stockApres" style="text-align: center;">
                               </div>
                             </td>
                         </tr>
                     </tbody>
                   </table>
 
-                  <div *ngIf="errorMessage" class="error-message">
+                  <!-- Popup d'erreur (affichée uniquement en cas d'erreur) -->
+                  <div class="modal-overlay" *ngIf="errorMessage">
+                    <div class="modal-content">
+                      <p class="modal-content-text">{{ errorMessage }}</p>
+                      <button class="modal-content-text-button" (click)="clearSelections()">OK</button>
+                    </div>
+                  </div>
+
+                  <!-- <div *ngIf="errorMessage" class="error-message">
                     {{ errorMessage }}
                   </div>
+                  <div *ngIf="errorMessage" class="error-popup">
+                    {{ errorMessage }}
+                    <button (click)="errorMessage = ''">×</button>
+                  </div> -->
                 </div>
-
-                <!-- // button de ajustement -->
-                <!-- <div class="btn_ajuster">
-                  <button>Ajouter plus</button>
-                </div> -->
               </div>
             </div>
 
-            <!-- Cadre pour "Reduire" -->
-            <div class="information_cadre" *ngIf="selectedAction === 'reduire'">
-              <div class="info_titre_input">
-
-                <div class="add_new_quantite_stock">
-                    <h4>Gestion des stocks</h4>
-                </div>
-
-                <div class="containerTable">
-                  <table>
-                    <thead>
-                        <tr class="titleTableProduit">
-                            <th class="title_table_name">Mes produits</th>
-                            <th class="title_table_contenu">Stock actuel</th>
-                            <th class="title_table_contenu" style="color: red;">Quantité à reduire</th>
-                            <th class="title_table_contenu">Coût unitaire</th>
-                            <th class="title_table_contenu">Stock après</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                      <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
-                        <td>
-                          <div class="champ_input">
-                            <select required name="selectedProduct" class="input_focus_type input_focus_type_select" [(ngModel)]="selectedProduct">
-                              <option [ngValue]="null">Sélectionner un produit</option>
-                              <option *ngFor="let produit of tasks" [ngValue]="produit">
-                                {{ produit.nom }}
-                              </option>
-                            </select>
-                          </div>
-                        </td>
-                        <td>
-                          <!-- // Quantité  -->
-                          <div class="champ_input" style="margin-right: 15px;">
-                            <input type="text" disabled class="input_focus_type" id="stockActuel" 
-                              [value]="selectedProduct ? selectedProduct.quantite : 0" 
-                              name="stockActuel" style="cursor: no-drop; text-align: center;">
-                          </div>  
-                        </td>
-                        <td>
-                          <form>
-                            <div class="champ_input" style="margin-right: 15px;">
-                              <input type="number" class="input_focus_type"
-                                     id="quantiteRetirer"
-                                     [(ngModel)]="quantiteRetirer"
-                                     name="quantiteRetirer"
-                                     style="text-align: center;"
-                                     min="0">
-                            </div>
-                          </form>
-                        </td>
-                        <td>
-                          <!-- // prix Vente  -->
-                          <div class="champ_input" style="margin-right: 15px;">
-                            <input type="text" disabled class="input_focus_type" id="CoutUnitaire" 
-                              [value]="selectedProduct ? selectedProduct.prixVente : 0" 
-                              name="CoutUnitaire" style="cursor: no-drop; text-align: center;">
-                          </div>
-                        </td>
-                        <td>
-                          <div class="champ_input">
-                            <input type="text" disabled 
-                                   class="input_focus_type" 
-                                   id="stockApres" 
-                                   [value]="stockApres" 
-                                   name="stockApres" 
-                                   style="text-align: center;">
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-
-                    <tbody *ngIf="stocksVisible">
-                        <tr *ngFor="let stock of adjustedStocks" class="tr_stock" style="border-top: 1px solid #f0f2f5;">
-                            <td>
-                                <div class="champ_input_list_stock" style="margin-right: 10px;">
-                                    <input type="text" readonly class="input_table"  [value]="getProductName(stock)">
-                                </div>
-                                
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                  <input type="text" readonly class="input_table" [value]="stock.stockActuel" style="text-align: center;">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                <input type="text" readonly class="input_table" 
-                                  [value]="stock.quantiteRetirer && stock.quantiteRetirer > 0 ? stock.quantiteRetirer : stock.quantiteAjoute" 
-                                  style="text-align: center;">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                <input type="text" readonly class="input_table" [value]="getProductPrixVente(stock)" style="text-align: center;">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock">
-                                <input type="text" readonly class="input_table" 
-                                [value]="stock.stockApres" style="text-align: center;">
-                              </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                  </table>
-
-                  <div *ngIf="errorMessage" class="error-message">
-                    {{ errorMessage }}
-                  </div>
-                </div>
-
-                <!-- // button de ajustement  -->
-                <!-- <div class="btn_ajuster_reduire">
-                  <button>Reduire plus</button>
-                </div> -->
-              </div>
-            </div>
-
-            <!-- Boutons Annuler et Sauvegarder -->
+            <!-- Boutons Ajouter et Sauvegarder -->
             <div class="information_cadre" *ngIf="selectedAction === 'ajouter'">
               <div class="info_titre_input info_titre_input_btn">
                 <div class="btn_annuler">
@@ -330,15 +209,20 @@
               </div>
             </div>
 
-            <!-- Boutons Annuler et Sauvegarder -->
-            <div class="information_cadre" *ngIf="selectedAction === 'reduire'">
-              <div class="info_titre_input info_titre_input_btn">
-                <div class="btn_annuler">
-                  <button class="btn_cancel" (click)="goToStock()">Annuler</button>
-                </div>
-                <div class="btn_ajouter">
-                  <button class="btn_save" (click)="RetirerDesQuan()">Ajuster</button>
-                </div>
+            <!-- Pop-up de validation de l'ajustement -->
+            <!-- Pop-up de succès -->
+            <div class="modal-overlay" *ngIf="successMessage">
+              <div class="modal-content">
+                <p class="modal-content-text">{{ successMessage }}</p>
+                <button class="modal-content-text-button" (click)="successMessage = ''">OK</button>
+              </div>
+            </div>
+
+            <!-- Pop-up d'erreur -->
+            <div class="modal-overlay" *ngIf="errorMessageError">
+              <div class="modal-content">
+                <p class="modal-content-text">{{ errorMessageError }}</p>
+                <!-- <button class="modal-content-text-button" (click)="errorMessageError = ''">OK</button> -->
               </div>
             </div>
 
