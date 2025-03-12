@@ -66,6 +66,7 @@ export class DetailStockComponent {
     this.loadStockById();
     this.loadStockHistory();
   }
+  
 
   // Liste filtrée des stocks ajustés
     adjustedStocks: Stock[] = [];
@@ -285,14 +286,13 @@ export class DetailStockComponent {
     doc.text(`Détails du Produit N°: ${this.produit.codeGenerique}`, 14, 75) ;
     doc.line(14, 77, 195, 77);
   
-    const columns = ['Mes produits', 'Stock actuel', 'Quantité à ajouter', 'Coût du produit', 'Stock après'];
+    const columns = ['Mes produits', 'Stock actuel', 'Quantité à ajouter', 'Quantité à retiré', 'Coût du produit'];
   
     const rows = [[
       this.produit.nom || 'N/A',
       this.produit.quantite ?? 0,
       '_____',
       `${this.produit.prixAchat ?? 0}`,
-      `${(this.produit.quantite ?? 0) + 0} `
     ]];
   
     autoTable(doc, {

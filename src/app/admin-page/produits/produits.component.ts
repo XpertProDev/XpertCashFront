@@ -46,6 +46,7 @@ export class ProduitsComponent implements OnInit {
   userName: string = '';
   boutiqueName: string = '';
   addressBoutique : string = '';
+  showDescription: boolean = false;
 
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();

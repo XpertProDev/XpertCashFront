@@ -74,7 +74,7 @@ export class NavRightComponent implements OnInit{
     });
   }
 
-
+ 
 
   getAllhistorique() {
     this.stockService.getAllhistorique().subscribe(
