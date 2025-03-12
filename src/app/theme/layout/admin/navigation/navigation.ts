@@ -66,21 +66,30 @@ export const NavigationItems: NavigationItem[] = [
         icon: 'feather icon-clipboard'
       },
       {
-        id: 'revenue',
+        id: 'clients',
         title: 'Clients',
         type: 'item',
-        url: '/revenue',
+        url: '/clients',
         classes: 'nav-item',
         icon: 'feather icon-users'
       },
       {
-        id: 'facture',
+        id: 'fournisseurs',
         title: 'Fournisseurs',
         type: 'item',
-        url: '/facture',
+        url: '/fournisseurs',
         classes: 'nav-item',
         icon: 'feather icon-briefcase'
       },
+      {
+        id: 'facture',
+        title: 'Factures',
+        type: 'item',
+        url: '/facture',
+        classes: 'nav-item',
+        icon: 'feather icon-file'
+      },
+
       // Pour les compte
       /*{
         id: 'compte',
