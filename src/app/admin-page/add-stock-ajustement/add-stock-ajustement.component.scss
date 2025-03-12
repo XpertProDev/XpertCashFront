@@ -833,6 +833,7 @@ table {
   margin-top: 10px;
 }
 
+// btn ajouter
 .btn_ajouter {
   margin-left: 30px;
 }
@@ -849,6 +850,23 @@ table {
 
 .btn_ajouter i:hover {
   background-color: #0863c50e;
+  transition: all ease .5s;
+}
+
+// btn supprimer
+.btn_delete {
+  margin-left: 30px;
+  margin-top: 10px;
+}
+
+.btn_delete i {
+  font-size: 18px;
+  color: #ff0000;
+  cursor: pointer;
+}
+
+.btn_delete i:hover {
+  color: #ca0000;
   transition: all ease .5s;
 }
 
