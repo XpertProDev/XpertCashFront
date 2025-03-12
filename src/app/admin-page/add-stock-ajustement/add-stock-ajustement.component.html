@@ -88,6 +88,7 @@
                               [(ngModel)]="selectedProduct"
                               (ngModelChange)="checkExistingProduct()"
                               [compareWith]="compareProducts"
+                              #productSelect
                               [class.duplicate]="errorMessage.includes('est déjà dans la liste')" >
                               <option [ngValue]="null">Sélectionner un produit</option>
                               <option *ngFor="let produit of tasks" [ngValue]="produit">

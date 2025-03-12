@@ -949,11 +949,14 @@ select:invalid {
   color: #6c757d; 
 }
 
-select.input_focus_type_select {
-  transition: all 0.3s ease;
-}
-
 select.input_focus_type_select.duplicate {
   border-color: #ff4444;
   transform: scale(1.02);
+}
+
+select.input_focus_type_select {
+  transition: all 0.3s ease;
+  -webkit-appearance: none; /* Désactive le rendu natif */
+  -moz-appearance: none;
+  appearance: none;
 }

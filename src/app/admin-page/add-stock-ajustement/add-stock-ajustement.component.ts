@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProduitService } from '../SERVICES/produit.service';
@@ -20,6 +20,10 @@ import { Stock } from '../MODELS/stock.model';
   styleUrl: './add-stock-ajustement.component.scss'
 })
 export class AddStockAjustementComponent {
+
+  // Dans la classe du composant
+  @ViewChild('productSelect') productSelect!: ElementRef;
+
   ajusteForm!: FormGroup;
   ajusteRetirerForm!: FormGroup;
   errorMessage: string = '';
@@ -266,13 +270,7 @@ export class AddStockAjustementComponent {
       this.errorMessage = 'Quantité invalide';
       return;
     }
-  
-    // Vérification doublon
-    // if (this.productExistsInList(this.selectedProduct.nom)) {
-    //   this.errorMessage = `${this.selectedProduct.nom} est déjà dans la liste !`;
-    //   return;
-    // }
-  
+
     // Ajout dans la liste
     this.pendingAdjustments = [...this.pendingAdjustments, {
       produitId: this.selectedProduct.id,
@@ -294,11 +292,6 @@ export class AddStockAjustementComponent {
     this.pendingAdjustments = saved ? JSON.parse(saved) : [];
   }
 
-  // Vérifie si le produit existe déjà dans la liste
-  // productExistsInList(productName: string): boolean {
-  //   return this.pendingAdjustments.some(item => item.produitNom === productName);
-  // }
-
   checkExistingProduct() {
     if (!this.selectedProduct) {
       this.errorMessage = '';
@@ -317,30 +310,34 @@ export class AddStockAjustementComponent {
     }
   }
 
-  // clearSelections() {
-  //   this.errorMessage = '';
-  //   this.selectedProduct = null;
-  //   this.quantiteAjoute = null;
-  //   this.cdRef.detectChanges();
-  // }
-
   clearSelections() {
     this.errorMessage = '';
     
-    // Réinitialisation forcée avec nouvel objet
+    // Réinitialisation avec nouvel objet
     this.selectedProduct = null;
     this.quantiteAjoute = null;
-    
+  
     // Force la mise à jour du cycle de changement
     setTimeout(() => {
       this.cdRef.detectChanges();
+      this.cdRef.markForCheck();
     });
-  }
-  
-  compareProducts(a: any, b: any): boolean {
-    return a?.id === b?.id;
+
+    // Réinitialisation manuelle du DOM
+    if (this.productSelect) {
+      this.productSelect.nativeElement.selectedIndex = 0;
+    }
   }
 
-
+  compareProducts(a: Produit | null, b: Produit | null): boolean {
+    // Cas où les deux valeurs sont null
+    if (a === null && b === null) return true;
+    
+    // Cas où l'une des valeurs est null
+    if (!a || !b) return false;
+    
+    // Comparaison normale par ID
+    return a.id === b.id;
+  }
   
 }
