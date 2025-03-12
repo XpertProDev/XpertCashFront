@@ -32,7 +32,7 @@
         <th>Code</th>
         <th>Photo</th>
         <th>Nom produit</th>
-        <th>Description</th>
+        <!-- <th>Description</th> -->
         <th>Catégorie</th>
         <th>Prix Vente</th>
         <th>Coût du produit</th>
@@ -59,7 +59,7 @@
         </td>
         <!-- <td>{{product | json}}</td> -->
         <td [innerHTML]="highlightMatch(product.nom)"></td>
-        <td>{{ product.description }}</td>
+        <!-- <td>{{ product.description }}</td> -->
         <td [innerHTML]="highlightMatch(product.nomCategorie || '')"></td>
         <td>{{ product.prixVente }}</td>
         <td>{{ product.prixAchat }}</td>

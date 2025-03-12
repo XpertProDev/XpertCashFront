@@ -27,6 +27,7 @@ export class AddStockAjustementComponent {
   ajusteForm!: FormGroup;
   ajusteRetirerForm!: FormGroup;
   errorMessage: string = '';
+  errorMessageError: string = '';
 
   // Nom boutique 
   boutiqueName: string = '';
@@ -38,6 +39,8 @@ export class AddStockAjustementComponent {
   // Nouvelle variable pour stocker les ajustements locaux
   pendingAdjustments: any[] = [];
 
+  // Pop up de message
+  successMessage: string = '';
 
   // Contructor
   constructor(
@@ -270,21 +273,26 @@ export class AddStockAjustementComponent {
       this.errorMessage = 'Quantité invalide';
       return;
     }
-
-    // Ajout dans la liste
-    this.pendingAdjustments = [...this.pendingAdjustments, {
-      produitId: this.selectedProduct.id,
-      produitNom: this.selectedProduct.nom,
-      quantiteAjoute: this.quantiteAjoute,
-      stockActuel: this.selectedProduct.quantite,
-      stockApres: this.stockApres,
-      prixVente: this.selectedProduct.prixVente
-    }];
+  
+    // Ajout dans la liste avec descriptionAjout incluse
+    this.pendingAdjustments = [
+      ...this.pendingAdjustments,
+      {
+        produitId: this.selectedProduct.id,
+        produitNom: this.selectedProduct.nom,
+        quantiteAjoute: this.quantiteAjoute,
+        stockActuel: this.selectedProduct.quantite,
+        stockApres: this.stockApres,
+        prixVente: this.selectedProduct.prixVente,
+        descriptionAjout: this.descriptionAjout // Ajout de la description ici
+      }
+    ];
   
     // Réinitialisation
     this.selectedProduct = null;
     this.quantiteAjoute = null;
-  }
+    this.descriptionAjout = ''; // Réinitialiser le champ de description si besoin
+  }  
 
   // Méthode pour charger depuis localStorage
   loadPendingAdjustments() {
@@ -339,5 +347,70 @@ export class AddStockAjustementComponent {
     // Comparaison normale par ID
     return a.id === b.id;
   }
+
+  // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
+  AjouterDesQuan(): void {
+    // Réinitialiser les messages
+    this.errorMessage = '';
+    this.successMessage = '';
+  
+    if (this.pendingAdjustments.length > 0) {
+      let successfulCalls = 0;
+      const totalAdjustments = this.pendingAdjustments.length;
+  
+      this.pendingAdjustments.forEach(adjustment => {
+        const stockPayload = {
+          quantiteAjoute: adjustment.quantiteAjoute,
+          descriptionAjout: adjustment.descriptionAjout
+        };
+  
+        this.stockService.ajouterStock(adjustment.produitId, stockPayload).subscribe({
+          next: (response) => {
+            // Mise à jour locale du produit concerné
+            const product = this.tasks.find(p => p.id === adjustment.produitId);
+            if (product) {
+              product.quantite = adjustment.stockApres;
+            }
+            successfulCalls++;
+  
+            if (successfulCalls === totalAdjustments) {
+              this.showSuccessModal();
+            }
+          },
+          error: (error) => {
+            console.error('Erreur lors de l’ajustement pour le produit ID:', adjustment.produitId, error);
+            // En cas d'erreur, vous pouvez également afficher une pop-up d'erreur spécifique
+            this.showErrorModal(`Erreur lors de l’ajustement pour le produit ${adjustment.produitNom}`);
+          }
+        });
+      });
+  
+      // Réinitialisation de la liste des ajustements en attente
+      this.pendingAdjustments = [];
+      this.stocksVisible = true;
+    } else {
+      // Affichage du message d'erreur si aucun ajustement n'est présent
+      this.showErrorModal("Aucun produit en attente d’être ajusté.");
+    }
+  }
+  
+  // Méthode pour afficher une pop-up de succès
+  showSuccessModal(): void {
+    this.successMessage = 'Les produits ont été ajustés avec réussite !';
+    setTimeout(() => {
+      this.successMessage = '';
+    }, 5000);
+  }
+  
+  // Méthode pour afficher une pop-up d'erreur
+  showErrorModal(message: string): void {
+    this.errorMessageError = message;
+    setTimeout(() => {
+      this.errorMessageError = '';
+    }, 3000);
+  }
+  
+  
+
   
 }

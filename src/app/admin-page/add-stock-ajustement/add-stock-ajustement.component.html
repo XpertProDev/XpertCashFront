@@ -204,8 +204,25 @@
                   <button class="btn_cancel">Annuler</button>
                 </div>
                 <div class="btn_ajouter">
-                  <button class="btn_save">Ajuster</button>
+                  <button class="btn_save" (click)="AjouterDesQuan()">Ajuster</button>
                 </div>
+              </div>
+            </div>
+
+            <!-- Pop-up de validation de l'ajustement -->
+            <!-- Pop-up de succès -->
+            <div class="modal-overlay" *ngIf="successMessage">
+              <div class="modal-content">
+                <p class="modal-content-text">{{ successMessage }}</p>
+                <button class="modal-content-text-button" (click)="successMessage = ''">OK</button>
+              </div>
+            </div>
+
+            <!-- Pop-up d'erreur -->
+            <div class="modal-overlay" *ngIf="errorMessageError">
+              <div class="modal-content">
+                <p class="modal-content-text">{{ errorMessageError }}</p>
+                <!-- <button class="modal-content-text-button" (click)="errorMessageError = ''">OK</button> -->
               </div>
             </div>
 
