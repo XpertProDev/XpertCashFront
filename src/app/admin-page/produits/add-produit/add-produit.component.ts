@@ -91,6 +91,9 @@ export class AddProduitComponent {
     }
   }
 
+  goToProduit() {
+    this.router.navigate(['/produit']);
+  }
   
   // Exemple d'utilisation lors d'une réponse du backend
   onResponseFromBackend(response: any): void {
@@ -263,7 +266,7 @@ export class AddProduitComponent {
       prixVente: ['', Validators.required],
       prixAchat: ['', Validators.required],
       quantite: ['0'],
-      seuilAlert: ['', Validators.required],
+      seuilAlert: ['0'],
       description: [''],
       codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],
       categorieId: [''],

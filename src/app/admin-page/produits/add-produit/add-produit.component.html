@@ -101,33 +101,10 @@
                     </div>
                   </div>
 
-                  <!-- Input de Quantité  -->
-                  <div class="champ_input champ_input2">
-                    <input autocomplete="off" formControlName="quantite" type="number" class="input_focus " required id="quantite" name="quantite" placeholder="Saisis le quantité">
-                    <label for="quantite" class="label labelColor">En stock</label>
-                    <!-- <div *ngIf="f['quantite'].touched && f['quantite'].invalid" class="error-message">
-                      Le quantité de stock est vide.
-                    </div> -->
-                  </div>
+                  
                 </div>
 
-                <div class="double_input">
-                  <!-- Input de prixAchat  -->
-                  <div class="champ_input champ_input2">
-                    <input autocomplete="off" formControlName="seuilAlert" type="number" class="input_focus " required id="alertSeuil" name="alertSeuil" placeholder="Saisis le montant d'alerte">
-                    <label for="seuilAlert" class="label labelColor">Seuil d'alerte</label>
-                    <div *ngIf="f['seuilAlert'].touched && f['seuilAlert'].invalid" class="error-message">
-                      Le alert seuil est vide.
-                    </div>
-                  </div>
-
-                  <!-- Input de Unité de mesure  -->
-                  <!-- <div class="champ_input champ_input2">
-                    <input type="text" class="input_focus " required id="unite" name="unite" placeholder="Saisis l'unité de mesure'">
-                    <label for="unite" class="label labelColor">Unité de mesure</label>
-                  </div> -->
-
-                </div>
+                
 
                 <div class="double_input2">
                   <div class="champ_input">
@@ -178,19 +155,33 @@
             <div class="information_cadre">
               <div class="info_titre_input">
                 <h4>Inventaire</h4>
-
+            
                 <!-- Input de produits inventaire -->
                 <div class="champ_input_inventaire">
                   <p>Ajouter dans les stocks</p>
-
+            
                   <label class="switch">
                     <input type="checkbox" [(ngModel)]="isChecked" (change)="onToggleChange($event)" [ngModelOptions]="{standalone: true}"/>
                     <span class="slider round"></span>
                   </label>
-                  
+                </div>
+            
+                <!-- Afficher seulement si isChecked est activé -->
+                <div class="double_inputh" *ngIf="isChecked">
+                  <!-- Input de prixAchat -->
+                  <div class="champ_input champ_input2">
+                    <input autocomplete="off" formControlName="seuilAlert" type="number" class="input_focus " name="alertSeuil" placeholder="Saisis le montant d'alerte">
+                    <label for="seuilAlert" class="label labelColor">Seuil d'alerte</label>
+                  </div>
+            
+                  <div class="champ_input champ_input2">
+                    <input autocomplete="off" formControlName="quantite" type="number" class="input_focus " required id="quantite" name="quantite" placeholder="Saisis le quantité">
+                    <label for="quantite" class="label labelColor">En stock</label>
+                  </div>
                 </div>
               </div>    
             </div>
+            
             
             <!-- Les information des produit Photo  -->
             <div class="information_cadre">
@@ -232,7 +223,7 @@
 
                 <!-- Input de produits  -->
                 <div class="btn_annuler">
-                  <button class="btn_cancel">Annuler</button>
+                  <button class="btn_cancel" (click)="goToProduit()">Annuler</button>
                 </div>
 
                 <div class="btn_ajouter">
