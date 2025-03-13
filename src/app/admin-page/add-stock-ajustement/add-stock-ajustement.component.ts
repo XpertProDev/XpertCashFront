@@ -53,6 +53,10 @@ export class AddStockAjustementComponent {
       private cdRef: ChangeDetectorRef,
   ) {}
 
+  goToStock() {
+    this.router.navigate(['/stocks']);
+  }
+
   ngOnInit(): void  {
     this.getBoutiqueName();
     this.getPartageInfoUser();

@@ -1,5 +1,5 @@
 // angular import
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
 
 // bootstrap import
@@ -43,8 +43,7 @@ export class NavRightComponent implements OnInit{
   constructor(
     private userService: UsersService,
     private router: Router,
-    private stockService: StockService,
-    private cdr: ChangeDetectorRef
+    private stockService: StockService
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
@@ -66,7 +65,7 @@ export class NavRightComponent implements OnInit{
   getUserInfo(): void {
     this.userService.getUserInfo().subscribe({
       next: (user) => {
-        this.userName = user.nomComplet;
+        this.userName = user.nomComplet; // Récupération du nom
         this.nomEntreprise = user.nomEntreprise
       },
       error: (err) => {
@@ -75,9 +74,10 @@ export class NavRightComponent implements OnInit{
     });
   }
 
+ 
 
   getAllhistorique() {
-    this.stockService.getAllhistoriqueStream().subscribe(
+    this.stockService.getAllhistorique().subscribe(
       (data) => {
         this.stockHistory = data
           .map(item => ({
@@ -85,45 +85,40 @@ export class NavRightComponent implements OnInit{
             relativeTime: this.getRelativeTime(item.createdAt)
           }))
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-        this.cdr.detectChanges();
+  
+        console.log('Historique trié :', this.stockHistory);
       },
       (error) => {
         console.error("Erreur lors de la récupération de l'historique", error);
       }
     );
   }
-
-    getRelativeTime(date: string): string {
-      const currentTime = new Date();
-      const eventTime = new Date(date);
-      const timeDiff = currentTime.getTime() - eventTime.getTime();
-    
-      const seconds = Math.floor(timeDiff / 1000);
-      const minutes = Math.floor(seconds / 60);
-      const hours = Math.floor(minutes / 60);
-      const days = Math.floor(hours / 24);
-    
-      if (seconds < 60) {
-        return `Il y a ${seconds} seconde${seconds > 1 ? 's' : ''}`;
-      } 
-      if (minutes < 60) {
-        return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
-      } 
-      if (hours < 24) {
-        return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
-      }
-      if (days === 1) {
-        return 'Hier';
-      }
-      return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+  
+  
+  getRelativeTime(date: string): string {
+    const currentTime = new Date();
+    const eventTime = new Date(date);
+    const timeDiff = currentTime.getTime() - eventTime.getTime();
+  
+    const seconds = Math.floor(timeDiff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+  
+    if (seconds < 60) {
+      return `Il y a ${seconds} seconde${seconds > 1 ? 's' : ''}`;
+    } 
+    if (minutes < 60) {
+      return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
+    } 
+    if (hours < 24) {
+      return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
     }
-  
-  
-  
-  
-  
-  
+    if (days === 1) {
+      return 'Hier';
+    }
+    return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+  }
   
   
 

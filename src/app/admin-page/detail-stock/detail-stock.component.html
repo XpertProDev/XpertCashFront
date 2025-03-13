@@ -24,7 +24,7 @@
                 <i class="ri-printer-cloud-line" (click)="toggleExportDropdown()"></i>
               </div>
               <div class="export-dropdown" *ngIf="showExportDropdown">
-                <div class="export-option">Télécharger en PDF</div>
+                <div class="export-option" (click)="downloadBoutiqueProduitPDF()">Télécharger en PDF</div>
                 <div class="export-option">Imprimer</div>
               </div>
               <div class="iconDrop" style="margin-left: 20px;">

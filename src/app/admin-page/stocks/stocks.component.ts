@@ -61,6 +61,7 @@ export class StocksComponent implements OnInit {
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
   selectedFile: File | null = null;
+  showDescription: boolean = false;
 
   constructor(
     private categorieService: CategorieService,
