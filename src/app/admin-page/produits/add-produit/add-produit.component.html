@@ -114,11 +114,8 @@
                 <div class="double_input">
                   <!-- Input de prixAchat  -->
                   <div class="champ_input champ_input2">
-                    <input autocomplete="off" formControlName="seuilAlert" type="number" class="input_focus " required id="alertSeuil" name="alertSeuil" placeholder="Saisis le montant d'alerte">
+                    <input autocomplete="off" formControlName="seuilAlert" type="number" class="input_focus " name="alertSeuil" placeholder="Saisis le montant d'alerte">
                     <label for="seuilAlert" class="label labelColor">Seuil d'alerte</label>
-                    <div *ngIf="f['seuilAlert'].touched && f['seuilAlert'].invalid" class="error-message">
-                      Le alert seuil est vide.
-                    </div>
                   </div>
 
                   <!-- Input de Unité de mesure  -->
