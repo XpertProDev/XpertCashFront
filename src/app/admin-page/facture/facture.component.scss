@@ -189,3 +189,28 @@ table {
     color: #fff;
     cursor: pointer;
 }
+
+.mat-elevation-z8 {
+    margin: 20px 0;
+    
+    table {
+      width: 100%;
+      
+      th {
+        background-color: #0672E4;
+        color: white;
+        font-weight: bold;
+      }
+      
+      td {
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+      }
+    }
+  }
+  
+//   .currency {
+//     &::before {
+//       content: 'XOF ';
+//     }
+//   }
