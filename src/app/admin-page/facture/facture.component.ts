@@ -59,6 +59,7 @@ export interface PeriodicElement {
 
 
 export class FactureComponent  implements AfterViewInit {
+
   boutiqueName: string = '';
   nomComplet: string = '';
   nomEntreprise = '';

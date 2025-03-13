@@ -1,13 +1,26 @@
 <div class="global_container_facture">
     <div class="container_facture">
 
-        <div class="title">
+        <!-- <div class="title">
             <h3>Mes facture</h3>
+        </div> -->
+
+
+        <div class="tasks-header">
+          <h1 class="title">Ventes</h1>
+          
+          <div class="actions">
+            <!--Les recherche-->
+            <div class="inputSearch">
+              <i class="ri-search-2-line"></i>
+              <input type="text" placeholder="Recherche...." />
+            </div>
+          </div>
         </div>
 
         <div class="factures">
             <mat-accordion class="example-headers-align">
-                <mat-expansion-panel *ngFor="let facture of factures; let i = index" [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
+                <mat-expansion-panel class="cadre_panel" *ngFor="let facture of factures; let i = index" [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
                     <!-- // header facture  -->
                     <mat-expansion-panel-header>
                         <mat-panel-title class="title_facture"> Facture : <span class="title_facture_code">{{ facture.numeroFacture }}</span> </mat-panel-title>
@@ -83,7 +96,7 @@
                                 <!-- //  right  -->
                                  <!-- Description : affichage conditionnel -->
                                 <div class="description_detail" *ngIf="showDescription">
-                                    <textarea readonly >{{ facture.description }}</textarea>
+                                    <textarea readonly >{{ facture.description || 'Non description' }}</textarea>
                                 </div>
                             </div>
 
