@@ -12,30 +12,24 @@ import { Observable } from 'rxjs';
 
   constructor(private http: HttpClient) { }
 
-  ajouterStock(produitId: number, stock: any): Observable<any> {
+  ajouterStock(stockPayload: any): Observable<any> {
     const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
     });
     
-    // Préparation du FormData pour respecter le format multipart attendu par le back-end
-    const formData: FormData = new FormData();
-    formData.append('stock', JSON.stringify(stock));
-
-    return this.http.patch(`${this.apiUrl}/ajouterStock/${produitId}`, formData, { headers });
+    return this.http.patch(`${this.apiUrl}/ajouterStock`, stockPayload, { headers });
   }
 
-  retirerStock(produitId: number, stock: any): Observable<any> {
+  retirerStock(stockPayload: any): Observable<any> {
     const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
     });
     
-    // Préparation du FormData pour respecter le format multipart attendu par le back-end
-    const formData: FormData = new FormData();
-    formData.append('stock', JSON.stringify(stock));
-
-    return this.http.patch(`${this.apiUrl}/retirerStock/${produitId}`, formData, { headers });
+    return this.http.patch(`${this.apiUrl}/retirerStock`, stockPayload, { headers });
   }
 
   getAllstockhistorique(produitId: number,token: string): Observable<any[]> {
