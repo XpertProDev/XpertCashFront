@@ -296,7 +296,41 @@ export class AddStockAjustementComponent {
     this.selectedProduct = null;
     this.quantiteAjoute = null;
     this.descriptionAjout = ''; // Réinitialiser le champ de description si besoin
-  }  
+  }
+
+  // Méthode pour ajouter un ajustement à la liste
+  reduireToPendingAdjustments() {
+    if (this.errorMessage) return;
+  
+    if (!this.selectedProduct) {
+      this.errorMessage = 'Veuillez sélectionner un produit';
+      return;
+    }
+  
+    if (!this.quantiteRetirer || this.quantiteRetirer <= 0) {
+      this.errorMessage = 'Quantité invalide';
+      return;
+    }
+  
+    // Ajout dans la liste avec descriptionAjout incluse
+    this.pendingAdjustments = [
+      ...this.pendingAdjustments,
+      {
+        produitId: this.selectedProduct.id,
+        produitNom: this.selectedProduct.nom,
+        quantiteRetirer: this.quantiteRetirer,
+        stockActuel: this.selectedProduct.quantite,
+        stockApres: this.stockApres,
+        prixVente: this.selectedProduct.prixVente,
+        descriptionretire: this.descriptionRetire // Ajout de la description ici
+      }
+    ];
+  
+    // Réinitialisation
+    this.selectedProduct = null;
+    this.quantiteRetirer = null;
+    this.descriptionRetire = ''; // Réinitialiser le champ de description si besoin
+  } 
 
   // Méthode pour charger depuis localStorage
   loadPendingAdjustments() {
@@ -397,6 +431,52 @@ export class AddStockAjustementComponent {
       this.showErrorModal("Aucun produit en attente d’être ajusté.");
     }
   }
+
+  RetirerDesQuan(): void {
+    // Réinitialiser les messages
+    this.errorMessage = '';
+    this.successMessage = '';
+  
+    if (this.pendingAdjustments.length > 0) {
+      let successfulCalls = 0;
+      const totalAdjustments = this.pendingAdjustments.length;
+  
+      this.pendingAdjustments.forEach(adjustment => {
+        const stockPayload = {
+          quantiteRetirer: adjustment.quantiteRetirer,
+          descriptionRetire: adjustment.descriptionRetire
+        };
+  
+        this.stockService.retirerStock(adjustment.produitId, stockPayload).subscribe({
+          next: (response) => {
+            // Mise à jour locale du produit concerné
+            const product = this.tasks.find(p => p.id === adjustment.produitId);
+            if (product) {
+              product.quantite = adjustment.stockApres;
+            }
+            successfulCalls++;
+  
+            if (successfulCalls === totalAdjustments) {
+              this.showSuccessModal();
+            }
+          },
+          error: (error) => {
+            console.error('Erreur lors de la réduction pour le produit ID:', adjustment.produitId, error);
+            // En cas d'erreur, afficher une pop-up d'erreur spécifique
+            this.showErrorModal(`Erreur lors de la réduction pour le produit ${adjustment.produitNom}`);
+          }
+        });
+      });
+  
+      // Réinitialisation de la liste des ajustements en attente
+      this.pendingAdjustments = [];
+      this.stocksVisible = true;
+    } else {
+      // Affichage du message d'erreur si aucun ajustement n'est présent
+      this.showErrorModal("Aucun produit en attente d’être réduit.");
+    }
+  }
+  
   
   // Méthode pour afficher une pop-up de succès
   showSuccessModal(): void {
