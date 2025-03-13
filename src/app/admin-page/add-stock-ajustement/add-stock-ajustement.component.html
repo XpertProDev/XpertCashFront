@@ -145,7 +145,7 @@
                     </tbody>
 
                     <tbody  *ngIf="pendingAdjustments.length > 0">
-                        <tr  *ngFor="let adjustment of pendingAdjustments"  class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                        <tr  *ngFor="let adjustment of pendingAdjustments; let i = index"  class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 10px;">
                                   <input type="text" readonly class="input_table" [value]="adjustment.produitNom">
@@ -177,7 +177,7 @@
 
                             <td>
                               <!-- // Button de ajouter  -->
-                              <div class="btn_delete">
+                              <div class="btn_delete" (click)="removePendingAdjustment(i)">
                                 <i class="ri-delete-bin-5-fill"></i>
                               </div>
                             </td>

@@ -414,6 +414,10 @@ export class AddStockAjustementComponent {
     }, 3000);
   }
   
+  removePendingAdjustment(index: number): void {
+    // Supprime l'élément de la liste à l'index fourni
+    this.pendingAdjustments.splice(index, 1);
+  }  
   
 
   

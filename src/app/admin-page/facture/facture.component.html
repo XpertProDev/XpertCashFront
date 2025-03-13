@@ -172,9 +172,338 @@
                      </div>
                 </mat-expansion-panel>
                 <!-- // new mat-expansion-panel  -->
-                <div class="icon_more">
+                <!-- <div class="icon_more">
                     <i class="ri-more-2-fill"></i>
-                </div>
+                </div> -->
+                <mat-expansion-panel [expanded]="step() === 1" (opened)="setStep(1)" hideToggle>
+                  <!-- // header facture  -->
+                  <mat-expansion-panel-header>
+                      <mat-panel-title class="title_facture"> Facture : <span class="title_facture_code">FAC - 20250312-0002</span> </mat-panel-title>
+                      <!-- icon arrow icon_arrow -->
+                      <div class="icon_export">
+                          <div class="export-container" style="display: flex; align-items: center;">
+                              <!-- Icon pour afficher/masquer la description -->
+                              <div class="iconDrop" style="margin-right: 20px;" (click)="toggleDescription($event)">
+                                  <i class="ri-chat-check-line" *ngIf="!showDescription; else openIcon" title="Afficher la description"></i>
+                                  <ng-template #openIcon>
+                                      <i class="ri-chat-off-line" title="Fermer la description"></i>
+                                  </ng-template>
+                              </div>
+                      
+                              <!-- Autres icônes -->
+                              <div class="iconDrop">
+                                  <i class="ri-printer-cloud-line" (click)="toggleExportDropdown($event)"></i>
+                              </div>
+                              <div class="export-dropdown" *ngIf="showExportDropdown">
+                                  <div class="export-option">Télécharger en PDF</div>
+                                  <div class="export-option">Imprimer</div>
+                              </div>
+                      
+                              <!-- Flèche -->
+                              <div class="iconDrop" style="margin-left: 20px;">
+                                  <i class="ri-arrow-down-s-fill"></i>
+                              </div>
+                          </div>
+                      </div>
+                      
+                  </mat-expansion-panel-header>
+            
+                  <!-- // contenu de la facture  -->
+                   <div class="content_facture">
+
+                      <!-- // info de produit  -->
+                      <div class="title_produit">
+                          <h4>Informations de la boutique</h4>
+                      </div>
+
+                      <div class="bare"></div>
+
+                      <!-- // Imprimate  -->
+                      <div class="container_imprimate">
+                          <div class="content_imprimate">
+                  
+                          <!-- Les autres infos restent inchangées -->
+                          <div class="double_info_content">
+                              <!-- // left  -->
+                              <div class="info_content">
+                                  <div class="info">
+                                    <p class="info_title">Boutique :</p>
+                                    <p class="info_value" style="color: #0672E4;">Ma Boutique</p>
+                                  </div>
+                                  <div class="info">
+                                    <p class="info_title">Date de creation :</p>
+                                    <p class="info_value">1234/23/23</p>
+                                  </div>
+                                  <div class="info">
+                                    <p class="info_title">Créé par :</p>
+                                    <p class="info_value">Diakaridia</p>
+                                  </div>
+                                  <div class="info">
+                                    <p class="info_title">Email :</p>
+                                    <p class="info_value">sydiakaridia38&#64;gmail.com</p>
+                                  </div>
+                                  <div class="info">
+                                    <p class="info_title">Type de mouvement :</p>
+                                    <p class="info_value">Ajouter</p>
+                                  </div>
+                              </div>
+
+                              <!-- //  right  -->
+                               <!-- Description : affichage conditionnel -->
+                              <div class="description_detail" *ngIf="showDescription">
+                                  <textarea readonly [value]="getDisplayedDescription()"></textarea>
+                              </div>
+                          </div>
+
+                          <!-- // info de produit  -->
+                          <div class="title_produit" style="margin-top: 25px;">
+                              <h4>Informations sur les produits</h4>
+                          </div>
+
+                          <!-- // barre  -->
+                          <div class="bare"></div>
+
+                        </div>
+                  
+                          <!-- Le reste du template (table, signature, etc.) -->
+                          <div class="containerTable">
+                            <div class="table_title">
+                              <p>Produits</p>
+                            </div>
+                            <div class="mat-elevation-z8">
+                              <table mat-table [dataSource]="dataSource">
+                            
+                                  <!-- Code produit Column -->
+                                  <ng-container matColumnDef="codeGenerique">
+                                    <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Code  </th>
+                                    <td mat-cell *matCellDef="let ajustement" class="codeGenerique"> {{ajustement.codeGenerique}} </td>
+                                  </ng-container>
+                            
+                                  <!-- Mes produits Column -->
+                                  <ng-container matColumnDef="nomProduit">
+                                    <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Mes produits  </th>
+                                    <td mat-cell *matCellDef="let ajustement"> {{ajustement.nomProduit }} </td>
+                                  </ng-container>
+                            
+                                  <!-- Stock actuel Column -->
+                                  <ng-container matColumnDef="stockActuel">
+                                      <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Stock actuel </th>
+                                      <td mat-cell *matCellDef="let ajustement"> {{ajustement.stockActuel}} </td>
+                                  </ng-container>
+                              
+                                  <!-- Quantite Ajouter -->
+                                  <ng-container matColumnDef="quantiteAjoute">
+                                      <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Quantite Ajouter </th>
+                                      <td mat-cell *matCellDef="let ajustement" class="quantiteAjoute"> {{ajustement.quantiteAjoute}} </td>
+                                  </ng-container>
+                              
+                                  <!-- Quantite retirer Column -->
+                                  <ng-container matColumnDef="quantiteRetirer">
+                                      <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Quantite retirer </th>
+                                      <td mat-cell *matCellDef="let ajustement" class="quantiteRetirer"> {{ajustement.quantiteRetirer}} </td>
+                                  </ng-container>
+                              
+                                  <!-- Stock après Column -->
+                                  <ng-container matColumnDef="stockApres">
+                                      <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Stock après </th>
+                                      <td mat-cell *matCellDef="let ajustement"> {{ajustement.stockApres}} </td>
+                                  </ng-container>
+                            
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                              </table>
+                            
+                              <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                                             showFirstLastButtons
+                                             aria-label="Select page of periodic elements">
+                              </mat-paginator>
+                            </div>
+                            
+                          </div>
+                  
+                          <!-- Signature -->
+                          <div class="container_signature">
+                            <div class="content_signature">
+                              <div class="signature">
+                                <p>Signature</p>
+                              </div>
+                              <div class="approuve">
+                                <p>Approuvé par</p>
+                              </div>
+                              <div class="recu">
+                                <p>Reçu par</p>
+                              </div>
+                            </div>
+                          </div>
+                      </div>
+
+                   </div>
+              </mat-expansion-panel>
+
+              <mat-expansion-panel [expanded]="step() === 2" (opened)="setStep(2)" hideToggle>
+                  <!-- // header facture  -->
+                  <mat-expansion-panel-header>
+                      <mat-panel-title class="title_facture"> Facture : <span class="title_facture_code">FAC - 20250312-0003</span> </mat-panel-title>
+                      <!-- icon arrow icon_arrow -->
+                      <div class="icon_export">
+                          <div class="export-container" style="display: flex; align-items: center;">
+                              <!-- Icon pour afficher/masquer la description -->
+                              <div class="iconDrop" style="margin-right: 20px;" (click)="toggleDescription($event)">
+                                  <i class="ri-chat-check-line" *ngIf="!showDescription; else openIcon" title="Afficher la description"></i>
+                                  <ng-template #openIcon>
+                                      <i class="ri-chat-off-line" title="Fermer la description"></i>
+                                  </ng-template>
+                              </div>
+                      
+                              <!-- Autres icônes -->
+                              <div class="iconDrop">
+                                  <i class="ri-printer-cloud-line" (click)="toggleExportDropdown($event)"></i>
+                              </div>
+                              <div class="export-dropdown" *ngIf="showExportDropdown">
+                                  <div class="export-option">Télécharger en PDF</div>
+                                  <div class="export-option">Imprimer</div>
+                              </div>
+                      
+                              <!-- Flèche -->
+                              <div class="iconDrop" style="margin-left: 20px;">
+                                  <i class="ri-arrow-down-s-fill"></i>
+                              </div>
+                          </div>
+                      </div>
+                      
+                  </mat-expansion-panel-header>
+            
+                  <!-- // contenu de la facture  -->
+                   <div class="content_facture">
+
+                      <!-- // info de produit  -->
+                      <div class="title_produit">
+                          <h4>Informations de la boutique</h4>
+                      </div>
+
+                      <div class="bare"></div>
+
+                      <!-- // Imprimate  -->
+                      <div class="container_imprimate">
+                          <div class="content_imprimate">
+                  
+                          <!-- Les autres infos restent inchangées -->
+                          <div class="double_info_content">
+                              <!-- // left  -->
+                              <div class="info_content">
+                                  <div class="info">
+                                    <p class="info_title">Boutique :</p>
+                                    <p class="info_value" style="color: #0672E4;">Ma Boutique</p>
+                                  </div>
+                                  <div class="info">
+                                    <p class="info_title">Date de creation :</p>
+                                    <p class="info_value">1234/23/23</p>
+                                  </div>
+                                  <div class="info">
+                                    <p class="info_title">Créé par :</p>
+                                    <p class="info_value">Diakaridia</p>
+                                  </div>
+                                  <div class="info">
+                                    <p class="info_title">Email :</p>
+                                    <p class="info_value">sydiakaridia38&#64;gmail.com</p>
+                                  </div>
+                                  <div class="info">
+                                    <p class="info_title">Type de mouvement :</p>
+                                    <p class="info_value">Ajouter</p>
+                                  </div>
+                              </div>
+
+                              <!-- //  right  -->
+                               <!-- Description : affichage conditionnel -->
+                              <div class="description_detail" *ngIf="showDescription">
+                                  <textarea readonly [value]="getDisplayedDescription()"></textarea>
+                              </div>
+                          </div>
+
+                          <!-- // info de produit  -->
+                          <div class="title_produit" style="margin-top: 25px;">
+                              <h4>Informations sur les produits</h4>
+                          </div>
+
+                          <!-- // barre  -->
+                          <div class="bare"></div>
+
+                        </div>
+                  
+                          <!-- Le reste du template (table, signature, etc.) -->
+                          <div class="containerTable">
+                            <div class="table_title">
+                              <p>Produits</p>
+                            </div>
+                            <div class="mat-elevation-z8">
+                              <table mat-table [dataSource]="dataSource">
+                            
+                                  <!-- Code produit Column -->
+                                  <ng-container matColumnDef="codeGenerique">
+                                    <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Code  </th>
+                                    <td mat-cell *matCellDef="let ajustement" class="codeGenerique"> {{ajustement.codeGenerique}} </td>
+                                  </ng-container>
+                            
+                                  <!-- Mes produits Column -->
+                                  <ng-container matColumnDef="nomProduit">
+                                    <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Mes produits  </th>
+                                    <td mat-cell *matCellDef="let ajustement"> {{ajustement.nomProduit }} </td>
+                                  </ng-container>
+                            
+                                  <!-- Stock actuel Column -->
+                                  <ng-container matColumnDef="stockActuel">
+                                      <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Stock actuel </th>
+                                      <td mat-cell *matCellDef="let ajustement"> {{ajustement.stockActuel}} </td>
+                                  </ng-container>
+                              
+                                  <!-- Quantite Ajouter -->
+                                  <ng-container matColumnDef="quantiteAjoute">
+                                      <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Quantite Ajouter </th>
+                                      <td mat-cell *matCellDef="let ajustement" class="quantiteAjoute"> {{ajustement.quantiteAjoute}} </td>
+                                  </ng-container>
+                              
+                                  <!-- Quantite retirer Column -->
+                                  <ng-container matColumnDef="quantiteRetirer">
+                                      <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Quantite retirer </th>
+                                      <td mat-cell *matCellDef="let ajustement" class="quantiteRetirer"> {{ajustement.quantiteRetirer}} </td>
+                                  </ng-container>
+                              
+                                  <!-- Stock après Column -->
+                                  <ng-container matColumnDef="stockApres">
+                                      <th style="background-color: #0672E4; color: #fff;" mat-header-cell *matHeaderCellDef> Stock après </th>
+                                      <td mat-cell *matCellDef="let ajustement"> {{ajustement.stockApres}} </td>
+                                  </ng-container>
+                            
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                              </table>
+                            
+                              <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                                             showFirstLastButtons
+                                             aria-label="Select page of periodic elements">
+                              </mat-paginator>
+                            </div>
+                            
+                          </div>
+                  
+                          <!-- Signature -->
+                          <div class="container_signature">
+                            <div class="content_signature">
+                              <div class="signature">
+                                <p>Signature</p>
+                              </div>
+                              <div class="approuve">
+                                <p>Approuvé par</p>
+                              </div>
+                              <div class="recu">
+                                <p>Reçu par</p>
+                              </div>
+                            </div>
+                          </div>
+                      </div>
+
+                   </div>
+              </mat-expansion-panel>
                 
             </mat-accordion>
               
