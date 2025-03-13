@@ -126,71 +126,11 @@ export class FactureComponent  implements AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.getUserInfo();
     this.getBoutiqueName();
-    this.getProduit();
-    this.loadStockById();
-    this.loadStockHistory();
+    this.getPartageInfoUser();
   }
 
-  // Charge un seul stock ajusté (par exemple le premier)
-    loadAdjustedStock(): void {
-      const token = this.userService.getToken(); 
-      if (!token) {
-        console.error('Token introuvable');
-        return;
-      }
-      this.stockService.getAllStocks(token).subscribe({
-        next: (stocks: Stock[]) => {
-          console.log("recuperer", stocks)
-          // Filtre pour garder uniquement les stocks ayant des ajustements
-          const adjustedStocks = stocks.filter(stock =>
-            (stock.quantiteAjoute && stock.quantiteAjoute > 0) ||
-            (stock.quantiteRetirer && stock.quantiteRetirer > 0)
-          );
-          // Sélectionne le premier stock ajusté (ou null s'il n'y en a pas)
-          this.stock = adjustedStocks.length > 0 ? adjustedStocks[0] : null;
-        },
-        error: (error) => {
-          console.error("Erreur lors du chargement du stock ajusté", error);
-        }
-      });
-    }
-  
-    // Appeler le service pour récupérer le stock par ID
-    loadStockById(): void {
-      const idParam = this.route.snapshot.paramMap.get('id');
-      const stockId = idParam ? +idParam : null;
-      
-      if (!stockId) {
-        console.error('ID du stock invalide');
-        return;
-      }
-    
-      const token = this.userService.getToken(); 
-      if (!token) {
-        console.error('Token introuvable');
-        return;
-      }
-    
-      this.stockService.getAllStocks(token).subscribe({
-        next: (stocks: Stock[]) => {
-          // Chercher le stock dont l'ID correspond
-          const selectedStock = stocks.find(stock => stock.id === stockId);
-          if (selectedStock) {
-            console.log("Stock trouvé :", selectedStock);
-            this.stock = selectedStock;
-          } else {
-            console.error(`Aucun stock trouvé avec l'ID ${stockId}`);
-          }
-        },
-        error: (error) => {
-          console.error("Erreur lors du chargement des stocks", error);
-        }
-      });
-    }    
-  
-
+  // Boutique Name
   getBoutiqueName() {
     this.userService.getUserInfo().subscribe(
       (userInfo) => {
@@ -210,91 +150,16 @@ export class FactureComponent  implements AfterViewInit {
     );
   }
 
+  // Partage de donner de user
   getPartageInfoUser() {
-    // Partage de donner de user
-    this.sharedDataService.boutiqueName$.subscribe(name => {
-     console.log("AddProduitComponent - Nom boutique récupéré :", name);
-     this.boutiqueName = name;
-   });
- }
-
-  getUserInfo(): void {
-    this.userService.getUserInfo().subscribe({
-      next: (user) => {
-        this.nomComplet = user.nomComplet; 
-        this.nomEntreprise = user.nomEntreprise
-        this.email = user.email
-      },
-      error: (err) => {
-        console.error("Erreur lors de la récupération des infos utilisateur :", err);
-      }
+      this.sharedDataService.boutiqueName$.subscribe(name => {
+      console.log("AddProduitComponent - Nom boutique récupéré :", name);
+      this.boutiqueName = name;
     });
   }
 
-  getProduit(): void {
-      const idParam = this.route.snapshot.paramMap.get('id'); // Récupère l'ID depuis l'URL
-      const productId = idParam ? +idParam : 0; // Convertit en nombre, 0 si invalide
-    
-      if (productId > 0) { // Vérifie si l'ID est valide
-        this.produitService.getProduitById(productId).subscribe({
-          next: (data: Produit) => {
-            console.log('Produit récupéré:', data);
-            this.produit = data; // Stocke le produit
-            this.loadStockHistory();  // Appel de l'historique une fois le produit récupéré
-          },
-          error: (err) => {
-            console.error('Erreur lors de la récupération du produit:', err);
-          }
-        });
-      } else {
-        console.error('ID du produit invalide');
-      }
-    } 
 
-  loadStockHistory(): void {
-    const produitId = this.produit?.id;
-    if (!produitId) {
-      console.error('Produit non défini pour charger l\'historique');
-      return;
-    }
-    const token = this.userService.getToken();
-    if (!token) {
-      console.error('Token introuvable');
-      return;
-    }
-    this.stockService.getAllstockhistorique(produitId, token).subscribe({
-      next: (data: any[]) => {
-        console.log('Historique de stock:', data);
-        this.stockHistory = data;
-      },
-      error: (error) => {
-        console.error("Erreur lors du chargement de l'historique de stock", error);
-      }
-    });
-  }
-
-  getLastStockAction(): string {
-    if (!this.stockHistory || this.stockHistory.length === 0) {
-      // console.log('Aucune activité dans stockHistory');
-      return 'Non activitité';
-    }
-    const lastStock = this.stockHistory[this.stockHistory.length - 1];
-    // console.log('Dernière action stockée :', lastStock?.action);
-    return lastStock?.action || 'Non activitité';
-  }
-
-  getDisplayedDescription(): string {
-    const lastAction = (this.getLastStockAction() || '').toLowerCase();
-    // console.log('Action en minuscule :', lastAction);
-    console.log('descriptionAjout:', this.stock?.descriptionAjout, 'descriptionRetire:', this.stock?.descriptionRetire);
   
-    if (lastAction.includes('ajout') && this.stock?.descriptionAjout) {
-      return this.stock.descriptionAjout;
-    } else if ((lastAction.includes('retire') || lastAction.includes('reduction')) && this.stock?.descriptionRetire) {
-      return this.stock.descriptionRetire;
-    }
-    return 'Aucune description...';
-  }
 
 }
 
