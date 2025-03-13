@@ -29,51 +29,29 @@
                     <input type="text" class="input_focus" disabled id="boutique" [value]="boutiqueName" name="boutique" style="cursor: no-drop; color: #0672E4;">
                   </div>
                 </div>
-
+                
                 <form [formGroup]="ajusteForm">
-                  <div class="double_input" *ngIf="selectedAction === 'ajouter'">
-                    <!-- // Description  -->
+                  <div class="double_input">
+                    <!-- Description Global -->
                     <div class="champ_input champ_input2">
-                      <textarea class="input_focus2" formControlName="descriptionAjout" [(ngModel)]="descriptionAjout" id="descriptionAjout" name="descriptionAjout" placeholder="Saisis Une description pour ce produit"></textarea>
-                      <label for="descriptionAjout" class="label labelColor">Description (Facultatif)</label>
-                      <div *ngIf="a['descriptionAjout'].touched && a['descriptionAjout'].invalid" class="error-message">
-                        <span *ngIf="a['descriptionAjout'].errors?.['minlength']">La description doit avoir au moins 2 caractères.</span>
-                        <span *ngIf="a['descriptionAjout'].errors?.['maxlength']">La description ne doit pas dépasser 100 caractères.</span>
+                      <textarea class="input_focus2"
+                                formControlName="descriptionGlobal"
+                                id="descriptionGlobal"
+                                name="descriptionGlobal"
+                                placeholder="Saisis Une description pour ce produit"></textarea>
+                      <label for="descriptionGlobal" class="label labelColor">Description (Facultatif)</label>
+                      <div *ngIf="f['descriptionGlobal'].touched && f['descriptionGlobal'].invalid" class="error-message">
+                        <span *ngIf="f['descriptionGlobal'].errors?.['minlength']">La description doit avoir au moins 2 caractères.</span>
+                        <span *ngIf="f['descriptionGlobal'].errors?.['maxlength']">La description ne doit pas dépasser 100 caractères.</span>
                       </div>
                     </div>
-                    <!-- // Fournisseur  -->
+                    <!-- Fournisseur -->
                     <div class="champ_input champ_input2">
                       <div class="title_input">Fournisseur</div>
-                      <!-- On lie le select à "selectedActionFournisseur" -->
                       <select required name="action" class="input_focus">
                         <option value="">Choisissez-en un</option>
-                        <!-- <option value="ajouter">Ajouter</option> -->
                       </select>
                     </div>
-                  </div>
-                </form>
-
-                <form [formGroup]="ajusteRetirerForm">
-                  <div class="double_input" *ngIf="selectedAction === 'reduire'">
-                    <!-- // Description  -->
-                    <div class="champ_input champ_input2">
-                      <textarea class="input_focus2" formControlName="descriptionRetire" [(ngModel)]="descriptionRetire" id="descriptionRetire" name="descriptionRetire" placeholder="Saisis Une description pour ce produit"></textarea>
-                      <label for="descriptionRetire" class="label labelColor">Description (Facultatif)</label>
-                      <div *ngIf="r['descriptionRetire'].touched && r['descriptionRetire'].invalid" class="error-message">
-                        <span *ngIf="r['descriptionRetire'].errors?.['minlength']">La description doit avoir au moins 2 caractères.</span>
-                        <span *ngIf="r['descriptionRetire'].errors?.['maxlength']">La description ne doit pas dépasser 100 caractères.</span>
-                      </div>
-                    </div>
-                    <!-- // Fournisseur  -->
-                    <div class="champ_input champ_input2">
-                      <div class="title_input">Fournisseur</div>
-                      <!-- On lie le select à "selectedActionFournisseur" -->
-                      <select required name="action" class="input_focus">
-                        <option value="">Choisissez-en un</option>
-                        <!-- <option value="ajouter">Ajouter</option> -->
-                      </select>
-                    </div>
-  
                   </div>
                 </form>
                 

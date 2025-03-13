@@ -42,6 +42,10 @@ export class AddStockAjustementComponent {
   // Pop up de message
   successMessage: string = '';
 
+  // Description Global
+  descriptionGlobal: string = '';
+
+
   // Contructor
   constructor(
       private sharedDataService: SharedDataService,
@@ -63,7 +67,7 @@ export class AddStockAjustementComponent {
     this.loadProduits();
     // this.checkStocksVisibility();
     this.getAjusteForm();
-    this.getAjusteRetirerForm();
+    // this.getAjusteRetirerForm();
     // this.loadPendingAdjustments();
   }
 
@@ -165,7 +169,9 @@ export class AddStockAjustementComponent {
 
   // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
 
-  get a() { return this.ajusteForm.controls; }
+  get f() {
+    return this.ajusteForm.controls;
+  }
   get r() { return this.ajusteRetirerForm.controls; }
 
 
@@ -254,15 +260,15 @@ export class AddStockAjustementComponent {
 
   getAjusteForm() {
     this.ajusteForm = this.fb.group({
-      descriptionAjout: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]]
-    })
+      descriptionGlobal: ['', [Validators.minLength(2), Validators.maxLength(100)]],
+    });
   }
 
-  getAjusteRetirerForm() {
-    this.ajusteRetirerForm = this.fb.group({
-      descriptionRetire: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]]
-    })
-  }
+  // getAjusteRetirerForm() {
+  //   this.ajusteRetirerForm = this.fb.group({
+  //     descriptionRetire: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]]
+  //   })
+  // }
 
   // Méthode pour ajouter un ajustement à la liste
   addToPendingAdjustments() {
@@ -386,98 +392,103 @@ export class AddStockAjustementComponent {
     return a.id === b.id;
   }
 
-  // Méthode pour ajouter le stock (ne modifie pas showAdjustedStocks)
+  /**
+   * Méthode pour ajouter du stock en regroupant les ajustements
+   */
   AjouterDesQuan(): void {
-    // Réinitialiser les messages
     this.errorMessage = '';
     this.successMessage = '';
-  
+
     if (this.pendingAdjustments.length > 0) {
-      let successfulCalls = 0;
-      const totalAdjustments = this.pendingAdjustments.length;
-  
+      // Regrouper les quantités par produit
+      const produitsQuantites: { [key: string]: number } = {};
       this.pendingAdjustments.forEach(adjustment => {
-        const stockPayload = {
-          produitsQuantites: {
-            [adjustment.produitId]: adjustment.quantiteAjoute
-          },
-          description: adjustment.descriptionAjout
-        };        
-        
-        this.stockService.ajouterStock(stockPayload).subscribe({
-          next: (response) => {
-            // Mettre à jour localement le stock
-            const product = this.tasks.find(p => p.nom === adjustment.produitNom);
+        produitsQuantites[adjustment.produitId] = Number(adjustment.quantiteAjoute);
+      });
+
+      // Récupérer la description depuis le formulaire Reactive
+      const descriptionGlobal = this.ajusteForm.value.descriptionGlobal || '';
+
+      const stockPayload = {
+        produitsQuantites: produitsQuantites,
+        description: descriptionGlobal
+      };
+
+      this.stockService.ajouterStock(stockPayload).subscribe({
+        next: (response) => {
+          // Mise à jour locale pour chaque produit concerné
+          this.pendingAdjustments.forEach(adjustment => {
+            const product = this.tasks.find(p => p.id === adjustment.produitId);
             if (product) {
               product.quantite = adjustment.stockApres;
             }
-            successfulCalls++;
-            if (successfulCalls === totalAdjustments) {
-              this.showSuccessModal();
-            }
-          },
-          error: (error) => {
-            console.error('Erreur lors de l’ajustement pour le produit:', adjustment.produitNom, error);
-            this.showErrorModal(`Erreur lors de l’ajustement pour le produit ${adjustment.produitNom}`);
-          }
-        });
+          });
+
+          //Vider categorieGlobal
+          this.ajusteForm.patchValue({ descriptionGlobal: '' });
         
+          this.showSuccessModal();
+          this.pendingAdjustments = [];
+          this.stocksVisible = true;
+        },
+        error: (error) => {
+          console.error('Erreur lors de l’ajustement global', error);
+          this.showErrorModal('Erreur lors de l’ajustement global.');
+        }
       });
-  
-      // Réinitialisation de la liste des ajustements en attente
-      this.pendingAdjustments = [];
-      this.stocksVisible = true;
     } else {
-      // Affichage du message d'erreur si aucun ajustement n'est présent
       this.showErrorModal("Aucun produit en attente d’être ajusté.");
     }
   }
 
+  /**
+   * Méthode pour retirer du stock en regroupant les ajustements
+   */
   RetirerDesQuan(): void {
-    // Réinitialiser les messages
     this.errorMessage = '';
     this.successMessage = '';
-  
+
     if (this.pendingAdjustments.length > 0) {
-      let successfulCalls = 0;
-      const totalAdjustments = this.pendingAdjustments.length;
-  
+      // Regrouper les quantités à retirer par produit
+      const produitsQuantites: { [key: string]: number } = {};
       this.pendingAdjustments.forEach(adjustment => {
-        const stockPayload = {
-          produitsQuantites: {
-            [adjustment.produitId]: adjustment.quantiteRetirer
-          },
-          description: adjustment.descriptionRetire
-        };               
-        
-        this.stockService.retirerStock(stockPayload).subscribe({
-          next: (response) => {
-            const product = this.tasks.find(p => p.nom === adjustment.produitNom);
+        produitsQuantites[adjustment.produitId] = Number(adjustment.quantiteRetirer);
+      });
+
+      // Récupérer la description depuis le formulaire Reactive
+      const descriptionGlobal = this.ajusteForm.value.descriptionGlobal || '';
+
+      const stockPayload = {
+        produitsQuantites: produitsQuantites,
+        description: descriptionGlobal
+      };
+
+      this.stockService.retirerStock(stockPayload).subscribe({
+        next: (response) => {
+          // Mise à jour locale pour chaque produit concerné
+          this.pendingAdjustments.forEach(adjustment => {
+            const product = this.tasks.find(p => p.id === adjustment.produitId);
             if (product) {
               product.quantite = adjustment.stockApres;
             }
-            successfulCalls++;
-            if (successfulCalls === totalAdjustments) {
-              this.showSuccessModal();
-            }
-          },
-          error: (error) => {
-            console.error('Erreur lors de la réduction pour le produit:', adjustment.produitNom, error);
-            this.showErrorModal(`Erreur lors de la réduction pour le produit ${adjustment.produitNom}`);
-          }
-        });
-        
+          });
+
+          // Vider categorieGlobal
+          this.ajusteForm.patchValue({ descriptionGlobal: '' });
+
+          this.showSuccessModal();
+          this.pendingAdjustments = [];
+          this.stocksVisible = true;
+        },
+        error: (error) => {
+          console.error('Erreur lors de la réduction globale', error);
+          this.showErrorModal('Erreur lors de la réduction globale.');
+        }
       });
-  
-      // Réinitialisation de la liste des ajustements en attente
-      this.pendingAdjustments = [];
-      this.stocksVisible = true;
     } else {
-      // Affichage du message d'erreur si aucun ajustement n'est présent
       this.showErrorModal("Aucun produit en attente d’être réduit.");
     }
   }
-  
   
   // Méthode pour afficher une pop-up de succès
   showSuccessModal(): void {
