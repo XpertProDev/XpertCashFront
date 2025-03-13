@@ -1,0 +1,214 @@
+
+.container {
+    display: flex;
+    width: 100%;
+  }
+  
+  .sidebar {
+    width: 280px;
+    background-color: #f0f0f0;
+    padding: 20px;
+    // height: 50vh;
+  }
+  
+  .profile {
+    text-align: center;
+  }
+  
+  .profile h2 {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .profile .profil_email {
+    font-size: 12px;
+  }
+
+  .profile-img {
+    width: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+  
+  .stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+  }
+  
+  .team {
+    margin-top: 30px;
+  }
+  
+  .member {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .member img {
+    width: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .status {
+    margin-left: auto;
+    padding: 5px 10px;
+    border-radius: 15px;
+  }
+  
+  .status.offline {
+    background-color: #ccc;
+  }
+  
+  .status.available {
+    background-color: #a8e063;
+  }
+  
+  .status.busy {
+    background-color: #ff6347;
+  }
+  
+  .main-content {
+    flex-grow: 1;
+    padding: 20px 20px 20px 40px;
+  }
+  
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .search-bar {
+    display: flex;
+  }
+  
+  .search-bar input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+  }
+  
+  .search-bar button {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 0 4px 4px 0;
+    background-color: #f0f0f0;
+    cursor: pointer;
+  }
+  
+  .form-row {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-row label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .form-row input, .form-row textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .form-row textarea {
+    resize: vertical;
+  }
+
+.container_form_profil {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px
+}
+    
+.div1 {
+    grid-column: span 2 / span 2;
+}
+
+.div3 {
+    grid-column: span 2 / span 2;
+    grid-column-start: 3;
+}
+
+.div4 {
+    grid-column: span 2 / span 2;
+    grid-row-start: 2;
+}
+
+.div5 {
+    grid-column: span 2 / span 2;
+    grid-column-start: 3;
+    grid-row-start: 2;
+}
+
+.div7 {
+    grid-column: span 2 / span 2;
+    grid-row-start: 3;
+}
+
+.div8 {
+    grid-column: span 2 / span 2;
+    grid-column-start: 3;
+    grid-row-start: 3;
+}
+
+///////// PARAMETRE DE COMPTE
+/////
+
+.container_parametre {
+    margin: 40px 10px;
+}
+
+.title p {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.cadre {
+    width: 100%;
+    background-color: #fff;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+    margin-bottom: 15px;
+}
+
+.cadre_cursor {
+    cursor: pointer;
+}
+
+.cadre:hover {
+    transition: all 0.1s;
+    box-shadow: rgba(0, 0, 0, 0.113) 0px 1px 2px 0px;
+}
+
+.title_cadre span {
+    font-size: 14px;
+    letter-spacing: 0.60px;
+}
+
+.icon_cadre i {
+    font-size: 20px;
+}
+
+.icon_cadre .btn {
+    padding: 5px 20px;
+    background-color: #0671e434;
+    color: #000000;
+    border: none;
+    font-size: 14px;
+}
+
+.icon_cadre .btn:hover {
+    background-color: #0671e45d;
+    transition: all .5;
+}

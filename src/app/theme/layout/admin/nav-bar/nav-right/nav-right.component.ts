@@ -10,12 +10,15 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { ChatUserListComponent } from './chat-user-list/chat-user-list.component';
 import { ChatMsgComponent } from './chat-msg/chat-msg.component';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { StockService } from 'src/app/admin-page/SERVICES/stocks.service';
 
 @Component({
   selector: 'app-nav-right',
-  imports: [SharedModule, ],
+  imports: [
+    SharedModule,
+    RouterLink
+  ],
   templateUrl: './nav-right.component.html',
   styleUrls: ['./nav-right.component.scss'],
   providers: [NgbDropdownConfig],
