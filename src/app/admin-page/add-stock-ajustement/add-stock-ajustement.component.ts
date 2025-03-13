@@ -398,29 +398,30 @@ export class AddStockAjustementComponent {
   
       this.pendingAdjustments.forEach(adjustment => {
         const stockPayload = {
-          quantiteAjoute: adjustment.quantiteAjoute,
-          descriptionAjout: adjustment.descriptionAjout
-        };
-  
-        this.stockService.ajouterStock(adjustment.produitId, stockPayload).subscribe({
+          produitsQuantites: {
+            [adjustment.produitId]: adjustment.quantiteAjoute
+          },
+          description: adjustment.descriptionAjout
+        };        
+        
+        this.stockService.ajouterStock(stockPayload).subscribe({
           next: (response) => {
-            // Mise à jour locale du produit concerné
-            const product = this.tasks.find(p => p.id === adjustment.produitId);
+            // Mettre à jour localement le stock
+            const product = this.tasks.find(p => p.nom === adjustment.produitNom);
             if (product) {
               product.quantite = adjustment.stockApres;
             }
             successfulCalls++;
-  
             if (successfulCalls === totalAdjustments) {
               this.showSuccessModal();
             }
           },
           error: (error) => {
-            console.error('Erreur lors de l’ajustement pour le produit ID:', adjustment.produitId, error);
-            // En cas d'erreur, vous pouvez également afficher une pop-up d'erreur spécifique
+            console.error('Erreur lors de l’ajustement pour le produit:', adjustment.produitNom, error);
             this.showErrorModal(`Erreur lors de l’ajustement pour le produit ${adjustment.produitNom}`);
           }
         });
+        
       });
   
       // Réinitialisation de la liste des ajustements en attente
@@ -443,29 +444,29 @@ export class AddStockAjustementComponent {
   
       this.pendingAdjustments.forEach(adjustment => {
         const stockPayload = {
-          quantiteRetirer: adjustment.quantiteRetirer,
-          descriptionRetire: adjustment.descriptionRetire
-        };
-  
-        this.stockService.retirerStock(adjustment.produitId, stockPayload).subscribe({
+          produitsQuantites: {
+            [adjustment.produitId]: adjustment.quantiteRetirer
+          },
+          description: adjustment.descriptionRetire
+        };               
+        
+        this.stockService.retirerStock(stockPayload).subscribe({
           next: (response) => {
-            // Mise à jour locale du produit concerné
-            const product = this.tasks.find(p => p.id === adjustment.produitId);
+            const product = this.tasks.find(p => p.nom === adjustment.produitNom);
             if (product) {
               product.quantite = adjustment.stockApres;
             }
             successfulCalls++;
-  
             if (successfulCalls === totalAdjustments) {
               this.showSuccessModal();
             }
           },
           error: (error) => {
-            console.error('Erreur lors de la réduction pour le produit ID:', adjustment.produitId, error);
-            // En cas d'erreur, afficher une pop-up d'erreur spécifique
+            console.error('Erreur lors de la réduction pour le produit:', adjustment.produitNom, error);
             this.showErrorModal(`Erreur lors de la réduction pour le produit ${adjustment.produitNom}`);
           }
         });
+        
       });
   
       // Réinitialisation de la liste des ajustements en attente
