@@ -78,7 +78,7 @@ export class ListProduitComponent {
     }
   
   
-    isChecked = false;
+    isChecked = true;
     boutiqueName: string = '';
     boutiqueId: number = 1; 
     messageAPI: string = '';
