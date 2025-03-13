@@ -91,6 +91,9 @@ export class AddProduitComponent {
     }
   }
 
+  goToProduit() {
+    this.router.navigate(['/produit']);
+  }
   
   // Exemple d'utilisation lors d'une réponse du backend
   onResponseFromBackend(response: any): void {
