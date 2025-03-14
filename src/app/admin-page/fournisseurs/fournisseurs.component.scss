@@ -1,0 +1,35 @@
+/* fournisseurs.component.scss */
+.champs_code_bare_double {
+    max-width: 500px;
+    margin: 20px auto;
+  
+    .champ_input {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+  
+    .input_focus {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+  
+      &:focus {
+        outline: none;
+        border-color: #2196F3;
+        box-shadow: 0 0 4px rgba(33, 150, 243, 0.3);
+      }
+    }
+  
+    .label {
+      position: absolute;
+      left: 12px;
+      top: -8px;
+      background: white;
+      padding: 0 5px;
+      font-size: 12px;
+      color: #666;
+      transition: 0.3s;
+    }
+  }

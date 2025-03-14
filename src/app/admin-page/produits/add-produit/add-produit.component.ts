@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { map, Observable, of, startWith } from 'rxjs';
 import { SharedDataService } from '../../SERVICES/shared-data.service';
 import { CategorieService } from '../../SERVICES/categorie.service';
@@ -15,7 +13,7 @@ import { ProduitService } from '../../SERVICES/add-produit-service';
 import { PopupData } from '../../MODELS/PopUp/popup-data';
 import { UsersService } from '../../SERVICES/users.service';
 import imageCompression from 'browser-image-compression';
-import { NgxBarcodeModule } from 'ngx-barcode';
+import { NgxBarcode6Module } from 'ngx-barcode6';
 
 // export interface CategorySelect {
 //   name: string;
@@ -33,10 +31,10 @@ import { NgxBarcodeModule } from 'ngx-barcode';
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
-    MatFormFieldModule,
-    MatInputModule,
+    // MatFormFieldModule,
+    // MatInputModule,
+    NgxBarcode6Module
   ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './add-produit.component.html',
   styleUrl: './add-produit.component.scss'
 })
@@ -268,9 +266,8 @@ export class AddProduitComponent {
       quantite: ['0'],
       seuilAlert: ['0'],
       description: [''],
-      codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],
-      categorieId: [''],
-      uniteId: ['']
+      codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],      categorieId: [''],
+      uniteId: [''],
     });
     
     // Abonnement pour récupérer l'ID de la boutique active
@@ -317,6 +314,11 @@ export class AddProduitComponent {
         }
       }
     });
+
+    // Remplacer l'abonnement existant par :
+    this.ajouteProduitForm.get('codeBare')?.valueChanges.subscribe(value => {
+      this.showBarcode = value && value.length >= 3;
+    });
     
   }
 
@@ -349,8 +351,6 @@ export class AddProduitComponent {
     return new File([u8arr], filename, { type: mime });
   }
   
-  
-
   getBoutiqueName() {
     this.usersService.getUserInfo().subscribe(
       (userInfo) => {
@@ -508,9 +508,9 @@ export class AddProduitComponent {
           // Mettre à jour les options filtrées pour afficher la nouvelle unité
           this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
             startWith<string | UniteMesure>(''),
-            map(value => (typeof value === 'string' ? value : value.nom)),
+            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
             map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
-          );
+          );          
   
           // Afficher un message de succès
           this.apiMessageType = 'success';
@@ -653,30 +653,24 @@ export class AddProduitComponent {
   
   // Options de configuration pour le code barre
 
-  elementType = 'svg';
-  value = '00000';
-  format = 'codabar';
-  lineColor = '#000000';
-  width = 2;
-  height = 100;
-  displayValue = true;
-  fontOptions = '';
-  font = 'monospace';
-  textAlign = 'center';
-  textPosition = 'bottom';
-  textMargin = 2;
-  fontSize = 20;
-  background = '#ffffff';
-  margin = 10;
-  marginTop = 10;
-  marginBottom = 10;
-  marginLeft = 10;
-  marginRight = 10;
+  showBarcode = false;
 
-  get values(): string[] {
-    return this.value.split('\n');
-  }
-  
+  // Configuration options for barcode
+  barcodeOptions = {
+    format: 'CODE128', // Format le plus commun
+    lineColor: '#000000',
+    width: 2,
+    height: 50,
+    displayValue: true,
+    margin: 10
+  };
+
+  // Modifiez onCodeBarChange() :
+onCodeBarChange(): void {
+  const codeBareValue = this.ajouteProduitForm.get('codeBare')?.value || '';
+  this.showBarcode = codeBareValue.length >= 2;
+}
+
   
 
 }

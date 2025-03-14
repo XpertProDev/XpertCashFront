@@ -133,32 +133,38 @@
               <div class="info_titre_input">
                 <h4>Identité de produit</h4>
 
+                <!--  -->
+
                 <!-- Input de produits  -->
                 <div class="champs_code_bare_double">
                   <div class="champ_input">
                     <input 
-                        type="number"
+                        type="text" 
                         formControlName="codeBare"
                         autocomplete="off"
                         class="input_focus"
                         id="codeBar"
                         name="codeBar"
-                        placeholder="Numéro code barre">
+                        placeholder="Numéro code barre"
+                        inputmode="numeric" 
+                        pattern="[0-9]*"> 
                     <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
                     <div *ngIf="f['codeBare'].touched && f['codeBare'].invalid" class="error-message">
-                      <span *ngIf="f['codeBare'].errors?.['minlength']">Le nom doit avoir au moins 8 caractères.</span>
-                      <span *ngIf="f['codeBare'].errors?.['maxlength']">Le nom ne doit pas dépasser 14 caractères.</span>
+                      <span *ngIf="f['codeBare'].errors?.['minlength']">Le code barre doit avoir au moins 8 caractères.</span>
+                      <span *If="f['codeBare'].errors?.['maxlength']">Le code barre ne doit pas dépasser 14 caractères.</span>
                     </div>
                   </div>
-                  <!-- // code bare  -->
-
-                  <div fxLayout="column">
-                    <ngx-barcode *ngFor="let bcValue of values" [bc-value]="bcValue" [bc-format]="format" [bc-line-color]="lineColor"
-                     [bc-width]="width" [bc-height]="height" [bc-display-value]="displayValue" [bc-font-options]="fontOptions" [bc-font]="font"
-                     [bc-text-align]="textAlign" [bc-text-position]="textPosition" [bc-text-margin]="textMargin" [bc-font-size]="fontSize" [bc-background]="background"
-                     [bc-margin]="margin" [bc-margin-top]="marginTop" [bc-margin-bottom]="marginBottom" [bc-margin-left]="marginLeft" [bc-margin-right]="marginRight"></ngx-barcode>
+                
+                  <div fxLayout="column" *ngIf="showBarcode">
+                    <ngx-barcode6
+                      [bc-value]="f['codeBare'].value"
+                      bc-format="CODE128"
+                      [bc-line-color]="'#000000'"
+                      [bc-width]="2"
+                      [bc-height]="50"
+                      [bc-display-value]="true">
+                    </ngx-barcode6>
                   </div>
-                  
                 </div>
 
                 <div class="champ_input">
