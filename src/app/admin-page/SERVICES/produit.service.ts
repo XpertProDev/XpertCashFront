@@ -58,7 +58,7 @@ export class ProduitService {
       formData.append('image', file, file.name);
     }
   
-    return this.http.patch<Produit>(`${this.apiUrl}/updateProduit/${produit.id}`, formData, { headers });
+    return this.http.patch<Produit>(`${this.apiUrl}/updateProduit/${produit.id}`, formData, { headers })
   }  
   
 

@@ -519,8 +519,8 @@ export class ListProduitComponent {
     
       // Fusionner les valeurs du formulaire avec le produit existant
       const updatedProduct: Produit = {
-        ...this.produit,                         // Conserve les propriétés existantes (id, codeGenerique, etc.)
-        ...this.modifierProduitForm.value        // Met à jour avec les valeurs saisies dans le formulaire
+        ...this.produit,
+        ...this.modifierProduitForm.value 
       };
     
       // Ajout de logs pour le debug
