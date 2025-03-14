@@ -69,6 +69,9 @@ export class FactureComponent  implements AfterViewInit {
   // Les Facture 
   // factures: Facture[] = [];
 
+  noFacturesAvailable = false;
+  messageNoFacture = 'Aucune facture disponible.';
+
   factures: FactureWithDataSource[] = [];
 
    // Dropdown pour l'export
@@ -190,29 +193,44 @@ export class FactureComponent  implements AfterViewInit {
   // loadFactures() {
   //   this.factureService.getFactures().subscribe({
   //     next: (data) => {
-  //       this.factures = data.reverse();
+  //       this.factures = data.reverse().map(facture => ({
+  //         ...facture,
+  //         dataSource: new MatTableDataSource(this.getFormattedProduits(facture))
+  //       })) as FactureWithDataSource[];
   //       this.changeDetectorRef.markForCheck();
   //     },
   //     error: (error) => {
   //       console.error('Erreur lors de la récupération des factures', error);
   //     }
   //   });
-  // }
+  // }  
 
   loadFactures() {
     this.factureService.getFactures().subscribe({
       next: (data) => {
-        this.factures = data.reverse().map(facture => ({
-          ...facture,
-          dataSource: new MatTableDataSource(this.getFormattedProduits(facture))
-        })) as FactureWithDataSource[];
+        if (data.length === 0) {
+          this.noFacturesAvailable = true;
+          this.factures = [];
+        } else {
+          this.factures = data.reverse().map(facture => ({
+            ...facture,
+            dataSource: new MatTableDataSource(this.getFormattedProduits(facture))
+          })) as FactureWithDataSource[];
+          this.noFacturesAvailable = false;
+        }
         this.changeDetectorRef.markForCheck();
       },
       error: (error) => {
-        console.error('Erreur lors de la récupération des factures', error);
+        if (error.status === 404 && error.error.message === this.messageNoFacture) {
+          this.noFacturesAvailable = true;
+          this.factures = [];
+        } else {
+          console.error('Erreur lors de la récupération des factures', error);
+        }
+        this.changeDetectorRef.markForCheck();
       }
     });
-  }  
+  }
 
   // Méthode pour obtenir les produits formatés
   getFormattedProduits(facture: Facture): any[] {

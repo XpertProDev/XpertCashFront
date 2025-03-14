@@ -7,7 +7,7 @@
 
 
         <div class="tasks-header">
-          <h1 class="title">Ventes</h1>
+          <h1 class="title">Factures</h1>
           
           <div class="actions">
             <!--Les recherche-->
@@ -18,8 +18,13 @@
           </div>
         </div>
 
+         <!-- Message quand il n'y a pas de factures -->
+        <div *ngIf="noFacturesAvailable" class="no-facture-message">
+          {{ messageNoFacture }}
+        </div>
+
         <div class="factures">
-            <mat-accordion class="example-headers-align">
+            <mat-accordion *ngIf="!noFacturesAvailable" class="example-headers-align">
                 <mat-expansion-panel class="cadre_panel" *ngFor="let facture of factures; let i = index" [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
                     <!-- // header facture  -->
                     <mat-expansion-panel-header>
