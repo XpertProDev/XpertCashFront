@@ -20,6 +20,7 @@ import { Stock } from '../MODELS/stock.model';
 import { Facture, FactureWithDataSource, ProduitFacture } from '../MODELS/facture.model';
 import { FactureService } from '../SERVICES/facture.service';
 import { ViewChildren, QueryList } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -51,6 +52,7 @@ export interface PeriodicElement {
     MatTableModule, 
     MatPaginatorModule,
     CommonModule,
+    FormsModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './facture.component.html',
@@ -69,7 +71,15 @@ export class FactureComponent  implements AfterViewInit {
   // Les Facture 
   // factures: Facture[] = [];
 
+  noFacturesAvailable = false;
+  messageNoFacture = 'Aucune facture disponible.';
+
   factures: FactureWithDataSource[] = [];
+
+
+  // Ajouter ces nouvelles propriétés
+  searchTerm: string = '';
+  filteredFactures: FactureWithDataSource[] = [];
 
    // Dropdown pour l'export
    showExportDropdown = false;
@@ -190,29 +200,59 @@ export class FactureComponent  implements AfterViewInit {
   // loadFactures() {
   //   this.factureService.getFactures().subscribe({
   //     next: (data) => {
-  //       this.factures = data.reverse();
+  //       this.factures = data.reverse().map(facture => ({
+  //         ...facture,
+  //         dataSource: new MatTableDataSource(this.getFormattedProduits(facture))
+  //       })) as FactureWithDataSource[];
   //       this.changeDetectorRef.markForCheck();
   //     },
   //     error: (error) => {
   //       console.error('Erreur lors de la récupération des factures', error);
   //     }
   //   });
-  // }
+  // }  
 
   loadFactures() {
     this.factureService.getFactures().subscribe({
       next: (data) => {
-        this.factures = data.reverse().map(facture => ({
-          ...facture,
-          dataSource: new MatTableDataSource(this.getFormattedProduits(facture))
-        })) as FactureWithDataSource[];
+        if (data.length === 0) {
+          this.noFacturesAvailable = true;
+          this.factures = [];
+          this.filteredFactures = [];
+        } else {
+          this.factures = data.reverse().map(facture => ({
+            ...facture,
+            dataSource: new MatTableDataSource(this.getFormattedProduits(facture))
+          })) as FactureWithDataSource[];
+          this.filteredFactures = [...this.factures];
+          this.noFacturesAvailable = false;
+        }
         this.changeDetectorRef.markForCheck();
       },
       error: (error) => {
-        console.error('Erreur lors de la récupération des factures', error);
+        if (error.status === 404 && error.error.message === this.messageNoFacture) {
+          this.noFacturesAvailable = true;
+          this.factures = [];
+        } else {
+          console.error('Erreur lors de la récupération des factures', error);
+        }
+        this.changeDetectorRef.markForCheck();
       }
     });
-  }  
+  }
+
+  // Ajouter la méthode de filtrage
+  applyFilter() {
+    if (!this.searchTerm) {
+      this.filteredFactures = [...this.factures];
+      return;
+    }
+
+    const searchTermLower = this.searchTerm.toLowerCase();
+    this.filteredFactures = this.factures.filter(facture => 
+      facture.numeroFacture.toLowerCase().includes(searchTermLower)
+    );
+  }
 
   // Méthode pour obtenir les produits formatés
   getFormattedProduits(facture: Facture): any[] {

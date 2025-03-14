@@ -7,20 +7,35 @@
 
 
         <div class="tasks-header">
-          <h1 class="title">Ventes</h1>
+          <h1 class="title">Factures</h1>
           
           <div class="actions">
             <!--Les recherche-->
             <div class="inputSearch">
               <i class="ri-search-2-line"></i>
-              <input type="text" placeholder="Recherche...." />
+              <input 
+                type="text" 
+                placeholder="Recherche...." 
+                [(ngModel)]="searchTerm" 
+                (input)="applyFilter()"
+              />
             </div>
           </div>
         </div>
 
+         <!-- Message quand il n'y a pas de factures -->
+        <div *ngIf="noFacturesAvailable" class="no-facture-message">
+          {{ messageNoFacture }}
+        </div>
+
+        <!-- Message quand la recherche ne donne rien -->
+        <div *ngIf="!noFacturesAvailable && filteredFactures.length === 0 && searchTerm" class="no-facture-message">
+          Aucune facture trouvée pour le numéro "{{ searchTerm }}"
+        </div>
+
         <div class="factures">
-            <mat-accordion class="example-headers-align">
-                <mat-expansion-panel class="cadre_panel" *ngFor="let facture of factures; let i = index" [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
+            <mat-accordion *ngIf="!noFacturesAvailable" class="example-headers-align">
+                <mat-expansion-panel class="cadre_panel" *ngFor="let facture of filteredFactures; let i = index" [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
                     <!-- // header facture  -->
                     <mat-expansion-panel-header>
                         <mat-panel-title class="title_facture"> Facture : <span class="title_facture_code">{{ facture.numeroFacture }}</span> </mat-panel-title>
