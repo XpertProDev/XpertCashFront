@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, HostListener } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,6 +15,7 @@ import { ProduitService } from '../../SERVICES/add-produit-service';
 import { PopupData } from '../../MODELS/PopUp/popup-data';
 import { UsersService } from '../../SERVICES/users.service';
 import imageCompression from 'browser-image-compression';
+import { NgxBarcodeModule } from 'ngx-barcode';
 
 // export interface CategorySelect {
 //   name: string;
@@ -33,8 +34,9 @@ import imageCompression from 'browser-image-compression';
     ReactiveFormsModule,
     MatAutocompleteModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './add-produit.component.html',
   styleUrl: './add-produit.component.scss'
 })
@@ -199,8 +201,6 @@ export class AddProduitComponent {
     }
   }
   
-
-
   //////// FOCUS CATEGORY
   myControl = new FormControl();
   uniteControl = new FormControl();
@@ -651,6 +651,31 @@ export class AddProduitComponent {
     }
   }
   
+  // Options de configuration pour le code barre
+
+  elementType = 'svg';
+  value = '00000';
+  format = 'codabar';
+  lineColor = '#000000';
+  width = 2;
+  height = 100;
+  displayValue = true;
+  fontOptions = '';
+  font = 'monospace';
+  textAlign = 'center';
+  textPosition = 'bottom';
+  textMargin = 2;
+  fontSize = 20;
+  background = '#ffffff';
+  margin = 10;
+  marginTop = 10;
+  marginBottom = 10;
+  marginLeft = 10;
+  marginRight = 10;
+
+  get values(): string[] {
+    return this.value.split('\n');
+  }
   
   
 
