@@ -271,6 +271,15 @@ export class FactureComponent  implements AfterViewInit {
     return text.replace(regex, '<mark>$1</mark>');
   }
 
+  getColor(type: string): string {
+    if (type === 'AJOUTER') {
+      return '#008000';
+    } else if (type === 'Réduction') {
+      return '#ff0000';
+    }
+    return '#000';
+  }  
+
 
 }
 
