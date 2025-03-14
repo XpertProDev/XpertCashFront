@@ -70,6 +70,7 @@ mat-expansion-panel {
     color: #0672E4; 
     padding-left: 6px; 
     letter-spacing: 1px;
+    font-weight: 500;
 }
 
 .icon_arrow {
@@ -256,9 +257,9 @@ table {
         border-bottom: 1px solid #ddd;
       }
     }
-  }
+}
 
-  .no-facture-message {
+.no-facture-message {
     text-align: center;
     padding: 40px;
     font-size: 18px;
@@ -267,10 +268,5 @@ table {
     border-radius: 8px;
     margin: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  
-//   .currency {
-//     &::before {
-//       content: 'XOF ';
-//     }
-//   }
+}
+

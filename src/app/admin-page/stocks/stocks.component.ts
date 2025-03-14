@@ -82,7 +82,7 @@ export class StocksComponent implements OnInit {
   highlightMatch(text: string): string {
     if (!this.searchText) return text;
     const regex = new RegExp(`(${this.searchText})`, 'gi');
-    return text.replace(regex, '<strong>$1</strong>');
+    return text.replace(regex, '<mark>$1</mark>');
   }
 
   // Retourne la liste filtrée et paginée des produits

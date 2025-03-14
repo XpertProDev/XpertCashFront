@@ -38,7 +38,7 @@
                 <mat-expansion-panel class="cadre_panel" *ngFor="let facture of filteredFactures; let i = index" [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
                     <!-- // header facture  -->
                     <mat-expansion-panel-header>
-                        <mat-panel-title class="title_facture"> Facture : <span class="title_facture_code">{{ facture.numeroFacture }}</span> </mat-panel-title>
+                        <mat-panel-title class="title_facture"> Facture : <span class="title_facture_code"  [innerHTML]="highlightMatch(facture.numeroFacture || '')"></span> </mat-panel-title>
                         <!-- icon arrow icon_arrow -->
                         <div class="icon_export">
                             <div class="export-container" style="display: flex; align-items: center;">

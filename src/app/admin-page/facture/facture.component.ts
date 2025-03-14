@@ -262,7 +262,15 @@ export class FactureComponent  implements AfterViewInit {
       quantiteRetirer: facture.type === 'RETRAIT' ? p.quantite : 0
     }));
   }
-  
+
+
+  // Permet de mettre en évidence le texte recherché
+  highlightMatch(text: string): string {
+    if (!this.searchTerm) return text;
+    const regex = new RegExp(`(${this.searchTerm})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
+  }
+
 
 }
 
