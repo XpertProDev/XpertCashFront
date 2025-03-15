@@ -156,14 +156,14 @@
                     </div>
                   </div>
                 
-                  <div fxLayout="column" *ngIf="showBarcode">
+                  <div style="margin-left: 15px;" *ngIf="showBarcode">
                     <ngx-barcode6
                       [bc-value]="f['codeBare'].value"
                       bc-format="CODE128"
                       [bc-line-color]="'#000000'"
                       [bc-width]="1"
-                      [bc-height]="35"
-                      [bc-font-size]="10"
+                      [bc-height]="40"
+                      [bc-font-size]="12"
                       [bc-display-value]="true">
                     </ngx-barcode6>
                   </div>

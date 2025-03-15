@@ -659,7 +659,7 @@ export class AddProduitComponent {
   // Modifiez onCodeBarChange() :
   onCodeBarChange(): void {
     const codeBareValue = this.ajouteProduitForm.get('codeBare')?.value || '';
-    this.showBarcode = codeBareValue.length >= 2;
+    this.showBarcode = codeBareValue.length >= 1;
   }
 
   
