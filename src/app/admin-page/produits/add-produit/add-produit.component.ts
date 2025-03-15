@@ -266,7 +266,8 @@ export class AddProduitComponent {
       quantite: ['0'],
       seuilAlert: ['0'],
       description: [''],
-      codeBare: ['', [Validators.minLength(8), Validators.maxLength(18)]],      categorieId: [''],
+      codeBare: ['', [Validators.minLength(8), Validators.maxLength(13)]],
+      categorieId: [''],
       uniteId: [''],
     });
     
@@ -655,21 +656,11 @@ export class AddProduitComponent {
 
   showBarcode = false;
 
-  // Configuration options for barcode
-  barcodeOptions = {
-    format: 'CODE128', // Format le plus commun
-    lineColor: '#000000',
-    width: 2,
-    height: 50,
-    displayValue: true,
-    margin: 10
-  };
-
   // Modifiez onCodeBarChange() :
-onCodeBarChange(): void {
-  const codeBareValue = this.ajouteProduitForm.get('codeBare')?.value || '';
-  this.showBarcode = codeBareValue.length >= 2;
-}
+  onCodeBarChange(): void {
+    const codeBareValue = this.ajouteProduitForm.get('codeBare')?.value || '';
+    this.showBarcode = codeBareValue.length >= 2;
+  }
 
   
 

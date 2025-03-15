@@ -146,12 +146,13 @@
                         id="codeBar"
                         name="codeBar"
                         placeholder="Numéro code barre"
-                        inputmode="numeric" 
+                        inputmode="numeric"
+                        maxlength="14"
                         pattern="[0-9]*"> 
                     <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
                     <div *ngIf="f['codeBare'].touched && f['codeBare'].invalid" class="error-message">
                       <span *ngIf="f['codeBare'].errors?.['minlength']">Le code barre doit avoir au moins 8 caractères.</span>
-                      <span *If="f['codeBare'].errors?.['maxlength']">Le code barre ne doit pas dépasser 14 caractères.</span>
+                      <span *ngIf="f['codeBare'].errors?.['maxlength']">Le code barre ne doit pas dépasser 13 caractères.</span>
                     </div>
                   </div>
                 
@@ -160,8 +161,9 @@
                       [bc-value]="f['codeBare'].value"
                       bc-format="CODE128"
                       [bc-line-color]="'#000000'"
-                      [bc-width]="2"
-                      [bc-height]="50"
+                      [bc-width]="1"
+                      [bc-height]="35"
+                      [bc-font-size]="10"
                       [bc-display-value]="true">
                     </ngx-barcode6>
                   </div>
