@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { map, Observable, of, startWith } from 'rxjs';
 import { Produit } from '../../MODELS/produit.model';
 import { ProduitService } from '../../SERVICES/produit.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Categorie } from '../../MODELS/categorie.model';
 import { UniteMesure } from '../../MODELS/unite.model';
 import { CategorieService } from '../../SERVICES/categorie.service';
@@ -34,7 +34,8 @@ export interface UniteSelect {
     MatAutocompleteModule,
     // MatFormFieldModule,
     // MatInputModule,
-    NgxBarcode6Module
+    NgxBarcode6Module,
+    RouterLink
   ],
   templateUrl: './list-produit.component.html',
   styleUrl: './list-produit.component.scss'
