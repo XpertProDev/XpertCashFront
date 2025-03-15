@@ -75,12 +75,9 @@ export class ConnexionPageComponent {
           if (response.token) {
             console.log("Token généré :", response.token);
             this.authService.saveToken(response.token);
-            // Connexion réussie : pas de popup, navigation directe
             this.router.navigate(['/analytics']);
           } else {
-            // Si la réponse ne contient pas de token, on affiche l'erreur
             this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
-            // Affichage de la popup en cas d'erreur
             this.openPopup("Erreur de connexion", this.errorMessage, 'error');
           }
         },
@@ -97,11 +94,10 @@ export class ConnexionPageComponent {
               message = error.error.error;
             }
           }
-          // Affichage de la popup en cas d'erreur
           this.openPopup("❌ Oups, une erreur !", message, "error");
         }
       });
-    }, 2000);
+    }, 1000);
   }
   
   get f() { return this.loginForm.controls; }

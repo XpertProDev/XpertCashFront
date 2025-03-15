@@ -54,6 +54,7 @@ export class ListProduitComponent {
       image: '',
       type: 'success'
     };
+    showBarcode = false;
     
     // Exemple d'utilisation lors d'une réponse du backend
     onResponseFromBackend(response: any): void {
@@ -569,9 +570,6 @@ export class ListProduitComponent {
         });
     }
     
-    // Options de configuration pour le code barre
-
-  showBarcode = false;
 
   // Modifiez onCodeBarChange() :
   onCodeBarChange(): void {

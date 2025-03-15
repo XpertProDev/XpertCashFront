@@ -76,7 +76,6 @@ export class FactureComponent  implements AfterViewInit {
 
   factures: FactureWithDataSource[] = [];
 
-
   // Ajouter ces nouvelles propriétés
   searchTerm: string = '';
   filteredFactures: FactureWithDataSource[] = [];
@@ -111,7 +110,29 @@ export class FactureComponent  implements AfterViewInit {
   // @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChildren(MatPaginator) paginators!: QueryList<MatPaginator>;
   
+  totalFactures = 0;
+  pageSize = 5;
+  currentPage = 0;
+  paginatedFactures: FactureWithDataSource[] = [];
 
+  // Gestion de la pagination
+  // onPageChange(event: any): void {
+  //   this.currentPage = event.pageIndex;
+  //   this.pageSize = event.pageSize;
+  //   this.updatePaginatedFactures();
+  // }
+
+  onPageChange(event: any): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+  }
+
+  // Ajouter cette méthode
+  private updatePaginatedFactures(): void {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.paginatedFactures = this.filteredFactures.slice(startIndex, endIndex);
+  }
 
   ngAfterViewInit() {
     this.paginators.changes.subscribe(() => {
@@ -223,10 +244,12 @@ export class FactureComponent  implements AfterViewInit {
           this.factures = data.reverse().map(facture => ({
             ...facture,
             dataSource: new MatTableDataSource(this.getFormattedProduits(facture))
-          })) as FactureWithDataSource[];
+          }));
+          console.log("Nombre de facture", this.factures.length)
           this.filteredFactures = [...this.factures];
           this.noFacturesAvailable = false;
         }
+        this.updatePaginatedFactures();
         this.changeDetectorRef.markForCheck();
       },
       error: (error) => {
@@ -245,13 +268,14 @@ export class FactureComponent  implements AfterViewInit {
   applyFilter() {
     if (!this.searchTerm) {
       this.filteredFactures = [...this.factures];
-      return;
+    } else {
+      const searchTermLower = this.searchTerm.toLowerCase();
+      this.filteredFactures = this.factures.filter(facture => 
+        facture.numeroFacture.toLowerCase().includes(searchTermLower)
+      );
     }
-
-    const searchTermLower = this.searchTerm.toLowerCase();
-    this.filteredFactures = this.factures.filter(facture => 
-      facture.numeroFacture.toLowerCase().includes(searchTermLower)
-    );
+    this.currentPage = 0;
+    this.updatePaginatedFactures();
   }
 
   // Méthode pour obtenir les produits formatés
@@ -280,6 +304,12 @@ export class FactureComponent  implements AfterViewInit {
     return '#000';
   }  
 
+  // Nouvelle méthode pour mettre à jour les données paginées
+  private updatePagination() {
+    this.totalFactures = this.filteredFactures.length;
+    const startIndex = this.currentPage * this.pageSize;
+    this.paginatedFactures = this.filteredFactures.slice(startIndex, startIndex + this.pageSize);
+  }
 
 }
 

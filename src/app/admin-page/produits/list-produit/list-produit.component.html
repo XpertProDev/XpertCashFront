@@ -134,7 +134,6 @@
                         {{ optionUnite.nom }}
                       </mat-option>
                     </mat-autocomplete>
-                    
                   </div>
                   <div class="btn_add_categoryDiv2">
                     <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
@@ -170,7 +169,7 @@
                             name="codeBar"
                             placeholder="Numéro code barre"
                             inputmode="numeric"
-                            maxlength="14"
+                            maxlength="13"
                             pattern="[0-9]*"
                             (keypress)="validateNumericInput($event)"> 
                         <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
