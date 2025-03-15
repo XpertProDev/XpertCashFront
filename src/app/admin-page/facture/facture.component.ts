@@ -116,10 +116,15 @@ export class FactureComponent  implements AfterViewInit {
   paginatedFactures: FactureWithDataSource[] = [];
 
   // Gestion de la pagination
+  // onPageChange(event: any): void {
+  //   this.currentPage = event.pageIndex;
+  //   this.pageSize = event.pageSize;
+  //   this.updatePaginatedFactures();
+  // }
+
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
-    this.updatePaginatedFactures();
   }
 
   // Ajouter cette méthode
