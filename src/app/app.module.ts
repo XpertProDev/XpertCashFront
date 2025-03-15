@@ -17,6 +17,8 @@ import { MatInputModule } from '@angular/material/input';
 import { AuthInterceptor } from './admin-page/SERVICES/auth.interceptor';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CodeInputModule } from 'angular-code-input';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { FrenchMatPaginatorIntl } from './admin-page/facture/facture.component';
 
 
 @NgModule({
@@ -40,6 +42,7 @@ import { CodeInputModule } from 'angular-code-input';
     provideHttpClient(),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: LOCALE_ID, useValue: 'fr-FR',  },
+    { provide: MatPaginatorIntl, useClass: FrenchMatPaginatorIntl }
     // provideCharts(withDefaultRegisterables())
   ],
 })
