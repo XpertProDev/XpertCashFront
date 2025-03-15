@@ -171,7 +171,8 @@
                             placeholder="Numéro code barre"
                             inputmode="numeric"
                             maxlength="14"
-                            pattern="[0-9]*"> 
+                            pattern="[0-9]*"
+                            (keypress)="validateNumericInput($event)"> 
                         <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
                         <div *ngIf="f['codeBare'].touched && f['codeBare'].invalid" class="error-message">
                           <span *ngIf="f['codeBare'].errors?.['minlength']">Le code barre doit avoir au moins 8 caractères.</span>
@@ -247,7 +248,7 @@
             <!-- Les information des produit Photo  -->
             <div class="information_cadre">
               <div class="info_titre_input">
-                <h4>Ajouter un image</h4>
+                <h4>Ajouter une image</h4>
 
                 <p *ngIf="!errorMessage" style="font-size: 12px; float: right;">Taille : 2 Mo max</p>
                 <p *ngIf="errorMessage" style="font-size: 12px; float: right; color: red;">{{ errorMessage }}</p>
