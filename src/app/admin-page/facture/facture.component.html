@@ -202,7 +202,7 @@
         <!-- Pagination -->
         <div class="pagination">
           <mat-paginator 
-            [length]="totalFactures"
+            [length]="factures.length"
             [pageSize]="pageSize"
             [pageSizeOptions]="[5, 10, 25, 100]"
             (page)="onPageChange($event)">

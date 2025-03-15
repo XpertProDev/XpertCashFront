@@ -119,7 +119,7 @@ export class FactureComponent  implements AfterViewInit {
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
-    this.updatePagination();
+    this.updatePaginatedFactures();
   }
 
   // Ajouter cette méthode
@@ -244,8 +244,8 @@ export class FactureComponent  implements AfterViewInit {
           this.filteredFactures = [...this.factures];
           this.noFacturesAvailable = false;
         }
-        this.updatePagination();
-        this.changeDetectorRef.detectChanges();
+        this.updatePaginatedFactures();
+        this.changeDetectorRef.markForCheck();
       },
       error: (error) => {
         if (error.status === 404 && error.error.message === this.messageNoFacture) {
@@ -270,7 +270,7 @@ export class FactureComponent  implements AfterViewInit {
       );
     }
     this.currentPage = 0;
-    this.updatePagination();
+    this.updatePaginatedFactures();
   }
 
   // Méthode pour obtenir les produits formatés
