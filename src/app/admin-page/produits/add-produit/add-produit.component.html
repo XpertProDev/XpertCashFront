@@ -142,7 +142,8 @@
                         placeholder="Numéro code barre"
                         inputmode="numeric"
                         maxlength="14"
-                        pattern="[0-9]*"> 
+                        pattern="[0-9]*"
+                        (keypress)="validateNumericInput($event)"> 
                     <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
                     <div *ngIf="f['codeBare'].touched && f['codeBare'].invalid" class="error-message">
                       <span *ngIf="f['codeBare'].errors?.['minlength']">Le code barre doit avoir au moins 8 caractères.</span>

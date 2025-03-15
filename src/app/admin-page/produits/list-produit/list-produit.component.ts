@@ -578,4 +578,11 @@ export class ListProduitComponent {
     const codeBareValue = this.modifierProduitForm.get('codeBare')?.value || '';
     this.showBarcode = codeBareValue.length >= 1;
   }
+  validateNumericInput(event: KeyboardEvent): void {
+    const charCode = event.which ? event.which : event.keyCode;
+    if (charCode < 48 || charCode > 57) {
+      event.preventDefault();
+    }
+  }
+  
 }
