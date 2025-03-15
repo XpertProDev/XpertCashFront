@@ -28,6 +28,7 @@
     "@angular/router": "19.0.5",
     "@ng-bootstrap/ng-bootstrap": "18.0.0",
     "@popperjs/core": "2.11.8",
+    "angular-code-input": "^2.0.0",
     "apexcharts": "^4.4.0",
     "bootstrap": "5.3.3",
     "browser-image-compression": "^2.0.2",

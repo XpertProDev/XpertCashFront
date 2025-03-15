@@ -299,6 +299,7 @@
   grid-template-columns: 1fr 100px;
   align-items: center;
   gap: 20px;
+  margin-bottom: 20px;
 }
 
 .btn_save .btn {
@@ -311,4 +312,17 @@
 .btn_save .btn:hover {
   background-color: #0263cb;
   transition: all .5;
+}
+
+// code de verif 
+.champ_input_code_verif {
+  width: 40%;
+}
+
+code-input {
+  --item-height: 50px;
+  // --text-security-type: disc;
+  --item-border-focused: 1px solid #0672E4;
+  --item-border-bottom-focused: 1px solid #0672E4;
+  --item-font-weight: 600;
 }
