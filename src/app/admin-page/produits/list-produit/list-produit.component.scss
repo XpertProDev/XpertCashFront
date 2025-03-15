@@ -651,3 +651,12 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+
+// Code bare
+.champs_code_bare_double {
+  // display: grid;
+  // grid-template-columns: 1fr 150px;
+  display: flex;
+  
+}

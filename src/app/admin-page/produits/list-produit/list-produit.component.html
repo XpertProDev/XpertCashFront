@@ -104,25 +104,23 @@
                     </div>
                   </div>
 
-                  <!-- Input de Quantité  -->
-                 
-                </div>
+                  <!-- // date  -->
+                  <div class="double_input">
+                    <!-- Input de prixAchat  -->
 
-                <div class="double_input">
-                  <!-- Input de prixAchat  -->
-                 
-
-                  <!-- // TRIPLE  -->
-                  <div class="triple" style="display: flex; gap: 20px;">
-                      <div class="champ_input">
-                        <input [value]="produit.createdAt | date:'dd-MM-yyyy \'à\' HH:mm'" type="text" class="input_focus" [disabled]="true" style="cursor: no-drop; color: red;" id="alertSeuil" name="alertSeuil" placeholder="Saisis le montant d'alerte">
-                        <label for="seuilAlert" class="label labelColor">Date creation</label>
-                      </div>
-                      <div class="champ_input">
-                        <input [value]="produit.lastUpdated | date:'dd-MM-yyyy \'à\' HH:mm'" type="text" class="input_focus" [disabled]="true" style="cursor: no-drop; color: red;" id="alertSeuil" name="alertSeuil">
-                        <label for="seuilAlert" class="label labelColor">Date modification</label>
-                      </div>
+                    <!-- // TRIPLE  -->
+                    <div class="triple" style="display: flex; gap: 20px;">
+                        <div class="champ_input">
+                          <input [value]="produit.createdAt | date:'dd-MM-yyyy \'à\' HH:mm'" type="text" class="input_focus" [disabled]="true" style="cursor: no-drop; color: red;" id="alertSeuil" name="alertSeuil" placeholder="Saisis le montant d'alerte">
+                          <label for="seuilAlert" class="label labelColor">Date creation</label>
+                        </div>
+                        <div class="champ_input">
+                          <input [value]="produit.lastUpdated | date:'dd-MM-yyyy \'à\' HH:mm'" type="text" class="input_focus" [disabled]="true" style="cursor: no-drop; color: red;" id="alertSeuil" name="alertSeuil">
+                          <label for="seuilAlert" class="label labelColor">Date modification</label>
+                        </div>
                     </div>
+                  </div>
+                 
                 </div>
 
                 <div class="double_input2">
@@ -160,17 +158,42 @@
                       <label for="codeGenerique" class="label labelColor">Code du produit</label>
                     </div>
 
-                    <div class="champ_input champ_input2">
-                      <input formControlName="codeBare" type="text" class="input_focus " id="codeBare" name="codeBare" 
-                      placeholder="Numéro code barre">
-                      <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
-                      <div *ngIf="f['codeBare'].touched && f['codeBare'].invalid" class="error-message">
-                        <span *ngIf="f['codeBare'].errors?.['minlength']">Le nom doit avoir au moins 8 caractères.</span>
-                        <span *ngIf="f['codeBare'].errors?.['maxlength']">Le nom ne doit pas dépasser 14 caractères.</span>
+                    <!-- // champs_code_bare_double -->
+                    <div class="champs_code_bare_double">
+                      <div class="champ_input">
+                        <input 
+                            type="text" 
+                            formControlName="codeBare"
+                            autocomplete="off"
+                            class="input_focus"
+                            id="codeBar"
+                            name="codeBar"
+                            placeholder="Numéro code barre"
+                            inputmode="numeric"
+                            maxlength="14"
+                            pattern="[0-9]*"> 
+                        <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
+                        <div *ngIf="f['codeBare'].touched && f['codeBare'].invalid" class="error-message">
+                          <span *ngIf="f['codeBare'].errors?.['minlength']">Le code barre doit avoir au moins 8 caractères.</span>
+                          <span *ngIf="f['codeBare'].errors?.['maxlength']">Le code barre ne doit pas dépasser 13 caractères.</span>
+                        </div>
+                      </div>
+                    
+                      <div style="margin-left: 15px;" *ngIf="showBarcode">
+                        <ngx-barcode6
+                          [bc-value]="f['codeBare'].value"
+                          bc-format="CODE128"
+                          [bc-line-color]="'#000000'"
+                          [bc-width]="1"
+                          [bc-height]="40"
+                          [bc-font-size]="12"
+                          [bc-display-value]="true">
+                        </ngx-barcode6>
                       </div>
                     </div>
+                    
 
-                 </div>
+                </div>
 
                 <div class="champ_input">
                   <textarea formControlName="description" class="input_focus2" id="description" name="description" 

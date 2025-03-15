@@ -15,6 +15,7 @@ import { SharedDataService } from '../../SERVICES/shared-data.service';
 import { UniteMesureService } from '../../SERVICES/unite.service';
 import { UsersService } from '../../SERVICES/users.service';
 import { PopupData } from '../../MODELS/PopUp/popup-data';
+import { NgxBarcode6Module } from 'ngx-barcode6';
 
 export interface CategorySelect {
   nom: string;
@@ -31,8 +32,9 @@ export interface UniteSelect {
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
-    MatFormFieldModule,
-    MatInputModule
+    // MatFormFieldModule,
+    // MatInputModule,
+    NgxBarcode6Module
   ],
   templateUrl: './list-produit.component.html',
   styleUrl: './list-produit.component.scss'
@@ -291,6 +293,12 @@ export class ListProduitComponent {
         this.messageAPI = '';
         this.apiMessageType = '';
       });
+
+      // Remplacer l'abonnement existant par :
+      this.modifierProduitForm.get('codeBare')?.valueChanges.subscribe(value => {
+        this.showBarcode = value && value.length >= 3;
+      });
+    
     }
 
     // updateProduct(): void {
@@ -560,5 +568,13 @@ export class ListProduitComponent {
         });
     }
     
-    
+    // Options de configuration pour le code barre
+
+  showBarcode = false;
+
+  // Modifiez onCodeBarChange() :
+  onCodeBarChange(): void {
+    const codeBareValue = this.modifierProduitForm.get('codeBare')?.value || '';
+    this.showBarcode = codeBareValue.length >= 1;
+  }
 }

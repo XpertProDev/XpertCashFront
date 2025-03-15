@@ -1,28 +1,2 @@
 <!-- fournisseurs.component.html -->
-<div class="champs_code_bare_double">
-    <div class="champ_input">
-      <input 
-        type="text"
-        autocomplete="off"
-        class="input_focus"
-        id="codeBare"
-        name="codeBare"
-        [(ngModel)]="codeBare"
-        (ngModelChange)="onCodeBarChange()"
-        placeholder="Numéro code barre"
-        maxlength="13">
-      <label for="codeBar" class="label labelColor">Numéro code barre (Facultatif)</label>
-    </div>
-  
-    <!-- fournisseurs.component.html -->
-    <div fxLayout="column" *ngIf="showBarcode">
-        <ngx-barcode6
-        [bc-value]="codeBare()"
-        bc-format="CODE128"
-        [bc-line-color]="'#000000'"
-        [bc-width]="2"
-        [bc-height]="50"
-        [bc-display-value]="true">
-        </ngx-barcode6>
-    </div>
-</div>
+<p>fournisseurs</p>
