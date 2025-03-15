@@ -679,9 +679,5 @@ input:checked + .slider:before {
 // Code bare
 .champs_code_bare_double {
   display: grid;
-  grid-template-columns: 1fr 200px;
-}
-
-ngx-barcode6 text {
-  font-size: 10px !important;
+  grid-template-columns: 1fr 150px;
 }
