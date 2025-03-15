@@ -212,3 +212,103 @@
     background-color: #0671e45d;
     transition: all .5;
 }
+
+// cadre a cacher
+
+.information_cadre {
+  width: 100%;
+  height: auto;
+  background-color: #fff;
+  box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.108);
+  border-radius: 5px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.info_titre_input {
+  padding: 20px; 
+}
+
+.info_titre_input h5 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  letter-spacing: 0.60px;
+}
+
+.champ_input {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+.input_focus {
+  width: 100%;
+  min-width: 250px;
+  height: 49px;
+  outline: none;
+  border-bottom: 1px solid rgb(53, 50, 50);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  margin: 10px 0 0;
+  transition: all 0.3s;
+  font-size: 14px;
+  //padding-left: 10px;
+  background: none;
+  color: #695c5c;
+}
+
+.champ_input .label {
+  position: absolute;
+  top: 22px;
+  left: 4px;
+  pointer-events: none;
+  color: rgb(107, 102, 102);
+}
+
+.input_focus:hover {
+  border-bottom: 1px solid #0672E4;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.input_focus:not(:placeholder-shown) + .label,
+.input_focus:focus + .label {
+  color: #0672E4;
+  top: 0;
+  left: 0;
+  transition: all 0.3s ease-in-out;
+  background: none;
+  font-size: 11px;
+  padding: 0;
+}
+
+.input_focus::placeholder {
+  opacity: 0;
+}
+
+.input_focus:focus::placeholder {
+  opacity: 1;
+  animation-delay: 1s;
+  font-size: 12px;
+  transition: all 0.2s ease-in-out;
+}
+
+.double_input {
+  display: grid; 
+  grid-template-columns: 1fr 100px;
+  align-items: center;
+  gap: 20px;
+}
+
+.btn_save .btn {
+  padding: 5px 28px;
+  background-color: #0672E4;
+  color: #fff;
+  border: none;
+}
+
+.btn_save .btn:hover {
+  background-color: #0263cb;
+  transition: all .5;
+}
