@@ -99,6 +99,60 @@
                     <button class="btn">Modifier</button>
                 </div>
             </div>
+
+            <!-- Les information des produit Inventaire  -->
+            <div class="information_cadre">
+              <form class="info_titre_input">
+                <h5>Modifier email</h5>
+            
+                <!-- // Ancien mot de passe  -->
+                <div class="double_input">
+                  <!-- Input de nom produits  -->
+                  <div class="champ_input">
+                    <input autocomplete="off" type="email" class="input_focus " required placeholder="Saisis l'ancien email">
+                    <label for="password" class="label labelColor">Ancien email</label>
+                  </div>
+
+                  <!-- Input de nom produits  -->
+                  <div class="btn_save">
+                    <button type="submit" class="btn">Verifier</button>
+                  </div>
+                </div>
+            
+                <!-- // Code de verification  -->
+                <div class="double_input">
+                  <!-- Input de nom produits  -->
+                  <div class="champ_input_code_verif">
+                    <code-input [isCodeHidden]="true"
+                                  [codeLength]="5"
+                                  (codeChanged)="onCodeChanged($event)"
+                                  (codeCompleted)="onCodeCompleted($event)">
+                    </code-input>
+                  </div>
+
+                  <!-- Input de nom produits  -->
+                  <div class="btn_save">
+                    <button type="submit" class="btn">Valider</button>
+                  </div>
+                </div>
+            
+                <!-- // Ancien mot de passe  -->
+                <div class="double_input">
+                  <!-- Input de nom produits  -->
+                  <div class="champ_input">
+                    <input autocomplete="off" type="email" class="input_focus " required placeholder="Saisis le nouveau email">
+                    <label for="password" class="label labelColor">Nouveau email</label>
+                  </div>
+
+                  <!-- Input de nom produits  -->
+                  <div class="btn_save">
+                    <button type="submit" class="btn">Modifier</button>
+                  </div>
+                </div>
+
+              </form>    
+            </div>
+
         </div>
     </div>
 </div>
