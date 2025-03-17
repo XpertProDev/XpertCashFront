@@ -29,6 +29,9 @@ export class ProfilComponent  implements OnInit{
   showNewPassword: boolean = false;
   showConfirmPassword: boolean = false;
 
+  // Methode pour cadre From
+  isPasswordFormVisible = false;
+
   toggleCurrentPasswordVisibility() {
     this.showCurrentPassword = !this.showCurrentPassword;
   }
@@ -39,6 +42,10 @@ export class ProfilComponent  implements OnInit{
   
   toggleConfirmPasswordVisibility() {
     this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  togglePasswordForm() {
+    this.isPasswordFormVisible = !this.isPasswordFormVisible;
   }
   
 
@@ -82,7 +89,6 @@ export class ProfilComponent  implements OnInit{
       }
     });
   }
-  
 
   get currentPassword() {
     return this.passwordForm.get('currentPassword');
@@ -137,6 +143,7 @@ export class ProfilComponent  implements OnInit{
       next: (response) => {
         // Si le serveur retourne du texte, le traiter ici
         this.successMessage = response.includes('succès') ? response : "Mot de passe modifié !";
+        this.isPasswordFormVisible = false;
         this.passwordForm.reset();
         setTimeout(() => this.successMessage = null, 5000);
       },

@@ -88,12 +88,12 @@
                 </div>
                 <!-- // icon  -->
                 <div class="icon_cadre">
-                    <button class="btn">Modifier</button>
+                    <button class="btn" (click)="togglePasswordForm()">Modifier</button>
                 </div>
               </div>
               
               <!-- Les information des produit Inventaire  -->
-              <div class="information_cadre">
+              <div class="information_cadre information_cadre_visible" [class.visible]="isPasswordFormVisible">
                 <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()" class="info_titre_input">
                   <h5>Modifier mot de passe</h5>
 
@@ -195,16 +195,14 @@
             </div>
 
             <!-- // Modifier le email  -->
-            <div class="cadre">
-                <!-- // title_cadre  -->
+            <!-- <div class="cadre">
                 <div class="title_cadre">
                     <span>Email</span>
                 </div>
-                <!-- // icon  -->
                 <div class="icon_cadre">
                     <button class="btn">Modifier</button>
                 </div>
-            </div>
+            </div> -->
 
         </div>
     </div>

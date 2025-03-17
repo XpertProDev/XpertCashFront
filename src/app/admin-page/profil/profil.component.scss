@@ -320,7 +320,7 @@
 .eye_container {
   position: absolute;
   right: 20px;
-  top: 20px;
+  top: 24px;
 }
 
 .eye_ferme i, 
@@ -340,4 +340,22 @@
 .eye_ferme, .eye_ouvre {
   font-size: 1.2rem;
   color: #666;
+}
+
+
+/* Style de base du cadre */
+.information_cadre_visible {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out; 
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out, max-height 0.5s ease-out;
+}
+
+/* Style lorsque le cadre est visible */
+.information_cadre.visible {
+  max-height: 500px;
+  opacity: 1; 
+  transform: translateY(0); 
 }
