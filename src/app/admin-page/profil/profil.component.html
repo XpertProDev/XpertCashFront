@@ -94,33 +94,102 @@
               
               <!-- Les information des produit Inventaire  -->
               <div class="information_cadre">
-                <form class="info_titre_input">
+                <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()" class="info_titre_input">
                   <h5>Modifier mot de passe</h5>
-              
-                  <!-- // Ancien mot de passe  -->
+
+                  <!-- Ancien mot de passe -->
                   <div class="champ_input">
-                    <input autocomplete="off" type="password" class="input_focus " required placeholder="Saisis le mot de passe actuel">
-                    <label for="password" class="label labelColor">Mot de passe actuel</label>
-                  </div>
-              
-                  <!-- // Ancien mot de passe  -->
-                  <div class="champ_input">
-                    <input autocomplete="off" type="password" class="input_focus " required placeholder="Saisis un nouveau mot de passe">
-                    <label for="newPassword" class="label labelColor">Nouveau mot de passe</label>
-                  </div>
-              
-                  <!-- // ConfirmPassword mot de passe  -->
-                  <div class="champ_input">
-                    <input autocomplete="off" type="password" class="input_focus " required placeholder="Confirmer le nouveau mot de passe">
-                    <label for="ConfirmPassword" class="label labelColor">Confirmer le  nouveau mot de passe</label>
-                  </div>
-              
-                  <!-- // Ancien mot de passe  -->
-                  <div class="btn_save">
-                    <button type="submit" class="btn">Confirmer</button>
+                    <input 
+                      formControlName="currentPassword" 
+                      [type]="showCurrentPassword ? 'text' : 'password'"
+                      class="input_focus" 
+                      placeholder="Saisis le mot de passe actuel"
+                    >
+                    <label class="label labelColor">Mot de passe actuel</label>
+                    <div *ngIf="currentPassword?.touched && currentPassword?.invalid">
+                      <small class="text-danger" *ngIf="currentPassword?.errors?.['required']">
+                        Ce champ est obligatoire
+                      </small>
+                    </div>
+
+                    <!-- // icon eye_container -->
+                    <div class="eye_container" (click)="toggleCurrentPasswordVisibility()">
+                      <div class="eye_ferme" *ngIf="!showCurrentPassword">
+                        <i class="ri-eye-close-line"></i>
+                      </div>
+                      <div class="eye_ouvre" *ngIf="showCurrentPassword">
+                        <i class="ri-eye-line"></i>
+                      </div>
+                    </div>
+
                   </div>
 
-                </form>    
+                  <!-- Nouveau mot de passe -->
+                  <div class="champ_input">
+                    <input 
+                      formControlName="newPassword"
+                      [type]="showNewPassword ? 'text' : 'password'"
+                      class="input_focus" 
+                      placeholder="Saisis un nouveau mot de passe"
+                    >
+                    <label class="label labelColor">Nouveau mot de passe</label>
+                    <div *ngIf="newPassword?.touched && newPassword?.invalid">
+                      <small class="text-danger" *ngIf="newPassword?.errors?.['required']">
+                        Ce champ est obligatoire
+                      </small>
+                      <small class="text-danger" *ngIf="newPassword?.errors?.['minlength']">
+                        Minimum 8 caractères
+                      </small>
+                    </div>
+
+                    <!-- // icon eye_container -->
+                    <div class="eye_container" (click)="toggleNewPasswordVisibility()">
+                      <div class="eye_ferme" *ngIf="!showNewPassword">
+                        <i class="ri-eye-close-line"></i>
+                      </div>
+                      <div class="eye_ouvre" *ngIf="showNewPassword">
+                        <i class="ri-eye-line"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Confirmation mot de passe -->
+                  <div class="champ_input">
+                    <input 
+                      formControlName="confirmPassword"
+                      [type]="showNewPassword ? 'text' : 'password'"
+                      class="input_focus" 
+                      placeholder="Confirmer le nouveau mot de passe"
+                    >
+                    <label class="label labelColor">Confirmer le nouveau mot de passe</label>
+                    <div *ngIf="confirmPassword?.touched && passwordForm.invalid">
+                      <small class="text-danger" *ngIf="passwordForm.errors?.['mismatch']">
+                        Les mots de passe ne correspondent pas
+                      </small>
+                    </div>
+
+                  </div>
+
+                  <!-- Messages d'erreur/succès -->
+                  <div *ngIf="errorMessage" class="alert alert-danger">
+                    {{ errorMessage }}
+                  </div>
+                  <div *ngIf="successMessage" class="alert alert-success">
+                    {{ successMessage }}
+                  </div>
+
+                  <!-- Bouton de soumission -->
+                  <div class="btn_save">
+                    <button 
+                      type="submit" 
+                      class="btn"
+                      [disabled]="passwordForm.invalid || isLoading"
+                    >
+                      <span *ngIf="!isLoading">Confirmer</span>
+                      <!-- <span *ngIf="isLoading">Chargement...</span> -->
+                    </button>
+                  </div>
+                </form>
               </div>
 
             </div>
