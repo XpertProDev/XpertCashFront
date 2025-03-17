@@ -54,6 +54,7 @@ export class ListProduitComponent {
       image: '',
       type: 'success'
     };
+    showBarcode = false;
     
     // Exemple d'utilisation lors d'une réponse du backend
     onResponseFromBackend(response: any): void {
@@ -144,6 +145,11 @@ export class ListProduitComponent {
       const checkbox = event.target as HTMLInputElement;
       console.log('isChecked:', checkbox.checked);
       // Faites ce que vous voulez ici avec la valeur
+    }
+
+    clearImage() {
+      this.newPhotoUrl = null;
+      this.imageFile = null;
     }
   
     // Gestion de l'image
@@ -569,9 +575,6 @@ export class ListProduitComponent {
         });
     }
     
-    // Options de configuration pour le code barre
-
-  showBarcode = false;
 
   // Modifiez onCodeBarChange() :
   onCodeBarChange(): void {

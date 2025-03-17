@@ -138,7 +138,7 @@ export class InscriptionComponent implements OnInit {
           this.openPopup("❌ Oups, une erreur !", message, "error");
         }
       });
-    }, 2000);
+    }, 1000);
   }
 
   get f() { return this.registerForm.controls; }

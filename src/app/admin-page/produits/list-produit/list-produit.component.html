@@ -134,7 +134,6 @@
                         {{ optionUnite.nom }}
                       </mat-option>
                     </mat-autocomplete>
-                    
                   </div>
                   <div class="btn_add_categoryDiv2">
                     <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
@@ -170,7 +169,7 @@
                             name="codeBar"
                             placeholder="Numéro code barre"
                             inputmode="numeric"
-                            maxlength="14"
+                            maxlength="13"
                             pattern="[0-9]*"
                             (keypress)="validateNumericInput($event)"> 
                         <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
@@ -260,6 +259,9 @@
                     <!-- <img [src]="newPhotoUrl ? newPhotoUrl : (produit.photo ? (backendUrl + produit.photo) : 'assets/img/appareil.jpg')" alt="Produit"> -->
                     <img [src]="newPhotoUrl ? newPhotoUrl : getImageUrl(produit)" alt="Produit">
                   </div> 
+                  <button *ngIf="newPhotoUrl && newPhotoUrl !== urllink" (click)="clearImage()" class="clear-image-btn">
+                    <i class="ri-delete-bin-5-line"></i>
+                  </button>
                   <div>
                     <label for="file" class="footer_file"> 
                       <i class="ri-file-3-fill"></i>

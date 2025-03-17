@@ -1,7 +1,18 @@
+<div *ngIf="toastMessage" class="toast-container">
+  <div class="toast-message">
+    {{ message }}
+  </div>
+</div>
+
 <div class="containerTable">
   <!-- En-tête : titre, actions et barre de recherche -->
   <div class="tasks-header">
     <h1 class="title">Produits</h1>
+   <!-- <button (click)="showToast('Message envoyé avec succès!')">Afficher Message</button> -->
+
+   
+    
+
     <div class="actions">
       <button class="add-task" (click)="goToAddProduit()">Ajouter un produit</button>
       <div class="contentIcon">

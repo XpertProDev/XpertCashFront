@@ -145,14 +145,14 @@ export class ProfilComponent  implements OnInit{
         this.successMessage = response.includes('succès') ? response : "Mot de passe modifié !";
         this.isPasswordFormVisible = false;
         this.passwordForm.reset();
-        setTimeout(() => this.successMessage = null, 5000);
+        setTimeout(() => this.successMessage = null, 10000);
       },
       error: (error) => {
         // Gérer les erreurs de parsing ou autres
         if (error instanceof HttpErrorResponse) {
           this.errorMessage = error.error.message || error.error || "Erreur inconnue";
         }
-        setTimeout(() => this.errorMessage = null, 5000);
+        setTimeout(() => this.errorMessage = null, 10000);
       },
       // complete: () => {
       //   this.isLoading = false;

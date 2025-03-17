@@ -53,6 +53,11 @@ export class AddProduitComponent {
     type: 'success'
   };
 
+  clearImage() {
+    this.newPhotoUrl = null;
+    this.imageFile = null;
+  }
+
   async testImageCompression(file: File) {
     if (!file) {
       console.log('Aucun fichier sélectionné.');
@@ -169,6 +174,7 @@ export class AddProduitComponent {
     const checkbox = event.target as HTMLInputElement;
     console.log('isChecked:', checkbox.checked);
   }
+  
 
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;

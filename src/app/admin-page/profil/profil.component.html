@@ -1,3 +1,15 @@
+
+<div class="toast-container">
+
+  <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
+    {{ errorMessage }}
+  </div>
+  <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+    {{ successMessage }}
+  </div>
+
+</div>
+
 <div class="container">
     <aside class="sidebar">
       <div class="profile">
@@ -171,12 +183,12 @@
                   </div>
 
                   <!-- Messages d'erreur/succès -->
-                  <div *ngIf="errorMessage" class="alert alert-danger">
+                  <!-- <div *ngIf="errorMessage" class="alert alert-danger">
                     {{ errorMessage }}
                   </div>
                   <div *ngIf="successMessage" class="alert alert-success">
                     {{ successMessage }}
-                  </div>
+                  </div> -->
 
                   <!-- Bouton de soumission -->
                   <div class="btn_save">

@@ -681,3 +681,18 @@ input:checked + .slider:before {
   display: grid;
   grid-template-columns: 1fr 150px;
 }
+
+
+.clear-image-btn {
+  background: transparent;
+  border: none;
+  color: red;
+  font-size: 18px;
+  cursor: pointer;
+  position: absolute;
+  left: 14%;
+  margin-left: 10px;
+  transform: translateY(-50%);
+}
+
+

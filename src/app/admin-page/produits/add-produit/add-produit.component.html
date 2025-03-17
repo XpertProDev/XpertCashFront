@@ -141,7 +141,7 @@
                         name="codeBar"
                         placeholder="Numéro code barre"
                         inputmode="numeric"
-                        maxlength="14"
+                        maxlength="13"
                         pattern="[0-9]*"
                         (keypress)="validateNumericInput($event)"> 
                     <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
@@ -219,6 +219,10 @@
                     <!-- <img class="roudel" [src]="newPhotoUrl || urllink" alt="Aperçu de l'image" style="max-width:200px;"> -->
                     <img class="roudel" [src]="newPhotoUrl || urllink" alt="Aperçu de l'image" style="max-width:200px;">
                   </div> 
+                  <button *ngIf="newPhotoUrl && newPhotoUrl !== urllink" (click)="clearImage()" class="clear-image-btn">
+                    <i class="ri-delete-bin-5-line"></i>
+                  </button>
+                  
                   <div>
                     <label for="file" class="footer_file"> 
                       <i class="ri-file-3-fill"></i>
