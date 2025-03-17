@@ -78,8 +78,10 @@
                     <button class="btn">Modifier</button>
                 </div>
             </div>
-            <!-- // Modifier le mot de passe  -->
-            <div class="cadre">
+            
+            <div class="groupe_cadre">
+              <!-- // Modifier le mot de passe  -->
+              <div class="cadre">
                 <!-- // title_cadre  -->
                 <div class="title_cadre">
                     <span>Mot de passe</span>
@@ -88,7 +90,41 @@
                 <div class="icon_cadre">
                     <button class="btn">Modifier</button>
                 </div>
+              </div>
+              
+              <!-- Les information des produit Inventaire  -->
+              <div class="information_cadre">
+                <form class="info_titre_input">
+                  <h5>Modifier mot de passe</h5>
+              
+                  <!-- // Ancien mot de passe  -->
+                  <div class="champ_input">
+                    <input autocomplete="off" type="password" class="input_focus " required placeholder="Saisis le mot de passe actuel">
+                    <label for="password" class="label labelColor">Mot de passe actuel</label>
+                  </div>
+              
+                  <!-- // Ancien mot de passe  -->
+                  <div class="champ_input">
+                    <input autocomplete="off" type="password" class="input_focus " required placeholder="Saisis un nouveau mot de passe">
+                    <label for="newPassword" class="label labelColor">Nouveau mot de passe</label>
+                  </div>
+              
+                  <!-- // ConfirmPassword mot de passe  -->
+                  <div class="champ_input">
+                    <input autocomplete="off" type="password" class="input_focus " required placeholder="Confirmer le nouveau mot de passe">
+                    <label for="ConfirmPassword" class="label labelColor">Confirmer le  nouveau mot de passe</label>
+                  </div>
+              
+                  <!-- // Ancien mot de passe  -->
+                  <div class="btn_save">
+                    <button type="submit" class="btn">Confirmer</button>
+                  </div>
+
+                </form>    
+              </div>
+
             </div>
+
             <!-- // Modifier le email  -->
             <div class="cadre">
                 <!-- // title_cadre  -->
@@ -99,59 +135,6 @@
                 <div class="icon_cadre">
                     <button class="btn">Modifier</button>
                 </div>
-            </div>
-
-            <!-- Les information des produit Inventaire  -->
-            <div class="information_cadre">
-              <form class="info_titre_input">
-                <h5>Modifier email</h5>
-            
-                <!-- // Ancien mot de passe  -->
-                <div class="double_input">
-                  <!-- Input de nom produits  -->
-                  <div class="champ_input">
-                    <input autocomplete="off" type="email" class="input_focus " required placeholder="Saisis l'ancien email">
-                    <label for="password" class="label labelColor">Ancien email</label>
-                  </div>
-
-                  <!-- Input de nom produits  -->
-                  <div class="btn_save">
-                    <button type="submit" class="btn">Verifier</button>
-                  </div>
-                </div>
-            
-                <!-- // Code de verification  -->
-                <div class="double_input">
-                  <!-- Input de nom produits  -->
-                  <div class="champ_input_code_verif">
-                    <code-input [isCodeHidden]="true"
-                                  [codeLength]="5"
-                                  (codeChanged)="onCodeChanged($event)"
-                                  (codeCompleted)="onCodeCompleted($event)">
-                    </code-input>
-                  </div>
-
-                  <!-- Input de nom produits  -->
-                  <div class="btn_save">
-                    <button type="submit" class="btn">Valider</button>
-                  </div>
-                </div>
-            
-                <!-- // Ancien mot de passe  -->
-                <div class="double_input">
-                  <!-- Input de nom produits  -->
-                  <div class="champ_input">
-                    <input autocomplete="off" type="email" class="input_focus " required placeholder="Saisis le nouveau email">
-                    <label for="password" class="label labelColor">Nouveau email</label>
-                  </div>
-
-                  <!-- Input de nom produits  -->
-                  <div class="btn_save">
-                    <button type="submit" class="btn">Modifier</button>
-                  </div>
-                </div>
-
-              </form>    
             </div>
 
         </div>
