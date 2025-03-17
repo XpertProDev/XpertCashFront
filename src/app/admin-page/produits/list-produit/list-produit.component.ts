@@ -146,6 +146,11 @@ export class ListProduitComponent {
       console.log('isChecked:', checkbox.checked);
       // Faites ce que vous voulez ici avec la valeur
     }
+
+    clearImage() {
+      this.newPhotoUrl = null;
+      this.imageFile = null;
+    }
   
     // Gestion de l'image
     urllink: string = "assets/img/appareil.jpg";

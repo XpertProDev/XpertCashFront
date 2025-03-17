@@ -34,7 +34,8 @@ import { CodeInputModule } from 'angular-code-input';
     MatInputModule,
     MatAutocompleteModule,
     MatSlideToggleModule,
-    CodeInputModule
+    CodeInputModule,
+    
   ],
   providers: [
     provideHttpClient(),
