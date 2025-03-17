@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-compte',
-  imports: [],
+  imports: [
+    RouterLink
+  ],
   templateUrl: './compte.component.html',
   styleUrl: './compte.component.scss'
 })
