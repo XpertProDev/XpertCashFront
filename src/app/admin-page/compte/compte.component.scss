@@ -113,3 +113,18 @@ tr:hover {
 .titleTableProduit th {
     font-size: 12px;
 }
+
+.content_sort {
+    display: flex;
+    align-items: center;
+}
+
+.icon_sort {
+    margin-left: 6px;
+}
+
+.icon_sort i{
+    font-size: 12px;
+    cursor: pointer;
+    color: #292929;
+}
