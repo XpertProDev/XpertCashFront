@@ -124,14 +124,17 @@ export class FactureComponent  implements AfterViewInit {
 
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
+    this.pageSize = event.pageSize; 
+    this.updatePaginatedFactures();
   }
 
   // Ajouter cette méthode
   private updatePaginatedFactures(): void {
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
+    console.log(`Paginating from ${startIndex} to ${endIndex} of ${this.filteredFactures.length} items`);
     this.paginatedFactures = this.filteredFactures.slice(startIndex, endIndex);
+    this.changeDetectorRef.detectChanges();
   }
 
   ngAfterViewInit() {
@@ -274,7 +277,7 @@ export class FactureComponent  implements AfterViewInit {
         facture.numeroFacture.toLowerCase().includes(searchTermLower)
       );
     }
-    this.currentPage = 0;
+    this.currentPage = 0; // Réinitialiser à la première page
     this.updatePaginatedFactures();
   }
 
