@@ -68,8 +68,6 @@ export class FactureComponent  implements AfterViewInit {
   email: string = '';
   produit: Produit | undefined;
   stockHistory: any[] = [];
-  // Les Facture 
-  // factures: Facture[] = [];
 
   noFacturesAvailable = false;
   messageNoFacture = 'Aucune facture disponible.';
@@ -115,16 +113,9 @@ export class FactureComponent  implements AfterViewInit {
   currentPage = 0;
   paginatedFactures: FactureWithDataSource[] = [];
 
-  // Gestion de la pagination
-  // onPageChange(event: any): void {
-  //   this.currentPage = event.pageIndex;
-  //   this.pageSize = event.pageSize;
-  //   this.updatePaginatedFactures();
-  // }
-
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize; 
+    this.pageSize = event.pageSize;
     this.updatePaginatedFactures();
   }
 
@@ -132,8 +123,9 @@ export class FactureComponent  implements AfterViewInit {
   private updatePaginatedFactures(): void {
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    console.log(`Paginating from ${startIndex} to ${endIndex} of ${this.filteredFactures.length} items`);
     this.paginatedFactures = this.filteredFactures.slice(startIndex, endIndex);
+    
+    // Forcer la mise à jour du paginator
     this.changeDetectorRef.detectChanges();
   }
 
@@ -248,12 +240,11 @@ export class FactureComponent  implements AfterViewInit {
             ...facture,
             dataSource: new MatTableDataSource(this.getFormattedProduits(facture))
           }));
-          console.log("Nombre de facture", this.factures.length)
           this.filteredFactures = [...this.factures];
           this.noFacturesAvailable = false;
         }
         this.updatePaginatedFactures();
-        this.changeDetectorRef.markForCheck();
+        this.changeDetectorRef.detectChanges();
       },
       error: (error) => {
         if (error.status === 404 && error.error.message === this.messageNoFacture) {
@@ -267,6 +258,8 @@ export class FactureComponent  implements AfterViewInit {
     });
   }
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
   // Ajouter la méthode de filtrage
   applyFilter() {
     if (!this.searchTerm) {
@@ -277,8 +270,13 @@ export class FactureComponent  implements AfterViewInit {
         facture.numeroFacture.toLowerCase().includes(searchTermLower)
       );
     }
-    this.currentPage = 0; // Réinitialiser à la première page
+    this.currentPage = 0;
     this.updatePaginatedFactures();
+    
+    // Réinitialiser le paginator
+    if (this.paginator) {
+      this.paginator.firstPage();
+    }
   }
 
   // Méthode pour obtenir les produits formatés
