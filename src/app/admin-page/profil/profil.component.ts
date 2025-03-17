@@ -19,10 +19,36 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class ProfilComponent  implements OnInit{
   passwordForm!: FormGroup;
+  nomBoutiqueForm!: FormGroup;
   isLoading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
   userId!: number;
+
+  userName: string = '';
+  nomEntreprise: string = '';
+  email: string = '';
+  phone: string = '';
+  roleType: string = '';
+  pays: string = '';
+  nomBoutique: string = '';
+  flagPays: string = '';
+  isNomBoutiqueFormVisible = false;
+
+  paysFlags: { [key: string]: string } = {
+    'Mali': '🇲🇱',
+    'Sénégal': '🇸🇳',
+    'Côte d\'Ivoire': '🇨🇮',
+    'Guinée': '🇬🇳',
+    'Burkina Faso': '🇧🇫',
+    'Togo': '🇹🇬',
+    'Niger': '🇳🇪',
+    'Bénin': '🇧🇯',
+    'Mauritanie': '🇲🇷',
+    'Gabon': '🇬🇦',
+    'Cameroun': '🇨🇲',
+   
+  };
 
   // Methode de eye
   showCurrentPassword: boolean = false;
@@ -31,6 +57,8 @@ export class ProfilComponent  implements OnInit{
 
   // Methode pour cadre From
   isPasswordFormVisible = false;
+
+  
 
   toggleCurrentPasswordVisibility() {
     this.showCurrentPassword = !this.showCurrentPassword;
@@ -52,12 +80,13 @@ export class ProfilComponent  implements OnInit{
   constructor(
     private fb: FormBuilder,
     private profilService: ProfilService,
-    private usersService: UsersService
+    private usersService: UsersService,
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.getConnectedUserId();
+    this.getUserInfo();
   }
 
   private initForm(): void {
@@ -66,6 +95,10 @@ export class ProfilComponent  implements OnInit{
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
+
+    this.nomBoutiqueForm = this.fb.group({
+      nomBoutique: ['', [Validators.required]]
+    });
   }
 
   // Récupère l'id de l'utilisateur connecté via UsersService ou le localStorage
@@ -100,6 +133,10 @@ export class ProfilComponent  implements OnInit{
   
   get confirmPassword() {
     return this.passwordForm.get('confirmPassword');
+  }
+
+  get nomBoutiqueControl() {
+    return this.nomBoutiqueForm.get('nomBoutique');
   }
 
   // Validator pour vérifier que les deux nouveaux mots de passe correspondent
@@ -157,6 +194,28 @@ export class ProfilComponent  implements OnInit{
       // complete: () => {
       //   this.isLoading = false;
       // }
+    });
+  }
+
+  
+
+  getUserInfo(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        this.userName = user.nomComplet;
+        this.nomEntreprise = user.nomEntreprise
+        this.email = user.email;
+        this.phone = user.phone;
+        this.roleType = user.roleType;
+        this.pays = user.pays;
+        this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';
+        this.flagPays = this.paysFlags[this.pays] || '';
+        console.log("Infos utilisateur récupérées :", user);
+        
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des infos utilisateur :", err);
+      }
     });
   }
   
