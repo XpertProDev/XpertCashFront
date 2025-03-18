@@ -1,5 +1,23 @@
 
+<div class="toast-container">
+  <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
+    {{ errorMessage }}
+  </div>
+</div>
+
 <div class="containerTable">
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Creation en cours...</p>
+    </div>
+  </div>
+
     <!-- En-tête : titre, actions et barre de recherche -->
     <div class="tasks-header">
       <h1 class="title">Comptes</h1>
@@ -73,56 +91,71 @@
             <h4>Ajouter un membre</h4>
             <button class="close-btn" (click)="closePopup()">&times;</button>
         </div>
-        <div class="popup-body">
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+          <div class="popup-body">
             
-          <div class="double_input">
-            <!-- Input de nom et prénom  -->
-            <div class="champ_input champ_input2">
-              <input autocomplete="off" type="text" class="input_focus" placeholder="Saisis le nom et prénom">
-              <label for="nomComplet" class="label">Nom complet</label>
+            <div class="double_input">
+              <!-- Input de nom et prénom  -->
+              <div class="champ_input champ_input2">
+                <input class="input_focus" type="text" formControlName="nomComplet" placeholder="Saisis le nom et prénom">
+                <label class="label">Nom complet</label>
+                <div *ngIf="userForm.get('nomComplet')?.invalid && userForm.get('nomComplet')?.touched">
+                  <small class="error">Le nom complet est requis.</small>
+                </div>
+              </div>
+  
+              <!-- Input d'email'  -->
+              <div class="champ_input champ_input2">
+                <input class="input_focus" type="email" formControlName="email" placeholder="Saisis l'email">
+                <label class="label">Email</label>
+                <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched">
+                  <small class="error">Un email valide est requis.</small>
+                </div>
+              </div>
+  
             </div>
-
-            <!-- Input d'email'  -->
-            <div class="champ_input champ_input2">
-              <input autocomplete="off" type="text" class="input_focus" placeholder="Saisis l'email">
-              <label for="email" class="label">Email</label>
-            </div>
-          </div>
-
-          <!-- Input role et type  -->
-          <div class="champ_input">
-            <select class="input_focus" [(ngModel)]="selectedRole">
-              <option value="">Type de role</option>
-              <option *ngFor="let role of roles" [value]="role.name">
-                {{ role.name }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Input pour pays et phone  -->
-          <div class="double_input">
-            <!-- Input de pays  -->
+  
+            <!-- Input role et type  -->
             <div class="champ_input">
-              <select class="input_focus">
-                <option value="">Pays</option>
-                <option value="Mali">Mali</option>
-                <option value="Senegal">Sénégal</option>
-                <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+              <select class="input_focus" formControlName="roleType">
+                <option value="" disabled selected>Type de rôle</option>
+                <option *ngFor="let role of roles" [value]="role.name">{{ role.name }}</option>
               </select>
+              <div *ngIf="userForm.get('roleType')?.invalid && userForm.get('roleType')?.touched">
+                <small class="error">Veuillez sélectionner un rôle.</small>
+              </div>
             </div>
-
-            <!-- Input phone  -->
-            <div class="champ_input champ_input2">
-              <input autocomplete="off" type="text" class="input_focus" placeholder="00 00 00 00">
-              <label for="email" class="label">Phone</label>
-            </div>
-          </div>
-
+  
+            <!-- Input pour pays et phone  -->
+            <div class="double_input">
+              <div class="champ_input">
+                <select class="input_focus" formControlName="pays">
+                  <option value="" disabled selected>Pays</option>
+                  <option value="Mali">Mali</option>
+                  <option value="Senegal">Sénégal</option>
+                  <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                </select>
+                <div *ngIf="userForm.get('pays')?.invalid && userForm.get('pays')?.touched">
+                  <small class="error">Veuillez choisir un pays.</small>
+                </div>
+              </div>
           
-        </div>
-        <div class="popup-footer">
-            <button class="btn-cancel" (click)="closePopup()">Annuler</button>
-            <button class="btn-submit">Ajouter</button>
-        </div>
+              <!-- // Input de phone  -->
+              <div class="champ_input champ_input2">
+                <input class="input_focus" type="text" formControlName="phone" placeholder="00 00 00 00">
+                <label class="label">Phone</label>
+                <div *ngIf="userForm.get('phone')?.invalid && userForm.get('phone')?.touched">
+                  <small class="error">Le numéro de téléphone est requis.</small>
+                </div>
+              </div>
+            </div>
+  
+            
+          </div>
+          <div class="popup-footer">
+              <button class="btn-cancel" (click)="closePopup()">Annuler</button>
+              <button class="btn-submit" [disabled]="userForm.invalid">Ajouter</button>
+          </div>
+        </form>
     </div>
   </div>
