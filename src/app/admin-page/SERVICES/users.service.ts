@@ -132,4 +132,19 @@ export class UsersService {
       
       return this.http.put<{ message?: string; error?: string }>(`${this.apiUrl}/updatedBoutique/${id}`, updates, { headers });
     }
+
+    updateUser(id: number, updates: { nomComplet: string; phone: string; password: string }): Observable<{ message?: string; error?: string }> {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError('Aucun token trouvé');
+      }
+      
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+      
+      return this.http.patch<{ message?: string; error?: string }>(`${this.apiUrl}/updateUsers/${id}`, updates, { headers });
+    }
 }

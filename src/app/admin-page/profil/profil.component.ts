@@ -20,10 +20,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class ProfilComponent  implements OnInit{
   passwordForm!: FormGroup;
   nomBoutiqueForm!: FormGroup;
+  nomCompletForm!: FormGroup;
   isLoading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
   userId!: number;
+  nomComplet: string = '';
+  password: string = '';
 
   userName: string = '';
   nomEntreprise: string = '';
@@ -35,11 +38,12 @@ export class ProfilComponent  implements OnInit{
   boutiqueAdresse: string = '';
   flagPays: string = '';
   isNomBoutiqueFormVisible = false;
+  isUserFormVisible = false;
 
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
     'Sénégal': '🇸🇳',
-    'Côte d\'Ivoire': '🇨🇮',
+    'Côte d\'Ivoire': '🇨\u200D',
     'Guinée': '🇬🇳',
     'Burkina Faso': '🇧🇫',
     'Togo': '🇹🇬',
@@ -80,6 +84,10 @@ export class ProfilComponent  implements OnInit{
     toggleNomBoutiqueForm() {
     this.isNomBoutiqueFormVisible = !this.isNomBoutiqueFormVisible;
   }
+
+  toggleUserForm() {
+    this.isUserFormVisible = !this.isUserFormVisible;
+  }
   
 
   constructor(
@@ -105,6 +113,13 @@ export class ProfilComponent  implements OnInit{
       nomBoutique: ['', [Validators.required]],
       adresse: ['', [Validators.required]]
     });
+
+    this.nomCompletForm = this.fb.group({
+      nomComplet: ['', [Validators.required]],
+      phone: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{7,15}$')]], // Numéro valide
+      password: ['', [Validators.required, Validators.minLength(6)]] // Mot de passe avec min 6 caractères
+    });
+    
   }
 
   // Récupère l'id de l'utilisateur connecté via UsersService ou le localStorage
@@ -147,6 +162,18 @@ export class ProfilComponent  implements OnInit{
 
   get adresseControl() {
     return this.nomBoutiqueForm.get('adresse');
+  }
+
+  get nomCompletControl() {
+    return this.nomCompletForm.get('nomComplet');
+  }
+
+  get phoneControl() {
+    return this.nomCompletForm.get('phone');
+  }
+
+  get passwordControl() {
+    return this.nomCompletForm.get('password');
   }
   
 
@@ -276,4 +303,54 @@ export class ProfilComponent  implements OnInit{
       }
     );
   }
+
+
+  onSubmitUpdateUser(): void {
+    this.errorMessage = null;
+    this.successMessage = null;
+    
+    if (this.nomCompletForm.invalid) {
+      this.errorMessage = "Veuillez remplir tous les champs correctement";
+      return;
+    }
+  
+    const { nomComplet, phone, password } = this.nomCompletForm.value;
+  
+    this.usersService.updateUser(this.userId, { nomComplet, phone, password }).subscribe({
+      next: (response) => {
+        if (response && response.message) {
+          this.successMessage = response.message;
+        } else {
+          this.successMessage = "Profil mis à jour avec succès !";
+        }
+        this.isUserFormVisible = false;
+        this.nomCompletForm.reset();
+        setTimeout(() => this.successMessage = null, 10000);
+      },
+      error: (error) => {
+        if (error instanceof HttpErrorResponse) {
+          this.errorMessage = error.error.message || error.error || "Erreur inconnue";
+        }
+        setTimeout(() => this.errorMessage = null, 10000);
+      },
+    });
+  }
+
+  updateUser(id: number, nomComplet: string, phone: string, password: string): void {
+    const updates = { nomComplet, phone, password };
+    this.usersService.updateUser(id, updates).subscribe(
+      response => {
+        if (response.message) {
+          console.log(response.message);
+        } else if (response.error) {
+          console.error(response.error);
+        }
+      },
+      error => {
+        console.error('Erreur lors de la mise à jour de la boutique:', error);
+      }
+    );
+  }
+  
+  
 }
