@@ -1,4 +1,3 @@
-
 <div class="toast-container">
 
   <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
@@ -84,13 +83,62 @@
             <div class="cadre">
                 <!-- // title_cadre  -->
                 <div class="title_cadre">
-                    <span>Nom de la boutique</span>
+                    <span>Nom et Adress de la boutique</span>
                 </div>
                 <!-- // icon  -->
                 <div class="icon_cadre">
-                    <button class="btn">Modifier</button>
+                    <button class="btn" (click)="toggleNomBoutiqueForm()">Modifier</button>
                 </div>
+              
             </div>
+
+               <!-- Modification Boutique -->
+               <div class="information_cadre information_cadre_visible" [class.visible]="isNomBoutiqueFormVisible">
+                <form [formGroup]="nomBoutiqueForm" (ngSubmit)="onSubmitNomBoutique()" class="info_titre_input">
+                  <h5>Modifier nom de boutique</h5>
+
+                  <!-- Nom de la boutique -->
+                  <div class="champ_input">
+                    <input 
+                      formControlName="nomBoutique" 
+                      class="input_focus" 
+                      placeholder="Saisis le nom de la boutique"
+                    >
+                    <label class="label labelColor">Nom de la Boutique</label>
+                    <div *ngIf="nomBoutiqueControl?.touched && nomBoutiqueControl?.invalid">
+                      <small class="text-danger" *ngIf="nomBoutiqueControl?.errors?.['required']">
+                        Ce champ est obligatoire
+                      </small>
+                    </div>
+                  </div>
+
+                  <!-- Adresse de la boutique -->
+                  <div class="champ_input">
+                    <input 
+                      formControlName="adresse" 
+                      class="input_focus" 
+                      placeholder="Saisis l'adresse de la boutique"
+                    >
+                    <label class="label labelColor">Adresse de la Boutique</label>
+                    <div *ngIf="adresseControl?.touched && adresseControl?.invalid">
+                      <small class="text-danger" *ngIf="adresseControl?.errors?.['required']">
+                        Ce champ est obligatoire
+                      </small>
+                    </div>
+                  </div>
+
+                  <!-- Bouton de soumission -->
+                  <div class="btn_save">
+                    <button 
+                      type="submit" 
+                      class="btn"
+                      [disabled]="nomBoutiqueForm.invalid || isLoading"
+                    >
+                      <span *ngIf="!isLoading">Confirmer</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
             
             <div class="groupe_cadre">
               <!-- // Modifier le mot de passe  -->
@@ -105,38 +153,6 @@
                 </div>
               </div>
 
-             <!-- Modification Boutique -->
-            <div class="information_cadre information_cadre_visible" [class.visible]="isNomBoutiqueFormVisible">
-              <form >
-                <h5>Modifier nom de boutique</h5>
-
-                <!-- Nom de la boutique -->
-                <div class="champ_input">
-                  <input 
-                    formControlName="nomBoutique" 
-                    class="input_focus" 
-                    placeholder="Saisis le nom de la boutique"
-                  >
-                  <label class="label labelColor">Nom de la Boutique</label>
-                  <div >
-                    <small class="text-danger" >
-                      Ce champ est obligatoire
-                    </small>
-                  </div>
-                </div>
-
-                <!-- Bouton de soumission -->
-                <div class="btn_save">
-                  <button 
-                    type="submit" 
-                    class="btn"
-                    [disabled]="nomBoutiqueForm.invalid || isLoading"
-                  >
-                    <span *ngIf="!isLoading">Confirmer</span>
-                  </button>
-                </div>
-              </form>
-            </div>
               <!-- Les information des produit Inventaire  -->
               <div class="information_cadre information_cadre_visible" [class.visible]="isPasswordFormVisible">
                 <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()" class="info_titre_input">

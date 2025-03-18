@@ -117,14 +117,19 @@ export class UsersService {
         return null;
       }
     }
-    
-    
-    
-    
 
-  // // Connexion
-  //   ccc(credentials: { email: string; password: string }): Observable<{ message?: string; token?: string; error?: string }> {
-  //     return this.http.post<{ message?: string; token?: string; error?: string }>(`${this.apiUrl}/login`, credentials);
-  // }
-  
+    updateBoutique(id: number, updates: { nomBoutique: string; adresse: string }): Observable<{ message?: string; error?: string }> {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError('Aucun token trouvé');
+      }
+      
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+      
+      return this.http.put<{ message?: string; error?: string }>(`${this.apiUrl}/updatedBoutique/${id}`, updates, { headers });
+    }
 }

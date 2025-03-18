@@ -32,6 +32,7 @@ export class ProfilComponent  implements OnInit{
   roleType: string = '';
   pays: string = '';
   nomBoutique: string = '';
+  boutiqueAdresse: string = '';
   flagPays: string = '';
   isNomBoutiqueFormVisible = false;
 
@@ -42,7 +43,7 @@ export class ProfilComponent  implements OnInit{
     'Guinée': '🇬🇳',
     'Burkina Faso': '🇧🇫',
     'Togo': '🇹🇬',
-    'Niger': '🇳🇪',
+    'Niger': '🇳\u200D',
     'Bénin': '🇧🇯',
     'Mauritanie': '🇲🇷',
     'Gabon': '🇬🇦',
@@ -75,6 +76,10 @@ export class ProfilComponent  implements OnInit{
   togglePasswordForm() {
     this.isPasswordFormVisible = !this.isPasswordFormVisible;
   }
+
+    toggleNomBoutiqueForm() {
+    this.isNomBoutiqueFormVisible = !this.isNomBoutiqueFormVisible;
+  }
   
 
   constructor(
@@ -97,7 +102,8 @@ export class ProfilComponent  implements OnInit{
     }, { validators: this.passwordMatchValidator });
 
     this.nomBoutiqueForm = this.fb.group({
-      nomBoutique: ['', [Validators.required]]
+      nomBoutique: ['', [Validators.required]],
+      adresse: ['', [Validators.required]]
     });
   }
 
@@ -138,6 +144,11 @@ export class ProfilComponent  implements OnInit{
   get nomBoutiqueControl() {
     return this.nomBoutiqueForm.get('nomBoutique');
   }
+
+  get adresseControl() {
+    return this.nomBoutiqueForm.get('adresse');
+  }
+  
 
   // Validator pour vérifier que les deux nouveaux mots de passe correspondent
   private passwordMatchValidator(form: FormGroup): ValidationErrors | null {
@@ -218,5 +229,51 @@ export class ProfilComponent  implements OnInit{
       }
     });
   }
+
   
+
+
+  onSubmitNomBoutique(): void {
+    this.errorMessage = null;
+    this.successMessage = null;
+    
+    if (this.nomBoutiqueForm.invalid) {
+      this.errorMessage = "Veuillez remplir tous les champs correctement";
+      return;
+    }
+  
+    const nomBoutique = this.nomBoutiqueForm.value.nomBoutique;
+    const adresse = this.nomBoutiqueForm.value.adresse;
+  
+    this.usersService.updateBoutique(this.userId, { nomBoutique, adresse }).subscribe({
+      next: (response) => {
+        this.successMessage = response.message ? response.message : "Boutique mise à jour avec succès !";
+        this.isNomBoutiqueFormVisible = false;
+        this.nomBoutiqueForm.reset();
+        setTimeout(() => this.successMessage = null, 10000);
+      },
+      error: (error) => {
+        if (error instanceof HttpErrorResponse) {
+          this.errorMessage = error.error.message || error.error || "Erreur inconnue";
+        }
+        setTimeout(() => this.errorMessage = null, 10000);
+      },
+    });
+  }
+
+  updateBoutique(id: number, nomBoutique: string, adresse: string): void {
+    const updates = { nomBoutique, adresse };
+    this.usersService.updateBoutique(id, updates).subscribe(
+      response => {
+        if (response.message) {
+          console.log(response.message);
+        } else if (response.error) {
+          console.error(response.error);
+        }
+      },
+      error => {
+        console.error('Erreur lors de la mise à jour de la boutique:', error);
+      }
+    );
+  }
 }
