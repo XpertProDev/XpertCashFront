@@ -70,27 +70,6 @@ export class ProduitsComponent implements OnInit {
     private usersService: UsersService,
   ) {}
 
-  toastMessage = false;
-  message = '';
-  
-  showToast(msg: string) {
-    this.message = msg;  // Attribue le message dynamique à la variable message
-    this.toastMessage = true;  // Affiche le toast
-  
-    // Log pour confirmer l'exécution
-    console.log('Toast déclenché !');
-  
-    // Cache le toast après 3 secondes
-    setTimeout(() => {
-      this.toastMessage = false;  // Cache le toast
-      // Log pour confirmer la fin
-      console.log('Toast caché !');
-    }, 3000); // Cache après 3 secondes
-  }
-  
-  
-
-
   ngOnInit(): void {
     this.getUserBoutiqueId();
     this.getUserInfo();

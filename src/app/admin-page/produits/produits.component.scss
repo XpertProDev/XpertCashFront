@@ -1018,43 +1018,5 @@ img.roudel_detail{
   display: block;
 }
 
-/* Conteneur du toast */
-.toast-container {
-  position: fixed;
-  top: 54px;
-  right: 35px;
-  z-index: 9999;
-}
 
- //toast
-.toast-message {
-  background-color: #4bb625;
-  color: white;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  animation: fadeInOut 3s ease-in-out;
-  transform: translateY(-20px);
-}
-
-/* Animation pour faire apparaître et disparaître le toast */
-@keyframes fadeInOut {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  20% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(2px); /* Le toast disparaît avec un léger mouvement vers le bas */
-  }
-}
 
