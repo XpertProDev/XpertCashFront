@@ -5,7 +5,7 @@
       <h1 class="title">Comptes</h1>
   
       <div class="actions">
-        <button class="add-task">Ajouter</button>
+        <button class="add-task" (click)="openPopup()">Ajouter</button>
         <div class="contentIcon">
           <div class="bare"></div>
         </div>
@@ -37,7 +37,7 @@
         <tr>
           <td>Diakaridia SY</td>
           <td>informatiquexpertpro2&#64;gmail.com</td>
-          <td>RH</td>
+          <td>Admin</td>
           <td>Mali</td>
           <td>+223 78711623</td>
         </tr>
@@ -65,3 +65,64 @@
   
   </div>
   
+  
+  <!-- Popup overlay -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h4>Ajouter un membre</h4>
+            <button class="close-btn" (click)="closePopup()">&times;</button>
+        </div>
+        <div class="popup-body">
+            
+          <div class="double_input">
+            <!-- Input de nom et prénom  -->
+            <div class="champ_input champ_input2">
+              <input autocomplete="off" type="text" class="input_focus" placeholder="Saisis le nom et prénom">
+              <label for="nomComplet" class="label">Nom complet</label>
+            </div>
+
+            <!-- Input d'email'  -->
+            <div class="champ_input champ_input2">
+              <input autocomplete="off" type="text" class="input_focus" placeholder="Saisis l'email">
+              <label for="email" class="label">Email</label>
+            </div>
+          </div>
+
+          <!-- Input role et type  -->
+          <div class="champ_input">
+            <select class="input_focus" [(ngModel)]="selectedRole">
+              <option value="">Type de role</option>
+              <option *ngFor="let role of roles" [value]="role.name">
+                {{ role.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Input pour pays et phone  -->
+          <div class="double_input">
+            <!-- Input de pays  -->
+            <div class="champ_input">
+              <select class="input_focus">
+                <option value="">Pays</option>
+                <option value="Mali">Mali</option>
+                <option value="Senegal">Sénégal</option>
+                <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+              </select>
+            </div>
+
+            <!-- Input phone  -->
+            <div class="champ_input champ_input2">
+              <input autocomplete="off" type="text" class="input_focus" placeholder="00 00 00 00">
+              <label for="email" class="label">Phone</label>
+            </div>
+          </div>
+
+          
+        </div>
+        <div class="popup-footer">
+            <button class="btn-cancel" (click)="closePopup()">Annuler</button>
+            <button class="btn-submit">Ajouter</button>
+        </div>
+    </div>
+  </div>
