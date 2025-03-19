@@ -16,6 +16,7 @@ import { Router, RouterLink } from '@angular/router';
 import autoTable from 'jspdf-autotable';
 import { UsersService } from '../SERVICES/users.service';
 import { ColorFormats } from 'ngx-color-picker/lib/formats';
+import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 
 @Component({
   selector: 'app-produits',
@@ -30,6 +31,7 @@ import { ColorFormats } from 'ngx-color-picker/lib/formats';
     // RouterLink,
     MatInputModule,
     MatPaginatorModule,
+    CustomNumberPipe
   ],
   templateUrl: './produits.component.html',
   styleUrls: ['./produits.component.scss']

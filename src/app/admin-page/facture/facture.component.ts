@@ -21,6 +21,7 @@ import { Facture, FactureWithDataSource, ProduitFacture } from '../MODELS/factur
 import { FactureService } from '../SERVICES/facture.service';
 import { ViewChildren, QueryList } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 
 
 
@@ -53,6 +54,7 @@ export interface PeriodicElement {
     MatPaginatorModule,
     CommonModule,
     FormsModule,
+    CustomNumberPipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './facture.component.html',

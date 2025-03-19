@@ -17,10 +17,15 @@ import { MatInputModule } from '@angular/material/input';
 import { AuthInterceptor } from './admin-page/SERVICES/auth.interceptor';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CodeInputModule } from 'angular-code-input';
+import localeDe from '@angular/common/locales/de';
+import { CustomNumberPipe } from './admin-page/MODELS/customNumberPipe';
+
+
+registerLocaleData(localeDe);
 
 
 @NgModule({
-  declarations: [InscriptionComponent],
+  declarations: [InscriptionComponent, CustomNumberPipe],
   imports: [
     CommonModule,
     AppRoutingModule,
@@ -35,12 +40,12 @@ import { CodeInputModule } from 'angular-code-input';
     MatAutocompleteModule,
     MatSlideToggleModule,
     CodeInputModule,
-    
-  ],
+  ], 
   providers: [
     provideHttpClient(),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: LOCALE_ID, useValue: 'fr-FR',  },
+    { provide: LOCALE_ID, useValue: 'de-DE' }
     // provideCharts(withDefaultRegisterables())
   ],
 })

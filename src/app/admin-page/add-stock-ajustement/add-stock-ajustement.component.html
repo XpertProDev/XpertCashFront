@@ -104,6 +104,7 @@
                               <input type="number" class="input_focus_type"
                                      id="addQuantite"
                                      [(ngModel)]="quantiteAjoute"
+                                     placeholder="....."
                                      name="addQuantite"
                                      style="text-align: center;"
                                      min="0">
@@ -122,7 +123,7 @@
                           <!-- // prix Vente  -->
                           <div class="champ_input" style="margin-right: 15px;">
                             <input type="text" disabled class="input_focus_type" id="CoutUnitaire" 
-                              [value]="selectedProduct ? selectedProduct.prixVente : 0" 
+                              [value]="selectedProduct ? (selectedProduct.prixVente | customNumber) : (0 | customNumber)" 
                               name="CoutUnitaire" style="cursor: no-drop; text-align: center;">
                           </div>
                         </td>                        
@@ -166,7 +167,9 @@
                             </td>
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                <input type="text" readonly class="input_table" [value]="adjustment.prixVente" style="text-align: center;">
+                                <input type="text" readonly class="input_table" 
+                                  [value]="adjustment.prixVente | customNumber" 
+                                  style="text-align: center;">
                               </div>
                             </td>
                             <td>
@@ -251,6 +254,7 @@
                               <input type="number" class="input_focus_type"
                                      id="quantiteRetirer"
                                      [(ngModel)]="quantiteRetirer"
+                                     placeholder="....."
                                      name="quantiteRetirer"
                                      style="text-align: center;"
                                      min="0">
@@ -269,7 +273,7 @@
                           <!-- // prix Vente  -->
                           <div class="champ_input" style="margin-right: 15px;">
                             <input type="text" disabled class="input_focus_type" id="CoutUnitaire" 
-                              [value]="selectedProduct ? selectedProduct.prixVente : 0" 
+                              [value]="selectedProduct ? (selectedProduct.prixVente | customNumber) : (0 | customNumber)"
                               name="CoutUnitaire" style="cursor: no-drop; text-align: center;">
                           </div>
                         </td>                        
@@ -313,7 +317,9 @@
                             </td>
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                <input type="text" readonly class="input_table" [value]="adjustment.prixVente" style="text-align: center;">
+                                <input type="text" readonly class="input_table" 
+                                  [value]="adjustment.prixVente | customNumber" 
+                                  style="text-align: center;">
                               </div>
                             </td>
                             <td>
