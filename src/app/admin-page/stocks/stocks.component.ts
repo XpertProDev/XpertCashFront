@@ -18,6 +18,7 @@ import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
 import { ChangeDetectorRef } from '@angular/core';
+import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 @Component({
   selector: 'app-stocks',
   imports: [
@@ -31,6 +32,7 @@ import { ChangeDetectorRef } from '@angular/core';
       //AsyncPipe,
       MatPaginatorModule,
       RouterLink,
+      CustomNumberPipe
   ],
   templateUrl: './stocks.component.html',
   styleUrl: './stocks.component.scss'

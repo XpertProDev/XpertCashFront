@@ -179,7 +179,7 @@
     justify-content: space-between;
     border-radius: 5px;
     box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
-    margin-bottom: 15px;
+    // margin-bottom: 15px;
 }
 
 .cadre_cursor {
@@ -222,7 +222,8 @@
   box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.108);
   border-radius: 5px;
   // margin-top: 20px;
-  margin-bottom: 20px;
+  // margin-bottom: 20px;
+  margin-top: 10px;
 }
 
 .info_titre_input {
@@ -351,6 +352,7 @@
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 0.3s ease-out, transform 0.3s ease-out, max-height 0.5s ease-out;
+  margin-bottom: 10px;
 }
 
 /* Style lorsque le cadre est visible */

@@ -8,6 +8,7 @@ import { UsersService } from '../SERVICES/users.service';
 import { Produit } from '../MODELS/produit.model';
 import { StockService } from '../SERVICES/stocks.service';
 import { Stock } from '../MODELS/stock.model';
+import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 
 @Component({
   selector: 'app-add-stock-ajustement',
@@ -15,6 +16,7 @@ import { Stock } from '../MODELS/stock.model';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    CustomNumberPipe
   ],
   templateUrl: './add-stock-ajustement.component.html',
   styleUrl: './add-stock-ajustement.component.scss'

@@ -43,7 +43,7 @@
               <div class="info_titre_input"> 
                 <h4>Information des produits</h4>
 
-                <div class="double_input">
+                <div class="double_input_grid">
                   <!-- Input de nom produits  -->
                   <div class="champ_input champ_input2">
                     <input autocomplete="off" formControlName="nom" type="text" class="input_focus " required id="nom" name="nom" placeholder="Saisis le nom de magasin">
@@ -55,6 +55,27 @@
                     </div>
                   </div>
 
+                  <div class="double_input2">
+                    <div class="champ_input champ_input2">
+                      <input autocomplete="off" type="text" placeholder="Saisis le nom de catégorie"
+                             class="input_focus" matInput [formControl]="myControl" 
+                             [matAutocomplete]="auto" style="cursor: pointer;">
+                      <label for="categorieId" class="label labelCategory">Catégorie</label>
+                      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
+                        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+                          {{ option.nom }}
+                        </mat-option>
+                      </mat-autocomplete>
+                      
+                    </div>
+
+                    <div class="btn_add_categoryDiv2">
+                      <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer une catégorie</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="double_input_grid">
                   <!-- Input de nom produits  -->
                   <div class="champ_input champ_input2">
                     <input autocomplete="off" formControlName="prixVente" type="number" class="input_focus " required id="prixVente" name="prixVente" placeholder="Saisis le nom de magasin">
@@ -63,52 +84,29 @@
                       Le prix de vente est vide.
                     </div>
                   </div>
-                </div>
-
-                <!-- Input de categorie  -->
-                <!-- <div class="champ_input">
-                  <input type="text" class="input_focus " required id="category" name="category" placeholder="Saisis le nom de categorie">
-                  <label for="category" class="label labelColor">Catégorie (Facultatif)</label>
-                </div> -->
-
-                <div class="double_input2">
-                  <div class="champ_input">
-                    <input autocomplete="off" type="text" placeholder="Saisis le nom de catégorie"
-                           class="input_focus" matInput [formControl]="myControl" 
-                           [matAutocomplete]="auto" style="cursor: pointer;">
-                    <label for="categorieId" class="label labelCategory">Catégorie</label>
-                    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
-                      <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
-                        {{ option.nom }}
-                      </mat-option>
-                    </mat-autocomplete>
-                    
-                  </div>
-                                   
                   
-                  <div class="btn_add_categoryDiv2">
-                    <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer une catégorie</button>
+                  <!-- Input de prixAchat  -->
+                  <div class="champ_input">
+                    <input autocomplete="off" formControlName="prixAchat" type="number" class="input_focus " required id="prixAchat" name="prixAchat" placeholder="Saisis le prix d'achat">
+                    <label for="prixAchat" class="label labelColor">Coût du produit</label>
+                    <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
+                      Le coût du produit est vide.
+                    </div>
                   </div>
-                </div>
 
-                <!-- Input de prixAchat  -->
-                <div class="champ_input">
-                  <input autocomplete="off" formControlName="prixAchat" type="number" class="input_focus " required id="prixAchat" name="prixAchat" placeholder="Saisis le prix d'achat">
-                  <label for="prixAchat" class="label labelColor">Coût du produit</label>
-                  <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
-                    Le coût du produit est vide.
-                  </div>
                 </div>
 
                 <div class="double_input2">
                   <div class="champ_input">
                     <input autocomplete="off" type="text" placeholder="Saisis l'unité de mesure" 
-                           matInput [formControl]="UniterControl" class="input_focus"
+                           matInput [formControl]="uniteControl" class="input_focus"
                            [matAutocomplete]="autoUnite" style="cursor: pointer;">
                     <label for="uniteId" class="label labelCategory">Unité de mesure</label>
-                    <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
-                      <mat-option *ngFor="let optionUnite of filteredNomUnite | async" [value]="optionUnite">
-                        {{ optionUnite.nom }}
+                    <mat-autocomplete #autoUnite="matAutocomplete" 
+                                    (optionSelected)="onUniteSelected($event)" 
+                                    [displayWith]="displayFnUnite">
+                      <mat-option *ngFor="let option of filteredNomUnite | async" [value]="option">
+                        {{ option.nom }}
                       </mat-option>
                     </mat-autocomplete>
                     
@@ -189,15 +187,16 @@
             
                 <!-- Afficher seulement si isChecked est activé -->
                 <div class="double_inputh" *ngIf="isChecked">
+                  <!-- Input de En stock -->
+                  <div class="champ_input champ_input2">
+                    <input autocomplete="off" formControlName="quantite" type="number" class="input_focus " required id="quantite" name="quantite" placeholder="Saisis le quantité">
+                    <label for="quantite" class="label labelColor">En stock</label>
+                  </div>
+
                   <!-- Input de prixAchat -->
                   <div class="champ_input champ_input2">
                     <input autocomplete="off" formControlName="seuilAlert" type="number" class="input_focus " name="alertSeuil" placeholder="Saisis le montant d'alerte">
                     <label for="seuilAlert" class="label labelColor">Seuil d'alerte</label>
-                  </div>
-            
-                  <div class="champ_input champ_input2">
-                    <input autocomplete="off" formControlName="quantite" type="number" class="input_focus " required id="quantite" name="quantite" placeholder="Saisis le quantité">
-                    <label for="quantite" class="label labelColor">En stock</label>
                   </div>
                 </div>
               </div>    

@@ -75,6 +75,21 @@ export class CompteComponent  implements OnInit {
 
   closePopup() {
     this.showPopup = false;
+    this.resetForm();
+  }
+
+  private resetForm() {
+    this.userForm.patchValue({
+      nomComplet: '',
+      email: '',
+      roleType: '',
+      phone: '',
+      pays: ''
+    });
+  
+    this.userForm.markAsPristine();
+    this.userForm.markAsUntouched();
+    this.userForm.updateValueAndValidity();
   }
 
   onSubmit(): void {
@@ -94,7 +109,6 @@ export class CompteComponent  implements OnInit {
       return;
     }
   
-    // Activer le loader
     this.isLoading = true;
   
     this.usersService.addUserToEntreprise(request, token).subscribe({
@@ -105,19 +119,29 @@ export class CompteComponent  implements OnInit {
         } else {
           this.successMessage = "Création de compte réussie !";
         }
-        this.userForm.reset();
-        this.isLoading = false; 
+        
+        // Réinitialisation explicite des champs
+        this.userForm.patchValue({
+          nomComplet: '',
+          email: '',
+          roleType: '',
+          phone: '',
+          pays: ''
+        });
+        
+        // Réinitialisation de l'état du formulaire (optionnel mais recommandé)
+        Object.keys(this.userForm.controls).forEach(controlName => {
+          this.userForm.get(controlName)?.setErrors(null);
+        });
+  
+        this.isLoading = false;
         this.closePopup();
         setTimeout(() => this.successMessage = null, 1000);
       },      
       error: (error) => {
         this.isLoading = false; 
         if (error instanceof HttpErrorResponse) {
-          if (error.error && typeof error.error === 'object') {
-            this.errorMessage = Object.values(error.error).join(', ') || "Erreur inconnue";
-          } else {
-            this.errorMessage = error.error || "Erreur inconnue";
-          }
+          this.errorMessage = error.error.message || "Erreur inconnue";
         } else {
           this.errorMessage = "Erreur lors de l'ajout de l'utilisateur";
         }
@@ -125,8 +149,6 @@ export class CompteComponent  implements OnInit {
       }           
     });
   }
-  
-  
 
 }
 

@@ -121,6 +121,7 @@
                 <option value="" disabled selected>Type de rôle</option>
                 <option *ngFor="let role of roles" [value]="role.name">{{ role.name }}</option>
               </select>
+              <!-- <label class="label">Les rôles</label> -->
               <div *ngIf="userForm.get('roleType')?.invalid && userForm.get('roleType')?.touched">
                 <small class="error">Veuillez sélectionner un rôle.</small>
               </div>

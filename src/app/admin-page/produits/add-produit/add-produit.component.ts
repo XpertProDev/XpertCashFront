@@ -251,7 +251,7 @@ export class AddProduitComponent {
         (uniteMesures) => {
           console.log('Unité de mesure reçues depuis l\'API :', uniteMesures); // Debug ici
           this.optionsUnite = uniteMesures;
-          this.filteredNomUnite = this.UniterControl.valueChanges.pipe(
+          this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
             startWith<string | UniteMesure>(''),
             // map(value => (typeof value === 'string' ? value : value.nom)),
             map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
@@ -415,7 +415,9 @@ export class AddProduitComponent {
   // Pour unite
   private _filterUnite(name: string): UniteMesure[] {
     const filterValue = name.toLowerCase();
-    return this.optionsUnite.filter(optionNomUnite => optionNomUnite.nom.toLowerCase().includes(filterValue));
+    return this.optionsUnite.filter(optionNomUnite => 
+      optionNomUnite.nom.toLowerCase().includes(filterValue)
+    );
   }
   
   displayFnUnite(unityMesure?: UniteMesure): string {
@@ -461,19 +463,30 @@ export class AddProduitComponent {
         if (response && response.id) {
           // Réinitialiser le formulaire
           this.ajouteCategoryForm.get('categoryName')!.setValue('');
-  
-          // Ajouter la nouvelle catégorie à la liste des catégories
-          const newCategory: Categorie = { id: response.id, nom: categoryData.nom };
+
+          // Créer le nouvel objet catégorie
+          const newCategory: Categorie = { 
+            id: response.id, 
+            nom: categoryData.nom 
+          };
+
+          // Ajouter à la liste des options
           this.options.push(newCategory);
-  
-          // Mettre à jour les options filtrées pour inclure la nouvelle catégorie
+
+          // 1. Mettre à jour l'input d'autocomplete
+          this.myControl.setValue(newCategory);
+
+          // 2. Mettre à jour la valeur dans le formulaire principal
+          this.ajouteProduitForm.get('categorieId')?.setValue(newCategory.id);
+
+          // Mettre à jour les options filtrées
           this.filteredOptions = this.myControl.valueChanges.pipe(
-            startWith<string | Categorie>(''),
-            map(value => (typeof value === 'string' ? value : value.nom)),
+            startWith(newCategory), // Pré-remplir avec la nouvelle valeur
+            map(value => (typeof value === 'string' ? value : value?.nom)),
             map(name => (name ? this._filter(name) : this.options.slice()))
           );
-  
-          // Afficher un message de succès
+
+          // Afficher message
           this.apiMessageType = 'success';
           this.messageAPI = response.message || "La catégorie a été créée avec succès.";
         }
@@ -496,7 +509,6 @@ export class AddProduitComponent {
       }
     });
   }
-  
 
   submitFormUnity(): void {
     const unityData = { nom: this.ajouteUniteForm.value.unityName };
@@ -507,19 +519,34 @@ export class AddProduitComponent {
         if (response && response.id) {
           // Réinitialiser le formulaire
           this.ajouteUniteForm.get('unityName')!.setValue('');
-          
-          // Ajouter l'unité créée à la liste des unités
-          const newUnity: UniteMesure = { id: response.id, nom: unityData.nom };
+
+          // Créer la nouvelle unité
+          const newUnity: UniteMesure = { 
+            id: response.id, 
+            nom: unityData.nom 
+          };
+
+          // Ajouter à la liste
           this.optionsUnite.push(newUnity);
-  
-          // Mettre à jour les options filtrées pour afficher la nouvelle unité
+          // Force la mise à jour du filtre
+          this.uniteControl.updateValueAndValidity();
+
+          // 1. Mettre à jour l'input d'autocomplete
+          this.uniteControl.setValue(newUnity);
+
+          // 2. Mettre à jour le formulaire principal
+          this.ajouteProduitForm.get('uniteId')?.setValue(newUnity.id);
+
+          // 3. Mettre à jour les options filtrées
+          // Corriger la structure du pipe RxJS
+          // Corriger la structure du pipe RxJS
           this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
-            startWith<string | UniteMesure>(''),
-            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-            map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
-          );          
-  
-          // Afficher un message de succès
+            startWith(newUnity),
+            map(value => typeof value === 'string' ? value : value?.nom),
+            map((name: string) => name ? this._filterUnite(name) : this.optionsUnite.slice())
+          );
+
+          // Afficher message
           this.apiMessageType = 'success';
           this.messageAPI = response.message || "L'unité a été créée avec succès.";
         }

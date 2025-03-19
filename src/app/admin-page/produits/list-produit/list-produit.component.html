@@ -76,8 +76,8 @@
                 <div class="double_input2">
                   <div class="champ_input">
                     <input type="text" placeholder="Saisis le nom de catégorie"
-                           class="input_focus" matInput [formControl]="myControl" 
-                           [matAutocomplete]="auto" style="cursor: pointer;" [value]="produit.nomCategorie">
+                        class="input_focus" matInput [formControl]="myControl" 
+                        [matAutocomplete]="auto" style="cursor: pointer;" [value]="produit.nomCategorie  || 'non categorie'">
                     <label for="categorieId" class="label labelCategory">Catégorie</label>
                     <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
                       <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
@@ -126,8 +126,8 @@
                 <div class="double_input2">
                   <div class="champ_input">
                     <input type="text" placeholder="Saisis l'unité de mesure" 
-                           matInput [formControl]="uniteControl" class="input_focus"
-                           [matAutocomplete]="autoUnite" style="cursor: pointer;" [value]="produit.nomUnite || 'non unite'">
+                        matInput [formControl]="uniteControl" class="input_focus"
+                        [matAutocomplete]="autoUnite" style="cursor: pointer;" [value]="produit.nomUnite || 'non unite'">
                     <label for="uniteId" class="label labelCategory">Unité de mesure</label>
                     <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
                       <mat-option *ngFor="let optionUnite of filteredNomUnite | async" [value]="optionUnite">

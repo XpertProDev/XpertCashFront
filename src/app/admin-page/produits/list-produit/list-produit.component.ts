@@ -329,10 +329,19 @@ export class ListProduitComponent {
 
       // Exemple dans votre composant TypeScript
       this.produitService.getProduitById(productId).subscribe({
+        // 
         next: (data: Produit) => {
-          console.log('Donnée du produit:', data); // Vérifiez ici la valeur de data.photo
+          console.log('Donnée du produit:', data);
           this.produit = data;
           this.modifierProduitForm.patchValue(this.produit);
+          this.loadInitialValues(); 
+          
+          // Ajouter ces lignes pour initialiser les contrôles d'autocomplete
+          const selectedUnite = this.optionsUnite.find(u => u.id === this.produit.uniteId);
+          if(selectedUnite) this.uniteControl.setValue(selectedUnite);
+          
+          const selectedCategorie = this.options.find(c => c.id === this.produit.categorieId);
+          if(selectedCategorie) this.myControl.setValue(selectedCategorie);
         },
         error: (err) => {
           console.error('Erreur lors de la récupération du produit', err);
@@ -398,7 +407,9 @@ export class ListProduitComponent {
     // Pour unite
     private _filterUnite(name: string): UniteMesure[] {
       const filterValue = name.toLowerCase();
-      return this.optionsUnite.filter(optionNomUnite => optionNomUnite.nom.toLowerCase().includes(filterValue));
+      return this.optionsUnite.filter(option => 
+        option.nom.toLowerCase().includes(filterValue)
+      );
     }
     
     displayFnUnite(unityMesure?: UniteMesure): string {
@@ -444,19 +455,30 @@ export class ListProduitComponent {
           if (response && response.id) {
             // Réinitialiser le formulaire
             this.ajouteCategoryForm.get('categoryName')!.setValue('');
-    
-            // Ajouter la nouvelle catégorie à la liste des catégories
-            const newCategory: Categorie = { id: response.id, nom: categoryData.nom };
+  
+            // Créer le nouvel objet catégorie
+            const newCategory: Categorie = { 
+              id: response.id, 
+              nom: categoryData.nom 
+            };
+  
+            // Ajouter à la liste des options
             this.options.push(newCategory);
-    
-            // Mettre à jour les options filtrées pour inclure la nouvelle catégorie
+  
+            // 1. Mettre à jour l'input d'autocomplete
+            this.myControl.setValue(newCategory);
+  
+            // 2. Mettre à jour la valeur dans le formulaire principal
+            this.modifierProduitForm.get('categorieId')?.setValue(newCategory.id);
+  
+            // Mettre à jour les options filtrées
             this.filteredOptions = this.myControl.valueChanges.pipe(
-              startWith<string | Categorie>(''),
-              map(value => (typeof value === 'string' ? value : value.nom)),
+              startWith(newCategory), // Pré-remplir avec la nouvelle valeur
+              map(value => (typeof value === 'string' ? value : value?.nom)),
               map(name => (name ? this._filter(name) : this.options.slice()))
             );
-    
-            // Afficher un message de succès
+  
+            // Afficher message
             this.apiMessageType = 'success';
             this.messageAPI = response.message || "La catégorie a été créée avec succès.";
           }
@@ -479,6 +501,18 @@ export class ListProduitComponent {
         }
       });
     }
+
+    private loadInitialValues() {
+      if(this.produit.uniteId) {
+        const initialUnite = this.optionsUnite.find(u => u.id === this.produit.uniteId);
+        if(initialUnite) this.uniteControl.setValue(initialUnite);
+      }
+      
+      if(this.produit.categorieId) {
+        const initialCategorie = this.options.find(c => c.id === this.produit.categorieId);
+        if(initialCategorie) this.myControl.setValue(initialCategorie);
+      }
+    }
   
     submitFormUnity(): void {
       const unityData = { nom: this.ajouteUniteForm.value.unityName };
@@ -489,19 +523,31 @@ export class ListProduitComponent {
           if (response && response.id) {
             // Réinitialiser le formulaire
             this.ajouteUniteForm.get('unityName')!.setValue('');
-            
-            // Ajouter l'unité créée à la liste des unités
-            const newUnity: UniteMesure = { id: response.id, nom: unityData.nom };
+  
+            // Créer la nouvelle unité
+            const newUnity: UniteMesure = { 
+              id: response.id, 
+              nom: unityData.nom 
+            };
+  
+            // Ajouter à la liste
             this.optionsUnite.push(newUnity);
-    
-            // Mettre à jour les options filtrées pour afficher la nouvelle unité
+  
+            // Mettre à jour le contrôle après l'ajout
+            this.uniteControl.setValue(newUnity);
+            this.modifierProduitForm.get('uniteId')?.setValue(newUnity.id);
+            
+            // Forcer la mise à jour des options filtrées
             this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
-              startWith<string | UniteMesure>(''),
-              map(value => (typeof value === 'string' ? value : value.nom)),
-              map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
+              startWith(newUnity),
+              map(value => typeof value === 'string' ? value : value?.nom),
+              map((name: string) => name ? this._filterUnite(name) : this.optionsUnite.slice())
             );
-    
-            // Afficher un message de succès
+            
+            // Ajouter cette ligne pour actualiser l'affichage
+            this.uniteControl.updateValueAndValidity();
+
+            // Afficher message
             this.apiMessageType = 'success';
             this.messageAPI = response.message || "L'unité a été créée avec succès.";
           }
