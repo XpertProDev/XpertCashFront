@@ -99,12 +99,14 @@
                 <div class="double_input2">
                   <div class="champ_input">
                     <input autocomplete="off" type="text" placeholder="Saisis l'unité de mesure" 
-                           matInput [formControl]="UniterControl" class="input_focus"
+                           matInput [formControl]="uniteControl" class="input_focus"
                            [matAutocomplete]="autoUnite" style="cursor: pointer;">
                     <label for="uniteId" class="label labelCategory">Unité de mesure</label>
-                    <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
-                      <mat-option *ngFor="let optionUnite of filteredNomUnite | async" [value]="optionUnite">
-                        {{ optionUnite.nom }}
+                    <mat-autocomplete #autoUnite="matAutocomplete" 
+                                    (optionSelected)="onUniteSelected($event)" 
+                                    [displayWith]="displayFnUnite">
+                      <mat-option *ngFor="let option of filteredNomUnite | async" [value]="option">
+                        {{ option.nom }}
                       </mat-option>
                     </mat-autocomplete>
                     
