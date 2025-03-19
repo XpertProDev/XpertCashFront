@@ -109,7 +109,7 @@ export class FactureComponent  implements AfterViewInit {
   @ViewChildren(MatPaginator) paginators!: QueryList<MatPaginator>;
   
   totalFactures = 0;
-  pageSize = 5;
+  pageSize = 10;
   currentPage = 0;
   paginatedFactures: FactureWithDataSource[] = [];
 
@@ -142,7 +142,7 @@ export class FactureComponent  implements AfterViewInit {
   }
 
   // Collaste 
-  step = signal(0);
+  step = signal(-1);
 
   setStep(index: number) {
     this.step.set(index);
