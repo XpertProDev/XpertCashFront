@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Users } from '../MODELS/utilisateur.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, switchMap, throwError } from 'rxjs';
+import { UserNewRequest } from '../MODELS/user-new-request.model';
 
 interface UserRequest {
   nomComplet: string;
@@ -117,6 +118,12 @@ export class UsersService {
         return null;
       }
     }
+    
+    addUserToEntreprise(userData: any, token: string): Observable<string> {
+      const headers = { Authorization: `Bearer ${token}` };
+      return this.http.post<string>(`${this.apiUrl}/addNewUsers`, userData, { headers });
+    }
+    
 
     updateBoutique(id: number, updates: { nomBoutique: string; adresse: string }): Observable<{ message?: string; error?: string }> {
       const token = localStorage.getItem('authToken');

@@ -1,1 +1,161 @@
-<p>Page compte</p>
+
+<div class="toast-container">
+  <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
+    {{ errorMessage }}
+  </div>
+</div>
+
+<div class="containerTable">
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Creation en cours...</p>
+    </div>
+  </div>
+
+    <!-- En-tête : titre, actions et barre de recherche -->
+    <div class="tasks-header">
+      <h1 class="title">Comptes</h1>
+  
+      <div class="actions">
+        <button class="add-task" (click)="openPopup()">Ajouter</button>
+        <div class="contentIcon">
+          <div class="bare"></div>
+        </div>
+        <div class="inputSearch">
+          <i class="ri-search-2-line"></i>
+          <input type="text" placeholder="Recherche...." />
+        </div>
+      </div>
+    </div>
+  
+    <!-- Tableau des produits -->
+    <table>
+      <thead>
+        <tr class="titleTableProduit">
+          <th>Nom complet</th>
+          <th>Email</th>
+          <th class="content_sort">
+            Rôle type
+            <div class="icon_sort">
+              <i class="ri-sort-asc"></i>
+            </div>
+          </th>
+          <th>Pays</th>
+          <th>Phone</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- /////////// -->
+        <tr>
+          <td>Diakaridia SY</td>
+          <td>informatiquexpertpro2&#64;gmail.com</td>
+          <td>Admin</td>
+          <td>Mali</td>
+          <td>+223 78711623</td>
+        </tr>
+
+
+        <!-- /////////// -->
+        <tr>
+          <td>Ibrahim Diaby</td>
+          <td>informatiquexpertpro3&#64;gmail.com</td>
+          <td>COMPTABLE</td>
+          <td>Mali</td>
+          <td>+223 00000000</td>
+        </tr>
+
+        <!-- /////////// -->
+        <tr>
+          <td>Mohamed Diallo</td>
+          <td>informatiquexpertpro3&#64;gmail.com</td>
+          <td>VENDEUR</td>
+          <td>Mali</td>
+          <td>+223 00000000</td>
+        </tr>
+      </tbody>
+    </table>
+  
+  </div>
+  
+  
+  <!-- Popup overlay -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h4>Ajouter un membre</h4>
+            <button class="close-btn" (click)="closePopup()">&times;</button>
+        </div>
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+          <div class="popup-body">
+            
+            <div class="double_input">
+              <!-- Input de nom et prénom  -->
+              <div class="champ_input champ_input2">
+                <input class="input_focus" type="text" formControlName="nomComplet" placeholder="Saisis le nom et prénom">
+                <label class="label">Nom complet</label>
+                <div *ngIf="userForm.get('nomComplet')?.invalid && userForm.get('nomComplet')?.touched">
+                  <small class="error">Le nom complet est requis.</small>
+                </div>
+              </div>
+  
+              <!-- Input d'email'  -->
+              <div class="champ_input champ_input2">
+                <input class="input_focus" type="email" formControlName="email" placeholder="Saisis l'email">
+                <label class="label">Email</label>
+                <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched">
+                  <small class="error">Un email valide est requis.</small>
+                </div>
+              </div>
+  
+            </div>
+  
+            <!-- Input role et type  -->
+            <div class="champ_input">
+              <select class="input_focus" formControlName="roleType">
+                <option value="" disabled selected>Type de rôle</option>
+                <option *ngFor="let role of roles" [value]="role.name">{{ role.name }}</option>
+              </select>
+              <div *ngIf="userForm.get('roleType')?.invalid && userForm.get('roleType')?.touched">
+                <small class="error">Veuillez sélectionner un rôle.</small>
+              </div>
+            </div>
+  
+            <!-- Input pour pays et phone  -->
+            <div class="double_input">
+              <div class="champ_input">
+                <select class="input_focus" formControlName="pays">
+                  <option value="" disabled selected>Pays</option>
+                  <option value="Mali">Mali</option>
+                  <option value="Senegal">Sénégal</option>
+                  <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                </select>
+                <div *ngIf="userForm.get('pays')?.invalid && userForm.get('pays')?.touched">
+                  <small class="error">Veuillez choisir un pays.</small>
+                </div>
+              </div>
+          
+              <!-- // Input de phone  -->
+              <div class="champ_input champ_input2">
+                <input class="input_focus" type="text" formControlName="phone" placeholder="00 00 00 00">
+                <label class="label">Phone</label>
+                <div *ngIf="userForm.get('phone')?.invalid && userForm.get('phone')?.touched">
+                  <small class="error">Le numéro de téléphone est requis.</small>
+                </div>
+              </div>
+            </div>
+  
+            
+          </div>
+          <div class="popup-footer">
+              <button class="btn-cancel" (click)="closePopup()">Annuler</button>
+              <button class="btn-submit" [disabled]="userForm.invalid">Ajouter</button>
+          </div>
+        </form>
+    </div>
+  </div>
