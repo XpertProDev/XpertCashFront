@@ -9,6 +9,7 @@ import { UsersService } from '../SERVICES/users.service';
 import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
 import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 import { Users } from '../MODELS/utilisateur.model';
+import { log } from 'console';
 
 @Component({
   selector: 'app-compte',
@@ -33,6 +34,23 @@ export class CompteComponent  implements OnInit {
   errorMessage: string | null = null; 
   successMessage: string | null = null;
 
+  users: any[] = [];
+
+  paysFlags: { [key: string]: string } = {
+    'Mali': '🇲🇱',
+    'Sénégal': '🇸🇳',
+    'Côte d\'Ivoire': '🇨🇮',
+    'Guinée': '🇬🇳',
+    'Burkina Faso': '🇧🇫',
+    'Togo': '🇹🇬',
+    'Niger': '🇳🇪',
+    'Bénin': '🇧🇯',
+    'Mauritanie': '🇲🇷',
+    'Gabon': '🇬🇦',
+    'Cameroun': '🇨🇲',
+   
+  };
+
   constructor(
     private rolesService: RolesService,
     private usersService: UsersService,
@@ -43,6 +61,20 @@ export class CompteComponent  implements OnInit {
   ngOnInit() {
     this.loadRoles();
     this.initForm();
+    
+    this.usersService.getUserInfo().subscribe({
+      next: (userData) => {
+        if (userData && userData.id) {
+          const entrepriseId = userData.id;
+          this.loadUsersOfEntreprise(entrepriseId);
+        } else {
+          console.error("Impossible de récupérer l'ID de l'entreprise.");
+        }
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des informations utilisateur :", err);
+      }
+    });
   }
 
   initForm() {
@@ -67,6 +99,24 @@ export class CompteComponent  implements OnInit {
         }
       });
     }
+  }
+
+  loadUsersOfEntreprise(entrepriseId: number) {
+    this.isLoading = true;
+    this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
+      next: (data) => {
+        this.users = data.map(user => ({
+          ...user,
+          flag: this.paysFlags[user.pays] || ''
+        }));
+        this.isLoading = false;
+        console.log('Utilisateurs récupérés:', this.users);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des utilisateurs', err);
+        this.isLoading = false;
+      }
+    });
   }
 
   openPopup() {
@@ -97,59 +147,43 @@ export class CompteComponent  implements OnInit {
     this.successMessage = null;
   
     if (this.userForm.invalid) {
-      this.errorMessage = "Veuillez remplir tous les champs correctement";
+      this.errorMessage = "Veuillez remplir tous les champs correctement.";
       return;
     }
   
     const request: UserNewRequest = this.userForm.value;
     const token = localStorage.getItem('authToken');
-    
+  
     if (!token) {
-      this.errorMessage = "Token non disponible";
+      this.errorMessage = "Vous devez être connecté pour ajouter un utilisateur.";
       return;
     }
   
     this.isLoading = true;
   
+    console.log("Données envoyées :", request);
+    console.log("Token utilisé :", token);
+  
     this.usersService.addUserToEntreprise(request, token).subscribe({
       next: (response) => {
-        const res = response as string;
-        if (typeof res === 'string' && res.includes('succès')) {
-          this.successMessage = res;
+        console.log("Réponse du serveur :", response);
+  
+        if (typeof response === 'string' && response.includes('succès')) {
+          this.successMessage = response;
         } else {
-          this.successMessage = "Création de compte réussie !";
+          this.successMessage = "Utilisateur ajouté avec succès !";
         }
-        
-        // Réinitialisation explicite des champs
-        this.userForm.patchValue({
-          nomComplet: '',
-          email: '',
-          roleType: '',
-          phone: '',
-          pays: ''
-        });
-        
-        // Réinitialisation de l'état du formulaire (optionnel mais recommandé)
-        Object.keys(this.userForm.controls).forEach(controlName => {
-          this.userForm.get(controlName)?.setErrors(null);
-        });
+  
+        // Réinitialisation des champs du formulaire
+        this.userForm.reset();
   
         this.isLoading = false;
         this.closePopup();
-        setTimeout(() => this.successMessage = null, 1000);
-      },      
-      error: (error) => {
-        this.isLoading = false; 
-        if (error instanceof HttpErrorResponse) {
-          this.errorMessage = error.error.message || "Erreur inconnue";
-        } else {
-          this.errorMessage = "Erreur lors de l'ajout de l'utilisateur";
-        }
-        setTimeout(() => this.errorMessage = null, 10000);
-      }           
+        setTimeout(() => this.successMessage = null, 3000);
+      },
     });
   }
+  
 
 }
 
-// sydiakaridia38@gmail.com

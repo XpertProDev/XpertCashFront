@@ -1,4 +1,3 @@
-
 <div class="toast-container">
   <div *ngIf="successMessage" class="alert alert-success toast-message-success">
     {{ successMessage }}
@@ -51,32 +50,14 @@
         </tr>
       </thead>
       <tbody>
-        <!-- /////////// -->
-        <tr>
-          <td>Diakaridia SY</td>
-          <td>informatiquexpertpro2&#64;gmail.com</td>
-          <td>Admin</td>
-          <td>Mali</td>
-          <td>+223 78711623</td>
-        </tr>
-
-
-        <!-- /////////// -->
-        <tr>
-          <td>Ibrahim Diaby</td>
-          <td>informatiquexpertpro3&#64;gmail.com</td>
-          <td>COMPTABLE</td>
-          <td>Mali</td>
-          <td>+223 00000000</td>
-        </tr>
-
-        <!-- /////////// -->
-        <tr>
-          <td>Mohamed Diallo</td>
-          <td>informatiquexpertpro3&#64;gmail.com</td>
-          <td>VENDEUR</td>
-          <td>Mali</td>
-          <td>+223 00000000</td>
+        <tr *ngFor="let user of users">
+          <td>{{ user.nomComplet }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.role?.name }}</td>
+          <td>
+             {{ user.pays }} <span>{{ user.flag }}</span>
+          </td>
+          <td>{{ user.phone }}</td>
         </tr>
       </tbody>
     </table>
@@ -133,7 +114,7 @@
                 <select class="input_focus" formControlName="pays">
                   <option value="" disabled selected>Pays</option>
                   <option value="Mali">Mali</option>
-                  <option value="Senegal">Sénégal</option>
+                  <option value="Sénégal">Sénégal</option>
                   <option value="Côte d'Ivoire">Côte d'Ivoire</option>
                 </select>
                 <div *ngIf="userForm.get('pays')?.invalid && userForm.get('pays')?.touched">
