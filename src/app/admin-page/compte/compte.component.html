@@ -136,7 +136,13 @@
           </div>
           <div class="popup-footer">
               <button class="btn-cancel" (click)="closePopup()">Annuler</button>
-              <button class="btn-submit" [disabled]="userForm.invalid">Ajouter</button>
+              <button class="btn-submit" 
+                      [disabled]="userForm.invalid" 
+                      [style.backgroundColor]="userForm.valid ? '#0672E4' : '#0671e434'"
+                      [style.color]="userForm.valid ? '#ffffff' : '#00000073'"
+                      [style.cursor]="userForm.valid ? 'pointer' : 'no-drop'">
+                Ajouter
+              </button>
           </div>
         </form>
     </div>

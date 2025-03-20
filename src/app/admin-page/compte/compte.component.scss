@@ -195,10 +195,12 @@ tr:hover {
   }
   
   .btn-submit {
-    background-color: #0672E4;
+    background-color: #0671e434;
     // border: 1px solid #ACCEBC;
     padding: 6px 25px;
     color: #ffffff;
+    cursor: pointer;
+    cursor: no-drop;
   }
 
   // .btn-submit:hover {

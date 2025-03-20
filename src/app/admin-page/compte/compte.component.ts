@@ -80,7 +80,7 @@ export class CompteComponent  implements OnInit {
   initForm() {
     this.userForm = this.fb.group({
       nomComplet: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
       roleType: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
       pays: ['', Validators.required]
