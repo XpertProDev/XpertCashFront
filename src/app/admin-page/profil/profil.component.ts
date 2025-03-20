@@ -52,7 +52,6 @@ export class ProfilComponent  implements OnInit{
     'Mauritanie': '🇲🇷',
     'Gabon': '🇬🇦',
     'Cameroun': '🇨🇲',
-   
   };
 
   // Methode de eye

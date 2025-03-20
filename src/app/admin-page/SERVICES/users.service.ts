@@ -5,6 +5,8 @@ import { Observable, switchMap, throwError } from 'rxjs';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
 
 interface UserRequest {
+  //id: UserRequest;
+  id: number;
   nomComplet: string;
   nomEntreprise: string;
   email: string;
@@ -119,6 +121,17 @@ export class UsersService {
       }
     }
     
+    // Méthode pour extraire l'ID de l'utilisateur connecté depuis le token
+    extractUserIdFromToken(token: string): number | null {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1])); // Décodage du payload du token
+        return decodedToken.sub ? parseInt(decodedToken.sub, 10) : null; // Assurez-vous que 'sub' contient l'ID
+      } catch (error) {
+        console.error('Erreur lors de l\'extraction de l\'ID depuis le token :', error);
+        return null;
+      }
+    }
+
     addUserToEntreprise(userData: any, token: string): Observable<string> {
       const headers = { Authorization: `Bearer ${token}` };
       return this.http.post<string>(`${this.apiUrl}/addNewUsers`, userData, { headers });
@@ -159,5 +172,21 @@ export class UsersService {
       });
       
       return this.http.patch<{ message?: string; error?: string }>(`${this.apiUrl}/updateUsers/${id}`, updates, { headers });
+    }
+
+
+    getAllUsersOfEntreprise(entrepriseId: number): Observable<any[]> {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError('Aucun token trouvé');
+      }
+    
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+    
+      return this.http.get<any[]>(`${this.apiUrl}/entreprise/${entrepriseId}/allusers`, { headers });
     }
 }
