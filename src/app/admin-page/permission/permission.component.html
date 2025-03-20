@@ -1,0 +1,65 @@
+<div class="container" >
+    <div class="title">
+        <span class="h4">Accès a la permission</span>
+    </div>
+    <div class="content">
+        <!-- // Type de permission  -->
+         <div class="permissionPage">
+            <div *ngFor="let permission of permissions" class="div{{permission.id}}">
+                <div class="card_permission">
+                    <div class="img_name">
+                        <div class="img_permission">
+                            <img [src]="permission.imgUrl">
+                        </div>
+                        <div class="name_permission">
+                            <span class="h5">{{permission.name}}</span>
+                        </div>
+                    </div>
+                    <label class="container_checkbox">
+                        <input 
+                          type="checkbox" 
+                          [(ngModel)]="permission.selected">
+                        <svg viewBox="0 0 90 90" height="2em" width="2em">
+                          <path 
+                            d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16" 
+                            pathLength="575.0541381835938" 
+                            class="path">
+                          </path>
+                        </svg>
+                      </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="container_permission">
+            <div class="content_permission">
+                <!-- Pour les selects de permission -->
+                <div class="containerTable">
+                    <div class="title_cadre_permission">
+                        <span> {{selectedCount}} </span>
+                        <span>Sélectionnée(s)</span>
+                    </div>
+                    <!-- Permission selectionner -->
+                    <div class="permission_select">
+                        <!-- Select   -->
+                        <div  *ngFor="let permission of selectedPermissions" class="selet_dynamic">
+                            <div class="img_permission_select">
+                                <img [src]="permission.imgUrl">
+                            </div>
+                            <div class="name_permission_select">
+                                <span class="h5">{{permission.name}}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn_confirm">
+                        <button class="btn">Confirmer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+         
+
+    </div>
+</div>
+

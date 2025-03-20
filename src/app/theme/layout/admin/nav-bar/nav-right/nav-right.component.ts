@@ -126,7 +126,7 @@ export class NavRightComponent implements OnInit{
   
 
   goToCompte() {
-    this.router.navigate(['/compte']);
+    this.router.navigate(['/utilisateur']);
   }
 
   onLogout(): void {

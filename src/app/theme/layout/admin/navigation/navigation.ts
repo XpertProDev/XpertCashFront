@@ -158,20 +158,20 @@ export const NavigationItems: NavigationItem[] = [
         type: 'collapse',
         icon: 'feather icon-box',
         children: [
-          {
-            id: 'compte',
-            title: 'Comptes',
-            type: 'item',
-            url: '/compte',
-            //classes: 'nav-item',
-          },
-          {
-            id: 'profil',
-            title: 'Profil',
-            type: 'item',
-            url: '/profil',
-            //classes: 'nav-item',
-          },
+          // {
+          //   id: 'compte',
+          //   title: 'Comptes',
+          //   type: 'item',
+          //   url: '/compte',
+          //   //classes: 'nav-item',
+          // },
+          // {
+          //   id: 'profil',
+          //   title: 'Profil',
+          //   type: 'item',
+          //   url: '/profil',
+          //   //classes: 'nav-item',
+          // },
         ]
       }
     ]

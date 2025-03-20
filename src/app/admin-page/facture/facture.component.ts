@@ -329,7 +329,7 @@ export class FactureComponent  implements AfterViewInit {
     doc.setTextColor(6, 114, 228);
     doc.text(this.filteredFactures[0]?.numeroFacture || 'FAC-XXXXXX', 30, y);
     doc.setFont('helvetica', 'bold');
-
+ 
     
    
     
