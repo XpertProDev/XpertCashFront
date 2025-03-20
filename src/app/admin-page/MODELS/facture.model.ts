@@ -1,4 +1,5 @@
 export interface ProduitFacture {
+    codeProduit: string;
     nomProduit: string;
     prixUnitair: number;
     quantite: number;

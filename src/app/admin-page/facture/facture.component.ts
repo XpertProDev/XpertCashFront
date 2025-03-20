@@ -22,6 +22,9 @@ import { FactureService } from '../SERVICES/facture.service';
 import { ViewChildren, QueryList } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 
 
 
@@ -313,6 +316,144 @@ export class FactureComponent  implements AfterViewInit {
     const startIndex = this.currentPage * this.pageSize;
     this.paginatedFactures = this.filteredFactures.slice(startIndex, startIndex + this.pageSize);
   }
+
+ 
+  downloadPDFWithJsPDF(): void {
+    const doc = new jsPDF();
+    doc.setFontSize(9);
+
+    // 1. Numéro de facture
+    let y = 15;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Facture No :', 10, y);
+    doc.setTextColor(6, 114, 228);
+    doc.text(this.filteredFactures[0]?.numeroFacture || 'FAC-XXXXXX', 30, y);
+    doc.setFont('helvetica', 'bold');
+
+    
+   
+    
+    // 2. Informations de la boutique
+    y += 8;
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Informations de la boutique', 10, y);
+    
+    y += 5;
+    doc.setDrawColor(0, 0, 0);
+    doc.line(10, y, 200, y);
+    y += 10;
+    
+    y += 1;
+    doc.text('Boutique :', 10, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(6, 114, 228);
+    doc.text(this.boutiqueName, 30, y);
+
+    y += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('Date de création :', 10, y);
+    doc.setFont('helvetica', 'normal');
+    
+    const formatDate = (dateString: string): string => {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+        }).format(date);
+    };
+    
+    const formattedDate = formatDate(this.filteredFactures[0]?.dateFacture || '');
+    doc.text(formattedDate || 'N/A', 40, y);
+
+     y += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Créé par:', 10, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(this.filteredFactures[0]?.nomUtilisateur || 'N/A', 27, y);
+
+
+    y += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Téléphone :', 10, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(this.filteredFactures[0]?.telephoneUtilisateur || 'N/A', 30, y);
+
+    y += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Type de mouvement :', 10, y);
+    doc.setFont('helvetica', 'normal');
+    
+    let typeMouvement = this.filteredFactures[0]?.type || 'N/A';
+    typeMouvement = typeMouvement.replace(/(.+)\1+/, '$1');
+    
+    const couleurMouvement: [number, number, number] = 
+        typeMouvement === 'AJOUTER' ? [0, 150, 0] : [255, 0, 0];
+
+    doc.setTextColor(...couleurMouvement);
+    doc.setFont('helvetica', 'bold');
+    doc.text(typeMouvement, 45, y);
+    doc.setTextColor(0, 0, 0);
+
+   y += 12;
+
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Informations sur les produits', 10, y);
+    
+    y += 5;
+    doc.line(10, y, 200, y);
+    y += 10;
+   
+    doc.text('Produits', 10, y);
+    y += 10;
+
+    doc.setFillColor(6, 114, 228);
+    doc.setTextColor(255, 255, 255);
+    doc.rect(10, y, 190, 10, 'F');
+    doc.text('Code', 15, y + 7);
+    doc.text('Produit', 50, y + 7);
+    doc.text('Prix unitaire', 100, y + 7);
+    doc.text('Quantité', 140, y + 7);
+    doc.text('Total', 170, y + 7);
+
+    // 6. Données des produits
+    y += 15;
+    doc.setTextColor(0, 0, 0);
+    const produits = this.filteredFactures[0]?.produits || [];
+    produits.forEach((produit, index) => {
+        doc.text(produit.codeGenerique || `P-${index + 1}`, 15, y);
+        doc.text(produit.nomProduit, 50, y);
+        doc.text(produit.prixUnitair.toFixed(3), 100, y);
+        doc.text(produit.quantite.toString(), 140, y);
+        doc.setTextColor(255, 0, 0);
+        doc.text((produit.total || 0).toFixed(3), 170, y);
+        doc.setTextColor(0, 0, 0);
+        y += 10;
+    });
+
+    // 7. Séparateur avant la signature
+    y += 10;
+    doc.line(10, y, 200, y);
+    y += 15;
+
+    // 8. Signature
+    doc.setFont('helvetica', 'bold');
+    doc.text('Signature', 20, y);
+    doc.text('Approuvé par', 90, y);
+    doc.text('Reçu par', 160, y);
+
+    // 9. Sauvegarde du PDF
+    doc.save('facture.pdf');
+}
+
+
+
 
 }
 
