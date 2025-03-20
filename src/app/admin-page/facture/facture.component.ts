@@ -82,7 +82,7 @@ export class FactureComponent  implements AfterViewInit {
 
    // Dropdown pour l'export
    showExportDropdown = false;
-   showDescription = false;
+   showDescription = true;
    
    // Liste filtrée des stocks ajustés
    adjustedStocks: Stock[] = [];
