@@ -111,7 +111,7 @@
             <!-- Input pour pays et phone  -->
             <div class="double_input">
               <div class="champ_input">
-                <select class="input_focus" formControlName="pays">
+                <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
                   <option value="" disabled selected>Pays</option>
                   <option value="Mali">Mali</option>
                   <option value="Senegal">Sénégal</option>
@@ -124,8 +124,9 @@
           
               <!-- // Input de phone  -->
               <div class="champ_input champ_input2">
-                <input class="input_focus" type="text" formControlName="phone" placeholder="00 00 00 00">
-                <label class="label">Phone</label>
+                <input class="input_focus" type="text" formControlName="phone"  placeholder="00 00 00 00" [maxlength]="maxPhoneLength" [value]="indicatif ? indicatif : ''">
+                
+                <label class="label">Phone </label>
                 <div *ngIf="userForm.get('phone')?.invalid && userForm.get('phone')?.touched">
                   <small class="error">Le numéro de téléphone est requis.</small>
                 </div>

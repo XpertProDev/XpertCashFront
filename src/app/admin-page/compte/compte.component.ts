@@ -38,17 +38,23 @@ export class CompteComponent  implements OnInit {
 
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
-    'Sénégal': '🇸🇳',
+    'Senegal': '🇸🇳',
     'Côte d\'Ivoire': '🇨🇮',
     'Guinée': '🇬🇳',
     'Burkina Faso': '🇧🇫',
-    'Togo': '🇹🇬',
     'Niger': '🇳🇪',
-    'Bénin': '🇧🇯',
-    'Mauritanie': '🇲🇷',
-    'Gabon': '🇬🇦',
-    'Cameroun': '🇨🇲',
-   
+  };
+
+  indicatif: string = '';
+  maxPhoneLength: number = 8;
+
+  paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
+    'Mali': { indicatif: '+223', longueur: 8 },
+    'Senegal': { indicatif: '+221', longueur: 9 },
+    'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 },
+    'Guinée': { indicatif: '+224', longueur: 9 },
+    'Burkina Faso': { indicatif: '+226', longueur: 8 },
+    'Niger': { indicatif: '+227', longueur: 8 },
   };
 
   constructor(
@@ -86,6 +92,47 @@ export class CompteComponent  implements OnInit {
       pays: ['', Validators.required]
     });
   }
+
+  onPaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+  
+    if (paysInfo) {
+      this.indicatif = `${paysInfo.indicatif} `;  
+  
+      this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
+  
+      this.userForm.controls['phone'].setValue(this.indicatif);
+  
+      this.updatePhoneValidator(paysInfo.longueur);
+    }
+  }
+  
+  updatePhoneValidator(longueur: number): void {
+    this.userForm.controls['phone'].setValidators([
+      Validators.required,
+      Validators.pattern(`^\\+\\d{1,3}\\s?\\d{${longueur}}$`)
+    ]);
+    this.userForm.controls['phone'].updateValueAndValidity();
+  }
+  
+  formatPhoneNumber(): void {
+    let valeur = this.userForm.controls['phone'].value;
+  
+    if (!valeur.startsWith(this.indicatif)) {
+      this.userForm.controls['phone'].setValue(this.indicatif);
+    }
+  
+    let regex = new RegExp(`^\\${this.indicatif}(\\d*)$`);
+    let match = valeur.match(regex);
+  
+    if (match) {
+      let chiffres = match[1].replace(/\D/g, '');
+      this.userForm.controls['phone'].setValue(this.indicatif + chiffres);
+    }
+  }
+  
+  
 
   loadRoles() {
     const token = localStorage.getItem('authToken'); 
