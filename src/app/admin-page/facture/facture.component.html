@@ -35,10 +35,26 @@
 
         <div class="factures">
             <mat-accordion *ngIf="!noFacturesAvailable" class="example-headers-align">
-                <mat-expansion-panel class="cadre_panel" *ngFor="let facture of paginatedFactures; let i = index" [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
+                <mat-expansion-panel #panel class="cadre_panel" *ngFor="let facture of paginatedFactures; let i = index" [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
                     <!-- // header facture  -->
                     <mat-expansion-panel-header>
-                        <mat-panel-title class="title_facture"> Facture : <span class="title_facture_code"  [innerHTML]="highlightMatch(facture.numeroFacture || '')"></span> </mat-panel-title>
+                        <mat-panel-title class="title_facture"> 
+                          <div class="numFacture">
+                            Facture : <span class="title_facture_code"  [innerHTML]="highlightMatch(facture.numeroFacture || '')"></span> 
+                          </div>
+                          <!-- // bare  -->
+                           <div class="barre" *ngIf="!panel.expanded"></div>
+                           <!-- // Personnage qui a cree -->
+                            <div class="personnage" *ngIf="!panel.expanded">
+                                Créé par : <span class="title_facture_info">{{ facture.nomUtilisateur }}</span>
+                            </div>
+                            <!-- // bare  -->
+                             <div class="barre" *ngIf="!panel.expanded"></div>
+                            <!-- // Personnage type d'ajoute-->
+                             <div class="personnage" *ngIf="!panel.expanded">
+                                Type de mouvement : <span  [style.color]="getColor(facture.type)" style="font-weight: 600; text-transform: uppercase;">{{ facture.type }}</span>
+                             </div>
+                        </mat-panel-title>
                         <!-- icon arrow icon_arrow -->
                         <div class="icon_export">
                             <div class="export-container" style="display: flex; align-items: center;">

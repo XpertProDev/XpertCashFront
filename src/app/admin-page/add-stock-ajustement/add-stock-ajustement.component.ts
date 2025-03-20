@@ -494,7 +494,7 @@ export class AddStockAjustementComponent {
   
   // Méthode pour afficher une pop-up de succès
   showSuccessModal(): void {
-    this.successMessage = '✅ Les produits ont été ajustés avec réussite ! ';
+    this.successMessage = 'Les produits ont été ajustés avec réussite ! ';
     setTimeout(() => {
       this.successMessage = '';
     }, 5000);
