@@ -27,8 +27,8 @@
           <div class="bare"></div>
         </div>
         <div class="inputSearch">
-          <i class="ri-search-2-line"></i>
-          <input type="text" placeholder="Recherche...." />
+          <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch(searchInput)"></i>
+          <input #searchInput type="text" placeholder="Recherche...." (input)="filterUsers($event)" />
         </div>
       </div>
     </div>
@@ -42,7 +42,7 @@
           <th class="content_sort">
             Rôle type
             <div class="icon_sort">
-              <i class="ri-sort-asc"></i>
+              <i class="ri-sort-asc" (click)="sortRoles()"></i>
             </div>
           </th>
           <th>Pays</th>
@@ -50,7 +50,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of users">
+        <tr *ngFor="let user of filteredUsers">
           <td>{{ user.nomComplet }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.role?.name }}</td>

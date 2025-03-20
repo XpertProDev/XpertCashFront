@@ -35,6 +35,7 @@ export class CompteComponent  implements OnInit {
   successMessage: string | null = null;
 
   users: any[] = [];
+  filteredUsers: any[] = [];
 
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
@@ -56,6 +57,9 @@ export class CompteComponent  implements OnInit {
     'Burkina Faso': { indicatif: '+226', longueur: 8 },
     'Niger': { indicatif: '+227', longueur: 8 },
   };
+
+  isAscending: boolean = true;
+  searchTerm: string = '';
 
   constructor(
     private rolesService: RolesService,
@@ -81,6 +85,8 @@ export class CompteComponent  implements OnInit {
         console.error("Erreur lors de la récupération des informations utilisateur :", err);
       }
     });
+    
+    this.filteredUsers = this.users;
   }
 
   initForm() {
@@ -156,6 +162,7 @@ export class CompteComponent  implements OnInit {
           ...user,
           flag: this.paysFlags[user.pays] || ''
         }));
+        this.filteredUsers = this.users; // Mise à jour des utilisateurs filtrés
         this.isLoading = false;
         console.log('Utilisateurs récupérés:', this.users);
       },
@@ -229,6 +236,33 @@ export class CompteComponent  implements OnInit {
         setTimeout(() => this.successMessage = null, 3000);
       },
     });
+  }
+
+  sortRoles() {
+    this.users = this.users.sort((a, b) => {
+      if (this.isAscending) {
+        if (a.role?.name < b.role?.name) return -1;
+        if (a.role?.name > b.role?.name) return 1;
+      } else {
+        if (a.role?.name > b.role?.name) return -1;
+        if (a.role?.name < b.role?.name) return 1;
+      }
+      return 0;
+    });
+    this.isAscending = !this.isAscending;
+  }
+
+  filterUsers(event: Event) {
+    this.searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
+    this.filteredUsers = this.users.filter(user =>
+      user.nomComplet.toLowerCase().includes(this.searchTerm)
+    );
+  }
+
+  clearSearch(inputElement: HTMLInputElement) {
+    this.searchTerm = '';
+    this.filteredUsers = this.users;
+    inputElement.value = '';
   }
   
 
