@@ -172,7 +172,7 @@ const routes: Routes = [
 
       // La routing de Compte
       {
-        path: 'compte',
+        path: 'utilisateur',
         loadComponent: () => import('./admin-page/compte/compte.component').then(m => m.CompteComponent),
         canActivate: [authGuard]
       },
@@ -181,6 +181,13 @@ const routes: Routes = [
       {
         path: 'profil',
         loadComponent: () => import('./admin-page/profil/profil.component').then(m => m.ProfilComponent),
+        canActivate: [authGuard]
+      },
+
+      // La routing de Compte
+      {
+        path: 'permission',
+        loadComponent: () => import('./admin-page/permission/permission.component').then(m => m.PermissionComponent),
         canActivate: [authGuard]
       },
 
