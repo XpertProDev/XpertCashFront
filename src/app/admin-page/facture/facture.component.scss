@@ -56,6 +56,29 @@ mat-expansion-panel {
     font-size: 14px;
 }
 
+.mat-expansion-panel-header {
+    height: 60px;
+}
+
+.barre {
+    height: 25px;
+    width: 1px;
+    background-color: #0000003f;
+    margin: 0 10px;
+}
+
+.personnage {
+    color: #00000074;
+    font-size: 12px;
+}
+
+.title_facture_info {
+    color: #000; 
+    padding-left: 6px; 
+    letter-spacing: 1px;
+    font-weight: 500;
+}
+
 .title {
     margin-bottom: 20px;
     font-size: 18px;
