@@ -1,0 +1,435 @@
+.title_return {
+    display: flex;
+    align-items: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+  
+.title {
+    font-size: 18px;
+    margin: 0 0 0 10px;
+    
+}
+
+tr {
+    font-size: 13px;
+}
+  
+th{
+    border-bottom: 1px solid #dddddd94;
+    padding: 8px;
+
+}
+
+td {
+  padding: 15px 8px;
+  border-bottom: 1px solid #dddddd94;
+}
+  
+th {
+    background-color: #f2f2f2;
+}
+  
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+  
+tr:hover {
+    background-color: #ddd;
+}
+
+.containerTable {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.tasks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+  
+.actions {
+    display: flex;
+    align-items: center;
+}
+
+.add-task {
+    padding: 10px 30px;
+    background-color: #0672E4;
+    color: #ffffff;
+    border-radius: 5px;
+    border: none;
+}
+  
+.contentIcon {
+    margin: 0 10px;
+    display: flex;
+    align-items: center;
+}
+  
+  
+.contentIcon i{
+    padding: 0 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+  
+.contentIcon i:hover {
+    color: #0672E4;
+    transition: all 0.5s ease;
+}
+  
+.bare {
+    width: 2px;
+    height: 30px;
+    background-color: #eee;
+}
+  
+.inputSearch {
+    position: relative;
+    //width: 300px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 0 15px;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+        border-color: #0672E4;
+    }
+
+    input {
+        flex: 1;
+        height: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 14px;
+        color: #333;
+        padding-left: 10px;
+
+        &::placeholder {
+            color: #aaa;
+            font-size: 13px;
+        }
+    }
+
+    i {
+        font-size: 18px;
+        cursor: pointer;
+        color: #aaa;
+        transition: all 0.3s ease-in-out;
+
+        &:hover {
+            color: #0672E4;
+        }
+    }
+
+    .red-icon {
+        color: red;
+    }
+}
+  
+.inputSearch input {
+    width: 100%;
+    height: 100%;
+    padding-left: 10px;
+    border-radius: 5px;
+}
+  
+.inputSearch i {
+    position: absolute;
+    right: 0;
+    margin-right: 15px;
+    font-size: 17px;
+}
+
+.titleTableProduit th {
+    font-size: 12px;
+}
+
+.content_sort {
+    display: flex;
+    align-items: center;
+}
+
+.icon_sort {
+    margin-left: 6px;
+}
+
+.icon_sort i{
+    font-size: 12px;
+    cursor: pointer;
+    color: #292929;
+}
+
+/* Styles pour le popup */
+/* Styles pour le popup */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .popup-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 50%;
+  }
+  
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .popup-header h4 {
+    font-size: 18px;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .popup-footer {
+    margin-top: 20px;
+    text-align: right;
+  }
+  
+  .btn-cancel, .btn-submit {
+    padding: 8px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn-cancel {
+    background-color: #F3D8DA;
+    border: 1px solid #E7B1B6;
+    padding: 6px 25px;
+    color: #000000;
+  }
+
+  .btn-cancel:hover {
+    background-color: #E7B1B6;
+    transition: all .5s;
+  }
+  
+  .btn-submit {
+    background-color: #0671e434;
+    // border: 1px solid #ACCEBC;
+    padding: 6px 25px;
+    color: #ffffff;
+    cursor: pointer;
+    cursor: no-drop;
+  }
+
+  // .btn-submit:hover {
+  //   background-color: #ACCEBC;
+  //   transition: all .5s;
+  // }
+
+
+  // iNPUt
+
+  .double_input {
+    display: flex; 
+    align-items: center;
+    gap: 20px;
+  }
+
+  .champ_input {
+    position: relative;
+    margin-bottom: 25px;
+  }
+
+
+.input_focus {
+    width: 100%;
+    min-width: 150px;
+    height: 49px;
+    outline: none;
+    border-bottom: 1px solid rgb(53, 50, 50);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    margin: 10px 0 0;
+    transition: all 0.3s;
+    font-size: 14px;
+    //padding-left: 10px;
+    background: none;
+    color: #695c5c;
+  }
+  
+  .champ_input .label {
+    position: absolute;
+    top: 22px;
+    left: 4px;
+    pointer-events: none;
+    color: rgb(107, 102, 102);
+  }
+
+  .champ_grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    gap: 20px;
+  }
+
+  .input_focus:hover {
+    border-bottom: 1px solid #0672E4;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  
+  
+  .input_focus:not(:placeholder-shown) + .label,
+  .input_focus:focus + .label {
+    color: #0672E4;
+    top: 0;
+    left: 0;
+    transition: all 0.3s ease-in-out;
+    background: none;
+    font-size: 11px;
+    padding: 0;
+  }
+  
+  
+  .input_focus::placeholder {
+    opacity: 0;
+  }
+  
+  .input_focus:focus::placeholder {
+    opacity: 1;
+    animation-delay: 1s;
+    font-size: 12px;
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Conteneur du toast */
+.toast-container {
+  position: fixed;
+  top: 60px;
+  right: 35px;
+  z-index: 9999;
+}
+
+ // toast success
+.toast-message-success {
+  background-color: #D5E6DE;
+  border: 1px solid #ACCEBC;
+  color: #000;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: fadeInOut 3s ease-in-out;
+  transform: translateY(-20px);
+}
+
+//toast success
+.toast-message-danger {
+  background-color: #F3D8DA;
+  border: 1px solid #E7B1B6;
+  color: #000;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: fadeInOut 3s ease-in-out;
+  transform: translateY(-20px);
+}
+
+/* Animation pour faire apparaître et disparaître le toast */
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(2px); /* Le toast disparaît avec un léger mouvement vers le bas */
+  }
+}
+
+.error {
+  color: red;
+  // font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 18px;
+  z-index: 9999999999;
+}
+
+
+.loading-content {
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  gap: 10px; 
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.red-icon {
+  color: red;
+}
