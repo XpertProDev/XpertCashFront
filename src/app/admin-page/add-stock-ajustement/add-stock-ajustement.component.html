@@ -101,13 +101,15 @@
                         <td>
                           <form>
                             <div class="champ_input" style="margin-right: 15px;">
-                              <input type="number" class="input_focus_type"
-                                     id="addQuantite"
-                                     [(ngModel)]="quantiteAjoute"
-                                     placeholder="....."
-                                     name="addQuantite"
-                                     style="text-align: center;"
-                                     min="0">
+                              <!-- Modifiez les inputs de quantité pour qu'ils réagissent au changement -->
+                                <input type="number" 
+                                  id="addQuantite" class="input_focus_type"
+                                  [(ngModel)]="quantiteAjoute"
+                                  [max]="selectedProduct ? selectedProduct.quantite : null"
+                                  placeholder="....."
+                                  name="addQuantite"
+                                  style="text-align: center;"
+                                  min="0">
                             </div>
                           </form>
                         </td>               
@@ -252,12 +254,12 @@
                           <form>
                             <div class="champ_input" style="margin-right: 15px;">
                               <input type="number" class="input_focus_type"
-                                     id="quantiteRetirer"
-                                     [(ngModel)]="quantiteRetirer"
-                                     placeholder="....."
-                                     name="quantiteRetirer"
-                                     style="text-align: center;"
-                                     min="0">
+                                [(ngModel)]="quantiteRetirer"
+                                [max]="selectedProduct ? selectedProduct.quantite : null"
+                                placeholder="....."
+                                name="quantiteRetirer"
+                                style="text-align: center;"
+                                min="0">
                             </div>
                           </form>
                         </td>                     

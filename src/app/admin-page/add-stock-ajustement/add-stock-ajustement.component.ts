@@ -394,103 +394,174 @@ export class AddStockAjustementComponent {
     return a.id === b.id;
   }
 
-  /**
-   * Méthode pour ajouter du stock en regroupant les ajustements
-   */
+  /* Méthode pour ajouter du stock en regroupant les ajustements */
   AjouterDesQuan(): void {
     this.errorMessage = '';
     this.successMessage = '';
-
-    if (this.pendingAdjustments.length > 0) {
-      // Regrouper les quantités par produit
-      const produitsQuantites: { [key: string]: number } = {};
-      this.pendingAdjustments.forEach(adjustment => {
-        produitsQuantites[adjustment.produitId] = Number(adjustment.quantiteAjoute);
-      });
-
-      // Récupérer la description depuis le formulaire Reactive
+    const adjustmentsToProcess = [...this.pendingAdjustments];
+  
+    // Ajouter le produit sélectionné actuel s'il est valide
+    if (this.selectedProduct && this.quantiteAjoute && this.quantiteAjoute > 0) {
+      const existingIndex = adjustmentsToProcess.findIndex(
+        item => item.produitId === this.selectedProduct!.id
+      );
+  
+      if (existingIndex === -1) {
+        adjustmentsToProcess.push({
+          produitId: this.selectedProduct.id,
+          produitNom: this.selectedProduct.nom,
+          quantiteAjoute: this.quantiteAjoute,
+          stockActuel: this.selectedProduct.quantite,
+          stockApres: this.selectedProduct.quantite + this.quantiteAjoute,
+          prixVente: this.selectedProduct.prixVente
+        });
+      }
+    }
+  
+    if (adjustmentsToProcess.length > 0) {
+      const produitsQuantites = adjustmentsToProcess.reduce((acc, adjustment) => {
+        acc[adjustment.produitId] = adjustment.quantiteAjoute;
+        return acc;
+      }, {} as { [key: string]: number });
+  
       const descriptionGlobal = this.ajusteForm.value.descriptionGlobal || '';
-
-      const stockPayload = {
+  
+      this.stockService.ajouterStock({
         produitsQuantites: produitsQuantites,
         description: descriptionGlobal
-      };
-
-      this.stockService.ajouterStock(stockPayload).subscribe({
+      }).subscribe({
         next: (response) => {
-          // Mise à jour locale pour chaque produit concerné
-          this.pendingAdjustments.forEach(adjustment => {
+          // Mise à jour locale
+          adjustmentsToProcess.forEach(adjustment => {
             const product = this.tasks.find(p => p.id === adjustment.produitId);
-            if (product) {
-              product.quantite = adjustment.stockApres;
-            }
+            if (product) product.quantite = adjustment.stockApres;
           });
-
-          //Vider categorieGlobal
-          this.ajusteForm.patchValue({ descriptionGlobal: '' });
-        
+  
+          this.clearForm();
           this.showSuccessModal();
-          this.pendingAdjustments = [];
-          this.stocksVisible = true;
         },
         error: (error) => {
-          console.error('Erreur lors de l’ajustement global', error);
-          this.showErrorModal('Erreur lors de l’ajustement global.');
+          console.error('Erreur détaillée:', error);
+          this.showErrorModal(this.getErrorMessage(error));
         }
       });
     } else {
-      this.showErrorModal("Aucun produit en attente d’être ajusté.");
+      this.showErrorModal('Veuillez sélectionner au moins un produit avec une quantité valide');
     }
   }
 
-  /**
-   * Méthode pour retirer du stock en regroupant les ajustements
-   */
+  /* Méthode pour retirer du stock en regroupant les ajustements */
+  
   RetirerDesQuan(): void {
     this.errorMessage = '';
     this.successMessage = '';
-
-    if (this.pendingAdjustments.length > 0) {
-      // Regrouper les quantités à retirer par produit
-      const produitsQuantites: { [key: string]: number } = {};
-      this.pendingAdjustments.forEach(adjustment => {
-        produitsQuantites[adjustment.produitId] = Number(adjustment.quantiteRetirer);
-      });
-
-      // Récupérer la description depuis le formulaire Reactive
+    const adjustmentsToProcess = [...this.pendingAdjustments];
+  
+    // Ajouter le produit sélectionné actuel s'il est valide
+    if (this.selectedProduct && this.quantiteRetirer && this.quantiteRetirer > 0) {
+      const existingIndex = adjustmentsToProcess.findIndex(
+        item => item.produitId === this.selectedProduct!.id
+      );
+  
+      if (existingIndex === -1) {
+        // Vérifier que le stock ne devient pas négatif
+        const newStock = this.selectedProduct.quantite - this.quantiteRetirer;
+        
+        if (newStock < 0) {
+          this.showErrorModal('Le stock ne peut pas devenir négatif');
+          return;
+        }
+  
+        adjustmentsToProcess.push({
+          produitId: this.selectedProduct.id,
+          produitNom: this.selectedProduct.nom,
+          quantiteRetirer: this.quantiteRetirer,
+          stockActuel: this.selectedProduct.quantite,
+          stockApres: newStock,
+          prixVente: this.selectedProduct.prixVente
+        });
+      }
+    }
+  
+    if (adjustmentsToProcess.length > 0) {
+      const produitsQuantites = adjustmentsToProcess.reduce((acc, adjustment) => {
+        acc[adjustment.produitId] = adjustment.quantiteRetirer;
+        return acc;
+      }, {} as { [key: string]: number });
+  
       const descriptionGlobal = this.ajusteForm.value.descriptionGlobal || '';
-
-      const stockPayload = {
+  
+      this.stockService.retirerStock({
         produitsQuantites: produitsQuantites,
         description: descriptionGlobal
-      };
-
-      this.stockService.retirerStock(stockPayload).subscribe({
+      }).subscribe({
         next: (response) => {
-          // Mise à jour locale pour chaque produit concerné
-          this.pendingAdjustments.forEach(adjustment => {
+          // Mise à jour locale
+          adjustmentsToProcess.forEach(adjustment => {
             const product = this.tasks.find(p => p.id === adjustment.produitId);
-            if (product) {
-              product.quantite = adjustment.stockApres;
-            }
+            if (product) product.quantite = adjustment.stockApres;
           });
-
-          // Vider categorieGlobal
-          this.ajusteForm.patchValue({ descriptionGlobal: '' });
-
+  
+          this.clearForm();
           this.showSuccessModal();
-          this.pendingAdjustments = [];
-          this.stocksVisible = true;
         },
         error: (error) => {
-          console.error('Erreur lors de la réduction globale', error);
-          this.showErrorModal('Erreur lors de la réduction globale.');
+          console.error('Erreur détaillée:', error);
+          this.showErrorModal(this.getErrorMessage(error));
         }
       });
     } else {
-      this.showErrorModal("Aucun produit en attente d’être réduit.");
+      this.showErrorModal('Veuillez sélectionner au moins un produit avec une quantité valide');
     }
   }
+
+  private clearForm() {
+    this.pendingAdjustments = [];
+    this.selectedProduct = null;
+    this.quantiteAjoute = null;
+    this.quantiteRetirer = null;
+    this.ajusteForm.reset();
+  }
+  
+  private getErrorMessage(error: any): string {
+    if (error.status === 400) {
+      return error.error.message || 'Quantité invalide ou stock insuffisant'; 
+    }
+    if (error.status === 404) {
+      return 'Produit non trouvé';
+    }
+    return 'Erreur technique - Veuillez réessayer plus tard';
+  }
+
+  private validateCurrentSelection(): boolean {
+    if (!this.selectedProduct) return false;
+  
+    if (this.selectedAction === 'ajouter') {
+      return this.quantiteAjoute !== null 
+        && this.quantiteAjoute > 0 
+        && this.selectedProduct.quantite + this.quantiteAjoute >= 0;
+    }
+  
+    if (this.selectedAction === 'reduire') {
+      return this.quantiteRetirer !== null 
+        && this.quantiteRetirer > 0 
+        && this.selectedProduct.quantite - this.quantiteRetirer >= 0;
+    }
+  
+    return false;
+  }
+
+  // onQuantityChange(action: string) {
+  //   if (this.selectedProduct) {
+  //     const exists = this.pendingAdjustments.some(item => item.produitId === this.selectedProduct!.id);
+      
+  //     if (!exists) {
+  //       this.errorMessage = action === 'ajouter' 
+  //         ? 'N\'oubliez pas de cliquer sur "+" pour ajouter à la liste' 
+  //         : 'N\'oubliez pas de cliquer sur "+" pour ajouter à la liste';
+  //     }
+  //   }
+  // }
   
   // Méthode pour afficher une pop-up de succès
   showSuccessModal(): void {
