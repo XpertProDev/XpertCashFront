@@ -35,21 +35,31 @@ export class CompteComponent  implements OnInit {
   successMessage: string | null = null;
 
   users: any[] = [];
+  filteredUsers: any[] = [];
 
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
-    'Sénégal': '🇸🇳',
+    'Senegal': '🇸🇳',
     'Côte d\'Ivoire': '🇨🇮',
     'Guinée': '🇬🇳',
     'Burkina Faso': '🇧🇫',
-    'Togo': '🇹🇬',
     'Niger': '🇳🇪',
-    'Bénin': '🇧🇯',
-    'Mauritanie': '🇲🇷',
-    'Gabon': '🇬🇦',
-    'Cameroun': '🇨🇲',
-   
   };
+
+  indicatif: string = '';
+  maxPhoneLength: number = 8;
+
+  paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
+    'Mali': { indicatif: '+223', longueur: 8 },
+    'Senegal': { indicatif: '+221', longueur: 9 },
+    'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 },
+    'Guinée': { indicatif: '+224', longueur: 9 },
+    'Burkina Faso': { indicatif: '+226', longueur: 8 },
+    'Niger': { indicatif: '+227', longueur: 8 },
+  };
+
+  isAscending: boolean = true;
+  searchTerm: string = '';
 
   constructor(
     private rolesService: RolesService,
@@ -77,6 +87,8 @@ export class CompteComponent  implements OnInit {
         console.error("Erreur lors de la récupération des informations utilisateur :", err);
       }
     });
+    
+    this.filteredUsers = this.users;
   }
 
 
@@ -89,6 +101,47 @@ export class CompteComponent  implements OnInit {
       pays: ['', Validators.required]
     });
   }
+
+  onPaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+  
+    if (paysInfo) {
+      this.indicatif = `${paysInfo.indicatif} `;  
+  
+      this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
+  
+      this.userForm.controls['phone'].setValue(this.indicatif);
+  
+      this.updatePhoneValidator(paysInfo.longueur);
+    }
+  }
+  
+  updatePhoneValidator(longueur: number): void {
+    this.userForm.controls['phone'].setValidators([
+      Validators.required,
+      Validators.pattern(`^\\+\\d{1,3}\\s?\\d{${longueur}}$`)
+    ]);
+    this.userForm.controls['phone'].updateValueAndValidity();
+  }
+  
+  formatPhoneNumber(): void {
+    let valeur = this.userForm.controls['phone'].value;
+  
+    if (!valeur.startsWith(this.indicatif)) {
+      this.userForm.controls['phone'].setValue(this.indicatif);
+    }
+  
+    let regex = new RegExp(`^\\${this.indicatif}(\\d*)$`);
+    let match = valeur.match(regex);
+  
+    if (match) {
+      let chiffres = match[1].replace(/\D/g, '');
+      this.userForm.controls['phone'].setValue(this.indicatif + chiffres);
+    }
+  }
+  
+  
 
   loadRoles() {
     const token = localStorage.getItem('authToken'); 
@@ -112,6 +165,7 @@ export class CompteComponent  implements OnInit {
           ...user,
           flag: this.paysFlags[user.pays] || ''
         }));
+        this.filteredUsers = this.users; // Mise à jour des utilisateurs filtrés
         this.isLoading = false;
         console.log('Utilisateurs récupérés:', this.users);
       },
@@ -177,7 +231,6 @@ export class CompteComponent  implements OnInit {
           this.successMessage = "Utilisateur ajouté avec succès !";
         }
   
-        // Réinitialisation des champs du formulaire
         this.userForm.reset();
   
         this.isLoading = false;
@@ -189,6 +242,33 @@ export class CompteComponent  implements OnInit {
 
   openPermissionDetail(userId: number): void {
     this.router.navigate(['/userPermission', userId]);
+  }
+
+  sortRoles() {
+    this.users = this.users.sort((a, b) => {
+      if (this.isAscending) {
+        if (a.role?.name < b.role?.name) return -1;
+        if (a.role?.name > b.role?.name) return 1;
+      } else {
+        if (a.role?.name > b.role?.name) return -1;
+        if (a.role?.name < b.role?.name) return 1;
+      }
+      return 0;
+    });
+    this.isAscending = !this.isAscending;
+  }
+
+  filterUsers(event: Event) {
+    this.searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
+    this.filteredUsers = this.users.filter(user =>
+      user.nomComplet.toLowerCase().includes(this.searchTerm)
+    );
+  }
+
+  clearSearch(inputElement: HTMLInputElement) {
+    this.searchTerm = '';
+    this.filteredUsers = this.users;
+    inputElement.value = '';
   }
   
 

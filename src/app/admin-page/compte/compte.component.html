@@ -27,8 +27,8 @@
           <div class="bare"></div>
         </div>
         <div class="inputSearch">
-          <i class="ri-search-2-line"></i>
-          <input type="text" placeholder="Recherche...." />
+          <input #searchInput type="text" placeholder="Recherche..." (input)="filterUsers($event)" />
+          <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch(searchInput)"></i>
         </div>
       </div>
     </div>
@@ -42,7 +42,7 @@
           <th class="content_sort">
             Rôle type
             <div class="icon_sort">
-              <i class="ri-sort-asc"></i>
+              <i class="ri-sort-asc" (click)="sortRoles()"></i>
             </div>
           </th>
           <th>Pays</th>
@@ -111,7 +111,7 @@
             <!-- Input pour pays et phone  -->
             <div class="champ_grid">
               <div class="champ_input">
-                <select class="input_focus" formControlName="pays">
+                <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
                   <option value="" disabled selected>Pays</option>
                   <option value="Mali">Mali</option>
                   <option value="Sénégal">Sénégal</option>

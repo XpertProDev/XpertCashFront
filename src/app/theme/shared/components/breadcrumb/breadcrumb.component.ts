@@ -45,8 +45,8 @@ export class BreadcrumbComponent {
         const activeLink = router.url;
         const breadcrumbList = this.filterNavigation(this.navigations, activeLink);
         this.navigationList = breadcrumbList;
-        const title = breadcrumbList[breadcrumbList.length - 1]?.title || 'Welcome';
-        this.titleService.setTitle(title + ' | Gradient Able Angular free Admin Template');
+        const title = breadcrumbList[breadcrumbList.length - 1]?.title || 'Bienvenue';
+        this.titleService.setTitle(title + ' | sur Tchakeda');
       }
     });
   }
