@@ -22,6 +22,11 @@ export class PermissionComponent implements OnInit {
 
   user: UserNewRequest | undefined;;
 
+  errorMessage: string | null = null;
+  successMessage: string | null = null;
+  validationError: string | null = null;
+  originalSelectedPermissions: Set<number> = new Set();
+
   constructor(
       private usersService: UsersService,
       private route: ActivatedRoute,
@@ -85,28 +90,23 @@ export class PermissionComponent implements OnInit {
   
 
   // permission.component.ts
-  // permission.component.ts
-  // permission.component.ts
   getUserParId() {
     const userId = this.route.snapshot.params['userId'];
     
     this.usersService.getUserById(userId).subscribe({
       next: (user: UserNewRequest) => {
-        console.log('Réponse complète:', user);
         this.user = user;
-
+        this.originalSelectedPermissions.clear();
+  
         this.permissions.forEach(p => p.selected = false);
         
-        // Ajouter la vérification de null/undefined
-        if (user.role && user.role.permissions) {
+        if (user.role?.permissions) {
           user.role.permissions.forEach(backendPermission => {
             const frontendId = this.mapBackendToFrontendPermission(backendPermission.type);
             const permission = this.permissions.find(p => p.id === frontendId);
             if (permission) {
-              console.log(`Activation de la permission : ${permission.name}`);
               permission.selected = true;
-            } else {
-              console.warn(`Aucune correspondance trouvée pour : ${backendPermission.type}`);
+              this.originalSelectedPermissions.add(permission.id);
             }
           });
         }
@@ -125,6 +125,82 @@ export class PermissionComponent implements OnInit {
       'GERER_PERSONNEL': 6        // Gerer personnel
     };
     return mapping[backendType] ?? -1;
+  }
+
+  private mapFrontendToBackendPermission(frontendId: number): string {
+    const mapping: { [key: number]: string } = {
+      1: 'GERER_PRODUITS',
+      2: 'VENDRE_PRODUITS',
+      3: 'VOIR_FLUX_COMPTABLE',
+      4: 'APPROVISIONNER_STOCK',
+      5: 'GERER_MAGASINS',
+      6: 'GERER_PERSONNEL'
+    };
+    return mapping[frontendId] ?? '';
+  }
+
+
+  // Ajouter cette méthode pour gérer l'envoi
+  savePermissions() {
+    const userId = this.route.snapshot.params['userId'];
+    const permissionsMap: { [key: string]: boolean } = {};
+
+    // Réinitialiser les messages
+    this.successMessage = null;
+    this.errorMessage = null;
+    this.validationError = null;
+
+    // Compter les permissions sélectionnées
+    const selectedCount = this.permissions.filter(p => p.selected).length;
+    
+    // Validation personnalisée
+    if (selectedCount === 0) {
+      this.validationError = "Vous devez attribuer au moins une permission à l'utilisateur";
+      return;
+    }
+
+    // Vérifier les changements
+    const hasChanges = this.permissions.some(permission => {
+      const backendType = this.mapFrontendToBackendPermission(permission.id);
+      const wasSelected = this.originalSelectedPermissions.has(permission.id);
+      return permission.selected !== wasSelected;
+    });
+
+    if (!hasChanges) {
+      this.validationError = "Ces permissions sont déjà attribuées à l'utilisateur";
+      return;
+    }
+
+    // Suite de la logique d'envoi...
+    this.permissions.forEach(permission => {
+      const backendType = this.mapFrontendToBackendPermission(permission.id);
+      if (backendType) {
+        permissionsMap[backendType] = permission.selected;
+      }
+    });
+  
+    this.usersService.assignPermissionsToUser(userId, permissionsMap).subscribe({
+      next: (updatedUser) => {
+        this.successMessage = 'Permissions sauvegardées avec succès !';
+        console.log('Permissions mises à jour!', updatedUser);
+        
+        // Disparition automatique après 3 secondes
+        setTimeout(() => {
+          this.successMessage = null;
+        }, 10000);
+  
+        this.getUserParId();
+      },
+      error: (err) => {
+        this.errorMessage = 'Une erreur est survenue lors de la sauvegarde';
+        console.error('Erreur:', err);
+        
+        // Disparition automatique après 5 secondes
+        setTimeout(() => {
+          this.errorMessage = null;
+        }, 10000);
+      }
+    });
   }
 
 

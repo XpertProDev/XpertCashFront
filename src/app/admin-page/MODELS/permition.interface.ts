@@ -3,4 +3,5 @@ export interface Permission {
     name: string;
     imgUrl: string,
     selected: boolean;
+    type?: string;
   }

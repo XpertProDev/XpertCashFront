@@ -47,6 +47,19 @@
 
 </div>
 
+<div class="toast-container">
+    <!-- Ajouter la nouvelle alerte -->
+    <div *ngIf="validationError" class="alert alert-warning toast-message-warning">
+      {{ validationError }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
+      {{ errorMessage }}
+    </div>
+    <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+      {{ successMessage }}
+    </div>
+</div>
+
 <div class="container" >
     <div class="title_div title_div_permission">
         <div class="title">
@@ -107,7 +120,7 @@
                     </div>
 
                     <div class="btn_confirm">
-                        <button class="btn">Confirmer</button>
+                        <button class="btn" (click)="savePermissions()">Confirmer</button>
                     </div>
                 </div>
             </div>
