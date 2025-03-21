@@ -50,7 +50,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of users">
+        <tr *ngFor="let user of users" (click)="openPermissionDetail(user.id)">
           <td>{{ user.nomComplet }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.role?.name }}</td>

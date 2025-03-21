@@ -5,13 +5,19 @@
 
 }
 
-.title {
+.title_div {
     padding: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #E9D421;
     border-radius: 5px;
+}
+
+.title p {
+    text-align: center;
+    margin-top: 5px;
+    letter-spacing: 0.60px;
 }
 
 .h4 {

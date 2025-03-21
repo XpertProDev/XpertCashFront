@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Roles } from '../MODELS/roles.model';
 import { RolesService } from '../SERVICES/roles.service';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
@@ -55,7 +55,9 @@ export class CompteComponent  implements OnInit {
     private rolesService: RolesService,
     private usersService: UsersService,
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+    private router: Router,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
@@ -76,6 +78,7 @@ export class CompteComponent  implements OnInit {
       }
     });
   }
+
 
   initForm() {
     this.userForm = this.fb.group({
@@ -182,6 +185,10 @@ export class CompteComponent  implements OnInit {
         setTimeout(() => this.successMessage = null, 3000);
       },
     });
+  }
+
+  openPermissionDetail(userId: number): void {
+    this.router.navigate(['/permission', userId]);
   }
   
 

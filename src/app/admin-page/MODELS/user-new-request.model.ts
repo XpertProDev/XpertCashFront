@@ -1,7 +1,16 @@
 export interface UserNewRequest {
+    id: number;
     nomComplet: string;
     email: string;
     roleType: string;
     phone: string;
     pays: string;
+    role?: {
+        id: number;
+        name: string;
+        permissions: {
+          id: number;
+          type: string;
+        }[];
+      };
 }
