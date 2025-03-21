@@ -170,24 +170,31 @@ const routes: Routes = [
 
       },
 
-      // La routing de Compte
+      // La routing de utilisateur
       {
         path: 'utilisateur',
         loadComponent: () => import('./admin-page/compte/compte.component').then(m => m.CompteComponent),
         canActivate: [authGuard]
       },
 
-      // La routing de Compte
+      // La routing de Profil
       {
         path: 'profil',
         loadComponent: () => import('./admin-page/profil/profil.component').then(m => m.ProfilComponent),
         canActivate: [authGuard]
       },
 
-      // La routing de Compte
+      // La routing de userPermission
       {
         path: 'userPermission/:userId',
         loadComponent: () => import('./admin-page/permission/permission.component').then(m => m.PermissionComponent),
+        canActivate: [authGuard]
+      },
+
+      // La routing de Compte
+      {
+        path: 'boutique',
+        loadComponent: () => import('./admin-page/boutique/boutique.component').then(m => m.BoutiqueComponent),
         canActivate: [authGuard]
       },
 

@@ -89,6 +89,14 @@ export const NavigationItems: NavigationItem[] = [
         classes: 'nav-item',
         icon: 'feather icon-file'
       },
+      {
+        id: 'boutique',
+        title: 'Boutique',
+        type: 'item',
+        url: '/boutique',
+        classes: 'nav-item',
+        icon: 'feather icon-file'
+      },
 
       // Pour les compte
       /*{
