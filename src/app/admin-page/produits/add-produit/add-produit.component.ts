@@ -326,6 +326,8 @@ export class AddProduitComponent {
     this.ajouteProduitForm.get('codeBare')?.valueChanges.subscribe(value => {
       this.showBarcode = value && value.length >= 3;
     });
+
+    this.getFilteredStreetsBoutique();
     
   }
 
@@ -473,6 +475,8 @@ export class AddProduitComponent {
           // Ajouter à la liste des options
           this.options.push(newCategory);
 
+          this.showCategoryCreation = false;
+
           // 1. Mettre à jour l'input d'autocomplete
           this.myControl.setValue(newCategory);
 
@@ -525,6 +529,8 @@ export class AddProduitComponent {
             id: response.id, 
             nom: unityData.nom 
           };
+
+          this.showUniteCreation = false;
 
           // Ajouter à la liste
           this.optionsUnite.push(newUnity);
@@ -701,6 +707,84 @@ export class AddProduitComponent {
     }
   }
 
+
+  controlBoutique = new FormControl('');
+  streetsBoutique: string[] = ['Boutique 1', 'Boutique 2', 'Boutique 3'];
+  filteredStreetsBoutique!: Observable<string[]>;
+
+  getFilteredStreetsBoutique() {
+    this.filteredStreetsBoutique = this.controlBoutique.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterBoutique(value || ''))
+    );
+  }
+
+  private _filterBoutique(value: string): string[] {
+    const filterValue = this._normalizeValue(value);
+    return this.streetsBoutique.filter(street => this._normalizeValue(street).includes(filterValue));
+  }
+
+  private _normalizeValue(value: string): string {
+    return value.toLowerCase().replace(/\s/g, '');
+  }
+
+  showPopupBoutique = false;
+
+  
+  boutiqueForm!: FormGroup;
+  successMessage: string | null = null;
+  
+  // users: any[] = [];
+  filteredUsers: any[] = [];
+  
+  indicatif: string = '';
+  maxPhoneLength: number = 8;
+  
+  isAscending: boolean = true;
+  searchTerm: string = '';
+
+
+  initForm() {
+    this.boutiqueForm = this.fb.group({
+      nomBoutique: ['', Validators.required],
+      emailBoutique: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
+      adresseBoutique: ['', Validators.required],
+      telephoneBoutique: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
+    });
+  }
+  
+  updatePhoneValidator(longueur: number): void {
+    this.boutiqueForm.controls['phone'].setValidators([
+      Validators.required,
+      Validators.pattern(`^\\+\\d{1,3}\\s?\\d{${longueur}}$`)
+    ]);
+    this.boutiqueForm.controls['phone'].updateValueAndValidity();
+  }
+   
+  openPopupBoutique() {
+    this.showPopup = true;
+  }
+
+  closePopupBoutique() {
+    this.showPopup = false;
+    this.resetForm();
+  }
+
+  private resetForm() {
+    this.boutiqueForm.patchValue({
+      nomBoutique: '',
+      emailBoutique: '',
+      adresseBoutique: '',
+      telephoneBoutique: ''
+    });
+  
+    this.boutiqueForm.markAsPristine();
+    this.boutiqueForm.markAsUntouched();
+    this.boutiqueForm.updateValueAndValidity();
+  }
+
+
+  onSubmitBoutique(): void {}
   
 
 }

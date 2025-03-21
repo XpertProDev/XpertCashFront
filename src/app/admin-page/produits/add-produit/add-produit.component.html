@@ -26,14 +26,32 @@
             <!-- Les information des magasin  -->
             <div class="information_cadre">
               <div class="info_titre_input">
-                <h4>Magasin</h4>
-                <!-- <p>Nom boutique: {{ boutiqueName }}</p> -->
+                <h4>Boutique</h4>
                 <!-- Input de nom magasin  -->
-                <div class="champ_input">
+                <!-- <div class="champ_input">
                   <input type="text" class="input_focus input_focus_petit" [value]="boutiqueName" disabled required id="nomMagasin" name="nomMagasin" placeholder="Saisis le nom de magasin">
                   <label for="nomMagasin" class="label labelColor">Nom magasin</label>
+                </div> -->
+                <div class="double_input2">
+                  <div class="champ_input">
+                      <input type="text"
+                          placeholder="Search for a street"
+                          [formControl]="controlBoutique"
+                          [matAutocomplete]="autoBoutique"
+                          class="input_focus">
+                          <label for="boutiqueId" class="label">Boutique</label>
+                    <mat-autocomplete #autoBoutique="matAutocomplete">
+                      @for (street of filteredStreetsBoutique | async; track street) {
+                        <mat-option [value]="street">{{street}}</mat-option>
+                      }
+                    </mat-autocomplete>
+                    
+                  </div>
+
+                  <div class="btn_add_categoryDiv2">
+                    <button class="btn_add_category2" (click)="openPopupBoutique()">Créer une boutique</button>
+                  </div>
                 </div>
-                
                 
               </div>
             </div>
@@ -368,3 +386,73 @@
 </div>
 </div>
 
+
+
+ <!-- Popup overlay -->
+ <div class="popup-overlay" *ngIf="showPopup">
+  <div class="popup-content">
+      <div class="popup-headerBoutique">
+          <h4>Ajouter une boutique</h4>
+          <button class="close-btn" (click)="closePopupBoutique()">&times;</button>
+      </div>
+      <form [formGroup]="boutiqueForm" (ngSubmit)="onSubmitBoutique()">
+        <div class="popup-body">
+          
+          <div class="champ_grid">
+            <!-- Input de nom de boutique  -->
+            <div class="champ_input">
+              <input class="input_focus" style="min-width: 150px;" type="text" formControlName="nomBoutique" placeholder="Saisis le nom de boutique">
+              <label class="label">Nom boutque</label>
+              <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
+                <small class="error">Le nom boutique complet est vide.</small>
+              </div>
+            </div>
+
+            <!-- Input d'email'  -->
+            <div class="champ_input">
+              <input class="input_focus" style="min-width: 150px;" type="email" formControlName="emailBoutique" placeholder="Saisis l'email">
+              <label class="label">Email</label>
+              <div *ngIf="boutiqueForm.get('emailBoutique')?.invalid && boutiqueForm.get('emailBoutique')?.touched">
+                <small class="error">Un email valide est vide.</small>
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- Input pour pays et phone  -->
+          <div class="champ_grid">
+            <!-- // Input de telephone Boutique  -->
+            <div class="champ_input ">
+              <input class="input_focus" style="min-width: 150px;" type="number" formControlName="telephoneBoutique" placeholder="00 00 00 00">
+              <label class="label">Phone</label>
+              <div *ngIf="boutiqueForm.get('telephoneBoutique')?.invalid && boutiqueForm.get('telephoneBoutique')?.touched">
+                <small class="error">Le numéro de téléphone est requis.</small>
+              </div>
+            </div>
+
+            <!-- Input Numero de téléphone  -->
+            <div class="champ_input">
+                <input class="input_focus" style="min-width: 150px;" type="text" formControlName="adresseBoutique" placeholder="Saisis l'adresse">
+                <label class="label">Adresse boutique</label>
+                <div *ngIf="boutiqueForm.get('adresseBoutique')?.invalid && boutiqueForm.get('adresseBoutique')?.touched">
+                    <small class="error">L'adresse boutique valide est vide.</small>
+                </div>
+            </div>
+          </div>
+
+          
+        </div>
+        <div class="popup-footer">
+            <button class="btn-cancel" (click)="closePopupBoutique()">Annuler</button>
+            <button class="btn-submit" 
+                    [disabled]="boutiqueForm.invalid" 
+                    [style.backgroundColor]="boutiqueForm.valid ? '#0672E4' : '#0671e434'"
+                    [style.color]="boutiqueForm.valid ? '#ffffff' : '#00000073'"
+                    [style.cursor]="boutiqueForm.valid ? 'pointer' : 'no-drop'">
+              Ajouter
+            </button>
+        </div>
+      </form>
+  </div>
+</div>
