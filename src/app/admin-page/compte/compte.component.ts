@@ -188,7 +188,7 @@ export class CompteComponent  implements OnInit {
   }
 
   openPermissionDetail(userId: number): void {
-    this.router.navigate(['/permission', userId]);
+    this.router.navigate(['/userPermission', userId]);
   }
   
 

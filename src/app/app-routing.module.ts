@@ -186,7 +186,7 @@ const routes: Routes = [
 
       // La routing de Compte
       {
-        path: 'permission/:userId',
+        path: 'userPermission/:userId',
         loadComponent: () => import('./admin-page/permission/permission.component').then(m => m.PermissionComponent),
         canActivate: [authGuard]
       },

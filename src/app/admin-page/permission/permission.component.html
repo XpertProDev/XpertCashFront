@@ -1,3 +1,52 @@
+
+<div class="container_detail_user">
+    <div class="title_div">
+        <div class="title">
+            <span class="h4">Information personnel</span>
+        </div>
+    </div>
+
+    <div class="content_detail_user">
+        <div class="div1_detail_user">
+            <div class="card_permission_detail_user">
+                <div class="name_permission">
+                    Nom et prénom : <span class="h5 valueUser"> {{ user?.nomComplet }} </span>
+                </div>
+            </div>
+        </div>
+        <div class="div2_detail_user">
+            <div class="card_permission_detail_user">
+                <div class="name_permission">
+                    Email : <span class="h5 valueUser"> {{ user?.email }} </span>
+                </div>
+            </div>
+        </div>
+        <div class="div3_detail_user">
+            <div class="card_permission_detail_user">
+                <div class="name_permission">
+                    Rôle : <span class="h5 valueUser" style="color: #0672E4;"> {{ user?.role?.name }} </span>
+                </div>
+            </div>
+        </div>
+        <div class="div4_detail_user">
+            <div class="card_permission_detail_user">
+                <div class="name_permission">
+                    Numéro : <span class="h5 valueUser"> {{ user?.phone }} </span>
+                </div>
+            </div>
+        </div>
+        <div class="div5_detail_user">
+            <div class="card_permission_detail_user">
+                <div class="name_permission">
+                    Pays : <span class="h5 valueUser"> {{ user?.pays }} </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
 <div class="container" >
     <div class="title_div">
         <div class="title">
