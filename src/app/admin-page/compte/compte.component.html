@@ -27,8 +27,8 @@
           <div class="bare"></div>
         </div>
         <div class="inputSearch">
+          <input #searchInput type="text" placeholder="Recherche..." (input)="filterUsers($event)" />
           <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch(searchInput)"></i>
-          <input #searchInput type="text" placeholder="Recherche...." (input)="filterUsers($event)" />
         </div>
       </div>
     </div>
