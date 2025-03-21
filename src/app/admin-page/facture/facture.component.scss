@@ -72,11 +72,17 @@ mat-expansion-panel {
     font-size: 12px;
 }
 
+.numFacture {
+    color: #000000;
+    font-size: 13px;
+}
+
 .title_facture_info {
     color: #000; 
     padding-left: 6px; 
     letter-spacing: 1px;
     font-weight: 500;
+    font-size: 11px;
 }
 
 .title {
@@ -91,9 +97,10 @@ mat-expansion-panel {
 
 .title_facture_code {
     color: #0672E4; 
-    padding-left: 6px; 
+    padding-left: 5px; 
     letter-spacing: 1px;
     font-weight: 500;
+    font-size: 11px;
 }
 
 .icon_arrow {

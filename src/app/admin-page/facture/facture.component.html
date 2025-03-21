@@ -38,9 +38,15 @@
                 <mat-expansion-panel #panel class="cadre_panel" *ngFor="let facture of paginatedFactures; let i = index" [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
                     <!-- // header facture  -->
                     <mat-expansion-panel-header>
-                        <mat-panel-title class="title_facture"> 
+                        <mat-panel-title class="title_facture">
+                          <!-- // Personnage qui a cree -->
+                          <div class="personnage" *ngIf="!panel.expanded">
+                            Date : <span class="title_facture_info">{{ facture.dateFacture | date:'dd/MM/yyyy' }}</span>
+                          </div>
+                          <!-- // bare  -->
+                           <div class="barre" *ngIf="!panel.expanded"></div>
                           <div class="numFacture">
-                            Facture : <span class="title_facture_code"  [innerHTML]="highlightMatch(facture.numeroFacture || '')"></span> 
+                            Facture : <span class="title_facture_code" [innerHTML]="highlightMatch(facture.numeroFacture || '')"></span> 
                           </div>
                           <!-- // bare  -->
                            <div class="barre" *ngIf="!panel.expanded"></div>

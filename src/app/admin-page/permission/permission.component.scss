@@ -179,9 +179,15 @@
     height: 100%;
 }
 
+.name_permission {
+    font-weight: bold;
+    letter-spacing: 0.60px;
+}
+
 .name_permission .h5 {
     font-size: 14px;
-    letter-spacing: 0.60px;
+    // letter-spacing: 0.60px;
+    font-weight: 400;
 }
 
 .card_permission {
