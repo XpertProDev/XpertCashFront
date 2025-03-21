@@ -78,6 +78,49 @@
                         <th class="title_table_contenu">Stock après</th>
                       </tr>
                     </thead>
+
+                    <tbody  *ngIf="pendingAdjustments.length > 0">
+                        <tr  *ngFor="let adjustment of pendingAdjustments; let i = index"  class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 10px;">
+                                  <input type="text" readonly class="input_table" [value]="adjustment.produitNom">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                <input type="text" readonly class="input_table" 
+                                  [value]="adjustment.quantiteAjoute && adjustment.quantiteAjoute > 0 ? adjustment.quantiteAjoute : adjustment.quantiteRetirer" 
+                                  style="text-align: center;">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                  <input type="text" readonly class="input_table" [value]="adjustment.stockActuel" style="text-align: center;">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                <input type="text" readonly class="input_table" 
+                                  [value]="adjustment.prixVente | customNumber" 
+                                  style="text-align: center;">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock">
+                                <input type="text" readonly class="input_table" 
+                                [value]="adjustment.stockApres" style="text-align: center; cursor: no-drop">
+                              </div>
+                            </td>
+
+                            <td>
+                              <!-- // Button de ajouter  -->
+                              <div class="btn_delete" (click)="removePendingAdjustment(i)">
+                                <i class="ri-delete-bin-5-fill"></i>
+                              </div>
+                            </td>
+                        </tr>
+                    </tbody>
+
                     <tbody>
                       <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                         <td>
@@ -147,48 +190,6 @@
                         </td>                                                             
                       </tr>
                     </tbody>
-
-                    <tbody  *ngIf="pendingAdjustments.length > 0">
-                        <tr  *ngFor="let adjustment of pendingAdjustments; let i = index"  class="tr_stock" style="border-top: 1px solid #f0f2f5;">
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 10px;">
-                                  <input type="text" readonly class="input_table" [value]="adjustment.produitNom">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                <input type="text" readonly class="input_table" 
-                                  [value]="adjustment.quantiteAjoute && adjustment.quantiteAjoute > 0 ? adjustment.quantiteAjoute : adjustment.quantiteRetirer" 
-                                  style="text-align: center;">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                  <input type="text" readonly class="input_table" [value]="adjustment.stockActuel" style="text-align: center;">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                <input type="text" readonly class="input_table" 
-                                  [value]="adjustment.prixVente | customNumber" 
-                                  style="text-align: center;">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock">
-                                <input type="text" readonly class="input_table" 
-                                [value]="adjustment.stockApres" style="text-align: center; cursor: no-drop">
-                              </div>
-                            </td>
-
-                            <td>
-                              <!-- // Button de ajouter  -->
-                              <div class="btn_delete" (click)="removePendingAdjustment(i)">
-                                <i class="ri-delete-bin-5-fill"></i>
-                              </div>
-                            </td>
-                        </tr>
-                    </tbody>
                   </table>
 
                   <!-- Popup d'erreur (affichée uniquement en cas d'erreur) -->
@@ -230,6 +231,49 @@
                         <th class="title_table_contenu">Stock après</th>
                       </tr>
                     </thead>
+
+                    <tbody  *ngIf="pendingAdjustments.length > 0">
+                        <tr  *ngFor="let adjustment of pendingAdjustments; let i = index"  class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 10px;">
+                                  <input type="text" readonly class="input_table" [value]="adjustment.produitNom">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                <input type="text" readonly class="input_table" 
+                                  [value]="adjustment.quantiteRetirer && adjustment.quantiteRetirer > 0 ? adjustment.quantiteRetirer : adjustment.quantiteAjoute" 
+                                  style="text-align: center;">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                  <input type="text" readonly class="input_table" [value]="adjustment.stockActuel" style="text-align: center;">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                <input type="text" readonly class="input_table" 
+                                  [value]="adjustment.prixVente | customNumber" 
+                                  style="text-align: center;">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock">
+                                <input type="text" readonly class="input_table" 
+                                [value]="adjustment.stockApres" style="text-align: center;">
+                              </div>
+                            </td>
+
+                            <td>
+                              <!-- // Button de ajouter  -->
+                              <div class="btn_delete" (click)="removePendingAdjustment(i)">
+                                <i class="ri-delete-bin-5-fill"></i>
+                              </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    
                     <tbody>
                       <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                         <td>
@@ -296,48 +340,6 @@
                           </div>
                         </td>                                                             
                       </tr>
-                    </tbody>
-
-                    <tbody  *ngIf="pendingAdjustments.length > 0">
-                        <tr  *ngFor="let adjustment of pendingAdjustments; let i = index"  class="tr_stock" style="border-top: 1px solid #f0f2f5;">
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 10px;">
-                                  <input type="text" readonly class="input_table" [value]="adjustment.produitNom">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                <input type="text" readonly class="input_table" 
-                                  [value]="adjustment.quantiteRetirer && adjustment.quantiteRetirer > 0 ? adjustment.quantiteRetirer : adjustment.quantiteAjoute" 
-                                  style="text-align: center;">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                  <input type="text" readonly class="input_table" [value]="adjustment.stockActuel" style="text-align: center;">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock" style="margin-right: 15px;">
-                                <input type="text" readonly class="input_table" 
-                                  [value]="adjustment.prixVente | customNumber" 
-                                  style="text-align: center;">
-                              </div>
-                            </td>
-                            <td>
-                              <div class="champ_input_list_stock">
-                                <input type="text" readonly class="input_table" 
-                                [value]="adjustment.stockApres" style="text-align: center;">
-                              </div>
-                            </td>
-
-                            <td>
-                              <!-- // Button de ajouter  -->
-                              <div class="btn_delete" (click)="removePendingAdjustment(i)">
-                                <i class="ri-delete-bin-5-fill"></i>
-                              </div>
-                            </td>
-                        </tr>
                     </tbody>
                   </table>
 
