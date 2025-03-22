@@ -156,34 +156,41 @@
                               </div>
                               <div class="mat-elevation-z8">
                                 <table mat-table [dataSource]="facture.dataSource">
-                              
+                                  <!-- Colonnes existantes -->
                                   <ng-container matColumnDef="codeGenerique">
                                     <th mat-header-cell *matHeaderCellDef>Code</th>
                                     <td mat-cell *matCellDef="let p">{{ p.codeGenerique }}</td>
+                                    <td mat-footer-cell *matFooterCellDef> Total</td>
                                   </ng-container>
-                        
+                                
                                   <ng-container matColumnDef="nomProduit">
                                     <th mat-header-cell *matHeaderCellDef>Produit</th>
                                     <td mat-cell *matCellDef="let p">{{ p.nomProduit }}</td>
+                                    <td mat-footer-cell *matFooterCellDef>....</td>
                                   </ng-container>
-                        
+                                
                                   <ng-container matColumnDef="prixUnitair">
                                     <th mat-header-cell *matHeaderCellDef>Prix unitaire</th>
                                     <td mat-cell *matCellDef="let p">{{ p.prixUnitair | customNumber}}</td>
+                                    <td mat-footer-cell *matFooterCellDef>....</td>
                                   </ng-container>
-                        
+                                
                                   <ng-container matColumnDef="quantite">
                                     <th mat-header-cell *matHeaderCellDef>Quantité</th>
                                     <td mat-cell *matCellDef="let p">{{ p.quantite | customNumber}}</td>
+                                    <td mat-footer-cell *matFooterCellDef>....</td>
                                   </ng-container>
-                        
+                                
                                   <ng-container matColumnDef="total">
                                     <th mat-header-cell *matHeaderCellDef>Total</th>
                                     <td mat-cell *matCellDef="let p" style="color: #ff0000;">{{ p.total | customNumber }}</td>
+                                    <td mat-footer-cell *matFooterCellDef style="color: #0672E4; font-weight: bold;">{{ facture.totalSum | customNumber }}</td>
                                   </ng-container>
-                        
+                                
+                                  <!-- Ajouter la ligne de pied de tableau -->
                                   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                                   <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                                  <tr mat-footer-row *matFooterRowDef="displayedColumns"></tr>
                                 </table>
                               
                                 <!-- Ici, vous devez avoir un paginator pour chaque table -->

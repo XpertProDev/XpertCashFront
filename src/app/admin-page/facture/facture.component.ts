@@ -17,15 +17,16 @@ import { StockService } from '../SERVICES/stocks.service';
 import { UsersService } from '../SERVICES/users.service';
 import { Produit } from '../MODELS/produit.model';
 import { Stock } from '../MODELS/stock.model';
-import { Facture, FactureWithDataSource, ProduitFacture } from '../MODELS/facture.model';
+import { Facture, ProduitFacture } from '../MODELS/facture.model';
 import { FactureService } from '../SERVICES/facture.service';
 import { ViewChildren, QueryList } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import html2canvas from 'html2canvas';
+import { FactureWithDataSource } from '../MODELS/facture-with-data-source';
 
+//FactureWithDataSource
 
 
 export interface PeriodicElement {
@@ -241,10 +242,18 @@ export class FactureComponent  implements AfterViewInit {
           this.factures = [];
           this.filteredFactures = [];
         } else {
-          this.factures = data.reverse().map(facture => ({
-            ...facture,
-            dataSource: new MatTableDataSource(this.getFormattedProduits(facture))
-          }));
+          // Ajouter le calcul du totalSum ici
+          this.factures = data.reverse().map(facture => {
+            const produits = this.getFormattedProduits(facture);
+            const totalSum = produits.reduce((acc, p) => acc + (p.total || 0), 0);
+            
+            return {
+              ...facture,
+              dataSource: new MatTableDataSource(produits),
+              totalSum: totalSum
+            };
+          }) as FactureWithDataSource[];
+  
           this.filteredFactures = [...this.factures];
           this.noFacturesAvailable = false;
         }
