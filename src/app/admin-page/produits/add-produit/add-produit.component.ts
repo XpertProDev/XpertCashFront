@@ -218,7 +218,7 @@ export class AddProduitComponent {
 
   ngOnInit(): void  {
     this.getBoutiqueName();
-    this.getBoutiqueNames();
+    
     
     // Partage de donner de user
     this.sharedDataService.boutiqueName$.subscribe(name => {
@@ -329,7 +329,7 @@ export class AddProduitComponent {
     });
 
     this.getFilteredStreetsBoutique();
-    this.getBoutiqueNames(); // Appel pour récupérer les noms des boutiques
+    this.getBoutiqueName(); // Appel pour récupérer les noms des boutiques
     
   }
 
@@ -362,14 +362,13 @@ export class AddProduitComponent {
     return new File([u8arr], filename, { type: mime });
   }
   
-  getBoutiqueName() {
+
+  getBoutiqueName(): void {
     this.usersService.getUserInfo().subscribe(
       (userInfo) => {
-        console.log(userInfo);
-        if (userInfo && userInfo.boutiques && userInfo.boutiques.length > 0) {
-          console.log(userInfo.boutiques[0]);
-  
-          this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
+        if (userInfo && userInfo.boutiques) {
+          this.streetsBoutique = userInfo.boutiques.map((boutique: any) => boutique.nomBoutique);
+          this.getFilteredStreetsBoutique();
         } else {
           console.error('Aucune boutique trouvée pour cet utilisateur');
           this.boutiqueName = 'Aucune boutique';
@@ -740,21 +739,7 @@ export class AddProduitComponent {
 
   showPopupBoutique = false;
 
-  getBoutiqueNames(): void {
-    this.usersService.getUserInfo().subscribe(
-      (userInfo) => {
-        if (userInfo && userInfo.boutiques) {
-          this.streetsBoutique = userInfo.boutiques.map((boutique: any) => boutique.nomBoutique);
-          this.getFilteredStreetsBoutique(); // Met à jour les options filtrées immédiatement
-        } else {
-          console.error('Aucune boutique trouvée pour cet utilisateur');
-        }
-      },
-      (error) => {
-        console.error('Erreur lors de la récupération des informations utilisateur', error);
-      }
-    );
-  }
+  
   
   onFocusBoutiqueInput(): void {
     this.controlBoutique.setValue(''); // Réinitialise la valeur pour afficher toutes les options
