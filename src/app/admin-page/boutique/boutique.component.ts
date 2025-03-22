@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UsersService } from '../SERVICES/users.service';
@@ -14,54 +14,54 @@ import { UsersService } from '../SERVICES/users.service';
   templateUrl: './boutique.component.html',
   styleUrl: './boutique.component.scss'
 })
-export class BoutiqueComponent {
+
+export class BoutiqueComponent implements OnInit {
 
   showPopup = false;
   boutiques: any[] = [];
   filteredBoutiques: any[] = [];
-
   isLoading: boolean = false;
-  
-  boutiqueForm!: FormGroup;
-  errorMessage: string | null = null; 
+
+  boutiqueForm: FormGroup = new FormGroup({});
+  errorMessage: string | null = null;
   successMessage: string | null = null;
   
-  // users: any[] = [];
   filteredUsers: any[] = [];
-  
   indicatif: string = '';
   maxPhoneLength: number = 8;
-  
   isAscending: boolean = true;
   searchTerm: string = '';
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private usersService: UsersService
+    private usersService: UsersService,
+    private cdRef: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.fetchBoutiques()
+    this.initForm();  // ✅ Ajouté pour éviter l'erreur NG01052
+    this.fetchBoutiques();
   }
 
   initForm() {
     this.boutiqueForm = this.fb.group({
       nomBoutique: ['', Validators.required],
-      emailBoutique: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
-      adresseBoutique: ['', Validators.required],
-      telephoneBoutique: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
+      email: [''],
+      telephone: ['', [Validators.pattern(/^\d{8,15}$/)]],
+      adresse: [''],
+      
     });
   }
   
   updatePhoneValidator(longueur: number): void {
-    this.boutiqueForm.controls['phone'].setValidators([
+    this.boutiqueForm.controls['telephoneBoutique'].setValidators([
       Validators.required,
       Validators.pattern(`^\\+\\d{1,3}\\s?\\d{${longueur}}$`)
     ]);
-    this.boutiqueForm.controls['phone'].updateValueAndValidity();
+    this.boutiqueForm.controls['telephoneBoutique'].updateValueAndValidity();
   }
-   
+
   openPopup() {
     this.showPopup = true;
   }
@@ -72,20 +72,39 @@ export class BoutiqueComponent {
   }
 
   private resetForm() {
-    this.boutiqueForm.patchValue({
-      nomBoutique: '',
-      emailBoutique: '',
-      adresseBoutique: '',
-      telephoneBoutique: ''
-    });
+    if (this.boutiqueForm) {
+      this.boutiqueForm.reset();  // ✅ reset() simplifie la réinitialisation
+    }
+  }
+
+  onSubmit(): void {
+    console.log("onSubmit() déclenché !");
+    
+    if (this.boutiqueForm.valid) {
+      console.log("Formulaire valide, envoi en cours...", this.boutiqueForm.value);
   
-    this.boutiqueForm.markAsPristine();
-    this.boutiqueForm.markAsUntouched();
-    this.boutiqueForm.updateValueAndValidity();
+      this.usersService.addBoutique(this.boutiqueForm.value).subscribe({
+        next: (response) => {
+          console.log("Réponse du backend :", response);
+          this.successMessage = "Boutique ajoutée avec succès !";
+  
+          // ✅ Actualise la liste des boutiques après un ajout réussi
+          this.fetchBoutiques();
+  
+          this.resetForm();
+          this.closePopup();
+        },
+        error: (err) => {
+          console.error("Erreur lors de l'ajout :", err);
+          this.errorMessage = err.error?.error || "Une erreur est survenue.";
+        }
+      });
+  
+    } else {
+      console.warn("⚠️ Le formulaire est invalide !");
+    }
   }
   
-  onSubmit(): void {}
-
   fetchBoutiques(): void {
     this.usersService.getBoutiquesByEntreprise().subscribe({
       next: (data) => {
@@ -99,27 +118,25 @@ export class BoutiqueComponent {
     });
   }
 
-
   filterBoutiques(): void {
     const term = this.searchTerm.toLowerCase();
   
     if (!term) {
-      this.filteredBoutiques = [...this.boutiques]; // Réafficher toutes les boutiques si le champ est vide
+      this.filteredBoutiques = [...this.boutiques];
       return;
     }
   
     this.filteredBoutiques = this.boutiques.filter(boutique =>
-      boutique.nomBoutique.toLowerCase().includes(term) ||
-      boutique.adresse.toLowerCase().includes(term) 
+      (boutique.nomBoutique && boutique.nomBoutique.toLowerCase().includes(term)) || 
+      (boutique.adresse && boutique.adresse.toLowerCase().includes(term))
     );
   }
-  
   
 
   clearSearch(): void {
     this.searchTerm = '';
-    this.filteredBoutiques = this.boutiques; // Réinitialise la liste affichée
+    this.filteredBoutiques = this.boutiques;
   }
- 
-
+  
 }
+

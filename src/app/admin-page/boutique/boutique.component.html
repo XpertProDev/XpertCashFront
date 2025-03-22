@@ -50,7 +50,7 @@
             <td>{{ boutique.email }}</td>
             <td>{{ boutique.adresse }}</td>
             <td>{{ boutique.telephone }}</td>
-            <td>{{ boutique.createdAt }}</td>
+            <td>{{ boutique.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
           </tr>
         </tbody>
       </table>
@@ -66,6 +66,7 @@
               <button class="close-btn" (click)="closePopup()">&times;</button>
           </div>
           <form [formGroup]="boutiqueForm" (ngSubmit)="onSubmit()">
+
             <div class="popup-body">
               
               <div class="champ_grid">
@@ -80,7 +81,7 @@
     
                 <!-- Input d'email'  -->
                 <div class="champ_input">
-                  <input class="input_focus" type="email" formControlName="emailBoutique" placeholder="Saisis l'email">
+                  <input class="input_focus" type="email" formControlName="email" placeholder="Saisis l'email">
                   <label class="label">Email</label>
                   <div *ngIf="boutiqueForm.get('emailBoutique')?.invalid && boutiqueForm.get('emailBoutique')?.touched">
                     <small class="error">Un email valide est vide.</small>
@@ -94,7 +95,7 @@
               <div class="champ_grid">
                 <!-- // Input de telephone Boutique  -->
                 <div class="champ_input ">
-                  <input class="input_focus" type="number" formControlName="telephoneBoutique" placeholder="00 00 00 00">
+                  <input class="input_focus" type="number" formControlName="telephone" placeholder="00 00 00 00">
                   <label class="label">Phone</label>
                   <div *ngIf="boutiqueForm.get('telephoneBoutique')?.invalid && boutiqueForm.get('telephoneBoutique')?.touched">
                     <small class="error">Le numéro de téléphone est requis.</small>
@@ -103,7 +104,7 @@
 
                 <!-- Input Numero de téléphone  -->
                 <div class="champ_input">
-                    <input class="input_focus" type="text" formControlName="adresseBoutique" placeholder="Saisis l'adresse">
+                    <input class="input_focus" type="text" formControlName="adresse" placeholder="Saisis l'adresse">
                     <label class="label">Adresse boutique</label>
                     <div *ngIf="boutiqueForm.get('adresseBoutique')?.invalid && boutiqueForm.get('adresseBoutique')?.touched">
                         <small class="error">L'adresse boutique valide est vide.</small>

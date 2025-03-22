@@ -218,6 +218,7 @@ export class AddProduitComponent {
 
   ngOnInit(): void  {
     this.getBoutiqueName();
+    this.getBoutiqueNames();
     
     // Partage de donner de user
     this.sharedDataService.boutiqueName$.subscribe(name => {
@@ -328,6 +329,7 @@ export class AddProduitComponent {
     });
 
     this.getFilteredStreetsBoutique();
+    this.getBoutiqueNames(); // Appel pour récupérer les noms des boutiques
     
   }
 
@@ -641,8 +643,16 @@ export class AddProduitComponent {
         console.log('Image par défaut utilisée:', finalImage);
       }
   
+      // Inclure l'ID de la boutique sélectionnée dans les données
+      const boutiqueId = this.boutiqueIdSelected;
+      if (!boutiqueId) {
+        this.errorMessage = "Veuillez sélectionner une boutique.";
+        this.isLoading = false;
+        return;
+      }
+  
       // Envoi du produit avec l'image compressée (JPEG/PNG) ou l'image SVG par défaut
-      this.produitService.ajouterProduit(this.boutiqueId, produit, finalImage, addToStock, token)
+      this.produitService.ajouterProduit(boutiqueId, produit, finalImage, addToStock, token)
         .subscribe({
           next: data => {
             this.showPopupMessage({
@@ -709,7 +719,7 @@ export class AddProduitComponent {
 
 
   controlBoutique = new FormControl('');
-  streetsBoutique: string[] = ['Boutique 1', 'Boutique 2', 'Boutique 3'];
+  streetsBoutique: string[] = [];
   filteredStreetsBoutique!: Observable<string[]>;
 
   getFilteredStreetsBoutique() {
@@ -730,7 +740,26 @@ export class AddProduitComponent {
 
   showPopupBoutique = false;
 
+  getBoutiqueNames(): void {
+    this.usersService.getUserInfo().subscribe(
+      (userInfo) => {
+        if (userInfo && userInfo.boutiques) {
+          this.streetsBoutique = userInfo.boutiques.map((boutique: any) => boutique.nomBoutique);
+          this.getFilteredStreetsBoutique(); // Met à jour les options filtrées immédiatement
+        } else {
+          console.error('Aucune boutique trouvée pour cet utilisateur');
+        }
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des informations utilisateur', error);
+      }
+    );
+  }
   
+  onFocusBoutiqueInput(): void {
+    this.controlBoutique.setValue(''); // Réinitialise la valeur pour afficher toutes les options
+  }
+
   boutiqueForm!: FormGroup;
   successMessage: string | null = null;
   
@@ -783,8 +812,25 @@ export class AddProduitComponent {
     this.boutiqueForm.updateValueAndValidity();
   }
 
+  onBoutiqueSelected(event: any): void {
+    const selectedValue = event.option.value;
+    this.controlBoutique.setValue(selectedValue); // Met à jour le FormControl avec la valeur sélectionnée
+    console.log('Boutique sélectionnée :', selectedValue); // Debug pour vérifier la sélection
+
+    // Trouver l'ID de la boutique sélectionnée
+    const selectedBoutique = this.streetsBoutique.find(boutique => boutique === selectedValue);
+    if (selectedBoutique) {
+      const boutiqueIndex = this.streetsBoutique.indexOf(selectedBoutique);
+      this.boutiqueIdSelected = boutiqueIndex + 1; // Exemple : supposez que l'index correspond à l'ID
+    }
+  }
 
   onSubmitBoutique(): void {}
-  
+
+  displayFnBoutique(boutique?: string): string {
+    return boutique ? boutique : '';
+  }
+
+  boutiqueIdSelected: number | null = null; // Propriété pour stocker l'ID de la boutique sélectionnée
 
 }

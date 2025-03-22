@@ -205,6 +205,24 @@ export class UsersService {
     return this.http.post<UserNewRequest>(url, permissions);
   }
 
+  //Ajout de la boutique
+  addBoutique(boutique: any): Observable<any> {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.error("Aucun token trouvé, requête annulée.");
+      return throwError(() => new Error("Aucun token trouvé"));
+    }
+  
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+  
+    console.log("Envoi de la requête POST à :", `${this.apiUrl}/ajouterBoutique`, "avec données :", boutique);
+  
+    return this.http.post<any>(`${this.apiUrl}/ajouterBoutique`, boutique, { headers });
+  }
+  
+
   getBoutiquesByEntreprise(): Observable<any[]> {
     const token = localStorage.getItem('authToken');
     
