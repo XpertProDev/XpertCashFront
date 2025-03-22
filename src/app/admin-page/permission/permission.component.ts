@@ -141,6 +141,7 @@ export class PermissionComponent implements OnInit {
 
 
   // Ajouter cette méthode pour gérer l'envoi
+  // Ajouter cette méthode pour gérer l'envoi
   savePermissions() {
     const userId = this.route.snapshot.params['userId'];
     const permissionsMap: { [key: string]: boolean } = {};
@@ -156,9 +157,14 @@ export class PermissionComponent implements OnInit {
     // Validation personnalisée
     if (selectedCount === 0) {
       this.validationError = "Vous devez attribuer au moins une permission à l'utilisateur";
+      
+      // Disparition automatique après 5 secondes
+      setTimeout(() => {
+        this.validationError = null;
+      }, 3500);
       return;
     }
-
+    
     // Vérifier les changements
     const hasChanges = this.permissions.some(permission => {
       const backendType = this.mapFrontendToBackendPermission(permission.id);
@@ -168,6 +174,11 @@ export class PermissionComponent implements OnInit {
 
     if (!hasChanges) {
       this.validationError = "Ces permissions sont déjà attribuées à l'utilisateur";
+      
+      // Disparition automatique après 5 secondes
+      setTimeout(() => {
+        this.validationError = null;
+      }, 3500);
       return;
     }
 
@@ -178,7 +189,7 @@ export class PermissionComponent implements OnInit {
         permissionsMap[backendType] = permission.selected;
       }
     });
-  
+
     this.usersService.assignPermissionsToUser(userId, permissionsMap).subscribe({
       next: (updatedUser) => {
         this.successMessage = 'Permissions sauvegardées avec succès !';
@@ -188,7 +199,7 @@ export class PermissionComponent implements OnInit {
         setTimeout(() => {
           this.successMessage = null;
         }, 10000);
-  
+
         this.getUserParId();
       },
       error: (err) => {
@@ -202,6 +213,7 @@ export class PermissionComponent implements OnInit {
       }
     });
   }
+
 
 
 }
