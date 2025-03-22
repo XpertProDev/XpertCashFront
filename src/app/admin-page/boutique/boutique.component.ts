@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { UsersService } from '../SERVICES/users.service';
 
 @Component({
   selector: 'app-boutique',
@@ -16,6 +17,8 @@ import { Router } from '@angular/router';
 export class BoutiqueComponent {
 
   showPopup = false;
+  boutiques: any[] = [];
+  filteredBoutiques: any[] = [];
 
   isLoading: boolean = false;
   
@@ -35,9 +38,12 @@ export class BoutiqueComponent {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private usersService: UsersService
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.fetchBoutiques()
+  }
 
   initForm() {
     this.boutiqueForm = this.fb.group({
@@ -79,6 +85,41 @@ export class BoutiqueComponent {
   }
   
   onSubmit(): void {}
+
+  fetchBoutiques(): void {
+    this.usersService.getBoutiquesByEntreprise().subscribe({
+      next: (data) => {
+        this.boutiques = data;
+        this.filteredBoutiques = [...data];
+        console.log('Boutiques récupérées:', this.boutiques);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération des boutiques:', err);
+      }
+    });
+  }
+
+
+  filterBoutiques(): void {
+    const term = this.searchTerm.toLowerCase();
+  
+    if (!term) {
+      this.filteredBoutiques = [...this.boutiques]; // Réafficher toutes les boutiques si le champ est vide
+      return;
+    }
+  
+    this.filteredBoutiques = this.boutiques.filter(boutique =>
+      boutique.nomBoutique.toLowerCase().includes(term) ||
+      boutique.adresse.toLowerCase().includes(term) 
+    );
+  }
+  
+  
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filteredBoutiques = this.boutiques; // Réinitialise la liste affichée
+  }
  
 
 }

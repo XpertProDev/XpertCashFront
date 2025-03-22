@@ -191,18 +191,24 @@ export class FactureComponent  implements AfterViewInit {
     this.loadFactures();
   }
 
+  boutiquePhone: string = '';
+  boutiqueEmail: string = '';
+
   // Boutique Name
   getBoutiqueName() {
     this.userService.getUserInfo().subscribe(
       (userInfo) => {
         console.log(userInfo);
         if (userInfo && userInfo.boutiques && userInfo.boutiques.length > 0) {
-          console.log(userInfo.boutiques[0]);
-  
-          this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
+          const boutique = userInfo.boutiques[0];
+          this.boutiqueName = boutique.nomBoutique || 'Nom de la boutique non trouvé';
+          this.boutiquePhone = boutique.telephone || 'Téléphone non trouvé';
+          this.boutiqueEmail = boutique.email || 'Email non trouvé';
         } else {
           console.error('Aucune boutique trouvée pour cet utilisateur');
           this.boutiqueName = 'Aucune boutique';
+          this.boutiquePhone = 'N/A';
+          this.boutiqueEmail = 'N/A';
         }
       },
       (error) => {
@@ -359,6 +365,19 @@ export class FactureComponent  implements AfterViewInit {
     y += 8;
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
+    doc.text('Téléphone :', 10, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(this.boutiquePhone || 'N/A', 30, y);
+
+    y += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Email :', 10, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(this.boutiqueEmail || 'N/A', 22, y);
+
+    y += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
     doc.text('Date de création :', 10, y);
     doc.setFont('helvetica', 'normal');
     
@@ -380,12 +399,6 @@ export class FactureComponent  implements AfterViewInit {
     doc.text('Créé par:', 10, y);
     doc.setFont('helvetica', 'normal');
     doc.text(facture?.nomUtilisateur || 'N/A', 27, y);
-
-    y += 8;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Téléphone :', 10, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text(facture?.telephoneUtilisateur || 'N/A', 30, y);
 
     y += 8;
     doc.setFont('helvetica', 'bold');

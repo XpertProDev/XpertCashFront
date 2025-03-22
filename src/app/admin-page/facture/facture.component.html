@@ -122,8 +122,14 @@
                                     </div>
                                     <div class="info">
                                       <p class="info_title">Téléphone :</p>
-                                      <p class="info_value">{{ facture.telephoneUtilisateur }}</p>
+                                      <p class="info_value">{{ boutiquePhone }}</p>
                                     </div>
+
+                                    <div class="info">
+                                      <p class="info_title">Email :</p>
+                                      <p class="info_value">{{ boutiqueEmail }}</p>
+                                    </div>
+
                                     <div class="info">
                                       <p class="info_title">Type de mouvement :</p>
                                       <p class="info_value" [style.color]="getColor(facture.type)" style="font-weight: 600; text-transform: uppercase;">

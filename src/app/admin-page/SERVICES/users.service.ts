@@ -15,10 +15,14 @@ interface UserRequest {
   pays: string;
   adresseEntreprise: string;
   logoEntreprise : string,
-  boutiques : any
+  boutiques: {
+    id: number;
+    nomBoutique: string;
+    telephone: string;
+    email: string;
+    adresse: string; // Ajout du champ adresse
+  }[];
 }
-
-
 
 @Injectable({
   providedIn: 'root'
@@ -200,4 +204,20 @@ export class UsersService {
     const url = `${this.apiUrl}/${userId}/permissions`;
     return this.http.post<UserNewRequest>(url, permissions);
   }
+
+  getBoutiquesByEntreprise(): Observable<any[]> {
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      console.error('Aucun token trouvé');
+      return throwError('Aucun token trouvé');
+    }
+  
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+  
+    return this.http.get<any[]>(`${this.apiUrl}/boutiqueEntreprise`, { headers });
+  }
+  
 }

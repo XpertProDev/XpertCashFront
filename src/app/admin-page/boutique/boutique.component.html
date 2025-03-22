@@ -27,8 +27,8 @@
             <div class="bare"></div>
           </div>
           <div class="inputSearch">
-            <input #searchInput type="text" placeholder="Recherche..." />
-            <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'"></i>
+            <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..." (input)="filterBoutiques()" />
+            <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch()"></i>
           </div>
         </div>
       </div>
@@ -41,14 +41,16 @@
             <th>Email </th>
             <th>Adresse </th>
             <th>Téléphone </th>
+            <th>Date de Creation </th>
           </tr>
         </thead>
         <tbody>
-          <tr          >
-            <td>Boutique 1</td>
-            <td>boutique1&#64;gmail.com</td>
-            <td>Faladjié</td>
-            <td>78787878</td>
+          <tr *ngFor="let boutique of filteredBoutiques">
+            <td>{{ boutique.nomBoutique }}</td>
+            <td>{{ boutique.email }}</td>
+            <td>{{ boutique.adresse }}</td>
+            <td>{{ boutique.telephone }}</td>
+            <td>{{ boutique.createdAt }}</td>
           </tr>
         </tbody>
       </table>
