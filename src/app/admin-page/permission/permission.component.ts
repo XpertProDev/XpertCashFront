@@ -20,7 +20,8 @@ import { UserNewRequest } from '../MODELS/user-new-request.model';
 })
 export class PermissionComponent implements OnInit {
 
-  user: UserNewRequest | undefined;;
+  user: UserNewRequest | undefined;
+  enabledLien?: boolean;
 
   errorMessage: string | null = null;
   successMessage: string | null = null;
@@ -141,7 +142,6 @@ export class PermissionComponent implements OnInit {
 
 
   // Ajouter cette méthode pour gérer l'envoi
-  // Ajouter cette méthode pour gérer l'envoi
   savePermissions() {
     const userId = this.route.snapshot.params['userId'];
     const permissionsMap: { [key: string]: boolean } = {};
@@ -214,6 +214,44 @@ export class PermissionComponent implements OnInit {
     });
   }
 
+  // Suspendre user
+  onSuspendChange(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    const userId = this.route.snapshot.params['userId'];
+    
+    this.usersService.suspendUser(userId, isChecked).subscribe({
+        next: (response: string) => { // <-- Typez la réponse comme string
+            this.successMessage = response; // Utilisez directement la réponse du serveur
+            if (this.user) {
+                this.user.enabledLien = !isChecked;
+            }
+            setTimeout(() => this.successMessage = null, 5000);
+        },
+        error: (err) => {
+            this.errorMessage = err.error || "Erreur lors de l'opération";
+            console.error(err);
+            setTimeout(() => this.errorMessage = null, 5000);
+        }
+    });
+  } 
+  
+  private showSuccessMessage(isChecked: boolean) {
+    this.successMessage = `Utilisateur ${isChecked ? 'suspendu' : 'réactivé'} avec succès`;
+    setTimeout(() => this.successMessage = null, 5000);
+  }
+  
+  private handleError(error: any) {
+    console.error('Erreur:', error);
+    this.errorMessage = error.error?.message || 'Erreur serveur';
+    setTimeout(() => this.errorMessage = null, 5000);
+  }
+  
+  // Ajoutez cette méthode dans la classe :
+  private confirmAction(message: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      resolve(confirm(message)); // Utilise le dialogue de confirmation natif
+    });
+  }
 
 
 }
