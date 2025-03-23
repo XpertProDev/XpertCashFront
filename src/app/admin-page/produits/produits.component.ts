@@ -50,6 +50,9 @@ export class ProduitsComponent implements OnInit {
   addressBoutique : string = '';
   showDescription: boolean = false;
 
+  selectedBoutique: any = null;
+  boutiques: any[] = [];
+
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -75,7 +78,7 @@ export class ProduitsComponent implements OnInit {
   ngOnInit(): void {
     this.getUserBoutiqueId();
     this.getUserInfo();
-    this.loadProduits();
+    // this.loadProduits();
   }
 
   goToAddProduit() {
@@ -279,15 +282,15 @@ export class ProduitsComponent implements OnInit {
         localStorage.setItem('user', JSON.stringify(user));
         this.userName = user.nomComplet;
         this.nomEntreprise = user.nomEntreprise;
-        this.boutiqueName = user.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
-        this.addressBoutique = user.boutiques[0].adresse|| 'Adresse de la boutique non trouvé';
-  
-        const boutiqueId = this.usersService.getUserBoutiqueId();
-        if (boutiqueId) {
-          this.loadProduits();
-        } else {
-          console.error("L'ID de la boutique est manquant");
+        this.boutiques = user.boutiques; // Récupération de toutes les boutiques
+        
+        // Sélectionner la première boutique par défaut
+        if (this.boutiques.length > 0) {
+          this.selectedBoutique = this.boutiques[0];
+          this.loadProduits(this.selectedBoutique.id);
         }
+  
+        this.addressBoutique = this.selectedBoutique?.adresse || 'Adresse non trouvée';
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des informations utilisateur :", err);
@@ -295,67 +298,99 @@ export class ProduitsComponent implements OnInit {
     });
   }
 
+
+  // Ajoutez cette méthode pour changer de boutique
+  selectBoutique(boutique: any): void {
+    this.selectedBoutique = boutique;
+    this.loadProduits(boutique.id);
+    this.currentPage = 0; // Réinitialiser la pagination
+  }
+
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
-  loadProduits(): void {
-    const boutiqueId = this.usersService.getUserBoutiqueId();
-    if (!boutiqueId) {
-      console.error('L\'ID de la boutique est manquant');
-      return;
-    }
-    this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
-      next: (produits: Produit[]) => {
-        console.log('Produits récupérés:', produits);
-        this.tasks = produits.map(prod => {
-          // const fullImageUrl = `http://localhost:8080${prod.photo}`;
-          const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
-          ? `http://localhost:8080${prod.photo}`
+  // Corrigez la méthode loadProduits comme suit :
+loadProduits(boutiqueId: number): void {
+  if (!boutiqueId) {
+    console.error('L\'ID de la boutique est manquant');
+    return;
+  }
+
+  this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
+    next: (produits: Produit[]) => {
+      this.tasks = produits.map(prod => {
+        // Conversion de la photo
+        const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
+          ? `${this.backendUrl}${prod.photo}`
           : '';
-          console.log('Image URL:', fullImageUrl);
 
-          // Vérifier si `createdAt` est défini
-          let createdAtDate: Date | null = null;
-          if (prod.createdAt) {
-            const cleanedDateStr = prod.createdAt.replace(' à ', ' '); // Remplacer "à" par un espace
-            const dateParts = cleanedDateStr.match(/^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})$/);
-            
-            if (dateParts) {
-              const [, day, month, year, hours, minutes] = dateParts.map(Number);
-              createdAtDate = new Date(year, month - 1, day, hours, minutes);
-            } else {
-              console.warn("Format de date invalide pour:", prod.createdAt);
-            }
+        // Conversion de la date
+        let createdAt = new Date().toISOString();
+        if (prod.createdAt) {
+          try {
+            const [datePart, timePart] = prod.createdAt.split(' à ');
+            const [day, month, year] = datePart.split('-');
+            const [hours, minutes] = timePart.split(':');
+            createdAt = new Date(
+              parseInt(year),
+              parseInt(month) - 1,
+              parseInt(day),
+              parseInt(hours),
+              parseInt(minutes)
+            ).toISOString();
+          } catch (e) {
+            console.warn('Erreur de conversion de date', e);
           }
-          console.log("Date récupérée:", prod.createdAt);
+        }
 
-          return {
-            id: prod.id,
-            codeGenerique: prod.codeGenerique || '',
-            codeBare: prod.codeBare || 'Non numéro code barre',
-            nom: prod.nom || 'Nom inconnu',
-            description: prod.description || 'Non description',
-            prixVente: prod.prixVente || 0,
-            prixAchat: prod.prixAchat || 0,
-            quantite: prod.quantite || 0,
-            seuilAlert: prod.seuilAlert || 0,
-            enStock: prod.enStock || false,
-            photo: fullImageUrl,
-            nomCategorie: prod.nomCategorie || 'Non catégorie',
-            nomUnite: prod.nomUnite || 'Non unité',
-            createdAt: prod.createdAt || new Date().toISOString(),
-            categorieId: prod.categorieId,
-            uniteId: prod.uniteId 
-          };
-        })
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        
-        
-        this.dataSource.data = this.tasks;
+        // Mapping complet
+        return {
+          id: prod.id,
+          codeGenerique: prod.codeGenerique || '',
+          codeBare: prod.codeBare || '',
+          nom: prod.nom || 'Nom inconnu',
+          description: prod.description || '',
+          prixVente: prod.prixVente || 0,
+          prixAchat: prod.prixAchat || 0,
+          quantite: prod.quantite || 0,
+          seuilAlert: prod.seuilAlert || 0,
+          enStock: prod.enStock || false,
+          photo: fullImageUrl,
+          nomCategorie: prod.nomCategorie || '',
+          nomUnite: prod.nomUnite || '',
+          createdAt: createdAt,
+          categorieId: prod.categorieId || 0,
+          uniteId: prod.uniteId || 0
+        } as Produit;
+      }).sort((a, b) => {
+        const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
+        const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
+        return dateB - dateA;
+      })
+
+      this.dataSource.data = this.tasks;
+      if (this.paginator) {
         this.dataSource.paginator = this.paginator;
-      },
-      error: (err) => {
-        console.error("Erreur lors de la récupération des produits", err);
       }
-    });
+    },
+    error: (err) => console.error("Erreur :", err)
+  });
+}
+  
+  // Ajoutez cette méthode si nécessaire
+  private formatDate(dateStr: string): string {
+    try {
+      const [datePart, timePart] = dateStr.split(' à ');
+      const [day, month, year] = datePart.split('-');
+      const [hours, minutes] = timePart.split(':');
+      return new Date(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day),
+        parseInt(hours),
+        parseInt(minutes)
+      ).toISOString();
+    } catch {
+      return new Date().toISOString();
+    }
   }
   
   // Detail de produit 
@@ -366,29 +401,42 @@ export class ProduitsComponent implements OnInit {
   }
   
   // Méthode qui retourne l'image à afficher pour un produit
-getImageUrl(product: Produit): string {
-  // Vérifier si une image est bien fournie
-  if (product.photo && product.photo.trim() !== '') {
-    return product.photo;
-  } else {
-    // Récupérer la première lettre du nom (par défaut 'P' si non défini)
-    const firstLetter = product.nom ? product.nom.trim().charAt(0) : 'P';
-    return this.generateInitialImage(firstLetter);
+  getImageUrl(product: Produit): string {
+    // Vérifier si une image est bien fournie
+    if (product.photo && product.photo.trim() !== '') {
+      return product.photo;
+    } else {
+      // Récupérer la première lettre du nom (par défaut 'P' si non défini)
+      const firstLetter = product.nom ? product.nom.trim().charAt(0) : 'P';
+      return this.generateInitialImage(firstLetter);
+    }
   }
-}
 
-// Méthode qui génère une image SVG (sous forme de Data URL) avec la première lettre du nom
-generateInitialImage(letter: string): string {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
-      <rect width="100%" height="100%" fill="#f0f0f0"/>
-      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="100" fill="#333">
-        ${letter.toUpperCase()}
-      </text>
-    </svg>
-  `;
-  return 'data:image/svg+xml;base64,' + btoa(svg);
-}
+  // Méthode qui génère une image SVG (sous forme de Data URL) avec la première lettre du nom
+  generateInitialImage(letter: string): string {
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+        <rect width="100%" height="100%" fill="#f0f0f0"/>
+        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="100" fill="#333">
+          ${letter.toUpperCase()}
+        </text>
+      </svg>
+    `;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
+
+  // loadBoutiqueDetails(boutiqueId: number): void {
+  //   this.produitService.getBoutiqueById(boutiqueId).subscribe({
+  //     next: (boutique) => {
+  //       console.log('Boutique récupérée:', boutique);
+  //       // Traitement des données...
+  //     },
+  //     error: (err) => {
+  //       console.error('Erreur:', err);
+  //       // Gestion des erreurs
+  //     }
+  //   });
+  // }
 
   
 }
