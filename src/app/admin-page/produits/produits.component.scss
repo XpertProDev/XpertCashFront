@@ -1018,5 +1018,17 @@ img.roudel_detail{
   display: block;
 }
 
+.name_boutique {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  cursor: pointer;
+  margin: 10px 0;
+}
 
-
+.name_boutique_active {
+  background-color: #0672E4;
+  padding: 5px 20px;
+  border-radius: 5px;
+  color: #fff;
+}
