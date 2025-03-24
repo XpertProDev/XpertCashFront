@@ -53,6 +53,18 @@ export class AddProduitComponent {
     type: 'success'
   };
 
+  boutiqueForm!: FormGroup;
+  successMessage: string | null = null;
+  
+  // users: any[] = [];
+  filteredUsers: any[] = [];
+  
+  indicatif: string = '';
+  maxPhoneLength: number = 8;
+  
+  isAscending: boolean = true;
+  searchTerm: string = '';
+
   clearImage() {
     this.newPhotoUrl = null;
     this.imageFile = null;
@@ -157,6 +169,8 @@ export class AddProduitComponent {
   // produitForm: FormGroup;
   imageFile: File | null = null;
   isLoading: boolean = false;
+
+  boutiqueIdSelected: number | null = null; 
 
   constructor(
     private sharedDataService: SharedDataService,
@@ -367,7 +381,10 @@ export class AddProduitComponent {
     this.usersService.getUserInfo().subscribe(
       (userInfo) => {
         if (userInfo && userInfo.boutiques) {
-          this.streetsBoutique = userInfo.boutiques.map((boutique: any) => boutique.nomBoutique);
+          this.streetsBoutique = userInfo.boutiques.map((boutique: any) => ({
+            id: boutique.id,
+            name: boutique.nomBoutique
+          }));
           this.getFilteredStreetsBoutique();
         } else {
           console.error('Aucune boutique trouvée pour cet utilisateur');
@@ -387,7 +404,7 @@ export class AddProduitComponent {
   
   // Méthode pour la sélection d'une catégorie
   onCategorySelected(event: any): void {
-    console.log('Option sélectionnée :', event.option.value);  // Ajoutez ce log pour vérifier la sélection
+    console.log('Option sélectionnée :', event.option.value);
     if (event.option && event.option.value) {
       this.ajouteProduitForm.get('categorieId')?.setValue(event.option.value.id);
     } else {
@@ -718,7 +735,7 @@ export class AddProduitComponent {
 
 
   controlBoutique = new FormControl('');
-  streetsBoutique: string[] = [];
+  streetsBoutique: { id: number, name: string }[] = []; // Associe les noms aux IDs
   filteredStreetsBoutique!: Observable<string[]>;
 
   getFilteredStreetsBoutique() {
@@ -730,33 +747,20 @@ export class AddProduitComponent {
 
   private _filterBoutique(value: string): string[] {
     const filterValue = this._normalizeValue(value);
-    return this.streetsBoutique.filter(street => this._normalizeValue(street).includes(filterValue));
+    return this.streetsBoutique.map(b => b.name).filter(street => this._normalizeValue(street).includes(filterValue));
   }
 
   private _normalizeValue(value: string): string {
     return value.toLowerCase().replace(/\s/g, '');
   }
 
-  // showPopupBoutique = false;
-  showPopupBoutique: boolean = false;
+  showPopupBoutique = false;
 
   
   
   onFocusBoutiqueInput(): void {
     this.controlBoutique.setValue(''); // Réinitialise la valeur pour afficher toutes les options
   }
-
-  boutiqueForm!: FormGroup;
-  successMessage: string | null = null;
-  
-  // users: any[] = [];
-  filteredUsers: any[] = [];
-  
-  indicatif: string = '';
-  maxPhoneLength: number = 8;
-  
-  isAscending: boolean = true;
-  searchTerm: string = '';
 
 
   initForm() {
@@ -777,11 +781,11 @@ export class AddProduitComponent {
   }
    
   openPopupBoutique() {
-    this.showPopupBoutique = true;
+    this.showPopup = true;
   }
 
   closePopupBoutique() {
-    this.showPopupBoutique = false;
+    this.showPopup = false;
     this.resetForm();
   }
 
@@ -800,14 +804,12 @@ export class AddProduitComponent {
 
   onBoutiqueSelected(event: any): void {
     const selectedValue = event.option.value;
-    this.controlBoutique.setValue(selectedValue); // Met à jour le FormControl avec la valeur sélectionnée
-    console.log('Boutique sélectionnée :', selectedValue); // Debug pour vérifier la sélection
+    this.controlBoutique.setValue(selectedValue);
+    console.log('Boutique sélectionnée :', selectedValue);
 
-    // Trouver l'ID de la boutique sélectionnée
-    const selectedBoutique = this.streetsBoutique.find(boutique => boutique === selectedValue);
+    const selectedBoutique = this.streetsBoutique.find(boutique => boutique.name === selectedValue);
     if (selectedBoutique) {
-      const boutiqueIndex = this.streetsBoutique.indexOf(selectedBoutique);
-      this.boutiqueIdSelected = boutiqueIndex + 1; // Exemple : supposez que l'index correspond à l'ID
+      this.boutiqueIdSelected = selectedBoutique.id; 
     }
   }
 
@@ -817,6 +819,6 @@ export class AddProduitComponent {
     return boutique ? boutique : '';
   }
 
-  boutiqueIdSelected: number | null = null; // Propriété pour stocker l'ID de la boutique sélectionnée
+  
 
 }

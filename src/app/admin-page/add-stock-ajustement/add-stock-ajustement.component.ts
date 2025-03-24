@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProduitService } from '../SERVICES/produit.service';
 import { SharedDataService } from '../SERVICES/shared-data.service';
@@ -9,6 +9,10 @@ import { Produit } from '../MODELS/produit.model';
 import { StockService } from '../SERVICES/stocks.service';
 import { Stock } from '../MODELS/stock.model';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
+import { map, Observable, startWith } from 'rxjs';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-add-stock-ajustement',
@@ -16,7 +20,9 @@ import { CustomNumberPipe } from '../MODELS/customNumberPipe';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    CustomNumberPipe
+    CustomNumberPipe,
+    ReactiveFormsModule,
+    MatAutocompleteModule,
   ],
   templateUrl: './add-stock-ajustement.component.html',
   styleUrl: './add-stock-ajustement.component.scss'
@@ -46,6 +52,11 @@ export class AddStockAjustementComponent {
 
   // Description Global
   descriptionGlobal: string = '';
+  boutiqueIdSelected: number | null = null; 
+
+   controlBoutique = new FormControl('');
+    streetsBoutique: { id: number, name: string }[] = []; 
+    filteredStreetsBoutique!: Observable<string[]>;
 
 
   // Contructor
@@ -73,14 +84,15 @@ export class AddStockAjustementComponent {
     // this.loadPendingAdjustments();
   }
 
-  getBoutiqueName() {
+  getBoutiqueName(): void {
     this.usersService.getUserInfo().subscribe(
       (userInfo) => {
-        console.log(userInfo);
-        if (userInfo && userInfo.boutiques && userInfo.boutiques.length > 0) {
-          console.log(userInfo.boutiques[0]);
-  
-          this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
+        if (userInfo && userInfo.boutiques) {
+          this.streetsBoutique = userInfo.boutiques.map((boutique: any) => ({
+            id: boutique.id,
+            name: boutique.nomBoutique
+          }));
+          this.getFilteredStreetsBoutique();
         } else {
           console.error('Aucune boutique trouvée pour cet utilisateur');
           this.boutiqueName = 'Aucune boutique';
@@ -574,5 +586,43 @@ export class AddStockAjustementComponent {
   }  
   
 
+  onBoutiqueSelected(event: any): void {
+    const selectedValue = event.option.value;
+    this.controlBoutique.setValue(selectedValue);
+    console.log('Boutique sélectionnée :', selectedValue);
+
+    const selectedBoutique = this.streetsBoutique.find(boutique => boutique.name === selectedValue);
+    if (selectedBoutique) {
+      this.boutiqueIdSelected = selectedBoutique.id; 
+    }
+  }
+
+   getFilteredStreetsBoutique() {
+      this.filteredStreetsBoutique = this.controlBoutique.valueChanges.pipe(
+        startWith(''),
+        map(value => this._filterBoutique(value || ''))
+      );
+    }
+
+    private _filterBoutique(value: string): string[] {
+      const filterValue = this._normalizeValue(value);
+      return this.streetsBoutique.map(b => b.name).filter(street => this._normalizeValue(street).includes(filterValue));
+    }
+
+    private _normalizeValue(value: string): string {
+      return value.toLowerCase().replace(/\s/g, '');
+    }
+  
+    showPopupBoutique = false;
+  
+    
+    
+    onFocusBoutiqueInput(): void {
+      this.controlBoutique.setValue(''); 
+    }
+
+    displayFnBoutique(boutique?: string): string {
+      return boutique ? boutique : '';
+    }
   
 }

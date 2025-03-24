@@ -27,7 +27,15 @@
                   <!-- // Boutique  -->
                   <div class="champ_input champ_input2">
                     <div class="title_input">Boutique</div>
-                    <input type="text" class="input_focus" disabled id="boutique" [value]="boutiqueName" name="boutique" style="cursor: no-drop; color: #0672E4;">
+                    <input autocomplete="off" type="text" placeholder="Saisis le nom de boutique"
+                             class="input_focus" matInput [formControl]="controlBoutique" 
+                             [matAutocomplete]="autoBoutique" style="cursor: pointer;">
+                      <label for="boutiqueId" class="label">Boutique</label>
+                      <mat-autocomplete #autoBoutique="matAutocomplete" (optionSelected)="onBoutiqueSelected($event)" [displayWith]="displayFnBoutique">
+                        <mat-option *ngFor="let street of filteredStreetsBoutique | async" [value]="street">
+                          {{ street }}
+                        </mat-option>
+                      </mat-autocomplete>
                   </div>
                 </div>
                 
