@@ -464,7 +464,6 @@ export class AddStockAjustementComponent {
   }
 
   /* Méthode pour retirer du stock en regroupant les ajustements */
-  
   RetirerDesQuan(): void {
     this.errorMessage = '';
     this.successMessage = '';
