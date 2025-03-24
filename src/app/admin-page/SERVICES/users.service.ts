@@ -222,7 +222,7 @@ export class UsersService {
     return this.http.post<any>(`${this.apiUrl}/ajouterBoutique`, boutique, { headers });
   }
   
-
+  // LL recuperation de boutique dans e/ses
   getBoutiquesByEntreprise(): Observable<any[]> {
     const token = localStorage.getItem('authToken');
     
@@ -236,6 +236,28 @@ export class UsersService {
     });
   
     return this.http.get<any[]>(`${this.apiUrl}/boutiqueEntreprise`, { headers });
+  }
+
+  // Service pour suspendre user
+  suspendUser(userId: number, suspend: boolean): Observable<any> {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        return throwError('Aucun token trouvé');
+    }
+
+    const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.put(
+        `${this.apiUrl}/suspendre/${userId}`,
+        null,
+        { 
+            headers,
+            params: { suspend: suspend.toString() },
+            responseType: 'text' // <-- Ajoutez ceci
+        }
+    );
   }
   
 }

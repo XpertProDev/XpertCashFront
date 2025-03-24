@@ -335,7 +335,7 @@
             </div>
             <!-- Bouton Ajouter -->
             <div class="btn_save_category">
-              <button type="submit" class="btn_s_category">Ajouter</button>
+              <button type="submit" class="btn_s_category" (click)="submitFormCategory()">Ajouter</button>
             </div>
           </div>
         </form>
@@ -345,7 +345,7 @@
      <!-- Pour cree un category -->
      <div *ngIf="showUniteCreation" class="info_titre_input ajouter_cadre_cree_c_u">
       <h4>Créer un unité</h4>
-      <form [formGroup]="ajouteUniteForm" (ngSubmit)="submitFormUnity()">
+      <form [formGroup]="ajouteUniteForm">
         <div class="champ_input" style="margin-top: 15px;">
           <input autocomplete="off" formControlName="unityName" type="text" class="input_focus input_focus_cree_cate" required id="unityName" name="unityName" placeholder="Saisis le nom de unité">
           <label for="unityName" class="label labelColor">Nom unité</label>
@@ -372,7 +372,7 @@
             <button class="btn_c_category" (click)="cancelUniteCreation()">Annuler</button>
           </div>
           <div class="btn_save_category">
-            <button type="submit" class="btn_s_category" (click)="submitFormCategory()">Ajouter</button>
+            <button type="submit" class="btn_s_category" (click)="submitFormUnity()">Ajouter</button>
           </div>
         </div>
       </form>
@@ -383,16 +383,14 @@
 </div>
 </div>
 
-
-
  <!-- Popup overlay -->
- <div class="popup-overlay" *ngIf="showPopup">
+ <div class="popup-overlay" *ngIf="showPopupBoutique">
   <div class="popup-content">
       <div class="popup-headerBoutique">
           <h4>Ajouter une boutique</h4>
           <button class="close-btn" (click)="closePopupBoutique()">&times;</button>
       </div>
-      <form [formGroup]="boutiqueForm" (ngSubmit)="onSubmitBoutique()">
+      <form [formGroup]="boutiqueForm">
         <div class="popup-body">
           
           <div class="champ_grid">
@@ -446,7 +444,8 @@
                     [disabled]="boutiqueForm.invalid" 
                     [style.backgroundColor]="boutiqueForm.valid ? '#0672E4' : '#0671e434'"
                     [style.color]="boutiqueForm.valid ? '#ffffff' : '#00000073'"
-                    [style.cursor]="boutiqueForm.valid ? 'pointer' : 'no-drop'">
+                    [style.cursor]="boutiqueForm.valid ? 'pointer' : 'no-drop'"
+                    (click)="onSubmitBoutique()">
               Ajouter
             </button>
         </div>

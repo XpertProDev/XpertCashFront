@@ -1021,14 +1021,17 @@ img.roudel_detail{
 .name_boutique {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 10px;
   cursor: pointer;
   margin: 10px 0;
 }
 
+.name_boutique p {
+  padding: 5px 15px;
+}
+
 .name_boutique_active {
-  background-color: #0672E4;
-  padding: 5px 20px;
+  background-color: #E9D421;
   border-radius: 5px;
-  color: #fff;
+  color: #000000;
 }

@@ -5,6 +5,7 @@ export interface UserNewRequest {
     roleType: string;
     phone: string;
     pays: string;
+    enabledLien: boolean;
     role?: {
         id: number;
         name: string;
