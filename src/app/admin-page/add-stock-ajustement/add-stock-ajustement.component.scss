@@ -978,3 +978,26 @@ select.input_focus_type_select {
   -moz-appearance: none;
   appearance: none;
 }
+
+.info-message {
+  margin-top: 8px;
+  color: #666;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  i {
+    font-size: 1.2em;
+  }
+}
+
+.input_focus_type_select:disabled {
+  // background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+option[disabled] {
+  color: #999;
+  font-style: italic;
+}

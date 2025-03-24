@@ -134,20 +134,47 @@
                       <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                         <td>
                           <div class="champ_input">
-                            <select 
-                              required 
-                              name="selectedProduct" 
-                              class="input_focus_type input_focus_type_select" 
-                              [(ngModel)]="selectedProduct"
-                              (ngModelChange)="checkExistingProduct()"
-                              [compareWith]="compareProducts"
-                              #productSelect
-                              [class.duplicate]="errorMessage.includes('est déjà dans la liste')" >
-                              <option [ngValue]="null">Sélectionner un produit</option>
-                              <option *ngFor="let produit of tasks" [ngValue]="produit">
-                                {{ produit.nom }}
-                              </option>
-                            </select>
+                            <!-- Dans le select des produits -->
+                              <select 
+                                required 
+                                name="selectedProduct" 
+                                class="input_focus_type input_focus_type_select" 
+                                [(ngModel)]="selectedProduct"
+                                [disabled]="!boutiqueIdSelected"
+                                (ngModelChange)="checkExistingProduct()"
+                                [compareWith]="compareProducts"
+                                #productSelect
+                                [class.duplicate]="errorMessage.includes('est déjà dans la liste')">
+
+                                <option [ngValue]="null">
+                                  {{ boutiqueIdSelected ? 'Sélectionner un produit' : 'Veuillez sélectionner une boutique' }}
+                                </option>
+
+                                <!-- Message quand aucune boutique sélectionnée -->
+                                <ng-container *ngIf="!boutiqueIdSelected">
+                                  <option disabled>
+                                    Aucune boutique sélectionnée
+                                  </option>
+                                </ng-container>
+
+                                <!-- Message quand pas de produits -->
+                                <ng-container *ngIf="boutiqueIdSelected && tasks.length === 0">
+                                  <option disabled>
+                                    Aucun produit disponible dans cette boutique
+                                  </option>
+                                </ng-container>
+
+                                <!-- Liste des produits -->
+                                <option *ngFor="let produit of tasks" [ngValue]="produit">
+                                  {{ produit.nom }}
+                                </option>
+                              </select>
+
+                              <!-- Ajoutez ce message sous le select de boutique -->
+                              <!-- <div *ngIf="!controlBoutique.value" class="info-message">
+                              <i class="ri-information-line"></i>
+                              Sélectionnez une boutique pour voir ses produits
+                              </div> -->
                           </div>
                         </td>
                         <td>
@@ -287,7 +314,7 @@
                       <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                         <td>
                           <div class="champ_input">
-                            <select 
+                            <!-- <select 
                               required 
                               name="selectedProduct" 
                               class="input_focus_type input_focus_type_select" 
@@ -300,7 +327,41 @@
                               <option *ngFor="let produit of tasks" [ngValue]="produit">
                                 {{ produit.nom }}
                               </option>
-                            </select>
+                            </select> -->
+                            <select 
+                                required 
+                                name="selectedProduct" 
+                                class="input_focus_type input_focus_type_select" 
+                                [(ngModel)]="selectedProduct"
+                                [disabled]="!boutiqueIdSelected"
+                                (ngModelChange)="checkExistingProduct()"
+                                [compareWith]="compareProducts"
+                                #productSelect
+                                [class.duplicate]="errorMessage.includes('est déjà dans la liste')">
+
+                                <option [ngValue]="null">
+                                  {{ boutiqueIdSelected ? 'Sélectionner un produit' : 'Veuillez sélectionner une boutique' }}
+                                </option>
+
+                                <!-- Message quand aucune boutique sélectionnée -->
+                                <ng-container *ngIf="!boutiqueIdSelected">
+                                  <option disabled>
+                                    Aucune boutique sélectionnée
+                                  </option>
+                                </ng-container>
+
+                                <!-- Message quand pas de produits -->
+                                <ng-container *ngIf="boutiqueIdSelected && tasks.length === 0">
+                                  <option disabled>
+                                    Aucun produit disponible dans cette boutique
+                                  </option>
+                                </ng-container>
+
+                                <!-- Liste des produits -->
+                                <option *ngFor="let produit of tasks" [ngValue]="produit">
+                                  {{ produit.nom }}
+                                </option>
+                              </select>
                           </div>
                         </td>
                         <td>

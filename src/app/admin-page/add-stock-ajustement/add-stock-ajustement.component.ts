@@ -32,6 +32,8 @@ export class AddStockAjustementComponent {
   // Dans la classe du composant
   @ViewChild('productSelect') productSelect!: ElementRef;
 
+  // private destroy$ = new Subject<void>();
+
   ajusteForm!: FormGroup;
   ajusteRetirerForm!: FormGroup;
   errorMessage: string = '';
@@ -77,11 +79,9 @@ export class AddStockAjustementComponent {
   ngOnInit(): void  {
     this.getBoutiqueName();
     this.getPartageInfoUser();
-    this.loadProduits();
-    // this.checkStocksVisibility();
+    // Convertir explicitement null en undefined avec l'opérateur de coalescence nulle
+    // this.loadProduits(this.usersService.getUserBoutiqueId() ?? undefined);
     this.getAjusteForm();
-    // this.getAjusteRetirerForm();
-    // this.loadPendingAdjustments();
   }
 
   getBoutiqueName(): void {
@@ -117,61 +117,37 @@ export class AddStockAjustementComponent {
   tasks: Produit[] = [];
 
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
-  loadProduits(): void {
-    const boutiqueId = this.usersService.getUserBoutiqueId();
+  loadProduits(boutiqueId: number): void {
     if (!boutiqueId) {
-      console.error('L\'ID de la boutique est manquant');
+      this.tasks = []; // Réinitialiser la liste si aucun ID
       return;
     }
+  
     this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
       next: (produits: Produit[]) => {
-        // Filtrer les produits dont la quantité est supérieure à 0
         this.tasks = produits
-          .filter(prod => prod.enStock) 
-          .map(prod => {
-            const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
-              ? `http://localhost:8080${prod.photo}`
-              : '';
-    
-            let createdAtDate: Date | null = null;
-            if (prod.createdAt) {
-              const cleanedDateStr = prod.createdAt.replace(' à ', ' ');
-              const dateParts = cleanedDateStr.match(/^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})$/);
-    
-              if (dateParts) {
-                const [, day, month, year, hours, minutes] = dateParts.map(Number);
-                createdAtDate = new Date(year, month - 1, day, hours, minutes);
-              } else {
-                console.warn("Format de date invalide pour:", prod.createdAt);
+          .filter(prod => prod.enStock)
+          .map(prod => ({ ...prod })) // Simplifié le mapping
+          .sort((a, b) => {
+            const parseDate = (dateStr: string | undefined): number => {
+              try {
+                return dateStr ? new Date(dateStr).getTime() : 0;
+              } catch {
+                return 0;
               }
-            }
-            return {
-              id: prod.id,
-              codeGenerique: prod.codeGenerique || '',
-              codeBare: prod.codeBare || 'Non numéro code barre',
-              nom: prod.nom || 'Nom inconnu',
-              description: prod.description || 'Non description',
-              prixVente: prod.prixVente || 0,
-              prixAchat: prod.prixAchat || 0,
-              quantite: prod.quantite || 0,
-              seuilAlert: prod.seuilAlert || 0,
-              enStock: prod.enStock || false,
-              photo: fullImageUrl,
-              nomCategorie: prod.nomCategorie || 'Non catégorie',
-              nomUnite: prod.nomUnite || 'Non unité',
-              createdAt: prod.createdAt || new Date().toISOString(),
-              categorieId: prod.categorieId,
-              uniteId: prod.uniteId,
-              boutiqueId: prod.boutiqueId,
             };
-          })
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          
+            return parseDate(b.createdAt) - parseDate(a.createdAt);
+          });
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des produits", err);
+        this.tasks = [];
       }
     });
-  }  
+  } 
+
+  
 
   // quantiteAjoute: number = 0;
   quantiteAjoute: number | null = null; 
@@ -585,14 +561,15 @@ export class AddStockAjustementComponent {
   }  
   
 
+  // Modifiez onBoutiqueSelected
   onBoutiqueSelected(event: any): void {
-    const selectedValue = event.option.value;
-    this.controlBoutique.setValue(selectedValue);
-    console.log('Boutique sélectionnée :', selectedValue);
-
-    const selectedBoutique = this.streetsBoutique.find(boutique => boutique.name === selectedValue);
+    const selectedBoutique = this.streetsBoutique.find(b => b.name === event.option.value);
+    
     if (selectedBoutique) {
-      this.boutiqueIdSelected = selectedBoutique.id; 
+      this.boutiqueIdSelected = selectedBoutique.id;
+      this.loadProduits(selectedBoutique.id);
+      this.pendingAdjustments = []; // Réinitialiser les ajustements
+      this.selectedProduct = null; // Réinitialiser la sélection
     }
   }
 
