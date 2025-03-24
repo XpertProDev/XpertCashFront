@@ -233,6 +233,19 @@ export class CompteComponent  implements OnInit {
   
         this.userForm.reset();
   
+        // Rafraîchir la liste des utilisateurs
+        this.usersService.getUserInfo().subscribe({
+          next: (userData) => {
+            if (userData && userData.id) {
+              const entrepriseId = userData.id;
+              this.loadUsersOfEntreprise(entrepriseId);
+            }
+          },
+          error: (err) => {
+            console.error("Erreur lors de la récupération des informations utilisateur :", err);
+          }
+        });
+  
         this.isLoading = false;
         this.closePopup();
         setTimeout(() => this.successMessage = null, 3000);

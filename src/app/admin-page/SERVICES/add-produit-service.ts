@@ -22,15 +22,12 @@ export class ProduitService {
     const url = `${this.apiUrl}/create/${boutiqueId}?addToStock=${addToStock}`;
     const formData: FormData = new FormData();
 
-    // Ajoute l'objet produit sous forme de chaîne JSON
     formData.append('produit', JSON.stringify(produit));
 
-    // Ajoute le fichier image s'il est présent
     if (imageFile) {
       formData.append('image', imageFile, imageFile.name);
     }
 
-    // Prépare les headers avec le token (le Content-Type n'est pas défini pour laisser Angular gérer le FormData)
     const headers = new HttpHeaders({
       'Authorization': token
     });

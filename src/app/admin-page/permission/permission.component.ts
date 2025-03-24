@@ -198,7 +198,7 @@ export class PermissionComponent implements OnInit {
         // Disparition automatique après 3 secondes
         setTimeout(() => {
           this.successMessage = null;
-        }, 10000);
+        }, 15000);
 
         this.getUserParId();
       },
@@ -220,8 +220,8 @@ export class PermissionComponent implements OnInit {
     const userId = this.route.snapshot.params['userId'];
     
     this.usersService.suspendUser(userId, isChecked).subscribe({
-        next: (response: string) => { // <-- Typez la réponse comme string
-            this.successMessage = response; // Utilisez directement la réponse du serveur
+        next: (response: string) => { 
+            this.successMessage = response;
             if (this.user) {
                 this.user.enabledLien = !isChecked;
             }
@@ -249,7 +249,7 @@ export class PermissionComponent implements OnInit {
   // Ajoutez cette méthode dans la classe :
   private confirmAction(message: string): Promise<boolean> {
     return new Promise((resolve) => {
-      resolve(confirm(message)); // Utilise le dialogue de confirmation natif
+      resolve(confirm(message)); 
     });
   }
 

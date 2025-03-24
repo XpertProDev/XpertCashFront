@@ -95,7 +95,7 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/boutique',
         classes: 'nav-item',
-        icon: 'feather icon-file'
+        icon: 'feather icon-list'
       },
 
       // Pour les compte

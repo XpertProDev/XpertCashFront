@@ -53,6 +53,18 @@ export class AddProduitComponent {
     type: 'success'
   };
 
+  boutiqueForm!: FormGroup;
+  successMessage: string | null = null;
+  
+  // users: any[] = [];
+  filteredUsers: any[] = [];
+  
+  indicatif: string = '';
+  maxPhoneLength: number = 8;
+  
+  isAscending: boolean = true;
+  searchTerm: string = '';
+
   clearImage() {
     this.newPhotoUrl = null;
     this.imageFile = null;
@@ -159,6 +171,8 @@ export class AddProduitComponent {
   // produitForm: FormGroup;
   imageFile: File | null = null;
   isLoading: boolean = false;
+
+  boutiqueIdSelected: number | null = null; 
 
   constructor(
     private sharedDataService: SharedDataService,
@@ -391,7 +405,7 @@ export class AddProduitComponent {
   
   // Méthode pour la sélection d'une catégorie
   onCategorySelected(event: any): void {
-    console.log('Option sélectionnée :', event.option.value);  // Ajoutez ce log pour vérifier la sélection
+    console.log('Option sélectionnée :', event.option.value);
     if (event.option && event.option.value) {
       this.ajouteProduitForm.get('categorieId')?.setValue(event.option.value.id);
     } else {
@@ -723,7 +737,7 @@ export class AddProduitComponent {
 
 
   controlBoutique = new FormControl('');
-  streetsBoutique: string[] = [];
+  streetsBoutique: { id: number, name: string }[] = []; // Associe les noms aux IDs
   filteredStreetsBoutique!: Observable<string[]>;
 
   getFilteredStreetsBoutique() {
@@ -744,26 +758,13 @@ export class AddProduitComponent {
     return value.toLowerCase().replace(/\s/g, '');
   }
 
-  // showPopupBoutique = false;
-  showPopupBoutique: boolean = false;
+  showPopupBoutique = false;
 
   
   
   onFocusBoutiqueInput(): void {
     this.controlBoutique.setValue(''); // Réinitialise la valeur pour afficher toutes les options
   }
-
-  boutiqueForm!: FormGroup;
-  successMessage: string | null = null;
-  
-  // users: any[] = [];
-  filteredUsers: any[] = [];
-  
-  indicatif: string = '';
-  maxPhoneLength: number = 8;
-  
-  isAscending: boolean = true;
-  searchTerm: string = '';
 
 
   initForm() {
@@ -784,11 +785,11 @@ export class AddProduitComponent {
   }
    
   openPopupBoutique() {
-    this.showPopupBoutique = true;
+    this.showPopup = true;
   }
 
   closePopupBoutique() {
-    this.showPopupBoutique = false;
+    this.showPopup = false;
     this.resetForm();
   }
 
@@ -823,6 +824,6 @@ export class AddProduitComponent {
     return boutique ? boutique : '';
   }
 
-  boutiqueIdSelected: number | null = null; // Propriété pour stocker l'ID de la boutique sélectionnée
+  
 
 }
