@@ -27,9 +27,16 @@
                   <!-- // Boutique  -->
                   <div class="champ_input champ_input2">
                     <div class="title_input">Boutique</div>
-                    <input autocomplete="off" type="text" placeholder="Saisis le nom de boutique"
-                             class="input_focus" matInput [formControl]="controlBoutique" 
-                             [matAutocomplete]="autoBoutique" style="cursor: pointer;">
+                    <input 
+                        autocomplete="off" 
+                        type="text" 
+                        placeholder="Saisis le nom de boutique"
+                        class="input_focus" 
+                        matInput 
+                        [formControl]="controlBoutique"
+                        [matAutocomplete]="autoBoutique"
+                        (blur)="checkBoutiqueSelection()"
+                      >
                       <label for="boutiqueId" class="label">Boutique</label>
                       <mat-autocomplete #autoBoutique="matAutocomplete" (optionSelected)="onBoutiqueSelected($event)" [displayWith]="displayFnBoutique">
                         <mat-option *ngFor="let street of filteredStreetsBoutique | async" [value]="street">

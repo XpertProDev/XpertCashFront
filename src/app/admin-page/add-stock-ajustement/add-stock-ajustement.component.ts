@@ -9,7 +9,7 @@ import { Produit } from '../MODELS/produit.model';
 import { StockService } from '../SERVICES/stocks.service';
 import { Stock } from '../MODELS/stock.model';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
-import { map, Observable, startWith } from 'rxjs';
+import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -32,7 +32,7 @@ export class AddStockAjustementComponent {
   // Dans la classe du composant
   @ViewChild('productSelect') productSelect!: ElementRef;
 
-  // private destroy$ = new Subject<void>();
+  private destroy$ = new Subject<void>();
 
   ajusteForm!: FormGroup;
   ajusteRetirerForm!: FormGroup;
@@ -57,8 +57,8 @@ export class AddStockAjustementComponent {
   boutiqueIdSelected: number | null = null; 
 
    controlBoutique = new FormControl('');
-    streetsBoutique: { id: number, name: string }[] = []; 
-    filteredStreetsBoutique!: Observable<string[]>;
+  streetsBoutique: { id: number, name: string }[] = []; 
+  filteredStreetsBoutique!: Observable<string[]>;
 
 
   // Contructor
@@ -82,6 +82,38 @@ export class AddStockAjustementComponent {
     // Convertir explicitement null en undefined avec l'opérateur de coalescence nulle
     // this.loadProduits(this.usersService.getUserBoutiqueId() ?? undefined);
     this.getAjusteForm();
+    this.getControleBoutique();
+  }
+
+  getControleBoutique() : void {
+    this.controlBoutique.valueChanges
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(value => {
+      if (!value) {
+        this.handleBoutiqueDeselection();
+      }
+    });
+  }
+
+  // Nouvelle méthode pour gérer la désélection
+  private handleBoutiqueDeselection(): void {
+    this.boutiqueIdSelected = null;
+    this.tasks = [];
+    this.pendingAdjustments = [];
+    this.selectedProduct = null;
+    this.cdRef.detectChanges();
+  }
+
+  // Ajouter ngOnDestroy
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  checkBoutiqueSelection(): void {
+    if (!this.controlBoutique.value) {
+      this.handleBoutiqueDeselection();
+    }
   }
 
   getBoutiqueName(): void {
@@ -146,9 +178,7 @@ export class AddStockAjustementComponent {
       }
     });
   } 
-
   
-
   // quantiteAjoute: number = 0;
   quantiteAjoute: number | null = null; 
   quantiteRetirer: number | null = null; 
