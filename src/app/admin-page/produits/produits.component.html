@@ -71,7 +71,7 @@
             </div>
           </div>
         </td>
-        <!-- <td>{{product | json}}</td> -->
+        <!-- <div> {{ product | json }}</div> -->
         <td [innerHTML]="highlightMatch(product.nom)"></td>
         <td class="description-cell" (mouseover)="showDescription = true" (mouseout)="showDescription = false">
           {{ product.description || 'Non description' | slice:0:20 }}{{ product.description.length > 20 ? '...' : '' }}

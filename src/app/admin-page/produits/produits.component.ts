@@ -358,7 +358,8 @@ loadProduits(boutiqueId: number): void {
           nomUnite: prod.nomUnite || '',
           createdAt: createdAt,
           categorieId: prod.categorieId || 0,
-          uniteId: prod.uniteId || 0
+          uniteId: prod.uniteId || 0,
+          boutiqueId: prod.boutiqueId || 0
         } as Produit;
       }).sort((a, b) => {
         const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();

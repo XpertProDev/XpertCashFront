@@ -17,5 +17,7 @@ export interface Produit {
   nomUnite?: string;     // ex: "" ou la valeur réelle
   createdAt?: string;
   lastUpdated?: string;
-  
+
+  boutiqueId: number | null;
+  nomBoutique?: string; 
 }

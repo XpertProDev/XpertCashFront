@@ -126,6 +126,7 @@ export class ListProduitComponent {
       codeBare: '',
       photo: '',
       enStock: false,
+      boutiqueId: null,
       // Facultatif : nomCategorie, nomUnite, createdAt
     };
   
@@ -211,7 +212,7 @@ export class ListProduitComponent {
     // filteredOptions: Observable<CategorySelect[]> = of([]);
   
     ngOnInit(): void  {
-      this.getBoutiqueName();
+      // this.getBoutiqueName();
       this.getProduit();
       // this.updateProduct();
       
@@ -335,6 +336,9 @@ export class ListProduitComponent {
           this.produit = data;
           this.modifierProduitForm.patchValue(this.produit);
           this.loadInitialValues(); 
+
+          // l'appel à getBoutiqueName avec l'ID de la boutique du produit
+          this.getBoutiqueName(this.produit.boutiqueId);
           
           // Ajouter ces lignes pour initialiser les contrôles d'autocomplete
           const selectedUnite = this.optionsUnite.find(u => u.id === this.produit.uniteId);
@@ -352,24 +356,29 @@ export class ListProduitComponent {
 
   // Méthode pour charger le détail du produit et construire l'URL de l'image
   
-    getBoutiqueName() {
-      this.usersService.getUserInfo().subscribe(
-        (userInfo) => {
-          console.log(userInfo);
-          if (userInfo && userInfo.boutiques && userInfo.boutiques.length > 0) {
-            console.log(userInfo.boutiques[0]);
-    
-            this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
+  getBoutiqueName(boutiqueId: number | null) {
+    this.usersService.getUserInfo().subscribe(
+      (userInfo) => {
+        if (userInfo && userInfo.boutiques) {
+          // Recherche de la boutique correspondant à l'ID du produit
+          const boutique = userInfo.boutiques.find(b => b.id === boutiqueId);
+          if (boutique) {
+            this.boutiqueName = boutique.nomBoutique;
           } else {
-            console.error('Aucune boutique trouvée pour cet utilisateur');
-            this.boutiqueName = 'Aucune boutique';
+            console.error('Boutique non trouvée pour cet ID');
+            this.boutiqueName = 'Boutique inconnue';
           }
-        },
-        (error) => {
-          console.error('Erreur lors de la récupération des informations utilisateur', error);
+        } else {
+          console.error('Aucune boutique trouvée pour cet utilisateur');
+          this.boutiqueName = 'Aucune boutique';
         }
-      );
-    }
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des informations utilisateur', error);
+        this.boutiqueName = 'Erreur de chargement';
+      }
+    );
+  }
     // Getter pour faciliter l'accès aux contrôles dans le template
     get c() { return this.ajouteCategoryForm.controls; }
     get u() { return this.ajouteUniteForm.controls; }

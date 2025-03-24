@@ -331,6 +331,7 @@ export class StocksComponent implements OnInit {
               createdAt: prod.createdAt || new Date().toISOString(), // Assurer une valeur par défaut
               categorieId: prod.categorieId,
               uniteId: prod.uniteId,
+              boutiqueId: prod.boutiqueId,
             };
           })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
