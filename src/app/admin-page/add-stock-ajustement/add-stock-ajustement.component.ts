@@ -149,7 +149,8 @@ export class AddStockAjustementComponent {
               nomUnite: prod.nomUnite || 'Non unité',
               createdAt: prod.createdAt || new Date().toISOString(),
               categorieId: prod.categorieId,
-              uniteId: prod.uniteId 
+              uniteId: prod.uniteId,
+              boutiqueId: prod.boutiqueId,
             };
           })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -533,34 +534,22 @@ export class AddStockAjustementComponent {
     return 'Erreur technique - Veuillez réessayer plus tard';
   }
 
-  private validateCurrentSelection(): boolean {
-    if (!this.selectedProduct) return false;
+  // private validateCurrentSelection(): boolean {
+  //   if (!this.selectedProduct) return false;
   
-    if (this.selectedAction === 'ajouter') {
-      return this.quantiteAjoute !== null 
-        && this.quantiteAjoute > 0 
-        && this.selectedProduct.quantite + this.quantiteAjoute >= 0;
-    }
-  
-    if (this.selectedAction === 'reduire') {
-      return this.quantiteRetirer !== null 
-        && this.quantiteRetirer > 0 
-        && this.selectedProduct.quantite - this.quantiteRetirer >= 0;
-    }
-  
-    return false;
-  }
-
-  // onQuantityChange(action: string) {
-  //   if (this.selectedProduct) {
-  //     const exists = this.pendingAdjustments.some(item => item.produitId === this.selectedProduct!.id);
-      
-  //     if (!exists) {
-  //       this.errorMessage = action === 'ajouter' 
-  //         ? 'N\'oubliez pas de cliquer sur "+" pour ajouter à la liste' 
-  //         : 'N\'oubliez pas de cliquer sur "+" pour ajouter à la liste';
-  //     }
+  //   if (this.selectedAction === 'ajouter') {
+  //     return this.quantiteAjoute !== null 
+  //       && this.quantiteAjoute > 0 
+  //       && this.selectedProduct.quantite + this.quantiteAjoute >= 0;
   //   }
+  
+  //   if (this.selectedAction === 'reduire') {
+  //     return this.quantiteRetirer !== null 
+  //       && this.quantiteRetirer > 0 
+  //       && this.selectedProduct.quantite - this.quantiteRetirer >= 0;
+  //   }
+  
+  //   return false;
   // }
   
   // Méthode pour afficher une pop-up de succès
