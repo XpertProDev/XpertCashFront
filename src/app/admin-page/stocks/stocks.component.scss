@@ -573,3 +573,21 @@ tr:hover {
 .description-cell:hover .description-hover {
   display: block;
 }
+
+.name_boutique {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+.name_boutique p {
+  padding: 5px 15px;
+}
+
+.name_boutique_active {
+  background-color: #E9D421;
+  border-radius: 5px;
+  color: #000000;
+}

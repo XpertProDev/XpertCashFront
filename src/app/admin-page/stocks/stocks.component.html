@@ -25,6 +25,19 @@
     </div>
   </div>
 
+  <div class="container_list_boutique">
+    <div class="content_list_boutique">
+      <div class="name_boutique">
+        <!-- Boucle sur les boutiques réelles de l'utilisateur -->
+        <p *ngFor="let boutique of boutiques" 
+           [class.name_boutique_active]="boutique.id === selectedBoutique?.id"
+           (click)="selectBoutique(boutique)">
+           {{ boutique.nomBoutique }}
+        </p>
+      </div>
+    </div>
+  </div>
+
   <!-- Tableau des produits -->
   <table>
     <thead>

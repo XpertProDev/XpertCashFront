@@ -56,6 +56,9 @@ export class StocksComponent implements OnInit {
   pageSize = 5;
   currentPage = 0;
 
+  selectedBoutique: any = null;
+  boutiques: any[] = [];
+
   // Dropdown pour l'export
   showExportDropdown = false;
 
@@ -76,7 +79,7 @@ export class StocksComponent implements OnInit {
   ngOnInit(): void {
     this.getUserBoutiqueId();
     this.getUserInfo();
-    this.loadProduits();
+    // this.loadProduits();
   }
 
 
@@ -274,14 +277,14 @@ export class StocksComponent implements OnInit {
         localStorage.setItem('user', JSON.stringify(user));
         this.userName = user.nomComplet;
         this.nomEntreprise = user.nomEntreprise;
-        this.boutiqueName = user.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
-        this.addressBoutique = user.boutiques[0].adresse|| 'Adresse de la boutique non trouvé';
-  
-        const boutiqueId = this.usersService.getUserBoutiqueId();
-        if (boutiqueId) {
-          this.loadProduits();
-        } else {
-          console.error("L'ID de la boutique est manquant");
+        this.boutiques = user.boutiques; // Récupération de toutes les boutiques
+        
+        // Sélectionner la première boutique par défaut
+        if (this.boutiques.length > 0) {
+          this.selectedBoutique = this.boutiques[0];
+          this.boutiqueName = this.selectedBoutique.nomBoutique;
+          this.addressBoutique = this.selectedBoutique.adresse;
+          this.loadProduits(this.selectedBoutique.id);
         }
       },
       error: (err) => {
@@ -289,14 +292,10 @@ export class StocksComponent implements OnInit {
       }
     });
   }
-  
-
-  
-  
 
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
-  loadProduits(): void {
-    const boutiqueId = this.usersService.getUserBoutiqueId();
+  loadProduits(boutiqueId: number): void {
+    // const boutiqueId = this.usersService.getUserBoutiqueId();
     if (!boutiqueId) {
       console.error("L'ID de la boutique est manquant");
       return;
@@ -343,7 +342,16 @@ export class StocksComponent implements OnInit {
         console.error("Erreur lors de la récupération des produits", err);
       },
     });
-}
+  }
+
+  // Ajoute cette méthode pour la sélection des boutiques
+  selectBoutique(boutique: any): void {
+    this.selectedBoutique = boutique;
+    this.boutiqueName = boutique.nomBoutique;
+    this.addressBoutique = boutique.adresse;
+    this.loadProduits(boutique.id);
+    this.currentPage = 0; // Réinitialiser la pagination
+  }
 
   generateLetterAvatar(nom: string): string {
     const letter = nom ? nom.charAt(0).toUpperCase() : '?';
