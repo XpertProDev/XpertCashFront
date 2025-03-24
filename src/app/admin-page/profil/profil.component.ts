@@ -110,7 +110,7 @@ export class ProfilComponent  implements OnInit{
 
     this.nomBoutiqueForm = this.fb.group({
       nomBoutique: ['', [Validators.required]],
-      adresse: ['', [Validators.required]]
+      // adresse: ['', [Validators.required]]
     });
 
     this.nomCompletForm = this.fb.group({

@@ -48,9 +48,9 @@
         <tbody>
           <tr *ngFor="let boutique of filteredBoutiques">
             <td>{{ boutique.nomBoutique }}</td>
-            <td>{{ boutique.email }}</td>
-            <td>{{ boutique.adresse }}</td>
-            <td>{{ boutique.telephone }}</td>
+            <td>{{ boutique.email || 'Non email' }}</td>
+            <td>{{ boutique.adresse || 'Non adresse'  }}</td>
+            <td>{{ boutique.telephone || 'Non téléphone'  }}</td>
             <td>{{ boutique.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
           </tr>
         </tbody>
