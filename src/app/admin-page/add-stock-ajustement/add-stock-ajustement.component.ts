@@ -72,6 +72,8 @@ export class AddStockAjustementComponent {
   filteredStreetsBoutique!: Observable<string[]>;
   filteredStreetsBoutiqueTransfert!: Observable<any[]>;
 
+  showPopupBoutique = false;
+
   // Contructor
   constructor(
       private sharedDataService: SharedDataService,
@@ -610,7 +612,6 @@ export class AddStockAjustementComponent {
     this.pendingAdjustments.splice(index, 1);
   }  
   
-
   // Modifiez onBoutiqueSelected
   onBoutiqueSelected(event: any): void {
     const selectedBoutique = this.streetsBoutique.find(b => b.name === event.option.value);
@@ -623,34 +624,29 @@ export class AddStockAjustementComponent {
     }
   }
 
-   getFilteredStreetsBoutique() {
-      this.filteredStreetsBoutique = this.controlBoutique.valueChanges.pipe(
-        startWith(''),
-        map(value => this._filterBoutique(value || ''))
-      );
-    }
+  getFilteredStreetsBoutique() {
+    this.filteredStreetsBoutique = this.controlBoutique.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterBoutique(value || ''))
+    );
+  }
 
-    private _filterBoutique(value: string): string[] {
-      const filterValue = this._normalizeValue(value);
-      return this.streetsBoutique.map(b => b.name).filter(street => this._normalizeValue(street).includes(filterValue));
-    }
+  private _filterBoutique(value: string): string[] {
+    const filterValue = this._normalizeValue(value);
+    return this.streetsBoutique.map(b => b.name).filter(street => this._normalizeValue(street).includes(filterValue));
+  }
 
-    private _normalizeValue(value: string): string {
-      return value.toLowerCase().replace(/\s/g, '');
-    }
+  private _normalizeValue(value: string): string {
+    return value.toLowerCase().replace(/\s/g, '');
+  }
   
-    showPopupBoutique = false;
-  
-    
-    
-    onFocusBoutiqueInput(): void {
-      this.controlBoutique.setValue(''); 
-    }
+  onFocusBoutiqueInput(): void {
+    this.controlBoutique.setValue(''); 
+  }
 
-    displayFnBoutique(boutique?: string): string {
-      return boutique ? boutique : '';
-    }
-
+  displayFnBoutique(boutique?: string): string {
+    return boutique ? boutique : '';
+  }
 
   // OnBoutiqueSelected Transfert
   onBoutiqueSelectedTransfert(event: any): void {
@@ -686,105 +682,108 @@ export class AddStockAjustementComponent {
     return boutique?.name || '';
   }
 
+  // Nouvelle méthode pour valider un transfert unique
+
+  validateSingleTransfer(): any {
+    if (!this.boutiqueIdSelected || !this.selectedDestinationBoutique?.id) {
+        return { valid: false, error: 'Veuillez sélectionner les boutiques' };
+    }
+    
+    if (!this.selectedProduct) {
+        return { valid: false, error: 'Veuillez sélectionner un produit' };
+    }
+
+    const quantite = this.quantiteRetirer || 0;
+    if (quantite <= 0 || quantite > this.selectedProduct.quantite) {
+        return { valid: false, error: 'Quantité invalide' };
+    }
+
+    return { 
+        valid: true,
+        transfert: {
+            produitId: this.selectedProduct.id,
+            quantite: quantite,
+            boutiqueSourceId: this.boutiqueIdSelected,
+            boutiqueDestinationId: this.selectedDestinationBoutique.id
+        }
+    };
+  }
+
+  // Méthode de transfert principale
   async transfererProduits() {
-    if (this.pendingAdjustments.length === 0) {
-        this.errorMessageError = 'Aucun transfert à effectuer';
+      let transfersToProcess = [...this.pendingAdjustments];
+
+      // Si liste vide, vérifier le transfert unique
+      if (transfersToProcess.length === 0) {
+          const validation = this.validateSingleTransfer();
+          if (!validation.valid) {
+              this.errorMessageError = validation.error;
+              return;
+          }
+          transfersToProcess = [validation.transfert];
+      }
+
+      try {
+          const token = this.usersService.getToken();
+          if (!token) throw new Error('Non authentifié');
+
+          // Envoi des transferts
+          for (const transfert of transfersToProcess) {
+              await this.transfertService.effectuerTransfert(transfert).toPromise();
+              
+              // Mise à jour locale
+              const product = this.tasks.find(p => p.id === transfert.produitId);
+              if (product) product.quantite -= transfert.quantite;
+          }
+
+          // Réinitialisation
+          this.pendingAdjustments = [];
+          this.selectedProduct = null;
+          this.quantiteRetirer = null;
+          this.controlBoutiqueTransfert.reset();
+
+          this.successMessage = 'Transfert(s) effectué(s) avec succès';
+          setTimeout(() => this.successMessage = '', 3000);
+
+      } catch (error: any) {
+          console.error('Erreur:', error);
+          this.errorMessageError = error.error?.message || 'Erreur lors du transfert';
+          setTimeout(() => this.errorMessageError = '', 5000);
+      }
+  }
+
+  transfertToPendingAdjustments() {
+    const validation = this.validateSingleTransfer();
+    if (!validation.valid) {
+        this.errorMessageError = validation.error;
         return;
     }
 
-    try {
-        const token = this.usersService.getToken();
-        if (!token) throw new Error('Non authentifié');
+    // Vérification doublon
+    const exists = this.pendingAdjustments.some(t => 
+        t.produitId === validation.transfert.produitId &&
+        t.boutiqueDestinationId === validation.transfert.boutiqueDestinationId
+    );
 
-        // Envoi des transferts un par un
-        for (const adj of this.pendingAdjustments) {
-            const transfert: Transfert = {
-                produitId: adj.produitId,
-                boutiqueSourceId: adj.boutiqueSourceId,
-                boutiqueDestinationId: adj.boutiqueDestinationId,
-                quantite: adj.quantite
-            };
-
-            await this.transfertService.effectuerTransfert(transfert).toPromise();
-            
-            // Mise à jour locale
-            const product = this.tasks.find(p => p.id === adj.produitId);
-            if (product) product.quantite -= adj.quantite;
-        }
-
-        this.successMessage = 'Transfert(s) effectué(s) avec succès';
-        this.pendingAdjustments = [];
-        setTimeout(() => this.successMessage = '', 3000);
-
-    } catch (error: any) {
-        console.error('Erreur:', error);
-        this.errorMessageError = error.error?.message || 'Erreur lors du transfert';
-        setTimeout(() => this.errorMessageError = '', 5000);
+    if (exists) {
+        this.errorMessageError = 'Ce transfert est déjà dans la liste';
+        return;
     }
+
+    // Ajout avec les informations complètes
+    this.pendingAdjustments.push({
+        ...validation.transfert,
+        produitNom: this.selectedProduct!.nom,
+        stockActuel: this.selectedProduct!.quantite,
+        boutiqueDestinationName: this.selectedDestinationBoutique.name
+    });
+
+    // Réinitialisation des champs (sans vider la liste)
+    this.selectedProduct = null;
+    this.quantiteRetirer = null;
+    this.selectedDestinationBoutique = null;
+    this.controlBoutiqueTransfert.reset();
+    this.errorMessageError = '';
 }
-
-
-  transfertToPendingAdjustments() {
-      this.errorMessage = '';
-
-      // Validation
-      if (!this.boutiqueIdSelected) {
-          this.errorMessage = 'Veuillez sélectionner une boutique source';
-          return;
-      }
-      
-      if (!this.selectedDestinationBoutique) {
-          this.errorMessage = 'Veuillez sélectionner une boutique destination';
-          return;
-      }
-
-      if (this.boutiqueIdSelected === this.selectedDestinationBoutique.id) {
-          this.errorMessage = 'La source et la destination doivent être différentes';
-          return;
-      }
-
-      if (!this.selectedProduct) {
-          this.errorMessage = 'Veuillez sélectionner un produit';
-          return;
-      }
-
-      const quantite = this.quantiteRetirer || 0;
-      if (quantite <= 0 || quantite > this.selectedProduct.quantite) {
-          this.errorMessage = 'Quantité invalide';
-          return;
-      }
-
-      // Vérification doublon
-      const exists = this.pendingAdjustments.some(adj => 
-          adj.produitId === this.selectedProduct!.id &&
-          adj.boutiqueDestinationId === this.selectedDestinationBoutique.id
-      );
-
-      if (exists) {
-          this.errorMessage = 'Ce transfert existe déjà';
-          return;
-      }
-
-      // Ajout à la liste
-      this.pendingAdjustments.push({
-          produitId: this.selectedProduct.id,
-          produitNom: this.selectedProduct.nom,
-          quantite: quantite,
-          stockActuel: this.selectedProduct.quantite,
-          stockApres: this.selectedProduct.quantite - quantite,
-          boutiqueSourceId: this.boutiqueIdSelected,
-          boutiqueDestinationId: this.selectedDestinationBoutique.id,
-          boutiqueDestinationName: this.selectedDestinationBoutique.name
-      });
-
-      // Réinitialisation
-      this.selectedProduct = null;
-      this.quantiteRetirer = null;
-      this.selectedDestinationBoutique = null;
-      this.controlBoutiqueTransfert.reset();
-      this.errorMessage = '';
-  }
-
-  
   
 }
