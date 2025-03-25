@@ -443,11 +443,11 @@
             <div class="information_cadre" *ngIf="selectedAction === 'transfert'">
 
               <div class="info_titre_input">
-
+          
                 <div class="add_new_quantite_stock">
                     <h4>Gestion des transferts</h4>
                 </div>
-
+          
                 <div class="containerTable" style="position: relative;">
                   <table>
                     <thead>
@@ -459,7 +459,7 @@
                         <th class="title_table_contenu">Boutique d'arriver</th>
                       </tr>
                     </thead>
-
+          
                     <tbody *ngIf="pendingAdjustments.length > 0">
                         <tr  *ngFor="let adjustment of pendingAdjustments; let i = index"  class="tr_stock" style="border-top: 1px solid #f0f2f5;">
                             <td>
@@ -470,7 +470,7 @@
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 15px;">
                                 <input type="text" readonly class="input_table" 
-                                  [value]="adjustment.quantite" 
+                                  [value]="" 
                                   style="text-align: center;">
                               </div>
                             </td>
@@ -488,10 +488,10 @@
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 10px;">
                                 <!-- Utiliser adjustment.boutique au lieu de boutique -->
-                                <input type="text" readonly class="input_table" [value]="adjustment.boutiqueDestination.name"> 
+                                <input type="text" readonly class="input_table" [value]="adjustment.boutique?.name"> 
                               </div>
                             </td>
-
+          
                             <td>
                               <!-- // Button de ajouter  -->
                               <div class="btn_delete" (click)="removePendingAdjustment(i)">
@@ -515,25 +515,25 @@
                                 [compareWith]="compareProducts"
                                 #productSelect
                                 [class.duplicate]="errorMessage.includes('est déjà dans la liste')">
-
+          
                                 <option [ngValue]="null">
                                   {{ boutiqueIdSelected ? 'Sélectionner un produit' : 'Veuillez sélectionner une boutique' }}
                                 </option>
-
+          
                                 <!-- Message quand aucune boutique sélectionnée -->
                                 <ng-container *ngIf="!boutiqueIdSelected">
                                   <option disabled>
                                     Aucune boutique sélectionnée
                                   </option>
                                 </ng-container>
-
+          
                                 <!-- Message quand pas de produits -->
                                 <ng-container *ngIf="boutiqueIdSelected && tasks.length === 0">
                                   <option disabled>
                                     Aucun produit disponible dans cette boutique
                                   </option>
                                 </ng-container>
-
+          
                                 <!-- Liste des produits -->
                                 <option *ngFor="let produit of tasks" [ngValue]="produit">
                                   {{ produit.nom }}
@@ -564,9 +564,12 @@
                         </td>                     
                         <td>
                           <div class="champ_input" style="margin-right: 15px;">
-                            <input type="text" readonly class="input_focus_type" 
-                              [value]="transferStockApres" 
-                              style="text-align: center;">
+                            <input type="text" disabled 
+                                   class="input_focus_type" 
+                                   id="stockApres" 
+                                   [value]="stockApres" 
+                                   name="stockApres" 
+                                   style="text-align: center;">
                           </div>
                         </td>
                         <td>
@@ -574,13 +577,13 @@
                             <input 
                                 autocomplete="off" 
                                 type="text" 
-                                placeholder="Nom boutique"
-                                class="input_focus_type" style="min-width: 170px;" 
+                                placeholder="Saisis le nom de boutique"
+                                class="input_focus" 
                                 matInput 
                                 [formControl]="controlBoutiqueTransfert"
                                 [matAutocomplete]="autoBoutiqueTransfert"
                               >
-                              <!-- <label for="boutiqueId" class="label">Boutique</label> -->
+                              <label for="boutiqueId" class="label">Boutique</label>
                               <mat-autocomplete #autoBoutiqueTransfert="matAutocomplete" (optionSelected)="onBoutiqueSelectedTransfert($event)" [displayWith]="displayFnBoutiqueTransfert">
                                 <mat-option 
                                   *ngFor="let boutique of filteredStreetsBoutiqueTransfert | async" 
@@ -600,7 +603,7 @@
                       </tr>
                     </tbody>
                   </table>
-
+          
                   <!-- Popup d'erreur (affichée uniquement en cas d'erreur) -->
                   <div class="modal-overlay" *ngIf="errorMessage">
                     <div class="modal-content">
@@ -608,10 +611,10 @@
                       <button class="modal-content-text-button" (click)="clearSelections()">OK</button>
                     </div>
                   </div>
-
+          
                 </div>
               </div>
-            </div>
+          </div>
 
             <!-- Boutons Ajouter et Sauvegarder -->
             <div class="information_cadre" *ngIf="selectedAction === 'ajouter'">

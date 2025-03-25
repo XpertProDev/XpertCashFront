@@ -1,3 +1,7 @@
+
+
+// et aussi la partie frontend 
+ 
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -13,7 +17,6 @@ import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { TransfertService } from '../SERVICES/transfert-service';
 
 @Component({
   selector: 'app-add-stock-ajustement',
@@ -42,7 +45,7 @@ export class AddStockAjustementComponent {
 
   // Nom boutique 
   boutiqueName: string = '';
-  selectedAction: string = 'ajouter';
+  selectedAction: string = 'transfert';
 
   // Variable pour contrôler l'affichage des stocks ajustés après un rafraîchissement
   stocksVisible: boolean = false;
@@ -58,13 +61,11 @@ export class AddStockAjustementComponent {
   boutiqueIdSelected: number | null = null; 
 
   controlBoutique = new FormControl('');
-  controlBoutiqueTransfert = new FormControl<{ id: number; name: string } | null>(null);
+  controlBoutiqueTransfert = new FormControl('');
   streetsBoutique: { id: number, name: string }[] = []; 
   streetsBoutiqueTransfert: { id: number, name: string }[] = []; 
   filteredStreetsBoutique!: Observable<string[]>;
   filteredStreetsBoutiqueTransfert!: Observable<any[]>;
-  
-
 
   // Contructor
   constructor(
@@ -75,7 +76,6 @@ export class AddStockAjustementComponent {
       private usersService: UsersService,
       private stockService: StockService,
       private cdRef: ChangeDetectorRef,
-      private transfertService: TransfertService,
   ) {}
 
   goToStock() {
@@ -125,20 +125,25 @@ export class AddStockAjustementComponent {
   getBoutiqueName(): void {
     this.usersService.getUserInfo().subscribe(
       (userInfo) => {
-        if (userInfo?.boutiques) {
-          // Initialiser les deux listes avec les mêmes données
-          this.streetsBoutique = userInfo.boutiques.map(b => ({
-            id: b.id,
-            name: b.nomBoutique
+        if (userInfo && userInfo.boutiques) {
+          this.streetsBoutique = userInfo.boutiques.map((boutique: any) => ({
+            id: boutique.id,
+            name: boutique.nomBoutique
           }));
-          this.streetsBoutiqueTransfert = [...this.streetsBoutique]; // Copie des données
+          this.streetsBoutiqueTransfert = userInfo.boutiques.map((boutique: any) => ({
+            id: boutique.id,
+            name: boutique.nomBoutique
+          }));
+
           this.getFilteredStreetsBoutique();
           this.getFilteredStreetsBoutiqueTransfert();
+        } else {
+          console.error('Aucune boutique trouvée pour cet utilisateur');
+          this.boutiqueName = 'Aucune boutique';
         }
       },
       (error) => {
-        console.error('Erreur récupération utilisateur', error);
-        this.boutiqueName = 'Aucune boutique';
+        console.error('Erreur lors de la récupération des informations utilisateur', error);
       }
     );
   }
@@ -638,7 +643,6 @@ export class AddStockAjustementComponent {
       return boutique ? boutique : '';
     }
 
-    //////////////////////////////////////////// TRANSFERER UN PRODUIT 
 
   // Modifiez onBoutiqueSelected Transfert
   onBoutiqueSelectedTransfert(event: any): void {}
@@ -650,14 +654,14 @@ export class AddStockAjustementComponent {
     );
   }
 
-  private _filterBoutiqueTransfert(value: string | { id: number; name: string }): any[] {
-    const filterValue = typeof value === 'string' ? 
-      this._normalizeValueTransfert(value) : 
-      this._normalizeValueTransfert(value.name);
-  
-    return this.streetsBoutiqueTransfert.filter(b => 
-      this._normalizeValueTransfert(b.name).includes(filterValue)
-    );
+  private _filterBoutiqueTransfert(value: string): any[] {
+    if (typeof value === 'string') {
+      const filterValue = this._normalizeValueTransfert(value);
+      return this.streetsBoutiqueTransfert.filter(b => 
+        this._normalizeValueTransfert(b.name).includes(filterValue)
+      );
+    }
+    return this.streetsBoutiqueTransfert;
   }
 
   private _normalizeValueTransfert(value: string): string {
@@ -665,26 +669,17 @@ export class AddStockAjustementComponent {
   }
   
   onFocusBoutiqueInputTransfert(): void {
-    this.controlBoutiqueTransfert.setValue(null); 
+    this.controlBoutiqueTransfert.setValue(''); 
   }
 
-  // le displayFn pour gérer le type correctement
-  displayFnBoutiqueTransfert(boutique?: { id: number; name: string } | string): string {
-    if (!boutique) return '';
-    if (typeof boutique === 'string') return boutique;
-    return boutique.name;
+  displayFnBoutiqueTransfert(boutique?: any): string {
+    return boutique?.name || '';
   }
 
   transfererProduits() {}
 
-  transfertToPendingAdjustments() {}
+  transfertToPendingAdjustments () {}
 
-
-
-  // add-stock-ajustement.component.ts
-  get transferStockApres(): number | string {
-    if (!this.selectedProduct || this.quantiteRetirer === null) return '';
-    return this.selectedProduct.quantite - this.quantiteRetirer;
-  }
+  
   
 }
