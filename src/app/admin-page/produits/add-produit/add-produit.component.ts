@@ -785,11 +785,11 @@ export class AddProduitComponent {
   }
    
   openPopupBoutique() {
-    this.showPopup = true;
+    this.showPopupBoutique = true;
   }
 
   closePopupBoutique() {
-    this.showPopup = false;
+    this.showPopupBoutique = false;
     this.resetForm();
   }
 
