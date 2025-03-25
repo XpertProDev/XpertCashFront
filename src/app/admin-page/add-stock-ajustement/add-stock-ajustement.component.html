@@ -480,11 +480,12 @@
                               </div>
                             </td>
                             <td>
-                              <div class="champ_input_list_stock">
-                                <input type="text" readonly class="input_table" 
-                                [value]="adjustment.stockApres" style="text-align: center;">
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                  <input type="text" readonly class="input_table" 
+                                      [value]="adjustment.stockActuel" 
+                                      style="text-align: center;">
                               </div>
-                            </td>
+                          </td>
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 10px;">
                                 <!-- Utiliser adjustment.boutique au lieu de boutique -->
@@ -607,10 +608,10 @@
                   <!-- Popup d'erreur (affichée uniquement en cas d'erreur) -->
                   <div class="modal-overlay" *ngIf="errorMessage">
                     <div class="modal-content">
-                      <p class="modal-content-text">{{ errorMessage }}</p>
-                      <button class="modal-content-text-button" (click)="clearSelections()">OK</button>
+                        <p class="modal-content-text">{{ errorMessage }}</p>
+                        <button class="modal-content-text-button" (click)="errorMessage = ''">OK</button>
                     </div>
-                  </div>
+                </div>
           
                 </div>
               </div>

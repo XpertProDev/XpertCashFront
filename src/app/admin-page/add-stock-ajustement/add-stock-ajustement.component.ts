@@ -688,6 +688,11 @@ export class AddStockAjustementComponent {
     if (!this.boutiqueIdSelected || !this.selectedDestinationBoutique?.id) {
         return { valid: false, error: 'Veuillez sélectionner les boutiques' };
     }
+
+    // Ajout de la vérification des boutiques identiques
+    if (this.boutiqueIdSelected === this.selectedDestinationBoutique.id) {
+      return { valid: false, error: 'La source et la destination doivent être différentes' };
+    }
     
     if (!this.selectedProduct) {
         return { valid: false, error: 'Veuillez sélectionner un produit' };
@@ -717,7 +722,7 @@ export class AddStockAjustementComponent {
       if (transfersToProcess.length === 0) {
           const validation = this.validateSingleTransfer();
           if (!validation.valid) {
-              this.errorMessageError = validation.error;
+              this.errorMessage = validation.error;
               return;
           }
           transfersToProcess = [validation.transfert];
@@ -747,15 +752,15 @@ export class AddStockAjustementComponent {
 
       } catch (error: any) {
           console.error('Erreur:', error);
-          this.errorMessageError = error.error?.message || 'Erreur lors du transfert';
-          setTimeout(() => this.errorMessageError = '', 5000);
+          this.errorMessage = error.error?.message || 'Erreur lors du transfert';
+          setTimeout(() => this.errorMessage = '', 5000);
       }
   }
 
   transfertToPendingAdjustments() {
     const validation = this.validateSingleTransfer();
     if (!validation.valid) {
-        this.errorMessageError = validation.error;
+        this.errorMessage = validation.error;
         return;
     }
 
@@ -766,24 +771,26 @@ export class AddStockAjustementComponent {
     );
 
     if (exists) {
-        this.errorMessageError = 'Ce transfert est déjà dans la liste';
+        this.errorMessage = 'Ce transfert est déjà dans la liste';
         return;
     }
 
     // Ajout avec les informations complètes
+    const newStock = this.selectedProduct!.quantite - validation.transfert.quantite;
     this.pendingAdjustments.push({
-        ...validation.transfert,
-        produitNom: this.selectedProduct!.nom,
-        stockActuel: this.selectedProduct!.quantite,
-        boutiqueDestinationName: this.selectedDestinationBoutique.name
-    });
+    ...validation.transfert,
+    produitNom: this.selectedProduct!.nom,
+    stockActuel: this.selectedProduct!.quantite,
+    stockApres: newStock, // Calcul dynamique
+    boutiqueDestinationName: this.selectedDestinationBoutique.name
+});
 
     // Réinitialisation des champs (sans vider la liste)
     this.selectedProduct = null;
     this.quantiteRetirer = null;
     this.selectedDestinationBoutique = null;
     this.controlBoutiqueTransfert.reset();
-    this.errorMessageError = '';
+    this.errorMessage = '';
 }
   
 }
