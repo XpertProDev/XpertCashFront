@@ -439,6 +439,180 @@
               </div>
             </div>
 
+            <!-- Cadre pour "Transfert" -->
+            <div class="information_cadre" *ngIf="selectedAction === 'transfert'">
+
+              <div class="info_titre_input">
+
+                <div class="add_new_quantite_stock">
+                    <h4>Gestion des transferts</h4>
+                </div>
+
+                <div class="containerTable" style="position: relative;">
+                  <table>
+                    <thead>
+                      <tr class="titleTableProduit">
+                        <th class="title_table_name_transfert">Mes produits</th>
+                        <th class="title_table_contenu" style="color: #0672E4; margin-right: 15px;">Quantité de transfert</th>
+                        <th class="title_table_contenu">Stock actuel</th>
+                        <th class="title_table_contenu">Stock après</th>
+                        <th class="title_table_contenu">Boutique d'arriver</th>
+                      </tr>
+                    </thead>
+
+                    <tbody *ngIf="pendingAdjustments.length > 0">
+                        <tr  *ngFor="let adjustment of pendingAdjustments; let i = index"  class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 10px;">
+                                  <input type="text" readonly class="input_table" [value]="adjustment.produitNom">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                <input type="text" readonly class="input_table" 
+                                  [value]="adjustment.quantite" 
+                                  style="text-align: center;">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 15px;">
+                                  <input type="text" readonly class="input_table" [value]="adjustment.stockActuel" style="text-align: center;">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock">
+                                <input type="text" readonly class="input_table" 
+                                [value]="adjustment.stockApres" style="text-align: center;">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="champ_input_list_stock" style="margin-right: 10px;">
+                                <!-- Utiliser adjustment.boutique au lieu de boutique -->
+                                <input type="text" readonly class="input_table" [value]="adjustment.boutiqueDestination.name"> 
+                              </div>
+                            </td>
+
+                            <td>
+                              <!-- // Button de ajouter  -->
+                              <div class="btn_delete" (click)="removePendingAdjustment(i)">
+                                <i class="ri-delete-bin-5-fill"></i>
+                              </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    
+                    <tbody>
+                      <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                        <td>
+                          <div class="champ_input" style="margin-right: 15px;">
+                            <select 
+                                required 
+                                name="selectedProduct" 
+                                class="input_focus_type input_focus_type_select" 
+                                [(ngModel)]="selectedProduct"
+                                [disabled]="!boutiqueIdSelected"
+                                (ngModelChange)="checkExistingProduct()"
+                                [compareWith]="compareProducts"
+                                #productSelect
+                                [class.duplicate]="errorMessage.includes('est déjà dans la liste')">
+
+                                <option [ngValue]="null">
+                                  {{ boutiqueIdSelected ? 'Sélectionner un produit' : 'Veuillez sélectionner une boutique' }}
+                                </option>
+
+                                <!-- Message quand aucune boutique sélectionnée -->
+                                <ng-container *ngIf="!boutiqueIdSelected">
+                                  <option disabled>
+                                    Aucune boutique sélectionnée
+                                  </option>
+                                </ng-container>
+
+                                <!-- Message quand pas de produits -->
+                                <ng-container *ngIf="boutiqueIdSelected && tasks.length === 0">
+                                  <option disabled>
+                                    Aucun produit disponible dans cette boutique
+                                  </option>
+                                </ng-container>
+
+                                <!-- Liste des produits -->
+                                <option *ngFor="let produit of tasks" [ngValue]="produit">
+                                  {{ produit.nom }}
+                                </option>
+                              </select>
+                          </div>
+                        </td>
+                        <td>
+                          <form>
+                            <div class="champ_input" style="margin-right: 15px;">
+                              <input type="number" class="input_focus_type"
+                                [(ngModel)]="quantiteRetirer"
+                                [max]="selectedProduct ? selectedProduct.quantite : null"
+                                placeholder="....."
+                                name="quantiteRetirer"
+                                style="text-align: center;"
+                                min="0">
+                            </div>
+                          </form>
+                        </td>                     
+                        <td>
+                          <!-- // Quantité  -->
+                          <div class="champ_input" style="margin-right: 15px;">
+                            <input type="text" disabled class="input_focus_type" id="stockActuel" 
+                              [value]="selectedProduct ? selectedProduct.quantite : 0" 
+                              name="stockActuel" style="cursor: no-drop; text-align: center;">
+                          </div>                         
+                        </td>                     
+                        <td>
+                          <div class="champ_input" style="margin-right: 15px;">
+                            <input type="text" readonly class="input_focus_type" 
+                              [value]="transferStockApres" 
+                              style="text-align: center;">
+                          </div>
+                        </td>
+                        <td>
+                          <div class="champ_input champ_input2">
+                            <input 
+                                autocomplete="off" 
+                                type="text" 
+                                placeholder="Nom boutique"
+                                class="input_focus_type" style="min-width: 170px;" 
+                                matInput 
+                                [formControl]="controlBoutiqueTransfert"
+                                [matAutocomplete]="autoBoutiqueTransfert"
+                              >
+                              <!-- <label for="boutiqueId" class="label">Boutique</label> -->
+                              <mat-autocomplete #autoBoutiqueTransfert="matAutocomplete" (optionSelected)="onBoutiqueSelectedTransfert($event)" [displayWith]="displayFnBoutiqueTransfert">
+                                <mat-option 
+                                  *ngFor="let boutique of filteredStreetsBoutiqueTransfert | async" 
+                                  [value]="boutique"
+                                >
+                                  {{ boutique.name }}
+                                </mat-option>
+                              </mat-autocomplete>
+                          </div>
+                        </td>
+                        <td>
+                          <!-- // Button de ajouter  -->
+                          <div class="btn_ajouter" (click)="transfertToPendingAdjustments()">
+                            <i class="ri-add-fill"></i>
+                          </div>
+                        </td>                                                             
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <!-- Popup d'erreur (affichée uniquement en cas d'erreur) -->
+                  <div class="modal-overlay" *ngIf="errorMessage">
+                    <div class="modal-content">
+                      <p class="modal-content-text">{{ errorMessage }}</p>
+                      <button class="modal-content-text-button" (click)="clearSelections()">OK</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
             <!-- Boutons Ajouter et Sauvegarder -->
             <div class="information_cadre" *ngIf="selectedAction === 'ajouter'">
               <div class="info_titre_input info_titre_input_btn">
@@ -459,6 +633,18 @@
                 </div>
                 <div class="btn_ajouter">
                   <button class="btn_save" (click)="RetirerDesQuan()">Ajuster</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Boutons Transfert et Sauvegarder -->
+            <div class="information_cadre" *ngIf="selectedAction === 'transfert'">
+              <div class="info_titre_input info_titre_input_btn">
+                <div class="btn_annuler">
+                  <button class="btn_cancel" (click)="goToStock()">Annuler</button>
+                </div>
+                <div class="btn_ajouter">
+                  <button class="btn_save" (click)="transfererProduits()">Transférer</button>
                 </div>
               </div>
             </div>

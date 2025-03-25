@@ -13,6 +13,7 @@ import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { TransfertService } from '../SERVICES/transfert-service';
 
 @Component({
   selector: 'app-add-stock-ajustement',
@@ -56,9 +57,13 @@ export class AddStockAjustementComponent {
   descriptionGlobal: string = '';
   boutiqueIdSelected: number | null = null; 
 
-   controlBoutique = new FormControl('');
+  controlBoutique = new FormControl('');
+  controlBoutiqueTransfert = new FormControl<{ id: number; name: string } | null>(null);
   streetsBoutique: { id: number, name: string }[] = []; 
+  streetsBoutiqueTransfert: { id: number, name: string }[] = []; 
   filteredStreetsBoutique!: Observable<string[]>;
+  filteredStreetsBoutiqueTransfert!: Observable<any[]>;
+  
 
 
   // Contructor
@@ -70,6 +75,7 @@ export class AddStockAjustementComponent {
       private usersService: UsersService,
       private stockService: StockService,
       private cdRef: ChangeDetectorRef,
+      private transfertService: TransfertService,
   ) {}
 
   goToStock() {
@@ -119,19 +125,20 @@ export class AddStockAjustementComponent {
   getBoutiqueName(): void {
     this.usersService.getUserInfo().subscribe(
       (userInfo) => {
-        if (userInfo && userInfo.boutiques) {
-          this.streetsBoutique = userInfo.boutiques.map((boutique: any) => ({
-            id: boutique.id,
-            name: boutique.nomBoutique
+        if (userInfo?.boutiques) {
+          // Initialiser les deux listes avec les mêmes données
+          this.streetsBoutique = userInfo.boutiques.map(b => ({
+            id: b.id,
+            name: b.nomBoutique
           }));
+          this.streetsBoutiqueTransfert = [...this.streetsBoutique]; // Copie des données
           this.getFilteredStreetsBoutique();
-        } else {
-          console.error('Aucune boutique trouvée pour cet utilisateur');
-          this.boutiqueName = 'Aucune boutique';
+          this.getFilteredStreetsBoutiqueTransfert();
         }
       },
       (error) => {
-        console.error('Erreur lors de la récupération des informations utilisateur', error);
+        console.error('Erreur récupération utilisateur', error);
+        this.boutiqueName = 'Aucune boutique';
       }
     );
   }
@@ -630,5 +637,54 @@ export class AddStockAjustementComponent {
     displayFnBoutique(boutique?: string): string {
       return boutique ? boutique : '';
     }
+
+    //////////////////////////////////////////// TRANSFERER UN PRODUIT 
+
+  // Modifiez onBoutiqueSelected Transfert
+  onBoutiqueSelectedTransfert(event: any): void {}
+
+  getFilteredStreetsBoutiqueTransfert() {
+    this.filteredStreetsBoutiqueTransfert = this.controlBoutiqueTransfert.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterBoutiqueTransfert(value || ''))
+    );
+  }
+
+  private _filterBoutiqueTransfert(value: string | { id: number; name: string }): any[] {
+    const filterValue = typeof value === 'string' ? 
+      this._normalizeValueTransfert(value) : 
+      this._normalizeValueTransfert(value.name);
+  
+    return this.streetsBoutiqueTransfert.filter(b => 
+      this._normalizeValueTransfert(b.name).includes(filterValue)
+    );
+  }
+
+  private _normalizeValueTransfert(value: string): string {
+    return value.toLowerCase().replace(/\s/g, '');
+  }
+  
+  onFocusBoutiqueInputTransfert(): void {
+    this.controlBoutiqueTransfert.setValue(null); 
+  }
+
+  // le displayFn pour gérer le type correctement
+  displayFnBoutiqueTransfert(boutique?: { id: number; name: string } | string): string {
+    if (!boutique) return '';
+    if (typeof boutique === 'string') return boutique;
+    return boutique.name;
+  }
+
+  transfererProduits() {}
+
+  transfertToPendingAdjustments() {}
+
+
+
+  // add-stock-ajustement.component.ts
+  get transferStockApres(): number | string {
+    if (!this.selectedProduct || this.quantiteRetirer === null) return '';
+    return this.selectedProduct.quantite - this.quantiteRetirer;
+  }
   
 }
