@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Transfert } from "../MODELS/tranfert-model";
-import { Observable } from "rxjs";
+import { Observable } from "rxjs/internal/Observable";
 
 @Injectable({
     providedIn: 'root'
@@ -21,6 +21,7 @@ import { Observable } from "rxjs";
         'Content-Type': 'application/json'
     });
 
-    return this.http.post(`${this.apiUrl}/transferer-produits`, transfert, { headers });
+    return this.http.post(`${this.apiUrl}/transferer-produits`, transfert, { headers, responseType: 'text' });
   }
+
 }

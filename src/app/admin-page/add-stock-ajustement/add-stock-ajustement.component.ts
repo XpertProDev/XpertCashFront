@@ -17,6 +17,8 @@ import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { Transfert } from '../MODELS/tranfert-model';
+import { TransfertService } from '../SERVICES/transfert-service';
 
 @Component({
   selector: 'app-add-stock-ajustement',
@@ -42,6 +44,9 @@ export class AddStockAjustementComponent {
   ajusteRetirerForm!: FormGroup;
   errorMessage: string = '';
   errorMessageError: string = '';
+
+  // Selectionner des boutique 
+  selectedDestinationBoutique: any = null;
 
   // Nom boutique 
   boutiqueName: string = '';
@@ -76,6 +81,7 @@ export class AddStockAjustementComponent {
       private usersService: UsersService,
       private stockService: StockService,
       private cdRef: ChangeDetectorRef,
+      private transfertService: TransfertService,
   ) {}
 
   goToStock() {
@@ -216,6 +222,8 @@ export class AddStockAjustementComponent {
       return stockActuel + Number(this.quantiteAjoute);
     } else if (this.selectedAction === 'reduire' && this.quantiteRetirer) {
       return stockActuel - Number(this.quantiteRetirer);
+    } else if (this.selectedAction === 'transfert' && this.quantiteRetirer) {
+      return stockActuel - this.quantiteRetirer;
     }
     return '';
   }
@@ -644,8 +652,10 @@ export class AddStockAjustementComponent {
     }
 
 
-  // Modifiez onBoutiqueSelected Transfert
-  onBoutiqueSelectedTransfert(event: any): void {}
+  // OnBoutiqueSelected Transfert
+  onBoutiqueSelectedTransfert(event: any): void {
+    this.selectedDestinationBoutique = event.option.value;
+  }
 
   getFilteredStreetsBoutiqueTransfert() {
     this.filteredStreetsBoutiqueTransfert = this.controlBoutiqueTransfert.valueChanges.pipe(
@@ -676,9 +686,104 @@ export class AddStockAjustementComponent {
     return boutique?.name || '';
   }
 
-  transfererProduits() {}
+  async transfererProduits() {
+    if (this.pendingAdjustments.length === 0) {
+        this.errorMessageError = 'Aucun transfert à effectuer';
+        return;
+    }
 
-  transfertToPendingAdjustments () {}
+    try {
+        const token = this.usersService.getToken();
+        if (!token) throw new Error('Non authentifié');
+
+        // Envoi des transferts un par un
+        for (const adj of this.pendingAdjustments) {
+            const transfert: Transfert = {
+                produitId: adj.produitId,
+                boutiqueSourceId: adj.boutiqueSourceId,
+                boutiqueDestinationId: adj.boutiqueDestinationId,
+                quantite: adj.quantite
+            };
+
+            await this.transfertService.effectuerTransfert(transfert).toPromise();
+            
+            // Mise à jour locale
+            const product = this.tasks.find(p => p.id === adj.produitId);
+            if (product) product.quantite -= adj.quantite;
+        }
+
+        this.successMessage = 'Transfert(s) effectué(s) avec succès';
+        this.pendingAdjustments = [];
+        setTimeout(() => this.successMessage = '', 3000);
+
+    } catch (error: any) {
+        console.error('Erreur:', error);
+        this.errorMessageError = error.error?.message || 'Erreur lors du transfert';
+        setTimeout(() => this.errorMessageError = '', 5000);
+    }
+}
+
+
+  transfertToPendingAdjustments() {
+      this.errorMessage = '';
+
+      // Validation
+      if (!this.boutiqueIdSelected) {
+          this.errorMessage = 'Veuillez sélectionner une boutique source';
+          return;
+      }
+      
+      if (!this.selectedDestinationBoutique) {
+          this.errorMessage = 'Veuillez sélectionner une boutique destination';
+          return;
+      }
+
+      if (this.boutiqueIdSelected === this.selectedDestinationBoutique.id) {
+          this.errorMessage = 'La source et la destination doivent être différentes';
+          return;
+      }
+
+      if (!this.selectedProduct) {
+          this.errorMessage = 'Veuillez sélectionner un produit';
+          return;
+      }
+
+      const quantite = this.quantiteRetirer || 0;
+      if (quantite <= 0 || quantite > this.selectedProduct.quantite) {
+          this.errorMessage = 'Quantité invalide';
+          return;
+      }
+
+      // Vérification doublon
+      const exists = this.pendingAdjustments.some(adj => 
+          adj.produitId === this.selectedProduct!.id &&
+          adj.boutiqueDestinationId === this.selectedDestinationBoutique.id
+      );
+
+      if (exists) {
+          this.errorMessage = 'Ce transfert existe déjà';
+          return;
+      }
+
+      // Ajout à la liste
+      this.pendingAdjustments.push({
+          produitId: this.selectedProduct.id,
+          produitNom: this.selectedProduct.nom,
+          quantite: quantite,
+          stockActuel: this.selectedProduct.quantite,
+          stockApres: this.selectedProduct.quantite - quantite,
+          boutiqueSourceId: this.boutiqueIdSelected,
+          boutiqueDestinationId: this.selectedDestinationBoutique.id,
+          boutiqueDestinationName: this.selectedDestinationBoutique.name
+      });
+
+      // Réinitialisation
+      this.selectedProduct = null;
+      this.quantiteRetirer = null;
+      this.selectedDestinationBoutique = null;
+      this.controlBoutiqueTransfert.reset();
+      this.errorMessage = '';
+  }
 
   
   

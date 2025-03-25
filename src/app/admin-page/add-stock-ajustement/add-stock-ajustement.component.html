@@ -470,7 +470,7 @@
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 15px;">
                                 <input type="text" readonly class="input_table" 
-                                  [value]="" 
+                                  [value]="adjustment.quantite" 
                                   style="text-align: center;">
                               </div>
                             </td>
@@ -488,7 +488,7 @@
                             <td>
                               <div class="champ_input_list_stock" style="margin-right: 10px;">
                                 <!-- Utiliser adjustment.boutique au lieu de boutique -->
-                                <input type="text" readonly class="input_table" [value]="adjustment.boutique?.name"> 
+                                <input type="text" readonly class="input_table" [value]="adjustment.boutiqueDestinationName"> 
                               </div>
                             </td>
           
