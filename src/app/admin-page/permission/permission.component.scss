@@ -166,6 +166,8 @@
     grid-template-rows: repeat(3, 1fr);
     grid-column-gap: 0px;
     grid-row-gap: 0px;
+    margin-top: 20px;
+    gap: 30px;
 }
     
 .div1 { grid-area: 1 / 1 / 2 / 2; }
@@ -175,10 +177,6 @@
 .div5 { grid-area: 3 / 1 / 4 / 2; }
 .div6 { grid-area: 3 / 2 / 4 / 3; }
 
-.permissionPage {
-    margin-top: 20px;
-    gap: 30px;
-}
 
 .card_permission {
     background-color: #ffffff;
@@ -265,6 +263,8 @@
 }
 
 .containerTable {
+    position: fixed;
+    right: 25px;
     background-color: #ffffff;
     margin-top: 20px;
     border-radius: 10px;

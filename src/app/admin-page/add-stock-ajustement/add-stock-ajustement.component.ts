@@ -50,7 +50,7 @@ export class AddStockAjustementComponent {
 
   // Nom boutique 
   boutiqueName: string = '';
-  selectedAction: string = 'transfert';
+  selectedAction: string = 'ajouter';
 
   // Variable pour contrôler l'affichage des stocks ajustés après un rafraîchissement
   stocksVisible: boolean = false;
