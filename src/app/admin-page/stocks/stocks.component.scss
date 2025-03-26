@@ -601,6 +601,32 @@ tr:hover {
   margin: 8px 0;
 }
 
+.container_list_boutique {
+  // scrollbar-width: auto;
+  overflow: auto; 
+  scrollbar-color: #888 #f1f1f1;
+  // scrollbar-width: thin;
+  // white-space: nowrap; 
+}
+
+.container_list_boutique::-webkit-scrollbar {
+  width: 2px; 
+  height: 3px;
+}
+
+.container_list_boutique::-webkit-scrollbar-track {
+  background: #f1f1f1; /* couleur du fond de la scrollbar */
+}
+
+.container_list_boutique::-webkit-scrollbar-thumb {
+  background: blue;
+  border-radius: 4px;
+}
+
+.container_list_boutique::-webkit-scrollbar-thumb:hover {
+  background: red; 
+}
+
 .name_boutique {
   p {
     cursor: pointer;

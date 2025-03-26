@@ -43,6 +43,7 @@
             <th>Adresse </th>
             <th>Téléphone </th>
             <th>Date de Creation </th>
+            <th>Statut</th>
           </tr>
         </thead>
         <tbody>
@@ -52,6 +53,9 @@
             <td>{{ boutique.adresse || 'Non adresse'  }}</td>
             <td>{{ boutique.telephone || 'Non téléphone'  }}</td>
             <td>{{ boutique.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="content_statut_boutique">
+              <span class="statut_boutique"> Acticf </span>
+            </td>
           </tr>
         </tbody>
       </table>
