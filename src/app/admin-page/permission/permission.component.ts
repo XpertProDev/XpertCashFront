@@ -48,7 +48,7 @@ export class PermissionComponent implements OnInit {
     },
     { 
       id: 3,
-      name: 'Voir Flux Comptable',
+      name: 'Flux vente',
       imgUrl: 'assets/img/comptabilite.png',
       selected: false
     },
