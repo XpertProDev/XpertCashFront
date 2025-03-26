@@ -426,6 +426,13 @@ loadProduits(boutiqueId: number): void {
     return 'data:image/svg+xml;base64,' + btoa(svg);
   }
 
+  // Ajoutez cette méthode dans la classe ProduitsComponent
+  getBoutiqueTextColor(index: number, isActive: boolean): string {
+    // Génère des couleurs différentes selon l'index
+    const hue = (index * 137.508) % 360; // 137.508 pour une bonne répartition des couleurs
+    return isActive ? '#ffffff' : `hsl(${hue}, 70%, 40%)`; // Texte blanc si actif, couleur vive sinon
+  }
+
   // loadBoutiqueDetails(boutiqueId: number): void {
   //   this.produitService.getBoutiqueById(boutiqueId).subscribe({
   //     next: (boutique) => {

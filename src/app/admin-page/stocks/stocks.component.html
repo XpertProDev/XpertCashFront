@@ -29,8 +29,10 @@
     <div class="content_list_boutique">
       <div class="name_boutique">
         <ng-container *ngFor="let boutique of boutiques; let i = index">
-          <p [class.name_boutique_active]="boutique.id === selectedBoutique?.id"
-             (click)="selectBoutique(boutique)">
+          <p 
+            [class.name_boutique_active]="boutique.id === selectedBoutique?.id"
+            [style.color]="getBoutiqueTextColor(i, boutique.id === selectedBoutique?.id)"
+            (click)="selectBoutique(boutique)">
             {{ boutique.nomBoutique }}
           </p>
           <!-- Ajoute la barre SAUF après le dernier élément -->
