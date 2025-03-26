@@ -28,12 +28,14 @@
   <div class="container_list_boutique">
     <div class="content_list_boutique">
       <div class="name_boutique">
-        <!-- Boucle sur les boutiques réelles de l'utilisateur -->
-        <p *ngFor="let boutique of boutiques" 
-           [class.name_boutique_active]="boutique.id === selectedBoutique?.id"
-           (click)="selectBoutique(boutique)">
-           {{ boutique.nomBoutique }}
-        </p>
+        <ng-container *ngFor="let boutique of boutiques; let i = index">
+          <p [class.name_boutique_active]="boutique.id === selectedBoutique?.id"
+             (click)="selectBoutique(boutique)">
+            {{ boutique.nomBoutique }}
+          </p>
+          <!-- Ajoute la barre SAUF après le dernier élément -->
+          <div *ngIf="i !== boutiques.length - 1" class="barre"></div>
+        </ng-container>
       </div>
     </div>
   </div>
