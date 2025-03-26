@@ -112,15 +112,23 @@
     box-shadow: rgba(0, 0, 0, 0.065) 0px 4px 12px;
     border-radius: 10px;
     padding: 20px 15px;
-    // width: 270px;
     width: 100%;
-    // transition: background 0.3s ease;
+    position: relative;
+    transition: background 0.3s ease;
 }
 
 .card_permission_detail_user_check {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.065) 0px 4px 12px;
+  border-radius: 10px;
+  // padding: 20px 15px;
+  width: 100%;
+  position: relative;
+  transition: background 0.3s ease;
 }
 
 .valueUser {
@@ -745,26 +753,41 @@
   
   // css pour suspendre utilisateur 
   /* From Uiverse.io by mobinkakei */ 
-
+/* Style du bouton lock */
 .suspendre_check {
-  position: relative;
-}
-
-.btn-lock {
-  position: absolute;
-  right: 0;
-  top: -15px;
-  // top: calc(50% - 32px);
-  // left: calc(50% - 32px);
-  display: inline-block;
   background: #ff5b5b;
   width: 30px;
   height: 30px;
-  box-sizing: border-box;
-  padding: 12px 0 0 18px;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+/* Quand coché, changement de couleur */
+#inpLock:checked + .suspendre_check {
+  background: #ffffff!important;
+}
+
+/* Effet hover sur toute la carte */
+.card_permission_detail_user:hover {
+  background: rgba(0,0,0,0.03);
+}
+
+.btn-lock {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  box-sizing: border-box;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  /* Retirer les styles absolus précédents */
+  position: static;
+  background: transparent;
 }
 
 .btn-lock svg {
@@ -773,9 +796,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: -10px;
-  margin-top: -7px;
-
+  margin-left: 4px;
+  margin-top: 9px;
 }
 
 .btn-lock svg .bling {
@@ -810,7 +832,10 @@
 }
 
 #inpLock:checked + label {
-  background: #20cca5;
+  background: #ff0000f6;
+  color: #ffffffd5;
+  border-radius: 10px;
+  font-weight: 400;
 }
 
 #inpLock:checked + label svg {
