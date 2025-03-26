@@ -39,10 +39,40 @@
                              [matAutocomplete]="autoBoutique" style="cursor: pointer;">
                       <label for="boutiqueId" class="label">Boutique</label>
                       <mat-autocomplete #autoBoutique="matAutocomplete" (optionSelected)="onBoutiqueSelected($event)" [displayWith]="displayFnBoutique">
-                        <mat-option *ngFor="let street of filteredStreetsBoutique | async" [value]="street">
-                          {{ street }}
+                        <!-- Ajouter l'option de sélection multiple -->
+                        <mat-option (click)="toggleBoutiqueSelectionPanel()" class="select-option">
+                            <div style="display: flex; align-items: center; color: #0672E4;">
+                                <i class="ri-checkbox-multiple-line"></i>
+                                <span style="margin-left: 8px;">Sélectionner des boutiques</span>
+                            </div>
                         </mat-option>
-                      </mat-autocomplete>
+                        
+                        <mat-option *ngFor="let street of filteredStreetsBoutique | async" [value]="street">
+                            {{ street }}
+                        </mat-option>
+                    </mat-autocomplete>
+                    
+                    <!-- Panel de sélection des boutiques -->
+                    <div class="boutique-selection-panel" *ngIf="showBoutiqueSelectionPanel">
+                        <div class="panel-header">
+                            <h4>Sélectionner des boutiques</h4>
+                            <button class="close-btn" (click)="toggleBoutiqueSelectionPanel()">&times;</button>
+                        </div>
+                        <div class="panel-body">
+                            <div *ngFor="let boutique of boutiquesList" class="boutique-item">
+                                <label>
+                                    <input type="checkbox" 
+                                        [(ngModel)]="boutique.selected"
+                                        (change)="updateSelectedBoutiques()"
+                                        [ngModelOptions]="{standalone: true}">
+                                    {{ boutique.nomBoutique }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="panel-footer">
+                            <button class="btn-confirm" (click)="confirmBoutiqueSelection()">Confirmer</button>
+                        </div>
+                    </div>
                   </div> 
 
                   <div class="btn_add_categoryDiv2">

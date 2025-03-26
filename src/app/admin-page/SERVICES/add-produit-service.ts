@@ -13,17 +13,16 @@ export class ProduitService {
   constructor(private http: HttpClient) { }
 
   ajouterProduit(
-    boutiqueId: number,
+    boutiqueIds: number[], // Modifié pour accepter un tableau
     produit: Produit,
     imageFile: File | null,
     addToStock: boolean,
     token: string
   ): Observable<Produit> {
-    const url = `${this.apiUrl}/create/${boutiqueId}?addToStock=${addToStock}`;
+    const url = `${this.apiUrl}/create?addToStock=${addToStock}`;
     const formData: FormData = new FormData();
 
-    formData.append('produit', JSON.stringify(produit));
-
+    formData.append('boutiqueIds', JSON.stringify(boutiqueIds));
     if (imageFile) {
       formData.append('image', imageFile, imageFile.name);
     }

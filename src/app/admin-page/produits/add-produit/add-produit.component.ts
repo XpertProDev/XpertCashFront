@@ -172,7 +172,7 @@ export class AddProduitComponent {
   imageFile: File | null = null;
   isLoading: boolean = false;
 
-  boutiqueIdSelected: number | null = null; 
+  boutiqueIdSelected: number[] = [];
 
   constructor(
     private sharedDataService: SharedDataService,
@@ -663,14 +663,15 @@ export class AddProduitComponent {
       // Inclure l'ID de la boutique sélectionnée dans les données
       // const boutiqueId = this.boutiqueIdSelected;
       const boutiqueId = this.boutiqueIdSelected || this.boutiquesList[0]?.id;
-      if (!boutiqueId) {
-        this.errorMessage = "Veuillez sélectionner une boutique.";
+      
+      if (this.boutiqueIdSelected.length === 0) {
+        this.errorMessage = "Veuillez sélectionner au moins une boutique.";
         this.isLoading = false;
         return;
-      }
+    }
   
       // Envoi du produit avec l'image compressée (JPEG/PNG) ou l'image SVG par défaut
-      this.produitService.ajouterProduit(boutiqueId, produit, finalImage, addToStock, token)
+      this.produitService.ajouterProduit(this.boutiqueIdSelected, produit, finalImage, addToStock, token)
         .subscribe({
           next: data => {
             this.showPopupMessage({
@@ -810,11 +811,11 @@ export class AddProduitComponent {
     const selectedName = event.option.value;
     const selectedBoutique = this.boutiquesList.find(b => b.nomBoutique === selectedName);
     
+    // Ajouter au tableau au lieu d'assigner une valeur unique
     if (selectedBoutique) {
-        this.boutiqueIdSelected = selectedBoutique.id;
-        console.log('ID boutique sélectionnée:', this.boutiqueIdSelected);
+        this.boutiqueIdSelected = [selectedBoutique.id]; // Tableau avec un seul élément
     } else {
-        this.boutiqueIdSelected = null;
+        this.boutiqueIdSelected = []; // Tableau vide
     }
 }
 
@@ -824,6 +825,28 @@ export class AddProduitComponent {
     return boutique ? boutique : '';
   }
 
+  showBoutiqueSelectionPanel: boolean = false;
+selectedBoutiques: any[] = [];
+
+toggleBoutiqueSelectionPanel(): void {
+  this.showBoutiqueSelectionPanel = !this.showBoutiqueSelectionPanel;
+}
+
+updateSelectedBoutiques(): void {
+  this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
+}
+
+confirmBoutiqueSelection(): void {
+  const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
+  this.controlBoutique.setValue(selectedNames.join(', '));
+  
+  // Remplacer null par un tableau vide si aucune sélection
+  this.boutiqueIdSelected = this.selectedBoutiques.length > 0 
+      ? this.selectedBoutiques.map(b => b.id) 
+      : [];
+  
+  this.toggleBoutiqueSelectionPanel();
+}
   
 
 }
