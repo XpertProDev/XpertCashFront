@@ -51,7 +51,7 @@ export class ProduitsComponent implements OnInit {
   showDescription: boolean = false;
 
   selectedBoutique: any = null;
-  boutiques: any[] = [];
+  boutiques: any[] = []; 
 
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();
@@ -281,15 +281,15 @@ export class ProduitsComponent implements OnInit {
   getUserInfo(): void {
     this.usersService.getUserInfo().subscribe({
       next: (user) => {
+        console.log('Données reçues:', user);
         localStorage.setItem('user', JSON.stringify(user));
         this.userName = user.nomComplet;
         this.nomEntreprise = user.nomEntreprise;
-        this.boutiques = user.boutiques;
+        // this.boutiques = user.boutiques;
+        this.boutiques = user.boutiques ?? []; 
   
-        // Récupération de l'ID entreprise
-        this.entrepriseId = user.entrepriseId || // Priorité à la propriété directe
-                           user.boutiques[0]?.entreprise?.id || // Fallback sur la première boutique
-                           null;
+        // Récupération de l'ID entreprise depuis la réponse
+        this.entrepriseId = user.entrepriseId;
   
         if (!this.entrepriseId) {
           console.error('Aucun ID entreprise trouvé !');
@@ -304,6 +304,7 @@ export class ProduitsComponent implements OnInit {
         this.addressBoutique = this.selectedBoutique?.adresse || 'Adresse non trouvée';
       },
       error: (err) => {
+        this.boutiques = [];
         console.error("Erreur lors de la récupération des informations utilisateur :", err);
       }
     });
@@ -374,21 +375,15 @@ loadAllProduits(): void {
             : '';
 
           // Conversion de la date
-          let createdAt = new Date().toISOString();
+          let createdAt = '';
           if (prod.createdAt) {
-            try {
+            if (prod.createdAt.includes('à')) {
+              // Format français "jj-mm-yyyy à hh:mm"
               const [datePart, timePart] = prod.createdAt.split(' à ');
-              const [day, month, year] = datePart.split('-');
-              const [hours, minutes] = timePart.split(':');
-              createdAt = new Date(
-                parseInt(year),
-                parseInt(month) - 1,
-                parseInt(day),
-                parseInt(hours),
-                parseInt(minutes)
-              ).toISOString();
-            } catch (e) {
-              console.warn('Erreur de conversion de date', e);
+              // ... (votre code actuel)
+            } else {
+              // Si c'est une date ISO (ex: "2024-05-20T12:34:56Z")
+              createdAt = new Date(prod.createdAt).toISOString();
             }
           }
 
