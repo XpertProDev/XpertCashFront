@@ -67,6 +67,8 @@ export class ProduitsComponent implements OnInit {
   newPhotoUrl: string | null = null;
   selectedFile: File | null = null;
 
+  entrepriseId: number | null = null;
+
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
@@ -282,9 +284,18 @@ export class ProduitsComponent implements OnInit {
         localStorage.setItem('user', JSON.stringify(user));
         this.userName = user.nomComplet;
         this.nomEntreprise = user.nomEntreprise;
-        this.boutiques = user.boutiques; // Récupération de toutes les boutiques
-        
-        // Sélectionner la première boutique par défaut
+        this.boutiques = user.boutiques;
+  
+        // Récupération de l'ID entreprise
+        this.entrepriseId = user.entrepriseId || // Priorité à la propriété directe
+                           user.boutiques[0]?.entreprise?.id || // Fallback sur la première boutique
+                           null;
+  
+        if (!this.entrepriseId) {
+          console.error('Aucun ID entreprise trouvé !');
+          return;
+        }
+  
         if (this.boutiques.length > 0) {
           this.selectedBoutique = this.boutiques[0];
           this.loadProduits(this.selectedBoutique.id);
@@ -300,72 +311,43 @@ export class ProduitsComponent implements OnInit {
 
 
   // Ajoutez cette méthode pour changer de boutique
-  selectBoutique(boutique: any): void {
-    this.selectedBoutique = boutique;
-    this.loadProduits(boutique.id);
-    this.currentPage = 0; // Réinitialiser la pagination
+  // Modifiez selectBoutique pour gérer 'Tous les boutiques'
+  selectBoutique(boutique: any | null): void {
+    if (boutique === null) {
+      this.selectedBoutique = null;
+      this.loadAllProduits();
+    } else {
+      this.selectedBoutique = boutique;
+      this.loadProduits(boutique.id);
+    }
+    this.currentPage = 0;
   }
 
-  // Charge les produits depuis le backend et effectue le mapping pour l'affichage
-  // Corrigez la méthode loadProduits comme suit :
-loadProduits(boutiqueId: number): void {
-  if (!boutiqueId) {
-    console.error('L\'ID de la boutique est manquant');
+  // Ajoutez cette nouvelle méthode
+loadAllProduits(): void {
+  if (!this.entrepriseId) {
+    console.error('ID entreprise manquant');
     return;
   }
 
-  this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
+  this.produitService.getProduitsByEntrepriseId(this.entrepriseId).subscribe({
     next: (produits: Produit[]) => {
       this.tasks = produits.map(prod => {
-        // Conversion de la photo
+        // Reprenez ici la même logique de mapping que dans loadProduits()
         const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
           ? `${this.backendUrl}${prod.photo}`
           : '';
 
-        // Conversion de la date
-        let createdAt = new Date().toISOString();
-        if (prod.createdAt) {
-          try {
-            const [datePart, timePart] = prod.createdAt.split(' à ');
-            const [day, month, year] = datePart.split('-');
-            const [hours, minutes] = timePart.split(':');
-            createdAt = new Date(
-              parseInt(year),
-              parseInt(month) - 1,
-              parseInt(day),
-              parseInt(hours),
-              parseInt(minutes)
-            ).toISOString();
-          } catch (e) {
-            console.warn('Erreur de conversion de date', e);
-          }
-        }
-
-        // Mapping complet
         return {
-          id: prod.id,
-          codeGenerique: prod.codeGenerique || '',
-          codeBare: prod.codeBare || '',
-          nom: prod.nom || 'Nom inconnu',
-          description: prod.description || '',
-          prixVente: prod.prixVente || 0,
-          prixAchat: prod.prixAchat || 0,
-          quantite: prod.quantite || 0,
-          seuilAlert: prod.seuilAlert || 0,
-          enStock: prod.enStock || false,
+          ...prod,
           photo: fullImageUrl,
-          nomCategorie: prod.nomCategorie || '',
-          nomUnite: prod.nomUnite || '',
-          createdAt: createdAt,
-          categorieId: prod.categorieId || 0,
-          uniteId: prod.uniteId || 0,
-          boutiqueId: prod.boutiqueId || 0
+          createdAt: this.formatDate(prod.createdAt?.toString() || ''),
         } as Produit;
       }).sort((a, b) => {
         const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
         const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
         return dateB - dateA;
-      })
+      });
 
       this.dataSource.data = this.tasks;
       if (this.paginator) {
@@ -375,6 +357,75 @@ loadProduits(boutiqueId: number): void {
     error: (err) => console.error("Erreur :", err)
   });
 }
+
+  // Charge les produits depuis le backend et effectue le mapping pour l'affichage
+  loadProduits(boutiqueId: number): void {
+    if (!boutiqueId) {
+      console.error('L\'ID de la boutique est manquant');
+      return;
+    }
+
+    this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
+      next: (produits: Produit[]) => {
+        this.tasks = produits.map(prod => {
+          // Conversion de la photo
+          const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
+            ? `${this.backendUrl}${prod.photo}`
+            : '';
+
+          // Conversion de la date
+          let createdAt = new Date().toISOString();
+          if (prod.createdAt) {
+            try {
+              const [datePart, timePart] = prod.createdAt.split(' à ');
+              const [day, month, year] = datePart.split('-');
+              const [hours, minutes] = timePart.split(':');
+              createdAt = new Date(
+                parseInt(year),
+                parseInt(month) - 1,
+                parseInt(day),
+                parseInt(hours),
+                parseInt(minutes)
+              ).toISOString();
+            } catch (e) {
+              console.warn('Erreur de conversion de date', e);
+            }
+          }
+
+          // Mapping complet
+          return {
+            id: prod.id,
+            codeGenerique: prod.codeGenerique || '',
+            codeBare: prod.codeBare || '',
+            nom: prod.nom || 'Nom inconnu',
+            description: prod.description || '',
+            prixVente: prod.prixVente || 0,
+            prixAchat: prod.prixAchat || 0,
+            quantite: prod.quantite || 0,
+            seuilAlert: prod.seuilAlert || 0,
+            enStock: prod.enStock || false,
+            photo: fullImageUrl,
+            nomCategorie: prod.nomCategorie || '',
+            nomUnite: prod.nomUnite || '',
+            createdAt: createdAt,
+            categorieId: prod.categorieId || 0,
+            uniteId: prod.uniteId || 0,
+            boutiqueId: prod.boutiqueId || 0
+          } as Produit;
+        }).sort((a, b) => {
+          const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
+          const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
+          return dateB - dateA;
+        })
+
+        this.dataSource.data = this.tasks;
+        if (this.paginator) {
+          this.dataSource.paginator = this.paginator;
+        }
+      },
+      error: (err) => console.error("Erreur :", err)
+    });
+  }
   
   // Ajoutez cette méthode si nécessaire
   private formatDate(dateStr: string): string {

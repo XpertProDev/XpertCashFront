@@ -29,8 +29,8 @@
   <div class="container_list_boutique">
     <div class="content_list_boutique">
       <div class="name_boutique">
-        <div class="all_boutique">
-          <p class="all_boutique">Tout les boutiques</p>
+        <div class="all_boutique" (click)="selectBoutique(null)">
+          <p class="all_boutique">Tous les boutiques</p>
         </div>
         <ng-container *ngFor="let boutique of boutiques; let i = index">
           <p 

@@ -120,17 +120,10 @@ export class ProduitService {
     return this.http.get<Map<string, number>>(`${this.apiUrl}/produits/${boutiqueId}/totaux-stock`, { headers });
   }
   
-  // getBoutiqueById(boutiqueId: number): Observable<any> {
-  //   const token = localStorage.getItem('authToken');
-  //   if (!token) {
-  //     console.error('Aucun token trouvé');
-  //     return throwError('Aucun token trouvé');
-  //   }
-  //   const headers = new HttpHeaders({
-  //     Authorization: `Bearer ${token}`
-  //   });
-  //   return this.http.get<Map<string, number>>(`${this.apiUrl}/boutique/${boutiqueId}/produits`, { headers });
-  // }
+  // Nouvelle méthode pour récupérer tous les produits de l'entreprise
+  getProduitsByEntrepriseId(entrepriseId: number): Observable<Produit[]> {
+    return this.http.get<Produit[]>(`${this.apiUrl}/produits/entreprise/${entrepriseId}`);
+  }
   
   
 }
