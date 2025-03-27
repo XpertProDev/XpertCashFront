@@ -9,11 +9,11 @@ import { Categorie } from '../../MODELS/categorie.model';
 import { UniteMesure } from '../../MODELS/unite.model';
 import { UniteMesureService } from '../../SERVICES/unite.service';
 import { Router } from '@angular/router';
-import { ProduitService } from '../../SERVICES/add-produit-service';
 import { PopupData } from '../../MODELS/PopUp/popup-data';
 import { UsersService } from '../../SERVICES/users.service';
 import imageCompression from 'browser-image-compression';
 import { NgxBarcode6Module } from 'ngx-barcode6';
+import { ProduitService } from '../../SERVICES/produit.service';
 
 // export interface CategorySelect {
 //   name: string;

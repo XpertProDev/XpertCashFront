@@ -3,26 +3,7 @@ import { Users } from '../MODELS/utilisateur.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, switchMap, throwError } from 'rxjs';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
-
-interface UserRequest {
-  //id: UserRequest;
-  id: number;
-  nomComplet: string;
-  nomEntreprise: string;
-  email: string;
-  roleType: string;
-  phone: string;
-  pays: string;
-  adresseEntreprise: string;
-  logoEntreprise : string,
-  boutiques: {
-    id: number;
-    nomBoutique: string;
-    telephone: string;
-    email: string;
-    adresse: string; // Ajout du champ adresse
-  }[];
-}
+import { UserRequest } from '../MODELS/user-request';
 
 @Injectable({
   providedIn: 'root'
