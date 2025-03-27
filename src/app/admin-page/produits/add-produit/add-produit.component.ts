@@ -671,7 +671,7 @@ export class AddProduitComponent {
     }
   
       // Envoi du produit avec l'image compressée (JPEG/PNG) ou l'image SVG par défaut
-      this.produitService.ajouterProduit(this.boutiqueIdSelected, produit, finalImage, addToStock, token)
+      this.produitService.ajouterProduit(this.boutiqueIdSelected, produit, finalImage, addToStock)
         .subscribe({
           next: data => {
             this.showPopupMessage({

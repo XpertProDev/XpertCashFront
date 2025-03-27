@@ -13,24 +13,26 @@ export class ProduitService {
   constructor(private http: HttpClient) { }
 
   ajouterProduit(
-    boutiqueIds: number[], // Modifié pour accepter un tableau
-    produit: Produit,
+    boutiqueIds: number[],
+    produit: any, // Modifier le type si nécessaire
     imageFile: File | null,
     addToStock: boolean,
-    token: string
   ): Observable<Produit> {
     const url = `${this.apiUrl}/create?addToStock=${addToStock}`;
     const formData: FormData = new FormData();
-
+  
     formData.append('boutiqueIds', JSON.stringify(boutiqueIds));
+    formData.append('produit', JSON.stringify(produit)); 
+  
     if (imageFile) {
       formData.append('image', imageFile, imageFile.name);
     }
-
+  
+    const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({
-      'Authorization': token
+      'Authorization': `Bearer ${token}`
     });
-
+  
     return this.http.post<Produit>(url, formData, { headers });
   }
 
