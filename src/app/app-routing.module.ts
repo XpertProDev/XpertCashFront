@@ -191,10 +191,17 @@ const routes: Routes = [
         canActivate: [authGuard]
       },
 
-      // La routing de Compte
+      // La routing de Boutique
       {
         path: 'boutique',
         loadComponent: () => import('./admin-page/boutique/boutique.component').then(m => m.BoutiqueComponent),
+        canActivate: [authGuard]
+      },
+
+      // La routing de Compte
+      {
+        path: 'detail-boutique/:id',
+        loadComponent: () => import('./admin-page/detail-boutique/detail-boutique.component').then(m => m.DetailBoutiqueComponent),
         canActivate: [authGuard]
       },
 

@@ -40,7 +40,7 @@ export class BoutiqueComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.initForm();  // ✅ Ajouté pour éviter l'erreur NG01052
+    this.initForm();  // Ajouté pour éviter l'erreur NG01052
     this.fetchBoutiques();
   }
 
@@ -137,6 +137,12 @@ export class BoutiqueComponent implements OnInit {
     this.searchTerm = '';
     this.filteredBoutiques = this.boutiques;
   }
+
+  openBoutiqueDetail(boutiqueId: number): void {
+    this.router.navigate(['/detail-boutique', boutiqueId]);
+  }
+
+
   
 }
 

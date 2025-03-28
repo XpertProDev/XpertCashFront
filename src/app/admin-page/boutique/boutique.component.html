@@ -47,7 +47,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let boutique of filteredBoutiques">
+          <tr *ngFor="let boutique of filteredBoutiques" (click)="openBoutiqueDetail(boutique.id)">
             <td>{{ boutique.nomBoutique }}</td>
             <td>{{ boutique.email || 'Non email' }}</td>
             <td>{{ boutique.adresse || 'Non adresse'  }}</td>

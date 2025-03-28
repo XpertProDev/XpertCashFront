@@ -72,7 +72,7 @@
     </thead>
     <tbody>
       <!-- Boucle sur la liste filtrée et paginée -->
-      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;" (click)="openProduitDetail(product.id)" >
+      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;" (click)="openProduitDetail(product.id)">
         <td [innerHTML]="highlightMatch(product.codeGenerique || '')"></td>
         <td>
           <div class="imgProduit">
