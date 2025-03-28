@@ -54,8 +54,15 @@
             <td>{{ boutique.telephone || 'Non téléphone'  }}</td>
             <td>{{ boutique.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
             <td class="content_statut_boutique">
-              <span class="statut_boutique"> Acticf </span>
+              <span class="statut_boutique" 
+                    [ngStyle]="{
+                      'background-color': boutique.actif ? '#008000' : '#dc3545', 
+                      'color': 'white'
+                    }">
+                {{ boutique.actif ? 'Actif' : 'Inactif' }}
+              </span>
             </td>
+            
           </tr>
         </tbody>
       </table>
