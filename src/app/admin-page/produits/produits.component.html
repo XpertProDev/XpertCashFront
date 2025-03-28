@@ -29,7 +29,9 @@
   <div class="container_list_boutique">
     <div class="content_list_boutique">
       <div class="name_boutique">
-        <div class="all_boutique" (click)="selectBoutique(null)">
+        <div class="all_boutique" 
+          [class.name_boutique_active]="selectedBoutique === null"
+          (click)="selectBoutique(null)">
           <p class="all_boutique">Toutes les boutiques</p>
         </div>
      
