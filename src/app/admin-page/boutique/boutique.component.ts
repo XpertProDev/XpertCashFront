@@ -101,7 +101,7 @@ export class BoutiqueComponent implements OnInit {
       });
   
     } else {
-      console.warn("⚠️ Le formulaire est invalide !");
+      console.warn("Le formulaire est invalide !");
     }
   }
   
