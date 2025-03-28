@@ -37,14 +37,13 @@
      
         <ng-container *ngIf="(boutiques?.length || 0) > 0; else noBoutiques">
           <ng-container *ngFor="let boutique of boutiques || []; let i = index">
-            
             <p 
-              [class.name_boutique_active]="boutique.id === selectedBoutique?.id"
+              [class.name_boutique_active]="boutique.id === selectedBoutique?.id && boutique.actif"
               [class.suspended-boutique]="!boutique.actif"
-              [style.color]="getBoutiqueTextColor(i, boutique.id === selectedBoutique?.id)"
-              (click)="selectBoutique(boutique)">
-            {{ boutique.nomBoutique }}
-            <i *ngIf="!boutique.actif" class="ri-error-warning-line warning-icon"></i>
+              [style.color]="boutique.actif ? getBoutiqueTextColor(i, boutique.id === selectedBoutique?.id) : '#999'"
+              (click)="boutique.actif ? selectBoutique(boutique) : showSuspendedBoutiqueDialog()">
+              {{ boutique.nomBoutique }}
+              <i *ngIf="!boutique.actif" class="ri-error-warning-line warning-icon"></i>
             </p>
             <div *ngIf="i !== boutiques.length - 1" class="barre"></div>
           </ng-container>

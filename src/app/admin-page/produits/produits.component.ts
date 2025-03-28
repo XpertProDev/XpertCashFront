@@ -70,6 +70,8 @@ export class ProduitsComponent implements OnInit {
 
   entrepriseId: number | null = null;
 
+  previousSelectedBoutique: any = null;
+
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
@@ -314,8 +316,15 @@ export class ProduitsComponent implements OnInit {
 
 
   // Ajoutez cette méthode pour changer de boutique
-  // Modifiez selectBoutique pour gérer 'Tous les boutiques'
   selectBoutique(boutique: any | null): void {
+    if (boutique && !boutique.actif) {
+      this.showSuspendedBoutiqueDialog();
+      return; // Ne pas changer la sélection si boutique désactivée
+    }
+  
+    // Stocker la sélection précédente avant de changer
+    this.previousSelectedBoutique = this.selectedBoutique;
+    
     if (boutique === null) {
       this.selectedBoutique = null;
       this.loadAllProduits();
@@ -423,16 +432,23 @@ loadAllProduits(): void {
       error: (err) => {
         if (err.message === 'BOUTIQUE_DESACTIVEE') {
           this.showSuspendedBoutiqueDialog();
+          // Réinitialiser la sélection à la précédente
+          this.selectedBoutique = this.previousSelectedBoutique;
           return;
         }
         console.error("Erreur :", err);
       }
     });
   }
-  private showSuspendedBoutiqueDialog(): void {
-    this.dialog.open(SuspendedBoutiqueDialogComponent, {
+  
+  public showSuspendedBoutiqueDialog(): void {
+    const dialogRef = this.dialog.open(SuspendedBoutiqueDialogComponent, {
       width: '400px',
       disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.selectedBoutique = this.previousSelectedBoutique;
     });
   }
   
@@ -493,18 +509,6 @@ loadAllProduits(): void {
     return isActive ? '#ffffff' : `hsl(${hue}, 70%, 40%)`; // Texte blanc si actif, couleur vive sinon
   }
 
-  // loadBoutiqueDetails(boutiqueId: number): void {
-  //   this.produitService.getBoutiqueById(boutiqueId).subscribe({
-  //     next: (boutique) => {
-  //       console.log('Boutique récupérée:', boutique);
-  //       // Traitement des données...
-  //     },
-  //     error: (err) => {
-  //       console.error('Erreur:', err);
-  //       // Gestion des erreurs
-  //     }
-  //   });
-  // }
 
   
 }
