@@ -15,8 +15,9 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
 import autoTable from 'jspdf-autotable';
 import { UsersService } from '../SERVICES/users.service';
-import { ColorFormats } from 'ngx-color-picker/lib/formats';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
+import { MatDialog } from '@angular/material/dialog';
+import { SuspendedBoutiqueDialogComponent } from './suspended-boutique-dialog.component';
 
 @Component({
   selector: 'app-produits',
@@ -75,6 +76,7 @@ export class ProduitsComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private usersService: UsersService,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -418,7 +420,19 @@ loadAllProduits(): void {
           this.dataSource.paginator = this.paginator;
         }
       },
-      error: (err) => console.error("Erreur :", err)
+      error: (err) => {
+        if (err.message === 'BOUTIQUE_DESACTIVEE') {
+          this.showSuspendedBoutiqueDialog();
+          return;
+        }
+        console.error("Erreur :", err);
+      }
+    });
+  }
+  private showSuspendedBoutiqueDialog(): void {
+    this.dialog.open(SuspendedBoutiqueDialogComponent, {
+      width: '400px',
+      disableClose: true
     });
   }
   

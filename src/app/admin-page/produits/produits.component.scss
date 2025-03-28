@@ -1099,5 +1099,17 @@ img.roudel_detail{
     text-align: center;
   }
 
+  .suspended-boutique {
+    position: relative;
+    opacity: 0.7;
+    text-decoration: line-through;
+  }
+  
+  .warning-icon {
+    margin-left: 8px;
+    color: #ff9800;
+    font-size: 14px;
+  }
+
 
 }
