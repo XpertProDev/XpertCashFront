@@ -596,8 +596,8 @@
 }
 
 #inpLock:checked + label {
-  background: #ff0000f6;
-  color: #ffffffd5;
+  // background: #00800009;
+  color: #ff0000;
   border-radius: 10px;
   font-weight: 400;
 }
@@ -637,4 +637,70 @@
   50% {
     transform: translateY(1px);
   }
+}
+
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 18px;
+  z-index: 1000;
+}
+
+
+.loading-content {
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  gap: 10px; 
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
+/* Style pour le spinner de chargement */
+.spinner-border {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.5rem;
+  height: 1.5rem;
+  // color: #E9D421;
+}
+
+// /* Style dynamique pour le SVG */
+// svg[style*='#ff0000'] .lockb {
+//   fill: #ff0000;
+// }
+
+// svg[style*='#008000'] .lockb {
+//   fill: #008000;
+// }
+
+/* Désactivation pendant le chargement */
+input[disabled] + label {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

@@ -5,46 +5,51 @@
         </div>
     </div>
 
-    <div class="content_detail_boutique">
+    <div class="content_detail_boutique" *ngIf="!isLoading && !errorMessage">
         <div class="div1_detail_boutique">
             <div class="card_permission_detail_boutique">
                 <div class="name_permission">
-                    Nom boutique : <span class="h5 valueBoutique"> GamerTech</span>
+                    Nom boutique : <span class="h5 valueBoutique"> {{boutique?.nomBoutique || 'Non nom de la boutique' }} </span>
                 </div>
             </div>
         </div>
         <div class="div2_detail_boutique">
             <div class="card_permission_detail_boutique">
                 <div class="name_permission">
-                    Email : <span class="h5 valueBoutique"> example&#64;gmail.com</span>
+                    Email : <span class="h5 valueBoutique"> {{ boutique?.email || 'Non email' }} </span>
                 </div>
             </div>
         </div>
         <div class="div3_detail_boutique">
             <div class="card_permission_detail_boutique">
                 <div class="name_permission">
-                    Téléphone : <span class="h5 valueBoutique"> +223 00 00 00 00 </span>
+                    Téléphone : <span class="h5 valueBoutique"> {{ boutique?.telephone || 'Non téléphone' }} </span>
                 </div>
             </div>
         </div>
         <div class="div4_detail_boutique">
             <div class="card_permission_detail_boutique">
                 <div class="name_permission">
-                    Date de creation : <span class="h5 valueBoutique"> 00/00/0000 </span>
+                    Date de creation : <span class="h5 valueBoutique"> {{ boutique?.createdAt | date: 'dd/MM/yyyy' }} </span>
                 </div>
             </div>
         </div>
         <div class="div5_detail_boutique">
             <div class="card_permission_detail_boutique">
                 <div class="name_permission">
-                    Adresse : <span class="h5 valueBoutique"> Sotuba </span>
+                    Adresse : <span class="h5 valueBoutique"> {{ boutique?.adresse || 'Non adresse' }} </span>
                 </div>
             </div>
         </div>
         <div class="div6_detail_boutique">
             <div class="card_permission_detail_boutique">
                 <div class="name_permission">
-                    Status : <span class="h5 valueBoutique"> Actif </span>
+                    Status : 
+                    <span 
+                        class="h5 valueBoutique"
+                        [style.color]="boutique?.actif ? '#008000' : '#ff0000'">
+                        {{ boutique?.actif ? 'Actif' : 'Inactif' }}
+                    </span>
                 </div>
             </div>
         </div>
@@ -62,16 +67,20 @@
                 </div>
             </div>
         </div>
+        
+
         <div class="div9_detail_boutique">
             <div class="card_permission_detail_boutique_check">
                 <input 
                     id="inpLock" 
-                    type="checkbox">
+                    type="checkbox"
+                    [checked]="boutique?.actif"
+                    (change)="toggleBoutiqueStatus($event)"
+                    [disabled]="isUpdating">
                 
-                <!-- Le label englobe maintenant toute la carte -->
                 <label class="btn-lock" for="inpLock">
                     <div class="name_permission">
-                        Suspendre cette boutique
+                        {{ boutique?.actif ? 'Désactiver' : 'Activer' }} la boutique <!-- Texte dynamique -->
                     </div>
                     
                     <div class="suspendre_check suspendre_check_cadre">
@@ -84,8 +93,23 @@
                         </svg>
                     </div>
                 </label>
+        
+                <div *ngIf="isUpdating" class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
             </div>
         </div>
 
     </div>
+</div>
+
+<div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Connexion en cours...</p>
+    </div>
+  </div>
+
+<div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
 </div>
