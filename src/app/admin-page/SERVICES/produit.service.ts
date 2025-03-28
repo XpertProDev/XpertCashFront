@@ -69,19 +69,19 @@ export class ProduitService {
   }
 
   // Méthode pour récupérer la liste des produits d'une boutique
-getProduitsEntreprise(boutiqueId: number): Observable<Produit[]> {
-  const token = localStorage.getItem('authToken');
-  const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+  getProduitsEntreprise(boutiqueId: number): Observable<Produit[]> {
+    const token = localStorage.getItem('authToken');
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
-  return this.http.get<Produit[]>(`${this.apiUrl}/produits/${boutiqueId}/stock`, { headers }).pipe(
-    catchError(error => {
-      if (error.status === 400 && error.error?.error === 'Cette boutique est désactivée, ses produits ne sont pas accessibles !') {
-        return throwError(() => new Error('BOUTIQUE_DESACTIVEE'));
-      }
-      return throwError(() => error);
-    })
-  );
-}
+    return this.http.get<Produit[]>(`${this.apiUrl}/produits/${boutiqueId}/stock`, { headers }).pipe(
+      catchError(error => {
+        if (error.status === 400 && error.error?.error === 'Cette boutique est désactivée, ses produits ne sont pas accessibles !') {
+          return throwError(() => new Error('BOUTIQUE_DESACTIVEE'));
+        }
+        return throwError(() => error);
+      })
+    );
+  }
 
   // Méthode pour récupérer les totaux des produits en stock (déjà existante)
   getProduitBoutique(boutiqueId: number): Observable<Map<string, number>> {
