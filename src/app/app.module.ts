@@ -19,6 +19,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CodeInputModule } from 'angular-code-input';
 import localeDe from '@angular/common/locales/de';
 import { CustomNumberPipe } from './admin-page/MODELS/customNumberPipe';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
 
 
 registerLocaleData(localeDe);
@@ -40,6 +42,8 @@ registerLocaleData(localeDe);
     MatAutocompleteModule,
     MatSlideToggleModule,
     CodeInputModule,
+    // MatDialogModule,
+    // MatButtonModule,
   ], 
   providers: [
     provideHttpClient(),

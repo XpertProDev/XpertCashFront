@@ -2,8 +2,6 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { map, Observable, of, startWith } from 'rxjs';
 import { Produit } from '../../MODELS/produit.model';
 import { ProduitService } from '../../SERVICES/produit.service';

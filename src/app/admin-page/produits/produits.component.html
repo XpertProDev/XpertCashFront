@@ -29,17 +29,21 @@
   <div class="container_list_boutique">
     <div class="content_list_boutique">
       <div class="name_boutique">
-        <div class="all_boutique" (click)="selectBoutique(null)">
+        <div class="all_boutique" 
+          [class.name_boutique_active]="selectedBoutique === null"
+          (click)="selectBoutique(null)">
           <p class="all_boutique">Toutes les boutiques</p>
         </div>
      
         <ng-container *ngIf="(boutiques?.length || 0) > 0; else noBoutiques">
           <ng-container *ngFor="let boutique of boutiques || []; let i = index">
             <p 
-              [class.name_boutique_active]="boutique.id === selectedBoutique?.id"
-              [style.color]="getBoutiqueTextColor(i, boutique.id === selectedBoutique?.id)"
-              (click)="selectBoutique(boutique)">
+              [class.name_boutique_active]="boutique.id === selectedBoutique?.id && boutique.actif"
+              [class.suspended-boutique]="!boutique.actif"
+              [style.color]="boutique.actif ? getBoutiqueTextColor(i, boutique.id === selectedBoutique?.id) : '#999'"
+              (click)="boutique.actif ? selectBoutique(boutique) : showSuspendedBoutiqueDialog()">
               {{ boutique.nomBoutique }}
+              <i *ngIf="!boutique.actif" class="ri-error-warning-line warning-icon"></i>
             </p>
             <div *ngIf="i !== boutiques.length - 1" class="barre"></div>
           </ng-container>
@@ -70,7 +74,7 @@
     </thead>
     <tbody>
       <!-- Boucle sur la liste filtrée et paginée -->
-      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;" (click)="openProduitDetail(product.id)" >
+      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;" (click)="openProduitDetail(product.id)">
         <td [innerHTML]="highlightMatch(product.codeGenerique || '')"></td>
         <td>
           <div class="imgProduit">

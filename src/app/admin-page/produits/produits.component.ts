@@ -15,8 +15,9 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
 import autoTable from 'jspdf-autotable';
 import { UsersService } from '../SERVICES/users.service';
-import { ColorFormats } from 'ngx-color-picker/lib/formats';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
+import { MatDialog } from '@angular/material/dialog';
+import { SuspendedBoutiqueDialogComponent } from './suspended-boutique-dialog.component';
 
 @Component({
   selector: 'app-produits',
@@ -69,12 +70,15 @@ export class ProduitsComponent implements OnInit {
 
   entrepriseId: number | null = null;
 
+  previousSelectedBoutique: any = null;
+
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
     private fb: FormBuilder,
     private router: Router,
     private usersService: UsersService,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -312,8 +316,15 @@ export class ProduitsComponent implements OnInit {
 
 
   // Ajoutez cette méthode pour changer de boutique
-  // Modifiez selectBoutique pour gérer 'Tous les boutiques'
   selectBoutique(boutique: any | null): void {
+    if (boutique && !boutique.actif) {
+      this.showSuspendedBoutiqueDialog();
+      return; // Ne pas changer la sélection si boutique désactivée
+    }
+  
+    // Stocker la sélection précédente avant de changer
+    this.previousSelectedBoutique = this.selectedBoutique;
+    
     if (boutique === null) {
       this.selectedBoutique = null;
       this.loadAllProduits();
@@ -418,7 +429,26 @@ loadAllProduits(): void {
           this.dataSource.paginator = this.paginator;
         }
       },
-      error: (err) => console.error("Erreur :", err)
+      error: (err) => {
+        if (err.message === 'BOUTIQUE_DESACTIVEE') {
+          this.showSuspendedBoutiqueDialog();
+          // Réinitialiser la sélection à la précédente
+          this.selectedBoutique = this.previousSelectedBoutique;
+          return;
+        }
+        console.error("Erreur :", err);
+      }
+    });
+  }
+  
+  public showSuspendedBoutiqueDialog(): void {
+    const dialogRef = this.dialog.open(SuspendedBoutiqueDialogComponent, {
+      width: '400px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.selectedBoutique = this.previousSelectedBoutique;
     });
   }
   
@@ -479,18 +509,6 @@ loadAllProduits(): void {
     return isActive ? '#ffffff' : `hsl(${hue}, 70%, 40%)`; // Texte blanc si actif, couleur vive sinon
   }
 
-  // loadBoutiqueDetails(boutiqueId: number): void {
-  //   this.produitService.getBoutiqueById(boutiqueId).subscribe({
-  //     next: (boutique) => {
-  //       console.log('Boutique récupérée:', boutique);
-  //       // Traitement des données...
-  //     },
-  //     error: (err) => {
-  //       console.error('Erreur:', err);
-  //       // Gestion des erreurs
-  //     }
-  //   });
-  // }
 
   
 }

@@ -20,19 +20,35 @@ export class LoginPageComponent {
   }
 
   ngOnInit() {
-
-    // Gestion du dropdown Identification
     const checkbox = document.getElementById("checkbox") as HTMLInputElement;
-    const themePopup = document.querySelector(".theme-popup") as HTMLElement;
-
+    const themePopup = document.querySelector(".theme-popup") as HTMLElement | null;
+  
     checkbox?.addEventListener("change", (event) => {
       event.stopPropagation();
     });
-
+  
     document.addEventListener("click", (event) => {
-      if (!themePopup.contains(event.target as Node)) {
+      if (themePopup && !themePopup.contains(event.target as Node)) {
         checkbox.checked = false;
       }
     });
   }
+  
+
+  // ngOnInit() {
+
+  //   // Gestion du dropdown Identification
+  //   const checkbox = document.getElementById("checkbox") as HTMLInputElement;
+  //   const themePopup = document.querySelector(".theme-popup") as HTMLElement;
+
+  //   checkbox?.addEventListener("change", (event) => {
+  //     event.stopPropagation();
+  //   });
+
+  //   document.addEventListener("click", (event) => {
+  //     if (!themePopup.contains(event.target as Node)) {
+  //       checkbox.checked = false;
+  //     }
+  //   });
+  // }
 }
