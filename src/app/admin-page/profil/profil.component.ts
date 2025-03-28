@@ -37,6 +37,7 @@ export class ProfilComponent  implements OnInit{
   nomBoutique: string = '';
   boutiqueAdresse: string = '';
   flagPays: string = '';
+  personalCode: string = '';
   isNomBoutiqueFormVisible = false;
   isUserFormVisible = false;
 
@@ -240,6 +241,7 @@ export class ProfilComponent  implements OnInit{
     this.usersService.getUserInfo().subscribe({
       next: (user) => {
         this.userName = user.nomComplet;
+        this.personalCode = user.personalCode;
         this.nomEntreprise = user.nomEntreprise
         this.email = user.email;
         this.phone = user.phone;

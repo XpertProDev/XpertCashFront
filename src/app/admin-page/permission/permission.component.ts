@@ -48,25 +48,31 @@ export class PermissionComponent implements OnInit {
     },
     { 
       id: 3,
-      name: 'Flux vente',
+      name: 'Approvisonner Stock',
       imgUrl: 'assets/img/comptabilite.png',
       selected: false
     },
     { 
       id: 4,
-      name: 'Approvisionner stock',
+      name: 'Gestion de facture',
       imgUrl: 'assets/img/approvisionnement.png',
       selected: false
     },
     { 
       id: 5,
-      name: 'Gerer magasins',
+      name: 'Gerer les cliens',
       imgUrl: 'assets/img/boutique.png',
       selected: false
     },
     { 
       id: 6,
-      name: 'Gerer personnel',
+      name: 'Gerer les utilisateurs',
+      imgUrl: 'assets/img/directeur.png',
+      selected: false
+    },
+    { 
+      id: 7,
+      name: 'Gerer boutiques',
       imgUrl: 'assets/img/directeur.png',
       selected: false
     },
@@ -120,10 +126,11 @@ export class PermissionComponent implements OnInit {
     const mapping: { [key: string]: number } = {
       'GERER_PRODUITS': 1,        // Gerer produit
       'VENDRE_PRODUITS': 2,       // Vendre produit
-      'VOIR_FLUX_COMPTABLE': 3,   // Voir Flux Comptable
-      'APPROVISIONNER_STOCK': 4,  // Approvisionner stock
-      'GERER_MAGASINS': 5,        // Gerer magasins
-      'GERER_PERSONNEL': 6        // Gerer personnel
+      'APPROVISIONNER_STOCK': 3,   // Voir Flux Comptable
+      'Gestion_Facture': 4,  // Approvisionner stock
+      'GERER_CLIENTS': 5,        // Gerer magasins
+      'GERER_UTILISATEURS': 6,        // Gerer personnel
+      'GERER_BOUTIQUE': 7,
     };
     return mapping[backendType] ?? -1;
   }
@@ -132,10 +139,12 @@ export class PermissionComponent implements OnInit {
     const mapping: { [key: number]: string } = {
       1: 'GERER_PRODUITS',
       2: 'VENDRE_PRODUITS',
-      3: 'VOIR_FLUX_COMPTABLE',
-      4: 'APPROVISIONNER_STOCK',
-      5: 'GERER_MAGASINS',
-      6: 'GERER_PERSONNEL'
+      3: 'APPROVISIONNER_STOCK',
+      4: 'Gestion_Facture',
+      5: 'GERER_CLIENTS',
+      6: 'GERER_UTILISATEURS',
+      7: 'GERER_BOUTIQUE',
+
     };
     return mapping[frontendId] ?? '';
   }
@@ -209,7 +218,7 @@ export class PermissionComponent implements OnInit {
         // Disparition automatique après 5 secondes
         setTimeout(() => {
           this.errorMessage = null;
-        }, 10000);
+        }, 15000);
       }
     });
   }

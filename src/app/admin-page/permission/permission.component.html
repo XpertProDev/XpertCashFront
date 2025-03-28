@@ -71,8 +71,12 @@
         <div class="div7_detail_user">
             <div class="card_permission_detail_user">
                 <div class="name_permission">
-                    Code PIN : <span class="h5 valueUser">  </span>
+                    Code PIN : 
+                    <span class="h5 valueUser" style="font-weight: bold; font-style: italic; color: red;">
+                        {{ user?.personalCode }}
+                    </span>
                 </div>
+                
             </div>
         </div>
     </div>
