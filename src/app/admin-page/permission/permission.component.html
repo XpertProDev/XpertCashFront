@@ -24,7 +24,7 @@
         <div class="div3_detail_user">
             <div class="card_permission_detail_user">
                 <div class="name_permission">
-                    Rôle : <span class="h5 valueUser" style="color: #0672E4;"> {{ user?.role?.name }} </span>
+                    Rôle : <span class="h5 valueUser" style="color: #0672E4; font-weight: bold; font-style: italic;"> {{ user?.role?.name }} </span>
                 </div>
             </div>
         </div>
@@ -115,7 +115,7 @@
                             <img [src]="permission.imgUrl">
                         </div>
                         <div class="name_permission">
-                            <span class="h5">{{permission.name}}</span>
+                            <span class="h5" >{{permission.name}}</span>
                         </div>
                     </div>
                     <label class="cyber-checkbox">

@@ -21,40 +21,44 @@ import localeDe from '@angular/common/locales/de';
 import { CustomNumberPipe } from './admin-page/MODELS/customNumberPipe';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
+import { UnlockDialogComponent } from './unlock-dialog/unlock-dialog.component';
 
 
 registerLocaleData(localeDe);
 
 
 @NgModule({
-  declarations: [InscriptionComponent, CustomNumberPipe],
+  declarations: [
+    AppComponent,
+    InscriptionComponent,
+    CustomNumberPipe,
+    UnlockDialogComponent,
+    
+    
+  ],
   imports: [
     CommonModule,
+    MatDialogModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     BrowserModule,
     FormsModule,
-    AppComponent, 
-    // VenteComponent,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatAutocompleteModule,
     MatSlideToggleModule,
     CodeInputModule,
-    // MatDialogModule,
-    // MatButtonModule,
   ], 
   providers: [
     provideHttpClient(),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: LOCALE_ID, useValue: 'fr-FR',  },
     { provide: LOCALE_ID, useValue: 'de-DE' }
-    // provideCharts(withDefaultRegisterables())
   ],
+  bootstrap: [AppComponent]
 })
 export class AppModule { 
-  // CommandeTableComponent: any
   constructor() {
     registerLocaleData(fr.default);
   }

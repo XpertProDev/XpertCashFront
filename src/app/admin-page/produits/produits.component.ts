@@ -273,7 +273,9 @@ export class ProduitsComponent implements OnInit {
   // Récupère l'ID de la boutique depuis le localStorage
   getUserBoutiqueId(): number | null {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user && user.boutiques && user.boutiques.length > 0) {
+    console.log("boutique", this.boutiques);
+    
+    if (user && user.boutiques && user?.boutiques?.length > 0) {
       return user.boutiques[0]?.id || null;
     } else {
       console.error('Aucune boutique trouvée pour cet utilisateur');

@@ -91,8 +91,8 @@
         <!-- <div> {{ product | json }}</div> -->
         <td [innerHTML]="highlightMatch(product.nom)"></td>
         <td class="description-cell" (mouseover)="showDescription = true" (mouseout)="showDescription = false">
-          {{ product.description || 'Non description' | slice:0:20 }}{{ product.description.length > 20 ? '...' : '' }}
-          <div class="description-hover" *ngIf="showDescription">{{ product.description  || 'Non description'}}</div>
+          {{ product.description ? (product.description | slice:0:20) + (product.description.length > 20 ? '...' : '') : 'Non description' }}
+          <div class="description-hover" *ngIf="showDescription">{{ product.description || 'Non description' }}</div>
         </td>
         <td [innerHTML]="highlightMatch(product.nomCategorie || 'Non categorie')"></td>
         <td>{{ product.prixVente | customNumber }}</td>
@@ -122,4 +122,3 @@
     </mat-paginator>
   </div>
 </div>
-
