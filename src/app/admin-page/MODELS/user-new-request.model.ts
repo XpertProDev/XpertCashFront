@@ -1,5 +1,6 @@
 export interface UserNewRequest {
     id: number;
+    personalCode: string;
     nomComplet: string;
     email: string;
     roleType: string;

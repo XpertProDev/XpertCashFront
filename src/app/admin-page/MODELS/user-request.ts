@@ -1,5 +1,6 @@
 export interface UserRequest {
   id: number;
+  personalCode: string;
   entrepriseId: number;
   nomComplet: string;
   nomEntreprise: string;
