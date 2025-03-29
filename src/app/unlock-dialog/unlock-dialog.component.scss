@@ -1,71 +1,72 @@
 .lock-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    pointer-events: all;
-  }
-  
-  .popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); 
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    z-index: 10000;
-    pointer-events: auto;
-    width: 300px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    text-align: center;
-  }
-  
-  .popup input {
-    margin-bottom: 10px;
-    padding: 10px;
-    font-size: 12px;
-    width: 100%;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    outline: none;
-    text-align: center;
-  }
-  
-  .popup button {
-    background-color: #0672E4;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 13px;
-    cursor: pointer;
-    width: 100%;
-  }
-  
-  h2, .h2 {
-    font-size: 18px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  pointer-events: all;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); 
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 2;
+  pointer-events: auto;
+  width: 300px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.popup input {
+  margin-bottom: 10px;
+  padding: 10px;
+  font-size: 12px;
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  outline: none;
+  text-align: center;
+}
+
+.popup button {
+  background-color: #0672E4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 13px;
+  cursor: pointer;
+  width: 100%;
+}
+
+h2, .h2 {
+  font-size: 18px;
 }
 p {
-  font-size: 10px;
+font-size: 10px;
 }
 
 @keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
- 
+0% { transform: translateX(0); }
+25% { transform: translateX(-5px); }
+50% { transform: translateX(5px); }
+75% { transform: translateX(-5px); }
+100% { transform: translateX(0); }
+
 }
 
 .input-error {
-  background-color: #f8d7da; 
-  border: 1px solid #eb0a21;
+background-color: #f8d7da; 
+border: 1px solid #eb0a21;
 }
 
 .shake {
-  animation: shake 0.5s ease-in-out;
+animation: shake 0.5s ease-in-out;
 }
+
