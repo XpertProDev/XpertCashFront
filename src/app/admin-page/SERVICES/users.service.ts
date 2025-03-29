@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Users } from '../MODELS/utilisateur.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, switchMap, throwError } from 'rxjs';
+import { Observable, switchMap, tap, throwError } from 'rxjs';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
 import { UserRequest } from '../MODELS/user-request';
 
@@ -11,6 +11,7 @@ import { UserRequest } from '../MODELS/user-request';
 
 export class UsersService {
   private apiUrl: string = "http://localhost:8080/api/auth";
+  public isLocked: boolean = false;
   
 
   constructor(private http: HttpClient) {}
@@ -34,10 +35,16 @@ export class UsersService {
   logoutUser(): void {
     localStorage.removeItem('authToken');  
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('isLocked');
+    localStorage.removeItem('user');
+  
+    this.isLocked = false;
   
     history.pushState(null, '', '/connexion');
     window.location.href = "/connexion";
   }
+  
+  
   
   //Information sur User
   getUserInfo(): Observable<UserRequest> {
@@ -47,31 +54,39 @@ export class UsersService {
       console.error('Aucun token trouvé');
       return throwError('Aucun token trouvé');
     }
+  
     const decodedToken = this.decodeJwt(token);
     const isTokenExpired = this.isTokenExpired(decodedToken);
     
     if (isTokenExpired) {
-      // rafraîchie Token
       return this.getNewTokenFromApi().pipe(
         switchMap((newTokenResponse) => {
-          // update le token dans localStorage
           localStorage.setItem('authToken', newTokenResponse.token);
-
+  
           const headers = new HttpHeaders({
             Authorization: `Bearer ${newTokenResponse.token}`
           });
-          
-          return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers });
+  
+          return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
+            tap(user => {
+              localStorage.setItem('user', JSON.stringify(user)); // ➡️ Stocker l'utilisateur ici
+            })
+          );
         })
       );
     } else {
-      // Si le token n'est pas expiré, on fait la requête normalement
       const headers = new HttpHeaders({
         Authorization: `Bearer ${token}`
       });
-      return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers });
+  
+      return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
+        tap(user => {
+          localStorage.setItem('user', JSON.stringify(user)); // ➡️ Stocker l'utilisateur ici
+        })
+      );
     }
   }
+  
     
   // Simpl dcodage JWT pour vérifier si le token est expiré
   decodeJwt(token: string): any {

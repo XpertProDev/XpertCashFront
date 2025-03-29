@@ -82,7 +82,7 @@ export class ProduitsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.getUserBoutiqueId();
+    // this.getUserBoutiqueId();
     this.getUserInfo();
     // this.loadProduits();
   }
@@ -273,7 +273,9 @@ export class ProduitsComponent implements OnInit {
   // Récupère l'ID de la boutique depuis le localStorage
   getUserBoutiqueId(): number | null {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user && user.boutiques && user.boutiques.length > 0) {
+    console.log("boutique", this.boutiques);
+    
+    if (user && user.boutiques && user?.boutiques?.length > 0) {
       return user.boutiques[0]?.id || null;
     } else {
       console.error('Aucune boutique trouvée pour cet utilisateur');
@@ -298,6 +300,11 @@ export class ProduitsComponent implements OnInit {
         if (!this.entrepriseId) {
           console.error('Aucun ID entreprise trouvé !');
           return;
+        }
+
+        if (this.selectedBoutique) {
+          const boutiqueId = this.selectedBoutique.id;
+          
         }
   
         if (this.boutiques.length > 0) {
@@ -442,13 +449,15 @@ loadAllProduits(): void {
   }
   
   public showSuspendedBoutiqueDialog(): void {
-    const dialogRef = this.dialog.open(SuspendedBoutiqueDialogComponent, {
+    this.dialog.open(SuspendedBoutiqueDialogComponent, {
       width: '400px',
-      disableClose: true
-    });
-
-    dialogRef.afterClosed().subscribe(() => {
-      this.selectedBoutique = this.previousSelectedBoutique;
+      disableClose: true,
+      data: { 
+        onClose: () => {
+          // Forcer la mise à jour de l'affichage
+          this.selectedBoutique = this.previousSelectedBoutique;
+        }
+      }
     });
   }
   
@@ -508,6 +517,7 @@ loadAllProduits(): void {
     const hue = (index * 137.508) % 360; // 137.508 pour une bonne répartition des couleurs
     return isActive ? '#ffffff' : `hsl(${hue}, 70%, 40%)`; // Texte blanc si actif, couleur vive sinon
   }
+
 
 
   
