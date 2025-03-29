@@ -1,6 +1,14 @@
 <div class="popup">
     <h2>Session Verrouillée 🔒</h2>
     <p>Veuillez entrer votre Code PIN pour continuer.</p>
-    <input type="password" [(ngModel)]="personalCode" placeholder="Entrez votre Code PIN">
+    <input
+      type="password"
+      [(ngModel)]="personalCode"
+      placeholder="Entrez votre Code PIN"
+      maxlength="4"
+      [class.shake]="isCodeWrong" 
+      [class.input-error]="isCodeWrong" 
+    />
     <button (click)="verifyCode()">Déverrouiller</button>
-</div>
+  </div>
+  
