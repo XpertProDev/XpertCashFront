@@ -27,9 +27,12 @@
   .popup input {
     margin-bottom: 10px;
     padding: 10px;
-    font-size: 16px;
+    font-size: 12px;
     width: 100%;
-    box-sizing: border-box;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+    text-align: center;
   }
   
   .popup button {
@@ -37,10 +40,32 @@
     color: white;
     border: none;
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: 13px;
     cursor: pointer;
     width: 100%;
   }
   
+  h2, .h2 {
+    font-size: 18px;
+}
+p {
+  font-size: 10px;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
  
-  
+}
+
+.input-error {
+  background-color: #f8d7da; 
+  border: 1px solid #eb0a21;
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}

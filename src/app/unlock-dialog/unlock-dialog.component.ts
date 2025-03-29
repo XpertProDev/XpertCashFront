@@ -17,6 +17,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 export class UnlockDialogComponent {
   @Input() isDialogOpen: boolean = false;
   personalCode = '';
+  isCodeWrong = false;
+
 
   constructor(
     public dialogRef: MatDialogRef<UnlockDialogComponent>,
@@ -24,8 +26,14 @@ export class UnlockDialogComponent {
   ) {}
 
   verifyCode() {
-    console.log("🔑 Code entré:", this.personalCode);
-    this.dialogRef.close(this.personalCode);
+    if (this.personalCode !== this.data.userPersonalCode) {
+      this.isCodeWrong = true;
+      setTimeout(() => {
+        this.isCodeWrong = false;
+      }, 500);
+    } else {
+      this.dialogRef.close(this.personalCode);
+    }
   }
 
   ngOnDestroy() {
