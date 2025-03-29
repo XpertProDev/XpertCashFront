@@ -1,13 +1,9 @@
-// Angular Import
 import { ChangeDetectorRef, Component, HostListener, OnInit, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
-
-// project import
 import { SpinnerComponent } from './theme/shared/components/spinner/spinner.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UnlockDialogComponent } from './unlock-dialog/unlock-dialog.component';
 import { CommonModule } from '@angular/common';
-
 
 @Component({
   selector: 'app-root',
