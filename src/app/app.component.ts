@@ -30,7 +30,7 @@ export class AppComponent implements OnInit {
     if (this.isLocked) return;
 
     clearTimeout(this.inactivityTimer);
-    this.inactivityTimer = setTimeout(() => this.lockScreen(), 30 * 1000);
+    this.inactivityTimer = setTimeout(() => this.lockScreen(), 1000 * 1000);
   }
 
   lockScreen() {

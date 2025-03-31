@@ -5,6 +5,7 @@ export interface ProduitFacture {
     quantite: number;
     total: number;
     codeGenerique: string;
+
   }
   
   export interface Facture {
@@ -16,6 +17,8 @@ export interface ProduitFacture {
     nomUtilisateur: string;
     telephoneUtilisateur: string;
     produits: ProduitFacture[];
+    codeFournisseur: string
+
   }
   
   // Ajoutez l'interface FactureWithDataSource ici

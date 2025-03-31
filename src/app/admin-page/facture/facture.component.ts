@@ -36,6 +36,8 @@ export interface PeriodicElement {
   quantiteAjoute: number;
   quantiteRetirer: number;
   stockApres: number;
+  codeFournisseur: string
+
 }
 
 // const ELEMENT_DATA: PeriodicElement[] = [
@@ -252,6 +254,7 @@ export class FactureComponent  implements AfterViewInit {
           this.factures = data.reverse().map(facture => {
             const produits = this.getFormattedProduits(facture);
             const totalSum = produits.reduce((acc, p) => acc + (p.total || 0), 0);
+
             
             return {
               ...facture,
@@ -260,6 +263,8 @@ export class FactureComponent  implements AfterViewInit {
             };
           }) as FactureWithDataSource[];
   
+        console.log('Facture récupérés:', this.factures);
+
           this.filteredFactures = [...this.factures];
           this.noFacturesAvailable = false;
         }
