@@ -34,7 +34,7 @@ export class AppComponent implements OnInit {
     if (this.isLocked) return;
 
     clearTimeout(this.inactivityTimer);
-    this.inactivityTimer = setTimeout(() => this.lockScreen(), 30 * 1000);
+    this.inactivityTimer = setTimeout(() => this.lockScreen(), 30 * 10000);
   }
 
   lockScreen() {
@@ -76,15 +76,22 @@ export class AppComponent implements OnInit {
         this.isLocked = false;
         this.isDialogOpen = false;
         localStorage.removeItem('isLocked');
-  
+      
         this.dialog.closeAll();
-  
+    
         console.log("isLocked:", this.isLocked);
       } else {
-        console.warn("ode incorrect, veuillez réessayer.");
-        setTimeout(() => this.lockScreen(), 100);
+        console.warn("⛔ Code incorrect, veuillez réessayer.");
+        
+        // Vérifie si isLocked est encore vrai avant de rouvrir le pop-up
+        setTimeout(() => {
+          if (this.isLocked) {
+            this.lockScreen();
+          }
+        }, 500);
       }
     });
+    
   }
   
 

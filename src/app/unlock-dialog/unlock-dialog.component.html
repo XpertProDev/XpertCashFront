@@ -8,6 +8,7 @@
       maxlength="4"
       [class.shake]="isCodeWrong" 
       [class.input-error]="isCodeWrong" 
+      (keydown.enter)="verifyCode()"
     />
     <button (click)="verifyCode()">Déverrouiller</button>
   </div>
