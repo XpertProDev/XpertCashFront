@@ -68,7 +68,7 @@ export class AddStockAjustementComponent {
 
   controlBoutique = new FormControl('');
   controlBoutiqueTransfert = new FormControl('');
-  streetsBoutique: { id: number, name: string }[] = []; 
+  streetsBoutique: { id: number, name: string, actif: boolean }[] = [];
   streetsBoutiqueTransfert: { id: number, name: string }[] = []; 
   filteredStreetsBoutique!: Observable<string[]>;
   filteredStreetsBoutiqueTransfert!: Observable<any[]>;
@@ -137,7 +137,9 @@ export class AddStockAjustementComponent {
         if (userInfo && userInfo.boutiques) {
           this.streetsBoutique = userInfo.boutiques.map((boutique: any) => ({
             id: boutique.id,
-            name: boutique.nomBoutique
+            name: boutique.nomBoutique,
+            // Non affiche boutique
+            actif: boutique.actif
           }));
           this.streetsBoutiqueTransfert = userInfo.boutiques.map((boutique: any) => ({
             id: boutique.id,
@@ -641,9 +643,19 @@ export class AddStockAjustementComponent {
     );
   }
 
+  /*
   private _filterBoutique(value: string): string[] {
     const filterValue = this._normalizeValue(value);
     return this.streetsBoutique.map(b => b.name).filter(street => this._normalizeValue(street).includes(filterValue));
+  }
+  */
+
+  private _filterBoutique(value: string): string[] {
+    const filterValue = this._normalizeValue(value);
+    return this.streetsBoutique
+      .filter(b => b.actif) // Ne garder que les boutiques actives
+      .map(b => b.name)
+      .filter(street => this._normalizeValue(street).includes(filterValue));
   }
 
   private _normalizeValue(value: string): string {
