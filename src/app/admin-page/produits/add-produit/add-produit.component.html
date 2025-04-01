@@ -34,46 +34,56 @@
                 </div> -->
                 <div class="double_input2">
                   <div class="champ_input">
-                      <input autocomplete="off" type="text" placeholder="Saisis le nom de boutique"
-                             class="input_focus" matInput [formControl]="controlBoutique" 
-                             [matAutocomplete]="autoBoutique" style="cursor: pointer;">
-                      <label for="boutiqueId" class="label">Boutique</label>
-                      <mat-autocomplete #autoBoutique="matAutocomplete" (optionSelected)="onBoutiqueSelected($event)" [displayWith]="displayFnBoutique">
-                        <!-- Ajouter l'option de sélection multiple -->
-                        <mat-option (click)="toggleBoutiqueSelectionPanel()" class="select-option">
-                            <div style="display: flex; align-items: center; color: #0672E4;">
-                                <i class="ri-checkbox-multiple-line"></i>
-                                <span style="margin-left: 8px;">Sélectionner des boutiques</span>
-                            </div>
-                        </mat-option>
-                        
-                        <mat-option *ngFor="let street of filteredStreetsBoutique | async" [value]="street">
-                            {{ street }}
-                        </mat-option>
+                    <input autocomplete="off" 
+                           type="text" 
+                           placeholder="Saisis le nom de boutique"
+                           class="input_focus" 
+                           matInput 
+                           [formControl]="controlBoutique" 
+                           (click)="toggleBoutiqueSelectionPanel()"
+                           style="cursor: pointer;">
+                    <label for="boutiqueId" class="label">Boutique</label>
+                  
+                    <!-- Commenté pour désactiver l'autocomplete -->
+                    <!--
+                    <mat-autocomplete #autoBoutique="matAutocomplete" 
+                                     (optionSelected)="onBoutiqueSelected($event)" 
+                                     [displayWith]="displayFnBoutique">
+                      <mat-option (click)="toggleBoutiqueSelectionPanel()" class="select-option">
+                        <div style="display: flex; align-items: center; color: #0672E4;">
+                          <i class="ri-checkbox-multiple-line"></i>
+                          <span style="margin-left: 8px;">Sélectionner des boutiques</span>
+                        </div>
+                      </mat-option>
+                      
+                      <mat-option *ngFor="let street of filteredStreetsBoutique | async" [value]="street">
+                        {{ street }}
+                      </mat-option>
                     </mat-autocomplete>
-                    
+                    -->
+                  
                     <!-- Panel de sélection des boutiques -->
                     <div class="boutique-selection-panel" *ngIf="showBoutiqueSelectionPanel">
-                        <div class="panel-header">
-                            <h4>Sélectionner des boutiques</h4>
-                            <button class="close-btn" (click)="toggleBoutiqueSelectionPanel()">&times;</button>
+                      <div class="panel-header">
+                        <h4>Sélectionner des boutiques</h4>
+                        <button class="close-btn" (click)="toggleBoutiqueSelectionPanel()">&times;</button>
+                      </div>
+                      <div class="panel-body">
+                        <div *ngFor="let boutique of boutiquesList" class="boutique-item">
+                          <label>
+                            <input type="checkbox" 
+                                   [(ngModel)]="boutique.selected"
+                                   (change)="updateSelectedBoutiques()"
+                                   [ngModelOptions]="{standalone: true}">
+                            {{ boutique.nomBoutique }}
+                          </label>
                         </div>
-                        <div class="panel-body">
-                            <div *ngFor="let boutique of boutiquesList" class="boutique-item">
-                                <label>
-                                    <input type="checkbox" 
-                                        [(ngModel)]="boutique.selected"
-                                        (change)="updateSelectedBoutiques()"
-                                        [ngModelOptions]="{standalone: true}">
-                                    {{ boutique.nomBoutique }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="panel-footer">
-                            <button class="btn-confirm" (click)="confirmBoutiqueSelection()">Confirmer</button>
-                        </div>
+                      </div>
+                      <div class="panel-footer">
+                        <button class="btn-confirm" (click)="confirmBoutiqueSelection()">Confirmer</button>
+                      </div>
                     </div>
-                  </div> 
+                  </div>
 
                   <div class="btn_add_categoryDiv2">
                     <button class="btn_add_category2" (click)="openPopupBoutique()">Créer une boutique</button>
