@@ -553,7 +553,7 @@
                                 <option *ngFor="let produit of tasks" [ngValue]="produit">
                                   {{ produit.nom }}
                                 </option>
-                              </select>
+                            </select>
                           </div>
                         </td>
                         <td>
@@ -603,8 +603,11 @@
                                 <mat-option 
                                   *ngFor="let boutique of filteredStreetsBoutiqueTransfert | async" 
                                   [value]="boutique"
-                                >
+                                  [disabled]="!boutique.actif">
                                   {{ boutique.name }}
+                                  <span *ngIf="!boutique.actif" style="color: #ff0000; margin-left: 8px;">
+                                    (Suspendue)
+                                  </span>
                                 </mat-option>
                               </mat-autocomplete>
                           </div>

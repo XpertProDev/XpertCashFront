@@ -69,7 +69,8 @@ export class AddStockAjustementComponent {
   controlBoutique = new FormControl('');
   controlBoutiqueTransfert = new FormControl('');
   streetsBoutique: { id: number, name: string, actif: boolean }[] = [];
-  streetsBoutiqueTransfert: { id: number, name: string }[] = []; 
+  streetsBoutiqueTransfert: { id: number, name: string, actif: boolean }[] = [];
+  // streetsBoutiqueTransfert: { id: number, name: string }[] = []; 
   filteredStreetsBoutique!: Observable<string[]>;
   filteredStreetsBoutiqueTransfert!: Observable<any[]>;
 
@@ -135,22 +136,24 @@ export class AddStockAjustementComponent {
     this.usersService.getUserInfo().subscribe(
       (userInfo) => {
         if (userInfo && userInfo.boutiques) {
-          this.streetsBoutique = userInfo.boutiques.map((boutique: any) => ({
-            id: boutique.id,
-            name: boutique.nomBoutique,
-            // Non affiche boutique
-            actif: boutique.actif
-          }));
-          this.streetsBoutiqueTransfert = userInfo.boutiques.map((boutique: any) => ({
-            id: boutique.id,
-            name: boutique.nomBoutique
-          }));
+          // Modification ici : ajout de la propriété actif
+          this.streetsBoutique = userInfo.boutiques
+            .filter((boutique: any) => boutique.actif) // Filtre les boutiques actives
+            .map((boutique: any) => ({
+              id: boutique.id,
+              name: boutique.nomBoutique,
+              actif: boutique.actif // Ajout de la propriété manquante
+            }));
 
+          // Ancien code gardé en commentaire :
+          // this.streetsBoutique = userInfo.boutiques.map((boutique: any) => ({
+          //   id: boutique.id,
+          //   name: boutique.nomBoutique
+          // }));
+
+          this.streetsBoutiqueTransfert = [...this.streetsBoutique];
           this.getFilteredStreetsBoutique();
           this.getFilteredStreetsBoutiqueTransfert();
-        } else {
-          console.error('Aucune boutique trouvée pour cet utilisateur');
-          this.boutiqueName = 'Aucune boutique';
         }
       },
       (error) => {
@@ -685,12 +688,24 @@ export class AddStockAjustementComponent {
   private _filterBoutiqueTransfert(value: string): any[] {
     if (typeof value === 'string') {
       const filterValue = this._normalizeValueTransfert(value);
-      return this.streetsBoutiqueTransfert.filter(b => 
-        this._normalizeValueTransfert(b.name).includes(filterValue)
-      );
+      return this.streetsBoutiqueTransfert
+        .filter(b => 
+          this._normalizeValueTransfert(b.name).includes(filterValue) &&
+          b.id !== this.boutiqueIdSelected // <-- Exclure la boutique source
+        );
     }
     return this.streetsBoutiqueTransfert;
   }
+
+  // private _filterBoutiqueTransfert(value: string): any[] {
+  //   if (typeof value === 'string') {
+  //     const filterValue = this._normalizeValueTransfert(value);
+  //     return this.streetsBoutiqueTransfert.filter(b => 
+  //       this._normalizeValueTransfert(b.name).includes(filterValue)
+  //     );
+  //   }
+  //   return this.streetsBoutiqueTransfert;
+  // }
 
   private _normalizeValueTransfert(value: string): string {
     return value.toLowerCase().replace(/\s/g, '');
