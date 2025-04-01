@@ -73,21 +73,21 @@
 }
 
 .card_permission_detail_boutique {
-    background-color: #ffffff;
-    box-shadow: rgba(0, 0, 0, 0.065) 0px 4px 12px;
-    border-radius: 10px;
-    padding: 20px 15px;
-    width: 100%;
-    position: relative;
-    transition: background 0.3s ease;
+  background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.065) 0px 4px 12px;
+  border-radius: 10px;
+  padding: 20px 15px;
+  width: 100%;
+  position: relative;
+  transition: background 0.3s ease;
 }
 
 .card_permission_detail_boutique_check {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  background-color: #ffffff;
+  background-color: #0672E4;
+  color: #ffffff;
   box-shadow: rgba(0, 0, 0, 0.065) 0px 4px 12px;
   border-radius: 10px;
   width: 100%;
@@ -159,6 +159,7 @@
     border-radius: 50%;
     opacity: 0;
     transform-origin: center center;
+    // color: #1c1c1c;
   }
   
   /* Hover */
@@ -596,8 +597,8 @@
 }
 
 #inpLock:checked + label {
-  // background: #00800009;
-  color: #ff0000;
+  background: #ff0000;
+  color: #c8c8c8;
   border-radius: 10px;
   font-weight: 400;
 }

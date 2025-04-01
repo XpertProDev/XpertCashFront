@@ -53,8 +53,8 @@
                 <!-- Le label englobe maintenant toute la carte -->
                 <label class="btn-lock" for="inpLock">
                     <div class="name_permission">
-                        Suspendre utilisateur
-                    </div>
+                        {{ user?.enabledLien ? 'Suspendre utilisateur' : 'Activer suspendre' }}
+                      </div>
                     
                     <div class="suspendre_check suspendre_check_cadre">
                         <svg width="19" height="30" viewBox="0 0 36 60">

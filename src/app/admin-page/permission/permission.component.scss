@@ -121,8 +121,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  background-color: #ffffff;
+  background-color: #ff0000;
   box-shadow: rgba(0, 0, 0, 0.065) 0px 4px 12px;
   border-radius: 10px;
   // padding: 20px 15px;
@@ -788,6 +787,7 @@
   /* Retirer les styles absolus précédents */
   position: static;
   background: transparent;
+  color: #fff;
 }
 
 .btn-lock svg {
@@ -832,7 +832,7 @@
 }
 
 #inpLock:checked + label {
-  background: #ff0000f6;
+  background: #0672E4;
   color: #ffffffd5;
   border-radius: 10px;
   font-weight: 400;
