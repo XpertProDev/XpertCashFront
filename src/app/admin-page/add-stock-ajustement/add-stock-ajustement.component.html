@@ -599,12 +599,17 @@
                                 [matAutocomplete]="autoBoutiqueTransfert"
                               >
                               <label for="boutiqueId" class="label">Boutique</label>
-                              <mat-autocomplete #autoBoutiqueTransfert="matAutocomplete" (optionSelected)="onBoutiqueSelectedTransfert($event)" [displayWith]="displayFnBoutiqueTransfert">
+                              <mat-autocomplete #autoBoutiqueTransfert="matAutocomplete" 
+                                              (optionSelected)="onBoutiqueSelectedTransfert($event)"
+                                              [displayWith]="displayFnBoutiqueTransfert">
                                 <mat-option 
                                   *ngFor="let boutique of filteredStreetsBoutiqueTransfert | async" 
                                   [value]="boutique"
-                                  [disabled]="!boutique.actif">
+                                  [disabled]="boutique.id === boutiqueIdSelected || !boutique.actif">
                                   {{ boutique.name }}
+                                  <span *ngIf="boutique.id === boutiqueIdSelected" style="color: #666; margin-left: 8px;">
+                                    (Déjà sélectionnée)
+                                  </span>
                                   <span *ngIf="!boutique.actif" style="color: #ff0000; margin-left: 8px;">
                                     (Suspendue)
                                   </span>

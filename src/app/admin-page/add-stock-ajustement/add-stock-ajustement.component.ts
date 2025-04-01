@@ -634,8 +634,9 @@ export class AddStockAjustementComponent {
     if (selectedBoutique) {
       this.boutiqueIdSelected = selectedBoutique.id;
       this.loadProduits(selectedBoutique.id);
-      this.pendingAdjustments = []; // Réinitialiser les ajustements
-      this.selectedProduct = null; // Réinitialiser la sélection
+      this.pendingAdjustments = [];
+      this.selectedProduct = null;
+      this.updateTransfertFilter(); // Force le recalcul du filtre
     }
   }
 
@@ -685,16 +686,24 @@ export class AddStockAjustementComponent {
     );
   }
 
-  private _filterBoutiqueTransfert(value: string): any[] {
-    if (typeof value === 'string') {
-      const filterValue = this._normalizeValueTransfert(value);
-      return this.streetsBoutiqueTransfert
-        .filter(b => 
-          this._normalizeValueTransfert(b.name).includes(filterValue) &&
-          b.id !== this.boutiqueIdSelected // <-- Exclure la boutique source
-        );
-    }
-    return this.streetsBoutiqueTransfert;
+  private _filterBoutiqueTransfert(value: string | any): any[] {
+    // Gérer le cas où value est un objet boutique
+    const searchValue = typeof value === 'string' ? value : value?.name || '';
+    
+    const filterValue = this._normalizeValueTransfert(searchValue);
+    
+    return this.streetsBoutiqueTransfert
+      .filter(b => 
+        this._normalizeValueTransfert(b.name).includes(filterValue) &&
+        b.id !== this.boutiqueIdSelected // Exclure la boutique source
+      );
+  }
+
+  // Cette méthode pour forcer le rafraîchissement
+  private updateTransfertFilter() {
+    const currentValue = this.controlBoutiqueTransfert.value;
+    this.controlBoutiqueTransfert.setValue('');
+    this.controlBoutiqueTransfert.setValue(currentValue);
   }
 
   // private _filterBoutiqueTransfert(value: string): any[] {
