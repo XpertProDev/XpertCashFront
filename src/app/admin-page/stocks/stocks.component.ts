@@ -19,6 +19,10 @@ import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
 import { ChangeDetectorRef } from '@angular/core';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
+import { MatDialog } from '@angular/material/dialog';
+import { SuspendedBoutiqueDialogComponent } from '../produits/suspended-boutique-dialog.component';
+
+
 @Component({
   selector: 'app-stocks',
   imports: [
@@ -74,6 +78,7 @@ export class StocksComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private usersService: UsersService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -345,13 +350,70 @@ export class StocksComponent implements OnInit {
   }
 
   // Ajoute cette méthode pour la sélection des boutiques
-  selectBoutique(boutique: any): void {
+  // selectBoutique(boutique: any): void {
+  //   this.selectedBoutique = boutique;
+  //   this.boutiqueName = boutique.nomBoutique;
+  //   this.addressBoutique = boutique.adresse;
+  //   this.loadProduits(boutique.id);
+  //   this.currentPage = 0; // Réinitialiser la pagination
+  // }
+
+  selectBoutique(boutique: any | null): void {
+    if (boutique && !boutique.actif) {
+      this.showSuspendedBoutiqueDialog();
+      return; // Ne pas changer la sélection si la boutique est désactivée
+    }
+  
     this.selectedBoutique = boutique;
-    this.boutiqueName = boutique.nomBoutique;
-    this.addressBoutique = boutique.adresse;
-    this.loadProduits(boutique.id);
-    this.currentPage = 0; // Réinitialiser la pagination
+  
+    if (boutique === null) {
+      // Charger tous les produits en stock de l'entreprise
+      this.loadAllProduits();
+    } else {
+      // Charger les produits pour la boutique sélectionnée
+      this.boutiqueName = boutique.nomBoutique;
+      this.addressBoutique = boutique.adresse;
+      this.loadProduits(boutique.id);
+    }
+    this.currentPage = 0;
   }
+
+  loadAllProduits(): void {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const entrepriseId = user.entrepriseId;
+    if (!entrepriseId) {
+      console.error('ID entreprise manquant');
+      return;
+    }
+  
+    // Adaptez cette requête selon votre service pour obtenir tous les produits de l'entreprise
+    this.produitService.getProduitsByEntrepriseId(entrepriseId).subscribe({
+      next: (produits: Produit[]) => {
+        this.tasks = produits
+          .filter(prod => prod.enStock)  // seulement les produits en stock
+          .map(prod => {
+            const hasPhoto = prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined';
+            const fullImageUrl = hasPhoto ? `${this.backendUrl}${prod.photo}` : '';
+            return {
+              ...prod,
+              photo: fullImageUrl ? fullImageUrl : this.generateLetterAvatar(prod.nom)
+            };
+          }).sort((a, b) => {
+            const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
+            const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
+            return dateB - dateA;
+          });
+  
+        this.dataSource.data = this.tasks;
+        if (this.paginator) {
+          this.dataSource.paginator = this.paginator;
+        }
+      },
+      error: (err) => console.error("Erreur lors de la récupération des produits", err),
+    });
+  }
+  
+  
 
   generateLetterAvatar(nom: string): string {
     const letter = nom ? nom.charAt(0).toUpperCase() : '?';
@@ -376,6 +438,20 @@ export class StocksComponent implements OnInit {
     const hue = (index * 137.508) % 360; // 137.508 pour une bonne répartition des couleurs
     return isActive ? '#ffffff' : `hsl(${hue}, 70%, 40%)`; // Texte blanc si actif, couleur vive sinon
   }
+
+  public showSuspendedBoutiqueDialog(): void {
+    this.dialog.open(SuspendedBoutiqueDialogComponent, {
+      width: '400px',
+      disableClose: true,
+      data: { 
+        onClose: () => {
+          // Vous pouvez ici remettre à null ou conserver la boutique précédemment sélectionnée
+          this.selectedBoutique = null;
+        }
+      }
+    });
+  }
+  
   
   
 }
