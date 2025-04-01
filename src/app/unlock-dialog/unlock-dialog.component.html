@@ -1,15 +1,23 @@
 <div class="popup">
-    <h2>Session Verrouillée 🔒</h2>
-    <p>Veuillez entrer votre Code PIN pour continuer.</p>
-    <input
-      type="password"
-      [(ngModel)]="personalCode"
-      placeholder="Entrez votre Code PIN"
-      maxlength="4"
-      [class.shake]="isCodeWrong" 
-      [class.input-error]="isCodeWrong" 
-      (keydown.enter)="verifyCode()"
-    />
-    <button (click)="verifyCode()">Déverrouiller</button>
-  </div>
+  <h2>Session Verrouillée 🔒</h2>
+  <p>Veuillez entrer votre Code PIN pour continuer.</p>
   
+  <div class="pin-container" [class.shake]="isCodeWrong">
+    <input type="password" maxlength="1" [(ngModel)]="pin[0]" #pin0 id="0"
+           (input)="goToNext(pin0, pin1)" 
+           (keydown)="handleBackspace($event, 0, pin0, pin1)" />
+
+    <input type="password" maxlength="1" [(ngModel)]="pin[1]" #pin1 id="1"
+           (input)="goToNext(pin1, pin2)" 
+           (keydown)="handleBackspace($event, 1, pin1, pin0)" />
+
+    <input type="password" maxlength="1" [(ngModel)]="pin[2]" #pin2 id="2"
+           (input)="goToNext(pin2, pin3)" 
+           (keydown)="handleBackspace($event, 2, pin2, pin1)" />
+
+    <input type="password" maxlength="1" [(ngModel)]="pin[3]" #pin3 id="3"
+           (input)="verifyCode()" 
+           (keydown)="handleBackspace($event, 3, pin3, pin2)" />
+</div>
+  <button (click)="verifyCode()">Déverrouiller</button>
+</div>

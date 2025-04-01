@@ -1,13 +1,9 @@
-// Angular Import
 import { ChangeDetectorRef, Component, HostListener, OnInit, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
-
-// project import
 import { SpinnerComponent } from './theme/shared/components/spinner/spinner.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UnlockDialogComponent } from './unlock-dialog/unlock-dialog.component';
 import { CommonModule } from '@angular/common';
-
 
 @Component({
   selector: 'app-root',
@@ -34,7 +30,7 @@ export class AppComponent implements OnInit {
     if (this.isLocked) return;
 
     clearTimeout(this.inactivityTimer);
-    this.inactivityTimer = setTimeout(() => this.lockScreen(), 30 * 10000);
+    this.inactivityTimer = setTimeout(() => this.lockScreen(), 30 * 1000);
   }
 
   lockScreen() {
