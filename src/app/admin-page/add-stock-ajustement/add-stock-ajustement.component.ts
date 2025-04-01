@@ -63,6 +63,7 @@ export class AddStockAjustementComponent {
 
   // Description Global
   descriptionGlobal: string = '';
+  codeFournisseurGlobal: string = '';
   boutiqueIdSelected: number | null = null; 
 
   controlBoutique = new FormControl('');
@@ -204,6 +205,7 @@ export class AddStockAjustementComponent {
   quantiteRetirer: number | null = null; 
   descriptionAjout: string = '';
   descriptionRetire: string = '';
+  codeFournisseur: string = '';
   
   // Ajoutez une variable pour contrôler la visibilité
   // isProductAdded: boolean = false;
@@ -304,6 +306,8 @@ export class AddStockAjustementComponent {
   getAjusteForm() {
     this.ajusteForm = this.fb.group({
       descriptionGlobal: ['', [Validators.minLength(2), Validators.maxLength(100)]],
+      codeFournisseur: ['', [Validators.minLength(4), Validators.maxLength(100)]],
+
     });
   }
 
@@ -337,14 +341,16 @@ export class AddStockAjustementComponent {
         stockActuel: this.selectedProduct.quantite,
         stockApres: this.stockApres,
         prixVente: this.selectedProduct.prixVente,
-        descriptionAjout: this.descriptionAjout // Ajout de la description ici
+        descriptionAjout: this.descriptionAjout ,
+        codeFournisseur: this.codeFournisseur
       }
     ];
-  
+
     // Réinitialisation
     this.selectedProduct = null;
     this.quantiteAjoute = null;
     this.descriptionAjout = ''; // Réinitialiser le champ de description si besoin
+    this.codeFournisseur
   }
 
   // Méthode pour ajouter un ajustement à la liste
@@ -455,6 +461,7 @@ export class AddStockAjustementComponent {
           stockActuel: this.selectedProduct.quantite,
           stockApres: this.selectedProduct.quantite + this.quantiteAjoute,
           prixVente: this.selectedProduct.prixVente
+          
         });
       }
     }
@@ -466,10 +473,13 @@ export class AddStockAjustementComponent {
       }, {} as { [key: string]: number });
   
       const descriptionGlobal = this.ajusteForm.value.descriptionGlobal || '';
+      const codeFournisseur = this.ajusteForm.value.codeFournisseur || '';
+
   
       this.stockService.ajouterStock({
         produitsQuantites: produitsQuantites,
-        description: descriptionGlobal
+        codeFournisseur: codeFournisseur,
+
       }).subscribe({
         next: (response) => {
           // Mise à jour locale

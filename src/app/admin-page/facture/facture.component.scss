@@ -53,8 +53,13 @@ mat-expansion-panel {
 /////////// title_facture
 
 .title_facture {
-    font-size: 14px;
+    font-size: 13px;
+    gap: 1px;
 }
+
+
+
+
 
 .mat-expansion-panel-header {
     height: 60px;
@@ -77,6 +82,11 @@ mat-expansion-panel {
     font-size: 13px;
 }
 
+.Facture {
+    color: #000000;
+    font-size: 13px;
+}
+
 .title_facture_info {
     color: #000; 
     padding-left: 6px; 
@@ -88,6 +98,7 @@ mat-expansion-panel {
 .title {
     margin-bottom: 20px;
     font-size: 18px;
+    gap: 5px;
 }
 
 .title h3 {
@@ -96,6 +107,13 @@ mat-expansion-panel {
 }
 
 .title_facture_code {
+    color: #0672E4; 
+    padding-left: 5px; 
+    letter-spacing: 1px;
+    font-weight: 500;
+    font-size: 11px;
+}
+.title_facture_codeFournisseur {
     color: #0672E4; 
     padding-left: 5px; 
     letter-spacing: 1px;
@@ -292,7 +310,7 @@ table {
 .no-facture-message {
     text-align: center;
     padding: 40px;
-    font-size: 18px;
+    font-size: 13px;
     color: #666;
     background-color: #f8f9fa;
     border-radius: 8px;

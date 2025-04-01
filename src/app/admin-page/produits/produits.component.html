@@ -89,7 +89,7 @@
           </div>
         </td>
         <!-- <div> {{ product | json }}</div> -->
-        <td [innerHTML]="highlightMatch(product.nom)"></td>
+        <td [innerHTML]="highlightMatch(product.nom)" ></td>
         <td class="description-cell" (mouseover)="showDescription = true" (mouseout)="showDescription = false">
           {{ product.description ? (product.description | slice:0:20) + (product.description.length > 20 ? '...' : '') : 'Non description' }}
           <div class="description-hover" *ngIf="showDescription">{{ product.description || 'Non description' }}</div>
