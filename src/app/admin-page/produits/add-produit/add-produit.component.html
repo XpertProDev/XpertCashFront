@@ -11,7 +11,7 @@
 
     <div class="modal-body">
 
-      <form class="container_formulaire" [formGroup]="ajouteProduitForm" (ngSubmit)="onSubmit()">
+      <form class="container_formulaire" [formGroup]="ajouteProduitForm">
 
         <!-- Titre d'ajout de produits  -->
         <div class="Title">
@@ -306,7 +306,7 @@
                 </div>
 
                 <div class="btn_ajouter">
-                  <button class="btn_save">Sauvegarder</button>
+                  <button class="btn_save" (click)="onSubmit()">Sauvegarder</button>
                 </div>
                 
               </div>
