@@ -153,11 +153,8 @@ export class AddProduitComponent {
 
   boutiquesList: any[] = [];
 
-  // Propriétés pour la popup
-  // showPopup: boolean = false;
-  // showPopup2: boolean = false;
-  // showPopupCategory: boolean = false;
-  // showPopupCategory2: boolean = false;
+  showPopupCategory: boolean = false;
+  showPopupUnit: boolean = false;
   popupTitle: string = '';
   popupMessage: string = '';
   popupImage: string = '';
@@ -184,6 +181,29 @@ export class AddProduitComponent {
     private usersService: UsersService,
     
   ) {}
+
+  // Méthodes d'ouverture/fermeture des popups
+  openPopupCategory(): void {
+    this.showPopupCategory = true;
+    this.ajouteCategoryForm.reset();
+    this.errorMessageCategory = '';
+    this.messageAPI = '';
+  }
+
+  closePopupCategory(): void {
+    this.showPopupCategory = false;
+  }
+
+  openPopupUnit(): void {
+    this.showPopupUnit = true;
+    this.ajouteUniteForm.reset();
+    this.errorMessageUnity = '';
+    this.messageAPI = '';
+  }
+
+  closePopupUnit(): void {
+    this.showPopupUnit = false;
+  }
 
   onToggleChange(event: Event) {
     // event.target permet d’accéder au checkbox
@@ -452,18 +472,12 @@ export class AddProduitComponent {
 
   // Lorsque l'utilisateur clique sur "Créer" pour une catégorie
   onCreateCategoryClick() {
-    this.showCategoryCreation = true;
-    this.showUniteCreation = false; 
-    // this.ajouteUniteForm.get('unityName')!.setValue('');
-    this.ajouteCategoryForm.get('categoryName')!.setValue('');
+    this.openPopupCategory();
   }
 
   // Lorsque l'utilisateur clique sur "Créer" pour une unité
   onCreateUniteClick() {
-    this.showUniteCreation = true;
-    this.showCategoryCreation = false;
-    this.ajouteUniteForm.get('unityName')!.setValue('');
-    // this.ajouteCategoryForm.get('categoryName')!.setValue('');
+    this.openPopupUnit();
   }
 
   // Méthodes pour annuler la création
@@ -484,6 +498,8 @@ export class AddProduitComponent {
         if (response && response.id) {
           // Réinitialiser le formulaire
           this.ajouteCategoryForm.get('categoryName')!.setValue('');
+
+          this.closePopupCategory();
 
           // Créer le nouvel objet catégorie
           const newCategory: Categorie = { 
@@ -542,6 +558,8 @@ export class AddProduitComponent {
         if (response && response.id) {
           // Réinitialiser le formulaire
           this.ajouteUniteForm.get('unityName')!.setValue('');
+
+          this.closePopupUnit();
 
           // Créer la nouvelle unité
           const newUnity: UniteMesure = { 

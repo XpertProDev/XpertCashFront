@@ -335,96 +335,13 @@
     </div>
 
     <!-- Cadre ou on cree  -->
-    <div class="ajout_bool_form">
-
-      <!-- Pour cree un category -->
-      <div *ngIf="showCategoryCreation" class="info_titre_input ajouter_cadre_cree_c_u">
-        <h4>Créer un catégorie</h4>
-        <!-- Input de nom de catégorie -->
-        <form [formGroup]="ajouteCategoryForm">
-          <div class="champ_input champ_input_Categorie" style="margin-top: 15px;">
-            <input autocomplete="off" formControlName="categoryName" type="text" class="input_focus input_focus_cree_cate" required id="categoryName" name="categoryName" placeholder="Saisis le nom de catégorie">
-            <label for="categoryName" class="label labelColor">Nom catégorie</label>
-            <!-- Message d'erreur dynamique -->
-            <div *ngIf="c['categoryName'].touched && c['categoryName'].invalid" class="error-message">
-              <!-- <span *ngIf="c['categoryName'].errors?.['required']">Le nom de la catégorie est obligatoire.</span> -->
-              <span *ngIf="c['categoryName'].errors?.['minlength']">Le nom doit avoir au moins 3 caractères.</span>
-              <span *ngIf="c['categoryName'].errors?.['maxlength']">Le nom ne doit pas dépasser 20 caractères.</span>
-            </div>
-          </div>
-                          
-          <!-- Message d'erreur global -->
-           <!-- Affichage du message d'erreur dans le formulaire -->
-          <!-- <div *ngIf="errorMessageCategory" class="error-message-category">
-            {{ errorMessageCategory }}
-          </div> -->
-
-          <div *ngIf="errorMessage" class="error-message-category">
-            {{ errorMessageCategory }}
-          </div>
-
-          <div class="errorAPI" *ngIf="messageAPI">
-            <img [src]="apiMessageType === 'success' ? 'assets/img/succcccc.png' : 'assets/img/error.png'" alt="Message API">
-            <span>{{ messageAPI }}</span>
-          </div>                         
-              
-          <div class="btn-c-s">
-            <!-- Bouton Annuler -->
-            <div class="btn_cancel_category">
-              <button class="btn_c_category" (click)="cancelCategoryCreation()">Annuler</button>
-            </div>
-            <!-- Bouton Ajouter -->
-            <div class="btn_save_category">
-              <button type="submit" class="btn_s_category" (click)="submitFormCategory()">Ajouter</button>
-            </div>
-          </div>
-        </form>
-
-      </div>
-      
-     <!-- Pour cree un category -->
-     <div *ngIf="showUniteCreation" class="info_titre_input ajouter_cadre_cree_c_u">
-      <h4>Créer un unité</h4>
-      <form [formGroup]="ajouteUniteForm">
-        <div class="champ_input" style="margin-top: 15px;">
-          <input autocomplete="off" formControlName="unityName" type="text" class="input_focus input_focus_cree_cate" required id="unityName" name="unityName" placeholder="Saisis le nom de unité">
-          <label for="unityName" class="label labelColor">Nom unité</label>
-          <!-- Message d'erreur dynamique -->
-          <div *ngIf="u['unityName'].touched && u['unityName'].invalid" class="error-message">
-            <!-- <span *ngIf="u['unityName'].errors?.['required']">Le nom de la unité est obligatoire.</span> -->
-            <span *ngIf="u['unityName'].errors?.['minlength']">Le nom doit avoir au moins 2 caractères.</span>
-            <span *ngIf="u['unityName'].errors?.['maxlength']">Le nom ne doit pas dépasser 20 caractères.</span>
-          </div>
-        </div>
-
-        <div *ngIf="errorMessage" class="error-message-category">
-          {{ errorMessageUnity }}
-        </div>
-
-        <div class="errorAPI" *ngIf="messageAPI">
-          <img [src]="apiMessageType === 'success' ? 'assets/img/succcccc.png' : 'assets/img/error.png'" alt="Message API">
-          <span>{{ messageAPI }}</span>
-        </div>        
-
-
-        <div class="btn-c-s">
-          <div class="btn_cancel_category">
-            <button class="btn_c_category" (click)="cancelUniteCreation()">Annuler</button>
-          </div>
-          <div class="btn_save_category">
-            <button type="submit" class="btn_s_category" (click)="submitFormUnity()">Ajouter</button>
-          </div>
-        </div>
-      </form>
-    </div>    
-
-  </div>
+    
 
 </div>
 </div>
 
  <!-- Popup overlay -->
- <div class="popup-overlay" *ngIf="showPopupBoutique">
+<div class="popup-overlay" *ngIf="showPopupBoutique">
   <div class="popup-content">
       <div class="popup-headerBoutique">
           <h4>Ajouter une boutique</h4>
@@ -490,5 +407,89 @@
             </button>
         </div>
       </form>
+  </div>
+</div>
+
+<!-- Popup pour créer une catégorie -->
+<div class="popup-overlay" *ngIf="showPopupCategory">
+  <div class="popup-content">
+    <div class="popup-headerBoutique">
+      <h4>Créer une catégorie</h4>
+      <button class="close-btn" (click)="closePopupCategory()">&times;</button>
+    </div>
+    <form [formGroup]="ajouteCategoryForm">
+      <div class="popup-body">
+        <div class="champ_input" style="margin-top: 15px;">
+          <input autocomplete="off" formControlName="categoryName" type="text" 
+                 class="input_focus input_focus_cree_cate" required id="categoryName" 
+                 name="categoryName" placeholder="Saisis le nom de catégorie">
+          <label for="categoryName" class="label labelColor">Nom catégorie</label>
+          <div *ngIf="c['categoryName'].touched && c['categoryName'].invalid" class="error-message">
+            <span *ngIf="c['categoryName'].errors?.['minlength']">Le nom doit avoir au moins 3 caractères.</span>
+            <span *ngIf="c['categoryName'].errors?.['maxlength']">Le nom ne doit pas dépasser 20 caractères.</span>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessageCategory" class="error-message-category">
+          {{ errorMessageCategory }}
+        </div>
+
+        <div class="errorAPI" *ngIf="messageAPI">
+          <img [src]="apiMessageType === 'success' ? 'assets/img/succcccc.png' : 'assets/img/error.png'" alt="Message API">
+          <span>{{ messageAPI }}</span>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopupCategory()">Annuler</button>
+        <button class="btn-submit" 
+                [disabled]="ajouteCategoryForm.invalid" 
+                [style.backgroundColor]="ajouteCategoryForm.valid ? '#0672E4' : '#0671e434'"
+                (click)="submitFormCategory()">
+          Ajouter
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Popup pour créer une unité -->
+<div class="popup-overlay" *ngIf="showPopupUnit">
+  <div class="popup-content">
+    <div class="popup-headerBoutique">
+      <h4>Créer une unité</h4>
+      <button class="close-btn" (click)="closePopupUnit()">&times;</button>
+    </div>
+    <form [formGroup]="ajouteUniteForm">
+      <div class="popup-body">
+        <div class="champ_input" style="margin-top: 15px;">
+          <input autocomplete="off" formControlName="unityName" type="text" 
+                 class="input_focus input_focus_cree_cate" required id="unityName" 
+                 name="unityName" placeholder="Saisis le nom de unité">
+          <label for="unityName" class="label labelColor">Nom unité</label>
+          <div *ngIf="u['unityName'].touched && u['unityName'].invalid" class="error-message">
+            <span *ngIf="u['unityName'].errors?.['minlength']">Le nom doit avoir au moins 2 caractères.</span>
+            <span *ngIf="u['unityName'].errors?.['maxlength']">Le nom ne doit pas dépasser 20 caractères.</span>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessageUnity" class="error-message-category">
+          {{ errorMessageUnity }}
+        </div>
+
+        <div class="errorAPI" *ngIf="messageAPI">
+          <img [src]="apiMessageType === 'success' ? 'assets/img/succcccc.png' : 'assets/img/error.png'" alt="Message API">
+          <span>{{ messageAPI }}</span>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopupUnit()">Annuler</button>
+        <button class="btn-submit" 
+                [disabled]="ajouteUniteForm.invalid" 
+                [style.backgroundColor]="ajouteUniteForm.valid ? '#0672E4' : '#0671e434'"
+                (click)="submitFormUnity()">
+          Ajouter
+        </button>
+      </div>
+    </form>
   </div>
 </div>
