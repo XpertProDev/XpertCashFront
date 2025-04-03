@@ -40,7 +40,7 @@
             <p 
               [class.name_boutique_active]="boutique.id === selectedBoutique?.id && boutique.actif"
               [class.suspended-boutique]="!boutique.actif"
-              [style.color]="boutique.actif ? getBoutiqueTextColor(i, boutique.id === selectedBoutique?.id) : '#999'"
+              [style.color]="boutique.actif"
               (click)="boutique.actif ? selectBoutique(boutique) : showSuspendedBoutiqueDialog()">
               {{ boutique.nomBoutique }}
               <i *ngIf="!boutique.actif" class="ri-error-warning-line warning-icon"></i>

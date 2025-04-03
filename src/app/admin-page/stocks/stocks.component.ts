@@ -433,11 +433,12 @@ export class StocksComponent implements OnInit {
   }
 
   // Ajoutez cette méthode dans la classe ProduitsComponent
-  getBoutiqueTextColor(index: number, isActive: boolean): string {
-    // Génère des couleurs différentes selon l'index
-    const hue = (index * 137.508) % 360; // 137.508 pour une bonne répartition des couleurs
-    return isActive ? '#ffffff' : `hsl(${hue}, 70%, 40%)`; // Texte blanc si actif, couleur vive sinon
-  }
+  // getBoutiqueTextColor(index: number, isActive: boolean): string {
+  //   // Génère des couleurs différentes selon l'index
+  //   const hue = (index * 137.508) % 360; // 137.508 pour une bonne répartition des couleurs
+  //   return isActive ? '#ffffff' : `hsl(${hue}, 70%, 40%)`; // Texte blanc si actif, couleur vive sinon
+  // }
+  //  ? getBoutiqueTextColor(i, boutique.id === selectedBoutique?.id) : '#999'
 
   public showSuspendedBoutiqueDialog(): void {
     this.dialog.open(SuspendedBoutiqueDialogComponent, {
