@@ -82,6 +82,14 @@ export const NavigationItems: NavigationItem[] = [
         icon: 'feather icon-briefcase'
       },
       {
+        id: 'comptabilite',
+        title: 'Comptabilite',
+        type: 'item',
+        url: '/comptabilite',
+        classes: 'nav-item',
+        icon: 'feather icon-clipboard'
+      },
+      {
         id: 'facture',
         title: 'Factures',
         type: 'item',
