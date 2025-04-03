@@ -1017,3 +1017,48 @@ option[disabled] {
   color: #999;
   font-style: italic;
 }
+
+.option-with-icon .option-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-with-icon .option-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.container_name_icon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  // position: relative;
+}
+
+.option_icon_div {
+  position: absolute;
+  right: 0;
+  top: 16px;
+  // left: 770px;
+}
+
+.container_name_icon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.option_icon_div {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.option-icon {
+  color: #666;
+  font-size: 18px;
+}

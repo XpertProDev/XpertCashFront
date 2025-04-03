@@ -19,6 +19,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Transfert } from '../MODELS/tranfert-model';
 import { TransfertService } from '../SERVICES/transfert-service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-add-stock-ajustement',
@@ -29,6 +30,7 @@ import { TransfertService } from '../SERVICES/transfert-service';
     CustomNumberPipe,
     ReactiveFormsModule,
     MatAutocompleteModule,
+    MatIconModule,
   ],
   templateUrl: './add-stock-ajustement.component.html',
   styleUrl: './add-stock-ajustement.component.scss'

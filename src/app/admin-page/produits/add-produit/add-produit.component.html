@@ -118,7 +118,16 @@
                       <label for="categorieId" class="label labelCategory">Catégorie</label>
                       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
                         <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
-                          {{ option.nom }}
+                          <div class="container_name_icon">
+                            <div class="option-content">
+                              {{ option.nom }}
+                            </div>
+                        
+                            <!-- Suppression totale de la logique conditionnelle -->
+                            <div class="option_icon_div" *ngIf="myControl.value?.id !== option.id">
+                              <mat-icon class="option-icon">keyboard_arrow_right</mat-icon>
+                            </div>
+                          </div>
                         </mat-option>
                       </mat-autocomplete>
                       

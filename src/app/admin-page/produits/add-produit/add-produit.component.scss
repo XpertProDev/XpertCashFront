@@ -908,13 +908,14 @@ input:checked + .slider:before {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  position: relative;
+  // position: relative;
 }
 
 .option_icon_div {
   position: absolute;
-  left: 770px;
-  top: 1px;
+  right: 0;
+  top: 16px;
+  // left: 770px;
 }
 
 .container_name_icon {
@@ -927,15 +928,10 @@ input:checked + .slider:before {
 .option_icon_div {
   display: flex;
   align-items: center;
-  margin-left: auto; /* Pousse l'icône vers la droite */
-}
-
-.check-icon {
-  color: #4CAF50; /* Vert pour le check */
-  font-size: 25px;
+  margin-left: 20px; 
 }
 
 .option-icon {
-  color: #666; /* Gris pour la flèche */
+  color: #666;
   font-size: 18px;
 }
