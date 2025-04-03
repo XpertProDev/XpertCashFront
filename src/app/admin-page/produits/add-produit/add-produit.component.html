@@ -167,8 +167,18 @@
                                     (optionSelected)="onUniteSelected($event)" 
                                     [displayWith]="displayFnUnite">
                       <mat-option *ngFor="let option of filteredNomUnite | async" [value]="option">
-                        {{ option.nom }}
+                        <div class="container_name_icon">
+                          <div class="option-content">
+                            {{ option.nom }}
+                          </div>
+                      
+                          <!-- Suppression totale de la logique conditionnelle -->
+                          <div class="option_icon_div" *ngIf="uniteControl.value?.id !== option.id">
+                            <mat-icon class="option-icon">keyboard_arrow_right</mat-icon>
+                          </div>
+                        </div>
                       </mat-option>
+                    
                     </mat-autocomplete>
                     
                   </div>
@@ -176,7 +186,6 @@
                     <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
                   </div>
                 </div>
-
                 
               </div>
             </div>

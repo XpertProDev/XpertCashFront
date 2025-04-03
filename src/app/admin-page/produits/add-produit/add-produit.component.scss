@@ -890,3 +890,52 @@ input:checked + .slider:before {
   font-family: monospace; 
   // letter-spacing: 0.5px;
 }
+
+.option-with-icon .option-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-with-icon .option-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.container_name_icon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.option_icon_div {
+  position: absolute;
+  left: 770px;
+  top: 1px;
+}
+
+.container_name_icon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.option_icon_div {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Pousse l'icône vers la droite */
+}
+
+.check-icon {
+  color: #4CAF50; /* Vert pour le check */
+  font-size: 25px;
+}
+
+.option-icon {
+  color: #666; /* Gris pour la flèche */
+  font-size: 18px;
+}

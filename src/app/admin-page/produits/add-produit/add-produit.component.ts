@@ -14,6 +14,7 @@ import { UsersService } from '../../SERVICES/users.service';
 import imageCompression from 'browser-image-compression';
 import { NgxBarcode6Module } from 'ngx-barcode6';
 import { ProduitService } from '../../SERVICES/produit.service';
+import { MatIconModule } from '@angular/material/icon';
 
 // export interface CategorySelect {
 //   name: string;
@@ -31,9 +32,8 @@ import { ProduitService } from '../../SERVICES/produit.service';
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
-    // MatFormFieldModule,
-    // MatInputModule,
-    NgxBarcode6Module
+    NgxBarcode6Module,
+    MatIconModule
   ],
   templateUrl: './add-produit.component.html',
   styleUrl: './add-produit.component.scss'
