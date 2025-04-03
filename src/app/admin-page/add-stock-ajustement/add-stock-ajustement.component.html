@@ -40,7 +40,16 @@
                       <label for="boutiqueId" class="label">Boutique</label>
                       <mat-autocomplete #autoBoutique="matAutocomplete" (optionSelected)="onBoutiqueSelected($event)" [displayWith]="displayFnBoutique">
                         <mat-option *ngFor="let street of filteredStreetsBoutique | async" [value]="street">
-                          {{ street }}
+                          <div class="container_name_icon">
+                            <div class="option-content">
+                              {{ street }}
+                            </div>
+                        
+                            <!-- Icône de flèche permanente -->
+                            <div class="option_icon_div" *ngIf="controlBoutique.value !== street">
+                              <mat-icon class="option-icon">keyboard_arrow_right</mat-icon>
+                            </div>
+                          </div>
                         </mat-option>
                       </mat-autocomplete>
                   </div>

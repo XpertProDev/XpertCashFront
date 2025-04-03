@@ -205,6 +205,13 @@ const routes: Routes = [
         canActivate: [authGuard]
       },
 
+      // La routing de Comptabilite
+      {
+        path: 'comptabilite',
+        loadComponent: () => import('./admin-page/comptabilite/comptabilite.component').then(m => m.ComptabiliteComponent),
+        canActivate: [authGuard]
+      },
+
     ]
   }
 ];

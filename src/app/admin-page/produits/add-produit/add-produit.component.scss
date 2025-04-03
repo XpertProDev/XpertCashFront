@@ -873,3 +873,65 @@ input:checked + .slider:before {
 //       background-color: #e0e0e0;
 //   }
 // }
+
+.two_input {
+  position: relative;
+}
+.nombreDevise {
+  position: absolute;
+  bottom: -20px;
+  right: 10px;
+  transition: opacity 0.3s ease;
+}
+
+.nombreDevise p {
+  font-size: 11px;
+  margin: 0;
+  font-family: monospace; 
+  // letter-spacing: 0.5px;
+}
+
+.option-with-icon .option-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-with-icon .option-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.container_name_icon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  // position: relative;
+}
+
+.option_icon_div {
+  position: absolute;
+  right: 0;
+  top: 16px;
+  // left: 770px;
+}
+
+.container_name_icon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.option_icon_div {
+  display: flex;
+  align-items: center;
+  margin-left: 20px; 
+}
+
+.option-icon {
+  color: #666;
+  font-size: 18px;
+}

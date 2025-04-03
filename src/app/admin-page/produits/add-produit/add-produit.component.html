@@ -118,7 +118,16 @@
                       <label for="categorieId" class="label labelCategory">Catégorie</label>
                       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
                         <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
-                          {{ option.nom }}
+                          <div class="container_name_icon">
+                            <div class="option-content">
+                              {{ option.nom }}
+                            </div>
+                        
+                            <!-- Suppression totale de la logique conditionnelle -->
+                            <div class="option_icon_div" *ngIf="myControl.value?.id !== option.id">
+                              <mat-icon class="option-icon">keyboard_arrow_right</mat-icon>
+                            </div>
+                          </div>
                         </mat-option>
                       </mat-autocomplete>
                       
@@ -133,8 +142,11 @@
                 <div class="double_input_grid">
                   <!-- Input de nom produits  -->
                   <div class="champ_input champ_input2">
-                    <input autocomplete="off" formControlName="prixVente" type="number" class="input_focus " required id="prixVente" name="prixVente" placeholder="Saisis le nom de magasin">
+                    <input autocomplete="off" formControlName="prixVente" type="number" class="input_focus " required id="prixVente" name="prixVente" placeholder="Saisis le nom de magasin" (input)="formatPrixVente()">
                     <label for="prixVente" class="label labelColor">Prix de vente</label>
+                    <div class="nombreDevise" *ngIf="formattedPrixVente">
+                      <p>{{ formattedPrixVente }}</p>
+                    </div>
                     <div *ngIf="f['prixVente'].touched && f['prixVente'].invalid" class="error-message">
                       Le prix de vente est vide.
                     </div>
@@ -142,8 +154,11 @@
                   
                   <!-- Input de prixAchat  -->
                   <div class="champ_input">
-                    <input autocomplete="off" formControlName="prixAchat" type="number" class="input_focus " required id="prixAchat" name="prixAchat" placeholder="Saisis le prix d'achat">
+                    <input autocomplete="off" formControlName="prixAchat" type="number" class="input_focus " required id="prixAchat" name="prixAchat" placeholder="Saisis le prix d'achat" (input)="formatCoutProduit()">
                     <label for="prixAchat" class="label labelColor">Coût du produit</label>
+                    <div class="nombreDevise" *ngIf="formattedCoutProduit">
+                      <p>{{ formattedCoutProduit }}</p>
+                    </div>
                     <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
                       Le coût du produit est vide.
                     </div>
@@ -151,26 +166,37 @@
 
                 </div>
 
-                <div class="double_input2">
-                  <div class="champ_input">
-                    <input autocomplete="off" type="text" placeholder="Saisis l'unité de mesure" 
-                           matInput [formControl]="uniteControl" class="input_focus"
-                           [matAutocomplete]="autoUnite" style="cursor: pointer;">
-                    <label for="uniteId" class="label labelCategory">Unité de mesure</label>
-                    <mat-autocomplete #autoUnite="matAutocomplete" 
-                                    (optionSelected)="onUniteSelected($event)" 
-                                    [displayWith]="displayFnUnite">
-                      <mat-option *ngFor="let option of filteredNomUnite | async" [value]="option">
-                        {{ option.nom }}
-                      </mat-option>
-                    </mat-autocomplete>
-                    
-                  </div>
-                  <div class="btn_add_categoryDiv2">
-                    <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
+                <div class="double_input_grid">
+                  <div class="double_input2">
+                    <div class="champ_input champ_input2">
+                      <input autocomplete="off" type="text" placeholder="Saisis l'unité de mesure" 
+                            matInput [formControl]="uniteControl" class="input_focus"
+                            [matAutocomplete]="autoUnite" style="cursor: pointer;">
+                      <label for="uniteId" class="label labelCategory">Unité de mesure</label>
+                      <mat-autocomplete #autoUnite="matAutocomplete" 
+                                      (optionSelected)="onUniteSelected($event)" 
+                                      [displayWith]="displayFnUnite">
+                        <mat-option *ngFor="let option of filteredNomUnite | async" [value]="option">
+                          <div class="container_name_icon">
+                            <div class="option-content">
+                              {{ option.nom }}
+                            </div>
+                        
+                            <!-- Suppression totale de la logique conditionnelle -->
+                            <div class="option_icon_div" *ngIf="uniteControl.value?.id !== option.id">
+                              <mat-icon class="option-icon">keyboard_arrow_right</mat-icon>
+                            </div>
+                          </div>
+                        </mat-option>
+                      
+                      </mat-autocomplete>
+                      
+                    </div>
+                    <div class="btn_add_categoryDiv2">
+                      <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
+                    </div>
                   </div>
                 </div>
-
                 
               </div>
             </div>

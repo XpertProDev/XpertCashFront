@@ -14,6 +14,7 @@ import { UsersService } from '../../SERVICES/users.service';
 import imageCompression from 'browser-image-compression';
 import { NgxBarcode6Module } from 'ngx-barcode6';
 import { ProduitService } from '../../SERVICES/produit.service';
+import { MatIconModule } from '@angular/material/icon';
 
 // export interface CategorySelect {
 //   name: string;
@@ -31,9 +32,8 @@ import { ProduitService } from '../../SERVICES/produit.service';
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
-    // MatFormFieldModule,
-    // MatInputModule,
-    NgxBarcode6Module
+    NgxBarcode6Module,
+    MatIconModule
   ],
   templateUrl: './add-produit.component.html',
   styleUrl: './add-produit.component.scss'
@@ -55,6 +55,10 @@ export class AddProduitComponent {
 
   boutiqueForm!: FormGroup;
   successMessage: string | null = null;
+
+  // Variable initialisée vide
+  formattedPrixVente: string = '';
+  formattedCoutProduit: string = '';
   
   // users: any[] = [];
   filteredUsers: any[] = [];
@@ -844,27 +848,48 @@ export class AddProduitComponent {
   }
 
   showBoutiqueSelectionPanel: boolean = false;
-selectedBoutiques: any[] = [];
+  selectedBoutiques: any[] = [];
 
-toggleBoutiqueSelectionPanel(): void {
-  this.showBoutiqueSelectionPanel = !this.showBoutiqueSelectionPanel;
-}
+  toggleBoutiqueSelectionPanel(): void {
+    this.showBoutiqueSelectionPanel = !this.showBoutiqueSelectionPanel;
+  }
 
-updateSelectedBoutiques(): void {
-  this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
-}
+  updateSelectedBoutiques(): void {
+    this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
+  }
 
-confirmBoutiqueSelection(): void {
-  const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
-  this.controlBoutique.setValue(selectedNames.join(', '));
-  
-  // Remplacer null par un tableau vide si aucune sélection
-  this.boutiqueIdSelected = this.selectedBoutiques.length > 0 
-      ? this.selectedBoutiques.map(b => b.id) 
-      : [];
-  
-  this.toggleBoutiqueSelectionPanel();
-}
+  confirmBoutiqueSelection(): void {
+    const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
+    this.controlBoutique.setValue(selectedNames.join(', '));
+    
+    // Remplacer null par un tableau vide si aucune sélection
+    this.boutiqueIdSelected = this.selectedBoutiques.length > 0 
+        ? this.selectedBoutiques.map(b => b.id) 
+        : [];
+    
+    this.toggleBoutiqueSelectionPanel();
+  }
+
+  // Ajouter cette méthode
+  formatPrixVente() {
+    const rawValue = this.ajouteProduitForm.get('prixVente')?.value;
+    if (rawValue !== null && rawValue !== undefined && !isNaN(rawValue)) {
+        const formattedValue = new Intl.NumberFormat('fr-FR').format(rawValue);
+        this.formattedPrixVente = `${formattedValue} FCFA`;
+    } else {
+        this.formattedPrixVente = '';
+    }
+  }
+
+  formatCoutProduit() {
+      const rawValue = this.ajouteProduitForm.get('prixAchat')?.value; // <-- Correction ici
+      if (rawValue !== null && rawValue !== undefined && !isNaN(rawValue)) {
+          const formattedValue = new Intl.NumberFormat('fr-FR').format(rawValue);
+          this.formattedCoutProduit = `${formattedValue} FCFA`;
+      } else {
+          this.formattedCoutProduit = '';
+      }
+  }
   
 
 }
