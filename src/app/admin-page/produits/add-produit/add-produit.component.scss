@@ -873,3 +873,20 @@ input:checked + .slider:before {
 //       background-color: #e0e0e0;
 //   }
 // }
+
+.two_input {
+  position: relative;
+}
+.nombreDevise {
+  position: absolute;
+  bottom: -20px;
+  right: 10px;
+  transition: opacity 0.3s ease;
+}
+
+.nombreDevise p {
+  font-size: 11px;
+  margin: 0;
+  font-family: monospace; 
+  // letter-spacing: 0.5px;
+}
