@@ -65,13 +65,6 @@ mat-expansion-panel {
     height: 60px;
 }
 
-.barre {
-    height: 25px;
-    width: 1px;
-    background-color: #0000003f;
-    margin: 0 10px;
-}
-
 .personnage {
     color: #00000074;
     font-size: 12px;
@@ -323,3 +316,83 @@ table {
     margin-top: 20px;
   }
   
+// boutique 
+
+.name_boutique {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin: 30px 0 10px;
+  }
+  
+  .name_boutique p {
+    padding: 5px 15px;
+  }
+  
+  .name_boutique_active {
+    background-color: #E9D421;
+    border-radius: 5px;
+    color: #000000;
+  }
+  
+  .barre {
+    height: 25px;
+    width: 1px;
+    background-color: #0000003f;
+    // margin: 8px 0;
+    margin: 0 10px;
+  }
+  
+  .container_list_boutique {
+    // scrollbar-width: auto;
+    overflow: auto; 
+    scrollbar-color: #888 #f1f1f1;
+    // scrollbar-width: thin;
+    // white-space: nowrap; 
+  }
+  
+  .container_list_boutique::-webkit-scrollbar {
+    width: 2px; 
+    height: 3px;
+  }
+  
+  .container_list_boutique::-webkit-scrollbar-track {
+    background: #f1f1f1; /* couleur du fond de la scrollbar */
+  }
+  
+  .container_list_boutique::-webkit-scrollbar-thumb {
+    background: blue;
+    border-radius: 4px;
+  }
+  
+  .container_list_boutique::-webkit-scrollbar-thumb:hover {
+    background: red; 
+  }
+  
+  .name_boutique {
+    p {
+      cursor: pointer;
+      padding: 8px 16px;
+      margin: 4px 0;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      border-radius: 4px;
+  
+      &:hover {
+        background-color: rgba(0,0,0,0.05);
+        transform: translateY(-1px);
+      }
+  
+      &.name_boutique_active {
+        background-color: #E9D421; // Couleur de fond quand actif
+        color: #000 !important; // Force la couleur blanche quand actif
+      }
+    }
+  }
+  
+  .warning-icon {
+    margin-left: 8px;
+    color: #ff0000;
+    font-size: 14px;
+  }
