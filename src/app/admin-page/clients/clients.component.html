@@ -68,7 +68,10 @@
     <div class="container_cadre" *ngIf="!isListView" @viewAnimation>
       <div class="grid-view">
         <div class="client-card" *ngFor="let client of clients">
-          <h3>{{ client.name }}</h3>
+          <div class="name_icon">
+            <h3>{{ client.name }}</h3>
+            <i class="ri-community-line" title="Entreprise"></i>
+          </div>
           <div class="content_cadre_double">
             <!-- // Les information sur les cadre  -->
             <div class="info_cadre">
