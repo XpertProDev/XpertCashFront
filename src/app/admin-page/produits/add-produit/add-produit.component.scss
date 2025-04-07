@@ -776,7 +776,7 @@ input:checked + .slider:before {
   padding: 6px 25px;
   color: #ffffff;
   cursor: pointer;
-  cursor: no-drop;
+  //cursor: no-drop;
 }
 
 .btn-submit:hover {
