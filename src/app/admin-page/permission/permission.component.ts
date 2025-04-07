@@ -61,7 +61,9 @@ export class PermissionComponent implements OnInit {
     { 
       id: 5,
       name: 'Gerer les cliens',
-      imgUrl: 'assets/img/boutique.png',
+      imgUrl: 'assets/img/directeur.png',
+
+
       selected: false
     },
     { 
@@ -73,7 +75,7 @@ export class PermissionComponent implements OnInit {
     { 
       id: 7,
       name: 'Gerer boutiques',
-      imgUrl: 'assets/img/directeur.png',
+      imgUrl: 'assets/img/boutique.png',
       selected: false
     },
   ];

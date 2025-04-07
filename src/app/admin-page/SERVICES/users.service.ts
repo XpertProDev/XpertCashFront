@@ -69,7 +69,7 @@ export class UsersService {
   
           return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
             tap(user => {
-              localStorage.setItem('user', JSON.stringify(user)); // ➡️ Stocker l'utilisateur ici
+              localStorage.setItem('user', JSON.stringify(user));
             })
           );
         })
@@ -81,7 +81,7 @@ export class UsersService {
   
       return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
         tap(user => {
-          localStorage.setItem('user', JSON.stringify(user)); // ➡️ Stocker l'utilisateur ici
+          localStorage.setItem('user', JSON.stringify(user));
         })
       );
     }
