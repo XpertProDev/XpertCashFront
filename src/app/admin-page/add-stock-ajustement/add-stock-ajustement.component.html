@@ -37,7 +37,7 @@
                         [matAutocomplete]="autoBoutique"
                         (blur)="checkBoutiqueSelection()"
                       >
-                      <label for="boutiqueId" class="label">Boutique</label>
+                      <label for="boutiqueId" class="label" style="opacity: 0.8;">Boutique</label>
                       <mat-autocomplete #autoBoutique="matAutocomplete" (optionSelected)="onBoutiqueSelected($event)" [displayWith]="displayFnBoutique">
                         <mat-option *ngFor="let street of filteredStreetsBoutique | async" [value]="street">
                           <div class="container_name_icon">

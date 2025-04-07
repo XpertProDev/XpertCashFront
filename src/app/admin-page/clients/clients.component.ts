@@ -1,6 +1,6 @@
 import { trigger, transition, query, style, stagger, animate } from "@angular/animations";
 import { CommonModule } from "@angular/common";
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 
 interface Client {
@@ -34,21 +34,35 @@ interface Client {
   //   ])
   // ]
 })
-export class ClientsComponent {
+export class ClientsComponent implements OnInit  {
 
   isListView = true;
   showDropdown = false; 
+
+  ngOnInit() {
+    // Récupérer la préférence depuis le localStorage
+    const savedView = localStorage.getItem('viewPreference');
+    this.isListView = savedView !== 'grid'; // 'grid' si trouvé, sinon liste par défaut
+  }
   
   clients = [ // Déplace tes données dans un tableau
-    { name: 'Koureissi SY', email: 'sydiakaridia00@gmail', address: 'Koulouba', phone: '+223 78711623'},
-    { name: 'Amadou Traore', email: 'Amadou@gmail', address: 'Koulouba', phone: '+223 79632526'},
-    { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail', address: 'Koulouba', phone: '+223 72464400'},
-    { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail', address: 'Koulouba', phone: '+223 72464400'},
+    { name: 'Koureissi SY', email: 'sydiakaridia00@gmail.com', address: 'Koulouba', phone: '+223 78711623'},
+    { name: 'Amadou Traore', email: 'Amadou@gmail.com', address: 'Koulouba', phone: '+223 79632526'},
+    { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail.com', address: 'Koulouba', phone: '+223 72464400'},
+    { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail.com', address: 'Koulouba', phone: '+223 72464400'},
   ];
 
-  toggleView(viewType: string) {
+  // toggleView(viewType: string) {
+  //   this.isListView = viewType === 'list';
+  //   this.showDropdown = true;
+  // }
+
+  toggleView(viewType: 'list' | 'grid') {
     this.isListView = viewType === 'list';
     this.showDropdown = true;
+    
+    // Stocker la préférence dans le localStorage
+    localStorage.setItem('viewPreference', viewType);
   }
 
   sortField = 'name';
