@@ -18,6 +18,7 @@ import { UsersService } from '../SERVICES/users.service';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 import { MatDialog } from '@angular/material/dialog';
 import { SuspendedBoutiqueDialogComponent } from './suspended-boutique-dialog.component';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-produits',
@@ -32,7 +33,8 @@ import { SuspendedBoutiqueDialogComponent } from './suspended-boutique-dialog.co
     // RouterLink,
     MatInputModule,
     MatPaginatorModule,
-    CustomNumberPipe
+    CustomNumberPipe,
+    DragDropModule,
   ],
   templateUrl: './produits.component.html',
   styleUrls: ['./produits.component.scss']
@@ -50,6 +52,7 @@ export class ProduitsComponent implements OnInit {
   boutiqueName: string = '';
   addressBoutique : string = '';
   showDescription: boolean = false;
+  
 
   selectedBoutique: any = null;
   boutiques: any[] = []; 
@@ -350,6 +353,7 @@ loadAllProduits(): void {
   this.produitService.getProduitsByEntrepriseId(this.entrepriseId).subscribe({
     next: (produits: Produit[]) => {
       this.tasks = produits.map(prod => {
+        // Reprenez ici la même logique de mapping que dans loadProduits()
         const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
           ? `${this.backendUrl}${prod.photo}`
           : '';
@@ -381,7 +385,7 @@ loadAllProduits(): void {
       return;
     }
 
-    this.produitService.getProduitsEntreprise(boutiqueId).subscribe({      
+    this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
       next: (produits: Produit[]) => {
         this.tasks = produits.map(prod => {
           // Conversion de la photo
@@ -393,8 +397,11 @@ loadAllProduits(): void {
           let createdAt = '';
           if (prod.createdAt) {
             if (prod.createdAt.includes('à')) {
+              // Format français "jj-mm-yyyy à hh:mm"
               const [datePart, timePart] = prod.createdAt.split(' à ');
+              // ... (votre code actuel)
             } else {
+              // Si c'est une date ISO (ex: "2024-05-20T12:34:56Z")
               createdAt = new Date(prod.createdAt).toISOString();
             }
           }
@@ -419,14 +426,11 @@ loadAllProduits(): void {
             uniteId: prod.uniteId || 0,
             boutiqueId: prod.boutiqueId || 0
           } as Produit;
-          
         }).sort((a, b) => {
           const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
           const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
           return dateB - dateA;
         })
-
-        console.log("Produit :", this.tasks);
 
         this.dataSource.data = this.tasks;
         if (this.paginator) {
@@ -441,9 +445,6 @@ loadAllProduits(): void {
           return;
         }
         console.error("Erreur :", err);
-        //console log pour voir les donner du boutique
-       ;
-
       }
     });
   }
@@ -520,7 +521,11 @@ loadAllProduits(): void {
   // sur html
   //  ? getBoutiqueTextColor(i, boutique.id === selectedBoutique?.id) : '#999'
 
-
+  onDrop(event: CdkDragDrop<any[]>) {
+    const previousIndex = this.boutiques.findIndex(boutique => boutique === event.item.data);
+    const currentIndex = event.currentIndex;
+    moveItemInArray(this.boutiques, previousIndex, currentIndex);
+  }
 
   
 }

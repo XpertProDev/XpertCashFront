@@ -1135,3 +1135,21 @@ img.roudel_detail{
   color: #ff0000;
   font-size: 14px;
 }
+
+.container_list_boutique {
+  max-height: 400px; /* Hauteur max pour activer le scroll */
+  overflow-y: auto; /* Permet le scroll vertical */
+  scroll-behavior: smooth; /* Rend le scroll fluide */
+}
+
+.cdk-drag-preview {
+  background: #e4cb0d;
+  border-radius: 5px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px;
+  font-weight: bold;
+}
