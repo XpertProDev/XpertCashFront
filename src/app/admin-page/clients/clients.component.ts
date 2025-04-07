@@ -1,27 +1,74 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { trigger, transition, query, style, stagger, animate } from "@angular/animations";
+import { CommonModule } from "@angular/common";
+import { Component } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+
+interface Client {
+  name: string;
+  email: string;
+  address: string;
+  phone: string;
+}
 
 @Component({
   selector: 'app-clients',
   imports: [
-      CommonModule,
+    CommonModule,
+    FormsModule
   ],
   templateUrl: './clients.component.html',
-  styleUrls: ['./clients.component.scss']
+  styleUrls: ['./clients.component.scss'],
+  // animations: [
+  //   trigger('viewAnimation', [
+  //     transition('* <=> *', [
+  //       query(':enter', [
+  //         style({ opacity: 0, transform: 'translateY(20px)' }),
+  //         stagger('50ms', [
+  //           animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+  //         ])
+  //       ], { optional: true }),
+  //       query(':leave', [
+  //         animate('200ms', style({ opacity: 0 }))
+  //       ], { optional: true })
+  //     ])
+  //   ])
+  // ]
 })
 export class ClientsComponent {
 
-  isListView = true; // Par défaut on affiche la liste
-  showDropdown = false; // Contrôle l'affichage du dropdown
+  isListView = true;
+  showDropdown = false; 
+  
   clients = [ // Déplace tes données dans un tableau
-    { name: 'Koureissi SY', email: 'sydiakaridia00@gmail', address: 'Koulouba', phone: '78711623' },
-    { name: 'Amadou Traore', email: 'Amadou@gmail', address: 'Koulouba', phone: '79632526' },
-    { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail', address: 'Koulouba', phone: '72464400' }
+    { name: 'Koureissi SY', email: 'sydiakaridia00@gmail', address: 'Koulouba', phone: '+223 78711623'},
+    { name: 'Amadou Traore', email: 'Amadou@gmail', address: 'Koulouba', phone: '+223 79632526'},
+    { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail', address: 'Koulouba', phone: '+223 72464400'},
+    { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail', address: 'Koulouba', phone: '+223 72464400'},
   ];
 
   toggleView(viewType: string) {
     this.isListView = viewType === 'list';
     this.showDropdown = true;
   }
+
+  sortField = 'name';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  // Modifie la fonction sort
+  sort(field: keyof Client) { // Spécifie le type de field
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+
+    this.clients.sort((a, b) => {
+      const modifier = this.sortDirection === 'asc' ? 1 : -1;
+      const valueA = a[field].toString().toLowerCase();
+      const valueB = b[field].toString().toLowerCase();
+      return valueA.localeCompare(valueB) * modifier;
+    });
+  }
+
 }

@@ -8,12 +8,16 @@
         <div class="barre"></div>
   
         <!-- Icone avec événement de clic -->
-        <div class="contentIcon" (click)="showDropdown = !showDropdown">
-          <i class="ri-sort-asc"></i>
+        <div class="contentIcon" (click)="showDropdown = !showDropdown" clickOutside (clickOutside)="showDropdown = false">
+          <i [class]="isListView ? 'ri-list-check' : 'ri-apps-fill'"></i>
           <!-- Dropdown -->
           <div class="view-dropdown" *ngIf="showDropdown">
-              <div class="dropdown-item" (click)="toggleView('list')">Afficher en liste</div>
-              <div class="dropdown-item" (click)="toggleView('grid')">Afficher en cadre</div>
+            <div class="dropdown-item" (click)="toggleView('list')">
+                Liste {{ isListView ? '✓' : '' }}
+            </div>
+            <div class="dropdown-item" (click)="toggleView('grid')">
+                Cadre {{ !isListView ? '✓' : '' }}
+            </div>
           </div>
         </div>
   
@@ -21,21 +25,25 @@
         
         <div class="inputSearch">
           <i class="ri-search-2-line"></i>
-          <input type="text" placeholder="Recherche...." />
+          <input 
+            type="text"
+            placeholder="Recherche...." 
+          />
         </div>
       </div>
     </div>
     
       <!-- Tableau (visible par défaut) -->
-    <table *ngIf="isListView">
+    <table *ngIf="isListView" @viewAnimation>
       
       <thead>
-        <tr class="titleTableProduit">
-          <th>Nom & prénom</th>
-          <th>Email</th>
-          <th>Adresse</th>
-          <th>Téléphone</th>
-        </tr>
+        <th (click)="sort('name')">
+          Nom & prénom 
+          <i [class]="sortField === 'name' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
+        </th>
+        <th> Email </th>
+        <th> Adresse </th>
+        <th> Téléphone </th>
       </thead>
 
       <tbody>
@@ -49,19 +57,17 @@
     </table>
     
     <!-- Vue cadre (quand on active) -->
-    <div class="container_cadre" *ngIf="!isListView">
+    <div class="container_cadre" *ngIf="!isListView" @viewAnimation>
       <div class="grid-view">
-          <div class="client-card" *ngFor="let client of clients">
-              <h3>{{ client.name }}</h3>
-              <p>{{ client.email }}</p>
-              <p>{{ client.address }}</p>
-              <p>{{ client.phone }}</p>
-          </div>
+        <div class="client-card" *ngFor="let client of clients">
+          <h3>{{ client.name }}</h3>
+          <p><i class="ri-mail-line"></i>{{ client.email }}</p>
+          <p><i class="ri-map-pin-line"></i>{{ client.address }}</p>
+          <p><i class="ri-phone-line"></i>{{ client.phone }}</p>
+      </div>
       </div>
     </div>
     
-    <!-- Exemple de données pour la vue en cadre -->
-    <!-- Vous pouvez définir la propriété clients dans le composant ou récupérer les données via un service -->
   </div>
   
   
