@@ -39,6 +39,12 @@ export interface UniteSelect {
   styleUrl: './list-produit.component.scss'
 })
 export class ListProduitComponent {
+  boutiqueNames: string[] = [];
+
+  selectedBoutique: any = null;
+  previousSelectedBoutique: any | null = null;
+  boutiqueActuelle: string = "Toutes les boutiques";
+  boutiques: any[] = []; 
 
   // boutiqueId: number | null = null;
   
@@ -322,61 +328,105 @@ export class ListProduitComponent {
     // }
 
     // Fonction pour récupérer le produit
-    getProduit(): void {
-      const idParam = this.route.snapshot.paramMap.get('id');
-      const productId = idParam ? +idParam : 0; // Utilise 1 par défaut si non trouvé
 
-      // Exemple dans votre composant TypeScript
-      this.produitService.getProduitById(productId).subscribe({
-        // 
+    selectBoutique(boutique: any | null): void {
+      console.log("Boutique sélectionnée:", boutique);
+  
+      // Si une boutique est sélectionnée, met à jour selectedBoutique
+      if (boutique === null) {
+          this.selectedBoutique = null;
+          this.boutiqueActuelle = "Toutes les boutiques"; // Si aucune boutique n'est sélectionnée
+      } else {
+          this.selectedBoutique = boutique;
+          this.boutiqueActuelle = boutique.nomBoutique || "Boutique sans nom"; // Mise à jour de la boutique actuelle
+      }
+  
+      console.log("selectedBoutique après mise à jour:", this.selectedBoutique);
+      console.log("boutiqueActuelle après mise à jour:", this.boutiqueActuelle);
+  
+      // Après la mise à jour, appelle getProduit() pour récupérer les produits de la boutique sélectionnée
+      this.getProduit();
+  }
+  
+  
+  
+  
+  getProduit(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const productId = idParam ? +idParam : 0;
+
+    console.log("Avant d'appeler getProduit(), boutiqueActuelle est:", this.boutiqueActuelle);
+    console.log("selectedBoutique avant l'appel:", this.selectedBoutique);
+
+    this.produitService.getProduitById(productId).subscribe({
         next: (data: Produit) => {
-          console.log('Donnée du produit:', data);
-          this.produit = data;
-          this.modifierProduitForm.patchValue(this.produit);
-          this.loadInitialValues(); 
+            console.log('Donnée du produit:', data);
+            this.produit = data;
+            this.modifierProduitForm.patchValue(this.produit);
+            this.loadInitialValues();
 
-          // l'appel à getBoutiqueName avec l'ID de la boutique du produit
-          this.getBoutiqueName(this.produit.boutiqueId);
-          
-          // Ajouter ces lignes pour initialiser les contrôles d'autocomplete
-          const selectedUnite = this.optionsUnite.find(u => u.id === this.produit.uniteId);
-          if(selectedUnite) this.uniteControl.setValue(selectedUnite);
-          
-          const selectedCategorie = this.options.find(c => c.id === this.produit.categorieId);
-          if(selectedCategorie) this.myControl.setValue(selectedCategorie);
+            // Vérification des boutiques du produit
+            console.log("Boutiques disponibles pour ce produit:", this.produit.boutiques);
+
+            if (this.produit.boutiques && this.produit.boutiques.length > 0) {
+                if (this.selectedBoutique && this.selectedBoutique.id) {
+                    // Si une boutique est sélectionnée, on filtre pour n'afficher que la boutique sélectionnée
+                    console.log("selectedBoutique avant de filtrer:", this.selectedBoutique);
+                    const boutiqueActuelle = this.produit.boutiques.find(b => b.id === this.selectedBoutique.id);
+                    console.log("Boutique actuelle trouvée dans le produit:", boutiqueActuelle);
+
+                    if (boutiqueActuelle) {
+                        this.boutiqueNames = [boutiqueActuelle.nom]; // Afficher uniquement la boutique sélectionnée
+                        this.boutiqueActuelle = boutiqueActuelle.nom; // Mise à jour de la boutique actuelle
+                        console.log("Nom de la boutique actuelle affichée:", this.boutiqueNames);
+                    } else {
+                        this.boutiqueNames = ['Cette boutique ne possède pas ce produit']; // Si la boutique sélectionnée n'a pas ce produit
+                        this.boutiqueActuelle = 'Cette boutique ne possède pas ce produit'; // Mise à jour de la boutique actuelle
+                        console.log("Aucune correspondance pour la boutique actuelle.");
+                    }
+                } else {
+                    // Si aucune boutique n'est sélectionnée, afficher toutes les boutiques
+                    this.boutiqueNames = this.produit.boutiques.map(b => b.nom);
+                    this.boutiqueActuelle = 'Toutes les boutiques'; // Mise à jour pour refléter "Toutes les boutiques"
+                    console.log("Aucune boutique sélectionnée, affichage de toutes les boutiques.");
+                }
+            } else {
+                this.boutiqueNames = ['Aucune boutique trouvée pour ce produit'];
+                this.boutiqueActuelle = 'Aucune boutique trouvée pour ce produit';
+                console.log("Aucune boutique pour ce produit.");
+            }
+
+            // Affichage final de toutes les boutiques qui sont affichées
+            console.log("Boutiques affichées:", this.boutiqueNames);
+            console.log("Nom de la boutique actuelle:", this.boutiqueActuelle);  // Le nom de la boutique actuelle
         },
         error: (err) => {
-          console.error('Erreur lors de la récupération du produit', err);
+            console.error('Erreur lors de la récupération du produit', err);
         }
-      });
-      
-    }
+    });
+}
 
-  // Méthode pour charger le détail du produit et construire l'URL de l'image
-  
-  getBoutiqueName(boutiqueId: number | null) {
-    this.usersService.getUserInfo().subscribe(
-      (userInfo) => {
-        if (userInfo && userInfo.boutiques) {
-          // Recherche de la boutique correspondant à l'ID du produit
-          const boutique = userInfo.boutiques.find(b => b.id === boutiqueId);
-          if (boutique) {
-            this.boutiqueName = boutique.nomBoutique;
-          } else {
-            console.error('Boutique non trouvée pour cet ID');
-            this.boutiqueName = 'Boutique inconnue';
-          }
-        } else {
-          console.error('Aucune boutique trouvée pour cet utilisateur');
-          this.boutiqueName = 'Aucune boutique';
-        }
-      },
-      (error) => {
-        console.error('Erreur lors de la récupération des informations utilisateur', error);
-        this.boutiqueName = 'Erreur de chargement';
+
+
+
+
+    
+    getBoutiqueNames(boutiques: { id: number, nom: string, quantite: number }[] | undefined): string[] {
+      if (boutiques && boutiques.length > 0) {
+        return boutiques.map(b => `${b.nom} (ID: ${b.id}) - Quantité: ${b.quantite}`);
       }
-    );
-  }
+      console.error('Aucune boutique trouvée pour ce produit');
+      return ['Aucune boutique'];
+    }
+    
+  
+  
+
+
+
+
+  
+  
     // Getter pour faciliter l'accès aux contrôles dans le template
     get c() { return this.ajouteCategoryForm.controls; }
     get u() { return this.ajouteUniteForm.controls; }
