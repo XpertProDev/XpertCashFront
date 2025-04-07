@@ -1,72 +1,67 @@
-
 <div class="containerTable">
     <!-- En-tête : titre, actions et barre de recherche -->
     <div class="tasks-header">
-        <h1 class="title">Mes Clients</h1>
-        <!-- // action  -->
-        <div class="actions">
-            <button class="add-task" routerLink="/" >Créer un client</button>
-
-            <!-- // Bare  -->
-            <div class="barre"></div>
-
-            <div class="contentIcon">
-                <i class="ri-sort-asc"></i>
-            </div>
-
-            <!-- // Bare  -->
-            <div class="barre"></div>
-            
-            <!-- // searchText  -->
-            <div class="inputSearch">
-            <i class="ri-search-2-line"></i>
-            <input type="text"placeholder="Recherche...." />
-            </div>
+      <h1 class="title">Mes Clients</h1>
+      <div class="actions">
+        <button class="add-task" routerLink="/">Créer un client</button>
+  
+        <div class="barre"></div>
+  
+        <!-- Icone avec événement de clic -->
+        <div class="contentIcon" (click)="showDropdown = !showDropdown">
+          <i class="ri-sort-asc"></i>
+          <!-- Dropdown -->
+          <div class="view-dropdown" *ngIf="showDropdown">
+              <div class="dropdown-item" (click)="toggleView('list')">Afficher en liste</div>
+              <div class="dropdown-item" (click)="toggleView('grid')">Afficher en cadre</div>
+          </div>
         </div>
+  
+        <div class="barre"></div>
+        
+        <div class="inputSearch">
+          <i class="ri-search-2-line"></i>
+          <input type="text" placeholder="Recherche...." />
+        </div>
+      </div>
     </div>
     
-      <!-- Tableau des produits -->
-      <table>
-        <thead>
-          <tr class="titleTableProduit">
-            <th>Nom & prenom </th>
-            <th>Email </th>
-            <th>Adresse </th>
-            <th>Téléphone </th>
+      <!-- Tableau (visible par défaut) -->
+    <table *ngIf="isListView">
+      
+      <thead>
+        <tr class="titleTableProduit">
+          <th>Nom & prénom</th>
+          <th>Email</th>
+          <th>Adresse</th>
+          <th>Téléphone</th>
+        </tr>
+      </thead>
+
+      <tbody>
+          <tr *ngFor="let client of clients">
+              <td>{{ client.name }}</td>
+              <td>{{ client.email }}</td>
+              <td>{{ client.address }}</td>
+              <td>{{ client.phone }}</td>
           </tr>
-        </thead>
-        <tbody>
-            <tr>
-              <td>Koureissi SY</td>
-              <td>sydiakaridia00&#64;gmail</td>
-              <td>Koulouba</td>
-              <td> 00223 78711623 </td>
-            </tr>
-            <tr>
-              <td>Amadou Traore</td>
-              <td>Amadou&#64;gmail</td>
-              <td>Koulouba</td>
-              <td> 00223 78711623 </td>
-            </tr>
-            <tr>
-              <td>Mamoutou Daiby</td>
-              <td>Mamoutou&#64;gmail</td>
-              <td>Koulouba</td>
-              <td> 00223 78711623 </td>
-            </tr>
-        </tbody>
-      </table>
-
-    <!-- ?? cadre des clients  -->
-    <div class="container_cadre">
-        <div class="content_cadre">
-            <!-- // cadre client  -->
-            <div class="info_cadre">
-                
-            </div>
-        </div>
+      </tbody>
+    </table>
+    
+    <!-- Vue cadre (quand on active) -->
+    <div class="container_cadre" *ngIf="!isListView">
+      <div class="grid-view">
+          <div class="client-card" *ngFor="let client of clients">
+              <h3>{{ client.name }}</h3>
+              <p>{{ client.email }}</p>
+              <p>{{ client.address }}</p>
+              <p>{{ client.phone }}</p>
+          </div>
+      </div>
     </div>
     
-
+    <!-- Exemple de données pour la vue en cadre -->
+    <!-- Vous pouvez définir la propriété clients dans le composant ou récupérer les données via un service -->
   </div>
+  
   
