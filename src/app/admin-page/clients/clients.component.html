@@ -37,6 +37,7 @@
     <table *ngIf="isListView" @viewAnimation>
       
       <thead>
+        <th>Photo</th>
         <th (click)="sort('name')">
           Nom & prénom 
           <i [class]="sortField === 'name' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
@@ -48,6 +49,13 @@
 
       <tbody>
           <tr *ngFor="let client of clients">
+              <td>
+                <div class="imgClient">
+                  <!-- <img [src]="product.photo"> -->
+                  <img src="assets/img/profil.png" alt="Photo clients">
+                  <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/image_product.png' : product.photo"> -->
+                </div>
+              </td>
               <td>{{ client.name }}</td>
               <td>{{ client.email }}</td>
               <td>{{ client.address }}</td>
@@ -61,11 +69,31 @@
       <div class="grid-view">
         <div class="client-card" *ngFor="let client of clients">
           <h3>{{ client.name }}</h3>
-          <p><i class="ri-mail-line"></i>{{ client.email }}</p>
-          <p><i class="ri-map-pin-line"></i>{{ client.address }}</p>
-          <p><i class="ri-phone-line"></i>{{ client.phone }}</p>
+          <div class="content_cadre_double">
+            <!-- // Les information sur les cadre  -->
+            <div class="info_cadre">
+              <p><i class="ri-mail-line"></i>{{ client.email }}</p>
+              <p><i class="ri-map-pin-line"></i>{{ client.address }}</p>
+              <p><i class="ri-phone-line"></i>{{ client.phone }}</p>
+            </div>
+            <!-- // Image de client  -->
+            <div class="imgClient_grid">
+              <!-- <img [src]="product.photo"> -->
+              <img src="assets/img/profil.png" alt="Photo clients">
+              <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/image_product.png' : product.photo"> -->
+            </div>
+          </div>
+        </div>
       </div>
-      </div>
+    </div>
+
+     <!-- Pagination -->
+     <div class="pagination">
+      <mat-paginator 
+                    [pageSize]="pageSize"
+                    [pageSizeOptions]="[6, 10, 25, 100]"
+                    (page)="onPageChange($event)">
+      </mat-paginator>
     </div>
     
   </div>

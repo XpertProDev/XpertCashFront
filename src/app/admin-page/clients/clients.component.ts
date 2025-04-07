@@ -1,7 +1,9 @@
 import { trigger, transition, query, style, stagger, animate } from "@angular/animations";
 import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
+import { MatTableDataSource } from "@angular/material/table";
 
 interface Client {
   name: string;
@@ -14,7 +16,8 @@ interface Client {
   selector: 'app-clients',
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    MatPaginatorModule,
   ],
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.scss'],
@@ -39,6 +42,12 @@ export class ClientsComponent implements OnInit  {
   isListView = true;
   showDropdown = false; 
 
+  // Pagination et tableau de données
+    dataSource = new MatTableDataSource<Client>();
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+    pageSize = 6;
+    currentPage = 0;
+
   ngOnInit() {
     // Récupérer la préférence depuis le localStorage
     const savedView = localStorage.getItem('viewPreference');
@@ -47,15 +56,18 @@ export class ClientsComponent implements OnInit  {
   
   clients = [ // Déplace tes données dans un tableau
     { name: 'Koureissi SY', email: 'sydiakaridia00@gmail.com', address: 'Koulouba', phone: '+223 78711623'},
+    { name: 'Koureissi SY', email: 'sydiakaridia00@gmail.com', address: 'Koulouba', phone: '+223 78711623'},
+    { name: 'Amadou Traore', email: 'Amadou@gmail.com', address: 'Koulouba', phone: '+223 79632526'},
     { name: 'Amadou Traore', email: 'Amadou@gmail.com', address: 'Koulouba', phone: '+223 79632526'},
     { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail.com', address: 'Koulouba', phone: '+223 72464400'},
     { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail.com', address: 'Koulouba', phone: '+223 72464400'},
   ];
 
-  // toggleView(viewType: string) {
-  //   this.isListView = viewType === 'list';
-  //   this.showDropdown = true;
-  // }
+   // Gestion de la pagination
+   onPageChange(event: any): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+  }
 
   toggleView(viewType: 'list' | 'grid') {
     this.isListView = viewType === 'list';
