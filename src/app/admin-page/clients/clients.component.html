@@ -48,7 +48,7 @@
       </thead>
 
       <tbody>
-          <tr *ngFor="let client of clients">
+          <tr *ngFor="let client of paginatedClients">
               <td>
                 <div class="imgClient">
                   <!-- <img [src]="product.photo"> -->
@@ -87,7 +87,7 @@
     <!-- Vue cadre (quand on active) -->
     <div class="container_cadre" *ngIf="!isListView">
       <div class="grid-view">
-        <div class="client-card" *ngFor="let client of clients">
+        <div class="client-card" *ngFor="let client of paginatedClients">
           <div class="name_icon">
             <h3>
               <span *ngIf="client.nomComplet; else noNomComplet">{{ client.nomComplet }}</span>
@@ -133,12 +133,13 @@
       </div>
     </div>
 
-     <!-- Pagination -->
-     <div class="pagination">
-      <mat-paginator 
-                    [pageSize]="pageSize"
-                    [pageSizeOptions]="[6, 10, 25, 100]"
-                    (page)="onPageChange($event)">
+    <!-- Pagination -->
+    <div class="pagination">
+      <mat-paginator
+        [length]="clients.length"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[6, 10, 25, 100]"
+        (page)="onPageChange($event)">
       </mat-paginator>
     </div>
     

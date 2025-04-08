@@ -1,8 +1,7 @@
-import { trigger, transition, query, style, stagger, animate } from "@angular/animations";
 import { CommonModule } from "@angular/common";
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
+import { MatPaginator, MatPaginatorModule, PageEvent } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
 import { RouterLink } from "@angular/router";
 import { ClientService } from "../SERVICES/client-service";
@@ -33,7 +32,8 @@ export class ClientsComponent implements OnInit  {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   pageSize = 6;
   currentPage = 0;
-  clients: any[] = [];
+  totalClients = 0;
+  clients: Clients[] = [];
 
   constructor(
     private clientService: ClientService,
@@ -47,7 +47,7 @@ export class ClientsComponent implements OnInit  {
   }
 
   // Gestion de la pagination
-  onPageChange(event: any): void {
+  onPageChange(event: PageEvent): void {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
   }
@@ -74,8 +74,8 @@ export class ClientsComponent implements OnInit  {
 
     this.clients.sort((a, b) => {
       const modifier = this.sortDirection === 'asc' ? 1 : -1;
-      const valueA = a[field].toString().toLowerCase();
-      const valueB = b[field].toString().toLowerCase();
+      const valueA = a[field]!.toString().toLowerCase();
+      const valueB = b[field]!.toString().toLowerCase();
       return valueA.localeCompare(valueB) * modifier;
     });
   }
@@ -87,12 +87,18 @@ export class ClientsComponent implements OnInit  {
       this.clientService.getListClients().subscribe({
         next: (data) => {
           this.clients = data;
+          this.totalClients = data.length;
           console.log('Clients récupérées:', this.clients);
         },
       })
     } else {
       console.error('Aucun token trouvé !');
     }
+  }
+
+  get paginatedClients(): Clients[] {
+    const startIndex = this.currentPage * this.pageSize;
+    return this.clients.slice(startIndex, startIndex + this.pageSize);
   }
 
 }
