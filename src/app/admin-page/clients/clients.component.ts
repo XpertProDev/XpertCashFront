@@ -34,6 +34,8 @@ export class ClientsComponent implements OnInit  {
   currentPage = 0;
   totalClients = 0;
   clients: Clients[] = [];
+  sortField = 'nomComplet';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(
     private clientService: ClientService,
@@ -60,23 +62,22 @@ export class ClientsComponent implements OnInit  {
     localStorage.setItem('viewPreference', viewType);
   }
 
-  sortField = 'nomComplet';
-  sortDirection: 'asc' | 'desc' = 'asc';
 
   // Modifie la fonction sort
-  sort(field: keyof Clients) { // Spécifie le type de field
+  sort(field: keyof Clients) {
     if (this.sortField === field) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
-      this.sortField = field;
-      this.sortDirection = 'asc';
+        this.sortField = field;
+        this.sortDirection = 'asc';
     }
 
     this.clients.sort((a, b) => {
-      const modifier = this.sortDirection === 'asc' ? 1 : -1;
-      const valueA = a[field]!.toString().toLowerCase();
-      const valueB = b[field]!.toString().toLowerCase();
-      return valueA.localeCompare(valueB) * modifier;
+        const modifier = this.sortDirection === 'asc' ? 1 : -1;
+        // Gestion des valeurs undefined/null
+        const valueA = a[field]?.toString().toLowerCase() ?? '';
+        const valueB = b[field]?.toString().toLowerCase() ?? '';
+        return valueA.localeCompare(valueB) * modifier;
     });
   }
 
