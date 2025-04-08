@@ -212,6 +212,13 @@ const routes: Routes = [
         canActivate: [authGuard]
       },
 
+      // La routing de Add client
+      {
+        path: 'ajouter-client',
+        loadComponent: () => import('./admin-page/clients/addClient/add-clients/add-clients.component').then(m => m.AddClientsComponent),
+        canActivate: [authGuard]
+      },
+
     ]
   }
 ];

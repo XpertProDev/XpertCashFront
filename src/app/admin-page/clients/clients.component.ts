@@ -4,6 +4,7 @@ import { Component, OnInit, ViewChild } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
+import { RouterLink } from "@angular/router";
 
 interface Client {
   name: string;
@@ -18,6 +19,7 @@ interface Client {
     CommonModule,
     FormsModule,
     MatPaginatorModule,
+    RouterLink
   ],
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.scss'],
