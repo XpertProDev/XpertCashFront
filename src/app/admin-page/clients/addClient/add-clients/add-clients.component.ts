@@ -1,19 +1,23 @@
-import { AsyncPipe, CommonModule } from '@angular/common';
+
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Router } from '@angular/router';
 import imageCompression from 'browser-image-compression';
-import { Observable, startWith, map } from 'rxjs';
+import { Observable, startWith, map, of } from 'rxjs';
+import { Clients } from 'src/app/admin-page/MODELS/clients-model';
+import { Entreprise } from 'src/app/admin-page/MODELS/entreprise-model';
+import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-service';
 
 @Component({
   selector: 'app-add-clients',
+  standalone: true,
   imports: [
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule, 
-    AsyncPipe,
   ],
   templateUrl: './add-clients.component.html',
   styleUrl: './add-clients.component.scss'
@@ -26,9 +30,16 @@ export class AddClientsComponent implements OnInit {
   newPhotoUrl: string | null = null;
   selectedFile: File | null | undefined = null;
   imageFile: File | null = null;
+  // Focul controle entreprise // Auto complet
+  control = new FormControl();
+  filteredOptions: Observable<Entreprise[]> = of([]);
+  optionsEntreprise: Entreprise[] = [];
+  // Select pour voir entreprise
+  isEntrepriseSelected: boolean = false;
 
   constructor(
     private router: Router,
+    private entrepriseService: EntrepriseService,
   ) {}
 
   async testImageCompression(file: File) {
@@ -67,8 +78,7 @@ export class AddClientsComponent implements OnInit {
       } catch (error) {
         console.error('Erreur lors de la compression:', error);
       }
-    }
-  
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -99,25 +109,52 @@ export class AddClientsComponent implements OnInit {
     this.router.navigate(['/clients']);
   }
 
-  // Auto complet
-  control = new FormControl('');
-  streets: string[] = ['Entreprise 1', 'Entreprise 2', 'Entreprise 3'];
-  filteredStreets: Observable<string[]> | undefined;
-
   ngOnInit() {
-    this.filteredStreets = this.control.valueChanges.pipe(
-      startWith(''),
-      map(value => this._filter(value || '')),
-    );
+    this.getListEntreprise();
   }
 
-  private _filter(value: string): string[] {
-    const filterValue = this._normalizeValue(value);
-    return this.streets.filter(street => this._normalizeValue(street).includes(filterValue));
+  getListEntreprise() {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      this.entrepriseService.getListEntreprise(token).subscribe(
+        (entreprises) => {
+          console.log('Entreprise reçues depuis l\'API :', entreprises);
+          this.optionsEntreprise = entreprises;
+          this.filteredOptions = this.control.valueChanges.pipe(
+            startWith<string | Entreprise>(''),
+            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
+            map(name => (name ? this._filter(name) : this.optionsEntreprise.slice()))
+          );
+        }, 
+        (error) => {
+          console.error('Erreur lors de la récupération des catégories :', error);
+        }
+      ); 
+    } else {
+      console.error('Aucun token trouvé !');
+    }
   }
 
-  private _normalizeValue(value: string): string {
-    return value.toLowerCase().replace(/\s/g, '');
+  private _filter(name: string): Entreprise[] {
+    const filterValue = name.toLowerCase();
+    return this.optionsEntreprise.filter(entreprise => 
+      entreprise.nom?.toLowerCase().includes(filterValue));
   }
+
+  displayFnEntreprise(entreprise?: Entreprise): string {
+    return entreprise ? entreprise.nom : '';
+  }
+
+  // Methode pour la selection d'un entreprise
+  onEntrepriseSelected(event: any): void {
+    // console.log("Entreprise selectionner :", event.entreprise.value);
+    // if (event.entreprise && event.entreprise.value) {
+    //   this.ajouteEntrepriseForm.get('entrepriseId')?.setValue(event.option.value.id);
+    // } else {
+    //   this.ajouteEntrepriseForm.get('entrepriseId')?.setValue(null);
+    // }
+  }
+
+  
 
 }

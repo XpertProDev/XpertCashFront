@@ -1,43 +1,26 @@
 import { trigger, transition, query, style, stagger, animate } from "@angular/animations";
 import { CommonModule } from "@angular/common";
 import { Component, OnInit, ViewChild } from "@angular/core";
-import { FormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
 import { RouterLink } from "@angular/router";
+import { ClientService } from "../SERVICES/client-service";
+import { Clients } from "../MODELS/clients-model";
 
-interface Client {
-  name: string;
-  email: string;
-  address: string;
-  phone: string;
-}
 
 @Component({
   selector: 'app-clients',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
     MatPaginatorModule,
-    RouterLink
+    RouterLink,
   ],
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.scss'],
-  // animations: [
-  //   trigger('viewAnimation', [
-  //     transition('* <=> *', [
-  //       query(':enter', [
-  //         style({ opacity: 0, transform: 'translateY(20px)' }),
-  //         stagger('50ms', [
-  //           animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-  //         ])
-  //       ], { optional: true }),
-  //       query(':leave', [
-  //         animate('200ms', style({ opacity: 0 }))
-  //       ], { optional: true })
-  //     ])
-  //   ])
-  // ]
+  
 })
 export class ClientsComponent implements OnInit  {
 
@@ -45,28 +28,26 @@ export class ClientsComponent implements OnInit  {
   showDropdown = false; 
 
   // Pagination et tableau de données
-    dataSource = new MatTableDataSource<Client>();
-    @ViewChild(MatPaginator) paginator!: MatPaginator;
-    pageSize = 6;
-    currentPage = 0;
+  // Client 
+  dataSource = new MatTableDataSource<Clients>();
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  pageSize = 6;
+  currentPage = 0;
+  clients: any[] = [];
+
+  constructor(
+    private clientService: ClientService,
+  ) {}
 
   ngOnInit() {
     // Récupérer la préférence depuis le localStorage
     const savedView = localStorage.getItem('viewPreference');
-    this.isListView = savedView !== 'grid'; // 'grid' si trouvé, sinon liste par défaut
+    this.isListView = savedView !== 'grid'; 
+    this.getListClients();
   }
-  
-  clients = [ // Déplace tes données dans un tableau
-    { name: 'Koureissi SY', email: 'sydiakaridia00@gmail.com', address: 'Koulouba', phone: '+223 78711623'},
-    { name: 'Koureissi SY', email: 'sydiakaridia00@gmail.com', address: 'Koulouba', phone: '+223 78711623'},
-    { name: 'Amadou Traore', email: 'Amadou@gmail.com', address: 'Koulouba', phone: '+223 79632526'},
-    { name: 'Amadou Traore', email: 'Amadou@gmail.com', address: 'Koulouba', phone: '+223 79632526'},
-    { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail.com', address: 'Koulouba', phone: '+223 72464400'},
-    { name: 'Mamoutou Daiby', email: 'Mamoutou@gmail.com', address: 'Koulouba', phone: '+223 72464400'},
-  ];
 
-   // Gestion de la pagination
-   onPageChange(event: any): void {
+  // Gestion de la pagination
+  onPageChange(event: any): void {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
   }
@@ -79,11 +60,11 @@ export class ClientsComponent implements OnInit  {
     localStorage.setItem('viewPreference', viewType);
   }
 
-  sortField = 'name';
+  sortField = 'nomComplet';
   sortDirection: 'asc' | 'desc' = 'asc';
 
   // Modifie la fonction sort
-  sort(field: keyof Client) { // Spécifie le type de field
+  sort(field: keyof Clients) { // Spécifie le type de field
     if (this.sortField === field) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
@@ -97,6 +78,21 @@ export class ClientsComponent implements OnInit  {
       const valueB = b[field].toString().toLowerCase();
       return valueA.localeCompare(valueB) * modifier;
     });
+  }
+
+  // list clients 
+  getListClients() {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      this.clientService.getListClients().subscribe({
+        next: (data) => {
+          this.clients = data;
+          console.log('Clients récupérées:', this.clients);
+        },
+      })
+    } else {
+      console.error('Aucun token trouvé !');
+    }
   }
 
 }
