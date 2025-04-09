@@ -545,3 +545,10 @@ input:checked + .slider:before {
   color: #0672E4;
   font-weight: bold;
 }
+
+.error {
+  font-size: 14px;
+  color: #ff0000;
+  font-weight: bold;
+  position: relative;
+}

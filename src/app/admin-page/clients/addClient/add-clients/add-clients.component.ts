@@ -34,19 +34,15 @@ export class AddClientsComponent implements OnInit {
   entrepriseForm!: FormGroup;
   isEntrepriseSelected = false;
   showPopup = false;
-  // entrepriseForm: FormGroup = new FormGroup({});
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
   selectedFile: File | null | undefined = null;
   imageFile: File | null = null;
-  // Focul controle entreprise // Auto complet
   control = new FormControl();
   filteredOptions: Observable<Entreprise[]> = of([]);
-  // optionsEntreprise: Entreprise[] = [];
-  // Select pour voir entreprise
-  // isEntrepriseSelected: boolean = true;
   loading = false;
   optionsEntreprise$ = new BehaviorSubject<Entreprise[]>([]);
+  entrepriseRequiredError = false;
 
 
   constructor(
@@ -266,27 +262,36 @@ export class AddClientsComponent implements OnInit {
   ajouterClient() {
     this.errorMessage = '';
     this.successMessage = '';
-
+    this.entrepriseRequiredError = false;
+  
+    // Vérification de la sélection d'entreprise
+    if (this.isEntrepriseSelected) {
+      const entrepriseSelectionnee = this.control.value; // Ajout de la déclaration
+      
+      if (!entrepriseSelectionnee || !entrepriseSelectionnee.id) {
+        this.entrepriseRequiredError = true;
+        // this.errorMessage = 'Vous devez sélectionner ou créer une entreprise';
+        return;
+      }
+    }
+  
     if (this.clientForm.invalid) {
       this.errorMessage = 'Veuillez corriger les erreurs du formulaire.';
       return;
     }
-
+  
     const client: Clients = this.clientForm.value;
+    
     if (this.isEntrepriseSelected) {
       const selected = this.control.value as Entreprise;
       if (selected && selected.id) {
         client.entrepriseClient = { id: selected.id } as Entreprise;
-      } else {
-        // nouvelle entreprise créée via popup
-        client.entrepriseClient = this.control.value;
       }
     }
-
+  
     this.clientService.addClient(client).subscribe({
       next: res => {
         this.successMessage = res.message;
-        // reset + navigation si besoin
         this.clientForm.reset();
         this.isEntrepriseSelected = false;
         this.goToClients();
