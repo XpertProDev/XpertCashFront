@@ -82,10 +82,14 @@
                 </ng-template>
               </td>
               <td>
-                <div class="iconEntrepriseList">
+                <div *ngIf="client.entrepriseClient; else noEntreprise" class="iconEntrepriseList">
                   <i class="ri-community-line" title="Entreprise"></i>
                 </div>
+                <ng-template #noEntreprise>
+                  <span class="no-phone-text">Non entreprise</span>
+                </ng-template>
               </td>
+              
           </tr>
       </tbody>
     </table>
@@ -101,7 +105,12 @@
                 <span class="no-phone-text">Nom est vide</span>
               </ng-template>
             </h3>
-            <i class="ri-community-line" title="Entreprise"></i>
+            <ng-container *ngIf="client.entrepriseClient; else noEntrepriseCard">
+              <i class="ri-community-line" title="Entreprise"></i>
+            </ng-container>
+            <ng-template #noEntrepriseCard>
+              <span class="no-phone-text">Non entreprise</span>
+            </ng-template>
           </div>
           <div class="content_cadre_double">
             <!-- // Les information sur les cadre  -->

@@ -89,6 +89,15 @@ export class ClientsComponent implements OnInit  {
     if (token) {
       this.clientService.getListClients().subscribe({
         next: (data) => {
+          console.log('Données brutes:', data);
+          this.clients = data.map(client => ({
+            ...client,
+            entrepriseClient: client.entrepriseClient ? { 
+              id: client.entrepriseClient.id,
+              nom: client.entrepriseClient.nom
+            } : null
+          }));
+          
           // 1. Trier par id décroissant pour que les plus récents (id élevés) soient en tête
           this.clients = data.sort((a, b) => {
             // si vous avez un champ createdAt : return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -101,6 +110,12 @@ export class ClientsComponent implements OnInit  {
           // 2. Mettre à jour la source de données du tableau/paginator
           this.dataSource.data = this.clients;
           this.dataSource.paginator = this.paginator;
+
+          // Vérifiez un client spécifique
+          if (this.clients.length > 0) {
+            console.log('Exemple de client:', this.clients[0]);
+            console.log('Entreprise associée:', this.clients[0].entrepriseClient);
+          }
   
           console.log('Clients récupérées (triées) :', this.clients);
         },
