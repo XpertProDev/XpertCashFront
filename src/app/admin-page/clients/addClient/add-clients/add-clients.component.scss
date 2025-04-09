@@ -524,3 +524,30 @@ input:checked + .slider:before {
   top: -20px;
   left: -20px;
 }
+
+.success-messageApi {
+  font-size: 14px;
+  color: #0672E4;
+  font-weight: bold;
+  position: relative;
+  top: -20px;
+  left: -20px;
+}
+
+.error-messageApi2 {
+  font-size: 14px;
+  color: red;
+  font-weight: bold;
+  // position: relative;
+  // top: -20px;
+  // left: -20px;
+}
+
+.success-messageApi2 {
+  font-size: 14px;
+  color: #0672E4;
+  font-weight: bold;
+  // position: relative;
+  // top: -20px;
+  // left: -20px;
+}
