@@ -6,7 +6,7 @@ import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, 
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Router } from '@angular/router';
 import imageCompression from 'browser-image-compression';
-import { Observable, startWith, map, of } from 'rxjs';
+import { Observable, startWith, map, of, BehaviorSubject, combineLatest } from 'rxjs';
 import { Clients } from 'src/app/admin-page/MODELS/clients-model';
 import { Entreprise } from 'src/app/admin-page/MODELS/entreprise-model';
 import { ClientService } from 'src/app/admin-page/SERVICES/client-service';
@@ -42,10 +42,11 @@ export class AddClientsComponent implements OnInit {
   // Focul controle entreprise // Auto complet
   control = new FormControl();
   filteredOptions: Observable<Entreprise[]> = of([]);
-  optionsEntreprise: Entreprise[] = [];
+  // optionsEntreprise: Entreprise[] = [];
   // Select pour voir entreprise
   // isEntrepriseSelected: boolean = true;
   loading = false;
+  optionsEntreprise$ = new BehaviorSubject<Entreprise[]>([]);
 
 
   constructor(
@@ -150,24 +151,32 @@ export class AddClientsComponent implements OnInit {
 
   private loadEntreprises() {
     const token = localStorage.getItem('authToken') || '';
-    if (!token) {
-      console.error('Aucun token trouvé pour récupérer les entreprises');
-      return;
-    }
-  
+    if (!token) return;
+
     this.entrepriseService.getListEntreprise(token).subscribe(
-      (list: Entreprise[]) => {
-        this.optionsEntreprise = list;
-        this.filteredOptions = this.control.valueChanges.pipe(
-          startWith<string | Entreprise>(''),
-          map(value => typeof value === 'string' ? value : value.nom),
-          map(name => name ? this._filter(name) : this.optionsEntreprise.slice())
-        );
-      },
-      err => {
-        console.error('Erreur lors de la récupération des entreprises :', err);
-        this.errorMessage = err.error?.error || 'Erreur chargement entreprises';
-      }
+        (list: Entreprise[]) => {
+            this.optionsEntreprise$.next(list); // Mettre à jour le BehaviorSubject
+            this.setupAutocomplete();
+        },
+        err => {
+            console.error('Erreur lors de la récupération des entreprises :', err);
+            this.errorMessage = err.error?.error || 'Erreur chargement entreprises';
+        }
+    );
+  }
+
+  // Ajouter une nouvelle méthode pour configurer l'autocomplete :
+  private setupAutocomplete() {
+    this.filteredOptions = combineLatest([
+      this.control.valueChanges.pipe(
+        startWith(''),
+        map(value => typeof value === 'string' ? value : value?.nom)
+      ),
+      this.optionsEntreprise$
+    ]).pipe(
+      map(([name, entreprises]) => 
+        name ? this._filter(name, entreprises) : entreprises
+      )
     );
   }
 
@@ -177,15 +186,17 @@ export class AddClientsComponent implements OnInit {
       this.entrepriseService.getListEntreprise(token).subscribe(
         (entreprises) => {
           console.log('Entreprise reçues depuis l\'API :', entreprises);
-          this.optionsEntreprise = entreprises;
+          // Mettre à jour le BehaviorSubject
+          this.optionsEntreprise$.next(entreprises); 
           this.filteredOptions = this.control.valueChanges.pipe(
             startWith<string | Entreprise>(''),
             map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-            map(name => (name ? this._filter(name) : this.optionsEntreprise.slice()))
+            // Passer le tableau d'entreprises comme second paramètre
+            map(name => (name ? this._filter(name, this.optionsEntreprise$.value) : this.optionsEntreprise$.value.slice()))
           );
         }, 
         (error) => {
-          console.error('Erreur lors de la récupération des entreporises :', error);
+          console.error('Erreur lors de la récupération des entreprises :', error);
         }
       ); 
     } else {
@@ -193,10 +204,10 @@ export class AddClientsComponent implements OnInit {
     }
   }
 
-  private _filter(name: string): Entreprise[] {
+  private _filter(name: string, entreprises: Entreprise[]): Entreprise[] {
     const filterValue = name.toLowerCase();
-    return this.optionsEntreprise.filter(e =>
-      e.nom.toLowerCase().includes(filterValue)
+    return entreprises.filter(e =>
+        e.nom.toLowerCase().includes(filterValue)
     );
   }
 
@@ -230,9 +241,6 @@ export class AddClientsComponent implements OnInit {
   ajouterEntreprise() {
     if (this.entrepriseForm.invalid) return;
   
-    // this.loading = true;
-    this.errorMessageApi = ''; // Réinitialiser le message d'erreur
-
     const newEntreprise: Entreprise = {
       nom: this.entrepriseForm.value.nom,
       email: this.entrepriseForm.value.email,
@@ -242,18 +250,14 @@ export class AddClientsComponent implements OnInit {
   
     this.entrepriseService.addEntreprise(newEntreprise).subscribe({
       next: (createdEntreprise) => {
-        // Mettre à jour la liste
-        this.optionsEntreprise = [...this.optionsEntreprise, createdEntreprise];
+        const current = this.optionsEntreprise$.value;
+        this.optionsEntreprise$.next([createdEntreprise, ...current]); // Nouvelle entreprise en tête
         this.control.setValue(createdEntreprise);
         this.closePopup();
-        // this.loading = false;
         this.entrepriseForm.reset();
       },
       error: (error) => {
-        // this.loading = false;
-      // Récupérer le message d'erreur proprement
-      this.errorMessageApi = error.message || 'Erreur lors de la création';
-      setTimeout(() => this.errorMessageApi = '', 5000);
+        this.errorMessageApi = error.message || 'Erreur lors de la création';
       }
     });
   }
