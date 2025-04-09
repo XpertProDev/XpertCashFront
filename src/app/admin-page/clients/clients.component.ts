@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatPaginator, MatPaginatorModule, PageEvent } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
 import { ClientService } from "../SERVICES/client-service";
 import { Clients } from "../MODELS/clients-model";
 
@@ -41,6 +41,7 @@ export class ClientsComponent implements OnInit  {
 
   constructor(
     private clientService: ClientService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -131,6 +132,11 @@ export class ClientsComponent implements OnInit  {
   get paginatedClients(): Clients[] {
     const startIndex = this.currentPage * this.pageSize;
     return this.clients.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  // boutique id routing
+  openClientDetail(clientId: number): void {
+    this.router.navigate(['/detail-client', clientId]);
   }
 
 

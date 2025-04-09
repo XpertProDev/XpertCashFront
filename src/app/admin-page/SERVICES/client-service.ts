@@ -12,6 +12,8 @@ export class ClientService {
 
   constructor(private http: HttpClient) { }
 
+  getClientById() {}
+
 
   addClient(client: Clients): Observable<{ message: string; clientId: string; createdAt: string }> {
     const token = localStorage.getItem('authToken') || '';
@@ -45,11 +47,7 @@ export class ClientService {
   }
 
 
-  // getListClients(): Observable<Clients[]> {
-  //   const token = localStorage.getItem('authToken') || '';
-  //   const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-  //   return this.http.get<Clients[]>(`${this.apiUrl}/clients`, { headers });
-  // }
+  editClient() {}
   
 
 }

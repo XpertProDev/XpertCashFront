@@ -219,6 +219,14 @@ const routes: Routes = [
         canActivate: [authGuard]
       },
 
+      // Routing detail et edit client
+      {
+        path: 'detail-client/:id',
+        loadComponent: () => import('./admin-page/clients/detail-edit-client/detail-edit-client.component').then(m => m.DetailEditClientComponent),
+        canActivate: [authGuard]
+
+      },
+
     ]
   }
 ];

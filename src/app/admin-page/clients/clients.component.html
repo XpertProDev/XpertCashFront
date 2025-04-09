@@ -49,7 +49,7 @@
       </thead>
 
       <tbody>
-          <tr *ngFor="let client of paginatedClients">
+          <tr *ngFor="let client of paginatedClients" (click)="openClientDetail(client.id)">
               <td>
                 <div class="imgClient">
                   <!-- <img [src]="product.photo"> -->
