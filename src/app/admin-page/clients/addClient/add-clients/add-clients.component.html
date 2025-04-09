@@ -83,11 +83,11 @@
                     <label for="categorieId" class="label">Mon entreprise</label>
                     <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onEntrepriseSelected($event)" [displayWith]="displayFnEntreprise">
 
-                      <mat-option class="select-option">
+                      <mat-option class="select-option" (click)="openPopup()">
                         <div style="display: flex; align-items: center; color: #0672E4;">
                           <!-- <i class="ri-checkbox-multiple-line"></i> -->
                           <i class="ri-community-line"></i>
-                          <span style="margin-left: 8px;">Créer un entreprise</span>
+                          <span style="margin-left: 8px;">Créer une entreprise</span>
                         </div>
                       </mat-option>
 
@@ -151,4 +151,82 @@
         </form>
       </div>
     </div>
+</div>
+
+<!-- Popup overlay -->
+<div class="popup-overlay" *ngIf="showPopup">
+  <div class="popup-content">
+      <div class="popup-header">
+          <h4>Ajouter une entreprise</h4>
+          <button class="close-btn" (click)="closePopup()">&times;</button>
+      </div>
+      <form [formGroup]="entrepriseForm">
+        <div class="popup-body">
+          <div class="champ_grid">
+            <!-- Nom entreprise -->
+            <div class="champ_input">
+              <input class="input_focus" 
+                     type="text" 
+                     formControlName="nom"
+                     placeholder="Saisis le nom de l'entreprise">
+              <label class="label">Nom entreprise <span style="color: #ff0000; margin-left: 5px;">*</span></label>
+              <div *ngIf="entrepriseForm.get('nom')?.invalid && entrepriseForm.get('nom')?.touched" 
+                   class="error-text">
+                Ce champ est requis
+              </div>
+            </div>
+      
+            <!-- Email -->
+            <div class="champ_input">
+              <input class="input_focus" 
+                     type="email" 
+                     formControlName="email"
+                     placeholder="Saisis l'email">
+              <label class="label">Email</label>
+              <!-- <div *ngIf="entrepriseForm.get('email')?.errors?.['email']" 
+                   class="error-text">
+                Format email invalide
+              </div> -->
+            </div>
+          </div>
+      
+          <div class="champ_grid">
+            <!-- Adresse -->
+            <div class="champ_input">
+              <input class="input_focus" 
+                     type="text" 
+                     formControlName="adresse"
+                     placeholder="Saisis l'adresse">
+              <label class="label">Adresse</label>
+            </div>
+      
+            <!-- Téléphone -->
+            <div class="champ_input">
+              <input class="input_focus" 
+                     type="tel" 
+                     formControlName="telephone"
+                     placeholder="00 00 00 00">
+              <label class="label">Téléphone</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="container_error_message">
+          <div *ngIf="errorMessageApi" class="error-messageApi">
+          {{ errorMessageApi }}
+          </div>
+        </div>
+      
+        <div class="popup-footer">
+          <button type="button" class="btn-cancel" (click)="closePopup()">Annuler</button>
+          <button type="submit" class="btn-submit" 
+                [disabled]="entrepriseForm.invalid" 
+                [style.backgroundColor]="entrepriseForm.valid ? '#0672E4' : '#0671e434'"
+                [style.color]="entrepriseForm.valid ? '#ffffff' : '#00000073'"
+                [style.cursor]="entrepriseForm.valid ? 'pointer' : 'no-drop'" (click)="ajouterEntreprise()">
+            Ajouter
+          </button>
+        </div>
+      </form>
   </div>
+</div>

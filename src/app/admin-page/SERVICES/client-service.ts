@@ -27,6 +27,9 @@ export class ClientService {
     return this.http.get<any[]>(`${this.apiUrl}/clients`, { headers });
   }
 
-  addClient() {}
+  addClient() {
+
+  }
+  
 
 }

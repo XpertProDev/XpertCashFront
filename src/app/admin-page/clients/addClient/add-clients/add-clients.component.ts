@@ -1,7 +1,7 @@
 
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Router } from '@angular/router';
 import imageCompression from 'browser-image-compression';
@@ -26,6 +26,9 @@ export class AddClientsComponent implements OnInit {
 
 
   errorMessage: string = '';
+  errorMessageApi: string = '';
+  showPopup = false;
+  entrepriseForm: FormGroup = new FormGroup({});
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
   selectedFile: File | null | undefined = null;
@@ -35,11 +38,14 @@ export class AddClientsComponent implements OnInit {
   filteredOptions: Observable<Entreprise[]> = of([]);
   optionsEntreprise: Entreprise[] = [];
   // Select pour voir entreprise
-  isEntrepriseSelected: boolean = false;
+  isEntrepriseSelected: boolean = true;
+  loading = false;
+
 
   constructor(
     private router: Router,
     private entrepriseService: EntrepriseService,
+    private fb: FormBuilder,
   ) {}
 
   async testImageCompression(file: File) {
@@ -111,6 +117,7 @@ export class AddClientsComponent implements OnInit {
 
   ngOnInit() {
     this.getListEntreprise();
+    this.initEntreprise();
   }
 
   getListEntreprise() {
@@ -155,6 +162,52 @@ export class AddClientsComponent implements OnInit {
     // }
   }
 
+  openPopup() {
+    this.showPopup = true;
+  }
+
+  closePopup() {
+    this.showPopup = false;
+  }
   
+  initEntreprise() {
+    this.entrepriseForm = this.fb.group({
+      nom: ['', Validators.required],
+      email: [''],
+      telephone: [''],
+      adresse: ['']
+    });
+  }
+
+  ajouterEntreprise() {
+    if (this.entrepriseForm.invalid) return;
+  
+    // this.loading = true;
+    this.errorMessageApi = ''; // Réinitialiser le message d'erreur
+
+    const newEntreprise: Entreprise = {
+      nom: this.entrepriseForm.value.nom,
+      email: this.entrepriseForm.value.email,
+      telephone: this.entrepriseForm.value.telephone,
+      adresse: this.entrepriseForm.value.adresse
+    };
+  
+    this.entrepriseService.addEntreprise(newEntreprise).subscribe({
+      next: (createdEntreprise) => {
+        // Mettre à jour la liste
+        this.optionsEntreprise = [...this.optionsEntreprise, createdEntreprise];
+        this.control.setValue(createdEntreprise);
+        this.closePopup();
+        // this.loading = false;
+        this.entrepriseForm.reset();
+      },
+      error: (error) => {
+        // this.loading = false;
+      // Récupérer le message d'erreur proprement
+      this.errorMessageApi = error.message || 'Erreur lors de la création';
+      setTimeout(() => this.errorMessageApi = '', 5000);
+      }
+    });
+  }
 
 }

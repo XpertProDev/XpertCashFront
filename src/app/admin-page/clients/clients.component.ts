@@ -36,6 +36,8 @@ export class ClientsComponent implements OnInit  {
   clients: Clients[] = [];
   sortField = 'nomComplet';
   sortDirection: 'asc' | 'desc' = 'asc';
+  noClientsAvailable = false;
+  messageNoClient = 'Aucun client disponible.';
 
   constructor(
     private clientService: ClientService,
@@ -89,6 +91,7 @@ export class ClientsComponent implements OnInit  {
         next: (data) => {
           this.clients = data;
           this.totalClients = data.length;
+          this.noClientsAvailable = this.clients.length === 0;
           console.log('Clients récupérées:', this.clients);
         },
       })
