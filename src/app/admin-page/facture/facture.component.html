@@ -23,11 +23,37 @@
           </div>
         </div>
 
+        <!-- facture-component.html -->
+        <div class="container_list_boutique">
+          <div class="content_list_boutique">
+            <div class="name_boutique">
+              <ng-container *ngIf="(boutiques?.length || 0) > 0; else noBoutiques">
+                <div class="all_boutique" 
+                    [class.name_boutique_active]="selectedBoutique === null"
+                    (click)="selectBoutique(null)">
+                  <p class="all_boutique">Toutes les boutiques</p>
+                </div>
+                <ng-container *ngFor="let boutique of boutiques; let i = index">
+                  <p 
+                    [class.name_boutique_active]="boutique.id === selectedBoutique?.id && boutique.actif"
+                    [class.suspended-boutique]="!boutique.actif"
+                    (click)="boutique.actif ? selectBoutique(boutique) : showSuspendedBoutiqueDialog()">
+                    {{ boutique.nomBoutique }}
+                    <i *ngIf="!boutique.actif" class="ri-error-warning-line warning-icon"></i>
+                  </p>
+                  <div *ngIf="i !== boutiques.length - 1" class="barre"></div>
+                </ng-container>
+              </ng-container>
+              <ng-template #noBoutiques>
+                <p class="no-boutiques-message">Aucune boutique trouvée</p>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+
          <!-- Message quand il n'y a pas de factures -->
         <div *ngIf="noFacturesAvailable" class="no-facture-message">
           {{ messageNoFacture }}
-
-          
         </div>
 
         <!-- Message quand la recherche ne donne rien -->
@@ -58,7 +84,7 @@
                         <div class="barre" *ngIf="!panel.expanded && facture.type === 'AJOUTER'"></div>
                     
                         <!-- // Nº Fournisseur (Seulement pour AJOUTER) -->
-                        <div class="Facture" *ngIf="facture.type === 'AJOUTER'" style="margin-left: 10px;">
+                        <div class="Facture" *ngIf="facture.type === 'AJOUTER'">
                             Nº Fournisseur : <span class="title_facture_codeFournisseur" [innerHTML]="highlightMatch(facture.codeFournisseur || '****')"></span> 
                         </div>
                     

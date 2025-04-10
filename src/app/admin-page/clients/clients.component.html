@@ -1,1 +1,148 @@
-<p>clients works!</p>
+<div class="containerTable">
+    <!-- En-tête : titre, actions et barre de recherche -->
+    <div class="tasks-header">
+      <h1 class="title">Mes Clients</h1>
+      <div class="actions">
+        <button class="add-task" routerLink="/ajouter-client">Créer un client</button>
+  
+        <div class="barre"></div>
+  
+        <!-- Icone avec événement de clic -->
+        <div class="contentIcon" (click)="showDropdown = !showDropdown" clickOutside (clickOutside)="showDropdown = false">
+          <i [class]="isListView ? 'ri-list-check' : 'ri-apps-fill'"></i>
+          <!-- Dropdown -->
+          <div class="view-dropdown" *ngIf="showDropdown">
+            <div class="dropdown-item" (click)="toggleView('list')">
+                Liste {{ isListView ? '✓' : '' }}
+            </div>
+            <div class="dropdown-item" (click)="toggleView('grid')">
+                Cadre {{ !isListView ? '✓' : '' }}
+            </div>
+          </div>
+        </div>
+  
+        <div class="barre"></div>
+        
+        <div class="inputSearch">
+          <i class="ri-search-2-line"></i>
+          <input 
+            type="text"
+            placeholder="Recherche...." 
+          />
+        </div>
+      </div>
+    </div>
+    
+      <!-- Tableau (visible par défaut) -->
+    <table *ngIf="isListView">
+      
+      <thead>
+        <th>Photo</th>
+        <th (click)="sort('nomComplet')">
+          Nom & prénom 
+          <i [class]="sortField === 'nomComplet' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
+        </th>
+        <th> Email </th>
+        <th> Adresse </th>
+        <th> Téléphone </th>
+      </thead>
+
+      <tbody>
+          <tr *ngFor="let client of paginatedClients">
+              <td>
+                <div class="imgClient">
+                  <!-- <img [src]="product.photo"> -->
+                  <img src="assets/img/profil.png" alt="Photo clients">
+                  <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/image_product.png' : product.photo"> -->
+                </div>
+              </td>
+              <td>
+                <span *ngIf="client.nomComplet; else noNomComplet">{{ client.nomComplet }}</span>
+                <ng-template #noNomComplet>
+                  <span class="no-phone-text">Nom est vide</span>
+                </ng-template>
+              </td>
+              <td>
+                <span *ngIf="client.email; else noEmail">{{ client.email }}</span>
+                <ng-template #noEmail>
+                  <span class="no-phone-text">Non email</span>
+                </ng-template>
+              </td>
+              <td>
+                <span *ngIf="client.adresse; else noAdresse">{{ client.adresse }}</span>
+                <ng-template #noAdresse>
+                  <span class="no-phone-text">Non adresse</span>
+                </ng-template>
+              </td>
+              <td>
+                <span *ngIf="client.telephone; else noPhone">{{ client.telephone }}</span>
+                <ng-template #noPhone>
+                  <span class="no-phone-text">Non numéro de téléphone</span>
+                </ng-template>
+              </td>
+          </tr>
+      </tbody>
+    </table>
+    
+    <!-- Vue cadre (quand on active) -->
+    <div class="container_cadre" *ngIf="!isListView">
+      <div class="grid-view">
+        <div class="client-card" *ngFor="let client of paginatedClients">
+          <div class="name_icon">
+            <h3>
+              <span *ngIf="client.nomComplet; else noNomComplet">{{ client.nomComplet }}</span>
+              <ng-template #noNomComplet>
+                <span class="no-phone-text">Nom est vide</span>
+              </ng-template>
+            </h3>
+            <i class="ri-community-line" title="Entreprise"></i>
+          </div>
+          <div class="content_cadre_double">
+            <!-- // Les information sur les cadre  -->
+            <div class="info_cadre">
+              <p>
+                <i class="ri-mail-line"></i>
+                <span *ngIf="client.email; else noEmail">{{ client.email }}</span>
+                <ng-template #noEmail>
+                  <span class="no-phone-text">Non email</span>
+                </ng-template>
+              </p>
+              <p>
+                <i class="ri-map-pin-line"></i>
+                <span *ngIf="client.adresse; else noAdresse">{{ client.adresse }}</span>
+                <ng-template #noAdresse>
+                  <span class="no-phone-text">Non adresse</span>
+                </ng-template>
+              </p>
+              <p>
+                <i class="ri-phone-line"></i>
+                <span *ngIf="client.telephone; else noPhone">{{ client.telephone }}</span>
+                <ng-template #noPhone>
+                  <span class="no-phone-text">Non numéro de téléphone</span>
+                </ng-template>
+              </p>
+            </div>
+            <!-- // Image de client  -->
+            <div class="imgClient_grid">
+              <!-- <img [src]="product.photo"> -->
+              <img src="assets/img/profil.png" alt="Photo clients">
+              <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/image_product.png' : product.photo"> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <mat-paginator
+        [length]="clients.length"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[6, 10, 25, 100]"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+    
+  </div>
+  
+  

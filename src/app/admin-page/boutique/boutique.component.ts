@@ -116,7 +116,7 @@ export class BoutiqueComponent implements OnInit {
         console.error('Erreur lors de la récupération des boutiques:', err);
       }
     });
-  } 
+  }
 
   filterBoutiques(): void {
     const term = this.searchTerm.toLowerCase();

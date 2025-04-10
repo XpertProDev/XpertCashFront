@@ -34,8 +34,6 @@ registerLocaleData(localeDe);
     InscriptionComponent,
     CustomNumberPipe,
     UnlockDialogComponent,
-    
-    
   ],
   imports: [
     CommonModule,
