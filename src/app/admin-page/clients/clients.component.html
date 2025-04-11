@@ -3,7 +3,7 @@
     <div class="tasks-header">
       <h1 class="title">Mes Clients</h1>
       <div class="actions">
-        <button class="add-task" routerLink="/ajouter-client">Créer un client</button>
+        <button class="add-task" (click)="openPopup()">Créer un client</button>
   
         <div class="barre"></div>
   
@@ -97,7 +97,7 @@
     <!-- Vue cadre (quand on active) -->
     <div class="container_cadre" *ngIf="!isListView">
       <div class="grid-view">
-        <div class="client-card" *ngFor="let client of paginatedClients">
+        <div class="client-card" *ngFor="let client of paginatedClients" (click)="openClientDetail(client.id)">
           <div class="name_icon">
             <h3>
               <span *ngIf="client.nomComplet; else noNomComplet">{{ client.nomComplet }}</span>
@@ -166,3 +166,25 @@
   </div>
   
   
+<!-- Popup overlay -->
+<div class="popup-overlay" *ngIf="showPopup">
+  <div class="popup-content">
+      <div class="popup-header">
+          <h3>Ajouter une entreprise</h3>
+          <button class="close-btn" (click)="closePopup()">&times;</button>
+      </div>
+
+      <div class="contentCadreChoix">
+        <div class="cadreChoix" routerLink="/ajouter-client">
+          Clients
+        </div>
+
+        <div class="sizeBox"></div>
+
+        <div class="cadreChoix">
+          Entreprise clients
+        </div>
+      </div>
+      
+  </div>
+</div>

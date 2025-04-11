@@ -24,7 +24,8 @@ import { Clients } from "../MODELS/clients-model";
 export class ClientsComponent implements OnInit  {
 
   isListView = true;
-  showDropdown = false; 
+  showDropdown = false;
+  showPopup = false;
 
   // Pagination et tableau de données
   // Client 
@@ -138,6 +139,10 @@ export class ClientsComponent implements OnInit  {
   openClientDetail(clientId: number): void {
     this.router.navigate(['/detail-client', clientId]);
   }
+
+   // Ouvre/ferme le popup choix d'ajoute client
+   openPopup() { this.showPopup = true; }
+   closePopup() { this.showPopup = false; }
 
 
 }
