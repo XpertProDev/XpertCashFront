@@ -402,9 +402,10 @@ mat-paginator {
   
 .popup-content {
     background: white;
-    padding: 20px;
+    background: white;
+    padding: 15px 20px;
     border-radius: 8px;
-    width: 50%;
+    width: 25%;
 }
   
 .popup-header {
@@ -429,7 +430,7 @@ mat-paginator {
 .cadreChoix {
     background-color: #0672E4;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    padding: 15px 10px;
+    padding: 10px;
     border-radius: 5px;
     cursor: pointer;
     color: #ffffff;

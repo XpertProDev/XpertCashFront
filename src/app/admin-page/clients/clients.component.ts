@@ -135,9 +135,15 @@ export class ClientsComponent implements OnInit  {
     return this.clients.slice(startIndex, startIndex + this.pageSize);
   }
 
-  // boutique id routing
+  // client id routing
   openClientDetail(clientId: number): void {
     this.router.navigate(['/detail-client', clientId]);
+  }
+  
+  // entreprise client id routing
+  openEntrepriseClientDetail(clientId: number, event: MouseEvent): void {
+    event.stopPropagation(); 
+    this.router.navigate(['/detail-entreprise', clientId]);
   }
 
    // Ouvre/ferme le popup choix d'ajoute client

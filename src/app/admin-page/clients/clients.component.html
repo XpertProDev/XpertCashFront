@@ -82,7 +82,7 @@
                 </ng-template>
               </td>
               <td>
-                <div *ngIf="client.entrepriseClient; else noEntreprise" class="iconEntrepriseList">
+                <div *ngIf="client.entrepriseClient; else noEntreprise" class="iconEntrepriseList" (click)="openEntrepriseClientDetail(client.id, $event)">
                   <i class="ri-community-line" title="Entreprise"></i>
                 </div>
                 <ng-template #noEntreprise>
@@ -105,9 +105,10 @@
                 <span class="no-phone-text">Nom est vide</span>
               </ng-template>
             </h3>
-            <ng-container *ngIf="client.entrepriseClient; else noEntrepriseCard">
+            <span *ngIf="client.entrepriseClient; else noEntrepriseCard" 
+                  (click)="openEntrepriseClientDetail(client.id, $event)">
               <i class="ri-community-line" title="Entreprise"></i>
-            </ng-container>
+            </span>
             <ng-template #noEntrepriseCard>
               <span class="no-phone-text">Non entreprise</span>
             </ng-template>
@@ -181,7 +182,7 @@
 
         <div class="sizeBox"></div>
 
-        <div class="cadreChoix">
+        <div class="cadreChoix" routerLink="/ajouter-entreprise-client">
           Entreprise clients
         </div>
       </div>

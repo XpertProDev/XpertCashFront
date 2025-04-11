@@ -26,7 +26,6 @@ import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-servic
 })
 export class AddClientsComponent implements OnInit {
 
-
   errorMessage: string = '';
   errorMessageApi: string = '';
   successMessage = '';
@@ -43,7 +42,6 @@ export class AddClientsComponent implements OnInit {
   loading = false;
   optionsEntreprise$ = new BehaviorSubject<Entreprise[]>([]);
   entrepriseRequiredError = false;
-
 
   constructor(
     private router: Router,
