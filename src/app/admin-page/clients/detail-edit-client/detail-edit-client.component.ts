@@ -157,9 +157,8 @@ export class DetailEditClientComponent {
 
   private handleEntreprise(entreprise: Entreprise | null) {
     this.isEntrepriseSelected = !!entreprise;
-    if (entreprise) {
-      this.control.setValue(entreprise);
-    }
+    this.control.setValue(entreprise);
+    this.entrepriseRequiredError = false;
   }
 
   getClientForm() {
@@ -294,7 +293,63 @@ export class DetailEditClientComponent {
   }
 
   // Soumission du formulaire client
-  modifierClient() {}
+  modifierClient() {
+    // Marquer tous les champs comme touchés pour afficher les erreurs
+    this.markFormGroupTouched(this.modifierClientForm);
+  
+    if (this.modifierClientForm.invalid) {
+      this.errorMessage = 'Veuillez corriger les erreurs dans le formulaire.';
+      return;
+    }
+  
+    // Vérification de l'entreprise si le toggle est activé
+    let entrepriseClient: Entreprise | null = null;
+    if (this.isEntrepriseSelected) {
+      entrepriseClient = this.control.value;
+      if (!entrepriseClient) {
+        this.entrepriseRequiredError = true;
+        this.errorMessage = 'Veuillez sélectionner ou créer une entreprise.';
+        return;
+      }
+    }
+  
+    // Construction de l'objet client
+    const clientData: any = {
+      ...this.modifierClientForm.value,
+      id: this.clientId
+    };
+
+    if (this.isEntrepriseSelected && this.control.value?.id) {
+      clientData.entrepriseClient = { id: this.control.value.id };
+    } else {
+      clientData.entrepriseClient = null;
+    }
+  
+    // Appel au service
+    this.clientService.updateClient(this.clientId, clientData).subscribe({
+      next: (updatedClient) => {
+        this.successMessage = 'Client modifié avec succès !';
+        this.errorMessage = '';
+        setTimeout(() => this.router.navigate(['/clients']), 2000);
+      },
+      error: (error) => {
+        console.error('Erreur:', error);
+        this.errorMessage = error.error?.message || 'Erreur lors de la modification du client';
+        this.successMessage = '';
+      }
+    });
+  }
+  
+  // Méthode utilitaire pour marquer tous les champs comme touchés
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+  
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
+  }
 
   // Annuler et revenir à la liste
   goToClients() {
