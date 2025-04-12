@@ -7,7 +7,7 @@
             <h3>Modifier un entreprise client</h3>
           </div>
   
-          <div class="form_left_right">
+          <div class="form_left_right" >
             <div class="formulaire">
               <!-- Cadre contenant le select et la description -->
               <div class="information_cadre">
@@ -17,10 +17,11 @@
                     <!-- Nom et prenom -->
                     <div class="champ_input champ_input2">
                       <input type="text" class="input_focus"
-                                id="nomComplet" formControlName="nom"
-                                name="nomComplet"
-                                placeholder="Saisis le nom d'entreprise">
-                      <label for="nomComplet" class="label">Nom d'entreprise</label>
+                                id="nom" [value]="client.entrepriseClient.nom || 'Nom est vide' "
+                                name="nom"
+                                placeholder="Saisis le nom d'entreprise"
+                                [class.default-address]="!client.entrepriseClient.nom">
+                      <label for="nom" class="label">Nom d'entreprise</label>
                       <!-- <div *ngIf="entrepriseClientForm.get('nom')?.touched && entrepriseClientForm.get('nom')?.invalid" 
                             class="error">
                             <small *ngIf="entrepriseClientForm.get('nom')?.errors?.['required']">
@@ -34,9 +35,10 @@
                     <!-- Email -->
                     <div class="champ_input champ_input2">
                       <input type="email" class="input_focus"
-                                id="email" formControlName="email"
+                                id="email" [value]="client.entrepriseClient.email || 'Non email' "
                                 name="email"
-                                placeholder="Saisis l'email">
+                                placeholder="Saisis l'email"
+                                [class.default-address]="!client.entrepriseClient.email">
                       <label for="email" class="label">Email</label>
                       <!-- <div *ngIf="entrepriseClientForm.get('email')?.touched && entrepriseClientForm.get('email')?.invalid" class="error">
                         <small *ngIf="entrepriseClientForm.get('email')?.errors?.['email']">
@@ -50,9 +52,10 @@
                     <!-- Telephone -->
                     <div class="champ_input champ_input2">
                       <input type="number" class="input_focus"
-                                id="telephone" formControlName="telephone"
+                                id="telephone" [value]="client.entrepriseClient.telephone || 'Non téléphone' "
                                 name="telephone"
-                                placeholder="Saisis le numéro de téléphone">
+                                placeholder="Saisis le numéro de téléphone"
+                                [class.default-address]="!client.entrepriseClient.telephone">
                       <label for="telephone" class="label">Téléphone</label>
                       <!-- <div *ngIf="entrepriseClientForm.get('telephone')?.touched && entrepriseClientForm.get('telephone')?.invalid" 
                             class="error">
@@ -65,9 +68,10 @@
                     <div class="champ_input champ_input2">
                       <input class="input_focus"
                                 autocomplete="off"
-                                id="adresse" formControlName="adresse"
+                                id="adresse" [value]="client.entrepriseClient.adresse || 'Non adresse' "
                                 name="adresse"
-                                placeholder="Saisis l'adresse">
+                                placeholder="Saisis l'adresse"
+                                [class.default-address]="!client.entrepriseClient.adresse">
                       <label for="adresse" class="label">Adresse</label>
                     </div>
 
@@ -100,12 +104,6 @@
   
               <!-- Boutons Ajouter et Sauvegarder -->
               <div class="information_cadre information_cadre_save">
-                 <!-- Message d'erreur global -->
-                <div class="container_error_message">
-                    <!-- Messages API -->
-                    <div *ngIf="errorMessageApi" class="error-messageApi2">{{ errorMessageApi }}</div>
-                    <div *ngIf="successMessage" class="success-messageApi2">{{ successMessage }}</div>
-                </div>
 
                 <div class="info_titre_input info_titre_input_btn">
                   <div class="btn_annuler">
