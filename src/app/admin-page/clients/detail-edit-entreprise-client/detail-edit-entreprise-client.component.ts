@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-service';
 import { CommonModule } from '@angular/common';
 import { Clients } from '../../MODELS/clients-model';
+import { Entreprise } from '../../MODELS/entreprise-model';
 
 @Component({
   selector: 'app-detail-edit-entreprise-client',
@@ -36,6 +37,7 @@ export class DetailEditEntrepriseClientComponent {
     private router: Router,
     private route: ActivatedRoute,
     private fb: FormBuilder,
+    private entrepriseClientService: EntrepriseClientService,
   ) {}
 
   ngOnInit() {
@@ -78,10 +80,10 @@ export class DetailEditEntrepriseClientComponent {
   initializeForm() {
     if (this.client?.entrepriseClient) {
       this.entrepriseClientForm.patchValue({
-        nom: this.client.entrepriseClient.nom,
-        email: this.client.entrepriseClient.email,
-        telephone: this.client.entrepriseClient.telephone,
-        adresse: this.client.entrepriseClient.adresse
+        nom: this.client.entrepriseClient.nom || '',
+        email: this.client.entrepriseClient.email || '',
+        telephone: this.client.entrepriseClient.telephone || '',
+        adresse: this.client.entrepriseClient.adresse || ''
       });
     }
   }
@@ -141,6 +143,46 @@ export class DetailEditEntrepriseClientComponent {
 
   goToClients() {
       this.router.navigate(['/clients']);
+  }
+
+  onSubmit() {
+    if (this.entrepriseClientForm.valid && this.client?.entrepriseClient?.id) {
+      const updatedEntreprise = this.getFormData();
+  
+      this.entrepriseClientService.updateEntrepriseClient(
+        this.client.entrepriseClient.id,
+        updatedEntreprise
+      ).subscribe({
+        next: (updatedEntreprise) => {
+          console.log('Entreprise mise à jour:', updatedEntreprise);
+          this.client.entrepriseClient = { 
+            ...this.client.entrepriseClient, 
+            ...updatedEntreprise 
+          };
+          // Option 1 : Recharger les données du client
+          this.getClient(this.client.id!);
+          
+          // Option 2 : Naviguer vers la liste (avec rafraîchissement)
+          this.router.navigate(['/clients']);
+        },
+        error: (err) => {
+          console.error('Erreur lors de la mise à jour:', err);
+          alert(err.message || 'Erreur lors de la modification');
+        }
+      });
+    } else {
+      alert('Veuillez corriger les erreurs dans le formulaire');
+    }
+  }
+
+  private getFormData(): Entreprise {
+    return {
+      id: this.client.entrepriseClient?.id,
+      nom: this.entrepriseClientForm.get('nom')?.value,
+      email: this.entrepriseClientForm.get('email')?.value,
+      telephone: this.entrepriseClientForm.get('telephone')?.value,
+      adresse: this.entrepriseClientForm.get('adresse')?.value
+    };
   }
 
 }

@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { EntrepriseClient } from "../MODELS/entreprise-clients-model";
-import { catchError, Observable, throwError } from "rxjs";
+import { catchError, Observable, tap, throwError } from "rxjs";
 
 
 @Injectable({
@@ -30,6 +30,32 @@ export class EntrepriseClientService {
           return throwError(() => new Error(errorMsg));
         }),
       );
-    }
+  }
+
+  updateEntrepriseClient(id: number, entrepriseClient: EntrepriseClient): Observable<EntrepriseClient> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  
+    return this.http.put<EntrepriseClient>(
+      `${this.apiUrl}/cliententrepriseupdate/${id}`, 
+      entrepriseClient, 
+      { headers }
+    ).pipe(
+      // Ajouter un opérateur pour rafraîchir les données
+      tap(updated => console.log('Entreprise mise à jour:', updated)),
+      catchError(error => {
+        let errorMsg = 'Erreur lors de la modification';
+        if (error.status === 400) {
+          errorMsg = error.error || 'Données invalides';
+        } else if (error.status === 404) {
+          errorMsg = 'Entreprise non trouvée';
+        }
+        return throwError(() => new Error(errorMsg));
+      })
+    );
+  }
 
 }
