@@ -174,6 +174,8 @@ export class AddProduitComponent {
   isLoading: boolean = false;
 
   boutiqueIdSelected: number[] = [];
+  quantitesMap: { [boutiqueId: number]: number } = {};
+
 
   constructor(
     private sharedDataService: SharedDataService,
@@ -693,7 +695,10 @@ export class AddProduitComponent {
     }
   
       // Envoi du produit avec l'image compressée (JPEG/PNG) ou l'image SVG par défaut
-      this.produitService.ajouterProduit(this.boutiqueIdSelected, produit, finalImage, addToStock)
+      const quantitesSelected = this.boutiqueIdSelected.map(id => this.quantitesMap[id] || 0);
+
+      this.produitService
+        .ajouterProduit(this.boutiqueIdSelected, quantitesSelected, produit, finalImage, addToStock)
         .subscribe({
           next: data => {
             this.showPopupMessage({
@@ -702,17 +707,16 @@ export class AddProduitComponent {
               image: 'assets/img/succcccc.png',
               type: 'success',
             });
+      
             this.ajouteProduitForm.reset();
             this.myControl.reset();
             this.uniteControl.reset();
-  
+      
             this.imageFile = null;
             this.selectedFile = null;
             this.newPhotoUrl = null;
-  
+      
             this.isLoading = false;
-  
-            // Redirection vers la page '/produit'
             this.router.navigate(['/produit']);
           },
           error: error => {
@@ -734,6 +738,8 @@ export class AddProduitComponent {
             this.isLoading = false;
           }
         });
+      
+
   
     } catch (error) {
       console.error('Erreur lors de la compression:', error);

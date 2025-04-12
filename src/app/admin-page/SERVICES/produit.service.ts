@@ -15,15 +15,17 @@ export class ProduitService {
 
   ajouterProduit(
     boutiqueIds: number[],
-    produit: any, // Modifier le type si nécessaire
+    quantites: number[], // <-- à ajouter
+    produit: any,
     imageFile: File | null,
-    addToStock: boolean,
-  ): Observable<Produit> {
+    addToStock: boolean
+  ): Observable<Produit[]> { // <-- tableau car ton backend retourne une liste
     const url = `${this.apiUrl}/create?addToStock=${addToStock}`;
     const formData: FormData = new FormData();
   
     formData.append('boutiqueIds', JSON.stringify(boutiqueIds));
-    formData.append('produit', JSON.stringify(produit)); 
+    formData.append('quantites', JSON.stringify(quantites)); // <-- important
+    formData.append('produit', JSON.stringify(produit));
   
     if (imageFile) {
       formData.append('image', imageFile, imageFile.name);
@@ -34,8 +36,9 @@ export class ProduitService {
       'Authorization': `Bearer ${token}`
     });
   
-    return this.http.post<Produit>(url, formData, { headers });
+    return this.http.post<Produit[]>(url, formData, { headers });
   }
+  
 
   modifierProduit(produit: Produit, file?: File): Observable<Produit> {
     const token = localStorage.getItem('authToken') || '';
