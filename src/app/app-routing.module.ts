@@ -219,6 +219,29 @@ const routes: Routes = [
         canActivate: [authGuard]
       },
 
+      // La routing de Add emtreprise client
+      {
+        path: 'ajouter-entreprise-client',
+        loadComponent: () => import('./admin-page/clients/add-entreprise-client/add-entreprise-client.component').then(m => m.AddEntrepriseClientComponent),
+        canActivate: [authGuard]
+      },
+
+      // Routing detail et edit client
+      {
+        path: 'detail-client/:id',
+        loadComponent: () => import('./admin-page/clients/detail-edit-client/detail-edit-client.component').then(m => m.DetailEditClientComponent),
+        canActivate: [authGuard]
+
+      },
+
+      // Routing detail et edit entreprise client
+      {
+        path: 'detail-entreprise/:id',
+        loadComponent: () => import('./admin-page/clients/detail-edit-entreprise-client/detail-edit-entreprise-client.component').then(m => m.DetailEditEntrepriseClientComponent),
+        canActivate: [authGuard]
+
+      },
+
     ]
   }
 ];

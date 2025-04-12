@@ -1,19 +1,17 @@
-
-import { CommonModule } from '@angular/common';
-import { Token } from '@angular/compiler';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { Router } from '@angular/router';
+import { BehaviorSubject, combineLatest, map, Observable, of, startWith } from 'rxjs';
+import { Entreprise } from '../../MODELS/entreprise-model';
+import { ActivatedRoute, Router } from '@angular/router';
 import imageCompression from 'browser-image-compression';
-import { Observable, startWith, map, of, BehaviorSubject, combineLatest } from 'rxjs';
-import { Clients } from 'src/app/admin-page/MODELS/clients-model';
-import { Entreprise } from 'src/app/admin-page/MODELS/entreprise-model';
-import { ClientService } from 'src/app/admin-page/SERVICES/client-service';
-import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-service';
+import { Clients } from '../../MODELS/clients-model';
+import { ClientService } from '../../SERVICES/client-service';
+import { EntrepriseService } from '../../SERVICES/entreprise-service';
+import { CommonModule } from '@angular/common';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
-  selector: 'app-add-clients',
+  selector: 'app-detail-edit-client',
   standalone: true,
   imports: [
     FormsModule,
@@ -21,15 +19,15 @@ import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-servic
     ReactiveFormsModule,
     MatAutocompleteModule, 
   ],
-  templateUrl: './add-clients.component.html',
-  styleUrl: './add-clients.component.scss'
+  templateUrl: './detail-edit-client.component.html',
+  styleUrl: './detail-edit-client.component.scss'
 })
-export class AddClientsComponent implements OnInit {
-
+export class DetailEditClientComponent {
+  clientId!: number;
   errorMessage: string = '';
   errorMessageApi: string = '';
   successMessage = '';
-  clientForm!: FormGroup;
+  modifierClientForm!: FormGroup;
   entrepriseForm!: FormGroup;
   isEntrepriseSelected = false;
   showPopup = false;
@@ -42,12 +40,14 @@ export class AddClientsComponent implements OnInit {
   loading = false;
   optionsEntreprise$ = new BehaviorSubject<Entreprise[]>([]);
   entrepriseRequiredError = false;
-
+  
+  
   constructor(
     private router: Router,
     private fb: FormBuilder,
     private entrepriseService: EntrepriseService,
     private clientService: ClientService,
+    private route: ActivatedRoute,
   ) {}
 
   async testImageCompression(file: File) {
@@ -123,10 +123,46 @@ export class AddClientsComponent implements OnInit {
     this.getClientForm();
     this.getEntrepriseForm();
     this.loadEntreprises();
+    this.getRouteClient();
+  }
+
+  getRouteClient() {
+    this.route.params.subscribe(params => {
+      this.clientId = +params['id'];
+      this.loadClientData();
+    });
+  }
+
+  private loadClientData() {
+    this.clientService.getClientById(this.clientId).subscribe({
+      next: (client) => {
+        this.populateForm(client);
+        this.handleEntreprise(client.entrepriseClient);
+      },
+      error: (error) => {
+        this.errorMessage = 'Erreur lors du chargement du client';
+        console.error('Erreur:', error);
+      }
+    });
+  }
+
+  private populateForm(client: Clients) {
+    this.modifierClientForm.patchValue({
+      nomComplet: client.nomComplet,
+      email: client.email,
+      telephone: client.telephone,
+      adresse: client.adresse
+    });
+  }
+
+  private handleEntreprise(entreprise: Entreprise | null) {
+    this.isEntrepriseSelected = !!entreprise;
+    this.control.setValue(entreprise);
+    this.entrepriseRequiredError = false;
   }
 
   getClientForm() {
-    this.clientForm = this.fb.group({
+    this.modifierClientForm = this.fb.group({
       nomComplet: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.email]],
       telephone: [''],
@@ -197,7 +233,7 @@ export class AddClientsComponent implements OnInit {
       console.error('Aucun token trouvé !');
     }
   }
-
+  
   private _filter(name: string, entreprises: Entreprise[]): Entreprise[] {
     const filterValue = name.toLowerCase();
     return entreprises.filter(e =>
@@ -209,7 +245,7 @@ export class AddClientsComponent implements OnInit {
     return e ? e.nom : '';
   }
 
-  // Methode pour la selection d'un entreprise
+    // Methode pour la selection d'un entreprise
   onEntrepriseSelected(event: any): void {
     // console.log("Entreprise selectionner :", event.entreprise.value);
     // if (event.entreprise && event.entreprise.value) {
@@ -231,7 +267,7 @@ export class AddClientsComponent implements OnInit {
       adresse: ['']
     });
   }
-
+  
   ajouterEntreprise() {
     if (this.entrepriseForm.invalid) return;
   
@@ -257,45 +293,60 @@ export class AddClientsComponent implements OnInit {
   }
 
   // Soumission du formulaire client
-  ajouterClient() {
-    this.errorMessage = '';
-    this.successMessage = '';
-    this.entrepriseRequiredError = false;
+  modifierClient() {
+    // Marquer tous les champs comme touchés pour afficher les erreurs
+    this.markFormGroupTouched(this.modifierClientForm);
   
-    // Vérification de la sélection d'entreprise
+    if (this.modifierClientForm.invalid) {
+      this.errorMessage = 'Veuillez corriger les erreurs dans le formulaire.';
+      return;
+    }
+  
+    // Vérification de l'entreprise si le toggle est activé
+    let entrepriseClient: Entreprise | null = null;
     if (this.isEntrepriseSelected) {
-      const entrepriseSelectionnee = this.control.value; // Ajout de la déclaration
-      
-      if (!entrepriseSelectionnee || !entrepriseSelectionnee.id) {
+      entrepriseClient = this.control.value;
+      if (!entrepriseClient) {
         this.entrepriseRequiredError = true;
-        // this.errorMessage = 'Vous devez sélectionner ou créer une entreprise';
+        this.errorMessage = 'Veuillez sélectionner ou créer une entreprise.';
         return;
       }
     }
   
-    if (this.clientForm.invalid) {
-      this.errorMessage = 'Veuillez corriger les erreurs du formulaire.';
-      return;
+    // Construction de l'objet client
+    const clientData: any = {
+      ...this.modifierClientForm.value,
+      id: this.clientId
+    };
+
+    if (this.isEntrepriseSelected && this.control.value?.id) {
+      clientData.entrepriseClient = { id: this.control.value.id };
+    } else {
+      clientData.entrepriseClient = null;
     }
   
-    const client: Clients = this.clientForm.value;
-    
-    if (this.isEntrepriseSelected) {
-      const selected = this.control.value as Entreprise;
-      if (selected && selected.id) {
-        client.entrepriseClient = { id: selected.id } as Entreprise;
-      }
-    }
-  
-    this.clientService.addClient(client).subscribe({
-      next: res => {
-        this.successMessage = res.message;
-        this.clientForm.reset();
-        this.isEntrepriseSelected = false;
-        this.goToClients();
+    // Appel au service
+    this.clientService.updateClient(this.clientId, clientData).subscribe({
+      next: (updatedClient) => {
+        this.successMessage = 'Client modifié avec succès !';
+        this.errorMessage = '';
+        setTimeout(() => this.router.navigate(['/clients']), 2000);
       },
-      error: err => {
-        this.errorMessage = err.error?.error || 'Erreur lors de la création';
+      error: (error) => {
+        console.error('Erreur:', error);
+        this.errorMessage = error.error?.message || 'Erreur lors de la modification du client ';
+        this.successMessage = '';
+      }
+    });
+  }
+  
+  // Méthode utilitaire pour marquer tous les champs comme touchés
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+  
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
       }
     });
   }
@@ -304,5 +355,7 @@ export class AddClientsComponent implements OnInit {
   goToClients() {
     this.router.navigate(['/clients']);
   }
-
+  
+  
+  
 }

@@ -1,48 +1,39 @@
-import { CommonModule } from "@angular/common";
-import { Component, OnInit, ViewChild } from "@angular/core";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { MatPaginator, MatPaginatorModule, PageEvent } from "@angular/material/paginator";
-import { MatTableDataSource } from "@angular/material/table";
-import { Router, RouterLink } from "@angular/router";
-import { ClientService } from "../SERVICES/client-service";
-import { Clients } from "../MODELS/clients-model";
-
+import { Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ClientService } from '../../SERVICES/client-service';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-service';
+import { CommonModule } from '@angular/common';
+import { Clients } from '../../MODELS/clients-model';
 
 @Component({
-  selector: 'app-clients',
-  standalone: true,
+  selector: 'app-detail-edit-entreprise-client',
   imports: [
-    CommonModule,
     FormsModule,
-    MatPaginatorModule,
-    RouterLink,
+    CommonModule,
+    ReactiveFormsModule,
   ],
-  templateUrl: './clients.component.html',
-  styleUrls: ['./clients.component.scss'],
-  
+  templateUrl: './detail-edit-entreprise-client.component.html',
+  styleUrl: './detail-edit-entreprise-client.component.scss'
 })
-export class ClientsComponent implements OnInit  {
-
+export class DetailEditEntrepriseClientComponent {
+  entrepriseClientForm!: FormGroup;
   isListView = true;
   showDropdown = false;
   showPopup = false;
-
-  // Pagination et tableau de données
-  // Client 
-  dataSource = new MatTableDataSource<Clients>();
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  pageSize = 6;
-  currentPage = 0;
-  totalClients = 0;
   clients: Clients[] = [];
   sortField = 'nomComplet';
   sortDirection: 'asc' | 'desc' = 'asc';
   noClientsAvailable = false;
   messageNoClient = 'Aucun client disponible.';
+  client!: Clients;
 
   constructor(
     private clientService: ClientService,
     private router: Router,
+    private route: ActivatedRoute,
+    private fb: FormBuilder,
   ) {}
 
   ngOnInit() {
@@ -50,12 +41,28 @@ export class ClientsComponent implements OnInit  {
     const savedView = localStorage.getItem('viewPreference');
     this.isListView = savedView !== 'grid'; 
     this.getListClients();
+    const id = +this.route.snapshot.params['id'];
+    this.getClient(id);
+    this.getFormEntreprise();
   }
 
-  // Gestion de la pagination
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
+  getFormEntreprise() {
+    this.entrepriseClientForm = this.fb.group({
+      nom: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.email]],
+      telephone: ['', [Validators.pattern(/^\d+$/)]],
+      adresse: ['']
+    });
+  }
+
+  getClient(id: number) {
+    this.clientService.getClientById(id).subscribe({
+      next: (client) => {
+        this.client = client;
+        this.initializeForm(); // Initialiser le formulaire après récupération
+      },
+      error: (err) => console.error('Erreur lors de la récupération:', err)
+    });
   }
 
   toggleView(viewType: 'list' | 'grid') {
@@ -66,23 +73,15 @@ export class ClientsComponent implements OnInit  {
     localStorage.setItem('viewPreference', viewType);
   }
 
-
-  // Modifie la fonction sort
-  sort(field: keyof Clients) {
-    if (this.sortField === field) {
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-        this.sortField = field;
-        this.sortDirection = 'asc';
+  initializeForm() {
+    if (this.client?.entrepriseClient) {
+      this.entrepriseClientForm.patchValue({
+        nom: this.client.entrepriseClient.nom,
+        email: this.client.entrepriseClient.email,
+        telephone: this.client.entrepriseClient.telephone,
+        adresse: this.client.entrepriseClient.adresse
+      });
     }
-
-    this.clients.sort((a, b) => {
-        const modifier = this.sortDirection === 'asc' ? 1 : -1;
-        // Gestion des valeurs undefined/null
-        const valueA = a[field]?.toString().toLowerCase() ?? '';
-        const valueB = b[field]?.toString().toLowerCase() ?? '';
-        return valueA.localeCompare(valueB) * modifier;
-    });
   }
 
   // list clients 
@@ -105,13 +104,6 @@ export class ClientsComponent implements OnInit  {
             // si vous avez un champ createdAt : return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
             return (b.id ?? 0) - (a.id ?? 0);
           });
-  
-          this.totalClients = this.clients.length;
-          this.noClientsAvailable = this.clients.length === 0;
-  
-          // 2. Mettre à jour la source de données du tableau/paginator
-          this.dataSource.data = this.clients;
-          this.dataSource.paginator = this.paginator;
 
           // Vérifiez un client spécifique
           if (this.clients.length > 0) {
@@ -130,11 +122,6 @@ export class ClientsComponent implements OnInit  {
     }
   }
 
-  get paginatedClients(): Clients[] {
-    const startIndex = this.currentPage * this.pageSize;
-    return this.clients.slice(startIndex, startIndex + this.pageSize);
-  }
-
   // client id routing
   openClientDetail(clientId: number): void {
     this.router.navigate(['/detail-client', clientId]);
@@ -150,5 +137,9 @@ export class ClientsComponent implements OnInit  {
    openPopup() { this.showPopup = true; }
    closePopup() { this.showPopup = false; }
 
+  goToClients() {
+      this.router.navigate(['/clients']);
+  }
 
 }
+
