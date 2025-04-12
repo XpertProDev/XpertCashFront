@@ -20,6 +20,11 @@ import { Entreprise } from '../../MODELS/entreprise-model';
 })
 export class DetailEditEntrepriseClientComponent {
   entrepriseClientForm!: FormGroup;
+
+
+  errorMessage: string = '';
+  errorMessageApi: string = '';
+  successMessage = '';
   isListView = true;
   showDropdown = false;
   showPopup = false;
@@ -146,6 +151,9 @@ export class DetailEditEntrepriseClientComponent {
   }
 
   onSubmit() {
+    this.errorMessage = '';
+    this.successMessage = '';
+
     if (this.entrepriseClientForm.valid && this.client?.entrepriseClient?.id) {
       const updatedEntreprise = this.getFormData();
   

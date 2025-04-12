@@ -1,7 +1,7 @@
 <div class="container_global">
     <div class="content_formulaire">
       <div class="modal-body">
-        <form [formGroup]="entrepriseClientForm" class="container_formulaire" (ngSubmit)="onSubmit()">
+        <form [formGroup]="entrepriseClientForm" class="container_formulaire">
           <!-- Titre d'ajout de produits -->
           <div class="Title">
             <h3>Modifier un entreprise client</h3>
@@ -51,7 +51,7 @@
                     <!-- Telephone -->
                     <div class="champ_input champ_input2">
                       <input type="tel" class="input_focus"
-                                id="telephone" formControlName="telephone || 'Non numero téléphone' "
+                                id="telephone" formControlName="telephone"
                                 name="telephone"
                                 placeholder="Saisis le numéro de téléphone">
                       <label for="telephone" class="label">Téléphone</label>
@@ -102,19 +102,28 @@
               <!-- Boutons Ajouter et Sauvegarder -->
               <div class="information_cadre information_cadre_save">
 
+                <!-- Message d'erreur global -->
+                <div class="container_error_message">
+                  <!-- Messages API -->
+                  <div *ngIf="errorMessage" class="error-messageApi2">{{ errorMessage }}</div>
+                  <div *ngIf="successMessage" class="success-messageApi2">{{ successMessage }}</div>
+              </div>
+
                 <div class="info_titre_input info_titre_input_btn">
                   <div class="btn_annuler">
                     <button class="btn_cancel" (click)="goToClients()">Annuler</button>
                   </div>
                   <div class="btn_ajouter">
-                    <!-- <button class="btn_save" (click)="ajouterClient()"
-                          [disabled]="clientForm.invalid"
-                          [disabled]="clientForm.invalid" 
-                          [style.backgroundColor]="clientForm.valid ? '#0672E4' : '#0671e434'"
-                          [style.color]="clientForm.valid ? '#ffffff' : '#00000073'"
-                          [style.cursor]="clientForm.valid ? 'pointer' : 'no-drop'"> -->
-                    <!-- Modifier le bouton de soumission -->
-                    <button class="btn_save" type="submit" [disabled]="entrepriseClientForm.invalid">
+                    <button class="btn_save" (click)="onSubmit()"
+                          [disabled]="entrepriseClientForm.invalid"
+                          [disabled]="entrepriseClientForm.invalid" 
+                          [style.backgroundColor]="entrepriseClientForm.valid ? '#0672E4' : '#0671e434'"
+                          [style.color]="entrepriseClientForm.valid ? '#ffffff' : '#00000073'"
+                          [style.cursor]="entrepriseClientForm.valid ? 'pointer' : 'no-drop'">
+                      <!-- Modifier le bouton de soumission
+                      <button class="btn_save" type="submit" [disabled]="entrepriseClientForm.invalid">
+                        Modifier
+                      </button> -->
                       Modifier
                     </button>
                   </div>

@@ -257,9 +257,9 @@ export class AddClientsComponent implements OnInit {
   }
 
   // Soumission du formulaire client
-  ajouterClient() {
-    this.errorMessage = '';
-    this.successMessage = '';
+    ajouterClient() {
+      this.errorMessage = '';
+      this.successMessage = '';
     this.entrepriseRequiredError = false;
   
     // Vérification de la sélection d'entreprise
