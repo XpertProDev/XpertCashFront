@@ -77,7 +77,7 @@
               <h4>Ajouter une boutique</h4>
               <button class="close-btn" (click)="closePopup()">&times;</button>
           </div>
-          <form [formGroup]="boutiqueForm" (ngSubmit)="onSubmit()">
+          <form [formGroup]="boutiqueForm">
 
             <div class="popup-body">
               
@@ -132,7 +132,7 @@
                         [disabled]="boutiqueForm.invalid" 
                         [style.backgroundColor]="boutiqueForm.valid ? '#0672E4' : '#0671e434'"
                         [style.color]="boutiqueForm.valid ? '#ffffff' : '#00000073'"
-                        [style.cursor]="boutiqueForm.valid ? 'pointer' : 'no-drop'">
+                        [style.cursor]="boutiqueForm.valid ? 'pointer' : 'no-drop'"  (click)="onSubmit()">
                   Ajouter
                 </button>
             </div>

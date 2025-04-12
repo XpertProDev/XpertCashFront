@@ -34,6 +34,10 @@ export class ClientsComponent implements OnInit  {
   currentPage = 0;
   totalClients = 0;
   clients: Clients[] = [];
+  sortField = 'nomComplet';
+  sortDirection: 'asc' | 'desc' = 'asc';
+  noClientsAvailable = false;
+  messageNoClient = 'Aucun client disponible.';
 
   constructor(
     private clientService: ClientService,
@@ -60,23 +64,22 @@ export class ClientsComponent implements OnInit  {
     localStorage.setItem('viewPreference', viewType);
   }
 
-  sortField = 'nomComplet';
-  sortDirection: 'asc' | 'desc' = 'asc';
 
   // Modifie la fonction sort
-  sort(field: keyof Clients) { // Spécifie le type de field
+  sort(field: keyof Clients) {
     if (this.sortField === field) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
-      this.sortField = field;
-      this.sortDirection = 'asc';
+        this.sortField = field;
+        this.sortDirection = 'asc';
     }
 
     this.clients.sort((a, b) => {
-      const modifier = this.sortDirection === 'asc' ? 1 : -1;
-      const valueA = a[field]!.toString().toLowerCase();
-      const valueB = b[field]!.toString().toLowerCase();
-      return valueA.localeCompare(valueB) * modifier;
+        const modifier = this.sortDirection === 'asc' ? 1 : -1;
+        // Gestion des valeurs undefined/null
+        const valueA = a[field]?.toString().toLowerCase() ?? '';
+        const valueB = b[field]?.toString().toLowerCase() ?? '';
+        return valueA.localeCompare(valueB) * modifier;
     });
   }
 
@@ -86,11 +89,25 @@ export class ClientsComponent implements OnInit  {
     if (token) {
       this.clientService.getListClients().subscribe({
         next: (data) => {
-          this.clients = data;
-          this.totalClients = data.length;
-          console.log('Clients récupérées:', this.clients);
+          // 1. Trier par id décroissant pour que les plus récents (id élevés) soient en tête
+          this.clients = data.sort((a, b) => {
+            // si vous avez un champ createdAt : return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            return (b.id ?? 0) - (a.id ?? 0);
+          });
+  
+          this.totalClients = this.clients.length;
+          this.noClientsAvailable = this.clients.length === 0;
+  
+          // 2. Mettre à jour la source de données du tableau/paginator
+          this.dataSource.data = this.clients;
+          this.dataSource.paginator = this.paginator;
+  
+          console.log('Clients récupérées (triées) :', this.clients);
         },
-      })
+        error: (err) => {
+          console.error('Erreur lors de la récupération des clients :', err);
+        }
+      });
     } else {
       console.error('Aucun token trouvé !');
     }
@@ -100,5 +117,6 @@ export class ClientsComponent implements OnInit  {
     const startIndex = this.currentPage * this.pageSize;
     return this.clients.slice(startIndex, startIndex + this.pageSize);
   }
+
 
 }

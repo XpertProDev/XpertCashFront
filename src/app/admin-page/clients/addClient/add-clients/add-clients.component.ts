@@ -1,13 +1,15 @@
 
 import { CommonModule } from '@angular/common';
+import { Token } from '@angular/compiler';
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Router } from '@angular/router';
 import imageCompression from 'browser-image-compression';
-import { Observable, startWith, map, of } from 'rxjs';
+import { Observable, startWith, map, of, BehaviorSubject, combineLatest } from 'rxjs';
 import { Clients } from 'src/app/admin-page/MODELS/clients-model';
 import { Entreprise } from 'src/app/admin-page/MODELS/entreprise-model';
+import { ClientService } from 'src/app/admin-page/SERVICES/client-service';
 import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-service';
 
 @Component({
@@ -26,6 +28,13 @@ export class AddClientsComponent implements OnInit {
 
 
   errorMessage: string = '';
+  errorMessageApi: string = '';
+  successMessage = '';
+  clientForm!: FormGroup;
+  entrepriseForm!: FormGroup;
+  isEntrepriseSelected = false;
+  showPopup = false;
+  // entrepriseForm: FormGroup = new FormGroup({});
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
   selectedFile: File | null | undefined = null;
@@ -33,13 +42,18 @@ export class AddClientsComponent implements OnInit {
   // Focul controle entreprise // Auto complet
   control = new FormControl();
   filteredOptions: Observable<Entreprise[]> = of([]);
-  optionsEntreprise: Entreprise[] = [];
+  // optionsEntreprise: Entreprise[] = [];
   // Select pour voir entreprise
-  isEntrepriseSelected: boolean = false;
+  // isEntrepriseSelected: boolean = true;
+  loading = false;
+  optionsEntreprise$ = new BehaviorSubject<Entreprise[]>([]);
+
 
   constructor(
     private router: Router,
+    private fb: FormBuilder,
     private entrepriseService: EntrepriseService,
+    private clientService: ClientService,
   ) {}
 
   async testImageCompression(file: File) {
@@ -111,6 +125,59 @@ export class AddClientsComponent implements OnInit {
 
   ngOnInit() {
     this.getListEntreprise();
+    this.initEntreprise();
+    this.getClientForm();
+    this.getEntrepriseForm();
+    this.loadEntreprises();
+  }
+
+  getClientForm() {
+    this.clientForm = this.fb.group({
+      nomComplet: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.email]],
+      telephone: [''],
+      adresse: ['']
+    });
+  }
+
+  getEntrepriseForm() {
+    this.entrepriseForm = this.fb.group({
+      nom: ['', Validators.required],
+      email: ['', Validators.email],
+      telephone: [''],
+      adresse: ['']
+    });
+  }
+
+  private loadEntreprises() {
+    const token = localStorage.getItem('authToken') || '';
+    if (!token) return;
+
+    this.entrepriseService.getListEntreprise(token).subscribe(
+        (list: Entreprise[]) => {
+            this.optionsEntreprise$.next(list); // Mettre à jour le BehaviorSubject
+            this.setupAutocomplete();
+        },
+        err => {
+            console.error('Erreur lors de la récupération des entreprises :', err);
+            this.errorMessage = err.error?.error || 'Erreur chargement entreprises';
+        }
+    );
+  }
+
+  // Ajouter une nouvelle méthode pour configurer l'autocomplete :
+  private setupAutocomplete() {
+    this.filteredOptions = combineLatest([
+      this.control.valueChanges.pipe(
+        startWith(''),
+        map(value => typeof value === 'string' ? value : value?.nom)
+      ),
+      this.optionsEntreprise$
+    ]).pipe(
+      map(([name, entreprises]) => 
+        name ? this._filter(name, entreprises) : entreprises
+      )
+    );
   }
 
   getListEntreprise() {
@@ -119,15 +186,17 @@ export class AddClientsComponent implements OnInit {
       this.entrepriseService.getListEntreprise(token).subscribe(
         (entreprises) => {
           console.log('Entreprise reçues depuis l\'API :', entreprises);
-          this.optionsEntreprise = entreprises;
+          // Mettre à jour le BehaviorSubject
+          this.optionsEntreprise$.next(entreprises); 
           this.filteredOptions = this.control.valueChanges.pipe(
             startWith<string | Entreprise>(''),
             map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-            map(name => (name ? this._filter(name) : this.optionsEntreprise.slice()))
+            // Passer le tableau d'entreprises comme second paramètre
+            map(name => (name ? this._filter(name, this.optionsEntreprise$.value) : this.optionsEntreprise$.value.slice()))
           );
         }, 
         (error) => {
-          console.error('Erreur lors de la récupération des catégories :', error);
+          console.error('Erreur lors de la récupération des entreprises :', error);
         }
       ); 
     } else {
@@ -135,14 +204,15 @@ export class AddClientsComponent implements OnInit {
     }
   }
 
-  private _filter(name: string): Entreprise[] {
+  private _filter(name: string, entreprises: Entreprise[]): Entreprise[] {
     const filterValue = name.toLowerCase();
-    return this.optionsEntreprise.filter(entreprise => 
-      entreprise.nom?.toLowerCase().includes(filterValue));
+    return entreprises.filter(e =>
+        e.nom.toLowerCase().includes(filterValue)
+    );
   }
 
-  displayFnEntreprise(entreprise?: Entreprise): string {
-    return entreprise ? entreprise.nom : '';
+  displayFnEntreprise(e?: Entreprise): string {
+    return e ? e.nom : '';
   }
 
   // Methode pour la selection d'un entreprise
@@ -155,6 +225,81 @@ export class AddClientsComponent implements OnInit {
     // }
   }
 
+  // Ouvre/ferme le popup d’entreprise
+  openPopup() { this.showPopup = true; }
+  closePopup() { this.showPopup = false; }
   
+  initEntreprise() {
+    this.entrepriseForm = this.fb.group({
+      nom: ['', Validators.required],
+      email: [''],
+      telephone: [''],
+      adresse: ['']
+    });
+  }
+
+  ajouterEntreprise() {
+    if (this.entrepriseForm.invalid) return;
+  
+    const newEntreprise: Entreprise = {
+      nom: this.entrepriseForm.value.nom,
+      email: this.entrepriseForm.value.email,
+      telephone: this.entrepriseForm.value.telephone,
+      adresse: this.entrepriseForm.value.adresse
+    };
+  
+    this.entrepriseService.addEntreprise(newEntreprise).subscribe({
+      next: (createdEntreprise) => {
+        const current = this.optionsEntreprise$.value;
+        this.optionsEntreprise$.next([createdEntreprise, ...current]); // Nouvelle entreprise en tête
+        this.control.setValue(createdEntreprise);
+        this.closePopup();
+        this.entrepriseForm.reset();
+      },
+      error: (error) => {
+        this.errorMessageApi = error.message || 'Erreur lors de la création';
+      }
+    });
+  }
+
+  // Soumission du formulaire client
+  ajouterClient() {
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    if (this.clientForm.invalid) {
+      this.errorMessage = 'Veuillez corriger les erreurs du formulaire.';
+      return;
+    }
+
+    const client: Clients = this.clientForm.value;
+    if (this.isEntrepriseSelected) {
+      const selected = this.control.value as Entreprise;
+      if (selected && selected.id) {
+        client.entrepriseClient = { id: selected.id } as Entreprise;
+      } else {
+        // nouvelle entreprise créée via popup
+        client.entrepriseClient = this.control.value;
+      }
+    }
+
+    this.clientService.addClient(client).subscribe({
+      next: res => {
+        this.successMessage = res.message;
+        // reset + navigation si besoin
+        this.clientForm.reset();
+        this.isEntrepriseSelected = false;
+        this.goToClients();
+      },
+      error: err => {
+        this.errorMessage = err.error?.error || 'Erreur lors de la création';
+      }
+    });
+  }
+
+  // Annuler et revenir à la liste
+  goToClients() {
+    this.router.navigate(['/clients']);
+  }
 
 }
