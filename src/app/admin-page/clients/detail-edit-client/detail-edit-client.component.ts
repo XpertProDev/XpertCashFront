@@ -334,7 +334,7 @@ export class DetailEditClientComponent {
       },
       error: (error) => {
         console.error('Erreur:', error);
-        this.errorMessage = error.error?.message || 'Erreur lors de la modification du client';
+        this.errorMessage = error.error?.message || 'Erreur lors de la modification du client ';
         this.successMessage = '';
       }
     });
