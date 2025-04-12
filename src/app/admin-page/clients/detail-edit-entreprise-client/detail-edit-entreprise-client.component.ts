@@ -27,7 +27,9 @@ export class DetailEditEntrepriseClientComponent {
   sortDirection: 'asc' | 'desc' = 'asc';
   noClientsAvailable = false;
   messageNoClient = 'Aucun client disponible.';
-  client!: Clients;
+  client: Clients = {
+    entrepriseClient: {} // Initialisation par défaut
+  } as Clients;
 
   constructor(
     private clientService: ClientService,
