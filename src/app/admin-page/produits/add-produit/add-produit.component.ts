@@ -39,6 +39,7 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './add-produit.component.scss'
 })
 export class AddProduitComponent {
+  isChecked = false;
 
   // boutiqueId: number | null = null;
 
@@ -141,7 +142,7 @@ export class AddProduitComponent {
   }
 
 
-  isChecked = false;
+
   boutiqueName: string = '';
   boutiqueId: number = 1; 
   messageAPI: string = '';
