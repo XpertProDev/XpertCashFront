@@ -1,13 +1,13 @@
 <div class="container_global">
     <div class="content_formulaire">
       <div class="modal-body">
-        <form class="container_formulaire">
+        <form [formGroup]="entrepriseClientForm" class="container_formulaire" (ngSubmit)="onSubmit()">
           <!-- Titre d'ajout de produits -->
           <div class="Title">
             <h3>Modifier un entreprise client</h3>
           </div>
   
-          <div class="form_left_right" >
+          <div class="form_left_right" *ngIf="client?.entrepriseClient">
             <div class="formulaire">
               <!-- Cadre contenant le select et la description -->
               <div class="information_cadre">
@@ -17,61 +17,58 @@
                     <!-- Nom et prenom -->
                     <div class="champ_input champ_input2">
                       <input type="text" class="input_focus"
-                                id="nom" [value]="client.entrepriseClient.nom || 'Nom est vide' "
-                                name="nom"
-                                placeholder="Saisis le nom d'entreprise"
-                                [class.default-address]="!client.entrepriseClient.nom">
+                             id="nom" 
+                             formControlName="nom"
+                             placeholder="Saisis le nom d'entreprise">
                       <label for="nom" class="label">Nom d'entreprise</label>
-                      <!-- <div *ngIf="entrepriseClientForm.get('nom')?.touched && entrepriseClientForm.get('nom')?.invalid" 
-                            class="error">
-                            <small *ngIf="entrepriseClientForm.get('nom')?.errors?.['required']">
-                            Ce champ est obligatoire
-                            </small>
-                            <small *ngIf="entrepriseClientForm.get('nom')?.errors?.['minlength']">
-                            Minimum 2 caractères
-                            </small>
-                        </div> -->
+                      <div *ngIf="entrepriseClientForm.get('nom')?.invalid && entrepriseClientForm.get('nom')?.touched" 
+                           class="error">
+                        <small *ngIf="entrepriseClientForm.get('nom')?.errors?.['required']">
+                          Ce champ est obligatoire
+                        </small>
+                        <small *ngIf="entrepriseClientForm.get('nom')?.errors?.['minlength']">
+                          Minimum 2 caractères
+                        </small>
+                      </div>
                     </div>
                     <!-- Email -->
                     <div class="champ_input champ_input2">
                       <input type="email" class="input_focus"
-                                id="email" [value]="client.entrepriseClient.email || 'Non email' "
+                                id="email" formControlName="email"
                                 name="email"
-                                placeholder="Saisis l'email"
-                                [class.default-address]="!client.entrepriseClient.email">
+                                placeholder="Saisis l'email">
                       <label for="email" class="label">Email</label>
-                      <!-- <div *ngIf="entrepriseClientForm.get('email')?.touched && entrepriseClientForm.get('email')?.invalid" class="error">
-                        <small *ngIf="entrepriseClientForm.get('email')?.errors?.['email']">
-                            Format d'email invalide
-                        </small>
-                        </div> -->
+                        <div *ngIf="entrepriseClientForm.get('email')?.invalid && entrepriseClientForm.get('email')?.touched" 
+                           class="error">
+                          <small *ngIf="entrepriseClientForm.get('email')?.errors?.['email']">
+                              Format d'email invalide
+                          </small>
+                      </div>
                     </div>
 
                   </div>
                   <div class="double_input">
                     <!-- Telephone -->
                     <div class="champ_input champ_input2">
-                      <input type="number" class="input_focus"
-                                id="telephone" [value]="client.entrepriseClient.telephone || 'Non téléphone' "
+                      <input type="tel" class="input_focus"
+                                id="telephone" formControlName="telephone || 'Non numero téléphone' "
                                 name="telephone"
-                                placeholder="Saisis le numéro de téléphone"
-                                [class.default-address]="!client.entrepriseClient.telephone">
+                                placeholder="Saisis le numéro de téléphone">
                       <label for="telephone" class="label">Téléphone</label>
-                      <!-- <div *ngIf="entrepriseClientForm.get('telephone')?.touched && entrepriseClientForm.get('telephone')?.invalid" 
+                      <div *ngIf="entrepriseClientForm.get('telephone')?.invalid && entrepriseClientForm.get('telephone')?.touched" 
                             class="error">
-                            <small *ngIf="entrepriseClientForm.get('telephone')?.errors?.['pattern']">
+                          <small *ngIf="entrepriseClientForm.get('telephone')?.errors?.['pattern']">
                             Uniquement des chiffres
-                            </small>
-                      </div> -->
+                          </small>
+                      </div>
                     </div>
                     <!-- Adresse -->
                     <div class="champ_input champ_input2">
                       <input class="input_focus"
                                 autocomplete="off"
-                                id="adresse" [value]="client.entrepriseClient.adresse || 'Non adresse' "
+                                id="adresse" formControlName="adresse"
                                 name="adresse"
-                                placeholder="Saisis l'adresse"
-                                [class.default-address]="!client.entrepriseClient.adresse">
+                                placeholder="Saisis l'adresse">
                       <label for="adresse" class="label">Adresse</label>
                     </div>
 
@@ -117,9 +114,8 @@
                           [style.color]="clientForm.valid ? '#ffffff' : '#00000073'"
                           [style.cursor]="clientForm.valid ? 'pointer' : 'no-drop'"> -->
                     <!-- Modifier le bouton de soumission -->
-                    <button class="btn_save" 
-                        type="submit">
-                        Modifier
+                    <button class="btn_save" type="submit" [disabled]="entrepriseClientForm.invalid">
+                      Modifier
                     </button>
                   </div>
                 </div>
