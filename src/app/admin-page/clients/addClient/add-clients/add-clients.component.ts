@@ -42,6 +42,7 @@ export class AddClientsComponent implements OnInit {
   loading = false;
   optionsEntreprise$ = new BehaviorSubject<Entreprise[]>([]);
   entrepriseRequiredError = false;
+  isLoading: boolean = false;
 
   constructor(
     private router: Router,
@@ -257,18 +258,16 @@ export class AddClientsComponent implements OnInit {
   }
 
   // Soumission du formulaire client
-    ajouterClient() {
-      this.errorMessage = '';
-      this.successMessage = '';
+  ajouterClient() {
+    this.errorMessage = '';
+    this.successMessage = '';
     this.entrepriseRequiredError = false;
   
     // Vérification de la sélection d'entreprise
     if (this.isEntrepriseSelected) {
-      const entrepriseSelectionnee = this.control.value; // Ajout de la déclaration
-      
+      const entrepriseSelectionnee = this.control.value; 
       if (!entrepriseSelectionnee || !entrepriseSelectionnee.id) {
         this.entrepriseRequiredError = true;
-        // this.errorMessage = 'Vous devez sélectionner ou créer une entreprise';
         return;
       }
     }
@@ -277,6 +276,8 @@ export class AddClientsComponent implements OnInit {
       this.errorMessage = 'Veuillez corriger les erreurs du formulaire.';
       return;
     }
+  
+    this.isLoading = true; // Active le loading
   
     const client: Clients = this.clientForm.value;
     
@@ -287,17 +288,22 @@ export class AddClientsComponent implements OnInit {
       }
     }
   
-    this.clientService.addClient(client).subscribe({
-      next: res => {
-        this.successMessage = res.message;
-        this.clientForm.reset();
-        this.isEntrepriseSelected = false;
-        this.goToClients();
-      },
-      error: err => {
-        this.errorMessage = err.error?.error || 'Erreur lors de la création';
-      }
-    });
+    // Simuler un délai (optionnel)
+    setTimeout(() => {
+      this.clientService.addClient(client).subscribe({
+        next: res => {
+          this.isLoading = false; // Désactive le loading
+          this.successMessage = res.message;
+          this.clientForm.reset();
+          this.isEntrepriseSelected = false;
+          this.goToClients();
+        },
+        error: err => {
+          this.isLoading = false; // Désactive le loading en cas d'erreur
+          this.errorMessage = err.error?.error || 'Erreur lors de la création';
+        }
+      });
+    }, 2000); // Retirez le setTimeout si non nécessaire
   }
 
   // Annuler et revenir à la liste
