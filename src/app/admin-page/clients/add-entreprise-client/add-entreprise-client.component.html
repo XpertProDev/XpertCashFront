@@ -112,19 +112,20 @@
                     <button class="btn_cancel" (click)="goToClients()">Annuler</button>
                   </div>
                   <div class="btn_ajouter">
-                    <!-- <button class="btn_save" (click)="ajouterClient()"
+                    <!-- <button class="btn_save" (click)="ajouterEntrepriseClient()"
                           [disabled]="clientForm.invalid"
                           [disabled]="clientForm.invalid" 
                           [style.backgroundColor]="clientForm.valid ? '#0672E4' : '#0671e434'"
                           [style.color]="clientForm.valid ? '#ffffff' : '#00000073'"
-                          [style.cursor]="clientForm.valid ? 'pointer' : 'no-drop'"> -->
+                          [style.cursor]="clientForm.valid ? 'pointer' : 'no-drop'">  -->
                     <!-- Modifier le bouton de soumission -->
-                    <button class="btn_save" 
-                        type="submit"
-                        [disabled]="entrepriseClientForm.invalid || isSubmitting"
-                        [style.backgroundColor]="entrepriseClientForm.valid ? '#0672E4' : '#0671e434'"
-                        [style.cursor]="!isSubmitting && entrepriseClientForm.valid ? 'pointer' : 'no-drop'" (click)="ajouterEntrepriseClient()">
-                        {{ isSubmitting ? 'En cours...' : 'Ajouter' }}
+                    <button class="btn_save" (click)="ajouterEntrepriseClient()"
+                          [disabled]="entrepriseClientForm.invalid"
+                          [disabled]="entrepriseClientForm.invalid" 
+                          [style.backgroundColor]="entrepriseClientForm.valid ? '#0672E4' : '#0671e434'"
+                          [style.color]="entrepriseClientForm.valid ? '#ffffff' : '#00000073'"
+                          [style.cursor]="entrepriseClientForm.valid ? 'pointer' : 'no-drop'"> 
+                        Ajouter
                     </button>
                   </div>
                 </div>

@@ -1,4 +1,11 @@
 <div class="container_global">
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Creation en cours...</p>
+    </div>
+  </div>
+
     <div class="content_formulaire">
       <div class="modal-body">
         <form [formGroup]="clientForm" class="container_formulaire">

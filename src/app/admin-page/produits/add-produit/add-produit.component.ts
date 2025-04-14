@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { map, Observable, of, startWith } from 'rxjs';
@@ -38,13 +38,46 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './add-produit.component.html',
   styleUrl: './add-produit.component.scss'
 })
-export class AddProduitComponent {
+export class AddProduitComponent implements OnInit {
   isChecked = false;
-
   // boutiqueId: number | null = null;
-
   // Variable pour gérer l'affichage du popup
   showPopup: boolean = false;
+  boutiqueName: string = '';
+  boutiqueId: number = 1; 
+  messageAPI: string = '';
+  apiMessageType: 'success' | 'error' | '' = '';
+
+  ajouteProduitForm!: FormGroup;
+  modifierProduitForm!: FormGroup;
+  ajouteCategoryForm!: FormGroup;
+  ajouteUniteForm!: FormGroup;
+  errorMessage: string = '';
+  errorMessageCategory: string = '';
+  errorMessageUnity: string = '';
+
+  boutiquesList: any[] = [];
+
+  showPopupCategory: boolean = false;
+  showPopupUnit: boolean = false;
+  popupTitle: string = '';
+  popupMessage: string = '';
+  popupImage: string = '';
+  popupType: 'success' | 'error' = 'success';
+
+  imagePopup: string | null = null;
+  nomEntreprise: string = '';
+  adresseEntreprise: string = '';
+  logoEntreprise: string =''
+
+  // produitForm: FormGroup;
+  imageFile: File | null = null;
+  isLoading: boolean = false;
+
+  boutiqueIdSelected: number[] = [];
+  quantitesMap: { [boutiqueId: number]: number } = {};
+  boutiqueForm!: FormGroup;
+  successMessage: string | null = null;
 
    // Variable regroupant toutes les informations du popup
    popupData: PopupData = {
@@ -54,8 +87,7 @@ export class AddProduitComponent {
     type: 'success'
   };
 
-  boutiqueForm!: FormGroup;
-  successMessage: string | null = null;
+  
 
   // Variable initialisée vide
   formattedPrixVente: string = '';
@@ -143,39 +175,6 @@ export class AddProduitComponent {
 
 
 
-  boutiqueName: string = '';
-  boutiqueId: number = 1; 
-  messageAPI: string = '';
-  apiMessageType: 'success' | 'error' | '' = '';
-
-  ajouteProduitForm!: FormGroup;
-  modifierProduitForm!: FormGroup;
-  ajouteCategoryForm!: FormGroup;
-  ajouteUniteForm!: FormGroup;
-  errorMessage: string = '';
-  errorMessageCategory: string = '';
-  errorMessageUnity: string = '';
-
-  boutiquesList: any[] = [];
-
-  showPopupCategory: boolean = false;
-  showPopupUnit: boolean = false;
-  popupTitle: string = '';
-  popupMessage: string = '';
-  popupImage: string = '';
-  popupType: 'success' | 'error' = 'success';
-
-  imagePopup: string | null = null;
-  nomEntreprise: string = '';
-  adresseEntreprise: string = '';
-  logoEntreprise: string =''
-
-  // produitForm: FormGroup;
-  imageFile: File | null = null;
-  isLoading: boolean = false;
-
-  boutiqueIdSelected: number[] = [];
-  quantitesMap: { [boutiqueId: number]: number } = {};
 
 
   constructor(
@@ -625,6 +624,12 @@ export class AddProduitComponent {
       this.errorMessage = "Veuillez vérifier les informations saisies.";
       return;
     }
+
+    if (this.boutiqueIdSelected.some(id => !this.quantitesMap[id] || this.quantitesMap[id] < 0)) {
+      this.errorMessage = "Veuillez saisir une quantité valide pour chaque boutique.";
+      this.isLoading = false;
+      return;
+    }
   
     this.isLoading = true;
   
@@ -696,7 +701,8 @@ export class AddProduitComponent {
     }
   
       // Envoi du produit avec l'image compressée (JPEG/PNG) ou l'image SVG par défaut
-      const quantitesSelected = this.boutiqueIdSelected.map(id => this.quantitesMap[id] || 0);
+      // const quantitesSelected = this.boutiqueIdSelected.map(id => this.quantitesMap[id] || 0);
+      const quantitesSelected = this.boutiqueIdSelected.map(id => Number(this.quantitesMap[id]) || 0);
 
       this.produitService
         .ajouterProduit(this.boutiqueIdSelected, quantitesSelected, produit, finalImage, addToStock)
@@ -866,13 +872,16 @@ export class AddProduitComponent {
   }
 
   confirmBoutiqueSelection(): void {
+    this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
+    this.boutiqueIdSelected = this.selectedBoutiques.map(b => b.id);
+
     const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
     this.controlBoutique.setValue(selectedNames.join(', '));
-    
+
     // Remplacer null par un tableau vide si aucune sélection
-    this.boutiqueIdSelected = this.selectedBoutiques.length > 0 
-        ? this.selectedBoutiques.map(b => b.id) 
-        : [];
+    // this.boutiqueIdSelected = this.selectedBoutiques.length > 0 
+    //     ? this.selectedBoutiques.map(b => b.id) 
+    //     : [];
     
     this.toggleBoutiqueSelectionPanel();
   }

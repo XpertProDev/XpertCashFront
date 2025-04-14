@@ -6,136 +6,136 @@
     <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
       {{ errorMessage }}
     </div>
-  </div>
+</div>
   
-  <div class="containerTable">
-  
-    <div *ngIf="isLoading" class="loading-overlay">
-      <div class="loading-content">
-        <div class="spinner"></div>
-        <p>Creation en cours...</p>
-      </div>
+<div class="containerTable">
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Creation en cours...</p>
     </div>
+  </div>
+
+    <!-- En-tête : titre, actions et barre de recherche -->
+    <div class="tasks-header">
+      <h1 class="title">Mes boutiques</h1>
+      <!-- <div>{{boutiques | json}}</div> -->
   
-      <!-- En-tête : titre, actions et barre de recherche -->
-      <div class="tasks-header">
-        <h1 class="title">Mes boutiques</h1>
-        <!-- <div>{{boutiques | json}}</div> -->
-    
-        <div class="actions">
-          <button class="add-task" (click)="openPopup()">Ajouter </button>
-          <div class="contentIcon">
-            <div class="bare"></div>
-          </div>
-          <div class="inputSearch">
-            <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..." (input)="filterBoutiques()" />
-            <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch()"></i>
-          </div>
+      <div class="actions">
+        <button class="add-task" (click)="openPopup()">Ajouter </button>
+        <div class="contentIcon">
+          <div class="bare"></div>
+        </div>
+        <div class="inputSearch">
+          <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..." (input)="filterBoutiques()" />
+          <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch()"></i>
         </div>
       </div>
-    
-      <!-- Tableau des produits -->
-      <table>
-        <thead>
-          <tr class="titleTableProduit">
-            <th>Nom </th>
-            <th>Email </th>
-            <th>Adresse </th>
-            <th>Téléphone </th>
-            <th>Date de Creation </th>
-            <th>Statut</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let boutique of filteredBoutiques" (click)="openBoutiqueDetail(boutique.id)">
-            <td>{{ boutique.nomBoutique }}</td>
-            <td>{{ boutique.email || 'Non email' }}</td>
-            <td>{{ boutique.adresse || 'Non adresse'  }}</td>
-            <td>{{ boutique.telephone || 'Non téléphone'  }}</td>
-            <td>{{ boutique.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
-            <td class="content_statut_boutique">
-              <span class="statut_boutique" 
-                    [ngStyle]="{
-                      'background-color': boutique.actif ? '#008000' : '#dc3545', 
-                      'color': 'white'
-                    }">
-                {{ boutique.actif ? 'Actif' : 'Inactif' }}
-              </span>
-            </td>
-            
-          </tr>
-        </tbody>
-      </table>
-    
     </div>
-    
+  
+    <!-- Tableau des produits -->
+    <table>
+      <thead>
+        <tr class="titleTableProduit">
+          <th>Nom </th>
+          <th>Email </th>
+          <th>Adresse </th>
+          <th>Téléphone </th>
+          <th>Date de Creation </th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let boutique of filteredBoutiques" (click)="openBoutiqueDetail(boutique.id)">
+          <td>{{ boutique.nomBoutique }}</td>
+          <td>{{ boutique.email || 'Non email' }}</td>
+          <td>{{ boutique.adresse || 'Non adresse'  }}</td>
+          <td>{{ boutique.telephone || 'Non téléphone'  }}</td>
+          <td>{{ boutique.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td class="content_statut_boutique">
+            <span class="statut_boutique" 
+                  [ngStyle]="{
+                    'background-color': boutique.actif ? '#008000' : '#dc3545', 
+                    'color': 'white'
+                  }">
+              {{ boutique.actif ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+          
+        </tr>
+      </tbody>
+    </table>
+  
+</div>
+  
     
     <!-- Popup overlay -->
-    <div class="popup-overlay" *ngIf="showPopup">
-      <div class="popup-content">
-          <div class="popup-header">
-              <h4>Ajouter une boutique</h4>
-              <button class="close-btn" (click)="closePopup()">&times;</button>
-          </div>
-          <form [formGroup]="boutiqueForm">
-
-            <div class="popup-body">
-              
-              <div class="champ_grid">
-                <!-- Input de nom de boutique  -->
-                <div class="champ_input">
-                  <input class="input_focus" type="text" formControlName="nomBoutique" placeholder="Saisis le nom de boutique">
-                  <label class="label">Nom boutque</label>
-                  <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
-                    <small class="error">Le nom boutique complet est vide.</small>
-                  </div>
-                </div>
-    
-                <!-- Input d'email'  -->
-                <div class="champ_input">
-                  <input class="input_focus" type="email" formControlName="email" placeholder="Saisis l'email">
-                  <label class="label">Email</label>
-                  <div *ngIf="boutiqueForm.get('emailBoutique')?.invalid && boutiqueForm.get('emailBoutique')?.touched">
-                    <small class="error">Un email valide est vide.</small>
-                  </div>
-                </div>
-    
-              </div>
-    
-    
-              <!-- Input pour pays et phone  -->
-              <div class="champ_grid">
-                <!-- // Input de telephone Boutique  -->
-                <div class="champ_input ">
-                  <input class="input_focus" type="number" formControlName="telephone" placeholder="00 00 00 00">
-                  <label class="label">Phone</label>
-                  <div *ngIf="boutiqueForm.get('telephoneBoutique')?.invalid && boutiqueForm.get('telephoneBoutique')?.touched">
-                    <small class="error">Le numéro de téléphone est requis.</small>
-                  </div>
-                </div>
-
-                <!-- Input Numero de téléphone  -->
-                <div class="champ_input">
-                    <input class="input_focus" type="text" formControlName="adresse" placeholder="Saisis l'adresse">
-                    <label class="label">Adresse boutique</label>
-                    <div *ngIf="boutiqueForm.get('adresseBoutique')?.invalid && boutiqueForm.get('adresseBoutique')?.touched">
-                        <small class="error">L'adresse boutique valide est vide.</small>
-                    </div>
-                </div>
-              </div>
-    
-              
-            </div>
-            <div class="popup-footer">
-                <button class="btn-cancel" (click)="closePopup()">Annuler</button>
-                <button class="btn-submit" 
-                        [disabled]="boutiqueForm.invalid" 
-                        [style.backgroundColor]="boutiqueForm.valid ? '#0672E4' : '#0671e434'"
-                        [style.color]="boutiqueForm.valid ? '#ffffff' : '#00000073'"
-                        [style.cursor]="boutiqueForm.valid ? 'pointer' : 'no-drop'"  (click)="onSubmit()">
-                  Ajouter
-                </button>
-            </div>
-          </form>
+<div class="popup-overlay" *ngIf="showPopup">
+  <div class="popup-content">
+      <div class="popup-header">
+          <h4>Ajouter une boutique</h4>
+          <button class="close-btn" (click)="closePopup()">&times;</button>
       </div>
-    </div>
+      <form [formGroup]="boutiqueForm">
+
+        <div class="popup-body">
+          
+          <div class="champ_grid">
+            <!-- Input de nom de boutique  -->
+            <div class="champ_input">
+              <input class="input_focus" type="text" formControlName="nomBoutique" placeholder="Saisis le nom de boutique">
+              <label class="label">Nom boutque</label>
+              <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
+                <small class="error">Le nom boutique complet est vide.</small>
+              </div>
+            </div>
+
+            <!-- Input d'email'  -->
+            <div class="champ_input">
+              <input class="input_focus" type="email" formControlName="email" placeholder="Saisis l'email">
+              <label class="label">Email</label>
+              <div *ngIf="boutiqueForm.get('emailBoutique')?.invalid && boutiqueForm.get('emailBoutique')?.touched">
+                <small class="error">Un email valide est vide.</small>
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- Input pour pays et phone  -->
+          <div class="champ_grid">
+            <!-- // Input de telephone Boutique  -->
+            <div class="champ_input ">
+              <input class="input_focus" type="number" formControlName="telephone" placeholder="00 00 00 00">
+              <label class="label">Phone</label>
+              <div *ngIf="boutiqueForm.get('telephoneBoutique')?.invalid && boutiqueForm.get('telephoneBoutique')?.touched">
+                <small class="error">Le numéro de téléphone est requis.</small>
+              </div>
+            </div>
+
+            <!-- Input Numero de téléphone  -->
+            <div class="champ_input">
+                <input class="input_focus" type="text" formControlName="adresse" placeholder="Saisis l'adresse">
+                <label class="label">Adresse boutique</label>
+                <div *ngIf="boutiqueForm.get('adresseBoutique')?.invalid && boutiqueForm.get('adresseBoutique')?.touched">
+                    <small class="error">L'adresse boutique valide est vide.</small>
+                </div>
+            </div>
+          </div>
+
+          
+        </div>
+        <div class="popup-footer">
+            <button class="btn-cancel" (click)="closePopup()">Annuler</button>
+            <button class="btn-submit" 
+                    [disabled]="boutiqueForm.invalid" 
+                    [style.backgroundColor]="boutiqueForm.valid ? '#0672E4' : '#0671e434'"
+                    [style.color]="boutiqueForm.valid ? '#ffffff' : '#00000073'"
+                    [style.cursor]="boutiqueForm.valid ? 'pointer' : 'no-drop'"  (click)="onSubmit()">
+              Ajouter
+            </button>
+        </div>
+      </form>
+  </div>
+</div>

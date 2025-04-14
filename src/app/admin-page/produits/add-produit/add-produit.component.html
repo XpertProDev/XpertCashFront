@@ -271,7 +271,10 @@
                     <div *ngIf="boutique.selected" class=" double_input_grid">
                       <div class="champ_input champ_input2">
                         <!-- Quantité -->
-                        <input [(ngModel)]="boutique.quantite" [ngModelOptions]="{standalone: true}" type="number" class="input_focus" required placeholder="Saisis la quantité">
+                        <input  [ngModel]="quantitesMap[boutique.id] || 0" 
+                          (ngModelChange)="quantitesMap[boutique.id] = $event"  
+                          [ngModelOptions]="{standalone: true}" type="number" class="input_focus" 
+                          required placeholder="Saisis la quantité">
                         <label for="quantite" class="label labelColor">Quantité en stock pour {{ boutique.nomBoutique }}</label>
                       </div>
                 

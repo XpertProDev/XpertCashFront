@@ -21,6 +21,7 @@ export class AddEntrepriseClientComponent implements OnInit, OnDestroy  {
   
   entrepriseClientForm!: FormGroup;
   errorMessageApi: string = '';
+  errorMessage: string = '';
   successMessage: string = '';
   isSubmitting = false;
   private destroy$ = new Subject<void>();
@@ -70,12 +71,9 @@ export class AddEntrepriseClientComponent implements OnInit, OnDestroy  {
           setTimeout(() => this.router.navigate(['/clients']), 2000);
         },
         error: (err) => {
-          this.errorMessageApi = err.message || 'Erreur lors de l\'ajout de l\'entreprise';
+          this.errorMessageApi = err.error?.error || err.message || 'Erreur lors de l\'ajout de l\'entreprise';
           this.isSubmitting = false;
         },
-        complete: () => {
-          this.isSubmitting = false;
-        }
       });
   }
 
