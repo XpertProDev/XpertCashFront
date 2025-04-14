@@ -256,7 +256,6 @@
               <div class="info_titre_input">
                 <h4>Inventaire</h4>
             
-                <!-- Input de produits inventaire -->
                 <div class="champ_input_inventaire">
                   <p>Ajouter dans les stocks</p>
             
@@ -265,22 +264,30 @@
                     <span class="slider round"></span>
                   </label>
                 </div>
-            
-                <!-- Afficher seulement si isChecked est activé -->
-                <div class="double_inputh" *ngIf="isChecked">
-                  <!-- Input de En stock -->
-                  <div class="champ_input champ_input2">
-                    <input autocomplete="off" formControlName="quantite" type="number" class="input_focus " required id="quantite" name="quantite" placeholder="Saisis le quantité">
-                    <label for="quantite" class="label labelColor">En stock</label>
-                  </div>
 
-                  <!-- Input de prixAchat -->
-                  <div class="champ_input champ_input2">
-                    <input autocomplete="off" formControlName="seuilAlert" type="number" class="input_focus " name="alertSeuil" placeholder="Saisis le montant d'alerte">
-                    <label for="seuilAlert" class="label labelColor">Seuil d'alerte</label>
-                  </div>
+            
+                <div *ngIf="isChecked">
+                  <ng-container *ngFor="let boutique of boutiquesList">
+                    <div *ngIf="boutique.selected" class=" double_input_grid">
+                      <div class="champ_input champ_input2">
+                        <!-- Quantité -->
+                        <input  [ngModel]="quantitesMap[boutique.id] || 0" 
+                          (ngModelChange)="quantitesMap[boutique.id] = $event"  
+                          [ngModelOptions]="{standalone: true}" type="number" class="input_focus" 
+                          required placeholder="Saisis la quantité">
+                        <label for="quantite" class="label labelColor">Quantité en stock pour {{ boutique.nomBoutique }}</label>
+                      </div>
+                
+                      <!-- Seuil d'alerte -->
+                      <div class="champ_input champ_input2">
+                        <input [(ngModel)]="boutique.seuilAlert" [ngModelOptions]="{standalone: true}" type="number" class="input_focus" placeholder="Seuil d'alerte pour {{ boutique.nomBoutique }}">
+                        <label for="seuilAlert" class="label labelColor">Seuil d'alerte pour {{ boutique.nomBoutique }}</label>
+                      </div>
+                    </div>
+                  </ng-container>
                 </div>
-              </div>    
+                
+              </div>
             </div>
             
             
