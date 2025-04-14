@@ -338,7 +338,7 @@ export class ListProduitComponent {
           this.boutiqueActuelle = "Toutes les boutiques"; // Si aucune boutique n'est sélectionnée
       } else {
           this.selectedBoutique = boutique;
-          this.boutiqueActuelle = boutique.nomBoutique || "Boutique sans nom"; // Mise à jour de la boutique actuelle
+          this.boutiqueActuelle = boutique.nom || "Boutique sans nom"; // Mise à jour de la boutique actuelle
       }
   
       console.log("selectedBoutique après mise à jour:", this.selectedBoutique);
@@ -347,6 +347,7 @@ export class ListProduitComponent {
       // Après la mise à jour, appelle getProduit() pour récupérer les produits de la boutique sélectionnée
       this.getProduit();
   }
+  
   
   
   
@@ -369,32 +370,36 @@ export class ListProduitComponent {
             console.log("Boutiques disponibles pour ce produit:", this.produit.boutiques);
 
             if (this.produit.boutiques && this.produit.boutiques.length > 0) {
-                if (this.selectedBoutique && this.selectedBoutique.id) {
-                    // Si une boutique est sélectionnée, on filtre pour n'afficher que la boutique sélectionnée
-                    console.log("selectedBoutique avant de filtrer:", this.selectedBoutique);
-                    const boutiqueActuelle = this.produit.boutiques.find(b => b.id === this.selectedBoutique.id);
-                    console.log("Boutique actuelle trouvée dans le produit:", boutiqueActuelle);
-
-                    if (boutiqueActuelle) {
-                        this.boutiqueNames = [boutiqueActuelle.nom]; // Afficher uniquement la boutique sélectionnée
-                        this.boutiqueActuelle = boutiqueActuelle.nom; // Mise à jour de la boutique actuelle
-                        console.log("Nom de la boutique actuelle affichée:", this.boutiqueNames);
-                    } else {
-                        this.boutiqueNames = ['Cette boutique ne possède pas ce produit']; // Si la boutique sélectionnée n'a pas ce produit
-                        this.boutiqueActuelle = 'Cette boutique ne possède pas ce produit'; // Mise à jour de la boutique actuelle
-                        console.log("Aucune correspondance pour la boutique actuelle.");
-                    }
-                } else {
-                    // Si aucune boutique n'est sélectionnée, afficher toutes les boutiques
-                    this.boutiqueNames = this.produit.boutiques.map(b => b.nom);
-                    this.boutiqueActuelle = 'Toutes les boutiques'; // Mise à jour pour refléter "Toutes les boutiques"
-                    console.log("Aucune boutique sélectionnée, affichage de toutes les boutiques.");
-                }
-            } else {
-                this.boutiqueNames = ['Aucune boutique trouvée pour ce produit'];
-                this.boutiqueActuelle = 'Aucune boutique trouvée pour ce produit';
-                console.log("Aucune boutique pour ce produit.");
-            }
+              let boutiqueActuelle = null;
+          
+              if (this.selectedBoutique && this.selectedBoutique.id) {
+                  // Si une boutique est sélectionnée manuellement
+                  console.log("selectedBoutique avant de filtrer:", this.selectedBoutique);
+                  boutiqueActuelle = this.produit.boutiques.find(b => b.id === this.selectedBoutique.id);
+              } else if (this.produit.boutiqueId) {
+                  // Si aucune sélection manuelle, on prend la boutiqueId du produit
+                  console.log("Utilisation de produit.boutiqueId:", this.produit.boutiqueId);
+                  boutiqueActuelle = this.produit.boutiques.find(b => b.id === this.produit.boutiqueId);
+              }
+          
+              if (boutiqueActuelle) {
+                  this.boutiqueNames = [boutiqueActuelle.nom];
+                  this.boutiqueActuelle = boutiqueActuelle.nom;
+                  console.log("Boutique actuelle trouvée et affichée:", this.boutiqueNames);
+              } else {
+                  this.boutiqueNames = ['Cette boutique ne possède pas ce produit'];
+                  this.boutiqueActuelle = 'Cette boutique ne possède pas ce produit';
+                  console.log("Aucune correspondance pour la boutique actuelle.");
+              }
+          } else {
+              this.boutiqueNames = ['Aucune boutique trouvée pour ce produit'];
+              this.boutiqueActuelle = 'Aucune boutique trouvée pour ce produit';
+              console.log("Aucune boutique pour ce produit.");
+          }
+          
+          
+          
+          
 
             // Affichage final de toutes les boutiques qui sont affichées
             console.log("Boutiques affichées:", this.boutiqueNames);
