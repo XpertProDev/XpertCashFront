@@ -7,4 +7,5 @@ export interface Clients {
     email: string;
     telephone: string;
     entrepriseClient: Entreprise;
+    createdAt: Date;
 }

@@ -30,7 +30,7 @@ export class AppComponent implements OnInit {
     if (this.isLocked) return;
 
     clearTimeout(this.inactivityTimer);
-    this.inactivityTimer = setTimeout(() => this.lockScreen(), 1000 * 1000);
+    this.inactivityTimer = setTimeout(() => this.lockScreen(), 10000 * 1000);
   }
 
   lockScreen() {
@@ -74,6 +74,7 @@ export class AppComponent implements OnInit {
         localStorage.removeItem('isLocked');
       
         this.dialog.closeAll();
+        this.resetTimer();
     
         console.log("isLocked:", this.isLocked);
       } else {

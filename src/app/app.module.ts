@@ -22,6 +22,7 @@ import { CustomNumberPipe } from './admin-page/MODELS/customNumberPipe';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UnlockDialogComponent } from './unlock-dialog/unlock-dialog.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
 registerLocaleData(localeDe);
@@ -47,6 +48,7 @@ registerLocaleData(localeDe);
     MatAutocompleteModule,
     MatSlideToggleModule,
     CodeInputModule,
+    DragDropModule
   ], 
   providers: [
     provideHttpClient(),

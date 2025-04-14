@@ -46,6 +46,7 @@
         <th> Adresse </th>
         <th> Téléphone </th>
         <th> Entreprise </th>
+        <th> Date de Creation </th>
       </thead>
 
       <tbody>
@@ -83,12 +84,17 @@
               </td>
               <td>
                 <div *ngIf="client.entrepriseClient; else noEntreprise" class="iconEntrepriseList" (click)="openEntrepriseClientDetail(client.id, $event)">
-                  <i class="ri-community-line" title="Entreprise"></i>
+                  <i class="ri-git-branch-fill" title="Affiliation d'Entreprise"></i>
                 </div>
                 <ng-template #noEntreprise>
-                  <span class="no-phone-text">Non entreprise</span>
+                  <!--  <span class="no-phone-text">Non entreprise</span> -->
                 </ng-template>
               </td>
+              <td>
+                <span *ngIf="client.createdAt; else noDate">{{ client.createdAt | date: 'dd/MM/yyyy' }}</span>
+                <ng-template #noDate>
+                  <span class="no-phone-text">Non date</span>
+                </ng-template>
               
           </tr>
       </tbody>
@@ -105,12 +111,14 @@
                 <span class="no-phone-text">Nom est vide</span>
               </ng-template>
             </h3>
+            <span *ngIf="client.createdAt" class="dateCreat">{{ client.createdAt | date: 'dd/MM/yyyy' }}</span>
+
             <span *ngIf="client.entrepriseClient; else noEntrepriseCard" 
                   (click)="openEntrepriseClientDetail(client.id, $event)">
-              <i class="ri-community-line" title="Entreprise"></i>
+              <i class="ri-git-branch-fill" title="Affiliation d'Entreprise"></i>
             </span>
             <ng-template #noEntrepriseCard>
-              <span class="no-phone-text">Non entreprise</span>
+             <!--  <span class="no-phone-text">Non entreprise</span> -->
             </ng-template>
           </div>
           <div class="content_cadre_double">
@@ -137,6 +145,11 @@
                   <span class="no-phone-text">Non numéro de téléphone</span>
                 </ng-template>
               </p>
+              
+
+              
+              
+              
             </div>
             <!-- // Image de client  -->
             <div class="imgClient_grid">

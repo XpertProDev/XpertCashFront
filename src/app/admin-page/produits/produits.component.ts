@@ -18,6 +18,7 @@ import { UsersService } from '../SERVICES/users.service';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 import { MatDialog } from '@angular/material/dialog';
 import { SuspendedBoutiqueDialogComponent } from './suspended-boutique-dialog.component';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-produits',
@@ -32,7 +33,8 @@ import { SuspendedBoutiqueDialogComponent } from './suspended-boutique-dialog.co
     // RouterLink,
     MatInputModule,
     MatPaginatorModule,
-    CustomNumberPipe
+    CustomNumberPipe,
+    DragDropModule,
   ],
   templateUrl: './produits.component.html',
   styleUrls: ['./produits.component.scss']
@@ -50,8 +52,11 @@ export class ProduitsComponent implements OnInit {
   boutiqueName: string = '';
   addressBoutique : string = '';
   showDescription: boolean = false;
+  
 
   selectedBoutique: any = null;
+  previousSelectedBoutique: any | null = null;
+  boutiqueActuelle: string = "Toutes les boutiques";
   boutiques: any[] = []; 
 
   // Pagination et tableau de données
@@ -70,7 +75,7 @@ export class ProduitsComponent implements OnInit {
 
   entrepriseId: number | null = null;
 
-  previousSelectedBoutique: any = null;
+  
 
   constructor(
     private categorieService: CategorieService,
@@ -324,21 +329,27 @@ export class ProduitsComponent implements OnInit {
   selectBoutique(boutique: any | null): void {
     if (boutique && !boutique.actif) {
       this.showSuspendedBoutiqueDialog();
-      return; // Ne pas changer la sélection si boutique désactivée
+      return;
     }
   
-    // Stocker la sélection précédente avant de changer
     this.previousSelectedBoutique = this.selectedBoutique;
-    
+  
     if (boutique === null) {
       this.selectedBoutique = null;
+      this.boutiqueActuelle = "Toutes les boutiques";
       this.loadAllProduits();
     } else {
+      console.log("Boutique sélectionnée:", boutique); // 🛠 Debug ici
       this.selectedBoutique = boutique;
+      this.boutiqueActuelle = boutique.nomBoutique ? boutique.nomBoutique : "Boutique sans nom"; // ✅ Correction ici
       this.loadProduits(boutique.id);
     }
+    
     this.currentPage = 0;
+    console.log("Boutique actuelle:", this.boutiqueActuelle);
   }
+  
+  
 
   // Ajoutez cette nouvelle méthode
 loadAllProduits(): void {
@@ -518,7 +529,11 @@ loadAllProduits(): void {
   // sur html
   //  ? getBoutiqueTextColor(i, boutique.id === selectedBoutique?.id) : '#999'
 
-
+  onDrop(event: CdkDragDrop<any[]>) {
+    const previousIndex = this.boutiques.findIndex(boutique => boutique === event.item.data);
+    const currentIndex = event.currentIndex;
+    moveItemInArray(this.boutiques, previousIndex, currentIndex);
+  }
 
   
 }

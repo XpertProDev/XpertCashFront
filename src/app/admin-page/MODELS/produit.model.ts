@@ -1,3 +1,9 @@
+export interface Boutique {
+  id: number;
+  nom: string;
+  quantite: number;
+}
+
 export interface Produit {
   id: number;
   nom: string;
@@ -12,12 +18,12 @@ export interface Produit {
   codeBare: string;
   photo: string;
   enStock: boolean;
-  // Nouveaux champs issus du DTO
-  nomCategorie?: string; // ex: "Catégorie inconnue" ou la valeur réelle
-  nomUnite?: string;     // ex: "" ou la valeur réelle
+  nomCategorie?: string;
+  nomUnite?: string;
   createdAt?: string;
   lastUpdated?: string;
-
   boutiqueId: number | null;
-  nomBoutique?: string; 
+  nomBoutique?: string;
+  
+  boutiques?: Boutique[];
 }
