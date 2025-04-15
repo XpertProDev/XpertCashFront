@@ -11,9 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { UsersService } from '../SERVICES/users.service';
-import { map, startWith } from 'rxjs';
 import { Produit } from '../MODELS/produit.model';
-import { StockService } from '../SERVICES/stocks.service';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
@@ -53,19 +51,15 @@ export class StocksComponent implements OnInit {
   userName: string = '';
   boutiqueName: string = '';
   addressBoutique : string = '';
-
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   pageSize = 5;
   currentPage = 0;
-
   selectedBoutique: any = null;
   boutiques: any[] = [];
-
   // Dropdown pour l'export
   showExportDropdown = false;
-
   // Gestion de l'image uploadée
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
@@ -86,7 +80,6 @@ export class StocksComponent implements OnInit {
     this.getUserInfo();
     // this.loadProduits();
   }
-
 
   // Permet de mettre en évidence le texte recherché
   highlightMatch(text: string): string {
@@ -412,8 +405,6 @@ export class StocksComponent implements OnInit {
       error: (err) => console.error("Erreur lors de la récupération des produits", err),
     });
   }
-  
-  
 
   generateLetterAvatar(nom: string): string {
     const letter = nom ? nom.charAt(0).toUpperCase() : '?';
@@ -426,7 +417,6 @@ export class StocksComponent implements OnInit {
     // Encodage du SVG en base64 pour pouvoir l'utiliser comme data URL
     return `data:image/svg+xml;base64,${btoa(svg)}`;
   }
-
 
   openStockDetail(productId: number): void {
     this.router.navigate(['/detail-stock', productId]);

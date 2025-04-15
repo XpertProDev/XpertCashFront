@@ -26,10 +26,8 @@ export class DetailStockComponent {
   email: string = '';
   produit: Produit | undefined;
   stockHistory: any[] = [];
-
   // Dropdown pour l'export
   showExportDropdown = false;
-
   showDescription = false;
 
   constructor(@Inject(LOCALE_ID) private locale: string,
@@ -65,7 +63,6 @@ export class DetailStockComponent {
     this.loadStockHistory();
   }
   
-
   // Liste filtrée des stocks ajustés
     adjustedStocks: Stock[] = [];
     stock: Stock | null = null
@@ -126,9 +123,7 @@ export class DetailStockComponent {
         console.error("Erreur lors du chargement des stocks", error);
       }
     });
-  }    
-
-
+  }
 
   getBoutiqueName() {
     this.userService.getUserInfo().subscribe(
@@ -156,7 +151,6 @@ export class DetailStockComponent {
   //     this.boutiqueName = name;
   //   });
   // }
-
 
   getUserInfo(): void {
     this.userService.getUserInfo().subscribe({
@@ -314,8 +308,6 @@ export class DetailStockComponent {
     doc.save(`Fiche_Produit_${this.produit.nom}.pdf`);
   }
 
-  
-  
   getDisplayedDescription(): string {
     const lastAction = (this.getLastStockAction() || '').toLowerCase();
     // console.log('Action en minuscule :', lastAction);

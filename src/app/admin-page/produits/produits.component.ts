@@ -52,31 +52,22 @@ export class ProduitsComponent implements OnInit {
   boutiqueName: string = '';
   addressBoutique : string = '';
   showDescription: boolean = false;
-  
-
   selectedBoutique: any = null;
   previousSelectedBoutique: any | null = null;
   boutiqueActuelle: string = "Toutes les boutiques";
   boutiques: any[] = []; 
-
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   pageSize = 5;
   currentPage = 0;
-
   // Dropdown pour l'export
   showExportDropdown = false;
-
   // Gestion de l'image uploadée
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
   selectedFile: File | null = null;
-
   entrepriseId: number | null = null;
-
-  
-
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
@@ -352,39 +343,39 @@ export class ProduitsComponent implements OnInit {
   
 
   // Ajoutez cette nouvelle méthode
-loadAllProduits(): void {
-  if (!this.entrepriseId) {
-    console.error('ID entreprise manquant');
-    return;
+  loadAllProduits(): void {
+    if (!this.entrepriseId) {
+      console.error('ID entreprise manquant');
+      return;
+    }
+
+    this.produitService.getProduitsByEntrepriseId(this.entrepriseId).subscribe({
+      next: (produits: Produit[]) => {
+        this.tasks = produits.map(prod => {
+          // Reprenez ici la même logique de mapping que dans loadProduits()
+          const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
+            ? `${this.backendUrl}${prod.photo}`
+            : '';
+
+          return {
+            ...prod,
+            photo: fullImageUrl,
+            createdAt: this.formatDate(prod.createdAt?.toString() || ''),
+          } as Produit;
+        }).sort((a, b) => {
+          const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
+          const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
+          return dateB - dateA;
+        });
+
+        this.dataSource.data = this.tasks;
+        if (this.paginator) {
+          this.dataSource.paginator = this.paginator;
+        }
+      },
+      error: (err) => console.error("Erreur :", err)
+    });
   }
-
-  this.produitService.getProduitsByEntrepriseId(this.entrepriseId).subscribe({
-    next: (produits: Produit[]) => {
-      this.tasks = produits.map(prod => {
-        // Reprenez ici la même logique de mapping que dans loadProduits()
-        const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
-          ? `${this.backendUrl}${prod.photo}`
-          : '';
-
-        return {
-          ...prod,
-          photo: fullImageUrl,
-          createdAt: this.formatDate(prod.createdAt?.toString() || ''),
-        } as Produit;
-      }).sort((a, b) => {
-        const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
-        const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
-        return dateB - dateA;
-      });
-
-      this.dataSource.data = this.tasks;
-      if (this.paginator) {
-        this.dataSource.paginator = this.paginator;
-      }
-    },
-    error: (err) => console.error("Erreur :", err)
-  });
-}
 
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
   loadProduits(boutiqueId: number): void {
