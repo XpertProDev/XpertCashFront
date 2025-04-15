@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { map, Observable, of, startWith } from 'rxjs';
-import { SharedDataService } from '../../SERVICES/shared-data.service';
+// import { SharedDataService } from '../../SERVICES/shared-data.service';
 import { CategorieService } from '../../SERVICES/categorie.service';
 import { Categorie } from '../../MODELS/categorie.model';
 import { UniteMesure } from '../../MODELS/unite.model';
@@ -16,39 +16,22 @@ import { NgxBarcode6Module } from 'ngx-barcode6';
 import { ProduitService } from '../../SERVICES/produit.service';
 import { MatIconModule } from '@angular/material/icon';
 
-// export interface CategorySelect {
-//   name: string;
-// }
-
-// export interface UniteSelect {
-//   name: string;
-// }
 
 @Component({
   selector: 'app-add-produit',
   standalone: true,
-  imports: [
-    FormsModule,
-    CommonModule,
-    ReactiveFormsModule,
-    MatAutocompleteModule,
-    NgxBarcode6Module,
-    MatIconModule
-  ],
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, MatAutocompleteModule, NgxBarcode6Module, MatIconModule ],
   templateUrl: './add-produit.component.html',
   styleUrl: './add-produit.component.scss'
 })
 export class AddProduitComponent implements OnInit {
   isChecked = false;
-  // boutiqueId: number | null = null;
-  // Variable pour gérer l'affichage du popup
   showPopup: boolean = false;
   boutiqueName: string = '';
   boutiqueId: number = 1; 
   messageAPI: string = '';
   apiMessageType: 'success' | 'error' | '' = '';
   seuilsMap: { [boutiqueId: number]: number } = {};
-
   ajouteProduitForm!: FormGroup;
   modifierProduitForm!: FormGroup;
   ajouteCategoryForm!: FormGroup;
@@ -56,52 +39,59 @@ export class AddProduitComponent implements OnInit {
   errorMessage: string = '';
   errorMessageCategory: string = '';
   errorMessageUnity: string = '';
-
   boutiquesList: any[] = [];
-
   showPopupCategory: boolean = false;
   showPopupUnit: boolean = false;
   popupTitle: string = '';
   popupMessage: string = '';
   popupImage: string = '';
   popupType: 'success' | 'error' = 'success';
-
   imagePopup: string | null = null;
   nomEntreprise: string = '';
   adresseEntreprise: string = '';
   logoEntreprise: string =''
-
   // produitForm: FormGroup;
   imageFile: File | null = null;
   isLoading: boolean = false;
-
   boutiqueIdSelected: number[] = [];
   quantitesMap: { [boutiqueId: number]: number } = {};
   boutiqueForm!: FormGroup;
   successMessage: string | null = null;
-
-   // Variable regroupant toutes les informations du popup
-   popupData: PopupData = {
-    title: '',
-    message: '',
-    image: '',
-    type: 'success'
-  };
-
-  
-
+  // POUR UNITE
+  UniterControl = new FormControl();
+  showCategoryCreation: boolean = false;
+  showUniteCreation: boolean = false;
   // Variable initialisée vide
   formattedPrixVente: string = '';
   formattedCoutProduit: string = '';
-  
   // users: any[] = [];
   filteredUsers: any[] = [];
-  
   indicatif: string = '';
   maxPhoneLength: number = 8;
-  
   isAscending: boolean = true;
   searchTerm: string = '';
+  urllink: string = "assets/img/appareil.jpg";
+  newPhotoUrl: string | null = null;
+  selectedFile: File | null | undefined = null;
+  //////// FOCUS CATEGORY
+  myControl = new FormControl();
+  uniteControl = new FormControl();
+  options: Categorie[] = []; // Liste des catégories récupérées
+  optionsUnite: UniteMesure[] = []; // Liste des unites récupérées
+  filteredOptions: Observable<Categorie[]> = of([]);
+  filteredNomUnite: Observable<UniteMesure[]> = of([]);
+  controlBoutique = new FormControl('');
+  streetsBoutique: { id: number, name: string }[] = []; // Associe les noms aux IDs
+  filteredStreetsBoutique!: Observable<string[]>;
+  showPopupBoutique = false;
+  showBoutiqueSelectionPanel: boolean = false;
+  selectedBoutiques: any[] = [];
+  // Variable regroupant toutes les informations du popup
+  popupData: PopupData = { title: '', message: '', image: '', type: 'success' };
+  // Getter pour faciliter l'accès aux contrôles dans le template
+  get c() { return this.ajouteCategoryForm.controls; }
+  get u() { return this.ajouteUniteForm.controls; }
+  get f() { return this.ajouteProduitForm.controls; }
 
   clearImage() {
     this.newPhotoUrl = null;
@@ -146,9 +136,7 @@ export class AddProduitComponent implements OnInit {
     }
   }
 
-  goToProduit() {
-    this.router.navigate(['/produit']);
-  }
+  goToProduit() { this.router.navigate(['/produit']); }
   
   // Exemple d'utilisation lors d'une réponse du backend
   onResponseFromBackend(response: any): void {
@@ -163,26 +151,19 @@ export class AddProduitComponent implements OnInit {
   }
   
   // Méthode pour afficher le popup avec des données passées en paramètre
-  showPopupMessage(data: PopupData): void {
-    this.popupData = data;
-    this.showPopup = true; 
-    
-  }
+  showPopupMessage(data: PopupData): void { this.popupData = data; this.showPopup = true; }
 
   // Méthode pour fermer le popup
-  closePopup(): void {
-    this.showPopup = false;
-  }
+  closePopup(): void { this.showPopup = false; }
 
   constructor(
-    private sharedDataService: SharedDataService,
+    // private sharedDataService: SharedDataService,
     private categorieService: CategorieService,
     private uniteMesureService: UniteMesureService,
     private produitService: ProduitService,
     private fb: FormBuilder,
     private router: Router,
     private usersService: UsersService,
-    
   ) {}
 
   // Méthodes d'ouverture/fermeture des popups
@@ -193,9 +174,7 @@ export class AddProduitComponent implements OnInit {
     this.messageAPI = '';
   }
 
-  closePopupCategory(): void {
-    this.showPopupCategory = false;
-  }
+  closePopupCategory(): void { this.showPopupCategory = false; }
 
   openPopupUnit(): void {
     this.showPopupUnit = true;
@@ -204,20 +183,13 @@ export class AddProduitComponent implements OnInit {
     this.messageAPI = '';
   }
 
-  closePopupUnit(): void {
-    this.showPopupUnit = false;
-  }
+  closePopupUnit(): void { this.showPopupUnit = false; }
 
   onToggleChange(event: Event) {
     // event.target permet d’accéder au checkbox
     const checkbox = event.target as HTMLInputElement;
     console.log('isChecked:', checkbox.checked);
   }
-  
-
-  urllink: string = "assets/img/appareil.jpg";
-  newPhotoUrl: string | null = null;
-  selectedFile: File | null | undefined = null;
  
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -243,28 +215,8 @@ export class AddProduitComponent implements OnInit {
       reader.readAsDataURL(this.selectedFile);
     }
   }
-  
-  //////// FOCUS CATEGORY
-  myControl = new FormControl();
-  uniteControl = new FormControl();
 
-  options: Categorie[] = []; // Liste des catégories récupérées
-  optionsUnite: UniteMesure[] = []; // Liste des unites récupérées
-  filteredOptions: Observable<Categorie[]> = of([]);
-  filteredNomUnite: Observable<UniteMesure[]> = of([]);
-
-  // filteredOptions: Observable<CategorySelect[]> = of([]);
-
-  ngOnInit(): void  {
-    this.getBoutiqueName();
-    
-    
-    // Partage de donner de user
-    this.sharedDataService.boutiqueName$.subscribe(name => {
-      console.log("AddProduitComponent - Nom boutique récupéré :", name);
-      this.boutiqueName = name;
-    });
-    // 🟢 Filtrage des catégories (OK)
+  setupFormSubscriptions() {
     const token = localStorage.getItem('authToken'); // ou via un service d'authentification
     if (token) {
       this.categorieService.getCategories(token).subscribe(
@@ -305,6 +257,9 @@ export class AddProduitComponent implements OnInit {
     } else {
       console.error('Aucun token trouvé !');
     }
+  }
+
+  loadInitialData() {
     this.ajouteProduitForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prixVente: ['', Validators.required],
@@ -316,13 +271,7 @@ export class AddProduitComponent implements OnInit {
       categorieId: [''],
       uniteId: [''],
     });
-    
-    // Abonnement pour récupérer l'ID de la boutique active
-    this.sharedDataService.boutiqueId$.subscribe(id => {
-      this.boutiqueId = id;
-    });
 
-    // Formulaire pour ajouter une catégorie
     this.ajouteCategoryForm = this.fb.group({
       categoryName: ['', [/*Validators.required,*/ Validators.minLength(3), Validators.maxLength(20)]]
     });
@@ -330,20 +279,6 @@ export class AddProduitComponent implements OnInit {
     // Formulaire pour ajouter une unite
     this.ajouteUniteForm = this.fb.group({
       unityName: ['', [ Validators.minLength(2), Validators.maxLength(20)]]
-    });
-
-    // À chaque changement de valeur dans le champ "categoryName", on réinitialise l'erreur
-    this.ajouteCategoryForm.get('categoryName')?.valueChanges.subscribe(() => {
-      this.errorMessageCategory = '';
-      this.messageAPI = '';
-      this.apiMessageType = '';
-    });
-
-    // À chaque changement de valeur dans le champ "uniteName", on réinitialise l'erreur
-    this.ajouteUniteForm.get('unityName')?.valueChanges.subscribe(() => {
-      this.errorMessageUnity = '';
-      this.messageAPI = '';
-      this.apiMessageType = '';
     });
 
     // Abonnement pour mettre à jour l'image par défaut en fonction du nom du produit
@@ -361,15 +296,46 @@ export class AddProduitComponent implements OnInit {
         }
       }
     });
-
     // Remplacer l'abonnement existant par :
     this.ajouteProduitForm.get('codeBare')?.valueChanges.subscribe(value => {
       this.showBarcode = value && value.length >= 3;
     });
+  }
 
+  setupAutocompleteFilters() {
+    // À chaque changement de valeur dans le champ "categoryName", on réinitialise l'erreur
+    this.ajouteCategoryForm.get('categoryName')?.valueChanges.subscribe(() => {
+      this.errorMessageCategory = '';
+      this.messageAPI = '';
+      this.apiMessageType = '';
+    });
+
+    // À chaque changement de valeur dans le champ "uniteName", on réinitialise l'erreur
+    this.ajouteUniteForm.get('unityName')?.valueChanges.subscribe(() => {
+      this.errorMessageUnity = '';
+      this.messageAPI = '';
+      this.apiMessageType = '';
+    });
+  }
+ 
+  ngOnInit(): void  {
+    this.getBoutiqueName();
+    this.setupFormSubscriptions();
+    this.loadInitialData();
+    this.setupAutocompleteFilters();
     this.getFilteredStreetsBoutique();
-    this.getBoutiqueName(); // Appel pour récupérer les noms des boutiques
+    this.getBoutiqueName();
+    // Partage de donner de user
+    // this.sharedDataService.boutiqueName$.subscribe(name => {
+    //   console.log("AddProduitComponent - Nom boutique récupéré :", name);
+    //   this.boutiqueName = name;
+    // });
+    // 🟢 Filtrage des catégories (OK)
     
+    // Abonnement pour récupérer l'ID de la boutique active
+    // this.sharedDataService.boutiqueId$.subscribe(id => {
+    //   this.boutiqueId = id;
+    // });
   }
 
   generateImageFromLetter(letter: string): string {
@@ -401,7 +367,6 @@ export class AddProduitComponent implements OnInit {
     return new File([u8arr], filename, { type: mime });
   }
   
-
   getBoutiqueName(): void {
     this.usersService.getUserInfo().subscribe(
       (userInfo) => {
@@ -420,11 +385,6 @@ export class AddProduitComponent implements OnInit {
       }
     );
   }
-
-  // Getter pour faciliter l'accès aux contrôles dans le template
-  get c() { return this.ajouteCategoryForm.controls; }
-  get u() { return this.ajouteUniteForm.controls; }
-  get f() { return this.ajouteProduitForm.controls; }
   
   // Méthode pour la sélection d'une catégorie
   onCategorySelected(event: any): void {
@@ -444,7 +404,6 @@ export class AddProduitComponent implements OnInit {
       this.ajouteProduitForm.get('uniteId')?.setValue(null);
     }
   }
-
 
   // Pour categorie 
   private _filter(name: string): Categorie[] {
@@ -468,66 +427,41 @@ export class AddProduitComponent implements OnInit {
     return unityMesure ? unityMesure.nom : '';
   }
 
-  // POUR UNITE
-  UniterControl = new FormControl();
-  showCategoryCreation: boolean = false;
-  showUniteCreation: boolean = false;
-
   // Lorsque l'utilisateur clique sur "Créer" pour une catégorie
-  onCreateCategoryClick() {
-    this.openPopupCategory();
-  }
+  onCreateCategoryClick() { this.openPopupCategory(); }
 
   // Lorsque l'utilisateur clique sur "Créer" pour une unité
-  onCreateUniteClick() {
-    this.openPopupUnit();
-  }
+  onCreateUniteClick() { this.openPopupUnit(); }
 
   // Méthodes pour annuler la création
-  cancelCategoryCreation() {
-    this.showCategoryCreation = false;
-  }
+  cancelCategoryCreation() { this.showCategoryCreation = false; }
 
-  cancelUniteCreation() {
-    this.showUniteCreation = false;
-  }
+  cancelUniteCreation() { this.showUniteCreation = false; }
 
   submitFormCategory(): void {
     const categoryData = { nom: this.ajouteCategoryForm.value.categoryName };
-  
     this.categorieService.ajouterCategorie(categoryData).subscribe({
       next: (response: any) => {
         console.log('Catégorie ajoutée avec succès : ', response);
         if (response && response.id) {
           // Réinitialiser le formulaire
           this.ajouteCategoryForm.get('categoryName')!.setValue('');
-
           this.closePopupCategory();
-
           // Créer le nouvel objet catégorie
-          const newCategory: Categorie = { 
-            id: response.id, 
-            nom: categoryData.nom 
-          };
-
+          const newCategory: Categorie = { id: response.id, nom: categoryData.nom };
           // Ajouter à la liste des options
           this.options.push(newCategory);
-
           this.showCategoryCreation = false;
-
           // 1. Mettre à jour l'input d'autocomplete
           this.myControl.setValue(newCategory);
-
           // 2. Mettre à jour la valeur dans le formulaire principal
           this.ajouteProduitForm.get('categorieId')?.setValue(newCategory.id);
-
           // Mettre à jour les options filtrées
           this.filteredOptions = this.myControl.valueChanges.pipe(
             startWith(newCategory), // Pré-remplir avec la nouvelle valeur
             map(value => (typeof value === 'string' ? value : value?.nom)),
             map(name => (name ? this._filter(name) : this.options.slice()))
           );
-
           // Afficher message
           this.apiMessageType = 'success';
           this.messageAPI = response.message || "La catégorie a été créée avec succès.";
@@ -537,7 +471,6 @@ export class AddProduitComponent implements OnInit {
         console.log("Erreur complète :", error);
         console.log("Réponse API :", error.error);
         let message = "Une erreur est survenue lors de la création de la catégorie.";
-  
         if (error.error) {
           if (typeof error.error === "object" && error.error.error) {
             message = error.error.error;
@@ -545,7 +478,6 @@ export class AddProduitComponent implements OnInit {
             message = error.error;
           }
         }
-  
         this.apiMessageType = 'error';
         this.messageAPI = message;
       }
@@ -554,35 +486,27 @@ export class AddProduitComponent implements OnInit {
 
   submitFormUnity(): void {
     const unityData = { nom: this.ajouteUniteForm.value.unityName };
-  
     this.uniteMesureService.ajouterUnite(unityData).subscribe({
       next: (response: any) => {
         console.log('Unité ajouté avec succès : ', response);
         if (response && response.id) {
           // Réinitialiser le formulaire
           this.ajouteUniteForm.get('unityName')!.setValue('');
-
           this.closePopupUnit();
-
           // Créer la nouvelle unité
           const newUnity: UniteMesure = { 
             id: response.id, 
             nom: unityData.nom 
           };
-
           this.showUniteCreation = false;
-
           // Ajouter à la liste
           this.optionsUnite.push(newUnity);
           // Force la mise à jour du filtre
           this.uniteControl.updateValueAndValidity();
-
           // 1. Mettre à jour l'input d'autocomplete
           this.uniteControl.setValue(newUnity);
-
           // 2. Mettre à jour le formulaire principal
           this.ajouteProduitForm.get('uniteId')?.setValue(newUnity.id);
-
           // 3. Mettre à jour les options filtrées
           // Corriger la structure du pipe RxJS
           // Corriger la structure du pipe RxJS
@@ -591,7 +515,6 @@ export class AddProduitComponent implements OnInit {
             map(value => typeof value === 'string' ? value : value?.nom),
             map((name: string) => name ? this._filterUnite(name) : this.optionsUnite.slice())
           );
-
           // Afficher message
           this.apiMessageType = 'success';
           this.messageAPI = response.message || "L'unité a été créée avec succès.";
@@ -621,24 +544,9 @@ export class AddProduitComponent implements OnInit {
       this.errorMessage = "Veuillez vérifier les informations saisies.";
       return;
     }
-
-    // if (this.boutiqueIdSelected.some(id => !this.quantitesMap[id] || this.quantitesMap[id] < 0)) {
-    //   this.errorMessage = "Veuillez saisir une quantité valide pour chaque boutique.";
-    //   this.isLoading = false;
-    //   return;
-    // }
-
-    // const seuilsAlert = this.boutiqueIdSelected.map(id => {
-    //   const boutique = this.boutiquesList.find(b => b.id === id);
-    //   return Number(boutique?.seuilAlert) || 0;
-    // });
-    
-  
     this.isLoading = true;
-  
     const produit = this.ajouteProduitForm.value;
     console.log('Produit soumis:', produit);
-  
     const tokenStored = localStorage.getItem('authToken');
     if (!tokenStored) {
       this.showPopupMessage({
@@ -650,41 +558,33 @@ export class AddProduitComponent implements OnInit {
       this.isLoading = false;
       return;
     }
-  
-    const token = `Bearer ${tokenStored}`;
+    // const token = `Bearer ${tokenStored}`;
     const addToStock = this.isChecked;
-  
     try {
       let finalImage: File;
-  
       // Si une image a été sélectionnée
       if (this.imageFile && this.imageFile.name !== 'default.svg') {
         console.log('Compression de l\'image en cours...');
-  
         // Options de compression
         const options = {
           maxSizeMB: 1,
           maxWidthOrHeight: 1000,
           useWebWorker: true,
         };
-  
         const compressedFile = await imageCompression(this.imageFile, options);
         console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
-  
         // Vérification du type MIME du fichier compressé
         if (compressedFile.type !== 'image/png' && compressedFile.type !== 'image/jpeg') {
           this.errorMessage = 'Le fichier compressé n\'est pas un format valide (PNG ou JPEG).';
           this.isLoading = false;
           return;
         }
-  
         // Changer le nom du fichier en fonction du type MIME
         const extension = compressedFile.type === 'image/png' ? '.png' : '.jpeg';
         finalImage = new File([compressedFile], this.imageFile.name.replace(/\..+$/, extension), {
           type: compressedFile.type, // Forcer le type MIME à PNG ou JPEG
           lastModified: Date.now()
         });
-  
         console.log('Final Image:', finalImage);
       } else {
         // Si aucune image n'a été sélectionnée, utiliser l'image SVG générée
@@ -692,20 +592,15 @@ export class AddProduitComponent implements OnInit {
         finalImage = this.dataURLtoFile(this.generateImageFromLetter(productName), 'default.svg');
         console.log('Image par défaut utilisée:', finalImage);
       }
-  
-      // Inclure l'ID de la boutique sélectionnée dans les données
       // const boutiqueId = this.boutiqueIdSelected;
-      const boutiqueId = this.boutiqueIdSelected || this.boutiquesList[0]?.id;
-      
+      // const boutiqueId = this.boutiqueIdSelected || this.boutiquesList[0]?.id;
       if (this.boutiqueIdSelected.length === 0) {
         this.errorMessage = "Veuillez sélectionner au moins une boutique.";
         this.isLoading = false;
         return;
       }
-  
       const quantitesSelected = this.boutiqueIdSelected.map(id => Number(this.quantitesMap[id]) || 0);
       const seuilsSelected = this.boutiqueIdSelected.map(id => Number(this.seuilsMap[id]) || 0);
-
       this.produitService
         .ajouterProduit(
             this.boutiqueIdSelected, 
@@ -722,15 +617,12 @@ export class AddProduitComponent implements OnInit {
               image: 'assets/img/succcccc.png',
               type: 'success',
             });
-      
             this.ajouteProduitForm.reset();
             this.myControl.reset();
             this.uniteControl.reset();
-      
             this.imageFile = null;
             this.selectedFile = null;
             this.newPhotoUrl = null;
-      
             this.isLoading = false;
             this.router.navigate(['/produit']);
           },
@@ -759,27 +651,20 @@ export class AddProduitComponent implements OnInit {
       this.isLoading = false;
     }
   }
-  
   // Options de configuration pour le code barre
-
   showBarcode = false;
-
   // Modifiez onCodeBarChange() :
   onCodeBarChange(): void {
     const codeBareValue = this.ajouteProduitForm.get('codeBare')?.value || '';
     this.showBarcode = codeBareValue.length >= 1;
   }
+
   validateNumericInput(event: KeyboardEvent): void {
     const charCode = event.which ? event.which : event.keyCode;
     if (charCode < 48 || charCode > 57) {
       event.preventDefault(); 
     }
   }
-
-
-  controlBoutique = new FormControl('');
-  streetsBoutique: { id: number, name: string }[] = []; // Associe les noms aux IDs
-  filteredStreetsBoutique!: Observable<string[]>;
 
   getFilteredStreetsBoutique() {
     this.filteredStreetsBoutique = this.controlBoutique.valueChanges.pipe(
@@ -798,15 +683,10 @@ export class AddProduitComponent implements OnInit {
   private _normalizeValue(value: string): string {
     return value.toLowerCase().replace(/\s/g, '');
   }
-
-  showPopupBoutique = false;
-
-  
   
   onFocusBoutiqueInput(): void {
     this.controlBoutique.setValue(''); // Réinitialise la valeur pour afficher toutes les options
   }
-
 
   initForm() {
     this.boutiqueForm = this.fb.group({
@@ -825,14 +705,9 @@ export class AddProduitComponent implements OnInit {
     this.boutiqueForm.controls['phone'].updateValueAndValidity();
   }
    
-  openPopupBoutique() {
-    this.showPopupBoutique = true;
-  }
+  openPopupBoutique() { this.showPopupBoutique = true; }
 
-  closePopupBoutique() {
-    this.showPopupBoutique = false;
-    this.resetForm();
-  }
+  closePopupBoutique() { this.showPopupBoutique = false; this.resetForm(); }
 
   private resetForm() {
     this.boutiqueForm.patchValue({
@@ -841,7 +716,6 @@ export class AddProduitComponent implements OnInit {
       adresseBoutique: '',
       telephoneBoutique: ''
     });
-  
     this.boutiqueForm.markAsPristine();
     this.boutiqueForm.markAsUntouched();
     this.boutiqueForm.updateValueAndValidity();
@@ -850,7 +724,6 @@ export class AddProduitComponent implements OnInit {
   onBoutiqueSelected(event: any): void {
     const selectedName = event.option.value;
     const selectedBoutique = this.boutiquesList.find(b => b.nomBoutique === selectedName);
-    
     // Ajouter au tableau au lieu d'assigner une valeur unique
     if (selectedBoutique) {
         this.boutiqueIdSelected = [selectedBoutique.id]; // Tableau avec un seul élément
@@ -865,9 +738,6 @@ export class AddProduitComponent implements OnInit {
     return boutique ? boutique : '';
   }
 
-  showBoutiqueSelectionPanel: boolean = false;
-  selectedBoutiques: any[] = [];
-
   toggleBoutiqueSelectionPanel(): void {
     this.showBoutiqueSelectionPanel = !this.showBoutiqueSelectionPanel;
   }
@@ -879,15 +749,8 @@ export class AddProduitComponent implements OnInit {
   confirmBoutiqueSelection(): void {
     this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
     this.boutiqueIdSelected = this.selectedBoutiques.map(b => b.id);
-
     const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
     this.controlBoutique.setValue(selectedNames.join(', '));
-
-    // Remplacer null par un tableau vide si aucune sélection
-    // this.boutiqueIdSelected = this.selectedBoutiques.length > 0 
-    //     ? this.selectedBoutiques.map(b => b.id) 
-    //     : [];
-    
     this.toggleBoutiqueSelectionPanel();
   }
 

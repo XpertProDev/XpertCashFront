@@ -7,17 +7,14 @@ import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/co
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProduitService } from '../SERVICES/produit.service';
-import { SharedDataService } from '../SERVICES/shared-data.service';
+// import { SharedDataService } from '../SERVICES/shared-data.service';
 import { UsersService } from '../SERVICES/users.service';
 import { Produit } from '../MODELS/produit.model';
 import { StockService } from '../SERVICES/stocks.service';
 import { Stock } from '../MODELS/stock.model';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
-import { MatSelectModule } from '@angular/material/select';
-import { MatOptionModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { Transfert } from '../MODELS/tranfert-model';
 import { TransfertService } from '../SERVICES/transfert-service';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -80,7 +77,7 @@ export class AddStockAjustementComponent {
 
   // Contructor
   constructor(
-      private sharedDataService: SharedDataService,
+      // private sharedDataService: SharedDataService,
       private produitService: ProduitService,
       private fb: FormBuilder,
       private router: Router,
@@ -96,7 +93,7 @@ export class AddStockAjustementComponent {
 
   ngOnInit(): void  {
     this.getBoutiqueName();
-    this.getPartageInfoUser();
+    // this.getPartageInfoUser();
     // Convertir explicitement null en undefined avec l'opérateur de coalescence nulle
     // this.loadProduits(this.usersService.getUserBoutiqueId() ?? undefined);
     this.getAjusteForm();
@@ -164,13 +161,13 @@ export class AddStockAjustementComponent {
     );
   }
 
-  getPartageInfoUser() {
-     // Partage de donner de user
-     this.sharedDataService.boutiqueName$.subscribe(name => {
-      console.log("AddProduitComponent - Nom boutique récupéré :", name);
-      this.boutiqueName = name;
-    });
-  }
+  // getPartageInfoUser() {
+  //    // Partage de donner de user
+  //    this.sharedDataService.boutiqueName$.subscribe(name => {
+  //     console.log("AddProduitComponent - Nom boutique récupéré :", name);
+  //     this.boutiqueName = name;
+  //   });
+  // }
 
   // select de produit
   selectedProduct: Produit | null = null;

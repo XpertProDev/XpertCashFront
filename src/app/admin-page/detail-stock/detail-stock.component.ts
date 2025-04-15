@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UsersService } from '../SERVICES/users.service';
 import { ProduitService } from '../SERVICES/produit.service';
 import { Produit } from '../MODELS/produit.model';
-import { SharedDataService } from '../SERVICES/shared-data.service';
+// import { SharedDataService } from '../SERVICES/shared-data.service';
 import { StockService } from '../SERVICES/stocks.service';
 import { Stock } from '../MODELS/stock.model';
 import jsPDF from 'jspdf';
@@ -27,8 +27,6 @@ export class DetailStockComponent {
   produit: Produit | undefined;
   stockHistory: any[] = [];
 
-
-
   // Dropdown pour l'export
   showExportDropdown = false;
 
@@ -37,7 +35,7 @@ export class DetailStockComponent {
   constructor(@Inject(LOCALE_ID) private locale: string,
       private userService: UsersService,
       private produitService: ProduitService,
-      private sharedDataService: SharedDataService,
+      // private sharedDataService: SharedDataService,
       private stockService: StockService,
       private router: Router,
       private route: ActivatedRoute,
@@ -151,13 +149,13 @@ export class DetailStockComponent {
     );
   }
 
-  getPartageInfoUser() {
-     // Partage de donner de user
-     this.sharedDataService.boutiqueName$.subscribe(name => {
-      console.log("AddProduitComponent - Nom boutique récupéré :", name);
-      this.boutiqueName = name;
-    });
-  }
+  // getPartageInfoUser() {
+  //    // Partage de donner de user
+  //    this.sharedDataService.boutiqueName$.subscribe(name => {
+  //     console.log("AddProduitComponent - Nom boutique récupéré :", name);
+  //     this.boutiqueName = name;
+  //   });
+  // }
 
 
   getUserInfo(): void {

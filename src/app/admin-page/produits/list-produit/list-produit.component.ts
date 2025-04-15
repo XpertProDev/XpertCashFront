@@ -9,7 +9,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Categorie } from '../../MODELS/categorie.model';
 import { UniteMesure } from '../../MODELS/unite.model';
 import { CategorieService } from '../../SERVICES/categorie.service';
-import { SharedDataService } from '../../SERVICES/shared-data.service';
+// import { SharedDataService } from '../../SERVICES/shared-data.service';
 import { UniteMesureService } from '../../SERVICES/unite.service';
 import { UsersService } from '../../SERVICES/users.service';
 import { PopupData } from '../../MODELS/PopUp/popup-data';
@@ -97,7 +97,7 @@ export class ListProduitComponent {
   get f() { return this.modifierProduitForm.controls; }
 
   constructor(
-    private sharedDataService: SharedDataService,
+    // private sharedDataService: SharedDataService,
     private categorieService: CategorieService,
     private uniteMesureService: UniteMesureService,
     private produitService: ProduitService,
@@ -108,8 +108,8 @@ export class ListProduitComponent {
 
   ngOnInit(): void  {
     this.getProduit();
-    this.getPartageNameBoutique();
-    this.getPartageIdBoutique();
+    // this.getPartageNameBoutique();
+    // this.getPartageIdBoutique();
     this.getFiltrageCategoriesUnites();
     this.getModifierProduitForm();
     this.getAjouteCategoryForm();
@@ -192,13 +192,13 @@ export class ListProduitComponent {
   filteredOptions: Observable<Categorie[]> = of([]);
   filteredNomUnite: Observable<UniteMesure[]> = of([]);
     
-  getPartageNameBoutique() {
-    // Partage de donner de user
-    this.sharedDataService.boutiqueName$.subscribe(name => {
-      console.log("AddProduitComponent - Nom boutique récupéré :", name);
-      this.boutiqueName = name;
-    });
-  }
+  // getPartageNameBoutique() {
+  //   // Partage de donner de user
+  //   this.sharedDataService.boutiqueName$.subscribe(name => {
+  //     console.log("AddProduitComponent - Nom boutique récupéré :", name);
+  //     this.boutiqueName = name;
+  //   });
+  // }
 
   getFiltrageCategoriesUnites() {
     // 🟢 Filtrage des catégories (OK)
@@ -258,12 +258,12 @@ export class ListProduitComponent {
     });
   }
 
-  getPartageIdBoutique() {
-    // Abonnement pour récupérer l'ID de la boutique active
-    this.sharedDataService.boutiqueId$.subscribe(id => {
-      this.boutiqueId = id;
-    });
-  }
+  // getPartageIdBoutique() {
+  //   // Abonnement pour récupérer l'ID de la boutique active
+  //   this.sharedDataService.boutiqueId$.subscribe(id => {
+  //     this.boutiqueId = id;
+  //   });
+  // }
 
   getAjouteCategoryForm() {
     // Formulaire pour ajouter une catégorie

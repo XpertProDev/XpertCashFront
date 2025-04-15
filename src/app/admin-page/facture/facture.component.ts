@@ -12,7 +12,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProduitService } from '../SERVICES/produit.service';
-import { SharedDataService } from '../SERVICES/shared-data.service';
+// import { SharedDataService } from '../SERVICES/shared-data.service';
 import { StockService } from '../SERVICES/stocks.service';
 import { UsersService } from '../SERVICES/users.service';
 import { Produit } from '../MODELS/produit.model';
@@ -106,11 +106,11 @@ export class FactureComponent  implements AfterViewInit {
 
    constructor(
          private userService: UsersService,
-         private produitService: ProduitService,
-         private sharedDataService: SharedDataService,
-         private stockService: StockService,
-         private router: Router,
-         private route: ActivatedRoute,
+        //  private produitService: ProduitService,
+        //  private sharedDataService: SharedDataService,
+        //  private stockService: StockService,
+        //  private router: Router,
+        //  private route: ActivatedRoute,
          private factureService: FactureService,
          private changeDetectorRef: ChangeDetectorRef,
         private dialog: MatDialog
@@ -197,7 +197,7 @@ export class FactureComponent  implements AfterViewInit {
 
   ngOnInit(): void {
     this.getBoutiqueName();
-    this.getPartageInfoUser();
+    // this.getPartageInfoUser();
     // List des factures 
     // this.loadFactures();
     this.getUserInfo();
@@ -230,12 +230,12 @@ export class FactureComponent  implements AfterViewInit {
   }
 
   // Partage de donner de user
-  getPartageInfoUser() {
-      this.sharedDataService.boutiqueName$.subscribe(name => {
-      console.log("AddProduitComponent - Nom boutique récupéré :", name);
-      this.boutiqueName = name;
-    });
-  }
+  // getPartageInfoUser() {
+  //     this.sharedDataService.boutiqueName$.subscribe(name => {
+  //     console.log("AddProduitComponent - Nom boutique récupéré :", name);
+  //     this.boutiqueName = name;
+  //   });
+  // }
 
   // loadFactures() {
   //   this.factureService.getFactures().subscribe({

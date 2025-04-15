@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HeaderNavComponent } from 'src/app/admin-page/Navigation/header-nav/header-nav.component';
-import { SharedDataService } from 'src/app/admin-page/SERVICES/shared-data.service';
+// import { SharedDataService } from 'src/app/admin-page/SERVICES/shared-data.service';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 
 @Component({
@@ -31,7 +31,7 @@ export class InscriptionComponent implements OnInit {
     private fb: FormBuilder,
     private usersService: UsersService,
     private router: Router,
-    private sharedDataService: SharedDataService
+    // private sharedDataService: SharedDataService
   ) { }
 
   ngOnInit(): void {
@@ -108,12 +108,12 @@ export class InscriptionComponent implements OnInit {
   
           if (response && response.message) {
             // Mettre à jour le service partagé avec le nom de la boutique reçu (response.nomBoutique)
-            if(response.nomBoutique) {
-              console.log("Boutique dans la réponse :", response.nomBoutique);
-              this.sharedDataService.setBoutiqueName(response.nomBoutique);
-            } else {
-              console.error("La réponse ne contient pas 'nomBoutique'.");
-            }
+            // if(response.nomBoutique) {
+            //   console.log("Boutique dans la réponse :", response.nomBoutique);
+            //   this.sharedDataService.setBoutiqueName(response.nomBoutique);
+            // } else {
+            //   console.error("La réponse ne contient pas 'nomBoutique'.");
+            // }
             this.openPopup("Inscription réussie !", response.message, 'success');
           } else {
             this.errorMessage = response.error || "Erreur d'inscription, veuillez vérifier les champs.";
