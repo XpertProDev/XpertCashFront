@@ -492,7 +492,10 @@ loadAllProduits(): void {
   // openProductDetail(productId: number) {}
 
   openProduitDetail(productId: number): void {
-    this.router.navigate(['/detail-produit', productId]);
+    const boutiqueId = this.selectedBoutique?.id;
+    this.router.navigate(['/detail-produit', productId], { 
+      queryParams: { boutiqueId: boutiqueId } 
+    });
   }
   
   // Méthode qui retourne l'image à afficher pour un produit

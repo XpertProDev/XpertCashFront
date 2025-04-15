@@ -71,6 +71,7 @@ export class ListProduitComponent {
   // Variable regroupant toutes les informations du popup
   popupData: PopupData = { title: '', message: '', image: '', type: 'success' };
   showBarcode = false;
+  selectedBoutiqueId: number | null = null;
     
   // Produit 
   produit: Produit = {
@@ -117,6 +118,11 @@ export class ListProduitComponent {
     this.getAjouteCategoryFormCategoryName();
     this.getAjouteCategoryFormUnityName();
     this.getModifierProduitFormCodeBare();
+
+    this.route.queryParams.subscribe(params => {
+      this.selectedBoutiqueId = params['boutiqueId'] ? +params['boutiqueId'] : null;
+      this.getProduit();
+    });
   }
 
   // Exemple d'utilisation lors d'une réponse du backend
@@ -340,6 +346,15 @@ export class ListProduitComponent {
 
               // Vérification des boutiques du produit
               console.log("Boutiques disponibles pour ce produit:", this.produit.boutiques);
+              const boutiqueStock = data.boutiques?.find(b => b.id === this.selectedBoutiqueId);
+
+              this.produit.quantite = boutiqueStock?.quantite || 0;
+
+               // Mettre à jour le formulaire
+              this.modifierProduitForm.patchValue({
+                ...this.produit,
+                quantite: this.produit.quantite
+              });
 
               if (this.produit.boutiques && this.produit.boutiques.length > 0) {
                 let boutiqueActuelle = null;
@@ -378,6 +393,12 @@ export class ListProduitComponent {
               console.error('Erreur lors de la récupération du produit', err);
           }
       });
+  }
+
+  getBoutiqueQuantity(): number {
+    if (!this.selectedBoutiqueId || !this.produit.boutiques) return 0;
+    const boutique = this.produit.boutiques.find(b => b.id === this.selectedBoutiqueId);
+    return boutique?.quantite || 0;
   }
 
   getBoutiqueNames(boutiques: { id: number, nom: string, quantite: number }[] | undefined): string[] {
