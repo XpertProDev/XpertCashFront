@@ -106,6 +106,15 @@ export const NavigationItems: NavigationItem[] = [
         icon: 'feather icon-list'
       },
 
+      {
+        id: 'facture-proforma',
+        title: 'Facture-proforma',
+        type: 'item',
+        url: '/facture-proforma',
+        classes: 'nav-item',
+        icon: 'feather icon-repeat'
+      },
+
       // Pour les compte
       /*{
         id: 'compte',

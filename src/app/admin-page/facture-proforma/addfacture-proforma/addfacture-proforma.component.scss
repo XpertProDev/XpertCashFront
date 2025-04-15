@@ -594,3 +594,78 @@
     font-weight: bold;
     position: relative;
   }
+
+  /* From Uiverse.io by PriyanshuGupta28 */ 
+.input[type="checkbox"] {
+  display: none;
+}
+
+
+  /* Style for the custom checkbox */
+.custom-checkbox {
+  display: inline-block;
+    width: 15px;
+    height: 15px;
+    border: 2px solid #333;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    top: 2px;
+    left: 5px;
+}
+
+  /* Style for the custom checkmark */
+.custom-checkbox::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background-color: #333;
+  border-radius: 2px;
+  opacity: 0;
+}
+
+  /* Show the checkmark when checkbox is checked */
+.input[type="checkbox"]:checked + .custom-checkbox::after {
+  opacity: 1;
+}
+
+// btn ajouter
+.btn_ajouter {
+  margin-left: 30px;
+}
+
+.btn_ajouter i {
+  font-size: 14px;
+  background-color: transparent;
+  color: #0672E4;
+  padding: 2px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid #0672E4;
+}
+
+.btn_ajouter i:hover {
+  background-color: #0863c50e;
+  transition: all ease .5s;
+}
+
+// btn supprimer
+.btn_delete {
+  margin-left: 30px;
+  margin-top: 10px;
+}
+
+.btn_delete i {
+  font-size: 18px;
+  color: #ff0000;
+  cursor: pointer;
+}
+
+.btn_delete i:hover {
+  color: #ca0000;
+  transition: all ease .5s;
+}

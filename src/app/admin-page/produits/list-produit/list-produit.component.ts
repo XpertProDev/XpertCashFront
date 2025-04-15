@@ -370,9 +370,8 @@ export class ListProduitComponent {
             }
             
 
-              // Affichage final de toutes les boutiques qui sont affichées
               console.log("Boutiques affichées:", this.boutiqueNames);
-              console.log("Nom de la boutique actuelle:", this.boutiqueActuelle);  // Le nom de la boutique actuelle
+              console.log("Nom de la boutique actuelle:", this.boutiqueActuelle);
           },
           error: (err) => {
               console.error('Erreur lors de la récupération du produit', err);
@@ -390,7 +389,7 @@ export class ListProduitComponent {
 
   // Méthode pour la sélection d'une catégorie
   onCategorySelected(event: any): void {
-    console.log('Option sélectionnée :', event.option.value);  // Ajoutez ce log pour vérifier la sélection
+    console.log('Option sélectionnée :', event.option.value);
     if (event.option && event.option.value) {
       this.modifierProduitForm.get('categorieId')?.setValue(event.option.value.id);
     } else {
