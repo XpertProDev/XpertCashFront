@@ -51,7 +51,14 @@
           <div class="info_content">
             <div class="info">
               <p class="info_title">Boutique :</p>
-              <p class="info_value" style="color: #0672E4;">{{ boutiqueName }}</p>
+              <div *ngIf="selectedBoutiqueId; else allBoutiques">
+                <p class="info_value" style="color: #0672E4;">{{ boutiqueName }}</p>
+              </div>
+              <ng-template #allBoutiques>
+                <p class="info_value" style="color: #0672E4;">
+                  {{ allBoutiqueNames.join(', ') || 'Aucune boutique' }}
+                </p>
+              </ng-template>
             </div>
             <div class="info">
               <p class="info_title">Date de creation :</p>
@@ -101,7 +108,8 @@
                   </td>
                   <td>
                     <div class="champ_input" style="margin-right: 15px;">
-                      <input type="text" readonly class="input_table" [value]="produit?.quantite">
+                      <input type="text" readonly class="input_table" 
+                             [value]="selectedBoutiqueId ? (produit?.quantite || 0) : totalQuantity">
                     </div>
                   </td>
                   <td>

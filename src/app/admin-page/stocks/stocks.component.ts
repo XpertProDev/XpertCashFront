@@ -419,7 +419,8 @@ export class StocksComponent implements OnInit {
   }
 
   openStockDetail(productId: number): void {
-    this.router.navigate(['/detail-stock', productId]);
+    const queryParams = this.selectedBoutique ? { boutiqueId: this.selectedBoutique.id } : {};
+    this.router.navigate(['/detail-stock', productId], { queryParams });
   }
 
   // Ajoutez cette méthode dans la classe ProduitsComponent

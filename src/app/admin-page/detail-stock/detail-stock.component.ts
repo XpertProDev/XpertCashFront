@@ -29,6 +29,9 @@ export class DetailStockComponent {
   // Dropdown pour l'export
   showExportDropdown = false;
   showDescription = false;
+  allBoutiqueNames: string[] = [];
+  totalQuantity: number = 0;
+  selectedBoutiqueId: number | null = null;
 
   constructor(@Inject(LOCALE_ID) private locale: string,
       private userService: UsersService,
@@ -56,9 +59,14 @@ export class DetailStockComponent {
   }
 
   ngOnInit(): void {
+
+    // Récupérer l'ID de la boutique depuis les query params
+    this.route.queryParams.subscribe(params => {
+      this.selectedBoutiqueId = params['boutiqueId'] ? +params['boutiqueId'] : null;
+      this.getProduit();
+    });
+
     this.getUserInfo();
-    this.getBoutiqueName();
-    this.getProduit();
     this.loadStockById();
     this.loadStockHistory();
   }
@@ -166,24 +174,39 @@ export class DetailStockComponent {
   }
 
   getProduit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id'); // Récupère l'ID depuis l'URL
-    const productId = idParam ? +idParam : 0; // Convertit en nombre, 0 si invalide
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const productId = idParam ? +idParam : 0;
   
-    if (productId > 0) { // Vérifie si l'ID est valide
+    if (productId > 0) {
       this.produitService.getProduitById(productId).subscribe({
         next: (data: Produit) => {
-          console.log('Produit récupéré:', data);
-          this.produit = data; // Stocke le produit
-          this.loadStockHistory();  // Appel de l'historique une fois le produit récupéré
+          this.produit = data;
+          
+          // Mettre à jour les noms de toutes les boutiques
+          if (data.boutiques && data.boutiques.length > 0) {
+            this.allBoutiqueNames = data.boutiques.map(b => b.nom);
+            
+            // Calculer la quantité totale si "Toutes les boutiques" est sélectionné
+            if (!this.selectedBoutiqueId) {
+              this.totalQuantity = data.boutiques.reduce((sum, b) => sum + (b.quantite || 0), 0);
+            }
+          }
+  
+          // Trouver la boutique spécifique si ID est présent
+          if (this.selectedBoutiqueId && data.boutiques) {
+            const boutique = data.boutiques.find(b => b.id === this.selectedBoutiqueId);
+            if (boutique) {
+              this.boutiqueName = boutique.nom;
+              this.produit.quantite = boutique.quantite || 0;
+            }
+          }
+  
+          this.loadStockHistory();
         },
-        error: (err) => {
-          console.error('Erreur lors de la récupération du produit:', err);
-        }
+        error: (err) => console.error('Erreur:', err)
       });
-    } else {
-      console.error('ID du produit invalide');
     }
-  }  
+  } 
 
   loadStockHistory(): void {
     const produitId = this.produit?.id;
