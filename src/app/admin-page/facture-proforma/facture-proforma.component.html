@@ -15,4 +15,50 @@
               </div>
             </div>
           </div>
+
+
+          <div class="containerTable">
+         
+          
+         
+          
+            <!-- Vue cadre -->
+            <div class="container_cadre">
+              <div class="grid-view">
+                <div class="client-card" *ngFor="let facture of facturesproforma">
+                  <div class="name_icon">
+                    <h3>
+                      <span>{{ facture.numeroFacture }}</span>
+                    </h3>
+                    <span class="statut">{{ facture.statut }}</span>
+                  </div>
+                  <div class="content_cadre_double">
+                    <div class="info_cadre">
+                      <p>
+                        <i class="ri-mail-line"></i>
+                        <span>{{ facture.client || facture.entrepriseClient }}</span>
+                      </p>
+                      <p>
+                        <i class="ri-map-pin-line"></i>
+                        <span>{{ facture.adresse || 'Adresse inconnue' }}</span> 
+                      </p>
+                      <p>
+                        <i class="ri-phone-line"></i>
+                        <span>Date: {{ facture.dateCreation}}</span>
+                      </p>
+                    </div>
+                    <div class="imgClient_grid">
+                      <img src="assets/img/fac.jpg" alt="Photo client" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          
+        
+          
+            
+          </div>
+          
 </div>
