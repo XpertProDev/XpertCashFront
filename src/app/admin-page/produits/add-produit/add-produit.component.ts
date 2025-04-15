@@ -47,6 +47,7 @@ export class AddProduitComponent implements OnInit {
   boutiqueId: number = 1; 
   messageAPI: string = '';
   apiMessageType: 'success' | 'error' | '' = '';
+  seuilsMap: { [boutiqueId: number]: number } = {};
 
   ajouteProduitForm!: FormGroup;
   modifierProduitForm!: FormGroup;
@@ -172,10 +173,6 @@ export class AddProduitComponent implements OnInit {
   closePopup(): void {
     this.showPopup = false;
   }
-
-
-
-
 
   constructor(
     private sharedDataService: SharedDataService,
@@ -630,6 +627,12 @@ export class AddProduitComponent implements OnInit {
       this.isLoading = false;
       return;
     }
+
+    const seuilsAlert = this.boutiqueIdSelected.map(id => {
+      const boutique = this.boutiquesList.find(b => b.id === id);
+      return Number(boutique?.seuilAlert) || 0;
+    });
+    
   
     this.isLoading = true;
   
@@ -698,15 +701,20 @@ export class AddProduitComponent implements OnInit {
         this.errorMessage = "Veuillez sélectionner au moins une boutique.";
         this.isLoading = false;
         return;
-    }
+      }
   
-      // Envoi du produit avec l'image compressée (JPEG/PNG) ou l'image SVG par défaut
-      // const quantitesSelected = this.boutiqueIdSelected.map(id => this.quantitesMap[id] || 0);
       const quantitesSelected = this.boutiqueIdSelected.map(id => Number(this.quantitesMap[id]) || 0);
+      const seuilsSelected = this.boutiqueIdSelected.map(id => Number(this.seuilsMap[id]) || 0);
 
       this.produitService
-        .ajouterProduit(this.boutiqueIdSelected, quantitesSelected, produit, finalImage, addToStock)
-        .subscribe({
+        .ajouterProduit(
+            this.boutiqueIdSelected, 
+            quantitesSelected, 
+            seuilsSelected,
+            produit, 
+            finalImage, 
+            addToStock
+        ).subscribe({
           next: data => {
             this.showPopupMessage({
               title: 'Succès',
@@ -745,9 +753,6 @@ export class AddProduitComponent implements OnInit {
             this.isLoading = false;
           }
         });
-      
-
-  
     } catch (error) {
       console.error('Erreur lors de la compression:', error);
       this.errorMessage = 'Erreur lors de la compression de l\'image';
@@ -852,7 +857,7 @@ export class AddProduitComponent implements OnInit {
     } else {
         this.boutiqueIdSelected = []; // Tableau vide
     }
-}
+  }
 
   onSubmitBoutique(): void {}
 

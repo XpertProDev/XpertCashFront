@@ -16,6 +16,7 @@ export class ProduitService {
   ajouterProduit(
     boutiqueIds: number[],
     quantites: number[], // <-- à ajouter
+    seuilAlert: number[],
     produit: any,
     imageFile: File | null,
     addToStock: boolean
@@ -26,6 +27,7 @@ export class ProduitService {
     formData.append('boutiqueIds', JSON.stringify(boutiqueIds));
     formData.append('quantites', JSON.stringify(quantites)); // <-- important
     formData.append('produit', JSON.stringify(produit));
+    formData.append('seuilAlert', JSON.stringify(seuilAlert));
   
     if (imageFile) {
       formData.append('image', imageFile, imageFile.name);

@@ -280,7 +280,12 @@
                 
                       <!-- Seuil d'alerte -->
                       <div class="champ_input champ_input2">
-                        <input [(ngModel)]="boutique.seuilAlert" [ngModelOptions]="{standalone: true}" type="number" class="input_focus" placeholder="Seuil d'alerte pour {{ boutique.nomBoutique }}">
+                        <input 
+                          [(ngModel)]="seuilsMap[boutique.id]" 
+                          [ngModelOptions]="{standalone: true}" 
+                          type="number" 
+                          class="input_focus" 
+                          placeholder="Seuil d'alerte pour {{ boutique.nomBoutique }}">
                         <label for="seuilAlert" class="label labelColor">Seuil d'alerte pour {{ boutique.nomBoutique }}</label>
                       </div>
                     </div>
