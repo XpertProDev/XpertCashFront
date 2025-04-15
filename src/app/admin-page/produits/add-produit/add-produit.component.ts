@@ -622,16 +622,16 @@ export class AddProduitComponent implements OnInit {
       return;
     }
 
-    if (this.boutiqueIdSelected.some(id => !this.quantitesMap[id] || this.quantitesMap[id] < 0)) {
-      this.errorMessage = "Veuillez saisir une quantité valide pour chaque boutique.";
-      this.isLoading = false;
-      return;
-    }
+    // if (this.boutiqueIdSelected.some(id => !this.quantitesMap[id] || this.quantitesMap[id] < 0)) {
+    //   this.errorMessage = "Veuillez saisir une quantité valide pour chaque boutique.";
+    //   this.isLoading = false;
+    //   return;
+    // }
 
-    const seuilsAlert = this.boutiqueIdSelected.map(id => {
-      const boutique = this.boutiquesList.find(b => b.id === id);
-      return Number(boutique?.seuilAlert) || 0;
-    });
+    // const seuilsAlert = this.boutiqueIdSelected.map(id => {
+    //   const boutique = this.boutiquesList.find(b => b.id === id);
+    //   return Number(boutique?.seuilAlert) || 0;
+    // });
     
   
     this.isLoading = true;
