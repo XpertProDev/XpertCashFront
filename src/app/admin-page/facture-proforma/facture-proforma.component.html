@@ -1,0 +1,18 @@
+<div class="containerTable">
+        <!-- En-tête : titre, actions et barre de recherche -->
+        <div class="tasks-header">
+            <h1 class="title">Facture proforma</h1>
+            <!-- <div>{{boutiques | json}}</div> -->
+        
+            <div class="actions">
+              <button class="add-task"  (click)="goToAddProduit()">Ajouter </button>
+              <div class="contentIcon">
+                <div class="bare"></div>
+              </div>
+              <div class="inputSearch">
+                <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..."  />
+                <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch()"></i>
+              </div>
+            </div>
+          </div>
+</div>
