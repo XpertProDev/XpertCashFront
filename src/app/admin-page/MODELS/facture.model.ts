@@ -18,7 +18,8 @@ export interface ProduitFacture {
     telephoneUtilisateur: string;
     produits: ProduitFacture[];
     codeFournisseur: string
-
+    boutiqueIds: number[]; // Ajouter ce champ
+    boutiqueNames?: string[]; // Ajouter ce champ
   }
   
   // Ajoutez l'interface FactureWithDataSource ici

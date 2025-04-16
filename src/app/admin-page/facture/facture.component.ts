@@ -229,70 +229,6 @@ export class FactureComponent  implements AfterViewInit {
     );
   }
 
-  // Partage de donner de user
-  // getPartageInfoUser() {
-  //     this.sharedDataService.boutiqueName$.subscribe(name => {
-  //     console.log("AddProduitComponent - Nom boutique récupéré :", name);
-  //     this.boutiqueName = name;
-  //   });
-  // }
-
-  // loadFactures() {
-  //   this.factureService.getFactures().subscribe({
-  //     next: (data) => {
-  //       this.factures = data.reverse().map(facture => ({
-  //         ...facture,
-  //         dataSource: new MatTableDataSource(this.getFormattedProduits(facture))
-  //       })) as FactureWithDataSource[];
-  //       this.changeDetectorRef.markForCheck();
-  //     },
-  //     error: (error) => {
-  //       console.error('Erreur lors de la récupération des factures', error);
-  //     }
-  //   });
-  // }  
-
-  // loadFactures() {
-  //   this.factureService.getFactures().subscribe({
-  //     next: (data) => {
-  //       if (data.length === 0) {
-  //         this.noFacturesAvailable = true;
-  //         this.factures = [];
-  //         this.filteredFactures = [];
-  //       } else {
-  //         // Ajouter le calcul du totalSum ici
-  //         this.factures = data.reverse().map(facture => {
-  //           const produits = this.getFormattedProduits(facture);
-  //           const totalSum = produits.reduce((acc, p) => acc + (p.total || 0), 0);
-
-            
-  //           return {
-  //             ...facture,
-  //             dataSource: new MatTableDataSource(produits),
-  //             totalSum: totalSum
-  //           };
-  //         }) as FactureWithDataSource[];
-  
-  //       console.log('Facture récupérés:', this.factures);
-
-  //         this.filteredFactures = [...this.factures];
-  //         this.noFacturesAvailable = false;
-  //       }
-  //       this.updatePaginatedFactures();
-  //       this.changeDetectorRef.detectChanges();
-  //     },
-  //     error: (error) => {
-  //       if (error.status === 404 && error.error.message === this.messageNoFacture) {
-  //         this.noFacturesAvailable = true;
-  //         this.factures = [];
-  //       } else {
-  //         console.error('Erreur lors de la récupération des factures', error);
-  //       }
-  //       this.changeDetectorRef.markForCheck();
-  //     }
-  //   });
-  // }
-
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   // Ajouter la méthode de filtrage
@@ -348,6 +284,7 @@ export class FactureComponent  implements AfterViewInit {
   }
 
   downloadPDFWithJsPDF(facture: any, boutiqueName: string): void {
+    const boutiqueNames = facture.boutiqueNames?.join(', ') || 'Toutes les boutiques';
     const doc = new jsPDF();
     doc.setFontSize(9);
 
@@ -361,6 +298,7 @@ export class FactureComponent  implements AfterViewInit {
     doc.text('Facture No :', 10, y);
     doc.setTextColor(6, 114, 228);
     doc.text(facture?.numeroFacture || 'FAC-XXXXXX', 30, y);
+    doc.text(boutiqueNames, 30, y);
     
     y += 8;
     doc.setTextColor(0, 0, 0);
@@ -482,6 +420,7 @@ export class FactureComponent  implements AfterViewInit {
       next: (user) => {
         this.boutiques = user.boutiques;
         this.entrepriseId = user.entrepriseId;
+        this.factureService.setBoutiques(this.boutiques);
         if (this.boutiques.length > 0) {
           this.selectedBoutique = null;
           this.loadAllFactures();
@@ -513,7 +452,10 @@ export class FactureComponent  implements AfterViewInit {
   loadFactures(boutiqueId: number): void {
     this.factureService.getFacturesByBoutique(boutiqueId).subscribe({
       next: (data) => this.processFactures(data),
-      error: (error) => console.error('Erreur:', error)
+      error: (error) => {
+        console.error('Erreur:', error);
+        this.processFactures([]); 
+      }
     });
   }
   
@@ -530,32 +472,41 @@ export class FactureComponent  implements AfterViewInit {
     });
   }
 
-  private processFactures(data: Facture[]): void {
-    if (data.length === 0) {
+  private processFactures(data: Facture[] | null): void {
+    if (!data || !Array.isArray(data)) {
       this.noFacturesAvailable = true;
       this.factures = [];
       this.filteredFactures = [];
-    } else {
-      this.factures = data.reverse().map(facture => ({
-        ...facture,
-        dataSource: new MatTableDataSource(this.getFormattedProduits(facture)),
-        totalSum: this.getFormattedProduits(facture).reduce((acc, p) => acc + (p.total || 0), 0)
-      }));
-      this.filteredFactures = [...this.factures];
-      this.noFacturesAvailable = false;
+      return;
     }
+  
+    this.factures = data.reverse().map(facture => ({
+      ...facture,
+      boutiqueIds: facture.boutiqueIds || [],
+      boutiqueNames: this.getBoutiqueNames(facture.boutiqueIds),
+      dataSource: new MatTableDataSource(this.getFormattedProduits(facture)),
+      totalSum: this.getFormattedProduits(facture).reduce((acc, p) => acc + (p.total || 0), 0)
+    }));
+  
+    this.filteredFactures = [...this.factures];
+    this.noFacturesAvailable = this.factures.length === 0;
     this.updatePaginatedFactures();
   }
 
-  // facture.component.ts
-showSuspendedBoutiqueDialog(): void {
-  this.dialog.open(SuspendedBoutiqueDialogComponent, {
-    width: '400px',
-    disableClose: true,
-    data: { onClose: () => this.selectedBoutique = null }
-  });
-}
+  private getBoutiqueNames(ids: number[] = []): string[] {
+    return ids
+      .map(id => this.boutiques.find(b => b.id === id)?.nomBoutique || 'Boutique inconnue' )
+      .filter(name => !!name) as string[];
+  }
 
+  // facture.component.ts
+  showSuspendedBoutiqueDialog(): void {
+    this.dialog.open(SuspendedBoutiqueDialogComponent, {
+      width: '400px',
+      disableClose: true,
+      data: { onClose: () => this.selectedBoutique = null }
+    });
+  }
 
 
 }

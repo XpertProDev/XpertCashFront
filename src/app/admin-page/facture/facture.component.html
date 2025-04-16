@@ -81,7 +81,7 @@
                         </div>
                     
                         <!-- // Afficher la barre SEULEMENT si Nº Fournisseur est affiché -->
-                        <div class="barre" *ngIf="!panel.expanded && facture.type === 'AJOUTER'"></div>
+                        <div class="barre" *ngIf="facture.type === 'AJOUTER'"></div>
                     
                         <!-- // Nº Fournisseur (Seulement pour AJOUTER) -->
                         <div class="Facture" *ngIf="facture.type === 'AJOUTER'">
@@ -159,7 +159,14 @@
                                 <div class="info_content">
                                     <div class="info">
                                       <p class="info_title">Boutique :</p>
-                                      <p class="info_value" style="color: #0672E4;">{{ boutiqueName }}</p>
+                                      <div *ngIf="selectedBoutique; else allBoutiques">
+                                        <p class="info_value" style="color: #0672E4;">{{ selectedBoutique.nomBoutique }}</p>
+                                      </div>
+                                      <ng-template #allBoutiques>
+                                        <p class="info_value" style="color: #0672E4;">
+                                          {{ facture.boutiqueNames?.join(', ') || 'Non spécifié' }}
+                                        </p>
+                                      </ng-template>
                                     </div>
                                     <div class="info">
                                       <p class="info_title">Date de creation :</p>
