@@ -444,6 +444,4 @@ export class StocksComponent implements OnInit {
     });
   }
   
-  
-  
 }
