@@ -163,8 +163,11 @@
                                         <p class="info_value" style="color: #0672E4;">{{ selectedBoutique.nomBoutique }}</p>
                                       </div>
                                       <ng-template #allBoutiques>
-                                        <p class="info_value" style="color: #0672E4;">
+                                        <!-- <p class="info_value" style="color: #0672E4;">
                                           {{ facture.boutiqueNames?.join(', ') || 'Non spécifié' }}
+                                        </p> -->
+                                        <p class="info_value" style="color: #0672E4;">
+                                          {{ getBoutiqueNamesForFacture(facture) || 'Non spécifié' }}
                                         </p>
                                       </ng-template>
                                     </div>

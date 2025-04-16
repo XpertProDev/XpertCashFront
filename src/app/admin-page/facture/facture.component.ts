@@ -197,10 +197,10 @@ export class FactureComponent  implements AfterViewInit {
 
   ngOnInit(): void {
     this.getBoutiqueName();
+    this.getUserInfo();
     // this.getPartageInfoUser();
     // List des factures 
     // this.loadFactures();
-    this.getUserInfo();
   }
 
   boutiquePhone: string = '';
@@ -275,6 +275,23 @@ export class FactureComponent  implements AfterViewInit {
     }
     return '#000';
   }  
+
+  getBoutiqueNamesForFacture(facture: FactureWithDataSource): string {
+    // Si une boutique spécifique est sélectionnée
+    if (this.selectedBoutique) {
+      return this.selectedBoutique.nomBoutique;
+    }
+    
+    // Pour "Toutes les boutiques", utiliser les IDs de la facture
+    if (facture.boutiqueIds?.length > 0) {
+      return facture.boutiqueIds
+        .map(id => this.boutiques.find(b => b.id === id)?.nomBoutique || 'Boutique inconnue')
+        .join(', ');
+    }
+    
+    // Fallback si aucune information n'est disponible
+    return 'Non spécifié';
+  }
 
   // Nouvelle méthode pour mettre à jour les données paginées
   private updatePagination() {
@@ -449,23 +466,37 @@ export class FactureComponent  implements AfterViewInit {
     this.currentPage = 0;
   }
 
+  // Dans loadFactures()
   loadFactures(boutiqueId: number): void {
     this.factureService.getFacturesByBoutique(boutiqueId).subscribe({
-      next: (data) => this.processFactures(data),
+      next: (data) => {
+        const facturesWithBoutique = data.map(f => ({
+          ...f,
+          boutiqueIds: [boutiqueId] // Ajoute l'ID de la boutique à chaque facture
+        }));
+        this.processFactures(facturesWithBoutique);
+      },
       error: (error) => {
         console.error('Erreur:', error);
-        this.processFactures([]); 
+        this.processFactures([]);
       }
     });
   }
-  
+
+  // Dans loadAllFactures()
   loadAllFactures(): void {
     const requests = this.boutiques.map(b => 
       this.factureService.getFacturesByBoutique(b.id)
     );
     forkJoin(requests).subscribe({
       next: (responses) => {
-        const allFactures = responses.flat();
+        const allFactures = responses.flatMap((factures, index) => {
+          const boutiqueId = this.boutiques[index].id;
+          return factures.map(f => ({
+            ...f,
+            boutiqueIds: [boutiqueId] // Ajoute l'ID de la boutique à chaque facture
+          }));
+        });
         this.processFactures(allFactures);
       },
       error: (error) => console.error('Erreur:', error)
