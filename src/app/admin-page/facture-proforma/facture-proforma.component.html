@@ -1,64 +1,130 @@
 <div class="containerTable">
-        <!-- En-tête : titre, actions et barre de recherche -->
-        <div class="tasks-header">
-            <h1 class="title">Facture proforma</h1>
-            <!-- <div>{{boutiques | json}}</div> -->
-        
-            <div class="actions">
-              <button class="add-task"  (click)="goToAddProduit()">Ajouter </button>
-              <div class="contentIcon">
-                <div class="bare"></div>
-              </div>
-              <div class="inputSearch">
-                <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..."  />
-                <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch()"></i>
-              </div>
+  <!-- En-tête : titre, actions et barre de recherche -->
+  <div class="tasks-header">
+      <h1 class="title">Facture proforma</h1>
+      <!-- <div>{{boutiques | json}}</div> -->
+  
+      <div class="actions">
+        <button class="add-task"  (click)="goToAddProduit()">Ajouter une facture </button>
+        <div class="contentIcon">
+          <div class="bare"></div>
+        </div>
+        <div class="inputSearch">
+          <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..."  />
+          <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch()"></i>
+        </div>
+      </div>
+  </div>
+
+  <!-- Vue cadre -->
+  <!-- <div class="containerTable">
+    <div class="container_cadre">
+      <div class="grid-view">
+        <div class="client-card" *ngFor="let facture of facturesproforma">
+          <div class="name_icon">
+            <h3>
+              <span>{{ facture.numeroFacture }}</span>
+            </h3>
+            <span class="statut">{{ facture.statut }}</span>
+          </div>
+          <div class="content_cadre_double">
+            <div class="info_cadre">
+              <p>
+                <i class="ri-mail-line"></i>
+                <span>{{ facture.client || facture.entrepriseClient }}</span>
+              </p>
+              <p>
+                <i class="ri-map-pin-line"></i>
+                <span>{{ facture.adresse || 'Adresse inconnue' }}</span> 
+              </p>
+              <p>
+                <i class="ri-phone-line"></i>
+                <span>Date: {{ facture.dateCreation}}</span>
+              </p>
+            </div>
+            <div class="imgClient_grid">
+              <img src="assets/img/fac.jpg" alt="Photo client" />
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
 
+  <div class="parent">
+    <div class="cadre_cahier" *ngFor="let facture of facturesproforma">
+      <div class="title_facture">
+        <h5>Facture Proforma</h5>
+      </div>
 
-          <div class="containerTable">
-         
+      <!-- // Les informations  -->
+      <div class="information_cadre">
+        <!-- // numero facture  -->
+        <div class="num_facture">
+          <span>{{ facture.numeroFacture }} </span>
+        </div>
+        <!-- // Name client  -->
+        <div class="double_info">
+          <span class="left_name">
+            Client(s) :
+          </span>
+          <span class="right_name">
+            {{ facture.client || facture.entrepriseClient }}
+          </span>
+        </div>
+        <!-- // Date de creation  -->
+        <div class="double_info">
+          <span class="left_name">
+            Date :
+          </span>
+          <span class="right_name date_name" style="font-size: 11px;">
+            {{ facture.dateCreation }}
+          </span>
+        </div>
+      </div>
+
+      <!-- // Table  -->
+      <table>
+        <thead>
+          <tr>
+            <th> Produit </th>
+            <th> Quantité </th>
+            <th> Montant Total </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td> Lait </td>
+            <td> 20 </td>
+            <td class="tb_total"> 230 000 </td>
+          </tr>
+          <tr>
+            <td> Ordinateur </td>
+            <td> 20 </td>
+            <td class="tb_total"> 1 300 000 </td>
+          </tr>
+          <tr>
+            <td> || </td>
+            <td> || </td>
+            <td class="tb_total"> || </td>
+          </tr>
+        </tbody>
+        <tfoot>
           
-         
-          
-            <!-- Vue cadre -->
-            <div class="container_cadre">
-              <div class="grid-view">
-                <div class="client-card" *ngFor="let facture of facturesproforma">
-                  <div class="name_icon">
-                    <h3>
-                      <span>{{ facture.numeroFacture }}</span>
-                    </h3>
-                    <span class="statut">{{ facture.statut }}</span>
-                  </div>
-                  <div class="content_cadre_double">
-                    <div class="info_cadre">
-                      <p>
-                        <i class="ri-mail-line"></i>
-                        <span>{{ facture.client || facture.entrepriseClient }}</span>
-                      </p>
-                      <p>
-                        <i class="ri-map-pin-line"></i>
-                        <span>{{ facture.adresse || 'Adresse inconnue' }}</span> 
-                      </p>
-                      <p>
-                        <i class="ri-phone-line"></i>
-                        <span>Date: {{ facture.dateCreation}}</span>
-                      </p>
-                    </div>
-                    <div class="imgClient_grid">
-                      <img src="assets/img/fac.jpg" alt="Photo client" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-          
-        
-          
-            
-          </div>
+        </tfoot>
+      </table>
+
+      <!-- // image etiquette  -->
+      <div class="image_etiquette">
+        <img src="assets/etiquette/Etiquette-Sy-XPERTPRO-Gris.png" alt="Etiquette">
+        <div class="etat">
+          <p class="tilte_etat"> - Etat - </p>
+          <span> {{ facture.statut }} </span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
           
 </div>
