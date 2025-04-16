@@ -107,6 +107,6 @@ export class FactureProformaComponent implements OnInit {
 
   showDetails(factureId: number): void {
     // Redirige vers la page de détail
-    this.router.navigate(['/facture-details', factureId]);
+    this.router.navigate(['/facture-proforma-details', factureId]);
   }
 }

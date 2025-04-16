@@ -52,14 +52,10 @@
   </div> -->
 
   <div class="parent">
-    <div class="cadre_cahier" *ngFor="let facture of facturesproforma">
+    <div class="cadre_cahier" *ngFor="let facture of facturesproforma" (click)="showDetails(facture.id)">
       <div class="title_facture">
         <h5>Facture Proforma</h5>
       </div>
-
-      <!-- <div>
-        {{facture | json}}
-      </div> -->
 
       <!-- // Les informations  -->
       <div class="information_cadre">
@@ -98,7 +94,7 @@
         </thead>
         <tbody>
           <ng-container *ngIf="facture.ligneFactureProforma?.length; else noLines">
-            <tr *ngFor="let ligne of facture.ligneFactureProforma.slice(0, 2)" >
+            <tr *ngFor="let ligne of facture.ligneFactureProforma.slice(0, 2)">
               <td> {{ ligne.nomProduit }} </td>
               <td> {{ ligne.quantite }} </td>
               <td class="tb_total"> {{ ligne.montantTotal | customNumber }} </td>

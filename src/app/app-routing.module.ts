@@ -258,7 +258,7 @@ const routes: Routes = [
 
       // La routing de facture proforma
       {
-        path: 'detail-facture-proforma/:id',
+        path: 'facture-proforma-details/:id',
         loadComponent: () => import('./admin-page/facture-proforma/detail-facture-proforma/detail-facture-proforma.component').then(m => m.DetailFactureProformaComponent),
         canActivate: [authGuard]
       },
