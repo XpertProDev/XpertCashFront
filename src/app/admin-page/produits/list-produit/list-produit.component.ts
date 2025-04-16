@@ -331,44 +331,58 @@ export class ListProduitComponent {
   }
   
   getProduit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    const productId = idParam ? +idParam : 0;
-  
-    this.produitService.getProduitById(productId).subscribe({
-      next: (data: Produit) => {
-        this.produit = data;
-        this.modifierProduitForm.patchValue(this.produit);
-        this.loadInitialValues();
-  
-        // Nouvelle logique pour gérer l'affichage des boutiques
-        if (this.produit.boutiques && this.produit.boutiques.length > 0) {
-          if (this.selectedBoutiqueId) {
-            // Utilisation de l'opérateur optionnel et valeur par défaut
-            const boutiqueStock = data.boutiques?.find(b => b.id === this.selectedBoutiqueId) ?? null;
-            this.boutiqueNames = boutiqueStock ? [boutiqueStock.nom] : ['Boutique non trouvée'];
-            this.boutiqueActuelle = boutiqueStock?.nom || 'Boutique non trouvée';
-          } else {
-            // Utilisation de l'opérateur optionnel et valeur par défaut
-            this.boutiqueNames = data.boutiques?.map(b => b.nom) ?? [];
-            this.boutiqueActuelle = "Toutes les boutiques";
+      const idParam = this.route.snapshot.paramMap.get('id');
+      const productId = idParam ? +idParam : 0;
+
+      console.log("Avant d'appeler getProduit(), boutiqueActuelle est:", this.boutiqueActuelle);
+      console.log("selectedBoutique avant l'appel:", this.selectedBoutique);
+
+      this.produitService.getProduitById(productId).subscribe({
+          next: (data: Produit) => {
+              console.log('Donnée du produit:', data);
+              this.produit = data;
+              this.modifierProduitForm.patchValue(this.produit);
+              this.loadInitialValues();
+
+              // Vérification des boutiques du produit
+              console.log("Boutiques disponibles pour ce produit:", this.produit.boutiques);
+
+              if (this.produit.boutiques && this.produit.boutiques.length > 0) {
+                let boutiqueActuelle = null;
+            
+                if (this.selectedBoutique && this.selectedBoutique.id) {
+                    // Si une boutique est sélectionnée manuellement
+                    console.log("selectedBoutique avant de filtrer:", this.selectedBoutique);
+                    boutiqueActuelle = this.produit.boutiques.find(b => b.id === this.selectedBoutique.id);
+                } else if (this.produit.boutiqueId) {
+                    // Si aucune sélection manuelle, on prend la boutiqueId du produit
+                    console.log("Utilisation de produit.boutiqueId:", this.produit.boutiqueId);
+                    boutiqueActuelle = this.produit.boutiques.find(b => b.id === this.produit.boutiqueId);
+                }
+            
+                if (boutiqueActuelle) {
+                    this.boutiqueNames = [boutiqueActuelle.nom];
+                    this.boutiqueActuelle = boutiqueActuelle.nom;
+                    console.log("Boutique actuelle trouvée et affichée:", this.boutiqueNames);
+                } else {
+                    this.boutiqueNames = ['Cette boutique ne possède pas ce produit'];
+                    this.boutiqueActuelle = 'Cette boutique ne possède pas ce produit';
+                    console.log("Aucune correspondance pour la boutique actuelle.");
+                }
+            } else {
+                this.boutiqueNames = ['Aucune boutique trouvée pour ce produit'];
+                this.boutiqueActuelle = 'Aucune boutique trouvée pour ce produit';
+                console.log("Aucune boutique pour ce produit.");
+            }
+            
+
+              console.log("Boutiques affichées:", this.boutiqueNames);
+              console.log("Nom de la boutique actuelle:", this.boutiqueActuelle);
+          },
+          error: (err) => {
+              console.error('Erreur lors de la récupération du produit', err);
           }
-        } else {
-          this.boutiqueNames = ['Aucune boutique associée'];
-          this.boutiqueActuelle = 'Aucune boutique associée';
-        }
-  
-        // Ajout de l'opérateur optionnel pour la quantité
-        const boutiqueStock = this.selectedBoutiqueId 
-          ? data.boutiques?.find(b => b.id === this.selectedBoutiqueId) ?? null
-          : null;
-        
-        this.produit.quantite = boutiqueStock?.quantite || 0;
-        this.modifierProduitForm.patchValue({ quantite: this.produit.quantite });
-      },
-      error: (err) => {
-        console.error('Erreur lors de la récupération du produit', err);
-      }
-    });
+      });
   }
 
   getBoutiqueQuantity(): number {
@@ -387,7 +401,7 @@ export class ListProduitComponent {
 
   // Méthode pour la sélection d'une catégorie
   onCategorySelected(event: any): void {
-    console.log('Option sélectionnée :', event.option.value);  // Ajoutez ce log pour vérifier la sélection
+    console.log('Option sélectionnée :', event.option.value);
     if (event.option && event.option.value) {
       this.modifierProduitForm.get('categorieId')?.setValue(event.option.value.id);
     } else {

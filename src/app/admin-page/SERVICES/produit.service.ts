@@ -106,5 +106,9 @@ export class ProduitService {
     return this.http.get<Produit[]>(`${this.apiUrl}/produits/entreprise/${entrepriseId}`);
   }
   
+
+  getProduitsParEntreprise(entrepriseId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/produits/entreprise/${entrepriseId}`);
+  }
   
 }

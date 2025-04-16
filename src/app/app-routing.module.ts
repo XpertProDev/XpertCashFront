@@ -242,6 +242,20 @@ const routes: Routes = [
 
       },
 
+      //Routing Facture proforma
+      {
+        path: 'facture-proforma',
+        loadComponent: () => import('./admin-page/facture-proforma/facture-proforma.component').then(m => m.FactureProformaComponent),
+        canActivate: [authGuard]
+      },
+
+      {
+        path: 'addfacture-proforma',
+        loadComponent: () => import('./admin-page/facture-proforma/addfacture-proforma/addfacture-proforma.component').then(m => m.AddfactureProformaComponent),
+        canActivate: [authGuard]
+
+      },
+
     ]
   }
 ];

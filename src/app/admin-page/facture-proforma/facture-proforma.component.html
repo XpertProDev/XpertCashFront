@@ -1,0 +1,64 @@
+<div class="containerTable">
+        <!-- En-tête : titre, actions et barre de recherche -->
+        <div class="tasks-header">
+            <h1 class="title">Facture proforma</h1>
+            <!-- <div>{{boutiques | json}}</div> -->
+        
+            <div class="actions">
+              <button class="add-task"  (click)="goToAddProduit()">Ajouter </button>
+              <div class="contentIcon">
+                <div class="bare"></div>
+              </div>
+              <div class="inputSearch">
+                <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..."  />
+                <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch()"></i>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="containerTable">
+         
+          
+         
+          
+            <!-- Vue cadre -->
+            <div class="container_cadre">
+              <div class="grid-view">
+                <div class="client-card" *ngFor="let facture of facturesproforma">
+                  <div class="name_icon">
+                    <h3>
+                      <span>{{ facture.numeroFacture }}</span>
+                    </h3>
+                    <span class="statut">{{ facture.statut }}</span>
+                  </div>
+                  <div class="content_cadre_double">
+                    <div class="info_cadre">
+                      <p>
+                        <i class="ri-mail-line"></i>
+                        <span>{{ facture.client || facture.entrepriseClient }}</span>
+                      </p>
+                      <p>
+                        <i class="ri-map-pin-line"></i>
+                        <span>{{ facture.adresse || 'Adresse inconnue' }}</span> 
+                      </p>
+                      <p>
+                        <i class="ri-phone-line"></i>
+                        <span>Date: {{ facture.dateCreation}}</span>
+                      </p>
+                    </div>
+                    <div class="imgClient_grid">
+                      <img src="assets/img/fac.jpg" alt="Photo client" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          
+        
+          
+            
+          </div>
+          
+</div>
