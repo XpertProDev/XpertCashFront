@@ -11,7 +11,7 @@
         </div>
         <div class="inputSearch">
           <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..."  />
-          <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch()"></i>
+          <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-  search-2-line'" (click)="clearSearch()"></i>
         </div>
       </div>
   </div>
@@ -57,6 +57,10 @@
         <h5>Facture Proforma</h5>
       </div>
 
+      <!-- <div>
+        {{facture | json}}
+      </div> -->
+
       <!-- // Les informations  -->
       <div class="information_cadre">
         <!-- // numero facture  -->
@@ -93,21 +97,25 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td> Lait </td>
-            <td> 20 </td>
-            <td class="tb_total"> 230 000 </td>
-          </tr>
-          <tr>
-            <td> Ordinateur </td>
-            <td> 20 </td>
-            <td class="tb_total"> 1 300 000 </td>
-          </tr>
-          <tr>
-            <td> || </td>
-            <td> || </td>
-            <td class="tb_total"> || </td>
-          </tr>
+          <ng-container *ngIf="facture.ligneFactureProforma?.length; else noLines">
+            <tr *ngFor="let ligne of facture.ligneFactureProforma.slice(0, 2)" >
+              <td> {{ ligne.nomProduit }} </td>
+              <td> {{ ligne.quantite }} </td>
+              <td class="tb_total"> {{ ligne.montantTotal | customNumber }} </td>
+            </tr>
+            <!-- Affiche les || s'il y a plus de 3 articles -->
+            <tr *ngIf="facture.ligneFactureProforma.length > 2" class="facture_trois">
+              <td>||</td>
+              <td>||</td>
+              <td class="tb_total">||</td>
+            </tr>
+          </ng-container>
+        
+          <ng-template #noLines>
+            <tr>
+              <td colspan="3" class="text-center">Aucun produit dans cette facture</td>
+            </tr>
+          </ng-template>
         </tbody>
         <tfoot>
           

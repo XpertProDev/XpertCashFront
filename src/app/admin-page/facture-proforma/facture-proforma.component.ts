@@ -8,13 +8,15 @@ import { ProduitService } from '../SERVICES/produit.service';
 import { UsersService } from '../SERVICES/users.service';
 import { Clients } from '../MODELS/clients-model';
 import { Produit } from '../MODELS/produit.model';
+import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 
 @Component({
   selector: 'app-facture-proforma',
   imports: [
-      CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CustomNumberPipe,
   ],
   templateUrl: './facture-proforma.component.html',
   styleUrl: './facture-proforma.component.scss'
@@ -101,5 +103,10 @@ export class FactureProformaComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  showDetails(factureId: number): void {
+    // Redirige vers la page de détail
+    this.router.navigate(['/facture-details', factureId]);
   }
 }

@@ -341,6 +341,11 @@ tr:hover {
     background-color: #ddd;
 }
 
+.facture_trois td {
+    padding: 4px 8px;
+    // text-align: center;
+}
+
 /* Dropdown styles */
 .contentIcon {
     position: relative;
@@ -559,7 +564,6 @@ mat-paginator {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
-    cursor: pointer;
 }
   
 .cadre_cahier {
@@ -571,10 +575,12 @@ mat-paginator {
     border: 1px solid #e0e0e0;
     height: 287px;
     position: relative;
+    cursor: pointer;
 }
 
 .cadre_cahier:hover {
-    transform: translateY(-1px);
+    // transform: translateY(-1px);
+    transform: scale(1.01);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
