@@ -45,6 +45,7 @@ table {
   .champ_input_list_stock {
     position: relative;
     margin-bottom: 10px;
+    display: block; 
   }
 
   .champ_input .title_input {
@@ -888,10 +889,6 @@ table {
 
 .tr_stock {
   display: table-row !important;
-}
-
-.champ_input_list_stock {
-  display: block; /* Ou flex selon votre layout */
 }
 
 .error-popup {

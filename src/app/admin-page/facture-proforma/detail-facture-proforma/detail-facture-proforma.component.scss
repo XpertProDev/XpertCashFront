@@ -1,3 +1,18 @@
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    // background-color: #f2f2f2;
+    padding: 10px 0;
+}
+
+    tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
 .loading-overlay {
     position: fixed;
     top: 0;
@@ -125,6 +140,7 @@
 .champ_input {
     position: relative;
     margin-bottom: 25px;
+    margin-right: 0;
 }
 
 .double_input_grid {
@@ -251,8 +267,59 @@
 .input_focus2:focus::placeholder {
     opacity: 1;
     animation-delay: 1s;
-    font-size: 15px;
+    font-size: 12px;
     transition: all 0.2s ease-in-out;
+}
+
+.input_focus_type_select {
+    min-width: 200px;
+}
+
+.input_focus_type_non_select {
+    max-width: 90px;
+}
+
+.input_focus_type {
+    width: 100%;
+    // min-width: 150px;
+    height: 49px;
+    outline: none;
+    border-bottom: 1px solid rgb(53, 50, 50);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    margin: 10px 0 0;
+    transition: all 0.3s;
+    font-size: 14px;
+    //padding-left: 10px;
+    background: none;
+    color: #695c5c;
+}
+
+.input_table {
+    width: 100%;
+    // min-width: 150px;
+    height: 49px;
+    outline: none;
+    border-bottom: 1px solid rgb(53, 50, 50);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    margin: 10px 0 0;
+    transition: all 0.3s;
+    font-size: 14px;
+    background: none;
+    color: #695c5c;
+}
+
+.add_new_quantite_stock {
+    margin-bottom: 20px;
+}
+
+.add_new_quantite_stock h4 {
+    font-size: 13px;
+    letter-spacing: 0.60px;
+    color: #0000008e;
 }
 
 // Toggle 
@@ -373,3 +440,69 @@
     background-color: #0863c5;
     transition: all .5s;
   }
+
+.containerTable {
+    position: relative;
+    background-color: #ffffff;
+    border-radius: 10px;
+} 
+
+.titleTableProduit th {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.title_table_name {
+    width: 50%;
+}
+
+// .title_table_stock {
+//     width: 10%;
+// }
+
+// .title_table_quantite {
+//     width: 40%;
+// }
+
+// btn ajouter
+.btn_ajouter_icon_add {
+    margin-left: 30px;
+}
+
+.btn_ajouter_icon_add i {
+    font-size: 14px;
+    background-color: transparent;
+    color: #0672E4;
+    padding: 2px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid #0672E4;
+}
+
+.btn_ajouter_icon_add i:hover {
+    background-color: #0863c50e;
+    transition: all ease .5s;
+}
+
+// btn supprimer
+.btn_delete_icon_add {
+    margin-left: 30px;
+    margin-top: 10px;
+}
+
+.btn_delete_icon_add i {
+    font-size: 18px;
+    color: #ff0000;
+    cursor: pointer;
+}
+
+.btn_delete_icon_add i:hover {
+    color: #ca0000;
+    transition: all ease .5s;
+}
+
+.champ_input_list_stock {
+    display: block; 
+    position: relative;
+    margin-bottom: 10px;
+}

@@ -59,6 +59,100 @@
                                 value="N˚ 001-04-2025" disabled >
                             <label for="numeroFacture" class="label">Numéro facture</label>
                         </div>
+                    </div>
+                </div>
+
+                <div class="information_cadre">
+                    <div class="info_titre_input">
+                        <div class="add_new_quantite_stock">
+                            <h4>Produits</h4>
+                        </div>
+
+                        <div class="containerTable">
+                            <table>
+                                <thead>
+                                    <tr class="titleTableProduit">
+                                        <th class="title_table_name">Mes produits</th>
+                                        <th class="title_table_stock">Stock actuel</th>
+                                        <th class="title_table_quantite">Quantité</th>
+                                    </tr>
+                                </thead>
+                                <!-- Annuler produit quantite  -->
+                                <tbody>
+                                    <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                                        <!-- // Produit  -->
+                                        <td>
+                                            <div class="champ_input" style="margin-right: 15px;">
+                                                <input class="input_focus_type" type="text" readonly class="input_table">
+                                            </div>
+                                        </td>
+                                        <!-- // Stock actuel -->
+                                        <td>
+                                          <div class="champ_input" style="margin-right: 15px;">
+                                            <input type="text" class="input_focus_type" readonly id="stockActuel" name="stockActuel" style="cursor: no-drop; text-align: center;">
+                                          </div>                         
+                                        </td>
+                                        <!-- // Quantité  -->
+                                        <td>
+                                            <div class="champ_input" style="margin-right: 15px;">
+                                                <input type="number" readonly class="input_focus_type input_focus_type_select" id="addQuantite" name="addQuantite" placeholder="0" min="0">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <!-- // Button de delele  -->
+                                            <div class="btn_delete_icon_add" (click)="removePendingAdjustment()">
+                                              <i class="ri-delete-bin-5-fill"></i>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <!-- Ajouter produit quantite  -->
+                                <tbody>
+                                    <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                                        <!-- // Produit  -->
+                                        <td>
+                                            <div class="champ_input" style="margin-right: 15px;">
+                                                <select required class="input_focus_type input_focus_type_select">
+                                                    <option value="">Sélectionner un produit</option>
+                                                    <option>
+                                                        produit 1
+                                                    </option>
+                                                    <option>
+                                                        produit 2
+                                                    </option>
+                                                    <option>
+                                                        produit 3
+                                                    </option>
+                                                    </select>
+                                            </div>
+                                        </td>
+                                        <!-- // Stock actuel -->
+                                        <td>
+                                          <div class="champ_input" style="margin-right: 15px;">
+                                            <input type="text" class="input_focus_type " disabled id="stockActuel" name="stockActuel" style="cursor: no-drop; text-align: center;">
+                                          </div>                         
+                                        </td>
+                                        <!-- // Quantité  -->
+                                        <td>
+                                            <div class="champ_input" style="margin-right: 15px;">
+                                                <input type="number" class="input_focus_type input_focus_type_select" id="addQuantite" name="addQuantite" placeholder="0" min="0">
+                                            </div>
+                                        </td>
+                                        <!-- // Button de ajouter  -->
+                                        <td>
+                                          <div class="btn_ajouter_icon_add" (click)="ajouterLigneFacture()">
+                                            <i class="ri-add-fill"></i>
+                                          </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="information_cadre">
+                    <div class="info_titre_input">
                         <!-- // Remise et Total hors taxe  -->
                         <div class="double_input_grid">
                             <div class="champ_input">
@@ -67,8 +161,8 @@
                             </div>
 
                             <div class="champ_input">
-                                <input autocomplete="off" type="number" class="input_focus" required disabled value="000000 CFA">
-                                <label for="totalFacture" class="label"> Total facture </label>
+                                <input autocomplete="off" type="number" class="input_focus" required placeholder="Saisis le total facture">
+                                <label for="totalFacture" class="label"> Total facture</label>
                             </div>
                         </div>
 
@@ -78,7 +172,6 @@
                             placeholder="Saisis Une description pour ce produit"></textarea>
                             <label for="description" class="label">Description (Facultatif)</label>
                         </div>
-
                     </div>
                 </div>
 
