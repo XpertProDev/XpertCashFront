@@ -12,11 +12,12 @@ import { UsersService } from '../../SERVICES/users.service';
 
 @Component({
   selector: 'app-addfacture-proforma',
+  // standalone: true,
   imports: [
-       FormsModule,
-        CommonModule,
-        ReactiveFormsModule,
-        MatAutocompleteModule,
+    FormsModule,
+    CommonModule,
+    ReactiveFormsModule,
+    MatAutocompleteModule,
   ],
   templateUrl: './addfacture-proforma.component.html',
   styleUrl: './addfacture-proforma.component.scss'
@@ -31,10 +32,9 @@ export class AddfactureProformaComponent implements OnInit {
   selectedEntrepriseId: number | null = null;
   nomEntreprise: string = '';
   boutiqueIds: number[] | undefined;
-
   produits: Produit[] = [];
-  lignesFacture: { produitId: number; quantite: number }[] = [
-    { produitId: 0, quantite: 1 }
+  lignesFacture: { produitId: number | null; quantite: number }[] = [
+    { produitId: null, quantite: 1 }
   ];
 
   clients: Clients[] = [];
@@ -77,7 +77,7 @@ export class AddfactureProformaComponent implements OnInit {
 
   // Ligne de produit
   ajouterLigneFacture() {
-    this.lignesFacture.push({ produitId: 0, quantite: 1 });
+    this.lignesFacture.push({ produitId: null, quantite: 1 });
   }
 
   // Supprimer ligne
@@ -132,22 +132,28 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
   
-    // Liste Produits
-    getProduits() {
-      const token = localStorage.getItem('authToken');
-      if (token && this.userEntrepriseId) {
-        this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
-          next: (data: Produit[]) => {
-            this.produits = data;
-            console.log('Produits récupérés :', data);
-          },
-          error: (err) => console.error('Erreur récupération produits :', err)
-        });
-      }
+  // Liste Produits
+  getProduits() {
+    const token = localStorage.getItem('authToken');
+    if (token && this.userEntrepriseId) {
+      this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
+        next: (data: Produit[]) => {
+          console.log('Produits récupérés :', data);
+          this.produits = data;
+          if (this.lignesFacture.length === 0) {
+            this.lignesFacture.push({ produitId: data[0]?.id || 0, quantite: 1 });
+          }
+        },
+        error: (err) => console.error('Erreur récupération produits :', err)
+      });
     }
-    
-    
-    
+  }
+
+  getStockActuel(produitId: number | null): number {
+    if (!produitId) return 0;
+    const produit = this.produits.find(p => p.id === produitId);
+    return produit?.quantite ?? 0;
+  }
 
   // Création de facture
   creerFactureProforma() {
