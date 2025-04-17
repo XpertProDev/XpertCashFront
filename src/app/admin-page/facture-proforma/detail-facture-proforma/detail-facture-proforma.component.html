@@ -1,1 +1,70 @@
-<p>detail-facture-proforma works!</p>
+<div class="container_global">
+    <div *ngIf="isLoading" class="loading-overlay">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <p>Connexion en cours...</p>
+        </div>
+    </div>
+
+    <div class="content_formulaire">
+        <div class="modal-body">
+            <form class="container_formulaire">
+                <!-- // Titre -->
+                <div class="Title">
+                    <h3>Détails de la facture</h3>
+                </div>
+                <!-- Les informations de l'etat  -->
+                <div class="information_cadre">
+                    <div class="info_titre_etat">
+                      <h4>État</h4>
+                      <div class="etat_container">
+                        <div class="etat_content">
+                            <!-- // Etat brouillon  -->
+                            <div class="etat_brouillon">
+                                <button class="btn_etat active">
+                                    Brouillon
+                                </button>
+                            </div>
+                            <!-- // Etat Approuver  -->
+                            <div class="etat_approuver">
+                                <button class="btn_etat">
+                                    Approuver
+                                </button>
+                            </div>
+                            <!-- // Etat Envoyer  -->
+                            <div class="etat_envoyer">
+                                <button class="btn_etat">
+                                    Envoyer
+                                </button>
+                            </div>
+                            <!-- // Etat Valider  -->
+                            <div class="etat_valider">
+                                <button class="btn_etat" disabled>
+                                    Valider
+                                </button>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+
+                <!-- Les informations de facture  -->
+                <div class="information_cadre">
+                    <div class="info_titre_input">
+                      <h4>N˚ Facture</h4>
+                      <!-- Input de nom magasin  -->
+                      <div class="champ_input">
+                        <input type="text" class="input_focus input_focus_petit"
+                               style="cursor: no-drop; color: #0672E4;" 
+                               value="N˚ 001-04-2025" disabled 
+                               id="nomMagasin" name="nomMagasin">
+                        <label for="nomMagasin" class="label labelColor">Numéro facture</label>
+                      </div>
+                    </div>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+
+</div>
