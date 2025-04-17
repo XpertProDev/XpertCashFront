@@ -33,9 +33,8 @@ export class AddfactureProformaComponent implements OnInit {
   nomEntreprise: string = '';
   boutiqueIds: number[] | undefined;
   produits: Produit[] = [];
-  lignesFacture: { produitId: number | null; quantite: number }[] = [
-    { produitId: null, quantite: 1 }
-  ];
+  inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 1 }];
+  confirmedLignes: { produitId: number | null; quantite: number }[] = [];
 
   clients: Clients[] = [];
   totalClients = 0;
@@ -75,16 +74,25 @@ export class AddfactureProformaComponent implements OnInit {
     }
   }
 
-  // Ligne de produit
-  ajouterLigneFacture() {
-    this.lignesFacture.push({ produitId: null, quantite: 1 });
+  ajouterLigneFacture(index: number) {
+    const ligne = this.inputLignes[index];
+    
+    if (ligne.produitId && ligne.quantite > 0) {
+      this.confirmedLignes.push({...ligne});
+      this.inputLignes.splice(index, 1);
+      this.inputLignes.push({ produitId: null, quantite: 1 });
+    }
   }
 
   // Supprimer ligne
-  supprimerLigneFacture(index: number) {
-    if (this.lignesFacture.length > 1) {
-      this.lignesFacture.splice(index, 1);
-    }
+  supprimerLigneConfirmee(index: number) {
+    this.confirmedLignes.splice(index, 1);
+  }
+
+  getProduitNom(produitId: number | null): string {
+    if (!produitId) return '';
+    const produit = this.produits.find(p => p.id === produitId);
+    return produit?.nom || '';
   }
 
   goToFacture() {
@@ -140,9 +148,9 @@ export class AddfactureProformaComponent implements OnInit {
         next: (data: Produit[]) => {
           console.log('Produits récupérés :', data);
           this.produits = data;
-          if (this.lignesFacture.length === 0) {
-            this.lignesFacture.push({ produitId: data[0]?.id || 0, quantite: 1 });
-          }
+          // if (this.lignesFacture.length === 0) {
+          //   this.lignesFacture.push({ produitId: data[0]?.id || 0, quantite: 1 });
+          // }
         },
         error: (err) => console.error('Erreur récupération produits :', err)
       });
@@ -165,7 +173,7 @@ export class AddfactureProformaComponent implements OnInit {
   
     const facture: any = {
       description: this.description,
-      lignesFacture: this.lignesFacture.map(ligne => ({
+      lignesFacture: this.confirmedLignes.map(ligne => ({
         produit: { id: ligne.produitId },
         quantite: ligne.quantite
       }))

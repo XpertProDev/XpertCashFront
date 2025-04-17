@@ -75,28 +75,28 @@
                             </thead>
                             <!-- Annuler produit quantite  -->
                             <tbody>
-                                <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;">
+                                <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of confirmedLignes; let i = index">
                                     <!-- // Produit  -->
                                     <td>
                                         <div class="champ_input" style="margin-right: 15px;">
-                                            <input class="input_focus_type" type="text" readonly class="input_table">
+                                            <input class="input_focus_type" type="text" [value]="getProduitNom(ligne.produitId)" readonly>
                                         </div>
                                     </td>
                                     <!-- // Stock actuel -->
                                     <td>
                                       <div class="champ_input" style="margin-right: 15px;">
-                                        <input type="text" class="input_focus_type" readonly id="stockActuel" name="stockActuel" style="cursor: no-drop; text-align: center;">
+                                        <input type="text" class="input_focus_type" [value]="getStockActuel(ligne.produitId)" style="cursor: no-drop; text-align: center;" readonly>
                                       </div>                         
                                     </td>
                                     <!-- // Quantité  -->
                                     <td>
                                         <div class="champ_input" style="margin-right: 15px;">
-                                            <input type="number" readonly class="input_focus_type input_focus_type_select" id="addQuantite" name="addQuantite" placeholder="0" min="0">
+                                            <input type="number" class="input_focus_type input_focus_type_select" [value]="ligne.quantite" readonly>
                                         </div>
                                     </td>
                                     <td>
                                         <!-- // Button de delele  -->
-                                        <div class="btn_delete_icon_add">
+                                        <div class="btn_delete_icon_add" (click)="supprimerLigneConfirmee(i)">
                                           <i class="ri-delete-bin-5-fill"></i>
                                         </div>
                                     </td>
@@ -104,7 +104,7 @@
                             </tbody>
                             <!-- Ajouter produit quantite  -->
                             <tbody>
-                                <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;"  *ngFor="let ligne of lignesFacture; let i = index">
+                                <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of inputLignes; let i = index">
                                     <!-- // Produit  -->
                                     <td>
                                       <div class="champ_input" style="margin-right: 15px;">
@@ -140,7 +140,7 @@
                                     </td>
                                     <!-- // Button de ajouter  -->
                                     <td>
-                                      <div class="btn_ajouter_icon_add" (click)="ajouterLigneFacture()">
+                                      <div class="btn_ajouter_icon_add" (click)="ajouterLigneFacture(i)">
                                         <i class="ri-add-fill"></i>
                                       </div>
                                     </td>
