@@ -1,8 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, catchError, Observable, tap, throwError } from "rxjs";
-import { Entreprise } from "../MODELS/entreprise-model";
-import { Clients } from "../MODELS/clients-model";
+import { catchError, Observable, tap, throwError } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +13,8 @@ export class FactureProFormaService {
   creerFactureProforma(
     facture: any,
     remisePourcentage?: number,
-    appliquerTVA?: boolean
+    tva?: number,
+    appliquerAdjustments?: boolean
   ): Observable<any> {
     const token = localStorage.getItem('authToken');
     if (!token) return throwError(() => new Error('Token manquant'));
@@ -25,9 +24,15 @@ export class FactureProFormaService {
     });
   
     let params = new HttpParams();
-    if (remisePourcentage !== undefined && appliquerTVA) {
-      params = params.set('remisePourcentage', remisePourcentage.toString());
-      params = params.set('appliquerTVA', 'true');
+  
+    // Nouvelle logique corrigée
+    if (appliquerAdjustments) {
+      if (remisePourcentage !== undefined) {
+        params = params.set('remisePourcentage', remisePourcentage.toString());
+      }
+      if (tva !== undefined) {
+        params = params.set('tva', tva.toString());
+      }
     }
   
     return this.http.post(`${this.apiUrl}/ajouter`, facture, { headers, params }).pipe(

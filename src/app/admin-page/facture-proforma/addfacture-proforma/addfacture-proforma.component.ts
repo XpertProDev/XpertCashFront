@@ -9,6 +9,8 @@ import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { Produit } from '../../MODELS/produit.model';
 import { ProduitService } from '../../SERVICES/produit.service';
 import { UsersService } from '../../SERVICES/users.service';
+import { catchError, Observable, tap, throwError } from 'rxjs';
+import { HttpHeaders, HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -41,16 +43,17 @@ export class AddfactureProformaComponent implements OnInit {
   noClientsAvailable = false;
   entreprises: any[] = [];
 
-  remiseTVAActive: boolean = false;
+  // remiseTVAActive: boolean = false;
+  activeRemise: boolean = false;
+  activeTva: boolean = false;
   remisePourcentage: number = 0;
   tva: number = 0;
   entrepriseId: number = 0;
   userEntrepriseId: number | null = null;
   isLoading: boolean = false;
   facturesproforma: any[] = [];
-
-
-
+  apiUrl: any;
+  http: any;
   constructor(
     private router: Router,
     private clientService: ClientService,
@@ -67,10 +70,25 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
   // Toggle remise / TVA
-  onToggleRemiseTVA() {
-    if (!this.remiseTVAActive) {
-      this.remisePourcentage = 0;
-      this.tva = 0;
+  // onToggleRemiseTVA() {
+  //   if (!this.remiseTVAActive) {
+  //     this.remisePourcentage = 0;
+  //     this.tva = 0;
+  //   }
+  // }
+
+  onToggleRemiseTVA() {}
+
+  // Toggle remise / TVA
+  onToggleRemise() {
+    if (!this.activeRemise) {
+      this.remisePourcentage = 0; // Réinitialise si désactivé
+    }
+  }
+  
+  onToggleTVA() {
+    if (!this.activeTva) {
+      this.tva = 0; // Réinitialise si désactivé
     }
   }
 
@@ -138,7 +156,6 @@ export class AddfactureProformaComponent implements OnInit {
       console.error('Token manquant pour entreprises');
     }
   }
-
   
   // Liste Produits
   getProduits() {
@@ -164,13 +181,14 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
   // Création de facture
+  // Création de facture
   creerFactureProforma() {
     const token = localStorage.getItem('authToken');
     if (!token) {
       console.error('Token manquant');
       return;
     }
-  
+
     const facture: any = {
       description: this.description,
       lignesFacture: this.confirmedLignes.map(ligne => ({
@@ -178,8 +196,7 @@ export class AddfactureProformaComponent implements OnInit {
         quantite: ligne.quantite
       }))
     };
-  
-    // Ajout du client ou de l'entreprise
+
     if (this.typeDestinataire === 'client' && this.selectedClientId) {
       facture.client = { id: this.selectedClientId };
     } else if (this.typeDestinataire === 'entreprise' && this.selectedEntrepriseId) {
@@ -188,25 +205,13 @@ export class AddfactureProformaComponent implements OnInit {
       console.error('Destinataire non spécifié');
       return;
     }
-  
-    // Préparer les query params dynamiquement
-    const queryParams: string[] = [];
-  
-    if (this.remiseTVAActive) {
-      if (this.remisePourcentage) {
-        queryParams.push(`remisePourcentage=${this.remisePourcentage}`);
-      }
-      if (this.tva) {
-        queryParams.push(`tva=${this.tva}`);
-      }
-    }
-  
-    const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
-  
+
+    // Appel du service avec 4 paramètres
     this.factureProFormaService.creerFactureProforma(
       facture,
-      this.remiseTVAActive ? this.remisePourcentage : undefined,
-      this.remiseTVAActive
+      this.activeRemise ? this.remisePourcentage : undefined,
+      this.activeTva ? this.tva : undefined,
+      (this.activeRemise || this.activeTva)
     ).subscribe({
       next: (res) => {
         console.log('Facture créée avec succès:', res);
@@ -214,14 +219,11 @@ export class AddfactureProformaComponent implements OnInit {
       },
       error: (err) => console.error('Erreur création facture :', err)
     });
-    
   }
-  
 
   removePendingAdjustment(index: number): void {
     this.pendingAdjustments.splice(index, 1);
-  } 
-
+  }
 
   getUserInfo(): void {
     this.usersService.getUserInfo().subscribe({
