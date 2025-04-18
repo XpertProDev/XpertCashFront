@@ -39,13 +39,10 @@ export class AddfactureProformaComponent implements OnInit {
   produits: Produit[] = [];
   inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 0 }];
   confirmedLignes: { produitId: number | null; quantite: number }[] = [];
-
   clients: Clients[] = [];
   totalClients = 0;
   noClientsAvailable = false;
   entreprises: any[] = [];
-
-  // remiseTVAActive: boolean = false;
   activeRemise: boolean = false;
   activeTva: boolean = false;
   remisePourcentage: number = 0;
@@ -54,8 +51,11 @@ export class AddfactureProformaComponent implements OnInit {
   userEntrepriseId: number | null = null;
   isLoading: boolean = false;
   facturesproforma: any[] = [];
-  apiUrl: any;
-  http: any;
+  totalHT: number = 0;
+  // apiUrl: any;
+  // http: any;
+
+
   constructor(
     private router: Router,
     private clientService: ClientService,
@@ -110,8 +110,22 @@ export class AddfactureProformaComponent implements OnInit {
       
       // Forcer la détection de changement
       this.confirmedLignes = [...this.confirmedLignes];
+
     }
   }
+
+  // ajouterLigneFacture(index: number) {
+  //   const ligne = this.inputLignes[index];
+    
+  //   if (ligne.produitId && ligne.quantite > 0) {
+  //     this.confirmedLignes.push({...ligne});
+  //     this.inputLignes.splice(index, 1);
+  //     this.inputLignes.push({ produitId: null, quantite: 1 });
+      
+  //     // Force le recalcul
+  //     this.confirmedLignes = [...this.confirmedLignes];
+  //   }
+  // }
 
   trackByFn(index: number, item: any): number {
     return index; // ou un identifiant unique si disponible
@@ -120,6 +134,7 @@ export class AddfactureProformaComponent implements OnInit {
   // Supprimer ligne
   supprimerLigneConfirmee(index: number) {
     this.confirmedLignes.splice(index, 1);
+    this.confirmedLignes = [...this.confirmedLignes]; // Force la mise à jour
   }
 
   getProduitNom(produitId: number | null): string {
@@ -206,6 +221,12 @@ export class AddfactureProformaComponent implements OnInit {
   getMontantTotal(ligne: any): number {
     const prix = this.getPrixVente(ligne.produitId);
     return prix * (ligne.quantite || 0);
+  }
+
+  getTotalHT(): number {
+    return this.confirmedLignes.reduce((total, ligne) => {
+      return total + this.getMontantTotal(ligne);
+    }, 0);
   }
 
   // Création de facture
