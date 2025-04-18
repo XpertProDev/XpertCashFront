@@ -216,7 +216,7 @@
             <!-- Remise -->
             <div class="information_cadre">
                 <div class="info_titre_input">
-                <h4>Remise et TVA</h4>
+                <h4>REMISE</h4>
         
                 <div class="champ_input_inventaire">
                     <p>Application de REMISE</p>
@@ -229,7 +229,10 @@
                 <div class="double_input_grid" *ngIf="activeRemise" style="margin-top: 15px;">
                     <div class="champ_input champ_input2">
                         <input type="number" step="0.01" class="input_focus" name="remisePourcentage" [(ngModel)]="remisePourcentage" (input)="onRemiseChange()" placeholder="Remise en %" />
-                        <label class="label">REMISE (%)</label>
+                        <!-- <label class="label">REMISE ({{ remisePourcentage ?? '' }}%)</label> -->
+                        <label class="label">
+                          REMISE <span *ngIf="remisePourcentage !== null">({{ remisePourcentage }}%)</span>
+                        </label>
                     </div>
         
                     <div class="champ_input champ_input2">
