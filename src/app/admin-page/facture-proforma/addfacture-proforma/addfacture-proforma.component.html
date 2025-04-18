@@ -67,11 +67,6 @@
                     <div class="containerTable">
                         <table>
                             <thead>
-                                <!-- <tr class="titleTableProduit">
-                                    <th class="title_table_name">Mes produits</th>
-                                    <th class="title_table_stock">Stock actuel</th>
-                                    <th class="title_table_quantite">Quantité</th>
-                                </tr> -->
                                 <tr class="titleTableProduit">
                                   <th class="title_table_name">Désignation</th>
                                   <th class="">Description</th>
@@ -81,31 +76,6 @@
                               </tr>
                             </thead>
                             <!-- Afficher produit dans la list  -->
-                            <!-- <tbody>
-                                <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of confirmedLignes; let i = index">
-                                    
-                                    <td>
-                                        <div class="champ_input" style="margin-right: 15px;">
-                                            <input class="input_focus_type" type="text" [value]="getProduitNom(ligne.produitId)" readonly>
-                                        </div>
-                                    </td>
-                                    <td>
-                                      <div class="champ_input" style="margin-right: 15px;">
-                                        <input type="text" class="input_focus_type" [value]="getStockActuel(ligne.produitId)" style="cursor: no-drop; text-align: center;" readonly>
-                                      </div>                         
-                                    </td>
-                                    <td>
-                                        <div class="champ_input" style="margin-right: 15px;">
-                                            <input type="number" class="input_focus_type input_focus_type_select" [value]="ligne.quantite" readonly>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="btn_delete_icon_add" (click)="supprimerLigneConfirmee(i)">
-                                          <i class="ri-delete-bin-5-fill"></i>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody> -->
                             <tbody>
                                 <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of confirmedLignes; let i = index">
                                     <!-- // Produit  -->
@@ -123,7 +93,7 @@
                                     <!-- // Prix Unitaire  -->
                                     <td>
                                       <div class="champ_input" style="margin-right: 15px;">
-                                          <input type="number" class="input_focus_type" placeholder="Prix unitaire">
+                                          <input type="number" class="input_focus_type" [value]="getPrixVente(ligne.produitId)" placeholder="Prix unitaire">
                                       </div>
                                     </td>
                                     <!-- // Quantité  -->
@@ -135,7 +105,7 @@
                                     <!-- // Total montant -->
                                     <td>
                                       <div class="champ_input" style="margin-right: 15px;">
-                                        <input type="text" class="input_focus_type" disabled id="prixTotal" placeholder="000000" style="cursor: no-drop; text-align: center;">
+                                        <input type="text" class="input_focus_type" disabled id="prixTotal" [value]="getPrixVente(ligne.produitId)" style="cursor: no-drop; text-align: center;">
                                       </div>                         
                                     </td>
                                     <td>
@@ -146,10 +116,11 @@
                                     </td>
                                 </tr>
                             </tbody>
-                            <!-- <tbody>
-                                <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of inputLignes; let i = index">
-                                    
-                                    <td>
+                            <!-- Ajouter produit quantite  -->
+                            <tbody>
+                              <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of inputLignes; let i = index">
+                                  <!-- // Produit  -->
+                                  <td>
                                       <div class="champ_input" style="margin-right: 15px;">
                                         <select 
                                           class="input_focus_type input_focus_type_select" 
@@ -161,80 +132,52 @@
                                           </option>
                                         </select>
                                       </div>
-                                    </td>
-                                    <td>
+                                  </td>
+                                  <!-- // Description -->
+                                  <td>
                                       <div class="champ_input" style="margin-right: 15px;">
-                                        <input 
-                                          type="text" 
-                                          class="input_focus_type" 
-                                          disabled 
-                                          [value]="getStockActuel(ligne.produitId)"
-                                          style="cursor: no-drop; text-align: center;"
-                                        >
-                                      </div>
-                                    </td>
-                                    <td>
-                                        <div class="champ_input" style="margin-right: 15px;">
-                                          <input type="number" class="input_focus input_focus_type" [(ngModel)]="ligne.quantite" [ngModelOptions]="{ standalone: true }" placeholder="Quantité" />
-                                            <label class="label">Quantité</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                      <div class="btn_ajouter_icon_add" (click)="ajouterLigneFacture(i)">
-                                        <i class="ri-add-fill"></i>
-                                      </div>
-                                    </td>
-                                </tr>
-                            </tbody> -->
-                            <!-- Ajouter produit quantite  -->
-                            <tbody>
-                                <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of inputLignes; let i = index">
-                                    <!-- // Produit  -->
-                                    <td>
-                                        <div class="champ_input" style="margin-right: 15px;">
-                                          <select 
-                                            class="input_focus_type input_focus_type_select" 
-                                            [(ngModel)]="ligne.produitId" 
-                                            [ngModelOptions]="{ standalone: true }" required>
-                                            <option [ngValue]="null">Sélectionner un produit</option>
-                                            <option *ngFor="let produit of produits" [ngValue]="produit.id">
-                                              {{ produit.nom }}
-                                            </option>
-                                          </select>
-                                        </div>
-                                    </td>
-                                    <!-- // Description -->
-                                    <td>
-                                        <div class="champ_input" style="margin-right: 15px;">
-                                          <input type="text" class="input_focus_type" style="resize: none;" placeholder="Description">
-                                        </div>                         
-                                    </td>
-                                    <!-- // Prix Unitaire  -->
-                                    <td>
-                                        <div class="champ_input" style="margin-right: 15px;">
-                                            <input type="number" class="input_focus_type" placeholder="Prix unitaire">
-                                        </div>
-                                    </td>
-                                    <!-- // Quantité  -->
-                                    <td>
-                                      <div class="champ_input" style="margin-right: 15px;">
-                                        <input type="number" class="input_focus_type input_focus_type_quantite" [(ngModel)]="ligne.quantite" [ngModelOptions]="{ standalone: true }" placeholder="Quantité" />
-                                          <!-- <label class="label">Quantité</label> -->
-                                      </div>
-                                    </td>
-                                    <!-- // Montant total -->
-                                    <td>
-                                      <div class="champ_input" style="margin-right: 15px;">
-                                        <input type="text" class="input_focus_type" disabled id="prixTotal" placeholder="000000" style="cursor: no-drop; text-align: center;">
+                                        <input type="text" class="input_focus_type" style="resize: none;" placeholder="Description">
                                       </div>                         
-                                    </td>
-                                    <!-- // Button de ajouter  -->
-                                    <td>
-                                      <div class="btn_ajouter_icon_add" (click)="ajouterLigneFacture(i)">
-                                        <i class="ri-add-fill"></i>
-                                      </div>
-                                    </td>
-                                </tr>
+                                  </td>
+                                  <!-- // Prix Unitaire  -->
+                                  <td>
+                                    <div class="champ_input" style="margin-right: 15px;">
+                                      <input 
+                                        type="number" 
+                                        class="input_focus_type" 
+                                        [value]="getPrixVente(ligne.produitId)" 
+                                        placeholder="Prix unitaire"
+                                        readonly
+                                      >
+                                    </div>
+                                  </td>
+                                  <!-- // Quantité  -->
+                                  <td>
+                                    <div class="champ_input" style="margin-right: 15px;">
+                                      <input type="number" class="input_focus_type input_focus_type_quantite" [(ngModel)]="ligne.quantite" [ngModelOptions]="{ standalone: true }" placeholder="Quantité" />
+                                        <!-- <label class="label">Quantité</label> -->
+                                    </div>
+                                  </td>
+                                  <!-- // Montant total -->
+                                  <td>
+                                    <div class="champ_input" style="margin-right: 15px;">
+                                      <input 
+                                        type="text" 
+                                        class="input_focus_type" 
+                                        disabled 
+                                        [value]="getMontantTotal(ligne) | customNumber" 
+                                        placeholder="0" 
+                                        style="cursor: no-drop; text-align: center;"
+                                      >
+                                    </div>                         
+                                  </td>
+                                  <!-- // Button de ajouter  -->
+                                  <td>
+                                    <div class="btn_ajouter_icon_add" (click)="ajouterLigneFacture(i)">
+                                      <i class="ri-add-fill"></i>
+                                    </div>
+                                  </td>
+                              </tr>
                             </tbody>
 
                         </table>

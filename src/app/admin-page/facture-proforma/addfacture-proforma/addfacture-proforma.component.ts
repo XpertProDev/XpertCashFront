@@ -11,6 +11,7 @@ import { ProduitService } from '../../SERVICES/produit.service';
 import { UsersService } from '../../SERVICES/users.service';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
+import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -20,6 +21,7 @@ import { HttpHeaders, HttpParams } from '@angular/common/http';
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
+    CustomNumberPipe
   ],
   templateUrl: './addfacture-proforma.component.html',
   styleUrl: './addfacture-proforma.component.scss'
@@ -35,7 +37,7 @@ export class AddfactureProformaComponent implements OnInit {
   nomEntreprise: string = '';
   boutiqueIds: number[] | undefined;
   produits: Produit[] = [];
-  inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 1 }];
+  inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 0 }];
   confirmedLignes: { produitId: number | null; quantite: number }[] = [];
 
   clients: Clients[] = [];
@@ -77,7 +79,7 @@ export class AddfactureProformaComponent implements OnInit {
   //   }
   // }
 
-  onToggleRemiseTVA() {}
+  // onToggleRemiseTVA() {}
 
   // Toggle remise / TVA
   onToggleRemise() {
@@ -174,13 +176,25 @@ export class AddfactureProformaComponent implements OnInit {
     }
   }
 
-  getStockActuel(produitId: number | null): number {
+  // getStockActuel(produitId: number | null): number {
+  //   if (!produitId) return 0;
+  //   const produit = this.produits.find(p => p.id === produitId);
+  //   return produit?.quantite ?? 0;
+  // }
+
+  // Récupère le prix unitaire d'un produit
+  getPrixVente(produitId: number | null): number {
     if (!produitId) return 0;
     const produit = this.produits.find(p => p.id === produitId);
-    return produit?.quantite ?? 0;
+    return produit?.prixVente || 0;
   }
 
-  // Création de facture
+  // Calcule le montant total pour une ligne
+  getMontantTotal(ligne: any): number {
+    const prix = this.getPrixVente(ligne.produitId);
+    return prix * (ligne.quantite || 0);
+  }
+
   // Création de facture
   creerFactureProforma() {
     const token = localStorage.getItem('authToken');
