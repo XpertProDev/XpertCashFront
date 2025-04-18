@@ -94,6 +94,30 @@ export class AddfactureProformaComponent implements OnInit {
     }
   }
 
+  onRemiseChange() {
+    // Force la mise à jour des valeurs
+    this.remisePourcentage = Number(this.remisePourcentage);
+  }
+
+  // Calcul du montant de la remise
+  getMontantRemise(): number {
+    return (this.getTotalHT() * this.remisePourcentage) / 100;
+  }
+
+  // Calcul du montant HT après remise
+  getTotalApresRemise(): number {
+    return this.getTotalHT() - this.getMontantRemise();
+  }
+
+  // Exemple pour la TVA
+  getMontantTVA(): number {
+    return (this.getTotalApresRemise() * this.tva) / 100;
+  }
+
+  getTotalTTC(): number {
+    return this.getTotalApresRemise() + this.getMontantTVA();
+  }
+
   ajouterLigneFacture(index: number) {
     const ligne = this.inputLignes[index];
     
@@ -113,19 +137,6 @@ export class AddfactureProformaComponent implements OnInit {
 
     }
   }
-
-  // ajouterLigneFacture(index: number) {
-  //   const ligne = this.inputLignes[index];
-    
-  //   if (ligne.produitId && ligne.quantite > 0) {
-  //     this.confirmedLignes.push({...ligne});
-  //     this.inputLignes.splice(index, 1);
-  //     this.inputLignes.push({ produitId: null, quantite: 1 });
-      
-  //     // Force le recalcul
-  //     this.confirmedLignes = [...this.confirmedLignes];
-  //   }
-  // }
 
   trackByFn(index: number, item: any): number {
     return index; // ou un identifiant unique si disponible
