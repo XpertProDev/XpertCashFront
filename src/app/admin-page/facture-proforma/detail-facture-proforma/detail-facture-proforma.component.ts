@@ -13,7 +13,8 @@ import { Produit } from '../../MODELS/produit.model';
 })
 export class DetailFactureProformaComponent implements OnInit {
   isLoading: boolean = false;
-  remiseTVAActive: boolean = false;
+  activeRemise: boolean = false;
+  activeTva: boolean = false;
   remisePourcentage: number = 0;
   tva: number = 0;
   errorMessage: string = '';
@@ -35,23 +36,29 @@ export class DetailFactureProformaComponent implements OnInit {
   }
 
   // Liste Produits
-      getProduits() {
-        const token = localStorage.getItem('authToken');
-        if (token && this.userEntrepriseId) {
-          this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
-            next: (data: Produit[]) => {
-              this.produits = data;
-              console.log('Produits récupérés :', data);
-            },
-            error: (err) => console.error('Erreur récupération produits :', err)
-          });
-        }
-      }
+  getProduits() {
+    const token = localStorage.getItem('authToken');
+    if (token && this.userEntrepriseId) {
+      this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
+        next: (data: Produit[]) => {
+          this.produits = data;
+          console.log('Produits récupérés :', data);
+        },
+        error: (err) => console.error('Erreur récupération produits :', err)
+      });
+    }
+  }
 
   // Toggle remise / TVA
-  onToggleRemiseTVA() {
-    if (!this.remiseTVAActive) {
+  onToggleRemise() {
+    if (!this.activeRemise) {
       this.remisePourcentage = 0;
+    }
+  }
+
+  // Toggle remise / TVA
+  onToggleTVA() {
+    if (!this.activeTva) {
       this.tva = 0;
     }
   }

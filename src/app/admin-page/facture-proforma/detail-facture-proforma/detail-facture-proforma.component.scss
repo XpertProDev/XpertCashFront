@@ -34,6 +34,8 @@ th {
     justify-content: space-between;
 }
 
+
+
 .iconEntrepriseList {
     padding-left: 20px;
 }
@@ -129,10 +131,24 @@ th {
     padding: 20px; 
 }
 
-.info_titre_input h4 {
-    font-size: 16px;
+.info_titre_input h2 span {
+    color: #0672E4;
+}
+
+.info_titre_input_proforma {
+    padding: 25px 20px;
+}
+
+.info_titre_input h2 {
+    font-size: 20px;
     margin-bottom: 10px;
-    letter-spacing: 0.60px;
+    letter-spacing: 0.50px;
+    text-align: center;
+}
+
+.info_titre_input p {
+    text-align: center;
+    margin: 0;
 }
 
 /* formulaire */
@@ -148,6 +164,12 @@ th {
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
+
+.double_input_grid_3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
 
 .input_focus {
     width: 100%;
@@ -452,9 +474,9 @@ th {
     font-weight: 500;
 }
 
-.title_table_name {
-    width: 50%;
-}
+// .title_table_name {
+//     width: 50%;
+// }
 
 // .title_table_stock {
 //     width: 10%;
@@ -505,4 +527,10 @@ th {
     display: block; 
     position: relative;
     margin-bottom: 10px;
+}
+ 
+.double_input_ttc {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
