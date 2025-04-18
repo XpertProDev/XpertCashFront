@@ -69,56 +69,56 @@
                             <thead>
                                 <tr class="titleTableProduit">
                                   <th class="title_table_name">Désignation</th>
+                                  <th class="">Quantité</th>
                                   <th class="">Description</th>
                                   <th class="">Prix Unitaire</th>
-                                  <th class="">Quantité</th>
                                   <th class="">Montant (FCFA)</th>
                               </tr>
                             </thead>
                             <!-- Afficher produit dans la list  -->
                             <tbody>
                                 <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of confirmedLignes; let i = index">
-                                    <!-- // Produit  -->
-                                    <td>
-                                      <div class="champ_input" style="margin-right: 15px;">
-                                          <input class="input_focus_type" type="text" [value]="getProduitNom(ligne.produitId)" readonly>
-                                      </div>
+                                  <!-- // Produit  -->
+                                  <td>
+                                    <div class="champ_input" style="margin-right: 15px;">
+                                        <input class="input_focus_type" type="text" [value]="getProduitNom(ligne.produitId)" readonly>
+                                    </div>
                                   </td>
-                                    <!-- // Description -->
-                                    <td>
-                                      <div class="champ_input" style="margin-right: 15px;">
-                                        <input type="text" class="input_focus_type" style="resize: none;" placeholder="Description">
-                                      </div>                         
-                                    </td>
-                                    <!-- // Prix Unitaire  -->
-                                    <td>
-                                      <div class="champ_input" style="margin-right: 15px;">
-                                          <input type="number" class="input_focus_type" [value]="getPrixVente(ligne.produitId)" placeholder="Prix unitaire">
-                                      </div>
-                                    </td>
-                                    <!-- // Quantité  -->
-                                    <td>
-                                      <div class="champ_input" style="margin-right: 15px;">
-                                          <input type="number" class="input_focus_type input_focus_type_quantite" [value]="ligne.quantite" readonly>
-                                      </div>
+                                  <!-- // Quantité  -->
+                                  <td>
+                                    <div class="champ_input" style="margin-right: 15px;">
+                                        <input type="number" class="input_focus_type input_focus_type_quantite" [value]="ligne.quantite" readonly>
+                                    </div>
                                   </td>
-                                    <!-- // Total montant -->
-                                    <td>
-                                      <div class="champ_input" style="margin-right: 15px;">
-                                        <input type="text" class="input_focus_type" disabled id="prixTotal" [value]="getPrixVente(ligne.produitId)" style="cursor: no-drop; text-align: center;">
-                                      </div>                         
-                                    </td>
-                                    <td>
-                                      <!-- // Button de delele  -->
-                                      <div class="btn_delete_icon_add" (click)="supprimerLigneConfirmee(i)">
-                                        <i class="ri-delete-bin-5-fill"></i>
-                                      </div>
-                                    </td>
+                                  <!-- // Description -->
+                                  <td>
+                                    <div class="champ_input" style="margin-right: 15px;">
+                                      <input type="text" class="input_focus_type" style="resize: none;" placeholder="Description">
+                                    </div>                         
+                                  </td>
+                                  <!-- // Prix Unitaire  -->
+                                  <td>
+                                    <div class="champ_input" style="margin-right: 15px;">
+                                        <input type="number" class="input_focus_type" [value]="getPrixVente(ligne.produitId)" placeholder="Prix unitaire" style="cursor: no-drop;">
+                                    </div>
+                                  </td>
+                                  <!-- // Total montant -->
+                                  <td>
+                                    <div class="champ_input" style="margin-right: 15px;">
+                                      <input type="text" class="input_focus_type" disabled id="prixTotal" [value]="getMontantTotal(ligne) | customNumber" style="cursor: no-drop;">
+                                    </div>                         
+                                  </td>
+                                  <td>
+                                    <!-- // Button de delele  -->
+                                    <div class="btn_delete_icon_add" (click)="supprimerLigneConfirmee(i)">
+                                      <i class="ri-delete-bin-5-fill"></i>
+                                    </div>
+                                  </td>
                                 </tr>
                             </tbody>
                             <!-- Ajouter produit quantite  -->
                             <tbody>
-                              <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of inputLignes; let i = index">
+                              <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of inputLignes; let i = index; trackBy: trackByFn">
                                   <!-- // Produit  -->
                                   <td>
                                       <div class="champ_input" style="margin-right: 15px;">
@@ -132,6 +132,13 @@
                                           </option>
                                         </select>
                                       </div>
+                                  </td>
+                                  <!-- // Quantité  -->
+                                  <td>
+                                    <div class="champ_input" style="margin-right: 15px;">
+                                      <input type="number" class="input_focus_type input_focus_type_quantite" [(ngModel)]="ligne.quantite" [ngModelOptions]="{ standalone: true }" placeholder="Quantité" />
+                                        <!-- <label class="label">Quantité</label> -->
+                                    </div>
                                   </td>
                                   <!-- // Description -->
                                   <td>
@@ -148,14 +155,8 @@
                                         [value]="getPrixVente(ligne.produitId)" 
                                         placeholder="Prix unitaire"
                                         readonly
+                                        style="cursor: no-drop;"
                                       >
-                                    </div>
-                                  </td>
-                                  <!-- // Quantité  -->
-                                  <td>
-                                    <div class="champ_input" style="margin-right: 15px;">
-                                      <input type="number" class="input_focus_type input_focus_type_quantite" [(ngModel)]="ligne.quantite" [ngModelOptions]="{ standalone: true }" placeholder="Quantité" />
-                                        <!-- <label class="label">Quantité</label> -->
                                     </div>
                                   </td>
                                   <!-- // Montant total -->
@@ -166,8 +167,7 @@
                                         class="input_focus_type" 
                                         disabled 
                                         [value]="getMontantTotal(ligne) | customNumber" 
-                                        placeholder="0" 
-                                        style="cursor: no-drop; text-align: center;"
+                                        style="cursor: no-drop;"
                                       >
                                     </div>                         
                                   </td>

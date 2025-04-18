@@ -98,10 +98,23 @@ export class AddfactureProformaComponent implements OnInit {
     const ligne = this.inputLignes[index];
     
     if (ligne.produitId && ligne.quantite > 0) {
-      this.confirmedLignes.push({...ligne});
+      // Ajouter le calcul du montant avant l'ajout
+      const nouvelleLigne = {
+        ...ligne,
+        montantTotal: this.getMontantTotal(ligne)
+      };
+      
+      this.confirmedLignes.push(nouvelleLigne);
       this.inputLignes.splice(index, 1);
       this.inputLignes.push({ produitId: null, quantite: 1 });
+      
+      // Forcer la détection de changement
+      this.confirmedLignes = [...this.confirmedLignes];
     }
+  }
+
+  trackByFn(index: number, item: any): number {
+    return index; // ou un identifiant unique si disponible
   }
 
   // Supprimer ligne
