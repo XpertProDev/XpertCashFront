@@ -13,7 +13,7 @@ export class FactureProFormaService {
   creerFactureProforma(
     facture: any,
     remisePourcentage?: number,
-    tva?: number,
+    appliquerTVA?: boolean,
     appliquerAdjustments?: boolean
   ): Observable<any> {
     const token = localStorage.getItem('authToken');
@@ -30,8 +30,8 @@ export class FactureProFormaService {
       if (remisePourcentage !== undefined) {
         params = params.set('remisePourcentage', remisePourcentage.toString());
       }
-      if (tva !== undefined) {
-        params = params.set('tva', tva.toString());
+      if (appliquerTVA !== undefined) {
+        params = params.set('appliquerTVA', appliquerTVA.toString());
       }
     }
   

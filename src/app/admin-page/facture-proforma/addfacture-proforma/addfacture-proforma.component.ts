@@ -111,7 +111,14 @@ export class AddfactureProformaComponent implements OnInit {
 
   // Exemple pour la TVA
   getMontantTVA(): number {
-    return (this.getTotalApresRemise() * this.tva) / 100;
+    if (this.activeTva) {
+      return (this.getTotalApresRemise() * 0.18); // 18% de TVA
+    }
+    return 0;
+  }
+
+  getTotalCommercial() : number {
+    return this.getTotalApresRemise();
   }
 
   getTotalTTC(): number {
@@ -269,7 +276,7 @@ export class AddfactureProformaComponent implements OnInit {
     this.factureProFormaService.creerFactureProforma(
       facture,
       this.activeRemise ? this.remisePourcentage : undefined,
-      this.activeTva ? this.tva : undefined,
+      this.activeTva,
       (this.activeRemise || this.activeTva)
     ).subscribe({
       next: (res) => {

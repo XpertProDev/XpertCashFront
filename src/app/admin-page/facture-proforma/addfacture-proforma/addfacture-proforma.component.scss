@@ -507,6 +507,11 @@ input:checked + .slider:before {
   margin-bottom: 10px;
 }
 
+.double_input_ttc {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
 // .loading-overlay {
 //     position: fixed;
