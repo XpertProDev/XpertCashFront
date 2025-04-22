@@ -105,17 +105,25 @@
       <div class="grid-view">
         <div class="client-card" *ngFor="let client of paginatedClients" (click)="openClientDetail(client.id)">
           <div class="name_icon">
-            <h3>
-              <span *ngIf="client.nomComplet; else noNomComplet">{{ client.nomComplet }}</span>
-              <ng-template #noNomComplet>
-                <span class="no-phone-text">Nom est vide</span>
-              </ng-template>
-            </h3>
+            <div class="tete">
+              
+              <div class="imgClient2">
+                <img src="assets/img/profil.png" alt="Photo clients">
+              </div>
+
+              <h3>
+                <span *ngIf="client.nomComplet; else noNomComplet">{{ client.nomComplet }}</span>
+                <ng-template #noNomComplet>
+                  <span class="no-phone-text">Nom est vide</span>
+                </ng-template>
+              </h3>
+            </div>
             <span *ngIf="client.createdAt" class="dateCreat">{{ client.createdAt | date: 'dd/MM/yyyy' }}</span>
 
             <span *ngIf="client.entrepriseClient; else noEntrepriseCard" 
                   (click)="openEntrepriseClientDetail(client.id, $event)">
-              <i class="ri-git-branch-fill" title="Affiliation d'Entreprise"></i>
+              <i class="ri-community-line" title="Affiliation d'Entreprise"></i>
+              <!-- <i class="ri-git-branch-fill"></i> -->
             </span>
             <ng-template #noEntrepriseCard>
              <!--  <span class="no-phone-text">Non entreprise</span> -->
@@ -145,16 +153,11 @@
                   <span class="no-phone-text">Non numéro de téléphone</span>
                 </ng-template>
               </p>
-              
-
-              
-              
-              
             </div>
             <!-- // Image de client  -->
             <div class="imgClient_grid">
               <!-- <img [src]="product.photo"> -->
-              <img src="assets/img/profil.png" alt="Photo clients">
+              <img src="assets/img/office_building.png" alt="Photo clients">
               <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/image_product.png' : product.photo"> -->
             </div>
           </div>
