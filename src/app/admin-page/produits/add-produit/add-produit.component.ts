@@ -772,7 +772,6 @@ export class AddProduitComponent implements OnInit {
       }
     });
   }
-  
 
   displayFnBoutique(boutique?: string): string {
     return boutique ? boutique : '';

@@ -64,6 +64,14 @@
                           [matAutocomplete]="auto" style="cursor: pointer;" [value]="produit.nomCategorie  || 'non categorie'">
                       <label for="categorieId" class="label labelCategory">Catégorie</label>
                       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
+
+                        <mat-option class="select-option" (click)="onCreateCategoryClick()">
+                          <div style="display: flex; align-items: center; color: #0672E4;">
+                            <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                            <span style="margin-left: 8px;">Créer une catégorie</span>
+                          </div>
+                        </mat-option>
+
                         <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
                           {{ option.nom}}
                         </mat-option>
@@ -72,8 +80,11 @@
                     </div>
                                      
                     
-                    <div class="btn_add_categoryDiv2">
+                    <!-- <div class="btn_add_categoryDiv2">
                       <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer une catégorie</button>
+                    </div> -->
+                    <div class="arrow_bas" style="position: absolute; right: 5px; top: 20px;">
+                      <i class="ri-arrow-down-s-line" style="font-size: 20px;"></i>
                     </div>
                   </div>
 
@@ -120,13 +131,24 @@
                           [matAutocomplete]="autoUnite" style="cursor: pointer;" [value]="produit.nomUnite || 'non unite'">
                       <label for="uniteId" class="label labelCategory">Unité de mesure</label>
                       <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
+
+                        <mat-option class="select-option" (click)="onCreateUniteClick()">
+                          <div style="display: flex; align-items: center; color: #0672E4;">
+                            <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                            <span style="margin-left: 8px;">Créer une unité</span>
+                          </div>
+                        </mat-option>
+
                         <mat-option *ngFor="let optionUnite of filteredNomUnite | async" [value]="optionUnite">
                           {{ optionUnite.nom }}
                         </mat-option>
                       </mat-autocomplete>
                     </div>
-                    <div class="btn_add_categoryDiv2">
+                    <!-- <div class="btn_add_categoryDiv2">
                       <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
+                    </div> -->
+                    <div class="arrow_bas" style="position: absolute; right: 5px; top: 20px;">
+                      <i class="ri-arrow-down-s-line" style="font-size: 20px;"></i>
                     </div>
                   </div>
 

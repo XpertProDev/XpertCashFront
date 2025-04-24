@@ -116,24 +116,28 @@
                              [matAutocomplete]="auto" style="cursor: pointer;">
                       <label for="categorieId" class="label labelCategory">Catégorie</label>
                       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
+
+                        <mat-option class="select-option" (click)="onCreateCategoryClick()">
+                          <div style="display: flex; align-items: center; color: #0672E4;">
+                            <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                            <span style="margin-left: 8px;">Créer une catégorie</span>
+                          </div>
+                        </mat-option>
+
                         <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
-                          <div class="container_name_icon">
-                            <div class="option-content">
-                              {{ option.nom }}
-                            </div>
-                        
-                            <!-- Suppression totale de la logique conditionnelle -->
-                            <div class="option_icon_div" *ngIf="myControl.value?.id !== option.id">
-                              <mat-icon class="option-icon">keyboard_arrow_right</mat-icon>
-                            </div>
+                          <div class="option-content">
+                            {{ option.nom }}
                           </div>
                         </mat-option>
                       </mat-autocomplete>
                       
                     </div>
 
-                    <div class="btn_add_categoryDiv2">
+                    <!-- <div class="btn_add_categoryDiv2">
                       <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer une catégorie</button>
+                    </div> -->
+                    <div class="arrow_bas" style="position: absolute; right: 5px; top: 20px;">
+                      <i class="ri-arrow-down-s-line" style="font-size: 20px;"></i>
                     </div>
                   </div>
                 </div>
@@ -172,29 +176,32 @@
                             matInput [formControl]="uniteControl" class="input_focus"
                             [matAutocomplete]="autoUnite" style="cursor: pointer;">
                       <label for="uniteId" class="label labelCategory">Unité de mesure</label>
-                      <mat-autocomplete #autoUnite="matAutocomplete" 
-                                      (optionSelected)="onUniteSelected($event)" 
-                                      [displayWith]="displayFnUnite">
+                      <mat-autocomplete #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
+
+                        <mat-option class="select-option" (click)="onCreateUniteClick()">
+                          <div style="display: flex; align-items: center; color: #0672E4;">
+                            <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                            <span style="margin-left: 8px;">Créer une unité</span>
+                          </div>
+                        </mat-option>
+
                         <mat-option *ngFor="let option of filteredNomUnite | async" [value]="option">
-                          <div class="container_name_icon">
-                            <div class="option-content">
-                              {{ option.nom }}
-                            </div>
-                        
-                            <!-- Suppression totale de la logique conditionnelle -->
-                            <div class="option_icon_div" *ngIf="uniteControl.value?.id !== option.id">
-                              <mat-icon class="option-icon">keyboard_arrow_right</mat-icon>
-                            </div>
+                          <div class="option-content">
+                            {{ option.nom }}
                           </div>
                         </mat-option>
                       
                       </mat-autocomplete>
                       
                     </div>
-                    <div class="btn_add_categoryDiv2">
+                    <!-- <div class="btn_add_categoryDiv2">
                       <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
+                    </div> -->
+                    <div class="arrow_bas" style="position: absolute; right: 5px; top: 20px;">
+                      <i class="ri-arrow-down-s-line" style="font-size: 20px;"></i>
                     </div>
                   </div>
+
                 </div>
                 
               </div>
