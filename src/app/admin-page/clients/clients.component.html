@@ -106,10 +106,24 @@
         <div class="client-card" *ngFor="let client of paginatedClients" (click)="openClientDetail(client.id)">
           <div class="name_icon">
             <div class="tete">
-              
-              <div class="imgClient2">
-                <img src="assets/img/profil.png" alt="Photo clients">
-              </div>
+              <span *ngIf="client.entrepriseClient; else noEntrepriseCard" 
+                    (click)="openEntrepriseClientDetail(client.id, $event)">
+                <i class="ri-community-line" title="Affiliation d'Entreprise"></i>
+                <!-- <i class="ri-git-branch-fill"></i> -->
+              </span>
+              <ng-template #noEntrepriseCard>
+               <!--  <span class="no-phone-text">Non entreprise</span> -->
+                <div class="imgClient2">
+                  <img src="assets/img/profil.png" alt="Photo clients">
+                </div>
+              </ng-template>
+
+              <!-- <div class="imgClient2">
+                <img 
+                  [src]="client.entrepriseClient ? 'assets/img/office_building.png' : 'assets/img/profil.png'" 
+                  alt="Photo clients"
+                >
+              </div> -->
 
               <h3>
                 <span *ngIf="client.nomComplet; else noNomComplet">{{ client.nomComplet }}</span>
@@ -119,15 +133,6 @@
               </h3>
             </div>
             <span *ngIf="client.createdAt" class="dateCreat">{{ client.createdAt | date: 'dd/MM/yyyy' }}</span>
-
-            <span *ngIf="client.entrepriseClient; else noEntrepriseCard" 
-                  (click)="openEntrepriseClientDetail(client.id, $event)">
-              <i class="ri-community-line" title="Affiliation d'Entreprise"></i>
-              <!-- <i class="ri-git-branch-fill"></i> -->
-            </span>
-            <ng-template #noEntrepriseCard>
-             <!--  <span class="no-phone-text">Non entreprise</span> -->
-            </ng-template>
           </div>
           <div class="content_cadre_double">
             <!-- // Les information sur les cadre  -->
@@ -154,12 +159,22 @@
                 </ng-template>
               </p>
             </div>
+            <!-- <div class="imgClient_grid">
+              <img src="assets/img/office_building.png" alt="Photo clients">
+            </div> -->
             <!-- // Image de client  -->
             <div class="imgClient_grid">
               <!-- <img [src]="product.photo"> -->
-              <img src="assets/img/office_building.png" alt="Photo clients">
+              <!-- <img src="assets/img/office_building.png" alt="Photo clients"> -->
+              <img [src]="client.entrepriseClient ? 'assets/img/office_building.png' : 'assets/img/profil.png'" alt="Photo clients">
               <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/image_product.png' : product.photo"> -->
             </div>
+            <!-- <div class="imgClient2">
+                <img 
+                  [src]="client.entrepriseClient ? 'assets/img/office_building.png' : 'assets/img/profil.png'" 
+                  alt="Photo clients"
+                >
+              </div> -->
           </div>
         </div>
       </div>
