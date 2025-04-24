@@ -45,21 +45,52 @@
               <div class="info_titre_input">
                 <h4>Information des produits</h4>
 
-                <div class="double_input">
+                <div class="champ_grid">
                   <!-- Input de nom produits  -->
-                  <div class="champ_input champ_input2">
+                  <div class="champ_input">
                     <input formControlName="nom" type="text" class="input_focus " id="nom" name="nom" 
                     placeholder="Saisis le nom de magasin">
                     <label for="nom" class="label labelColor">Nom produit</label>
                     <div *ngIf="f['nom'].touched && f['nom'].invalid" class="error-message">
-                      
                       <span *ngIf="f['nom'].errors?.['required']">Le nom produit est vide.</span>
                       <span *ngIf="f['nom'].errors?.['minlength']">Le nom doit avoir au moins 2 caractères.</span>
                     </div>
                   </div>
 
+                  <div class="double_input2">
+                    <div class="champ_input">
+                      <input type="text" placeholder="Saisis le nom de catégorie"
+                          class="input_focus" matInput [formControl]="myControl" 
+                          [matAutocomplete]="auto" style="cursor: pointer;" [value]="produit.nomCategorie  || 'non categorie'">
+                      <label for="categorieId" class="label labelCategory">Catégorie</label>
+                      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
+                        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+                          {{ option.nom}}
+                        </mat-option>
+                      </mat-autocomplete>
+                      
+                    </div>
+                                     
+                    
+                    <div class="btn_add_categoryDiv2">
+                      <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer une catégorie</button>
+                    </div>
+                  </div>
+
                   <!-- Input de nom produits  -->
-                  <div class="champ_input champ_input2">
+                  <!-- <div class="champ_input champ_input2">
+                    <input formControlName="prixVente" type="text" class="input_focus " id="prixVente" name="prixVente" 
+                    placeholder="Saisis le nom de magasin">
+                    <label for="prixVente" class="label labelColor">Prix de vente</label>
+                    <div *ngIf="f['prixVente'].touched && f['prixVente'].invalid" class="error-message">
+                      Le prix de vente est vide.
+                    </div>
+                  </div> -->
+                </div>
+
+                <div class="champ_grid">
+                   <!-- Input de nom produits  -->
+                   <div class="champ_input">
                     <input formControlName="prixVente" type="text" class="input_focus " id="prixVente" name="prixVente" 
                     placeholder="Saisis le nom de magasin">
                     <label for="prixVente" class="label labelColor">Prix de vente</label>
@@ -67,6 +98,50 @@
                       Le prix de vente est vide.
                     </div>
                   </div>
+
+                  <!-- Input de prixAchat  -->
+                  <div class="champ_input">
+                    <input formControlName="prixAchat" type="text" class="input_focus " required id="prixAchat" name="prixAchat" 
+                    placeholder="Saisis le prix d'achat">
+                    <label for="prixAchat" class="label labelColor">Coût du produit</label>
+                    <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
+                      Le Coût du produit est vide.
+                    </div>
+                  </div>
+                  
+                </div>
+
+                <div class="champ_grid">
+                  
+                  <div class="double_input2">
+                    <div class="champ_input">
+                      <input type="text" placeholder="Saisis l'unité de mesure" 
+                          matInput [formControl]="uniteControl" class="input_focus"
+                          [matAutocomplete]="autoUnite" style="cursor: pointer;" [value]="produit.nomUnite || 'non unite'">
+                      <label for="uniteId" class="label labelCategory">Unité de mesure</label>
+                      <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
+                        <mat-option *ngFor="let optionUnite of filteredNomUnite | async" [value]="optionUnite">
+                          {{ optionUnite.nom }}
+                        </mat-option>
+                      </mat-autocomplete>
+                    </div>
+                    <div class="btn_add_categoryDiv2">
+                      <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
+                    </div>
+                  </div>
+
+                  <!-- // TRIPLE  -->
+                  <div class="triple" style="display: flex; gap: 20px;">
+                    <div class="champ_input">
+                      <input [value]="produit.createdAt | date:'dd-MM-yyyy \'à\' HH:mm'" type="text" class="input_focus" [disabled]="true" style="cursor: no-drop; color: #9c9c9c; font-style: italic; letter-spacing: 0.50px; min-width: 190px;" id="dateCreate" name="dateCreate">
+                      <label for="dateCreate" class="label labelColor">Date creation</label>
+                    </div>
+                    <div class="champ_input">
+                      <input [value]="produit.lastUpdated | date:'dd-MM-yyyy \'à\' HH:mm'" type="text" class="input_focus" [disabled]="true" style="cursor: no-drop; color: #9c9c9c; font-style: italic; letter-spacing: 0.50px; min-width: 190px;" id="dateUpdate" name="dateUpdate">
+                      <label for="dateUpdate" class="label labelColor">Date modification</label>
+                    </div>
+                  </div>
+
                 </div>
 
                 <!-- Input de categorie  -->
@@ -75,7 +150,7 @@
                   <label for="category" class="label labelColor">Catégorie (Facultatif)</label>
                 </div> -->
 
-                <div class="double_input2">
+                <!-- <div class="double_input2">
                   <div class="champ_input">
                     <input type="text" placeholder="Saisis le nom de catégorie"
                         class="input_focus" matInput [formControl]="myControl" 
@@ -93,39 +168,9 @@
                   <div class="btn_add_categoryDiv2">
                     <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer une catégorie</button>
                   </div>
-                </div>
+                </div> -->
 
-                <div class="double_input">
-                  <!-- Input de prixAchat  -->
-                  <div class="champ_input champ_input2">
-                    <input formControlName="prixAchat" type="text" class="input_focus " required id="prixAchat" name="prixAchat" 
-                    placeholder="Saisis le prix d'achat">
-                    <label for="prixAchat" class="label labelColor">Coût du produit</label>
-                    <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
-                      Le Coût du produit est vide.
-                    </div>
-                  </div>
-
-                  <!-- // date  -->
-                  <div class="double_input">
-                    <!-- Input de prixAchat  -->
-
-                    <!-- // TRIPLE  -->
-                    <div class="triple" style="display: flex; gap: 20px;">
-                        <div class="champ_input">
-                          <input [value]="produit.createdAt | date:'dd-MM-yyyy \'à\' HH:mm'" type="text" class="input_focus" [disabled]="true" style="cursor: no-drop; color: red;" id="alertSeuil" name="alertSeuil" placeholder="Saisis le montant d'alerte">
-                          <label for="seuilAlert" class="label labelColor">Date creation</label>
-                        </div>
-                        <div class="champ_input">
-                          <input [value]="produit.lastUpdated | date:'dd-MM-yyyy \'à\' HH:mm'" type="text" class="input_focus" [disabled]="true" style="cursor: no-drop; color: red;" id="alertSeuil" name="alertSeuil">
-                          <label for="seuilAlert" class="label labelColor">Date modification</label>
-                        </div>
-                    </div>
-                  </div>
-                 
-                </div>
-
-                <div class="double_input2">
+                <!-- <div class="double_input2">
                   <div class="champ_input">
                     <input type="text" placeholder="Saisis l'unité de mesure" 
                         matInput [formControl]="uniteControl" class="input_focus"
@@ -140,8 +185,7 @@
                   <div class="btn_add_categoryDiv2">
                     <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
                   </div>
-                </div>
-
+                </div> -->
                 
               </div>
             </div>

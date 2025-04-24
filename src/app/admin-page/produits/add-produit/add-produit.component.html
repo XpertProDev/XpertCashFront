@@ -408,11 +408,10 @@
 
           </div>
 
-
           <!-- Input pour pays et phone  -->
           <div class="champ_grid">
             <!-- // Input de telephone Boutique  -->
-            <div class="champ_input ">
+            <div class="champ_input">
               <input class="input_focus" style="min-width: 150px;" type="number" formControlName="telephoneBoutique" placeholder="00 00 00 00">
               <label class="label">Phone</label>
               <div *ngIf="boutiqueForm.get('telephoneBoutique')?.invalid && boutiqueForm.get('telephoneBoutique')?.touched">
