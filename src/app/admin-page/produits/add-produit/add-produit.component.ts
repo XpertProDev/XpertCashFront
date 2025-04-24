@@ -319,6 +319,7 @@ export class AddProduitComponent implements OnInit {
   }
  
   ngOnInit(): void  {
+    this.initForm();
     this.getBoutiqueName();
     this.setupFormSubscriptions();
     this.loadInitialData();
@@ -691,9 +692,9 @@ export class AddProduitComponent implements OnInit {
   initForm() {
     this.boutiqueForm = this.fb.group({
       nomBoutique: ['', Validators.required],
-      emailBoutique: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
-      adresseBoutique: ['', Validators.required],
-      telephoneBoutique: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
+      emailBoutique: ['', [Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
+      adresseBoutique: [''],
+      telephoneBoutique: ['', Validators.pattern(/^\d{8,15}$/)],
     });
   }
   
@@ -732,7 +733,46 @@ export class AddProduitComponent implements OnInit {
     }
   }
 
-  onSubmitBoutique(): void {}
+  onSubmitBoutique(): void {
+    // Marquer les champs comme touchés pour afficher les erreurs
+    Object.keys(this.boutiqueForm.controls).forEach(field => {
+      const control = this.boutiqueForm.get(field);
+      control?.markAsTouched({ onlySelf: true });
+    });
+  
+    if (this.boutiqueForm.invalid) {
+      return;
+    }
+  
+    const formData = this.boutiqueForm.value;
+    
+    this.usersService.addBoutique(formData).subscribe({
+      next: (response) => {
+        this.showPopupMessage({
+          title: 'Succès',
+          message: 'Boutique créée avec succès',
+          image: 'assets/img/succcccc.png',
+          type: 'success'
+        });
+        this.closePopupBoutique();
+        this.getBoutiqueName(); // Rafraîchir la liste
+        this.boutiqueForm.reset();
+      },
+      error: (error) => {
+        let errorMessage = 'Erreur lors de la création de la boutique';
+        if (error.error) {
+          errorMessage = typeof error.error === 'string' ? error.error : error.error.message;
+        }
+        this.showPopupMessage({
+          title: 'Erreur',
+          message: errorMessage,
+          image: 'assets/img/error.png',
+          type: 'error'
+        });
+      }
+    });
+  }
+  
 
   displayFnBoutique(boutique?: string): string {
     return boutique ? boutique : '';

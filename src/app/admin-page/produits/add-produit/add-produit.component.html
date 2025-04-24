@@ -104,7 +104,6 @@
                     <input autocomplete="off" formControlName="nom" type="text" class="input_focus " required id="nom" name="nom" placeholder="Saisis le nom de produit">
                     <label for="nom" class="label labelColor">Nom produit</label>
                     <div *ngIf="f['nom'].touched && f['nom'].invalid" class="error-message">
-                      
                       <span *ngIf="f['nom'].errors?.['required']">Le nom produit est vide.</span>
                       <span *ngIf="f['nom'].errors?.['minlength']">Le nom doit avoir au moins 2 caractères.</span>
                     </div>
@@ -394,7 +393,7 @@
               <input class="input_focus" style="min-width: 150px;" type="text" formControlName="nomBoutique" placeholder="Saisis le nom de boutique">
               <label class="label">Nom boutque</label>
               <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
-                <small class="error">Le nom boutique complet est vide.</small>
+                <small class="error">Le nom est vide.</small>
               </div>
             </div>
 
@@ -403,7 +402,7 @@
               <input class="input_focus" style="min-width: 150px;" type="email" formControlName="emailBoutique" placeholder="Saisis l'email">
               <label class="label">Email</label>
               <div *ngIf="boutiqueForm.get('emailBoutique')?.invalid && boutiqueForm.get('emailBoutique')?.touched">
-                <small class="error">Un email valide est vide.</small>
+                <small class="error">Email invalide.</small>
               </div>
             </div>
 
@@ -425,10 +424,12 @@
             <div class="champ_input">
                 <input class="input_focus" style="min-width: 150px;" type="text" formControlName="adresseBoutique" placeholder="Saisis l'adresse">
                 <label class="label">Adresse boutique</label>
-                <div *ngIf="boutiqueForm.get('adresseBoutique')?.invalid && boutiqueForm.get('adresseBoutique')?.touched">
-                    <small class="error">L'adresse boutique valide est vide.</small>
-                </div>
             </div>
+          </div>
+
+          <div class="errorAPI" *ngIf="messageAPI">
+            <img [src]="apiMessageType === 'success' ? 'assets/img/succcccc.png' : 'assets/img/error.png'" alt="Message API">
+            <span>{{ messageAPI }}</span>
           </div>
 
           
