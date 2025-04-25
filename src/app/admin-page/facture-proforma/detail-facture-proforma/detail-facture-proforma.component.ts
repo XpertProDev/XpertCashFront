@@ -6,10 +6,12 @@ import { ProduitService } from '../../SERVICES/produit.service';
 import { Produit } from '../../MODELS/produit.model';
 import { FactureProForma } from '../../MODELS/FactureProForma.model';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
+import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
+import { RoundPipe } from '../../MODELS/round.pipe';
 
 @Component({
   selector: 'app-detail-facture-proforma',
-  imports: [ FormsModule, CommonModule, ReactiveFormsModule, RouterLink, ],
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, RouterLink, CustomNumberPipe, RoundPipe],
   templateUrl: './detail-facture-proforma.component.html',
   styleUrl: './detail-facture-proforma.component.scss'
 })
@@ -41,6 +43,26 @@ export class DetailFactureProformaComponent implements OnInit {
       this.loadFactureProforma(+id);
     }
     this.getProduits();
+  }
+
+  // Calcul du montant de la remise
+  get montantRemise(): number {
+    return this.factureProForma?.remise || 0;
+  }
+
+  // Calcul du montant TVA
+  get montantTVA(): number {
+    return this.activeTva ? (this.factureProForma?.totalHT || 0) * 0.18 : 0;
+  }
+
+  // Calcul du montant commercial (HT après remise)
+  get montantCommercial(): number {
+    return (this.factureProForma?.totalHT || 0) - this.montantRemise;
+  }
+
+  // Calcul du total TTC
+  get totalTTC(): number {
+    return this.montantCommercial + this.montantTVA;
   }
 
   loadFactureProforma(id: number): void {
@@ -90,6 +112,8 @@ export class DetailFactureProformaComponent implements OnInit {
       this.tva = 0;
     }
   }
+
+  
 
   removePendingAdjustment() {}
 
