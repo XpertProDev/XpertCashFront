@@ -91,7 +91,7 @@ export class DetailFactureProformaComponent implements OnInit {
     }
   }
 
-  removePendingAdjustment() {}  
+  removePendingAdjustment() {}
 
   ajouterLigneFacture() {}
 
