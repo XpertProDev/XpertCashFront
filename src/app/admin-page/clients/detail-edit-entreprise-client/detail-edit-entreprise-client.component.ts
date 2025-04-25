@@ -60,7 +60,10 @@ export class DetailEditEntrepriseClientComponent {
       nom: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.email]],
       telephone: ['', [Validators.pattern(/^\d+$/)]],
-      adresse: ['']
+      adresse: [''],
+      pays: [''],
+      siege: [''],
+      secteur: ['']
     });
   }
 
@@ -88,7 +91,10 @@ export class DetailEditEntrepriseClientComponent {
         nom: this.client.entrepriseClient.nom || '',
         email: this.client.entrepriseClient.email || '',
         telephone: this.client.entrepriseClient.telephone || '',
-        adresse: this.client.entrepriseClient.adresse || ''
+        adresse: this.client.entrepriseClient.adresse || '',
+        pays: this.client.entrepriseClient.pays || '',
+        siege: this.client.entrepriseClient.siege || '',
+        secteur: this.client.entrepriseClient.secteur || ''
       });
     }
   }
@@ -187,9 +193,12 @@ export class DetailEditEntrepriseClientComponent {
     return {
       id: this.client.entrepriseClient?.id,
       nom: this.entrepriseClientForm.get('nom')?.value,
+      pays: this.client.entrepriseClient?.pays,
       email: this.entrepriseClientForm.get('email')?.value,
       telephone: this.entrepriseClientForm.get('telephone')?.value,
-      adresse: this.entrepriseClientForm.get('adresse')?.value
+      adresse: this.entrepriseClientForm.get('adresse')?.value,
+      siege: this.client.entrepriseClient?.siege,
+      secteur: this.client.entrepriseClient?.secteur
     };
   }
 
