@@ -100,9 +100,9 @@
 
                 <div class="double_input_grid">
                   <!-- Input de nom produits  -->
-                  <div class="champ_input champ_input2">
+                  <div class="champ_input">
                     <input autocomplete="off" formControlName="nom" type="text" class="input_focus " required id="nom" name="nom" placeholder="Saisis le nom de produit">
-                    <label for="nom" class="label labelColor">Nom produit</label>
+                    <label for="nom" class="label">Nom produit</label>
                     <div *ngIf="f['nom'].touched && f['nom'].invalid" class="error-message">
                       <span *ngIf="f['nom'].errors?.['required']">Le nom produit est vide.</span>
                       <span *ngIf="f['nom'].errors?.['minlength']">Le nom doit avoir au moins 2 caractères.</span>
@@ -110,11 +110,11 @@
                   </div>
 
                   <div class="double_input2">
-                    <div class="champ_input champ_input2">
+                    <div class="champ_input">
                       <input autocomplete="off" type="text" placeholder="Saisis le nom de catégorie"
                              class="input_focus" matInput [formControl]="myControl" 
                              [matAutocomplete]="auto" style="cursor: pointer;">
-                      <label for="categorieId" class="label labelCategory">Catégorie</label>
+                      <label for="categorieId" class="label">Catégorie</label>
                       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
 
                         <mat-option class="select-option" (click)="onCreateCategoryClick()">
@@ -144,9 +144,9 @@
 
                 <div class="double_input_grid">
                   <!-- Input de nom produits  -->
-                  <div class="champ_input champ_input2">
+                  <div class="champ_input">
                     <input autocomplete="off" formControlName="prixVente" type="number" class="input_focus " required id="prixVente" name="prixVente" placeholder="Saisis le nom de magasin" (input)="formatPrixVente()">
-                    <label for="prixVente" class="label labelColor">Prix de vente</label>
+                    <label for="prixVente" class="label">Prix de vente</label>
                     <div class="nombreDevise" *ngIf="formattedPrixVente">
                       <p>{{ formattedPrixVente }}</p>
                     </div>
@@ -158,7 +158,7 @@
                   <!-- Input de prixAchat  -->
                   <div class="champ_input">
                     <input autocomplete="off" formControlName="prixAchat" type="number" class="input_focus " required id="prixAchat" name="prixAchat" placeholder="Saisis le prix d'achat" (input)="formatCoutProduit()">
-                    <label for="prixAchat" class="label labelColor">Coût du produit</label>
+                    <label for="prixAchat" class="label">Coût du produit</label>
                     <div class="nombreDevise" *ngIf="formattedCoutProduit">
                       <p>{{ formattedCoutProduit }}</p>
                     </div>
@@ -175,7 +175,7 @@
                       <input autocomplete="off" type="text" placeholder="Saisis l'unité de mesure" 
                             matInput [formControl]="uniteControl" class="input_focus"
                             [matAutocomplete]="autoUnite" style="cursor: pointer;">
-                      <label for="uniteId" class="label labelCategory">Unité de mesure</label>
+                      <label for="uniteId" class="label">Unité de mesure</label>
                       <mat-autocomplete #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
 
                         <mat-option class="select-option" (click)="onCreateUniteClick()">
