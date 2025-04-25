@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProduitService } from '../../SERVICES/produit.service';
 import { Produit } from '../../MODELS/produit.model';
+import { FactureProForma } from '../../MODELS/FactureProForma.model';
+import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 
 @Component({
   selector: 'app-detail-facture-proforma',
@@ -22,17 +24,43 @@ export class DetailFactureProformaComponent implements OnInit {
   produits: Produit[] = [];
   // Nouvelle variable pour stocker les ajustements locaux
   pendingAdjustments: any[] = [];
+  factureProForma!: FactureProForma;
 
   constructor(
       private router: Router,
-      // private clientService: ClientService,
-      // private factureProFormaService: FactureProFormaSer vice,
       private produitService: ProduitService,
-      // private usersService: UsersService
+      private route: ActivatedRoute,
+      private factureProFormaService: FactureProFormaService,
     ) {}
 
   ngOnInit(): void {
     this.getProduits();
+
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.loadFactureProforma(+id);
+    }
+    this.getProduits();
+  }
+
+  loadFactureProforma(id: number): void {
+    this.factureProFormaService.getFactureProformaById(id).subscribe({
+      next: (data) => {
+        this.factureProForma = data;
+        this.activeRemise = !!data.remise && data.remise > 0;
+        this.remisePourcentage = this.activeRemise 
+          ? (data.remise! / data.totalHT) * 100 
+          : 0;
+        this.activeTva = data.tva;
+        this.tva = this.activeTva ? 18 : 0;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur:', err);
+        this.errorMessage = 'Impossible de charger la facture';
+        this.isLoading = false;
+      }
+    });
   }
 
   // Liste Produits
