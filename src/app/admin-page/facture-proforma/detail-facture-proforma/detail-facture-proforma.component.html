@@ -54,44 +54,51 @@
                         <h2>FACTURE PROFORMA : <span> {{ factureProForma.numeroFacture }} </span></h2>
                         <p style="text-align: right;"> Bamako, le 9 avril 2025 </p>
                     </div>
-                    
                 </div>
+
+                <!-- Les informations de facture  -->
+                <div class="information_cadre">
+                    <div class="info_titre_input">
+                        <div class="champ_input">
+                            <input [value]="factureProForma.description" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object">
+                            <label for="object" class="label"> Object </label>
+                        </div>
+                    </div>
+                </div>
+                
 
                 <!-- Les informations pour utilisateur  -->
                 <div class="information_cadre">
                     <div class="info_titre_input">
-                        <h5>Utilisateur</h5>
-                        <!-- // Nom complet et email  -->
-                         <div>
-                            {{factureProForma | json}}
-                         </div>
-                        <div class="double_input_grid">
-                            <div class="champ_input">
-                                <input [value]="factureProForma.description" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object">
-                                <label for="object" class="label"> Object </label>
+                        <div *ngIf="factureProForma.client">
+                            <h5>Utilisateur</h5>
+                            <!-- // Nom complet et email  -->
+                             <!-- <div>
+                                {{factureProForma | json}}
+                             </div> -->
+                            <div class="double_input_grid">
+                                <div class="champ_input">
+                                    <input autocomplete="off" [value]="factureProForma.client.email" type="email" class="input_focus" required placeholder="Saisis l'email">
+                                    <label for="email" class="label"> Email </label>
+                                </div>
+    
+                                <div class="champ_input">
+                                    <input autocomplete="off" [value]="factureProForma.client.nomComplet" type="text" class="input_focus" required placeholder="Saisis le nom et prénom">
+                                    <label for="nomComplet" class="label"> Droit </label>
+                                </div>
                             </div>
-
-                            <div class="champ_input">
-                                <input autocomplete="off" [value]="factureProForma.client?.nomComplet" type="text" class="input_focus" required placeholder="Saisis le nom et prénom">
-                                <label for="nomComplet" class="label"> Droit </label>
-                            </div>
-                        </div>
-
-                        <!-- // Adresse et téléphone  -->
-                        <div class="double_input_grid_3">
-                            <div class="champ_input">
-                                <input autocomplete="off" [value]="factureProForma.client?.email" type="email" class="input_focus" required placeholder="Saisis l'email">
-                                <label for="email" class="label"> Email </label>
-                            </div>
-
-                            <div class="champ_input">
-                                <input autocomplete="off" [value]="factureProForma.client?.adresse" type="text" class="input_focus" required placeholder="Saisis l'adresse">
-                                <label for="adresse" class="label"> Adresse </label>
-                            </div>
-
-                            <div class="champ_input">
-                                <input autocomplete="off" [value]="factureProForma.client?.telephone" type="number" class="input_focus" required placeholder="00 00 00 00">
-                                <label for="numero" class="label"> Numéro téléphone </label>
+    
+                            <!-- // Adresse et téléphone  -->
+                            <div class="double_input_grid">
+                                <div class="champ_input">
+                                    <input autocomplete="off" [value]="factureProForma.client.adresse" type="text" class="input_focus" required placeholder="Saisis l'adresse">
+                                    <label for="adresse" class="label"> Adresse </label>
+                                </div>
+    
+                                <div class="champ_input">
+                                    <input autocomplete="off" [value]="factureProForma.client.telephone" type="number" class="input_focus" required placeholder="00 00 00 00">
+                                    <label for="numero" class="label"> Numéro téléphone </label>
+                                </div>
                             </div>
                         </div>
                         <!-- /////////////////////////////// Entreprise ///////////////////////////////  -->
