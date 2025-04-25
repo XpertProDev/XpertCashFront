@@ -26,7 +26,6 @@ export class DetailFactureProformaComponent implements OnInit {
   produits: Produit[] = [];
   // Nouvelle variable pour stocker les ajustements locaux
   pendingAdjustments: any[] = [];
-  factureProForma!: FactureProForma;
 
   constructor(
       private router: Router,
@@ -44,6 +43,17 @@ export class DetailFactureProformaComponent implements OnInit {
     }
     this.getProduits();
   }
+
+  factureProForma: FactureProForma = {
+    id: 0,
+    numeroFacture: '',
+    dateCreation: '',
+    description: '',
+    totalHT: 0,
+    tva: false,
+    totalFacture: 0,
+    lignesFacture: []
+  } as FactureProForma;
 
   // Calcul du montant de la remise
   get montantRemise(): number {
