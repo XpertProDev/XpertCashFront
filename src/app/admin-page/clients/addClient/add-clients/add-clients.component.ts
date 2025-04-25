@@ -227,9 +227,12 @@ export class AddClientsComponent implements OnInit {
   initEntreprise() {
     this.entrepriseForm = this.fb.group({
       nom: ['', Validators.required],
+      pays: [''],
       email: [''],
       telephone: [''],
-      adresse: ['']
+      adresse: [''],
+      siege: [''],
+      secteur: [''],
     });
   }
 
@@ -238,9 +241,14 @@ export class AddClientsComponent implements OnInit {
   
     const newEntreprise: Entreprise = {
       nom: this.entrepriseForm.value.nom,
+      pays: this.entrepriseForm.value.pays,
       email: this.entrepriseForm.value.email,
       telephone: this.entrepriseForm.value.telephone,
-      adresse: this.entrepriseForm.value.adresse
+      adresse: this.entrepriseForm.value.adresse,
+      siege: this.entrepriseForm.value.siege,
+      secteur: this.entrepriseForm.value.secteur,
+
+
     };
   
     this.entrepriseService.addEntreprise(newEntreprise).subscribe({

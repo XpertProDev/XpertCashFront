@@ -151,7 +151,12 @@ export class DetailEditClientComponent {
       nomComplet: client.nomComplet,
       email: client.email,
       telephone: client.telephone,
-      adresse: client.adresse
+      adresse: client.adresse,
+      poste: client.poste,
+      pays: client.pays,
+      ville: client.ville,
+
+
     });
   }
 
@@ -166,7 +171,12 @@ export class DetailEditClientComponent {
       nomComplet: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.email]],
       telephone: [''],
-      adresse: ['']
+      adresse: [''],
+      poste: [''],
+      pays: [''],
+      ville: [''],
+
+      
     });
   }
 
@@ -175,7 +185,9 @@ export class DetailEditClientComponent {
       nom: ['', Validators.required],
       email: ['', Validators.email],
       telephone: [''],
-      adresse: ['']
+      adresse: [''],
+      siege: [''],
+      secteur: [''],
     });
   }
 
@@ -262,9 +274,12 @@ export class DetailEditClientComponent {
   initEntreprise() {
     this.entrepriseForm = this.fb.group({
       nom: ['', Validators.required],
+      pays: [''],
       email: [''],
       telephone: [''],
-      adresse: ['']
+      adresse: [''],
+      siege: [''],
+      secteur: [''],
     });
   }
   
@@ -273,9 +288,13 @@ export class DetailEditClientComponent {
   
     const newEntreprise: Entreprise = {
       nom: this.entrepriseForm.value.nom,
+      pays: this.entrepriseForm.value.pays,
       email: this.entrepriseForm.value.email,
       telephone: this.entrepriseForm.value.telephone,
-      adresse: this.entrepriseForm.value.adresse
+      adresse: this.entrepriseForm.value.adresse,
+      siege: this.entrepriseForm.value.siege,
+      secteur: this.entrepriseForm.value.secteur,
+
     };
   
     this.entrepriseService.addEntreprise(newEntreprise).subscribe({
