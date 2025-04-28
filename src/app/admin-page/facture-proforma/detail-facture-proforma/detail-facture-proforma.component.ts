@@ -8,6 +8,7 @@ import { FactureProForma } from '../../MODELS/FactureProForma.model';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { RoundPipe } from '../../MODELS/round.pipe';
+import { UsersService } from '../../SERVICES/users.service';
 
 @Component({
   selector: 'app-detail-facture-proforma',
@@ -23,25 +24,28 @@ export class DetailFactureProformaComponent implements OnInit {
   tva: number = 0;
   errorMessage: string = '';
   userEntrepriseId: number | null = null;
+  nomEntreprise: string = '';
   produits: Produit[] = [];
   // Nouvelle variable pour stocker les ajustements locaux
   pendingAdjustments: any[] = [];
+  newProduitId: number | null = null;
+  inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 1 }];
 
   constructor(
       private router: Router,
       private produitService: ProduitService,
       private route: ActivatedRoute,
       private factureProFormaService: FactureProFormaService,
+      private usersService: UsersService,
     ) {}
 
   ngOnInit(): void {
     this.getProduits();
-
+    this.getUserInfo();
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadFactureProforma(+id);
     }
-    this.getProduits();
   }
 
   factureProForma: FactureProForma = {
@@ -102,11 +106,41 @@ export class DetailFactureProformaComponent implements OnInit {
       this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
         next: (data: Produit[]) => {
           this.produits = data;
-          console.log('Produits récupérés :', data);
+          console.log('PRODUITS RÉCUPÉRÉS:', this.produits); // <=== Ajoutez ceci
         },
         error: (err) => console.error('Erreur récupération produits :', err)
       });
+    } else {
+      console.error('Token manquant ou entreprise ID non défini');
     }
+  }
+
+  getUserInfo(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        this.nomEntreprise = user.nomEntreprise;
+        this.userEntrepriseId = user.entrepriseId;
+  
+        console.log("Infos utilisateur récupérées :", user);
+  
+        this.getProduits();
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des infos utilisateur :", err);
+      }
+    });
+  }
+
+  // Méthode de mise à jour des calculs
+  updateCalculs() {
+    this.inputLignes = [...this.inputLignes];
+  }
+
+  // Méthode pour récupérer le nom du produit
+  getProduitNom(produitId: number | null): string {
+    if (!produitId) return '';
+    const produit = this.produits.find(p => p.id === produitId);
+    return produit?.nom || '';
   }
 
   // Toggle remise / TVA
@@ -122,8 +156,6 @@ export class DetailFactureProformaComponent implements OnInit {
       this.tva = 0;
     }
   }
-
-  
 
   removePendingAdjustment() {}
 

@@ -209,18 +209,16 @@
                                         <!-- // Produit  -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                                <select required class="input_focus_type input_focus_type_select">
-                                                    <option value="">Sélectionner un produit</option>
-                                                    <option>
-                                                        produit 1
-                                                    </option>
-                                                    <option>
-                                                        produit 2
-                                                    </option>
-                                                    <option>
-                                                        produit 3
-                                                    </option>
-                                                    </select>
+                                              <select required 
+                                                      class="input_focus_type input_focus_type_select"
+                                                      [(ngModel)]="newProduitId"
+                                                      (ngModelChange)="updateCalculs()"
+                                                      [ngModelOptions]="{ standalone: true }">
+                                                <option [ngValue]="null">Sélectionner un produit</option>
+                                                <option *ngFor="let produit of produits" [ngValue]="produit.id">
+                                                  {{ produit.nom }}
+                                                </option>
+                                              </select>
                                             </div>
                                         </td>
                                         <!-- // Description -->
