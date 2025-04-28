@@ -1,13 +1,15 @@
+// Dans ton modèle FactureProForma
 export interface LigneFactureProforma {
-  id: number;
+  id?: number; // Rend l'id optionnel pour les nouvelles lignes
   produit: {
     id: number;
-    nom: string;
-    prixUnitaire: number;
+    nom?: string; // Optionnel selon tes besoins
+    prixUnitaire?: number;
   };
   description?: string;
   quantite: number;
-  prixUnitaire: number;
+  prixUnitaire: number; // Obligatoire
+  montantTotal?: number;
 }
 
 export interface FactureProForma {

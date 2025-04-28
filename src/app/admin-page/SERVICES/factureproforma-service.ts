@@ -73,22 +73,38 @@ export class FactureProFormaService {
   updateFactureProforma(
     factureId: number,
     remisePourcentage: number | undefined,
-    appliquerTVA: boolean,
-    modifications: any
-  ): Observable<any> {
-    const params = new HttpParams()
-      .set('remisePourcentage', remisePourcentage?.toString() || '')
-      .set('appliquerTVA', appliquerTVA.toString());
+    appliquerTVA: boolean | undefined,
+    modifications: FactureProForma
+  ): Observable<FactureProForma> {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      return throwError(() => new Error('Token manquant'));
+    }
 
-    return this.http.put(`${this.apiUrl}/updatefacture/${factureId}`, modifications, {
-      params,
-      headers: new HttpHeaders({
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      })
-    }).pipe(
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+
+    let params = new HttpParams();
+    
+    if (remisePourcentage !== undefined) {
+      params = params.set('remisePourcentage', remisePourcentage.toString());
+    }
+    
+    if (appliquerTVA !== undefined) {
+      params = params.set('appliquerTVA', appliquerTVA.toString());
+    }
+
+    return this.http.put<FactureProForma>(
+      `${this.apiUrl}/updatefacture/${factureId}`,
+      modifications,
+      { headers, params }
+    ).pipe(
+      tap(response => console.log('Facture mise à jour:', response)),
       catchError(error => {
-        console.error('Erreur modification:', error);
-        return throwError(error);
+        console.error('Erreur mise à jour:', error);
+        return throwError(() => error);
       })
     );
   }

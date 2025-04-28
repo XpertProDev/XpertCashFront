@@ -32,6 +32,7 @@ export class DetailFactureProformaComponent implements OnInit {
   inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 1 }];
   confirmedLignes: { produitId: number | null; quantite: number }[] = [];
   factureId!: number;
+  showDuplicatePopup: boolean = false;
 
   constructor(
       private router: Router,
@@ -97,6 +98,12 @@ export class DetailFactureProformaComponent implements OnInit {
     this.factureProFormaService.getFactureProformaById(id).subscribe({
       next: (data) => {
         this.factureProForma = data;
+
+         // Initialise les lignes confirmées avec les données existantes
+        this.confirmedLignes = data.lignesFacture.map(l => ({
+          produitId: l.produit.id,
+          quantite: l.quantite
+        }));
       
         // Correction 1 : Utilisez l'opérateur de coalescence null
         this.activeRemise = (data.remise ?? 0) > 0;
@@ -120,7 +127,11 @@ export class DetailFactureProformaComponent implements OnInit {
   getPrixVente(produitId: number | null): number {
     if (!produitId) return 0;
     const produit = this.produits.find(p => p.id === produitId);
-    return produit?.prixVente || 0;
+    if (!produit) {
+      console.error('Produit non trouvé pour ID:', produitId);
+      return 0;
+    }
+    return produit.prixVente || 0;
   }
 
   // Calcule le montant total pour une ligne
@@ -130,11 +141,9 @@ export class DetailFactureProformaComponent implements OnInit {
   }
 
   getTotalHT(): number {
-    // Total des lignes existantes
-    const totalFacture = this.factureProForma.lignesFacture.reduce((total, ligne) => 
-      total + (ligne.prixUnitaire * ligne.quantite), 0);
-  
-    // Total des nouvelles lignes ajoutées localement
+    const totalConfirmed = this.confirmedLignes.reduce((total, ligne) => 
+      total + this.getMontantTotal(ligne), 0);
+    
     const totalInput = this.inputLignes.reduce((total, ligne) => {
       if (ligne.produitId && ligne.quantite > 0) {
         return total + this.getMontantTotal(ligne);
@@ -142,7 +151,7 @@ export class DetailFactureProformaComponent implements OnInit {
       return total;
     }, 0);
   
-    return totalFacture + totalInput;
+    return totalConfirmed + totalInput;
   }
 
   // Liste Produits
@@ -182,6 +191,11 @@ export class DetailFactureProformaComponent implements OnInit {
     });
   }
 
+    // Méthode pour fermer le popup
+    closePopup() {
+      this.showDuplicatePopup = false;
+    }
+
   // Méthode de mise à jour des calculs
   updateCalculs() {
     this.inputLignes = [...this.inputLignes];
@@ -208,10 +222,91 @@ export class DetailFactureProformaComponent implements OnInit {
     }
   }
 
-  removePendingAdjustment() {}
 
-  ajouterLigneFacture() {}
+  ajouterLigneFacture(index: number) {
+    const ligne = this.inputLignes[index];
+    
+    if (ligne.produitId && ligne.quantite > 0) {
+      const produitExiste = this.confirmedLignes.some(
+        l => l.produitId === ligne.produitId
+      );
+  
+      if (produitExiste) {
+        this.showDuplicatePopup = true;
+        return;
+      }
+  
+      this.confirmedLignes.push({...ligne});
+      this.inputLignes = [{ produitId: null, quantite: 1 }];
+    }
+  }
 
-  submitUpdateForm() {}
+  supprimerLigneConfirmee(index: number) {
+    this.confirmedLignes.splice(index, 1);
+    this.confirmedLignes = [...this.confirmedLignes];
+  }
+  
+  trackByFn(index: number, item: any): number {
+    return index;
+  }
+
+  // Ajoute la méthode de soumission
+  submitUpdateForm() {
+    // Préparer les lignes existantes avec leurs IDs
+    const lignesExistantes = this.confirmedLignes.map(l => {
+      const ligneOriginale = this.factureProForma.lignesFacture.find(fl => fl.produit.id === l.produitId);
+      return {
+        id: ligneOriginale?.id, // Préserve l'ID existant
+        produit: { id: l.produitId! },
+        quantite: l.quantite,
+        prixUnitaire: this.getPrixVente(l.produitId!), // Récupère le prix depuis le produit
+        description: '' // Adapte selon tes données
+      };
+    });
+  
+    // Préparer les nouvelles lignes
+    const nouvellesLignes = this.inputLignes
+      .filter(l => l.produitId && l.quantite > 0)
+      .map(l => ({
+        produit: { id: l.produitId! },
+        quantite: l.quantite,
+        prixUnitaire: this.getPrixVente(l.produitId!),
+      }));
+  
+      const modifications = {
+        ...this.factureProForma,
+        lignesFacture: [
+          ...this.confirmedLignes.map(l => ({
+            produit: { id: l.produitId! },
+            quantite: l.quantite,
+            prixUnitaire: this.getPrixVente(l.produitId!) // Ajout du prixUnitaire
+          })),
+          ...this.inputLignes
+            .filter(l => l.produitId && l.quantite > 0)
+            .map(l => ({
+              produit: { id: l.produitId! },
+              quantite: l.quantite,
+              prixUnitaire: this.getPrixVente(l.produitId!) // Ajout du prixUnitaire
+            }))
+        ]
+      };
+  
+    // Appel du service
+    this.factureProFormaService.updateFactureProforma(
+      this.factureId,
+      this.activeRemise ? this.remisePourcentage : undefined,
+      this.activeTva,
+      modifications
+    ).subscribe({
+      next: (res) => {
+        console.log('Mise à jour réussie !', res);
+        this.router.navigate(['/facture-proforma']);
+      },
+      error: (err) => {
+        console.error('Échec de la mise à jour', err);
+        this.errorMessage = err.error.message || 'Erreur lors de la modification';
+      }
+    });
+  }
 
 }
