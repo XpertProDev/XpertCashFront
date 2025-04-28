@@ -124,7 +124,8 @@
                                       <div class="champ_input" style="margin-right: 15px;">
                                         <select 
                                           class="input_focus_type input_focus_type_select" 
-                                          [(ngModel)]="ligne.produitId" 
+                                          [(ngModel)]="ligne.produitId"
+                                          (ngModelChange)="updateCalculs()"
                                           [ngModelOptions]="{ standalone: true }" required>
                                           <option [ngValue]="null">Sélectionner un produit</option>
                                           <option *ngFor="let produit of produits" [ngValue]="produit.id">
@@ -142,7 +143,7 @@
                                   <!-- // Quantité  -->
                                   <td>
                                     <div class="champ_input" style="margin-right: 15px;">
-                                      <input type="number" class="input_focus_type input_focus_type_quantite" [(ngModel)]="ligne.quantite" [ngModelOptions]="{ standalone: true }" placeholder="Quantité" />
+                                      <input type="number" class="input_focus_type input_focus_type_quantite" [(ngModel)]="ligne.quantite" (ngModelChange)="updateCalculs()" [ngModelOptions]="{ standalone: true }" placeholder="Quantité" />
                                         <!-- <label class="label">Quantité</label> -->
                                     </div>
                                   </td>
@@ -300,7 +301,7 @@
                       <h4>MONTANT TOTAL TTC </h4>
                       <div class="montantTTC">
                           <h4>
-                              {{ getTotalTTC() | customNumber  }}
+                            {{ getTotalTTC() | customNumber }}
                           </h4>
                       </div>
                   </div>

@@ -112,10 +112,7 @@ export class AddfactureProformaComponent implements OnInit {
 
   // Exemple pour la TVA
   getMontantTVA(): number {
-    if (this.activeTva) {
-      return (this.getTotalApresRemise() * 0.18); // 18% de TVA
-    }
-    return 0;
+    return this.activeTva ? (this.getTotalApresRemise() * 0.18) : 0;
   }
 
   getTotalCommercial() : number {
@@ -151,6 +148,12 @@ export class AddfactureProformaComponent implements OnInit {
       
       this.confirmedLignes = [...this.confirmedLignes];
     }
+  }
+
+  updateCalculs() {
+    // Force la mise à jour des valeurs
+    this.inputLignes = [...this.inputLignes];
+    this.confirmedLignes = [...this.confirmedLignes];
   }
 
   // Méthode pour fermer le popup
@@ -255,9 +258,19 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
   getTotalHT(): number {
-    return this.confirmedLignes.reduce((total, ligne) => {
-      return total + this.getMontantTotal(ligne);
+    // Calcul des lignes confirmées
+    const totalConfirmed = this.confirmedLignes.reduce((total, ligne) => 
+      total + this.getMontantTotal(ligne), 0);
+    
+    // Calcul des lignes en cours d'édition
+    const totalInput = this.inputLignes.reduce((total, ligne) => {
+      if (ligne.produitId && ligne.quantite > 0) {
+        return total + this.getMontantTotal(ligne);
+      }
+      return total;
     }, 0);
+  
+    return totalConfirmed + totalInput;
   }
 
   // Création de facture
