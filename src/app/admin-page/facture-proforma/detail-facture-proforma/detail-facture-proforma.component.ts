@@ -12,7 +12,7 @@ import { UsersService } from '../../SERVICES/users.service';
 
 @Component({
   selector: 'app-detail-facture-proforma',
-  imports: [ FormsModule, CommonModule, ReactiveFormsModule, RouterLink, CustomNumberPipe, RoundPipe],
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, RouterLink, CustomNumberPipe],
   templateUrl: './detail-facture-proforma.component.html',
   styleUrl: './detail-facture-proforma.component.scss'
 })
@@ -30,6 +30,8 @@ export class DetailFactureProformaComponent implements OnInit {
   pendingAdjustments: any[] = [];
   newProduitId: number | null = null;
   inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 1 }];
+  confirmedLignes: { produitId: number | null; quantite: number }[] = [];
+  factureId!: number;
 
   constructor(
       private router: Router,
@@ -42,9 +44,10 @@ export class DetailFactureProformaComponent implements OnInit {
   ngOnInit(): void {
     this.getProduits();
     this.getUserInfo();
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadFactureProforma(+id);
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      this.factureId = +idParam;
+      this.getUserInfo();
     }
   }
 
@@ -60,35 +63,50 @@ export class DetailFactureProformaComponent implements OnInit {
   } as FactureProForma;
 
   // Calcul du montant de la remise
-  get montantRemise(): number {
-    return this.factureProForma?.remise || 0;
+  onRemiseChange() {
+    // Force la mise à jour des valeurs
+    this.remisePourcentage = Number(this.remisePourcentage);
   }
 
-  // Calcul du montant TVA
-  get montantTVA(): number {
-    return this.activeTva ? (this.factureProForma?.totalHT || 0) * 0.18 : 0;
+  // Calcul du montant de la remise
+  getMontantRemise(): number {
+    return (this.getTotalHT() * this.remisePourcentage) / 100;
   }
 
-  // Calcul du montant commercial (HT après remise)
-  get montantCommercial(): number {
-    return (this.factureProForma?.totalHT || 0) - this.montantRemise;
+  // Calcul du montant HT après remise
+  getTotalApresRemise(): number {
+    return this.getTotalHT() - this.getMontantRemise();
   }
 
-  // Calcul du total TTC
-  get totalTTC(): number {
-    return this.montantCommercial + this.montantTVA;
+  // Exemple pour la TVA
+  getMontantTVA(): number {
+    if (!this.activeTva) return 0;
+    const base = this.getTotalApresRemise();
+    return base * 0.18; // 18% de TVA
+  }
+
+  getTotalCommercial() : number {
+    return this.getTotalApresRemise();
+  }
+
+  getTotalTTC(): number {
+    return this.getTotalApresRemise() + this.getMontantTVA();
   }
 
   loadFactureProforma(id: number): void {
     this.factureProFormaService.getFactureProformaById(id).subscribe({
       next: (data) => {
         this.factureProForma = data;
-        this.activeRemise = !!data.remise && data.remise > 0;
+      
+        // Correction 1 : Utilisez l'opérateur de coalescence null
+        this.activeRemise = (data.remise ?? 0) > 0;
+        
+        // Correction 2 : Ajoutez une vérification de totalHT
         this.remisePourcentage = this.activeRemise 
-          ? (data.remise! / data.totalHT) * 100 
+          ? ((data.remise ?? 0) / (data.totalHT || 1)) * 100 
           : 0;
+
         this.activeTva = data.tva;
-        this.tva = this.activeTva ? 18 : 0;
         this.isLoading = false;
       },
       error: (err) => {
@@ -99,26 +117,51 @@ export class DetailFactureProformaComponent implements OnInit {
     });
   }
 
-  // Liste Produits
-  getProduits() {
-    const token = localStorage.getItem('authToken');
-    if (token && this.userEntrepriseId) {
-      this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
-        next: (data: Produit[]) => {
-          this.produits = data;
-          console.log('PRODUITS RÉCUPÉRÉS:', this.produits); // <=== Ajoutez ceci
-        },
-        error: (err) => console.error('Erreur récupération produits :', err)
-      });
-    } else {
-      console.error('Token manquant ou entreprise ID non défini');
-    }
-  }
-
   getPrixVente(produitId: number | null): number {
     if (!produitId) return 0;
     const produit = this.produits.find(p => p.id === produitId);
     return produit?.prixVente || 0;
+  }
+
+  // Calcule le montant total pour une ligne
+  getMontantTotal(ligne: any): number {
+    const prix = this.getPrixVente(ligne.produitId);
+    return prix * (ligne.quantite || 0);
+  }
+
+  getTotalHT(): number {
+    // Total des lignes existantes
+    const totalFacture = this.factureProForma.lignesFacture.reduce((total, ligne) => 
+      total + (ligne.prixUnitaire * ligne.quantite), 0);
+  
+    // Total des nouvelles lignes ajoutées localement
+    const totalInput = this.inputLignes.reduce((total, ligne) => {
+      if (ligne.produitId && ligne.quantite > 0) {
+        return total + this.getMontantTotal(ligne);
+      }
+      return total;
+    }, 0);
+  
+    return totalFacture + totalInput;
+  }
+
+  // Liste Produits
+  async getProduits() {
+    return new Promise<void>((resolve) => {
+      const token = localStorage.getItem('authToken');
+      if (token && this.userEntrepriseId) {
+        this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
+          next: (data: Produit[]) => {
+            this.produits = data;
+            resolve();
+            console.log('PRODUITS RÉCUPÉRÉS:', this.produits); // <=== Ajoutez ceci
+          },
+          error: (err) => console.error('Erreur récupération produits :', err)
+        });
+      } else {
+        console.error('Token manquant ou entreprise ID non défini');
+      }
+    });
   }
 
   getUserInfo(): void {
@@ -126,10 +169,12 @@ export class DetailFactureProformaComponent implements OnInit {
       next: (user) => {
         this.nomEntreprise = user.nomEntreprise;
         this.userEntrepriseId = user.entrepriseId;
+
+        this.getProduits().then(() => { // Modification ici
+          this.loadFactureProforma(this.factureId); 
+        });
   
         console.log("Infos utilisateur récupérées :", user);
-  
-        this.getProduits();
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
