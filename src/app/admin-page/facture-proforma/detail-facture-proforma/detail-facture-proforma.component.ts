@@ -115,6 +115,12 @@ export class DetailFactureProformaComponent implements OnInit {
     }
   }
 
+  getPrixVente(produitId: number | null): number {
+    if (!produitId) return 0;
+    const produit = this.produits.find(p => p.id === produitId);
+    return produit?.prixVente || 0;
+  }
+
   getUserInfo(): void {
     this.usersService.getUserInfo().subscribe({
       next: (user) => {
