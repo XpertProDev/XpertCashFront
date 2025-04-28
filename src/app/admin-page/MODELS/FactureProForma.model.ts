@@ -6,7 +6,7 @@ export interface LigneFactureProforma {
     nom?: string; // Optionnel selon tes besoins
     prixUnitaire?: number;
   };
-  description?: string;
+  // description?: string;
   quantite: number;
   prixUnitaire: number; // Obligatoire
   montantTotal?: number;
@@ -21,6 +21,7 @@ export interface FactureProForma {
     remise?: number;
     tva: boolean;
     totalFacture: number;
+    statut?: string; // Ajouté si nécessaire
     client?: {
       id: number;
       nomComplet: string;

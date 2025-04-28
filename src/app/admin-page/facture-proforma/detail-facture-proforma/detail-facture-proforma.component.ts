@@ -250,53 +250,41 @@ export class DetailFactureProformaComponent implements OnInit {
     return index;
   }
 
-  // Ajoute la méthode de soumission
+  cleanFactureForUpdate(facture: FactureProForma): any {
+    return {
+      client: facture.client ? { id: facture.client.id } : null,
+      description: facture.description,
+      lignesFacture: facture.lignesFacture.map(line => ({
+        // Pour chaque ligne, retourner uniquement les propriétés nécessaires
+        id: line.id,
+        produit: { id: line.produit.id },
+        quantite: line.quantite,
+        prixUnitaire: line.prixUnitaire
+      }))
+      // Ajouter ici les autres propriétés autorisées si nécessaire
+    };
+  }
+  
   submitUpdateForm() {
-    // Préparer les lignes existantes avec leurs IDs
-    const lignesExistantes = this.confirmedLignes.map(l => {
-      const ligneOriginale = this.factureProForma.lignesFacture.find(fl => fl.produit.id === l.produitId);
-      return {
-        id: ligneOriginale?.id, // Préserve l'ID existant
-        produit: { id: l.produitId! },
-        quantite: l.quantite,
-        prixUnitaire: this.getPrixVente(l.produitId!), // Récupère le prix depuis le produit
-        description: '' // Adapte selon tes données
-      };
-    });
+    const payload = this.cleanFactureForUpdate(this.factureProForma);
   
-    // Préparer les nouvelles lignes
-    const nouvellesLignes = this.inputLignes
-      .filter(l => l.produitId && l.quantite > 0)
-      .map(l => ({
-        produit: { id: l.produitId! },
-        quantite: l.quantite,
-        prixUnitaire: this.getPrixVente(l.produitId!),
-      }));
+    // Ajoutez éventuellement les nouvelles lignes issues des inputLignes si besoin :
+    payload.lignesFacture = [
+      ...payload.lignesFacture,
+      ...this.inputLignes
+        .filter(l => l.produitId && l.quantite > 0)
+        .map(l => ({
+          produit: { id: l.produitId! },
+          quantite: l.quantite,
+          prixUnitaire: this.getPrixVente(l.produitId!)
+        }))
+    ];
   
-      const modifications = {
-        ...this.factureProForma,
-        lignesFacture: [
-          ...this.confirmedLignes.map(l => ({
-            produit: { id: l.produitId! },
-            quantite: l.quantite,
-            prixUnitaire: this.getPrixVente(l.produitId!) // Ajout du prixUnitaire
-          })),
-          ...this.inputLignes
-            .filter(l => l.produitId && l.quantite > 0)
-            .map(l => ({
-              produit: { id: l.produitId! },
-              quantite: l.quantite,
-              prixUnitaire: this.getPrixVente(l.produitId!) // Ajout du prixUnitaire
-            }))
-        ]
-      };
-  
-    // Appel du service
     this.factureProFormaService.updateFactureProforma(
       this.factureId,
       this.activeRemise ? this.remisePourcentage : undefined,
       this.activeTva,
-      modifications
+      payload
     ).subscribe({
       next: (res) => {
         console.log('Mise à jour réussie !', res);
@@ -308,5 +296,7 @@ export class DetailFactureProformaComponent implements OnInit {
       }
     });
   }
+  
+  
 
 }
