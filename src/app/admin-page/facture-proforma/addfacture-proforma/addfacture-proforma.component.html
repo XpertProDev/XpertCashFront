@@ -315,7 +315,9 @@
                   <button class="btn_cancel" type="button" (click)="goToFacture()">Annuler</button>
                 </div>
                 <div class="btn_ajouter">
-                  <button class="btn_save" (click)="creerFactureProforma()">Ajouter</button>
+                  <button class="btn_save" (click)="creerFactureProforma()">
+                    {{ inputLignes.length > 0 ? 'Ajouter la facture' : 'Créer facture' }}
+                  </button>
                 </div>
               </div>
             </div>

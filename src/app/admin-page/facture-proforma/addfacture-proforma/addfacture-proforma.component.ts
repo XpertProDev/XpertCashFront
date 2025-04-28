@@ -123,30 +123,48 @@ export class AddfactureProformaComponent implements OnInit {
     return this.getTotalApresRemise() + this.getMontantTVA();
   }
 
+  // ajouterLigneFacture(index: number) {
+  //   const ligne = this.inputLignes[index];
+    
+  //   if (ligne.produitId && ligne.quantite > 0) {
+  //     // Vérifier si le produit existe déjà dans la liste confirmée
+  //     const produitExiste = this.confirmedLignes.some(
+  //       l => l.produitId === ligne.produitId
+  //     );
+  
+  //     if (produitExiste) {
+  //       this.showDuplicatePopup = true; // Afficher le popup
+  //       return; // Ne pas ajouter le produit
+  //     }
+  
+  //     const nouvelleLigne = {
+  //       ...ligne,
+  //       montantTotal: this.getMontantTotal(ligne)
+  //     };
+      
+  //     this.confirmedLignes.push(nouvelleLigne);
+  //     // Réinitialiser la ligne d'entrée après ajout
+  //     this.inputLignes = [{ produitId: null, quantite: 1 }];
+      
+  //     this.confirmedLignes = [...this.confirmedLignes];
+  //   }
+  // }
+
   ajouterLigneFacture(index: number) {
     const ligne = this.inputLignes[index];
     
     if (ligne.produitId && ligne.quantite > 0) {
-      // Vérifier si le produit existe déjà dans la liste confirmée
       const produitExiste = this.confirmedLignes.some(
         l => l.produitId === ligne.produitId
       );
   
       if (produitExiste) {
-        this.showDuplicatePopup = true; // Afficher le popup
-        return; // Ne pas ajouter le produit
+        this.showDuplicatePopup = true;
+        return;
       }
   
-      const nouvelleLigne = {
-        ...ligne,
-        montantTotal: this.getMontantTotal(ligne)
-      };
-      
-      this.confirmedLignes.push(nouvelleLigne);
-      // Réinitialiser la ligne d'entrée après ajout
+      this.confirmedLignes.push({...ligne});
       this.inputLignes = [{ produitId: null, quantite: 1 }];
-      
-      this.confirmedLignes = [...this.confirmedLignes];
     }
   }
 
@@ -281,9 +299,30 @@ export class AddfactureProformaComponent implements OnInit {
       return;
     }
 
+    const allLignes = [...this.confirmedLignes];
+
+    const currentLine = this.inputLignes[0];
+    if (currentLine.produitId && currentLine.quantite > 0) {
+      // Vérifier si le produit existe déjà
+      const produitExiste = allLignes.some(l => l.produitId === currentLine.produitId);
+      
+      if (produitExiste) {
+        this.showDuplicatePopup = true;
+        return;
+      }
+      
+      allLignes.push(currentLine);
+    }
+
+    // Vérifier qu'il y a au moins une ligne valide
+    if (allLignes.length === 0) {
+      alert('Ajoutez au moins un produit');
+      return;
+    }
+
     const facture: any = {
       description: this.description,
-      lignesFacture: this.confirmedLignes.map(ligne => ({
+      lignesFacture: allLignes.map(ligne => ({
         produit: { id: ligne.produitId },
         quantite: ligne.quantite
       }))
@@ -311,6 +350,9 @@ export class AddfactureProformaComponent implements OnInit {
       },
       error: (err) => console.error('Erreur création facture :', err)
     });
+
+    this.confirmedLignes = [];
+    this.inputLignes = [{ produitId: null, quantite: 1 }];
   }
 
   removePendingAdjustment(index: number): void {
