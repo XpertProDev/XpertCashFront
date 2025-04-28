@@ -46,7 +46,6 @@ export class FactureProFormaService {
   }
   
   //Get facture proformat
-
   getAlFactproformaOfEntreprise(entrepriseId: number): Observable<any[]> {
     const token = localStorage.getItem('authToken');
     
@@ -68,6 +67,30 @@ export class FactureProFormaService {
       'Authorization': `Bearer ${token}`
     });
     return this.http.get<FactureProForma>(`${this.apiUrl}/factureProforma/${id}`, { headers });
+  }
+
+  // Dans FactureProFormaService
+  updateFactureProforma(
+    factureId: number,
+    remisePourcentage: number | undefined,
+    appliquerTVA: boolean,
+    modifications: any
+  ): Observable<any> {
+    const params = new HttpParams()
+      .set('remisePourcentage', remisePourcentage?.toString() || '')
+      .set('appliquerTVA', appliquerTVA.toString());
+
+    return this.http.put(`${this.apiUrl}/updatefacture/${factureId}`, modifications, {
+      params,
+      headers: new HttpHeaders({
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      })
+    }).pipe(
+      catchError(error => {
+        console.error('Erreur modification:', error);
+        return throwError(error);
+      })
+    );
   }
 
 }

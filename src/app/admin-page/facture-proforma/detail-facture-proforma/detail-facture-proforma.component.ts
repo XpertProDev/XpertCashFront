@@ -170,7 +170,7 @@ export class DetailFactureProformaComponent implements OnInit {
         this.nomEntreprise = user.nomEntreprise;
         this.userEntrepriseId = user.entrepriseId;
 
-        this.getProduits().then(() => { // Modification ici
+        this.getProduits().then(() => { 
           this.loadFactureProforma(this.factureId); 
         });
   
