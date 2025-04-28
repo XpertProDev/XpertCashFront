@@ -52,6 +52,7 @@ export class AddfactureProformaComponent implements OnInit {
   isLoading: boolean = false;
   facturesproforma: any[] = [];
   totalHT: number = 0;
+  showDuplicatePopup: boolean = false;
   // apiUrl: any;
   // http: any;
 
@@ -129,20 +130,32 @@ export class AddfactureProformaComponent implements OnInit {
     const ligne = this.inputLignes[index];
     
     if (ligne.produitId && ligne.quantite > 0) {
-      // Ajouter le calcul du montant avant l'ajout
+      // Vérifier si le produit existe déjà dans la liste confirmée
+      const produitExiste = this.confirmedLignes.some(
+        l => l.produitId === ligne.produitId
+      );
+  
+      if (produitExiste) {
+        this.showDuplicatePopup = true; // Afficher le popup
+        return; // Ne pas ajouter le produit
+      }
+  
       const nouvelleLigne = {
         ...ligne,
         montantTotal: this.getMontantTotal(ligne)
       };
       
       this.confirmedLignes.push(nouvelleLigne);
-      this.inputLignes.splice(index, 1);
-      this.inputLignes.push({ produitId: null, quantite: 1 });
+      // Réinitialiser la ligne d'entrée après ajout
+      this.inputLignes = [{ produitId: null, quantite: 1 }];
       
-      // Forcer la détection de changement
       this.confirmedLignes = [...this.confirmedLignes];
-
     }
+  }
+
+  // Méthode pour fermer le popup
+  closePopup() {
+    this.showDuplicatePopup = false;
   }
 
   trackByFn(index: number, item: any): number {

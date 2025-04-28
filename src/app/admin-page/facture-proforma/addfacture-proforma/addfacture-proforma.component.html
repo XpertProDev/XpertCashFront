@@ -173,7 +173,7 @@
                                   </td>
                                   <!-- // Button de ajouter  -->
                                   <td>
-                                    <div class="btn_ajouter_icon_add" (click)="ajouterLigneFacture(i)">
+                                    <div *ngIf="i === inputLignes.length - 1" class="btn_ajouter_icon_add" (click)="ajouterLigneFacture(i)">
                                       <i class="ri-add-fill"></i>
                                     </div>
                                   </td>
@@ -305,7 +305,7 @@
                       </div>
                   </div>
               </div>
-          </div>
+            </div>
 
             <!-- Boutons -->
             <div class="information_cadre information_cadre_save">
@@ -325,6 +325,12 @@
   </div>
 </div>
 
-
+<!-- Popup de duplication -->
+<div *ngIf="showDuplicatePopup" class="duplicate-popup">
+  <div class="popup-content">
+    <p>Ce produit est déjà dans la liste.</p>
+    <button (click)="closePopup()">OK</button>
+  </div>
+</div>
 
   
