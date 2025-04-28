@@ -157,8 +157,8 @@
                                     <tr class="titleTableProduit">
                                         <th class="title_table_name">Désignation</th>
                                         <th class="">Description</th>
-                                        <th class="">Prix Unitaire</th>
                                         <th class="">Quantité</th>
+                                        <th class="">Prix Unitaire</th>
                                         <th class="">Montant (FCFA)</th>
                                     </tr>
                                 </thead>
@@ -177,16 +177,16 @@
                                               <input [value]="ligne.description || 'Nom description' " type="text" class="input_focus_type" style="resize: none;" placeholder="Description">
                                             </div>                         
                                         </td>
-                                        <!-- // Prix Unitaire  -->
-                                        <td>
-                                            <div class="champ_input" style="margin-right: 15px;">
-                                                <input [value]="ligne.prixUnitaire | number" type="number" class="input_focus_type" placeholder="Prix unitaire">
-                                            </div>
-                                        </td>
                                         <!-- // Quantité  -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <input [value]="ligne.quantite" type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité">
+                                            </div>
+                                        </td>
+                                        <!-- // Prix Unitaire  -->
+                                        <td>
+                                            <div class="champ_input" style="margin-right: 15px;">
+                                                <input [value]="ligne.prixUnitaire | number" type="number" class="input_focus_type" placeholder="Prix unitaire">
                                             </div>
                                         </td>
                                         <!-- // Stock actuel -->
@@ -227,16 +227,16 @@
                                               <input type="text" class="input_focus_type" style="resize: none;" placeholder="Description">
                                             </div>                         
                                         </td>
-                                        <!-- // Prix Unitaire  -->
-                                        <td>
-                                            <div class="champ_input" style="margin-right: 15px;">
-                                                <input type="number" class="input_focus_type" placeholder="Prix unitaire">
-                                            </div>
-                                        </td>
                                         <!-- // Quantité  -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <input type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité">
+                                            </div>
+                                        </td>
+                                        <!-- // Prix Unitaire  -->
+                                        <td>
+                                            <div class="champ_input" style="margin-right: 15px;">
+                                                <input type="number" class="input_focus_type" placeholder="Prix unitaire">
                                             </div>
                                         </td>
                                         <!-- // Stock actuel -->
@@ -262,9 +262,9 @@
                                         </td>
                                         <!-- // Description -->
                                         <td></td>
-                                        <!-- // Prix Unitaire  -->
-                                        <td></td>
                                         <!-- // Quantité  -->
+                                        <td></td>
+                                        <!-- // Prix Unitaire  -->
                                         <td></td>
                                         <!-- // Stock actuel -->
                                         <td>
