@@ -18,30 +18,58 @@
                     <div class="info_titre_etat">
                       <h4>État</h4>
                       <div class="etat_container">
+                        <!-- Section des états -->
                         <div class="etat_content">
-                            <!-- // Etat brouillon  -->
+                            <!-- Etat Brouillon -->
                             <div class="etat_brouillon">
-                                <button class="btn_etat active">
-                                    Brouillon
-                                </button>
+                            <button class="btn_etat" 
+                                    [class.active]="factureProForma.statut === statusOptions.BROUILLON"
+                                    [disabled]="factureProForma.statut !== statusOptions.BROUILLON"
+                                    (click)="openStatusConfirmation(statusOptions.BROUILLON)">
+                                Brouillon
+                            </button>
                             </div>
-                            <!-- // Etat Approuver  -->
+                            
+                            <!-- Etat Approuver -->
                             <div class="etat_approuver">
-                                <button class="btn_etat">
-                                    Approuver
-                                </button>
+                            <button class="btn_etat" 
+                                    [class.active]="factureProForma.statut === statusOptions.APPROUVE"
+                                    [disabled]="!canApprove()"
+                                    (click)="openStatusConfirmation(statusOptions.APPROUVE)">
+                                Approuver
+                            </button>
                             </div>
-                            <!-- // Etat Envoyer  -->
+                            
+                            <!-- Etat Envoyer -->
                             <div class="etat_envoyer">
-                                <button class="btn_etat">
-                                    Envoyer
-                                </button>
+                            <button class="btn_etat" 
+                                    [class.active]="factureProForma.statut === statusOptions.ENVOYE"
+                                    [disabled]="!canSend()"
+                                    (click)="openStatusConfirmation(statusOptions.ENVOYE)">
+                                Envoyer
+                            </button>
                             </div>
-                            <!-- // Etat Valider  -->
+                            
+                            <!-- Etat Valider -->
                             <div class="etat_valider">
-                                <button class="btn_etat" disabled>
-                                    Valider
-                                </button>
+                            <button class="btn_etat" 
+                                    [class.active]="factureProForma.statut === statusOptions.VALIDE"
+                                    [disabled]="!canValidate()"
+                                    (click)="openStatusConfirmation(statusOptions.VALIDE)">
+                                Valider
+                            </button>
+                            </div>
+                        </div>
+  
+                        <!-- Popup de confirmation -->
+                        <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
+                            <div class="popup-content">
+                            <h4>Confirmer le changement de statut</h4>
+                            <p>Voulez-vous vraiment passer la facture au statut "{{ selectedStatutLabel }}" ?</p>
+                            <div class="popup-actions">
+                                <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
+                                <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
+                            </div>
                             </div>
                         </div>
                       </div>
@@ -431,5 +459,17 @@
     <div class="popup-content">
       <p>Ce produit est déjà dans la liste.</p>
       <button (click)="closePopup()">OK</button>
+    </div>
+  </div>
+
+  <!-- Popup de confirmation -->
+<div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
+    <div class="popup-content">
+      <h4>Confirmer le changement de statut</h4>
+      <p>Voulez-vous vraiment passer la facture au statut "{{ selectedStatutLabel }}" ?</p>
+      <div class="popup-actions">
+        <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
+        <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
+      </div>
     </div>
   </div>

@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProduitService } from '../../SERVICES/produit.service';
 import { Produit } from '../../MODELS/produit.model';
-import { FactureProForma } from '../../MODELS/FactureProForma.model';
+import { FactureProForma, StatutFactureProForma } from '../../MODELS/FactureProForma.model';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { RoundPipe } from '../../MODELS/round.pipe';
@@ -34,6 +34,12 @@ export class DetailFactureProformaComponent implements OnInit {
   factureId!: number;
   showDuplicatePopup: boolean = false;
 
+  // Ajouter ces variables dans la classe
+  showStatusConfirmation = false;
+  pendingStatut: StatutFactureProForma | null = null;
+  selectedStatutLabel = '';
+  statusOptions = StatutFactureProForma;
+
   constructor(
       private router: Router,
       private produitService: ProduitService,
@@ -60,7 +66,8 @@ export class DetailFactureProformaComponent implements OnInit {
     totalHT: 0,
     tva: false,
     totalFacture: 0,
-    lignesFacture: []
+    lignesFacture: [],
+    statut: StatutFactureProForma.BROUILLON,
   } as FactureProForma;
 
   // Calcul du montant de la remise
@@ -313,7 +320,92 @@ export class DetailFactureProformaComponent implements OnInit {
     });
   }
   
+
+// Ajouter ces méthodes
+canApprove(): boolean {
+  return this.factureProForma.statut === StatutFactureProForma.BROUILLON;
+}
+
+canSend(): boolean {
+  return this.factureProForma.statut === StatutFactureProForma.APPROUVE;
+}
+
+canValidate(): boolean {
+  return this.factureProForma.statut === StatutFactureProForma.ENVOYE;
+}
+
+openStatusConfirmation(newStatut: StatutFactureProForma): void {
+  if (this.isStatusTransitionAllowed(newStatut)) {
+    this.pendingStatut = newStatut;
+    this.selectedStatutLabel = this.getStatusLabel(newStatut);
+    this.showStatusConfirmation = true;
+  }
+}
+
+private isStatusTransitionAllowed(newStatut: StatutFactureProForma): boolean {
+  if (!this.factureProForma?.statut) return false;
+
+  const allowedTransitions: Record<StatutFactureProForma, StatutFactureProForma[]> = {
+    [StatutFactureProForma.BROUILLON]: [StatutFactureProForma.APPROUVE],
+    [StatutFactureProForma.APPROUVE]: [StatutFactureProForma.ENVOYE, StatutFactureProForma.BROUILLON],
+    [StatutFactureProForma.ENVOYE]: [StatutFactureProForma.VALIDE, StatutFactureProForma.APPROUVE],
+    [StatutFactureProForma.VALIDE]: []
+  };
+
+  // Ajouter une vérification de type explicite
+  const currentStatut = this.factureProForma.statut as StatutFactureProForma;
   
+  // Vérifier que le statut existe dans la configuration
+  if (!Object.prototype.hasOwnProperty.call(allowedTransitions, currentStatut)) {
+    return false;
+  }
+
+  return allowedTransitions[currentStatut].includes(newStatut);
+}
+
+confirmStatusChange(): void {
+  if (!this.pendingStatut) return;
+
+  const modifications: Partial<FactureProForma> = {
+    statut: this.pendingStatut
+  };
+
+  this.factureProFormaService.updateFactureProforma(
+    this.factureId,
+    undefined,
+    undefined,
+    modifications
+  ).subscribe({
+    next: (updatedFacture) => {
+      this.factureProForma = updatedFacture;
+      this.showStatusConfirmation = false;
+      this.pendingStatut = null;
+      // Remplacer par votre système de notification
+      // alert('Statut mis à jour avec succès');
+    },
+    error: (err) => {
+      console.error('Erreur de mise à jour', err);
+      alert('Échec de la mise à jour du statut');
+      this.showStatusConfirmation = false;
+    }
+  });
+}
+
+cancelStatusChange(): void {
+  this.showStatusConfirmation = false;
+  this.pendingStatut = null;
+}
+
+private getStatusLabel(statut: StatutFactureProForma): string {
+  const labels: Record<StatutFactureProForma, string> = {
+    [StatutFactureProForma.BROUILLON]: 'Brouillon',
+    [StatutFactureProForma.APPROUVE]: 'Approuvé',
+    [StatutFactureProForma.ENVOYE]: 'Envoyé',
+    [StatutFactureProForma.VALIDE]: 'Validé'
+  };
+  return labels[statut];
+}
+    
   
 
 }

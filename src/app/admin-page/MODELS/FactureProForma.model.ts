@@ -1,3 +1,10 @@
+export enum StatutFactureProForma {
+  BROUILLON = 'BROUILLON',
+  APPROUVE = 'APPROUVE',
+  ENVOYE = 'ENVOYE',
+  VALIDE   = 'VALIDE'
+}
+
 // Dans ton modèle FactureProForma
 export interface LigneFactureProforma {
   id?: number; // Rend l'id optionnel pour les nouvelles lignes
