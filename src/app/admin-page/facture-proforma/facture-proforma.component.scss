@@ -673,8 +673,10 @@ tr:hover {
 .etat {
     position: absolute;
     transform: rotate(12deg);
-    top: 47px;
-    left: 60px;
+    // top: 47px;
+    // left: 60px;
+    top: 45px;
+    left: 58px;
 }
 
 .etat p {
@@ -685,4 +687,9 @@ tr:hover {
 
 .etat span {
     text-transform: lowercase;
+}
+
+.tilte_etat {
+    position: relative;
+    top: 3px;
 }

@@ -204,7 +204,9 @@
                                               <input  [value]="getMontantTotal(ligne) | customNumber"
                                                      type="text" 
                                                      class="input_focus_type" 
-                                                     disabled>
+                                                     disabled
+                                                     style="cursor: no-drop;"
+                                               >
                                             </div>                         
                                           </td>
                                         <td>
@@ -248,16 +250,20 @@
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <input [value]="getPrixVente(ligne.produitId) | customNumber" 
-                                                class="input_focus_type" 
-                                                readonly>
+                                                    class="input_focus_type" 
+                                                    readonly
+                                                    style="cursor: no-drop;"
+                                                >
                                             </div>
                                         </td>
                                         <!-- // Stock actuel -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <input [value]="getMontantTotal(ligne) | customNumber" 
-                                                class="input_focus_type" 
-                                                readonly>
+                                                    class="input_focus_type" 
+                                                    readonly
+                                                    style="cursor: no-drop;"
+                                                >
                                             </div>
                                           </td>
                                         <!-- // Button de ajouter  -->
