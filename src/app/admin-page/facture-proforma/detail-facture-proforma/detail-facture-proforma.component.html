@@ -60,7 +60,8 @@
                 <div class="information_cadre">
                     <div class="info_titre_input">
                         <div class="champ_input">
-                            <input [value]="factureProForma.description" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object">
+                            <!-- <input [value]="factureProForma.description" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object"> -->
+                            <input [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object">
                             <label for="object" class="label"> Object </label>
                         </div>
                     </div>
@@ -78,12 +79,12 @@
                              </div> -->
                             <div class="double_input_grid">
                                 <div class="champ_input">
-                                    <input autocomplete="off" [value]="factureProForma.client.email" type="email" class="input_focus" required placeholder="Saisis l'email">
+                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.client.email" type="email" class="input_focus" required placeholder="Saisis l'email">
                                     <label for="email" class="label"> Email </label>
                                 </div>
     
                                 <div class="champ_input">
-                                    <input autocomplete="off" [value]="factureProForma.client.nomComplet" type="text" class="input_focus" required placeholder="Saisis le nom et prénom">
+                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.client.nomComplet" type="text" class="input_focus" required placeholder="Saisis le nom et prénom">
                                     <label for="nomComplet" class="label"> Droit </label>
                                 </div>
                             </div>
@@ -91,12 +92,12 @@
                             <!-- // Adresse et téléphone  -->
                             <div class="double_input_grid">
                                 <div class="champ_input">
-                                    <input autocomplete="off" [value]="factureProForma.client.adresse" type="text" class="input_focus" required placeholder="Saisis l'adresse">
+                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.client.adresse" type="text" class="input_focus" required placeholder="Saisis l'adresse">
                                     <label for="adresse" class="label"> Adresse </label>
                                 </div>
     
                                 <div class="champ_input">
-                                    <input autocomplete="off" [value]="factureProForma.client.telephone" type="number" class="input_focus" required placeholder="00 00 00 00">
+                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.client.telephone" type="number" class="input_focus" required placeholder="00 00 00 00">
                                     <label for="numero" class="label"> Numéro téléphone </label>
                                 </div>
                             </div>
@@ -114,13 +115,13 @@
                             <!-- Les chaps d'entreprise -->
                             <div class="double_input_grid">
                                 <div class="champ_input">
-                                    <input autocomplete="off" [value]="factureProForma.entrepriseClient.nom || 'Non vide' " 
+                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.entrepriseClient.nom || 'Non vide' " 
                                         type="text" class="input_focus" required placeholder="Saisis le nom ">
                                     <label for="nom" class="label">Nom</label>
                                 </div>
 
                                 <div class="champ_input">
-                                    <input autocomplete="off" [value]="factureProForma.entrepriseClient.email || 'Nom email' " 
+                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.entrepriseClient.email || 'Nom email' " 
                                         type="email" class="input_focus" required placeholder="Saisis l'email">
                                     <label for="totalFacture" class="label">Email</label>
                                 </div>
@@ -128,13 +129,13 @@
 
                             <div class="double_input_grid">
                                 <div class="champ_input">
-                                    <input autocomplete="off" [value]="factureProForma.entrepriseClient.adresse || 'Nom adresse' " 
+                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.entrepriseClient.adresse || 'Nom adresse' " 
                                         type="text" class="input_focus" required placeholder="Saisis l'adresse">
                                     <label for="adresse" class="label">Adresse</label>
                                 </div>
 
                                 <div class="champ_input">
-                                    <input autocomplete="off" [value]="factureProForma.entrepriseClient.telephone || 'Nom téléphone' " 
+                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.entrepriseClient.telephone || 'Nom téléphone' " 
                                         type="number" class="input_focus" required placeholder="00 00 00 00">
                                     <label for="numero" class="label">Numéro téléphone</label>
                                 </div>
@@ -180,7 +181,8 @@
                                         <!-- // Quantité  -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                                <input  [value]="ligne.quantite" type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité">
+                                                <!-- <input  [value]="ligne.quantite" type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité"> -->
+                                                <input [(ngModel)]="ligne.quantite" [ngModelOptions]="{standalone: true}" type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité">
                                             </div>
                                         </td>
                                         <!-- // Prix Unitaire  -->
