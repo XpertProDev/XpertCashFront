@@ -20,44 +20,44 @@
                       <div class="etat_container">
                         <!-- Section des états -->
                         <div class="etat_content">
-                            <!-- Etat Brouillon -->
+                            <!-- Bouton Brouillon -->
                             <div class="etat_brouillon">
-                            <button class="btn_etat" 
-                                    [class.active]="factureProForma.statut === statusOptions.BROUILLON"
-                                    [disabled]="factureProForma.statut !== statusOptions.BROUILLON"
-                                    (click)="openStatusConfirmation(statusOptions.BROUILLON)">
+                                <button class="btn_etat" 
+                                        [class.active]="factureProForma.statut === statusOptions.BROUILLON"
+                                        [disabled]="!canTransitionTo(statusOptions.BROUILLON)"
+                                        (click)="openStatusConfirmation(statusOptions.BROUILLON)">
                                 Brouillon
-                            </button>
+                                </button>
                             </div>
                             
-                            <!-- Etat Approuver -->
+                            <!-- Bouton Approuver -->
                             <div class="etat_approuver">
-                            <button class="btn_etat" 
-                                    [class.active]="factureProForma.statut === statusOptions.APPROUVE"
-                                    [disabled]="!canApprove()"
-                                    (click)="openStatusConfirmation(statusOptions.APPROUVE)">
+                                <button class="btn_etat" 
+                                        [class.active]="factureProForma.statut === statusOptions.APPROUVE"
+                                        [disabled]="!canTransitionTo(statusOptions.APPROUVE)"
+                                        (click)="openStatusConfirmation(statusOptions.APPROUVE)">
                                 Approuver
-                            </button>
+                                </button>
                             </div>
                             
-                            <!-- Etat Envoyer -->
+                            <!-- Bouton Envoyer -->
                             <div class="etat_envoyer">
-                            <button class="btn_etat" 
-                                    [class.active]="factureProForma.statut === statusOptions.ENVOYE"
-                                    [disabled]="!canSend()"
-                                    (click)="openStatusConfirmation(statusOptions.ENVOYE)">
-                                Envoyer
-                            </button>
+                                <button class="btn_etat" 
+                                        [class.active]="factureProForma.statut === statusOptions.ENVOYE"
+                                        [disabled]="!canTransitionTo(statusOptions.ENVOYE)"
+                                        (click)="openStatusConfirmation(statusOptions.ENVOYE)">
+                                  Envoyer
+                                </button>
                             </div>
                             
-                            <!-- Etat Valider -->
+                            <!-- Bouton Valider -->
                             <div class="etat_valider">
-                            <button class="btn_etat" 
-                                    [class.active]="factureProForma.statut === statusOptions.VALIDE"
-                                    [disabled]="!canValidate()"
-                                    (click)="openStatusConfirmation(statusOptions.VALIDE)">
-                                Valider
-                            </button>
+                                <button class="btn_etat" 
+                                        [class.active]="factureProForma.statut === statusOptions.VALIDE"
+                                        [disabled]="!canTransitionTo(statusOptions.VALIDE)"
+                                        (click)="openStatusConfirmation(statusOptions.VALIDE)">
+                                  Valider
+                                </button>
                             </div>
                         </div>
   

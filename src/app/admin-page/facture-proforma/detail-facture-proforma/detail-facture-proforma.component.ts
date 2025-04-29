@@ -321,90 +321,101 @@ export class DetailFactureProformaComponent implements OnInit {
   }
   
 
-// Ajouter ces méthodes
-canApprove(): boolean {
-  return this.factureProForma.statut === StatutFactureProForma.BROUILLON;
-}
-
-canSend(): boolean {
-  return this.factureProForma.statut === StatutFactureProForma.APPROUVE;
-}
-
-canValidate(): boolean {
-  return this.factureProForma.statut === StatutFactureProForma.ENVOYE;
-}
-
-openStatusConfirmation(newStatut: StatutFactureProForma): void {
-  if (this.isStatusTransitionAllowed(newStatut)) {
-    this.pendingStatut = newStatut;
-    this.selectedStatutLabel = this.getStatusLabel(newStatut);
-    this.showStatusConfirmation = true;
-  }
-}
-
-private isStatusTransitionAllowed(newStatut: StatutFactureProForma): boolean {
-  if (!this.factureProForma?.statut) return false;
-
-  const allowedTransitions: Record<StatutFactureProForma, StatutFactureProForma[]> = {
-    [StatutFactureProForma.BROUILLON]: [StatutFactureProForma.APPROUVE],
-    [StatutFactureProForma.APPROUVE]: [StatutFactureProForma.ENVOYE, StatutFactureProForma.BROUILLON],
-    [StatutFactureProForma.ENVOYE]: [StatutFactureProForma.VALIDE, StatutFactureProForma.APPROUVE],
-    [StatutFactureProForma.VALIDE]: []
-  };
-
-  // Ajouter une vérification de type explicite
-  const currentStatut = this.factureProForma.statut as StatutFactureProForma;
-  
-  // Vérifier que le statut existe dans la configuration
-  if (!Object.prototype.hasOwnProperty.call(allowedTransitions, currentStatut)) {
-    return false;
+  // Ajouter ces méthodes
+  canApprove(): boolean {
+    return this.factureProForma.statut === StatutFactureProForma.BROUILLON;
   }
 
-  return allowedTransitions[currentStatut].includes(newStatut);
-}
+  canSend(): boolean {
+    return this.factureProForma.statut === StatutFactureProForma.APPROUVE;
+  }
 
-confirmStatusChange(): void {
-  if (!this.pendingStatut) return;
+  canValidate(): boolean {
+    return this.factureProForma.statut === StatutFactureProForma.ENVOYE;
+  }
 
-  const modifications: Partial<FactureProForma> = {
-    statut: this.pendingStatut
-  };
-
-  this.factureProFormaService.updateFactureProforma(
-    this.factureId,
-    undefined,
-    undefined,
-    modifications
-  ).subscribe({
-    next: (updatedFacture) => {
-      this.factureProForma = updatedFacture;
-      this.showStatusConfirmation = false;
-      this.pendingStatut = null;
-      // Remplacer par votre système de notification
-      // alert('Statut mis à jour avec succès');
-    },
-    error: (err) => {
-      console.error('Erreur de mise à jour', err);
-      alert('Échec de la mise à jour du statut');
-      this.showStatusConfirmation = false;
+  openStatusConfirmation(newStatut: StatutFactureProForma): void {
+    if (this.isStatusTransitionAllowed(newStatut)) {
+      this.pendingStatut = newStatut;
+      this.selectedStatutLabel = this.getStatusLabel(newStatut);
+      this.showStatusConfirmation = true;
     }
-  });
+  }
+
+  // Modifier la configuration des transitions
+  private isStatusTransitionAllowed(newStatut: StatutFactureProForma): boolean {
+    if (!this.factureProForma?.statut) return false;
+
+    const allowedTransitions: Record<StatutFactureProForma, StatutFactureProForma[]> = {
+      [StatutFactureProForma.BROUILLON]: [
+        StatutFactureProForma.APPROUVE,
+        StatutFactureProForma.ENVOYE,
+        StatutFactureProForma.VALIDE // Si vous voulez autoriser la validation directe
+      ],
+      [StatutFactureProForma.APPROUVE]: [
+        StatutFactureProForma.ENVOYE,
+        StatutFactureProForma.BROUILLON,
+        StatutFactureProForma.VALIDE // Optionnel
+      ],
+      [StatutFactureProForma.ENVOYE]: [
+        StatutFactureProForma.VALIDE,
+        StatutFactureProForma.APPROUVE,
+        StatutFactureProForma.BROUILLON // Optionnel
+      ],
+      [StatutFactureProForma.VALIDE]: []
+    };
+
+    const currentStatut = this.factureProForma.statut as StatutFactureProForma;
+    return allowedTransitions[currentStatut]?.includes(newStatut) || false;
+  }
+
+// Ajouter cette méthode publique pour le template
+canTransitionTo(targetStatus: StatutFactureProForma): boolean {
+  return this.isStatusTransitionAllowed(targetStatus);
 }
 
-cancelStatusChange(): void {
-  this.showStatusConfirmation = false;
-  this.pendingStatut = null;
-}
+  confirmStatusChange(): void {
+    if (!this.pendingStatut) return;
 
-private getStatusLabel(statut: StatutFactureProForma): string {
-  const labels: Record<StatutFactureProForma, string> = {
-    [StatutFactureProForma.BROUILLON]: 'Brouillon',
-    [StatutFactureProForma.APPROUVE]: 'Approuvé',
-    [StatutFactureProForma.ENVOYE]: 'Envoyé',
-    [StatutFactureProForma.VALIDE]: 'Validé'
-  };
-  return labels[statut];
-}
+    const modifications: Partial<FactureProForma> = {
+      statut: this.pendingStatut
+    };
+
+    this.factureProFormaService.updateFactureProforma(
+      this.factureId,
+      undefined,
+      undefined,
+      modifications
+    ).subscribe({
+      next: (updatedFacture) => {
+        this.factureProForma = updatedFacture;
+        this.showStatusConfirmation = false;
+        this.pendingStatut = null;
+        // Remplacer par votre système de notification
+        // alert('Statut mis à jour avec succès');
+      },
+      error: (err) => {
+        console.error('Erreur de mise à jour', err);
+        alert('Échec de la mise à jour du statut');
+        this.showStatusConfirmation = false;
+      }
+    });
+  }
+
+  cancelStatusChange(): void {
+    this.showStatusConfirmation = false;
+    this.pendingStatut = null;
+  }
+
+  private getStatusLabel(statut: StatutFactureProForma): string {
+    const labels: Record<StatutFactureProForma, string> = {
+      [StatutFactureProForma.BROUILLON]: 'Brouillon',
+      [StatutFactureProForma.APPROUVE]: 'Approuvé',
+      [StatutFactureProForma.ENVOYE]: 'Envoyé',
+      [StatutFactureProForma.VALIDE]: 'Validé'
+    };
+    return labels[statut];
+  }
     
   
 
