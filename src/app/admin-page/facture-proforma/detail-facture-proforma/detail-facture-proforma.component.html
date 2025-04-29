@@ -52,7 +52,7 @@
                 <div class="information_cadre">
                     <div class="info_titre_input info_titre_input_proforma">
                         <h2>FACTURE PROFORMA : <span> {{ factureProForma.numeroFacture }} </span></h2>
-                        <p style="text-align: right;"> Bamako, le 9 avril 2025 </p>
+                        <p style="text-align: right;">le {{ factureProForma.dateCreation | date:'dd-MM-yyyy' }}</p>
                     </div>
                 </div>
 
