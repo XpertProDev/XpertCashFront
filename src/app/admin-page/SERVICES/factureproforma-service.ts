@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { catchError, Observable, tap, throwError } from "rxjs";
-import { FactureProForma } from "../MODELS/FactureProForma.model";
+import { FactureProForma, UpdateFactureProFormaDTO } from "../MODELS/FactureProForma.model";
 
 @Injectable({
   providedIn: 'root'
@@ -74,7 +74,7 @@ export class FactureProFormaService {
     factureId: number,
     remisePourcentage: number | undefined,
     appliquerTVA: boolean | undefined,
-    modifications: FactureProForma
+    modifications: Partial<FactureProForma>
   ): Observable<FactureProForma> {
     const token = localStorage.getItem('authToken');
     if (!token) {

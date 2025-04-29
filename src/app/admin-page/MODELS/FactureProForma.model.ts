@@ -12,6 +12,19 @@ export interface LigneFactureProforma {
   montantTotal?: number;
 }
 
+export interface UpdateFactureProFormaDTO {
+  client?: { id: number } | null;
+  description?: string;
+  lignesFacture?: {
+    id?: number;
+    produit: { id: number };
+    quantite: number;
+    prixUnitaire: number;
+  }[];
+  // Ajouter d'autres champs optionnels si besoin
+}
+
+
 export interface FactureProForma {
     id: number;
     numeroFacture: string;

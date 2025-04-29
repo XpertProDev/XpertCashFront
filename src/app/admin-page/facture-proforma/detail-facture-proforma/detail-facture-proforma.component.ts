@@ -242,9 +242,12 @@ export class DetailFactureProformaComponent implements OnInit {
   }
 
   supprimerLigneConfirmee(index: number) {
+    // Mettez à jour factureProForma.lignesFacture directement
+    this.factureProForma.lignesFacture.splice(index, 1);
+    // Optionnel : mettre à jour confirmedLignes si vous l'utilisez pour la vue
     this.confirmedLignes.splice(index, 1);
-    this.confirmedLignes = [...this.confirmedLignes];
   }
+  
   
   trackByFn(index: number, item: any): number {
     return index;
@@ -266,25 +269,38 @@ export class DetailFactureProformaComponent implements OnInit {
   }
   
   submitUpdateForm() {
-    const payload = this.cleanFactureForUpdate(this.factureProForma);
-  
-    // Ajoutez éventuellement les nouvelles lignes issues des inputLignes si besoin :
+    const payload = {
+      client: this.factureProForma.client ? { id: this.factureProForma.client.id } : null,
+      description: this.factureProForma.description,
+      // Utilisez confirmedLignes puisque c'est là que se trouvent les modifications (ajouts, suppressions, etc.)
+      lignesFacture: this.confirmedLignes.map(l => ({
+        // Si une ligne existait déjà, vous pouvez éventuellement inclure l'id
+        // id: l.id, // si disponible
+        produit: { id: l.produitId },
+        quantite: l.quantite,
+        prixUnitaire: this.getPrixVente(l.produitId)
+      }))
+    };
+    
+    // Si vous avez aussi des lignes en cours d'ajout dans inputLignes, vous pouvez les concaténer :
+    const nouvellesLignes = this.inputLignes
+      .filter(l => l.produitId && l.quantite > 0)
+      .map(l => ({
+        produit: { id: l.produitId! },
+        quantite: l.quantite,
+        prixUnitaire: this.getPrixVente(l.produitId!)
+      }));
+    
     payload.lignesFacture = [
       ...payload.lignesFacture,
-      ...this.inputLignes
-        .filter(l => l.produitId && l.quantite > 0)
-        .map(l => ({
-          produit: { id: l.produitId! },
-          quantite: l.quantite,
-          prixUnitaire: this.getPrixVente(l.produitId!)
-        }))
+      ...nouvellesLignes
     ];
-  
+    
     this.factureProFormaService.updateFactureProforma(
       this.factureId,
       this.activeRemise ? this.remisePourcentage : undefined,
       this.activeTva,
-      payload
+      payload as Partial<FactureProForma>
     ).subscribe({
       next: (res) => {
         console.log('Mise à jour réussie !', res);
@@ -296,6 +312,7 @@ export class DetailFactureProformaComponent implements OnInit {
       }
     });
   }
+  
   
   
 
