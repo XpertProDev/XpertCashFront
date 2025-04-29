@@ -18,30 +18,58 @@
                     <div class="info_titre_etat">
                       <h4>État</h4>
                       <div class="etat_container">
+                        <!-- Section des états -->
                         <div class="etat_content">
-                            <!-- // Etat brouillon  -->
+                            <!-- Bouton Brouillon -->
                             <div class="etat_brouillon">
-                                <button class="btn_etat active">
-                                    Brouillon
+                                <button class="btn_etat" 
+                                        [class.active]="factureProForma.statut === statusOptions.BROUILLON"
+                                        [disabled]="!canTransitionTo(statusOptions.BROUILLON)"
+                                        (click)="openStatusConfirmation(statusOptions.BROUILLON)">
+                                Brouillon
                                 </button>
                             </div>
-                            <!-- // Etat Approuver  -->
+                            
+                            <!-- Bouton Approuver -->
                             <div class="etat_approuver">
-                                <button class="btn_etat">
-                                    Approuver
+                                <button class="btn_etat" 
+                                        [class.active]="factureProForma.statut === statusOptions.APPROUVE"
+                                        [disabled]="!canTransitionTo(statusOptions.APPROUVE)"
+                                        (click)="openStatusConfirmation(statusOptions.APPROUVE)">
+                                Approuver
                                 </button>
                             </div>
-                            <!-- // Etat Envoyer  -->
+                            
+                            <!-- Bouton Envoyer -->
                             <div class="etat_envoyer">
-                                <button class="btn_etat">
-                                    Envoyer
+                                <button class="btn_etat" 
+                                        [class.active]="factureProForma.statut === statusOptions.ENVOYE"
+                                        [disabled]="!canTransitionTo(statusOptions.ENVOYE)"
+                                        (click)="openStatusConfirmation(statusOptions.ENVOYE)">
+                                  Envoyer
                                 </button>
                             </div>
-                            <!-- // Etat Valider  -->
+                            
+                            <!-- Bouton Valider -->
                             <div class="etat_valider">
-                                <button class="btn_etat" disabled>
-                                    Valider
+                                <button class="btn_etat" 
+                                        [class.active]="factureProForma.statut === statusOptions.VALIDE"
+                                        [disabled]="!canTransitionTo(statusOptions.VALIDE)"
+                                        (click)="openStatusConfirmation(statusOptions.VALIDE)">
+                                  Valider
                                 </button>
+                            </div>
+                        </div>
+  
+                        <!-- Popup de confirmation -->
+                        <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
+                            <div class="popup-content">
+                            <h4>Confirmer le changement de statut</h4>
+                            <p>Voulez-vous vraiment passer la facture au statut "{{ selectedStatutLabel }}" ?</p>
+                            <div class="popup-actions">
+                                <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
+                                <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
+                            </div>
                             </div>
                         </div>
                       </div>
@@ -72,7 +100,7 @@
                 <div class="information_cadre">
                     <div class="info_titre_input">
                         <div *ngIf="factureProForma.client">
-                            <h5>Utilisateur</h5>
+                            <h5>Client</h5>
                             <!-- // Nom complet et email  -->
                              <!-- <div>
                                 {{factureProForma | json}}
@@ -106,7 +134,7 @@
                         <!-- Début de la section Entreprise - Afficher uniquement si entrepriseClient existe -->
                         <div *ngIf="factureProForma.entrepriseClient">
                             <div class="name_icon">
-                                <h5>Entreprise</h5>
+                                <h5>Entreprise clients</h5>
                                 <div class="iconEntrepriseList">
                                     <i class="ri-git-branch-fill" title="Affiliation d'Entreprise"></i>
                                 </div>
@@ -204,7 +232,9 @@
                                               <input  [value]="getMontantTotal(ligne) | customNumber"
                                                      type="text" 
                                                      class="input_focus_type" 
-                                                     disabled>
+                                                     disabled
+                                                     style="cursor: no-drop;"
+                                               >
                                             </div>                         
                                           </td>
                                         <td>
@@ -248,16 +278,20 @@
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <input [value]="getPrixVente(ligne.produitId) | customNumber" 
-                                                class="input_focus_type" 
-                                                readonly>
+                                                    class="input_focus_type" 
+                                                    readonly
+                                                    style="cursor: no-drop;"
+                                                >
                                             </div>
                                         </td>
                                         <!-- // Stock actuel -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <input [value]="getMontantTotal(ligne) | customNumber" 
-                                                class="input_focus_type" 
-                                                readonly>
+                                                    class="input_focus_type" 
+                                                    readonly
+                                                    style="cursor: no-drop;"
+                                                >
                                             </div>
                                           </td>
                                         <!-- // Button de ajouter  -->
@@ -425,5 +459,17 @@
     <div class="popup-content">
       <p>Ce produit est déjà dans la liste.</p>
       <button (click)="closePopup()">OK</button>
+    </div>
+  </div>
+
+  <!-- Popup de confirmation -->
+<div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
+    <div class="popup-content">
+      <h4>Confirmer le changement de statut</h4>
+      <p>Voulez-vous vraiment passer la facture au statut "{{ selectedStatutLabel }}" ?</p>
+      <div class="popup-actions">
+        <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
+        <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
+      </div>
     </div>
   </div>
