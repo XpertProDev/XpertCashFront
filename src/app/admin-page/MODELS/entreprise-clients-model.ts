@@ -1,7 +1,10 @@
-export class EntrepriseClient {
+export interface EntrepriseClient {
     id?: number;
-    nom!: string;
-    adresse!: string;
-    email!: string;
-    telephone!: string;
+    nom: string;
+    email: string;
+    adresse: string;
+    telephone: string;
+    pays: string;
+    siege: string;
+    secteur: string;
 }

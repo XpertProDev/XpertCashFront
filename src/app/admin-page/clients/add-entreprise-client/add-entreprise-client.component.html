@@ -47,20 +47,6 @@
 
                   </div>
                   <div class="double_input">
-                    <!-- Telephone -->
-                    <div class="champ_input champ_input2">
-                      <input type="number" class="input_focus"
-                                id="telephone" formControlName="telephone"
-                                name="telephone"
-                                placeholder="Saisis le numéro de téléphone">
-                      <label for="telephone" class="label">Téléphone</label>
-                      <div *ngIf="entrepriseClientForm.get('telephone')?.touched && entrepriseClientForm.get('telephone')?.invalid" 
-                            class="error">
-                            <small *ngIf="entrepriseClientForm.get('telephone')?.errors?.['pattern']">
-                            Uniquement des chiffres
-                            </small>
-                        </div>
-                    </div>
                     <!-- Adresse -->
                     <div class="champ_input champ_input2">
                       <input class="input_focus"
@@ -71,6 +57,55 @@
                       <label for="adresse" class="label">Adresse</label>
                     </div>
 
+                    <!-- siege -->
+                    <div class="champ_input champ_input2">
+                      <input type="text" class="input_focus"
+                                id="siege" formControlName="siege"
+                                name="siege"
+                                placeholder="Saisis le siège">
+                      <label for="telephone" class="label">Siege</label>
+                    </div>
+
+                  </div>
+
+                  <div class="grid_colonne">
+                    <!-- Pays -->
+                    <div class="champ_input div1">
+                      <select class="input_focus" 
+                              formControlName="pays" 
+                              (change)="onEntreprisePaysChange($event)">
+                        <option value="" disabled selected>Pays</option>
+                        <option value="Mali">Mali</option>
+                        <option value="Sénégal">Sénégal</option>
+                        <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                      </select>
+                      <label for="pays" class="label">Pays</label>
+                    </div>
+        
+                    <!-- Téléphone -->
+                    <div class="champ_input div2">
+                      <input type="tel" 
+                             class="input_focus"
+                             formControlName="telephone"
+                             placeholder="Saisis le numéro de téléphone"
+                             (input)="formatEntreprisePhoneNumber()">
+                      <label for="telephone" class="label">Téléphone</label>
+                      <div *ngIf="entrepriseClientForm.get('telephone')?.touched && entrepriseClientForm.get('telephone')?.invalid" 
+                            class="error">
+                        <small *ngIf="entrepriseClientForm.get('telephone')?.errors?.['pattern']">
+                          Format invalide pour le pays sélectionné
+                        </small>
+                      </div>
+                    </div>
+        
+                    <!-- Ville -->
+                    <div class="champ_input div3">
+                      <input class="input_focus"
+                                id="ville" formControlName="secteur"
+                                name="ville"
+                                placeholder="Saisis la ville">
+                      <label for="ville" class="label">Secteur</label>
+                    </div>
                   </div>
                   
                 </div>

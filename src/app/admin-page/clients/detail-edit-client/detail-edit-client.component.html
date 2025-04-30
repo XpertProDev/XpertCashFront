@@ -39,63 +39,62 @@
                     </div>
 
                   </div>
+
                   <div class="double_input">
-                     <!-- Pays -->
-                     <div class="champ_input champ_input2">
+                   
+                    <!-- Adress -->
+                    <div class="champ_input champ_input2">
                       <input class="input_focus"
-                                id="pays" formControlName="pays"
-                                name="pays"
-                                placeholder="Saisis le pays">
-                      <label for="pays" class="label">Pays</label>
+                                id="adresse" formControlName="adresse"
+                                name="adresse"
+                                placeholder="Saisissez votre adresse ">
+                      <label for="adresse" class="label">Adresse</label>
                     </div>
-                    
-                    <!-- Telephone -->
-                    <div class="champ_input champ_input2">
-                      <input type="tel" class="input_focus"
-                                id="telephone" formControlName="telephone"
-                                name="telephone"
-                                placeholder="Saisis le numéro de téléphone">
-                      <label for="telephone" class="label">Téléphone</label>
-                    </div>
-                   
-
-                  </div>
-
-                  <div class="double_input">
-                    <!-- Ville -->
-                    <div class="champ_input champ_input2">
-                     <input class="input_focus"
-                               id="ville" formControlName="ville"
-                               name="ville"
-                               placeholder="Saisis la viille">
-                     <label for="pays" class="label">Ville</label>
-                   </div>
-                   
-                   <!-- Adress -->
+ 
+                   <!-- Poste -->
                    <div class="champ_input champ_input2">
                      <input class="input_focus"
-                               id="adresse" formControlName="adresse"
-                               name="adresse"
-                               placeholder="Saisissez votre adresse ">
-                     <label for="adresse" class="label">Adresse</label>
+                               id="poste" formControlName="poste"
+                               name="poste"
+                               placeholder="Saisissez votre poste ">
+                     <label for="poste" class="label">Poste</label>
                    </div>
+ 
+                  </div>
 
-                  
-                  
-
-                 </div>
-                 
-                 <div class="double_input">
-                    <!-- Poste -->
-                    <div class="champ_input champ_input2">
-                      <input class="input_focus"
-                                id="poste" formControlName="poste"
-                                name="poste"
-                                placeholder="Saisissez votre poste ">
-                      <label for="poste" class="label">Poste</label>
+                  <div class="grid_colonne">
+                    <!-- Pays -->
+                    <!-- Sélecteur de pays -->
+                    <div class="champ_input div1">
+                      <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
+                        <option value="" disabled selected>Pays</option>
+                        <option value="Mali">Mali</option>
+                        <option value="Sénégal">Sénégal</option>
+                        <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                      </select>
+                      <!-- <label for="pays" class="label">Pays</label> -->
                     </div>
 
-                 </div>
+                    <!-- Champ téléphone -->
+                    <div class="champ_input div2">
+                      <input type="tel" class="input_focus"
+                            id="telephone" formControlName="telephone"
+                            name="telephone"
+                            placeholder="Saisis le numéro de téléphone"
+                            (input)="formatPhoneNumber()">
+                      <label for="telephone" class="label">Téléphone</label>
+                    </div>
+
+                     <!-- Ville -->
+                     <div class="champ_input div3">
+                      <input class="input_focus"
+                                id="ville" formControlName="ville"
+                                name="ville"
+                                placeholder="Saisis la viille">
+                      <label for="pays" class="label">Ville</label>
+                    </div>
+
+                  </div>
                   
                 </div>
               </div>

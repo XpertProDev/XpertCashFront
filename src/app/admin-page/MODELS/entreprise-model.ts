@@ -1,12 +1,11 @@
 export interface Entreprise {
     id?: number;
     nom: string;
-    pays: string;
-    adresse: string;
     email: string;
+    adresse: string;
     telephone: string;
+    pays: string;
     siege: string;
     secteur: string;
-    
 }
 

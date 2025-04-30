@@ -17,14 +17,20 @@ import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-servi
   styleUrl: './add-entreprise-client.component.scss'
 })
 export class AddEntrepriseClientComponent implements OnInit, OnDestroy  {
-
-  
   entrepriseClientForm!: FormGroup;
   errorMessageApi: string = '';
   errorMessage: string = '';
   successMessage: string = '';
   isSubmitting = false;
   private destroy$ = new Subject<void>();
+  entrepriseIndicatif: string = '';
+  entrepriseMaxPhoneLength: number = 0;
+
+  paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
+    'Mali': { indicatif: '+223', longueur: 8 },
+    'Sénégal': { indicatif: '+221', longueur: 9 },
+    'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 }
+  };
 
   constructor(
       private router: Router,
@@ -41,12 +47,55 @@ export class AddEntrepriseClientComponent implements OnInit, OnDestroy  {
     this.destroy$.complete();
   }
 
+  // Ajouter ces méthodes
+  onEntreprisePaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+
+    if (paysInfo) {
+      this.entrepriseIndicatif = `${paysInfo.indicatif} `;
+      this.entrepriseMaxPhoneLength = this.entrepriseIndicatif.length + paysInfo.longueur;
+
+      if (!this.entrepriseClientForm.get('telephone')?.value.startsWith(this.entrepriseIndicatif)) {
+        this.entrepriseClientForm.get('telephone')?.setValue(this.entrepriseIndicatif);
+      }
+
+      this.updatePhoneValidator(paysInfo.longueur);
+    }
+  }
+
+  private updatePhoneValidator(longueur: number): void {
+    this.entrepriseClientForm.controls['telephone'].setValidators([
+      Validators.required,
+      Validators.pattern(`^\\${this.entrepriseIndicatif}\\d{${longueur}}$`)
+    ]);
+    this.entrepriseClientForm.controls['telephone'].updateValueAndValidity();
+  }
+
+  formatEntreprisePhoneNumber(): void {
+    let valeur = this.entrepriseClientForm.get('telephone')?.value;
+    
+    if (!valeur.startsWith(this.entrepriseIndicatif)) {
+      this.entrepriseClientForm.get('telephone')?.setValue(this.entrepriseIndicatif);
+      return;
+    }
+
+    const chiffres = valeur.replace(this.entrepriseIndicatif, '').replace(/\D/g, '');
+    const numeroFormate = this.entrepriseIndicatif + chiffres;
+    this.entrepriseClientForm.get('telephone')?.setValue(
+      numeroFormate.slice(0, this.entrepriseIndicatif.length + this.entrepriseMaxPhoneLength)
+    );
+  }
+
   private initializeForm(): void {
     this.entrepriseClientForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       adresse: [''],
       email: ['', [Validators.email]],
-      telephone: ['', [Validators.pattern(/^[0-9]+$/)]]
+      telephone: [''],
+      pays: [''],
+      siege: [''],
+      secteur: ['']
     });
   }
 

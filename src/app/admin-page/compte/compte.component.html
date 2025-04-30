@@ -72,7 +72,7 @@
             <h4>Ajouter un membre</h4>
             <button class="close-btn" (click)="closePopup()">&times;</button>
         </div>
-        <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        <form [formGroup]="userForm">
           <div class="popup-body">
             
             <div class="double_input">
@@ -136,7 +136,7 @@
           </div>
           <div class="popup-footer">
               <button class="btn-cancel" (click)="closePopup()">Annuler</button>
-              <button class="btn-submit" 
+              <button class="btn-submit" (click)="onSubmit()"
                       [disabled]="userForm.invalid" 
                       [style.backgroundColor]="userForm.valid ? '#0672E4' : '#0671e434'"
                       [style.color]="userForm.valid ? '#ffffff' : '#00000073'"
