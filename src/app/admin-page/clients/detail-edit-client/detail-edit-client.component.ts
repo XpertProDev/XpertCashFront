@@ -40,7 +40,16 @@ export class DetailEditClientComponent {
   loading = false;
   optionsEntreprise$ = new BehaviorSubject<Entreprise[]>([]);
   entrepriseRequiredError = false;
-  
+  indicatif: string = '';
+  maxPhoneLength: number = 0;
+
+
+  // Ajoutez ces propriétés dans la classe
+  paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
+    'Mali': { indicatif: '+223', longueur: 8 },
+    'Sénégal': { indicatif: '+221', longueur: 9 },
+    'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 }
+  };
   
   constructor(
     private router: Router,
@@ -113,6 +122,52 @@ export class DetailEditClientComponent {
     }
   }
 
+  // Ajoutez ces méthodes
+  onPaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+  
+    if (paysInfo) {
+      this.indicatif = `${paysInfo.indicatif} `; // Ajout d'un espace après l'indicatif
+      this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
+  
+      // Met à jour la valeur avec l'indicatif + espace
+      const currentPhone = this.modifierClientForm.get('telephone')?.value || '';
+      if (!currentPhone.startsWith(this.indicatif)) {
+        this.modifierClientForm.get('telephone')?.setValue(this.indicatif);
+      }
+  
+      this.updatePhoneValidator(paysInfo.longueur);
+    }
+  }
+
+  // Modifiez la méthode updatePhoneValidator
+  updatePhoneValidator(longueur: number): void {
+    this.modifierClientForm.controls['telephone'].setValidators([
+      Validators.pattern(`^\\${this.indicatif}\\d{${longueur}}$`)
+    ]);
+    this.modifierClientForm.controls['telephone'].updateValueAndValidity();
+  }
+  
+  // Modifiez la méthode formatPhoneNumber
+  formatPhoneNumber(): void {
+    let valeur = this.modifierClientForm.get('telephone')?.value;
+    
+    // Garantit que l'indicatif avec espace est présent
+    if (!valeur.startsWith(this.indicatif)) {
+      this.modifierClientForm.get('telephone')?.setValue(this.indicatif);
+      return;
+    }
+
+    // Garde uniquement les chiffres après l'indicatif
+    const chiffres = valeur.replace(this.indicatif, '').replace(/\D/g, '');
+    const numeroFormate = this.indicatif + chiffres;
+    
+    // Limite la longueur selon le pays
+    const maxLength = this.indicatif.length + this.maxPhoneLength;
+    this.modifierClientForm.get('telephone')?.setValue(numeroFormate.slice(0, maxLength));
+  }
+
   goToStock() {
     this.router.navigate(['/clients']);
   }
@@ -146,6 +201,7 @@ export class DetailEditClientComponent {
     });
   }
 
+  // Modifiez la méthode populateForm pour initialiser l'indicatif
   private populateForm(client: Clients) {
     this.modifierClientForm.patchValue({
       nomComplet: client.nomComplet,
@@ -154,10 +210,23 @@ export class DetailEditClientComponent {
       adresse: client.adresse,
       poste: client.poste,
       pays: client.pays,
-      ville: client.ville,
-
-
+      ville: client.ville
     });
+
+    // Initialiser l'indicatif si le pays est déjà défini
+    if (client.telephone) {
+      const phoneValue = client.telephone.replace(/(\+\d{3})(\d+)/, '$1 $2');
+      this.modifierClientForm.patchValue({ telephone: phoneValue });
+    }
+  
+    if (client.pays) {
+      const paysInfo = this.paysIndicatifs[client.pays];
+      if (paysInfo) {
+        this.indicatif = `${paysInfo.indicatif} `; // Ajout de l'espace
+        this.maxPhoneLength = paysInfo.longueur;
+        this.updatePhoneValidator(paysInfo.longueur);
+      }
+    }
   }
 
   private handleEntreprise(entreprise: Entreprise | null) {
@@ -174,9 +243,7 @@ export class DetailEditClientComponent {
       adresse: [''],
       poste: [''],
       pays: [''],
-      ville: [''],
-
-      
+      ville: ['']
     });
   }
 

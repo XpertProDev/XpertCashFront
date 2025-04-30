@@ -39,7 +39,7 @@ export class CompteComponent  implements OnInit {
 
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
-    'Senegal': '🇸🇳',
+    'Sénégal': '🇸🇳',
     'Côte d\'Ivoire': '🇨🇮',
     'Guinée': '🇬🇳',
     'Burkina Faso': '🇧🇫',
@@ -51,7 +51,7 @@ export class CompteComponent  implements OnInit {
 
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
     'Mali': { indicatif: '+223', longueur: 8 },
-    'Senegal': { indicatif: '+221', longueur: 9 },
+    'Sénégal': { indicatif: '+221', longueur: 9 },
     'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 },
     'Guinée': { indicatif: '+224', longueur: 9 },
     'Burkina Faso': { indicatif: '+226', longueur: 8 },

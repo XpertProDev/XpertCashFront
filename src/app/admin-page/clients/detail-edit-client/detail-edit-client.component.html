@@ -64,21 +64,24 @@
 
                   <div class="grid_colonne">
                     <!-- Pays -->
+                    <!-- Sélecteur de pays -->
                     <div class="champ_input div1">
-                      <select class="input_focus">
+                      <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
                         <option value="" disabled selected>Pays</option>
                         <option value="Mali">Mali</option>
                         <option value="Sénégal">Sénégal</option>
                         <option value="Côte d'Ivoire">Côte d'Ivoire</option>
                       </select>
+                      <!-- <label for="pays" class="label">Pays</label> -->
                     </div>
 
-                    <!-- Telephone -->
+                    <!-- Champ téléphone -->
                     <div class="champ_input div2">
                       <input type="tel" class="input_focus"
-                                id="telephone" formControlName="telephone"
-                                name="telephone"
-                                placeholder="Saisis le numéro de téléphone">
+                            id="telephone" formControlName="telephone"
+                            name="telephone"
+                            placeholder="Saisis le numéro de téléphone"
+                            (input)="formatPhoneNumber()">
                       <label for="telephone" class="label">Téléphone</label>
                     </div>
 
