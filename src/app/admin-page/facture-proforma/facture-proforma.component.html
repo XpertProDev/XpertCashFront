@@ -85,12 +85,14 @@
 
       <!-- // image etiquette  -->
       <div class="image_etiquette">
-        <img src="assets/etiquette/Etiquette-Sy-XPERTPRO-Gris.png" alt="Etiquette">
-        <div class="etat">
+        <img [src]="getImageSrc(facture.statut)" alt="Etiquette">
+        <div class="etat" [ngClass]="getStatutClass(facture.statut)">
           <p class="tilte_etat"> - Etat - </p>
           <span> {{ facture.statut }} </span>
         </div>
       </div>
+      
+      
 
     </div>
 
