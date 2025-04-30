@@ -658,7 +658,8 @@ tr:hover {
     justify-content: center;
     cursor: pointer;
     position: absolute;
-    left: -7px;
+    // left: -7px;
+    left: -24px;
     transform: rotate(-19deg);
     bottom: -23px;
 }
@@ -679,17 +680,52 @@ tr:hover {
     left: 58px;
 }
 
-.etat p {
+/* Style par défaut */
+.etat {
+    font-size: 10px;
+  }
+  
+  .etat p {
     margin: 0;
     font-size: 10px;
-    color: #5f5959;
-}
-
-.etat span {
-    text-transform: lowercase;
-}
-
-.tilte_etat {
+  }
+  
+  .etat span {
+    text-transform: lowercase !important;
+    font-size: 12px;
+    letter-spacing: 0.50px;
+    font-weight: 500;
+  }
+  
+  .tilte_etat {
     position: relative;
     top: 3px;
-}
+    color: #ffffff89 !important;
+  }
+
+  
+  /* Styles spécifiques à chaque statut */
+
+  .etat-gris span {
+    color: #000;
+  }
+
+  .etat-gris p {
+    color: #0000007b !important;
+  }
+  
+  .etat-rouge p,
+  .etat-rouge span {
+    color: #fff;
+  }
+  
+  .etat-bleu p,
+  .etat-bleu span {
+    color: #fff; 
+  }
+  
+  .etat-vert p,
+  .etat-vert span {
+    color: #fff;
+  }
+  

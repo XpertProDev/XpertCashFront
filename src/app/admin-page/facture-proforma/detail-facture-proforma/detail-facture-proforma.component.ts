@@ -40,6 +40,8 @@ export class DetailFactureProformaComponent implements OnInit {
   selectedStatutLabel = '';
   statusOptions = StatutFactureProForma;
 
+  dateRelance?: string;
+
   constructor(
       private router: Router,
       private produitService: ProduitService,
@@ -374,33 +376,36 @@ canTransitionTo(targetStatus: StatutFactureProForma): boolean {
   return this.isStatusTransitionAllowed(targetStatus);
 }
 
-  confirmStatusChange(): void {
-    if (!this.pendingStatut) return;
+confirmStatusChange(): void {
+  if (!this.pendingStatut) return;
 
-    const modifications: Partial<FactureProForma> = {
-      statut: this.pendingStatut
-    };
+  const modifications: Partial<FactureProForma> = {
+    statut: this.pendingStatut,
+    ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
+      ? { dateRelance: this.dateRelance }
+      : {})
+  };
 
-    this.factureProFormaService.updateFactureProforma(
-      this.factureId,
-      undefined,
-      undefined,
-      modifications
-    ).subscribe({
-      next: (updatedFacture) => {
-        this.factureProForma = updatedFacture;
-        this.showStatusConfirmation = false;
-        this.pendingStatut = null;
-        // Remplacer par votre système de notification
-        // alert('Statut mis à jour avec succès');
-      },
-      error: (err) => {
-        console.error('Erreur de mise à jour', err);
-        alert('Échec de la mise à jour du statut');
-        this.showStatusConfirmation = false;
-      }
-    });
-  }
+  this.factureProFormaService.updateFactureProforma(
+    this.factureId,
+    undefined,
+    undefined,
+    modifications
+  ).subscribe({
+    next: (updatedFacture) => {
+      this.factureProForma = updatedFacture;
+      this.showStatusConfirmation = false;
+      this.pendingStatut = null;
+      this.dateRelance = undefined;
+    },
+    error: (err) => {
+      console.error('Erreur de mise à jour', err);
+      alert('Échec de la mise à jour du statut');
+      this.showStatusConfirmation = false;
+    }
+  });
+}
+
 
   cancelStatusChange(): void {
     this.showStatusConfirmation = false;

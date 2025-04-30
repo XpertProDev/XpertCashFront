@@ -19,7 +19,8 @@
                       <h4>État</h4>
                       <div class="etat_container">
                         <!-- Section des états -->
-                        <div class="etat_content">
+                        <div class="etat_content" [class.has-active]="factureProForma.statut">
+
                             <!-- Bouton Brouillon -->
                             <div class="etat_brouillon">
                                 <button class="btn_etat" 
@@ -80,7 +81,7 @@
                 <div class="information_cadre">
                     <div class="info_titre_input info_titre_input_proforma">
                         <h2>FACTURE PROFORMA : <span> {{ factureProForma.numeroFacture }} </span></h2>
-                        <p style="text-align: right;"> Bamako, le 9 avril 2025 </p>
+                        <p style="text-align: right;">le {{ factureProForma.dateCreation | date:'dd-MM-yyyy' }}</p>
                     </div>
                 </div>
 
@@ -462,14 +463,21 @@
     </div>
   </div>
 
-  <!-- Popup de confirmation -->
+<!-- Popup de confirmation -->
 <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
     <div class="popup-content">
       <h4>Confirmer le changement de statut</h4>
-      <p>Voulez-vous vraiment passer la facture au statut "{{ selectedStatutLabel }}" ?</p>
+      <p>Êtes-vous sûr de vouloir <span class="highlighted-status">{{ selectedStatutLabel }}</span> cette facture ?</p>
+      <!-- Date de relance si ENVOYE -->
+      <div *ngIf="pendingStatut === 'ENVOYE'" class="form-group">
+        <label for="relanceDate" style="font-size: 12px;">Date de relance (facultative) :</label>
+        <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control"/>
+      </div>
+  
       <div class="popup-actions">
         <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
         <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
       </div>
     </div>
   </div>
+  

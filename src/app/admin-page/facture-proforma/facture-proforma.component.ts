@@ -109,4 +109,40 @@ export class FactureProformaComponent implements OnInit {
     // Redirige vers la page de détail
     this.router.navigate(['/facture-proforma-details', factureId]);
   }
+
+  getImageSrc(statut: string): string {
+    switch (statut) {
+      case 'BROUILLON"':
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Gris.png';
+
+      case 'APPROUVE':
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-rouge.png';
+
+      case 'ENVOYE':
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-bleu-.png';
+      
+      case 'VALIDE':
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Vert.png';
+
+      default:
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Gris.png'; 
+    }
+  }
+
+  getStatutClass(statut: string): string {
+    switch (statut) {
+      case 'BROUILLON':
+        return 'etat-gris';
+      case 'APPROUVE':
+        return 'etat-rouge';
+      case 'ENVOYE':
+        return 'etat-bleu';
+      case 'VALIDE':
+        return 'etat-vert';
+      default:
+        return 'etat-gris';
+    }
+  }
+  
+  
 }
