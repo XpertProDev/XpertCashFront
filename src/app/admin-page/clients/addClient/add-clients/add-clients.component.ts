@@ -43,6 +43,14 @@ export class AddClientsComponent implements OnInit {
   optionsEntreprise$ = new BehaviorSubject<Entreprise[]>([]);
   entrepriseRequiredError = false;
   isLoading: boolean = false;
+  indicatif: string = '';
+  maxPhoneLength: number = 0;
+
+  paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
+    'Mali': { indicatif: '+223', longueur: 8 },
+    'Sénégal': { indicatif: '+221', longueur: 9 },
+    'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 }
+  };
 
   constructor(
     private router: Router,
@@ -50,6 +58,42 @@ export class AddClientsComponent implements OnInit {
     private entrepriseService: EntrepriseService,
     private clientService: ClientService,
   ) {}
+
+  onPaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+  
+    if (paysInfo) {
+      this.indicatif = `${paysInfo.indicatif} `;
+      this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
+  
+      if (!this.clientForm.get('telephone')?.value.startsWith(this.indicatif)) {
+        this.clientForm.get('telephone')?.setValue(this.indicatif);
+      }
+  
+      this.updatePhoneValidator(paysInfo.longueur);
+    }
+  }
+
+  updatePhoneValidator(longueur: number): void {
+    this.clientForm.controls['telephone'].setValidators([
+      Validators.pattern(`^\\${this.indicatif}\\d{${longueur}}$`)
+    ]);
+    this.clientForm.controls['telephone'].updateValueAndValidity();
+  }
+
+  formatPhoneNumber(): void {
+    let valeur = this.clientForm.get('telephone')?.value;
+    
+    if (!valeur.startsWith(this.indicatif)) {
+      this.clientForm.get('telephone')?.setValue(this.indicatif);
+      return;
+    }
+  
+    const chiffres = valeur.replace(this.indicatif, '').replace(/\D/g, '');
+    const numeroFormate = this.indicatif + chiffres;
+    this.clientForm.get('telephone')?.setValue(numeroFormate.slice(0, this.indicatif.length + this.maxPhoneLength));
+  }
 
   async testImageCompression(file: File) {
       if (!file) {
@@ -130,8 +174,11 @@ export class AddClientsComponent implements OnInit {
     this.clientForm = this.fb.group({
       nomComplet: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.email]],
-      telephone: [''],
-      adresse: ['']
+      telephone: ['', Validators.required],
+      adresse: [''],
+      poste: [''],
+      pays: [''],
+      ville: ['']
     });
   }
 
