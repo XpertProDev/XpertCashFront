@@ -3,7 +3,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Produit } from '../MODELS/produit.model';
-import { catchError, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -110,5 +110,17 @@ export class ProduitService {
   getProduitsParEntreprise(entrepriseId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/produits/entreprise/${entrepriseId}`);
   }
+
+  // Méthode pour recuperer les fournisseur de lutilisateur connecter
+  getFournisseurs(): Observable<any[]> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+  
+    return this.http.get<any[]>(`${this.apiUrl}/get-fournisseurs`, { headers });
+  }
+  
+  
   
 }
