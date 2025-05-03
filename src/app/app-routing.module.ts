@@ -250,6 +250,12 @@ const routes: Routes = [
       },
 
       {
+        path: 'facture-reel',
+        loadComponent: () => import('./admin-page/facture-reel/facture-reel.component').then(m => m.FactureReelComponent),
+        canActivate: [authGuard]
+      },
+
+      {
         path: 'addfacture-proforma',
         loadComponent: () => import('./admin-page/facture-proforma/addfacture-proforma/addfacture-proforma.component').then(m => m.AddfactureProformaComponent),
         canActivate: [authGuard]

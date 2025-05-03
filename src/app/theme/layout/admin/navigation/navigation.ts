@@ -131,7 +131,7 @@ export const NavigationItems: NavigationItem[] = [
                 id: 'facture-reelle',
                 title: 'Facture reelle',
                 type: 'item',
-                url: '/facture-reelle',
+                url: '/facture-reel',
               },
 
             ]
