@@ -263,6 +263,20 @@ const routes: Routes = [
         canActivate: [authGuard]
       },
 
+      // La routing de ajouter fournisseur
+      {
+        path: 'ajouter-fournisseur',
+        loadComponent: () => import('./admin-page/fournisseurs/add-fournisseur/add-fournisseur.component').then(m => m.AddFournisseurComponent),
+        canActivate: [authGuard]
+      },
+
+      // La routing de detail fournisseur
+      {
+        path: 'detail-fournisseur/:id',
+        loadComponent: () => import('./admin-page/fournisseurs/detail-edit-fournisseur/detail-edit-fournisseur.component').then(m => m.DetailEditFournisseurComponent),
+        canActivate: [authGuard]
+      },
+
     ]
   }
 ];
