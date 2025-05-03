@@ -116,10 +116,10 @@ export class FactureProformaComponent implements OnInit {
         return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Gris.png';
 
       case 'APPROUVE':
-        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-rouge.png';
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-bleu-.png';
 
       case 'ENVOYE':
-        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-bleu-.png';
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-orange.png';
       
       case 'VALIDE':
         return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Vert.png';
@@ -134,15 +134,16 @@ export class FactureProformaComponent implements OnInit {
       case 'BROUILLON':
         return 'etat-gris';
       case 'APPROUVE':
-        return 'etat-rouge';
-      case 'ENVOYE':
         return 'etat-bleu';
+      case 'ENVOYE':
+        return 'etat-orange';
       case 'VALIDE':
-        return 'etat-vert';
+        return 'etat-vert'; 
       default:
         return 'etat-gris';
     }
   }
+  
   
   
 }

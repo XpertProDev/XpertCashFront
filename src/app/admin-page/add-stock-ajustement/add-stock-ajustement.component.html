@@ -71,11 +71,21 @@
                       </div>
                     </div>
                     <!-- Fournisseur -->
-                    <div class="champ_input champ_input2">
-                      <div class="title_input">Fournisseur</div>
-                      <select required name="action" class="input_focus">
-                        <option value="">Choisissez-en un</option>
+                    <div class="champ_input champ_input2" *ngIf="selectedAction === 'ajouter'">
+                      <div class="champ_input_list_stocke" style="margin-right: 15px;">
+                        <div class="title_input2" style="text-align: center;">Facture fournisseur</div>
+                    
+                        <select class="input_table2"
+                              id="fournisseurId"
+                              formControlName="fournisseurId" 
+                              style="text-align: center; margin-bottom: 3px!important;">
+                            <option value="">-- Sélectionnez un fournisseur --</option>
+                            <option *ngFor="let f of fournisseurs" [value]="f.id">
+                              {{ f.nomComplet }}
+                            </option>
                       </select>
+
+                      </div>
                     </div>
 
                      <!-- Code Fournisseur (Affiché uniquement si "Ajouter" est sélectionné) -->

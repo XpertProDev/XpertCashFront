@@ -10,6 +10,9 @@ import { ProduitService } from '../SERVICES/produit.service';
 // import { SharedDataService } from '../SERVICES/shared-data.service';
 import { UsersService } from '../SERVICES/users.service';
 import { Produit } from '../MODELS/produit.model';
+import { Fournisseurs } from '../MODELS/fournisseurs-model';
+
+
 import { StockService } from '../SERVICES/stocks.service';
 import { Stock } from '../MODELS/stock.model';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
@@ -98,6 +101,7 @@ export class AddStockAjustementComponent {
     // this.loadProduits(this.usersService.getUserBoutiqueId() ?? undefined);
     this.getAjusteForm();
     this.getControleBoutique();
+    this.loadFournisseurs();
   }
 
   getControleBoutique() : void {
@@ -172,6 +176,7 @@ export class AddStockAjustementComponent {
   // select de produit
   selectedProduct: Produit | null = null;
   tasks: Produit[] = [];
+  fournisseurs: Fournisseurs[] = [];
 
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
   loadProduits(boutiqueId: number): void {
@@ -221,6 +226,19 @@ export class AddStockAjustementComponent {
   }
   get r() { return this.ajusteRetirerForm.controls; }
 
+  // Charge les fournisseur depuis le backend et effectue le mapping pour l'affichage
+  loadFournisseurs(): void {
+    this.produitService.getFournisseurs().subscribe({
+      next: (fournisseurs: Fournisseurs[]) => {
+        this.fournisseurs = fournisseurs;
+        console.log('Fournisseurs:', this.fournisseurs);
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des fournisseurs", err);
+        this.fournisseurs = [];
+      }
+    });
+  }
 
 
   get stockApres(): number | string {
@@ -311,6 +329,7 @@ export class AddStockAjustementComponent {
     this.ajusteForm = this.fb.group({
       descriptionGlobal: ['', [Validators.minLength(2), Validators.maxLength(100)]],
       codeFournisseur: ['', [Validators.minLength(4), Validators.maxLength(100)]],
+      fournisseurId: [null],
 
     });
   }
@@ -346,7 +365,8 @@ export class AddStockAjustementComponent {
         stockApres: this.stockApres,
         prixVente: this.selectedProduct.prixVente,
         descriptionAjout: this.descriptionAjout ,
-        codeFournisseur: this.codeFournisseur
+        codeFournisseur: this.codeFournisseur,
+        fournisseurId: this.fournisseurs.find(f => f.nomComplet === this.codeFournisseur)?.id
       }
     ];
 
@@ -451,7 +471,7 @@ export class AddStockAjustementComponent {
     this.successMessage = '';
     const adjustmentsToProcess = [...this.pendingAdjustments];
   
-    // Ajouter le produit sélectionné actuel s'il est valide
+    // Ajouter le produit sélectionné s'il est valide
     if (this.selectedProduct && this.quantiteAjoute && this.quantiteAjoute > 0) {
       const existingIndex = adjustmentsToProcess.findIndex(
         item => item.produitId === this.selectedProduct!.id
@@ -464,8 +484,8 @@ export class AddStockAjustementComponent {
           quantiteAjoute: this.quantiteAjoute,
           stockActuel: this.selectedProduct.quantite,
           stockApres: this.selectedProduct.quantite + this.quantiteAjoute,
-          prixVente: this.selectedProduct.prixVente
-          
+          prixVente: this.selectedProduct.prixVente,
+          fournisseurId: this.ajusteForm.value.fournisseurId  // ✅ bien utiliser un champ fournisseurId
         });
       }
     }
@@ -477,14 +497,20 @@ export class AddStockAjustementComponent {
       }, {} as { [key: string]: number });
   
       const descriptionGlobal = this.ajusteForm.value.descriptionGlobal || '';
+      const fournisseurId = this.ajusteForm.value.fournisseurId || null;
       const codeFournisseur = this.ajusteForm.value.codeFournisseur || '';
-
   
-      this.stockService.ajouterStock({
-        produitsQuantites: produitsQuantites,
-        codeFournisseur: codeFournisseur,
-
-      }).subscribe({
+      // ✅ construire dynamiquement l'objet à envoyer
+      const dataToSend: any = {
+        produitsQuantites,
+        description: descriptionGlobal,
+        codeFournisseur
+      };
+      if (fournisseurId) {
+        dataToSend.fournisseurId = fournisseurId;
+      }
+  
+      this.stockService.ajouterStock(dataToSend).subscribe({
         next: (response) => {
           // Mise à jour locale
           adjustmentsToProcess.forEach(adjustment => {
@@ -504,6 +530,7 @@ export class AddStockAjustementComponent {
       this.showErrorModal('Veuillez sélectionner au moins un produit avec une quantité valide');
     }
   }
+  
 
   /* Méthode pour retirer du stock en regroupant les ajustements */
   RetirerDesQuan(): void {
