@@ -3,6 +3,5 @@ node_modules
 .angular/cache/
 yarn.lock
 package-lock.json
-.DS_Store
 
 
