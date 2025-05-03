@@ -66,6 +66,14 @@ export const NavigationItems: NavigationItem[] = [
         icon: 'feather icon-clipboard'
       },
       {
+        id: 'facture',
+        title: 'Factures',
+        type: 'item',
+        url: '/facture',
+        classes: 'nav-item',
+        icon: 'feather icon-file'
+      },
+      {
         id: 'clients',
         title: 'Clients',
         type: 'item',
@@ -88,14 +96,6 @@ export const NavigationItems: NavigationItem[] = [
         url: '/comptabilite',
         classes: 'nav-item',
         icon: 'feather icon-clipboard'
-      },
-      {
-        id: 'facture',
-        title: 'Factures',
-        type: 'item',
-        url: '/facture',
-        classes: 'nav-item',
-        icon: 'feather icon-file'
       },
       {
         id: 'boutique',
