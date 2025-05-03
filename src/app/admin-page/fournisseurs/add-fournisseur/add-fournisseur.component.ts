@@ -102,7 +102,7 @@ export class AddFournisseurComponent {
     });
   }
 
-  goToClients() {
+  goToFournisseur() {
     this.router.navigate(['/fournisseurs']);
   }
 

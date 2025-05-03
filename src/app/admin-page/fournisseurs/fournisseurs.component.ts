@@ -56,7 +56,7 @@ export class FournisseursComponent {
   loadFournisseurs(): void {
     this.produitService.getFournisseurs().subscribe({
       next: (fournisseurs: Fournisseurs[]) => {
-        this.fournisseurs = fournisseurs;
+        this.fournisseurs = fournisseurs.reverse();
         console.log('Fournisseurs:', this.fournisseurs);
       },
       error: (err) => {
