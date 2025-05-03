@@ -658,7 +658,8 @@ tr:hover {
     justify-content: center;
     cursor: pointer;
     position: absolute;
-    left: -7px;
+    // left: -7px;
+    left: -24px;
     transform: rotate(-19deg);
     bottom: -23px;
 }
@@ -690,18 +691,27 @@ tr:hover {
   }
   
   .etat span {
-    text-transform: lowercase;
+    text-transform: lowercase !important;
+    font-size: 12px;
+    letter-spacing: 0.50px;
+    font-weight: 500;
   }
   
   .tilte_etat {
     position: relative;
     top: 3px;
+    color: #ffffff89 !important;
   }
+
   
   /* Styles spécifiques à chaque statut */
-  .etat-gris p,
+
   .etat-gris span {
     color: #000;
+  }
+
+  .etat-gris p {
+    color: #0000007b !important;
   }
   
   .etat-orange p,
@@ -711,7 +721,7 @@ tr:hover {
   
   .etat-bleu p,
   .etat-bleu span {
-    color: #fff; /* texte blanc pour fond bleu */
+    color: #fff; 
   }
   
   .etat-vert p,

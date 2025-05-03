@@ -1,1 +1,102 @@
 <p>{{ fournisseurs | json }}</p>
+
+<!-- fournisseurs.component.html -->
+<div class="containerTable">
+    <!-- En-tête -->
+    <div class="tasks-header">
+      <h1 class="title">Mes Fournisseurs</h1>
+      <div class="actions">
+        <button class="add-task" routerLink="/ajouter-fournisseur">
+          Créer un fournisseur
+        </button>
+
+        <div class="barre"></div>
+
+        <!-- Sélection de vue -->
+        <div class="contentIcon" (click)="showDropdown = !showDropdown" clickOutside (clickOutside)="showDropdown = false">
+          <i [class]="isListView ? 'ri-list-check' : 'ri-apps-fill'"></i>
+          <div class="view-dropdown" *ngIf="showDropdown">
+            <div class="dropdown-item" (click)="toggleView('list')">
+                Liste {{ isListView ? '✓' : '' }}
+            </div>
+            <div class="dropdown-item" (click)="toggleView('grid')">
+                Cadre {{ !isListView ? '✓' : '' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="barre"></div>
+        
+        <div class="inputSearch">
+          <i class="ri-search-2-line"></i>
+          <input 
+            type="text"
+            placeholder="Recherche...." 
+            [(ngModel)]="searchQuery"
+            (input)="applyFilter()"
+          />
+        </div>
+      </div>
+    </div>
+    
+    <!-- Vue Tableau -->
+    <table *ngIf="isListView">
+      <thead>
+        <th>Nom</th>
+        <th (click)="sort('email')">
+          Email 
+          <i [class]="sortField === 'email' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
+        </th>
+        <th (click)="sort('adresse')">Adresse</th>
+        <th (click)="sort('telephone')">Téléphone</th>
+        <th>Date Création</th>
+      </thead>
+
+      <tbody>
+          <tr *ngFor="let fournisseur of paginatedFournisseurs" (click)="openDetail(fournisseur.id)">
+              <td>{{ fournisseur.nomComplet || 'Non renseigné' }}</td>
+              <td>{{ fournisseur.email || 'Non renseigné' }}</td>
+              <td>{{ fournisseur.adresse || 'Non renseigné' }}</td>
+              <td>{{ fournisseur.telephone || 'Non renseigné' }}</td>
+              <td>{{ fournisseur.createdAt | date: 'dd/MM/yyyy' }}</td>
+          </tr>
+      </tbody>
+    </table>
+    
+    <!-- Vue Cadre -->
+    <div class="container_cadre" *ngIf="!isListView">
+      <div class="grid-view">
+        <div class="client-card" *ngFor="let fournisseur of paginatedFournisseurs" (click)="openDetail(fournisseur.id)">
+          <div class="name_icon">
+            <h3>{{ fournisseur.nomComplet }}</h3>
+            <span class="dateCreat">{{ fournisseur.createdAt | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <!-- <div class="content_cadre_double"> -->
+            <div class="info_cadre">
+                <p><i class="ri-mail-line"></i>{{ fournisseur.email || 'Non renseigné' }}</p>
+                <p><i class="ri-map-pin-line"></i>{{ fournisseur.adresse || 'Non renseigné' }}</p>
+                <p><i class="ri-phone-line"></i>{{ fournisseur.telephone || 'Non renseigné' }}</p>
+            </div>
+            <!-- <div class="imgClient_grid">
+              <img src="assets/img/supplier-icon.png" alt="Icon fournisseur">
+            </div> -->
+          <!-- </div> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Message vide -->
+    <div *ngIf="fournisseurs.length === 0" class="no-client-message">
+      Aucun fournisseur trouvé
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <mat-paginator
+        [length]="fournisseurs.length"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[6, 10, 25, 100]"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+</div>
