@@ -90,11 +90,28 @@
                              placeholder="Saisis le numéro de téléphone"
                              (input)="formatEntreprisePhoneNumber()">
                       <label for="telephone" class="label">Téléphone</label>
-                      <div *ngIf="entrepriseClientForm.get('telephone')?.touched && entrepriseClientForm.get('telephone')?.invalid" 
-                            class="error">
-                        <small *ngIf="entrepriseClientForm.get('telephone')?.errors?.['pattern']">
-                          Format invalide pour le pays sélectionné
+                    
+                      <!-- On récupère d’abord "pays" via un alias dans le même *ngIf -->  
+                      <div *ngIf="
+                            entrepriseClientForm.get('telephone')?.touched &&
+                            entrepriseClientForm.get('telephone')?.errors?.['pattern'] &&
+                            entrepriseClientForm.get('pays')?.value as pays
+                          "
+                          class="error">
+                        <small>
+                          Le numéro doit contenir
+                          {{ paysIndicatifs[pays].longueur }}
+                          chiffres après l’indicatif {{ paysIndicatifs[pays].indicatif.trim() }}.
                         </small>
+                      </div>
+                    
+                      <!-- Optionnel : champ requis -->
+                      <div *ngIf="
+                            entrepriseClientForm.get('telephone')?.touched &&
+                            entrepriseClientForm.get('telephone')?.errors?.['required']
+                          "
+                          class="error">
+                        <small>Le téléphone est requis.</small>
                       </div>
                     </div>
         

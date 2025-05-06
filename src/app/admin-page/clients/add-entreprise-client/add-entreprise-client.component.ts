@@ -27,9 +27,9 @@ export class AddEntrepriseClientComponent implements OnInit, OnDestroy  {
   entrepriseMaxPhoneLength: number = 0;
 
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
-    'Mali': { indicatif: '+223', longueur: 8 },
-    'Sénégal': { indicatif: '+221', longueur: 9 },
-    'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 }
+    'Mali': { indicatif: '+223 ', longueur: 8 },
+    'Sénégal': { indicatif: '+221 ', longueur: 9 },
+    'Côte d\'Ivoire': { indicatif: '+225 ', longueur: 10 }
   };
 
   constructor(
@@ -49,43 +49,47 @@ export class AddEntrepriseClientComponent implements OnInit, OnDestroy  {
 
   // Ajouter ces méthodes
   onEntreprisePaysChange(event: any): void {
-    const paysSelectionne = event.target.value;
+    const paysSelectionne = event.target.value as string;
     const paysInfo = this.paysIndicatifs[paysSelectionne];
-
-    if (paysInfo) {
-      this.entrepriseIndicatif = `${paysInfo.indicatif} `;
-      this.entrepriseMaxPhoneLength = this.entrepriseIndicatif.length + paysInfo.longueur;
-
-      if (!this.entrepriseClientForm.get('telephone')?.value.startsWith(this.entrepriseIndicatif)) {
-        this.entrepriseClientForm.get('telephone')?.setValue(this.entrepriseIndicatif);
-      }
-
-      this.updatePhoneValidator(paysInfo.longueur);
+    if (!paysInfo) return;
+  
+    this.entrepriseIndicatif    = paysInfo.indicatif;
+    this.entrepriseMaxPhoneLength = paysInfo.longueur;
+  
+    const ctrl = this.entrepriseClientForm.get('telephone')!;
+    if (!ctrl.value?.startsWith(this.entrepriseIndicatif)) {
+      ctrl.setValue(this.entrepriseIndicatif);
     }
+    this.updatePhoneValidator(paysInfo.longueur);
   }
 
+  // Méthode de mise à jour du validateur
   private updatePhoneValidator(longueur: number): void {
-    this.entrepriseClientForm.controls['telephone'].setValidators([
-      Validators.required,
-      Validators.pattern(`^\\${this.entrepriseIndicatif}\\d{${longueur}}$`)
-    ]);
-    this.entrepriseClientForm.controls['telephone'].updateValueAndValidity();
+    const ctrl = this.entrepriseClientForm.get('telephone')!;
+    const regex = new RegExp(`^\\${this.entrepriseIndicatif.trim()}\\s\\d{${longueur}}$`);
+    ctrl.setValidators([Validators.required, Validators.pattern(regex)]);
+    ctrl.updateValueAndValidity();
   }
+  
 
+  // Formatage "en direct" du numéro
   formatEntreprisePhoneNumber(): void {
-    let valeur = this.entrepriseClientForm.get('telephone')?.value;
-    
+    const ctrl = this.entrepriseClientForm.get('telephone')!;
+    let valeur = ctrl.value as string;
+  
     if (!valeur.startsWith(this.entrepriseIndicatif)) {
-      this.entrepriseClientForm.get('telephone')?.setValue(this.entrepriseIndicatif);
+      ctrl.setValue(this.entrepriseIndicatif);
       return;
     }
-
+  
+    // Retirer tout sauf les chiffres après l’indicatif
     const chiffres = valeur.replace(this.entrepriseIndicatif, '').replace(/\D/g, '');
-    const numeroFormate = this.entrepriseIndicatif + chiffres;
-    this.entrepriseClientForm.get('telephone')?.setValue(
-      numeroFormate.slice(0, this.entrepriseIndicatif.length + this.entrepriseMaxPhoneLength)
-    );
+  
+    // Reformater avec espace conservé
+    const numeroFormate = `${this.entrepriseIndicatif}${chiffres}`.slice(0, this.entrepriseIndicatif.length + this.entrepriseMaxPhoneLength);
+    ctrl.setValue(numeroFormate, { emitEvent: false });
   }
+  
 
   private initializeForm(): void {
     this.entrepriseClientForm = this.fb.group({
