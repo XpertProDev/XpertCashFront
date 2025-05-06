@@ -3,6 +3,8 @@ import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FournisseurService } from '../../SERVICES/fournisseur-service';
+import { Fournisseurs } from '../../MODELS/fournisseurs-model';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-detail-edit-fournisseur',
@@ -31,10 +33,12 @@ export class DetailEditFournisseurComponent {
     private fb: FormBuilder,
     private fournisseurService: FournisseurService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
     this.getInitForm();
+    this.loadFournisseur();
   }
 
   getInitForm() {
@@ -101,4 +105,21 @@ export class DetailEditFournisseurComponent {
     this.router.navigate(['/fournisseurs']);
   }
 
+  fournisseur!: Fournisseurs;
+
+  
+    private loadFournisseur(): void {
+      const id = Number(this.route.snapshot.paramMap.get('id'));
+      if (!id) {
+        console.error('ID du fournisseur non valide');
+        return;
+      }
+  
+      this.fournisseurService.getFournisseurById(id).subscribe({
+        next: (data) => this.fournisseur = data,
+        error: (err) => console.error('Erreur de chargement du fournisseur', err)
+      });
+    }
+
 }
+ 

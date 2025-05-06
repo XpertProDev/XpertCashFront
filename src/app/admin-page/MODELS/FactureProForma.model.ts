@@ -1,5 +1,6 @@
 export enum StatutFactureProForma {
   BROUILLON = 'BROUILLON',
+  APPROBATION = 'APPROBATION',
   APPROUVE = 'APPROUVE',
   ENVOYE = 'ENVOYE',
   VALIDE   = 'VALIDE'
@@ -36,6 +37,7 @@ export interface FactureProForma {
     id: number;
     numeroFacture: string;
     dateCreation: string;
+    dateApprobation?: string;
     description: string;
     totalHT: number;
     remise?: number;
