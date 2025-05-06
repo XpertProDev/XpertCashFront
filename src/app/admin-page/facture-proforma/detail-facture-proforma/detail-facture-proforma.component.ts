@@ -42,6 +42,9 @@ export class DetailFactureProformaComponent implements OnInit {
 
   dateRelance?: string;
 
+  users: any[] = [];
+  filteredUsers: any[] = [];
+
   constructor(
       private router: Router,
       private produitService: ProduitService,
@@ -53,6 +56,7 @@ export class DetailFactureProformaComponent implements OnInit {
   ngOnInit(): void {
     this.getProduits();
     this.getUserInfo();
+    this.loadUsersOfEntreprise(this.userEntrepriseId!);
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.factureId = +idParam;
@@ -328,6 +332,10 @@ export class DetailFactureProformaComponent implements OnInit {
     return this.factureProForma.statut === StatutFactureProForma.BROUILLON;
   }
 
+  canSendToApproval(): boolean {
+    return this.factureProForma.statut === StatutFactureProForma.APPROBATION;
+  }
+
   canSend(): boolean {
     return this.factureProForma.statut === StatutFactureProForma.APPROUVE;
   }
@@ -341,6 +349,10 @@ export class DetailFactureProformaComponent implements OnInit {
       this.pendingStatut = newStatut;
       this.selectedStatutLabel = this.getStatusLabel(newStatut);
       this.showStatusConfirmation = true;
+
+      if (newStatut === StatutFactureProForma.APPROBATION) {
+        this.loadUsersOfEntreprise(this.userEntrepriseId!);
+      }
     }
   }
 
@@ -351,8 +363,13 @@ export class DetailFactureProformaComponent implements OnInit {
     const allowedTransitions: Record<StatutFactureProForma, StatutFactureProForma[]> = {
       [StatutFactureProForma.BROUILLON]: [
         StatutFactureProForma.APPROUVE,
+        StatutFactureProForma.APPROBATION,
         StatutFactureProForma.ENVOYE,
         StatutFactureProForma.VALIDE // Si vous voulez autoriser la validation directe
+      ],
+      [StatutFactureProForma.APPROBATION]: [
+        StatutFactureProForma.APPROUVE,
+        StatutFactureProForma.BROUILLON
       ],
       [StatutFactureProForma.APPROUVE]: [
         StatutFactureProForma.ENVOYE,
@@ -379,6 +396,10 @@ canTransitionTo(targetStatus: StatutFactureProForma): boolean {
 confirmStatusChange(): void {
   if (!this.pendingStatut) return;
 
+  const selectedUsers = this.users
+  .filter(user => user.selected)
+  .map(user => user.id);
+
   const modifications: Partial<FactureProForma> = {
     statut: this.pendingStatut,
     ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
@@ -390,7 +411,8 @@ confirmStatusChange(): void {
     this.factureId,
     undefined,
     undefined,
-    modifications
+    modifications,
+    this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
   ).subscribe({
     next: (updatedFacture) => {
       this.factureProForma = updatedFacture;
@@ -415,6 +437,7 @@ confirmStatusChange(): void {
   private getStatusLabel(statut: StatutFactureProForma): string {
     const labels: Record<StatutFactureProForma, string> = {
       [StatutFactureProForma.BROUILLON]: 'Brouillon',
+      [StatutFactureProForma.APPROBATION]: 'Approbation',
       [StatutFactureProForma.APPROUVE]: 'Approuvé',
       [StatutFactureProForma.ENVOYE]: 'Envoyé',
       [StatutFactureProForma.VALIDE]: 'Validé'
@@ -423,5 +446,23 @@ confirmStatusChange(): void {
   }
     
   
+  loadUsersOfEntreprise(entrepriseId: number) {
+    this.isLoading = true;
+    this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
+      next: (data) => {
+        this.users = data.map(user => ({
+          ...user,
+          selected: false
+        }));
+        this.filteredUsers = this.users; // Mise à jour des utilisateurs filtrés
+        this.isLoading = false;
+        console.log('Utilisateurs récupérés:', this.users);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des utilisateurs', err);
+        this.isLoading = false;
+      }
+    });
+  }
 
 }

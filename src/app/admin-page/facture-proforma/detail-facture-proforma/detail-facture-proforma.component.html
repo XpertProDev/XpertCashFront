@@ -30,6 +30,16 @@
                                 Brouillon
                                 </button>
                             </div>
+
+                             <!-- Bouton Approbation -->
+                             <div class="etat_approbation" *ngIf="!factureProForma.dateApprobation">
+                                <button class="btn_etat" 
+                                        [class.active]="factureProForma.statut === statusOptions.APPROBATION"
+                                        [disabled]="!canTransitionTo(statusOptions.APPROBATION)"
+                                        (click)="openStatusConfirmation(statusOptions.APPROBATION)">
+                                  Approbation
+                                </button>
+                              </div>
                             
                             <!-- Bouton Approuver -->
                             <div class="etat_approuver">
@@ -480,4 +490,51 @@
       </div>
     </div>
   </div>
+
+  <!-- Liste des utilisateurs à cocher si statut = Approbation -->
+  <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
+    <div class="popup-content">
+      <h4>Confirmer le changement de statut</h4>
+      <p>
+        Êtes-vous sûr de vouloir 
+        <span class="highlighted-status">{{ selectedStatutLabel }}</span> 
+        cette facture ?
+      </p>
+  
+      <!-- Affichage conditionnel selon le statut -->
+      <div *ngIf="pendingStatut === 'ENVOYE'" class="form-group">
+        <label for="relanceDate" style="font-size: 12px;">Date de relance (facultative) :</label>
+        <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control" />
+      </div>
+  
+      <!-- ✅ Liste des utilisateurs pour l'approbation -->
+      <div *ngIf="pendingStatut === 'APPROBATION'" class="form-group">
+        <label style="font-size: 12px;">Sélectionnez les utilisateurs à notifier :</label>
+        <div *ngIf="users.length === 0">Aucun utilisateur à afficher</div>
+
+            <div *ngFor="let user of users" style="display: flex; align-items: center;">
+            <input
+                type="checkbox"
+                [(ngModel)]="user.selected"
+                id="user_{{ user.id }}"
+                style="margin-right: 8px; margin-bottom: 8px;"
+            />
+            <label for="user_{{ user.id }}">
+                {{ user.nomComplet }} - {{ user.phone }}
+            </label>
+            </div>
+
+      </div>
+  
+      <div class="popup-actions">
+        <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
+        <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
+      </div>
+    </div>
+  </div>
+  
+
+
+  
+  
   

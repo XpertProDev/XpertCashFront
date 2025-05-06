@@ -74,7 +74,8 @@ export class FactureProFormaService {
     factureId: number,
     remisePourcentage: number | undefined,
     appliquerTVA: boolean | undefined,
-    modifications: Partial<FactureProForma>
+    modifications: Partial<FactureProForma>,
+    idsApprobateurs?: number[]
   ): Observable<FactureProForma> {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -95,6 +96,13 @@ export class FactureProFormaService {
     if (appliquerTVA !== undefined) {
       params = params.set('appliquerTVA', appliquerTVA.toString());
     }
+
+    if (idsApprobateurs && idsApprobateurs.length > 0) {
+      idsApprobateurs.forEach(id => {
+        params = params.append('idsApprobateurs', id.toString());
+      });
+    }
+
 
     return this.http.put<FactureProForma>(
       `${this.apiUrl}/updatefacture/${factureId}`,
