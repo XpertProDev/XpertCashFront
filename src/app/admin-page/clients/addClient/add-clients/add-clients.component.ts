@@ -78,11 +78,15 @@ export class AddClientsComponent implements OnInit {
   }
 
   updatePhoneValidator(longueur: number): void {
+    // on impose exactement {longueur} chiffres après l’indicatif
+    const regex = new RegExp(`^\\${this.indicatif}\\d{${longueur}}$`);
     this.clientForm.controls['telephone'].setValidators([
-      Validators.pattern(`^\\${this.indicatif}\\d{${longueur}}$`)
+      Validators.required,
+      Validators.pattern(regex)
     ]);
     this.clientForm.controls['telephone'].updateValueAndValidity();
   }
+  
 
   formatPhoneNumber(): void {
     let valeur = this.clientForm.get('telephone')?.value;

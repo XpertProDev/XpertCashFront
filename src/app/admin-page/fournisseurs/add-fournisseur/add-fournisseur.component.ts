@@ -22,10 +22,13 @@ export class AddFournisseurComponent {
   errorMessage = '';
   successMessage = '';
   errorMessageApi = '';
-  countryDialCodes = {
-    'Mali': '+223',
-    'Sénégal': '+221',
-    'Côte d\'Ivoire': '+225'
+  indicatif: string = '';
+  maxPhoneLength: number = 0;
+
+  paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
+    'Mali': { indicatif: '+223 ', longueur: 8 },
+    'Sénégal': { indicatif: '+221 ', longueur: 9 },
+    'Côte d\'Ivoire': { indicatif: '+225 ', longueur: 10 }
   };
 
   constructor(
@@ -52,35 +55,51 @@ export class AddFournisseurComponent {
   onPaysChange(event: Event) {
     const select = event.target as HTMLSelectElement;
     const pays = select.value;
-    const dialCode = this.countryDialCodes[pays as keyof typeof this.countryDialCodes];
-    
-    if (dialCode) {
-      const currentPhone = this.fournisseurForm.get('telephone')?.value || '';
-      if (!currentPhone.startsWith(dialCode)) {
-        this.fournisseurForm.get('telephone')?.setValue(dialCode);
+    const paysInfo = this.paysIndicatifs[pays];
+  
+    if (paysInfo) {
+      this.indicatif = paysInfo.indicatif;
+      this.maxPhoneLength = paysInfo.longueur;
+  
+      const ctrl = this.fournisseurForm.get('telephone')!;
+      // préfixe si nécessaire
+      if (!ctrl.value?.startsWith(this.indicatif)) {
+        ctrl.setValue(this.indicatif);
       }
+      this.updatePhoneValidator(paysInfo.longueur);
     }
   }
+
+  private updatePhoneValidator(longueur: number): void {
+    const ctrl = this.fournisseurForm.get('telephone')!;
+    // on impose exactement {longueur} chiffres après l’indicatif
+    const regex = new RegExp(`^\\${this.indicatif}\\d{${longueur}}$`);
+    ctrl.setValidators([
+      Validators.required,
+      Validators.pattern(regex)
+    ]);
+    ctrl.updateValueAndValidity();
+  }  
 
   formatPhoneNumber() {
     const ctrl = this.fournisseurForm.get('telephone')!;
     let raw = ctrl.value as string;
-    const pays = this.fournisseurForm.get('pays')?.value;
-    const dialCode = this.countryDialCodes[pays as keyof typeof this.countryDialCodes] || '';
+    const pays = this.fournisseurForm.get('pays')?.value as string;
+    const paysInfo = this.paysIndicatifs[pays];
   
-    // 1) On retire le dialCode existant pour ne pas le dupliquer
-    if (dialCode && raw.startsWith(dialCode)) {
-      raw = raw.substring(dialCode.length);
+    // 1) Retirer l’indicatif s’il est déjà présent
+    if (paysInfo && raw.startsWith(paysInfo.indicatif)) {
+      raw = raw.substring(paysInfo.indicatif.length);
     }
-    // 2) On ne conserve que les chiffres
+    // 2) Conserver que les chiffres
     const cleaned = raw.replace(/\D/g, '');
   
-    // 3) On remet le dialCode + un espace + le bloc de chiffres
-    const formatted = dialCode 
-      ? `${dialCode} ${cleaned}` 
+    // 3) Remonter l’indicatif + espace + chiffres
+    const formatted = paysInfo
+      ? `${paysInfo.indicatif}${cleaned}`.slice(0, paysInfo.indicatif.length + paysInfo.longueur)
       : cleaned;
   
-    // 4) On remet la valeur sans retrigger d'événement
+    // 4) Mettre à jour sans retrigger
     ctrl.setValue(formatted, { emitEvent: false });
   }
   

@@ -52,12 +52,37 @@
                       <!-- Téléphone -->
                       <div class="champ_input div3">
                         <input type="tel" class="input_focus"
-                              id="telephone" formControlName="telephone"
-                              name="telephone"
-                              placeholder="Saisis le numéro de téléphone"
-                              (input)="formatPhoneNumber()">
+                               id="telephone" formControlName="telephone"
+                               name="telephone"
+                               placeholder="Saisis le numéro de téléphone"
+                               (input)="formatPhoneNumber()">
                         <label for="telephone" class="label">Téléphone</label>
+                      
+                        <!-- Erreur si pattern invalide -->
+                        <div 
+                          *ngIf="
+                            fournisseurForm.get('telephone')?.touched &&
+                            fournisseurForm.get('telephone')?.errors?.['pattern'] &&
+                            fournisseurForm.get('pays')?.value as pays
+                          " 
+                          class="error" >
+                          <small>
+                            Le numéro doit contenir
+                            {{ paysIndicatifs[pays].longueur }}
+                            chiffres après l’indicatif
+                            {{ paysIndicatifs[pays].indicatif.trim() }}.
+                          </small>
+                        </div>
+                      
+                        <!-- Erreur si le champ est vide -->
+                        <div *ngIf="
+                              fournisseurForm.get('telephone')?.touched &&
+                              fournisseurForm.get('telephone')?.errors?.['required']
+                            " class="error">
+                          <small>Le téléphone est requis.</small>
+                        </div>
                       </div>
+                                           
   
                     </div>
   
