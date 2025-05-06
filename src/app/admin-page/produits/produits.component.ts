@@ -326,7 +326,7 @@ export class ProduitsComponent implements OnInit {
     this.previousSelectedBoutique = this.selectedBoutique;
   
     if (boutique === null) {
-      this.selectedBoutique = null;
+      this.selectedBoutique = boutique;
       this.boutiqueActuelle = "Toutes les boutiques";
       this.loadAllProduits();
     } else {
@@ -516,6 +516,12 @@ export class ProduitsComponent implements OnInit {
 
   getBoutiqueNames(boutiques: any[] | undefined): string {
     if (!boutiques || boutiques.length === 0) return 'Aucune boutique';
+    
+    const maxDisplay = 2; // Nombre de boutiques à afficher avant troncature
+    if (boutiques.length > maxDisplay) {
+      const displayed = boutiques.slice(0, maxDisplay).map(b => b.nom);
+      return `${displayed.join(', ')}, ...`; // Ajoute les points de suspension
+    }
     return boutiques.map(b => b.nom).join(', ');
   }
 

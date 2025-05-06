@@ -74,7 +74,9 @@
         <th>Coût du produit</th>
         <!-- <th style="background-color: #0671e44a;">En stock</th> -->
         <th>Unité</th>
-        <th>Boutique</th>
+        <ng-container *ngIf="!selectedBoutique">
+          <th>Boutique</th>
+        </ng-container>
       </tr>
     </thead>
     <tbody>
@@ -112,7 +114,10 @@
             Aucune boutique
           </span>
         </td> -->
-        <td>{{ getBoutiqueNames(product.boutiques) }}</td>
+        <!-- Cellule conditionnelle -->
+        <ng-container>
+          <td  *ngIf="!selectedBoutique">{{ getBoutiqueNames(product.boutiques) }}</td>
+        </ng-container>
       </tr>
       <!-- Message si aucun produit ne correspond à la recherche -->
       <tr *ngIf="tasks.length > 0 && filteredProducts().length === 0">
