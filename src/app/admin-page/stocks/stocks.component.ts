@@ -329,6 +329,7 @@ export class StocksComponent implements OnInit {
               categorieId: prod.categorieId,
               uniteId: prod.uniteId,
               boutiqueId: prod.boutiqueId,
+              boutiques: prod.boutiques || [],
             };
           })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -389,7 +390,8 @@ export class StocksComponent implements OnInit {
             const fullImageUrl = hasPhoto ? `${this.backendUrl}${prod.photo}` : '';
             return {
               ...prod,
-              photo: fullImageUrl ? fullImageUrl : this.generateLetterAvatar(prod.nom)
+              photo: fullImageUrl ? fullImageUrl : this.generateLetterAvatar(prod.nom),
+              boutiques: prod.boutiques || [],
             };
           }).sort((a, b) => {
             const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
@@ -404,6 +406,17 @@ export class StocksComponent implements OnInit {
       },
       error: (err) => console.error("Erreur lors de la récupération des produits", err),
     });
+  }
+
+  getBoutiqueNames(boutiques: any[] | undefined): string {
+    if (!boutiques || boutiques.length === 0) return 'Aucune boutique';
+    
+    const maxDisplay = 2; // Nombre de boutiques à afficher avant troncature
+    if (boutiques.length > maxDisplay) {
+      const displayed = boutiques.slice(0, maxDisplay).map(b => b.nom);
+      return `${displayed.join(', ')}, ...`; // Ajoute les points de suspension
+    }
+    return boutiques.map(b => b.nom).join(', ');
   }
 
   generateLetterAvatar(nom: string): string {
