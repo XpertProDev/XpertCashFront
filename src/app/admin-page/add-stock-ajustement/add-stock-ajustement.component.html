@@ -73,7 +73,7 @@
                     <!-- Fournisseur -->
                     <div class="champ_input champ_input2" *ngIf="selectedAction === 'ajouter'">
                       <div class="champ_input_list_stocke" style="margin-right: 15px;">
-                        <div class="title_input2" style="text-align: center;">Facture fournisseur</div>
+                        <div class="title_input2" style="text-align: center;">Nom du fournisseur</div>
                     
                         <select class="input_table2"
                               id="fournisseurId"
@@ -91,14 +91,13 @@
                      <!-- Code Fournisseur (Affiché uniquement si "Ajouter" est sélectionné) -->
                      <div class="champ_input champ_input2" *ngIf="selectedAction === 'ajouter'" >
                       <div class="champ_input_list_stocke" style="margin-right: 15px; ">
-                        <div class="title_input2" style="text-align: center;">Facture fournisseur</div>
+                        <div class="title_input2" style="text-align: center;">Numéro du facture fournisseur</div>
                         <input type="text" class="input_table2" 
                         formControlName="codeFournisseur" 
                                 id="codeFournisseur"
                                 name="codeFournisseur"
                                 style="text-align: center; margin-bottom: 3px!important;"
-                                placeholder="0"
-                          >
+                                placeholder="0">
                       </div>
                     </div>
                   </div>
