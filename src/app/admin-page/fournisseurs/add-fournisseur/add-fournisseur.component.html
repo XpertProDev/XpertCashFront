@@ -21,6 +21,7 @@
                   <div class="info_titre_input">
                     
                     <div class="grid_colonne">
+
                       <!-- Nom et prenom -->
                       <div class="champ_input div1">
                         <input type="text" class="input_focus"
@@ -33,33 +34,9 @@
                           <small *ngIf="fournisseurForm.get('nomComplet')?.errors?.['minlength']">Au moins 2 caractères.</small>
                         </div>
                       </div>
-                      <!-- Email -->
-                        <div class="champ_input div2">
-                            <input type="email" class="input_focus"
-                                    id="email" formControlName="email"
-                                    name="email"
-                                    placeholder="Saisis l'email">
-                            <label for="email" class="label">Email</label>
-                            <div *ngIf="fournisseurForm.get('email')?.touched && fournisseurForm.get('email')?.invalid" class="error">
-                            <small *ngIf="fournisseurForm.get('email')?.errors?.['email']">Format invalide.</small>
-                            </div>
-                        </div>
 
-                        <!-- Adresse -->
-                        <div class="champ_input div3">
-                            <input class="input_focus"
-                                        id="adresse" formControlName="adresse"
-                                        name="adresse"
-                                        placeholder="Saisis l'adresse">
-                            <label for="adresse" class="label">Adresse</label>
-                        </div>
-  
-                    </div>
-  
-                    <!-- Modifiez le sélecteur de pays et le champ téléphone -->
-                    <div class="grid_colonne">
                       <!-- Pays -->
-                      <div class="champ_input div1">
+                      <div class="champ_input div2">
                         <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
                           <option value="" disabled selected>Pays</option>
                           <option value="Mali">Mali</option>
@@ -73,7 +50,7 @@
                       </div>
   
                       <!-- Téléphone -->
-                      <div class="champ_input div2">
+                      <div class="champ_input div3">
                         <input type="tel" class="input_focus"
                               id="telephone" formControlName="telephone"
                               name="telephone"
@@ -82,6 +59,32 @@
                         <label for="telephone" class="label">Téléphone</label>
                       </div>
   
+                    </div>
+  
+                    <!-- Modifiez le sélecteur de pays et le champ téléphone -->
+                    <div class="grid_colonne">
+
+                      <!-- Email -->
+                      <div class="champ_input div1">
+                          <input type="email" class="input_focus"
+                                  id="email" formControlName="email"
+                                  name="email"
+                                  placeholder="Saisis l'email">
+                          <label for="email" class="label">Email</label>
+                          <div *ngIf="fournisseurForm.get('email')?.touched && fournisseurForm.get('email')?.invalid" class="error">
+                          <small *ngIf="fournisseurForm.get('email')?.errors?.['email']">Format invalide.</small>
+                          </div>
+                      </div>
+
+                      <!-- Adresse -->
+                      <div class="champ_input div2">
+                          <input class="input_focus"
+                                      id="adresse" formControlName="adresse"
+                                      name="adresse"
+                                      placeholder="Saisis l'adresse">
+                          <label for="adresse" class="label">Adresse</label>
+                      </div>
+
                       <!-- Ville -->
                       <div class="champ_input div3">
                         <input class="input_focus"
