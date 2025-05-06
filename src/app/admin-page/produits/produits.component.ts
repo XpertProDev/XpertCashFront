@@ -423,7 +423,7 @@ export class ProduitsComponent implements OnInit {
             createdAt: createdAt,
             categorieId: prod.categorieId || 0,
             uniteId: prod.uniteId || 0,
-            boutiqueId: prod.boutiqueId || 0
+            boutiques: prod.boutiques || []
           } as Produit;
         }).sort((a, b) => {
           const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
@@ -512,6 +512,11 @@ export class ProduitsComponent implements OnInit {
       </svg>
     `;
     return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
+
+  getBoutiqueNames(boutiques: any[] | undefined): string {
+    if (!boutiques || boutiques.length === 0) return 'Aucune boutique';
+    return boutiques.map(b => b.nom).join(', ');
   }
 
   // Ajoutez cette méthode dans la classe ProduitsComponent
