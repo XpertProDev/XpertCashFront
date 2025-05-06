@@ -63,17 +63,27 @@ export class AddFournisseurComponent {
   }
 
   formatPhoneNumber() {
-    let phone = this.fournisseurForm.get('telephone')?.value;
+    const ctrl = this.fournisseurForm.get('telephone')!;
+    let raw = ctrl.value as string;
     const pays = this.fournisseurForm.get('pays')?.value;
-    const dialCode = this.countryDialCodes[pays as keyof typeof this.countryDialCodes];
-
-    if (dialCode && phone.startsWith(dialCode)) {
-      phone = phone.substring(dialCode.length).replace(/\D/g, '');
-      const formatted = phone.replace(/(\d{2})(?=\d)/g, '$1 ');
-      this.fournisseurForm.get('telephone')?.setValue(dialCode + ' ' + formatted, { emitEvent: false });
+    const dialCode = this.countryDialCodes[pays as keyof typeof this.countryDialCodes] || '';
+  
+    // 1) On retire le dialCode existant pour ne pas le dupliquer
+    if (dialCode && raw.startsWith(dialCode)) {
+      raw = raw.substring(dialCode.length);
     }
+    // 2) On ne conserve que les chiffres
+    const cleaned = raw.replace(/\D/g, '');
+  
+    // 3) On remet le dialCode + un espace + le bloc de chiffres
+    const formatted = dialCode 
+      ? `${dialCode} ${cleaned}` 
+      : cleaned;
+  
+    // 4) On remet la valeur sans retrigger d'événement
+    ctrl.setValue(formatted, { emitEvent: false });
   }
-
+  
   ajouterFournisseur() {
     if (this.fournisseurForm.invalid) {
       this.fournisseurForm.markAllAsTouched();
