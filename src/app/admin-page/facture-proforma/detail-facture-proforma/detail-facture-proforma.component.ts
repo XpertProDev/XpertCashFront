@@ -29,8 +29,22 @@ export class DetailFactureProformaComponent implements OnInit {
   // Nouvelle variable pour stocker les ajustements locaux
   pendingAdjustments: any[] = [];
   newProduitId: number | null = null;
-  inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 1 }];
-  confirmedLignes: { produitId: number | null; quantite: number }[] = [];
+  // inputLignes: { 
+  //   produitId: number | null; quantite: number 
+  // }[] = [{ produitId: null, quantite: 1 }];
+  // confirmedLignes: { produitId: number | null; quantite: number }[] = [];
+
+  inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; }[] = [{
+    produitId: null, quantite: 1,
+    ligneDescription: null 
+  }];
+
+  confirmedLignes: {
+    produitId: number | null;
+    quantite: number;
+    ligneDescription: string | null;
+  }[] = [];
+
   factureId!: number;
   showDuplicatePopup: boolean = false;
 
@@ -115,7 +129,8 @@ export class DetailFactureProformaComponent implements OnInit {
          // Initialise les lignes confirmées avec les données existantes
         this.confirmedLignes = data.lignesFacture.map(l => ({
           produitId: l.produit.id,
-          quantite: l.quantite
+          quantite: l.quantite,
+          ligneDescription: l.ligneDescription ?? ''
         }));
       
         // Correction 1 : Utilisez l'opérateur de coalescence null
@@ -250,7 +265,10 @@ export class DetailFactureProformaComponent implements OnInit {
       }
   
       this.confirmedLignes.push({...ligne});
-      this.inputLignes = [{ produitId: null, quantite: 1 }];
+      this.inputLignes = [{
+        produitId: null, quantite: 1,
+        ligneDescription: null
+      }];
     }
   }
 
@@ -288,11 +306,10 @@ export class DetailFactureProformaComponent implements OnInit {
       description: this.factureProForma.description,
       // Utilisez confirmedLignes puisque c'est là que se trouvent les modifications (ajouts, suppressions, etc.)
       lignesFacture: this.confirmedLignes.map(l => ({
-        // Si une ligne existait déjà, vous pouvez éventuellement inclure l'id
-        // id: l.id, // si disponible
         produit: { id: l.produitId },
         quantite: l.quantite,
-        prixUnitaire: this.getPrixVente(l.produitId)
+        prixUnitaire: this.getPrixVente(l.produitId),
+        ligneDescription: l.ligneDescription
       }))
     };
     
@@ -302,7 +319,8 @@ export class DetailFactureProformaComponent implements OnInit {
       .map(l => ({
         produit: { id: l.produitId! },
         quantite: l.quantite,
-        prixUnitaire: this.getPrixVente(l.produitId!)
+        prixUnitaire: this.getPrixVente(l.produitId!),
+        ligneDescription: l.ligneDescription
       }));
     
     payload.lignesFacture = [
