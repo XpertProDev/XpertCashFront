@@ -22,7 +22,6 @@ import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
     ReactiveFormsModule,
     MatAutocompleteModule,
     CustomNumberPipe,
-    RouterLink,
   ],
   templateUrl: './addfacture-proforma.component.html',
   styleUrl: './addfacture-proforma.component.scss'
@@ -393,6 +392,11 @@ export class AddfactureProformaComponent implements OnInit {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
       }
     });
+  }
+
+
+  apercuFactureProforma(): void {
+    this.router.navigate(['/facture-proforma-apercu']);
   }
 
   

@@ -283,12 +283,18 @@ const routes: Routes = [
         canActivate: [authGuard]
       },
 
-      // La routing de detail fournisseur
+      // Ajouter cette route pour l'aperçu sans ID
       {
         path: 'facture-proforma-apercu',
         loadComponent: () => import('./admin-page/facture-proforma/facture-proforma-apercu/facture-proforma-apercu.component').then(m => m.FactureProformaApercuComponent),
         canActivate: [authGuard]
       },
+      // Conserver la route existante pour les factures existantes
+      {
+        path: 'facture-proforma-apercu/:id',
+        loadComponent: () => import('./admin-page/facture-proforma/facture-proforma-apercu/facture-proforma-apercu.component').then(m => m.FactureProformaApercuComponent),
+        canActivate: [authGuard]
+      }
 
     ]
   }

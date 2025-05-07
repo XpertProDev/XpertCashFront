@@ -344,7 +344,6 @@ export class DetailFactureProformaComponent implements OnInit {
       }
     });
   }
-  
 
   // Ajouter ces méthodes
   canApprove(): boolean {
@@ -407,46 +406,45 @@ export class DetailFactureProformaComponent implements OnInit {
     return allowedTransitions[currentStatut]?.includes(newStatut) || false;
   }
 
-// Ajouter cette méthode publique pour le template
-canTransitionTo(targetStatus: StatutFactureProForma): boolean {
-  return this.isStatusTransitionAllowed(targetStatus);
-}
+  // Ajouter cette méthode publique pour le template
+  canTransitionTo(targetStatus: StatutFactureProForma): boolean {
+    return this.isStatusTransitionAllowed(targetStatus);
+  }
 
-confirmStatusChange(): void {
-  if (!this.pendingStatut) return;
+  confirmStatusChange(): void {
+    if (!this.pendingStatut) return;
 
-  const selectedUsers = this.users
-  .filter(user => user.selected)
-  .map(user => user.id);
+    const selectedUsers = this.users
+    .filter(user => user.selected)
+    .map(user => user.id);
 
-  const modifications: Partial<FactureProForma> = {
-    statut: this.pendingStatut,
-    ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
-      ? { dateRelance: this.dateRelance }
-      : {})
-  };
+    const modifications: Partial<FactureProForma> = {
+      statut: this.pendingStatut,
+      ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
+        ? { dateRelance: this.dateRelance }
+        : {})
+    };
 
-  this.factureProFormaService.updateFactureProforma(
-    this.factureId,
-    undefined,
-    undefined,
-    modifications,
-    this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
-  ).subscribe({
-    next: (updatedFacture) => {
-      this.factureProForma = updatedFacture;
-      this.showStatusConfirmation = false;
-      this.pendingStatut = null;
-      this.dateRelance = undefined;
-    },
-    error: (err) => {
-      console.error('Erreur de mise à jour', err);
-      alert('Échec de la mise à jour du statut');
-      this.showStatusConfirmation = false;
-    }
-  });
-}
-
+    this.factureProFormaService.updateFactureProforma(
+      this.factureId,
+      undefined,
+      undefined,
+      modifications,
+      this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
+    ).subscribe({
+      next: (updatedFacture) => {
+        this.factureProForma = updatedFacture;
+        this.showStatusConfirmation = false;
+        this.pendingStatut = null;
+        this.dateRelance = undefined;
+      },
+      error: (err) => {
+        console.error('Erreur de mise à jour', err);
+        alert('Échec de la mise à jour du statut');
+        this.showStatusConfirmation = false;
+      }
+    });
+  }
 
   cancelStatusChange(): void {
     this.showStatusConfirmation = false;

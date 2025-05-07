@@ -228,3 +228,137 @@ td.td_left {
 .footer em {
     font-size: 11px;
 }
+
+
+
+
+
+
+/* Styles de base */
+.facture-container {
+    max-width: 210mm; /* Format A4 */
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    font-family: 'Arial', sans-serif;
+  
+    .loading-overlay {
+      text-align: center;
+      padding: 2rem;
+      
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+    }
+  
+    .error-message {
+      color: #dc3545;
+      padding: 1rem;
+      border: 1px solid #dc3545;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+  }
+  
+  /* En-tête */
+  .facture-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #333;
+    padding-bottom: 1rem;
+  
+    .company-info {
+      h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #2c3e50;
+      }
+      
+      p {
+        margin: 0;
+        color: #7f8c8d;
+      }
+    }
+  
+    .facture-meta {
+      text-align: right;
+      
+      .facture-number {
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      
+      .facture-date {
+        color: #7f8c8d;
+      }
+    }
+  }
+  
+  /* Section client */
+  .client-info {
+    margin-bottom: 2rem;
+    
+    h3 {
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+  }
+  
+  /* Tableau des produits */
+  .products-section {
+    margin-bottom: 2rem;
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      
+      th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ecf0f1;
+      }
+      
+      th {
+        background-color: #f8f9fa;
+        color: #2c3e50;
+      }
+      
+      tr:hover {
+        background-color: #f8f9fa;
+      }
+    }
+  }
+  
+  /* Total */
+  .totals-section {
+    margin-top: 2rem;
+    text-align: right;
+  
+    .total-line {
+      margin: 10px 0;
+      
+      span:first-child {
+        margin-right: 20px;
+        color: #7f8c8d;
+      }
+      
+      &.grand-total {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+    }
+}
