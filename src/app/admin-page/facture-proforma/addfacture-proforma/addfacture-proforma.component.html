@@ -105,7 +105,7 @@
                                   <!-- // Total montant -->
                                   <td>
                                     <div class="champ_input" style="margin-right: 15px;">
-                                      <input type="text" class="input_focus_type" disabled id="prixTotal" [value]="getMontantTotal(ligne) | customNumber" style="cursor: no-drop;">
+                                      <input type="text" class="input_focus_type" disabled id="prixTotal" [value]="getMontantTotal(ligne) | customNumber" style="cursor: no-drop; text-align: center;">
                                     </div>                         
                                   </td>
                                   <td>
@@ -163,13 +163,7 @@
                                   <!-- // Montant total -->
                                   <td>
                                     <div class="champ_input" style="margin-right: 15px;">
-                                      <input 
-                                        type="text" 
-                                        class="input_focus_type" 
-                                        disabled 
-                                        [value]="getMontantTotal(ligne) | customNumber" 
-                                        style="cursor: no-drop;"
-                                      >
+                                      <input type="text" class="input_focus_type" disabled [value]="getMontantTotal(ligne) | customNumber" style="cursor: no-drop; text-align: center;">
                                     </div>                         
                                   </td>
                                   <!-- // Button de ajouter  -->
@@ -230,7 +224,6 @@
                 <div class="double_input_grid" *ngIf="activeRemise" style="margin-top: 15px;">
                     <div class="champ_input champ_input2">
                         <input type="number" step="0.01" class="input_focus" name="remisePourcentage" [(ngModel)]="remisePourcentage" (input)="onRemiseChange()" placeholder="Remise en %" />
-                        <!-- <label class="label">REMISE ({{ remisePourcentage ?? '' }}%)</label> -->
                         <label class="label">
                           REMISE <span *ngIf="remisePourcentage !== null">({{ remisePourcentage }}%)</span>
                         </label>
@@ -238,6 +231,7 @@
         
                     <div class="champ_input champ_input2">
                       <input 
+                      
                         type="text" 
                         class="input_focus" 
                         readonly
@@ -247,7 +241,7 @@
                 </div>
         
               </div>
-            </div>
+            </div> 
 
             <!-- // Toatal TTC  -->
             <div class="information_cadre">
@@ -314,9 +308,14 @@
                 <div class="btn_annuler">
                   <button class="btn_cancel" type="button" (click)="goToFacture()">Annuler</button>
                 </div>
-                <div class="btn_ajouter">
+                <!-- <div class="btn_ajouter">
                   <button class="btn_save" (click)="creerFactureProforma()">
                     {{ inputLignes.length > 0 ? 'Ajouter la facture' : 'Créer facture' }}
+                  </button>
+                </div> -->
+                <div class="btn_ajouter">
+                  <button class="btn_save" routerLink="/facture-proforma-apercu">
+                    Aperçu
                   </button>
                 </div>
               </div>
@@ -326,6 +325,8 @@
         
     </div>
   </div>
+
+
 </div>
 
 <!-- Popup de duplication -->

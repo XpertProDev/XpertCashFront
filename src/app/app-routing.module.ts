@@ -283,6 +283,13 @@ const routes: Routes = [
         canActivate: [authGuard]
       },
 
+      // La routing de detail fournisseur
+      {
+        path: 'facture-proforma-apercu',
+        loadComponent: () => import('./admin-page/facture-proforma/facture-proforma-apercu/facture-proforma-apercu.component').then(m => m.FactureProformaApercuComponent),
+        canActivate: [authGuard]
+      },
+
     ]
   }
 ];

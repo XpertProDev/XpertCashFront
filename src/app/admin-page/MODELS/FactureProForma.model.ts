@@ -13,8 +13,8 @@ export interface LigneFactureProforma {
     id: number;
     nom?: string; // Optionnel selon tes besoins
     prixUnitaire?: number;
+    ligneDescription?: string;
   };
-  // description?: string;
   quantite: number;
   prixUnitaire: number; // Obligatoire
   montantTotal?: number;

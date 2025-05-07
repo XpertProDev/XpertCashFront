@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ClientService } from '../../SERVICES/client-service';
 import { Clients } from '../../MODELS/clients-model';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
@@ -21,7 +21,8 @@ import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
-    CustomNumberPipe
+    CustomNumberPipe,
+    RouterLink,
   ],
   templateUrl: './addfacture-proforma.component.html',
   styleUrl: './addfacture-proforma.component.scss'
@@ -43,7 +44,7 @@ export class AddfactureProformaComponent implements OnInit {
   totalClients = 0;
   noClientsAvailable = false;
   entreprises: any[] = [];
-  activeRemise: boolean = false;
+  activeRemise: boolean = true;
   activeTva: boolean = false;
   remisePourcentage: number = 0;
   tva: number = 0;
@@ -323,7 +324,7 @@ export class AddfactureProformaComponent implements OnInit {
     const facture: any = {
       description: this.description,
       lignesFacture: allLignes.map(ligne => ({
-        produit: { id: ligne.produitId },
+        produit: { id: ligne.produitId},
         quantite: ligne.quantite
       }))
     };
