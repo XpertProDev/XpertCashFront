@@ -275,7 +275,8 @@ export class DetailFactureProformaComponent implements OnInit {
         id: line.id,
         produit: { id: line.produit.id },
         quantite: line.quantite,
-        prixUnitaire: line.prixUnitaire
+        prixUnitaire: line.prixUnitaire,
+        ligneDescription: line.ligneDescription
       }))
       // Ajouter ici les autres propriétés autorisées si nécessaire
     };

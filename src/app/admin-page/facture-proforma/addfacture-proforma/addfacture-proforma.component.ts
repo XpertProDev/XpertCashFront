@@ -38,8 +38,15 @@ export class AddfactureProformaComponent implements OnInit {
   nomEntreprise: string = '';
   boutiqueIds: number[] | undefined;
   produits: Produit[] = [];
-  inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 0 }];
-  confirmedLignes: { produitId: number | null; quantite: number }[] = [];
+  inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; }[] = [{
+    produitId: null, quantite: 0,
+    ligneDescription: null 
+  }];
+  confirmedLignes: {
+    produitId: number | null;
+    quantite: number;
+    ligneDescription: string | null;
+  }[] = [];
   clients: Clients[] = [];
   totalClients = 0;
   noClientsAvailable = false;
@@ -153,21 +160,29 @@ export class AddfactureProformaComponent implements OnInit {
 
   ajouterLigneFacture(index: number) {
     const ligne = this.inputLignes[index];
-    
     if (ligne.produitId && ligne.quantite > 0) {
       const produitExiste = this.confirmedLignes.some(
         l => l.produitId === ligne.produitId
       );
-  
       if (produitExiste) {
         this.showDuplicatePopup = true;
         return;
       }
-  
-      this.confirmedLignes.push({...ligne});
-      this.inputLignes = [{ produitId: null, quantite: 1 }];
+      // On clone bien avec description
+      this.confirmedLignes.push({
+        produitId: ligne.produitId,
+        quantite: ligne.quantite,
+        ligneDescription: ligne.ligneDescription
+      });
+      // Réinitialisation
+      this.inputLignes = [{
+        produitId: null,
+        quantite: 1,
+        ligneDescription: null
+      }];
     }
   }
+  
 
   updateCalculs() {
     // Force la mise à jour des valeurs
@@ -325,7 +340,8 @@ export class AddfactureProformaComponent implements OnInit {
       description: this.description,
       lignesFacture: allLignes.map(ligne => ({
         produit: { id: ligne.produitId},
-        quantite: ligne.quantite
+        quantite: ligne.quantite,
+        ligneDescription: ligne.ligneDescription,
       }))
     };
 
@@ -353,7 +369,10 @@ export class AddfactureProformaComponent implements OnInit {
     });
 
     this.confirmedLignes = [];
-    this.inputLignes = [{ produitId: null, quantite: 1 }];
+    this.inputLignes = [{
+      produitId: null, quantite: 1,
+      ligneDescription: null
+    }];
   }
 
   removePendingAdjustment(index: number): void {
