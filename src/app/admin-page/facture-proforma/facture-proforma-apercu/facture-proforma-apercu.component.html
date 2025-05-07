@@ -1,4 +1,4 @@
-<div class="container_global">
+<div class="container_global" *ngIf="facture; else noData">
     <!-- <div *ngIf="isLoading" class="loading-overlay">
         <div class="spinner"></div>
     </div> -->
@@ -26,22 +26,29 @@
                 <hr>
                 <!-- // titre  -->
                 <div class="titre">
-                    <h2>Facture proforma n˚021-04-2024</h2>
+                    <h2>Facture proforma n˚{{ facture.numeroFacture || '—' }}</h2>
                 </div>
                 <!-- // date  -->
                 <div class="date">
-                    <p>Bamako, le 12 Mai 2025</p>
+                    <!-- <p>Bamako, le 12 Mai 2025</p> -->
+                    <p>{{ facture.dateCreation | date:'dd MMMM yyyy' }}</p>
                 </div>
 
                 <!-- nom et object  -->
-                <div class="droit">
-                    <h4>DROIT :</h4> 
-                    <p>Mme Binta KERGNA</p>
+                <div class="droit" *ngIf="facture.client">
+                    <h4>Client : </h4> 
+                    <p>{{ facture.client.nomComplet}}</p>
+                </div>
+
+                <!-- nom et object  -->
+                <div class="droit" *ngIf="facture.entrepriseClient">
+                    <h4>Entreprise :</h4> 
+                    <p>{{ facture.entrepriseClient.nom }}</p>
                 </div>
 
                 <div class="object">
                     <h4>OBJECT :</h4>
-                    <p>Conception de supports de communication.</p>
+                    <p>{{ facture.description }}</p>
                 </div>
 
                 <!-- // Table  -->
@@ -52,69 +59,44 @@
                             <th style="width: 260px;">Description</th>
                             <th>Prix Unitaire (FCFA)</th>
                             <th>Quantité</th>
-                            <th>Durée</th>
+                            <!-- <th>Durée</th> -->
                             <th>Montant (FCFA)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="td_left">Conception Logo</td>
-                            <td class="td_left">Le logo est le reflet de l'image d'une entreprise</td>
-                            <td>15 000</td>
-                            <td>01</td>
-                            <td>3 Jours</td>
-                            <td>15 000</td>
-                        </tr>
-                        <tr>
-                            <td class="td_left">Conception Affiche</td>
-                            <td class="td_left">Nous concevons une affiche qui contiendra tous vos différents produits disponibles ainsi que les informations pour y accéder.</td>
-                            <td>15 000</td>
-                            <td>01</td>
-                            <td>3 Jours</td>
-                            <td>15 000</td>
-                        </tr>
-
-                        <tr>
-                            <td class="table_td_1"></td>
-                            <td class="table_td table_td_descripton">MONTANT TOTAL HT</td>
-                            <td class="table_td"></td>
-                            <td class="table_td"></td>
-                            <td class="table_td"></td>
-                            <td>30 000</td>
-                        </tr>
-                        <tr>
-                            <td class="table_td_1"></td>
-                            <td class="table_td table_td_descripton">REMISE (10%)</td>
-                            <td class="table_td"></td>
-                            <td class="table_td"></td>
-                            <td class="table_td"></td>
-                            <td>3 000</td>
-                        </tr>
-                        <tr>
-                            <td class="table_td_1"></td>
-                            <td class="table_td table_td_descripton">MONTANT COMMERCIAL</td>
-                            <td class="table_td"></td>
-                            <td class="table_td"></td>
-                            <td class="table_td"></td>
-                            <td>27 000</td>
-                        </tr>
-                        <tr>
-                            <td class="table_td_1"></td>
-                            <td class="table_td table_td_descripton">TVA(18%)</td>
-                            <td class="table_td"></td>
-                            <td class="table_td"></td>
-                            <td class="table_td"></td>
-                            <td>4 860</td>
-                        </tr>
-                        <tr>
-                            <td class="table_td_1"></td>
-                            <td class="table_td table_td_descripton">MONTANT TOTAL TTC</td>
-                            <td class="table_td"></td>
-                            <td class="table_td"></td>
-                            <td class="table_td td_center"></td>
-                            <td>31 860</td>
+                        <tr *ngFor="let ligne of facture.lignesFacture">
+                            <td class="td_left">{{ ligne.produit.nom }}</td>
+                            <td class="td_left">{{ ligne.ligneDescription }}</td>
+                            <td>{{ ligne.prixUnitaire | customNumber }}</td>
+                            <td>{{ ligne.quantite }}</td>
+                            <!-- <td>15 000</td> -->
+                            <td>{{ (ligne.prixUnitaire * ligne.quantite) | customNumber }}</td>
                         </tr>
                     </tbody>
+                    <tfoot>
+                        <tr>
+                          <td colspan="4">Total HT</td>
+                          <td>{{ facture.totalHT | customNumber }}</td>
+                        </tr>
+                        <tr *ngIf="facture.remise">
+                          <td colspan="4">Remise ({{ facture.remise }}%)</td>
+                          <td>{{ ((facture.totalHT * facture.remise/100) | customNumber) }}</td>
+                        </tr>
+                        <!-- Montant Commercial  -->
+                        <tr *ngIf="facture.remise">
+                            <td colspan="4">MONTANT COMMERCIAL</td>
+                            <td>---</td>
+                        </tr>
+                        <!-- tva  -->
+                        <tr *ngIf="facture.remise">
+                            <td colspan="4">TVA 18% </td>
+                            <td>---</td>
+                        </tr>
+                        <tr>
+                          <td colspan="4">Montant TTC</td>
+                          <td>{{ facture.totalFacture | customNumber }}</td>
+                        </tr>
+                      </tfoot>
                 </table>
 
                 <!-- // contenu_bottom  -->
@@ -152,3 +134,7 @@
         </div>
       </div>
 </div>
+
+<ng-template #noData>
+    <p>Aucune donnée d’aperçu… <a (click)="router.navigate(['/add-facture-proforma'])">Retour</a></p>
+</ng-template>

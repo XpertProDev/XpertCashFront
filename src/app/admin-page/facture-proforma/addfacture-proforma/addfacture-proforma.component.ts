@@ -12,6 +12,8 @@ import { UsersService } from '../../SERVICES/users.service';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
+import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
+import { FactureProForma } from '../../MODELS/FactureProForma.model';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -69,7 +71,8 @@ export class AddfactureProformaComponent implements OnInit {
     private clientService: ClientService,
     private factureProFormaService: FactureProFormaService,
     private produitService: ProduitService,
-    private usersService: UsersService
+    private usersService: UsersService,
+    private previewService: FacturePreviewService,
   ) {}
 
   ngOnInit(): void {
@@ -395,8 +398,62 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
 
+  // apercuFactureProforma(): void {
+  //   this.router.navigate(['/facture-proforma-apercu']);
+  // }
+
   apercuFactureProforma(): void {
+    // 1) Construire l'objet FactureProForma en mémoire
+    const lignes = [
+      ...this.confirmedLignes.map(l => ({
+        produit: { id: l.produitId! },
+        quantite: l.quantite,
+        ligneDescription: l.ligneDescription,
+        prixUnitaire: this.getPrixVente(l.produitId),
+      })),
+      // si inputLignes non vide et valide, on peut l’ajouter
+      ...this.inputLignes
+        .filter(l => l.produitId && l.quantite > 0)
+        .map(l => ({
+          produit: { id: l.produitId! },
+          quantite: l.quantite,
+          ligneDescription: l.ligneDescription,
+          prixUnitaire: this.getPrixVente(l.produitId),
+        }))
+    ];
+
+    const preview: FactureProForma = {
+      id: 0,
+      numeroFacture: '—', // vous pouvez générer ou laisser vide pour l’aperçu
+      dateCreation: new Date().toISOString(),
+      description: this.description,
+      totalHT: this.getTotalHT(),
+      remise: this.activeRemise ? this.remisePourcentage : 0,
+      tva: this.activeTva,
+      totalFacture: this.getTotalTTC(),
+      lignesFacture: lignes as any,
+      client: this.typeDestinataire === 'client' && this.selectedClientId
+        ? { id: this.selectedClientId, nomComplet: this.getClientName(this.selectedClientId) }
+        : undefined,
+      entrepriseClient: this.typeDestinataire === 'entreprise' && this.selectedEntrepriseId
+        ? { id: this.selectedEntrepriseId, nom: this.getEntrepriseName(this.selectedEntrepriseId) }
+        : undefined
+    };
+
+    // 2) Pousser vers le service
+    this.previewService.setPreview(preview);
+
+    // 3) Naviguer vers l’aperçu
     this.router.navigate(['/facture-proforma-apercu']);
+  }
+
+  private getClientName(id: number): string {
+    const c = this.clients.find(c => c.id === id);
+    return c ? c.nomComplet : '';
+  }
+  private getEntrepriseName(id: number): string {
+    const e = this.entreprises.find(e => e.id === id);
+    return e ? e.nom : '';
   }
 
   
