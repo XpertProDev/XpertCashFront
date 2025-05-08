@@ -6,7 +6,7 @@ export class FormStateService {
   private formState: any;
 
   saveState(state: any) {
-    this.formState = state;
+    this.formState = { ...state }; // Clonage profond si nécessaire
   }
 
   getState() {

@@ -14,6 +14,7 @@ import { HttpHeaders, HttpParams } from '@angular/common/http';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { FactureProForma } from '../../MODELS/FactureProForma.model';
+import { FormStateService } from '../../SERVICES/form-state.service';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -75,13 +76,38 @@ export class AddfactureProformaComponent implements OnInit {
     private produitService: ProduitService,
     private usersService: UsersService,
     private previewService: FacturePreviewService,
+    private formStateService: FormStateService
   ) {}
 
-  ngOnInit(): void {
-    this.getListClients();
-    this.getListEntreprise();
-    this.getProduits();
-    this.getUserInfo();
+  // Modification de ngOnInit()
+  async ngOnInit(): Promise<void> {
+    await this.getUserInfo(); // Charger d'abord les infos utilisateur
+    
+    await Promise.all([
+      this.getListClients(),
+      this.getListEntreprise(),
+      this.getProduits()
+    ]);
+
+    // Restaurer l'état APRÈS le chargement des données
+    const savedState = this.formStateService.getState();
+    if (savedState) {
+      this.typeDestinataire = savedState.typeDestinataire;
+      this.selectedClientId = savedState.selectedClientId;
+      this.selectedEntreprise = savedState.selectedEntreprise;
+      this.description = savedState.description;
+      this.inputLignes = savedState.inputLignes;
+      this.confirmedLignes = savedState.confirmedLignes;
+      this.activeRemise = savedState.activeRemise;
+      this.remisePourcentage = savedState.remisePourcentage;
+      this.activeTva = savedState.activeTva;
+    }
+  }
+
+  // Modification de la méthode navigateBack() dans le composant d'aperçu
+  navigateBack() {
+    // Ne pas effacer l'état ici
+    this.router.navigate(['/addfacture-proforma']);
   }
 
   // Toggle remise / TVA
@@ -263,7 +289,7 @@ export class AddfactureProformaComponent implements OnInit {
   getProduits() {
     const token = localStorage.getItem('authToken');
     if (token && this.userEntrepriseId) {
-      this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
+      this.produitService.getProduitsParEntreprise(this.userEntrepriseId!).subscribe({
         next: (data: Produit[]) => {
           console.log('Produits récupérés :', data);
           this.produits = data;
@@ -377,6 +403,19 @@ export class AddfactureProformaComponent implements OnInit {
       produitId: null, quantite: 1,
       ligneDescription: null
     }];
+
+    // Par (avec les vrais paramètres) :
+    this.factureProFormaService.creerFactureProforma(
+      facture,
+      this.activeRemise ? this.remisePourcentage : undefined,
+      this.activeTva,
+      (this.activeRemise || this.activeTva)
+    ).subscribe({
+      next: (res) => {
+        this.formStateService.clearState();
+        this.router.navigate(['/facture-proforma']);
+      }
+    });
   }
 
   removePendingAdjustment(index: number): void {
@@ -405,6 +444,19 @@ export class AddfactureProformaComponent implements OnInit {
   // }
 
   apercuFactureProforma(): void {
+    // Sauvegarder l'état actuel
+    this.formStateService.saveState({
+      typeDestinataire: this.typeDestinataire,
+      selectedClientId: this.selectedClientId,
+      selectedEntreprise: this.selectedEntreprise,
+      description: this.description,
+      inputLignes: this.inputLignes,
+      confirmedLignes: this.confirmedLignes,
+      activeRemise: this.activeRemise,
+      remisePourcentage: this.remisePourcentage,
+      activeTva: this.activeTva
+    });
+
     // 1) Construire l'objet FactureProForma en mémoire
     const lignes = [
       ...this.confirmedLignes.map(l => ({

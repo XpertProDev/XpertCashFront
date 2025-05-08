@@ -6,7 +6,7 @@
     <div class="information_cadre" style="position: relative;">
         <div class="cadre_retour">
             <!-- // icon  -->
-            <div class="retour_icon" routerLink="/addfacture-proforma">
+            <div class="retour_icon" (click)="navigateBack()">
                 <i class="ri-arrow-left-long-fill"></i>
             </div>
             <!-- // enregistrer  -->
@@ -73,7 +73,7 @@
                     <thead>
                         <tr>
                             <th>Désignation</th>
-                            <th style="width: 260px;">Description</th>
+                            <th style="width: 260px!important;">Description</th>
                             <th>Prix Unitaire (FCFA)</th>
                             <th>Quantité</th>
                             <!-- <th>Durée</th> -->
