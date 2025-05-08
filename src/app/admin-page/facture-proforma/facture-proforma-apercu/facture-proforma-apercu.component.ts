@@ -23,10 +23,15 @@ export class FactureProformaApercuComponent implements OnInit {
 
   constructor(
     private previewService: FacturePreviewService,
+    private factureService: FactureProFormaService,
     public router: Router
   ) {}
 
   ngOnInit(): void {
+    this.getFacturePreview();
+  }
+
+  getFacturePreview () {
     this.previewService.getPreview().subscribe(data => {
       if (!data) {
         // Si pas de données, on revient en arrière
@@ -37,6 +42,37 @@ export class FactureProformaApercuComponent implements OnInit {
     });
   }
 
+  onCreate(): void {
+    if (!this.facture) return;
+
+    // Préparer le payload comme dans AddfactureProformaComponent
+    const dto = {
+      description: this.facture.description,
+      client: this.facture.client ? { id: this.facture.client.id } : undefined,
+      entrepriseClient: this.facture.entrepriseClient
+        ? { id: this.facture.entrepriseClient.id }
+        : undefined,
+      lignesFacture: this.facture.lignesFacture.map(l => ({
+        produit: { id: l.produit.id },
+        quantite: l.quantite,
+        ligneDescription: l.ligneDescription,
+        prixUnitaire: l.prixUnitaire
+      }))
+    };
+
+    this.factureService.creerFactureProforma(
+      dto,
+      this.facture.remise ?? undefined,
+      this.facture.tva,
+      !!this.facture.remise || this.facture.tva
+    ).subscribe({
+      next: () => {
+        // après création, on revient à la liste
+        this.router.navigate(['/facture-proforma']);
+      },
+      error: err => console.error('Erreur création facture :', err)
+    });
+  }
 
   
 }

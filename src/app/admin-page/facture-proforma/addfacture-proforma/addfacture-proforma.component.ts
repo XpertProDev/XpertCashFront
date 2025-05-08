@@ -54,7 +54,7 @@ export class AddfactureProformaComponent implements OnInit {
   totalClients = 0;
   noClientsAvailable = false;
   entreprises: any[] = [];
-  activeRemise: boolean = true;
+  activeRemise: boolean = false;
   activeTva: boolean = false;
   remisePourcentage: number = 0;
   tva: number = 0;

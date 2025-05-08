@@ -1,4 +1,4 @@
-<div class="container_global" *ngIf="facture; else noData">
+<div class="container_global" *ngIf="facture as f; else noData">
     <!-- <div *ngIf="isLoading" class="loading-overlay">
         <div class="spinner"></div>
     </div> -->
@@ -11,10 +11,9 @@
             </div>
             <!-- // enregistrer  -->
             <div class="btn_ajouter">
-                <p class="btn_save">
-                  <!-- {{ inputLignes.length > 0 ? 'Ajouter la facture' : 'Créer facture' }} -->
-                  Créer facture
-                </p>
+                <button class="btn_save" (click)="onCreate()">
+                    {{ f.lignesFacture.length > 0 ? 'Ajouter la facture' : 'Créer la facture' }}
+                </button>                  
             </div>
         </div>
         <div class="info_titre_input">
@@ -30,7 +29,7 @@
                         <div class="content_entete">
                             <p class="para1">Groupe XpertPro - Le groupe des xperts et professionnels</p>
                             <p class="para2">Formation - Communication - Informatique</p>
-                            <div class="para3">Email : <a href="mailto">Groupexpertpro&#64;gmail.com</a> Téléphone : 93 33 56 21 / 79 87 33 75</div>
+                            <div class="para3">Email : <a href="mail">Groupexpertpro&#64;gmail.com</a> Téléphone : 93 33 56 21 / 79 87 33 75</div>
                         </div>
                     </div>
                 </div>
