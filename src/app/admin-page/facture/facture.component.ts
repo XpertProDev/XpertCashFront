@@ -104,6 +104,8 @@ export class FactureComponent  implements AfterViewInit {
   boutiques: any[] = [];
   entrepriseId!: number;
 
+  userInfo: any;
+
    constructor(
          private userService: UsersService,
         //  private produitService: ProduitService,
@@ -300,10 +302,77 @@ export class FactureComponent  implements AfterViewInit {
     this.paginatedFactures = this.filteredFactures.slice(startIndex, startIndex + this.pageSize);
   }
 
-  downloadPDFWithJsPDF(facture: any, boutiqueName: string): void {
+// Fonction principale pour charger l'image en base64
+async loadImageAsBase64(url: string): Promise<string> {
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('Erreur de chargement de l\'image: ' + response.statusText);
+    }
+
+    const blob = await response.blob();
+    const mimeType = blob.type;
+
+    // Vérifie si l'image est un PNG
+    if (mimeType !== 'image/png' && mimeType !== 'image/jpeg' && mimeType !== 'image/webp'  && mimeType !== 'image/jpg'  && mimeType !== 'image/avif') {
+      throw new Error('Le fichier n\'est ni PNG, ni JPEG, ni WEBP');
+    }
+
+    const base64String = await this.blobToBase64(blob);
+    console.log(base64String);
+    return base64String;
+  } catch (error) {
+    console.error('Erreur lors du chargement de l\'image:', error);
+    throw error;
+  }
+}
+
+
+// Helper pour convertir un Blob en Base64
+blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);  // Convertir en base64
+    reader.onerror = (error) => reject('Erreur de lecture du fichier : ' + error);  // Gérer les erreurs de lecture
+    reader.readAsDataURL(blob);
+  });
+}
+
+  
+  
+
+  
+  
+
+  async downloadPDFWithJsPDF(facture: any, boutiqueName: string): Promise<void> {
     const boutiqueNames = facture.boutiqueNames?.join(', ') || 'Toutes les boutiques';
     const doc = new jsPDF();
     doc.setFontSize(9);
+
+    const logoPath = this.userInfo?.logoEntreprise;
+
+    if (logoPath) {
+      const fullLogoUrl = `http://localhost:8080${logoPath}`;
+
+      const logoWidth = 20; 
+       const logoHeight = 15;
+  
+      try {
+        const logoBase64 = await this.loadImageAsBase64(fullLogoUrl);
+  
+        // Forcer le type MIME pour le PNG
+        doc.addImage(logoBase64, 'jpg', 170, 10, logoWidth, logoHeight);
+      } catch (error) {
+        console.error('Erreur lors de l\'ajout du logo au PDF:', error);
+      }
+    } else {
+      console.warn('Logo de l’entreprise non disponible.');
+    }
+    
+    
+
+
 
     const transform = (value: number): string => {
       if (value == null) return '';
@@ -315,7 +384,6 @@ export class FactureComponent  implements AfterViewInit {
     doc.text('Facture No :', 10, y);
     doc.setTextColor(6, 114, 228);
     doc.text(facture?.numeroFacture || 'FAC-XXXXXX', 30, y);
-    doc.text(boutiqueNames, 30, y);
     
     y += 8;
     doc.setTextColor(0, 0, 0);
@@ -435,6 +503,7 @@ export class FactureComponent  implements AfterViewInit {
   getUserInfo(): void {
     this.userService.getUserInfo().subscribe({
       next: (user) => {
+      this.userInfo = user;
         this.boutiques = user.boutiques;
         this.entrepriseId = user.entrepriseId;
         this.factureService.setBoutiques(this.boutiques);
