@@ -101,59 +101,20 @@ tr:hover {
   
 .inputSearch {
     position: relative;
-    //width: 300px;
+    width: 250px;
     height: 40px;
+    //background-color: red;
     display: flex;
     align-items: center;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 0 15px;
-    transition: all 0.3s ease-in-out;
-
-    &:hover {
-        border-color: #0672E4;
-    }
-
-    input {
-        flex: 1;
-        height: 100%;
-        border: none;
-        outline: none;
-        background: transparent;
-        font-size: 14px;
-        color: #333;
-        padding-left: 10px;
-
-        &::placeholder {
-            color: #aaa;
-            font-size: 13px;
-        }
-    }
-
-    i {
-        font-size: 18px;
-        cursor: pointer;
-        color: #aaa;
-        transition: all 0.3s ease-in-out;
-
-        &:hover {
-            color: #0672E4;
-        }
-    }
-
-    .red-icon {
-        color: red;
-    }
 }
-  
+
 .inputSearch input {
     width: 100%;
     height: 100%;
     padding-left: 10px;
     border-radius: 5px;
 }
-  
+
 .inputSearch i {
     position: absolute;
     right: 0;
@@ -647,7 +608,7 @@ th, td {
 th.th, td.td {
     border-bottom: 1px solid #dddddd94;
     padding: 20px;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 tr:nth-child(even) {
