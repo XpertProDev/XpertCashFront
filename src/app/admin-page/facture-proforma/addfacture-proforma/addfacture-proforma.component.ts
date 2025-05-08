@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ClientService } from '../../SERVICES/client-service';
 import { Clients } from '../../MODELS/clients-model';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
@@ -12,6 +12,8 @@ import { UsersService } from '../../SERVICES/users.service';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
+import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
+import { FactureProForma } from '../../MODELS/FactureProForma.model';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -21,7 +23,7 @@ import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
-    CustomNumberPipe
+    CustomNumberPipe,
   ],
   templateUrl: './addfacture-proforma.component.html',
   styleUrl: './addfacture-proforma.component.scss'
@@ -31,19 +33,27 @@ export class AddfactureProformaComponent implements OnInit {
 
   pendingAdjustments: any[] = [];
   description: string = '';
+  siege: string = '';
   typeDestinataire: string = 'client';
   selectedClientId: number | null = null;
   selectedEntrepriseId: number | null = null;
   nomEntreprise: string = '';
   boutiqueIds: number[] | undefined;
   produits: Produit[] = [];
-  inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 0 }];
-  confirmedLignes: { produitId: number | null; quantite: number }[] = [];
+  inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; }[] = [{
+    produitId: null, quantite: 0,
+    ligneDescription: null 
+  }];
+  confirmedLignes: {
+    produitId: number | null;
+    quantite: number;
+    ligneDescription: string | null;
+  }[] = [];
   clients: Clients[] = [];
   totalClients = 0;
   noClientsAvailable = false;
   entreprises: any[] = [];
-  activeRemise: boolean = false;
+  activeRemise: boolean = true;
   activeTva: boolean = false;
   remisePourcentage: number = 0;
   tva: number = 0;
@@ -62,7 +72,8 @@ export class AddfactureProformaComponent implements OnInit {
     private clientService: ClientService,
     private factureProFormaService: FactureProFormaService,
     private produitService: ProduitService,
-    private usersService: UsersService
+    private usersService: UsersService,
+    private previewService: FacturePreviewService,
   ) {}
 
   ngOnInit(): void {
@@ -152,21 +163,29 @@ export class AddfactureProformaComponent implements OnInit {
 
   ajouterLigneFacture(index: number) {
     const ligne = this.inputLignes[index];
-    
     if (ligne.produitId && ligne.quantite > 0) {
       const produitExiste = this.confirmedLignes.some(
         l => l.produitId === ligne.produitId
       );
-  
       if (produitExiste) {
         this.showDuplicatePopup = true;
         return;
       }
-  
-      this.confirmedLignes.push({...ligne});
-      this.inputLignes = [{ produitId: null, quantite: 1 }];
+      // On clone bien avec description
+      this.confirmedLignes.push({
+        produitId: ligne.produitId,
+        quantite: ligne.quantite,
+        ligneDescription: ligne.ligneDescription
+      });
+      // Réinitialisation
+      this.inputLignes = [{
+        produitId: null,
+        quantite: 1,
+        ligneDescription: null
+      }];
     }
   }
+  
 
   updateCalculs() {
     // Force la mise à jour des valeurs
@@ -323,8 +342,9 @@ export class AddfactureProformaComponent implements OnInit {
     const facture: any = {
       description: this.description,
       lignesFacture: allLignes.map(ligne => ({
-        produit: { id: ligne.produitId },
-        quantite: ligne.quantite
+        produit: { id: ligne.produitId},
+        quantite: ligne.quantite,
+        ligneDescription: ligne.ligneDescription,
       }))
     };
 
@@ -352,7 +372,10 @@ export class AddfactureProformaComponent implements OnInit {
     });
 
     this.confirmedLignes = [];
-    this.inputLignes = [{ produitId: null, quantite: 1 }];
+    this.inputLignes = [{
+      produitId: null, quantite: 1,
+      ligneDescription: null
+    }];
   }
 
   removePendingAdjustment(index: number): void {
@@ -373,6 +396,66 @@ export class AddfactureProformaComponent implements OnInit {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
       }
     });
+  }
+
+
+  // apercuFactureProforma(): void {
+  //   this.router.navigate(['/facture-proforma-apercu']);
+  // }
+
+  apercuFactureProforma(): void {
+    // 1) Construire l'objet FactureProForma en mémoire
+    const lignes = [
+      ...this.confirmedLignes.map(l => ({
+        produit: { id: l.produitId! },
+        quantite: l.quantite,
+        ligneDescription: l.ligneDescription,
+        prixUnitaire: this.getPrixVente(l.produitId),
+      })),
+      // si inputLignes non vide et valide, on peut l’ajouter
+      ...this.inputLignes
+        .filter(l => l.produitId && l.quantite > 0)
+        .map(l => ({
+          produit: { id: l.produitId! },
+          quantite: l.quantite,
+          ligneDescription: l.ligneDescription,
+          prixUnitaire: this.getPrixVente(l.produitId),
+        }))
+    ];
+
+    const preview: FactureProForma = {
+      id: 0,
+      numeroFacture: '—', // vous pouvez générer ou laisser vide pour l’aperçu
+      dateCreation: new Date().toISOString(),
+      siege: this.siege,
+      description: this.description,
+      totalHT: this.getTotalHT(),
+      remise: this.activeRemise ? this.remisePourcentage : 0,
+      tva: this.activeTva,
+      totalFacture: this.getTotalTTC(),
+      lignesFacture: lignes as any,
+      client: this.typeDestinataire === 'client' && this.selectedClientId
+        ? { id: this.selectedClientId, nomComplet: this.getClientName(this.selectedClientId) }
+        : undefined,
+      entrepriseClient: this.typeDestinataire === 'entreprise' && this.selectedEntrepriseId
+        ? { id: this.selectedEntrepriseId, nom: this.getEntrepriseName(this.selectedEntrepriseId) }
+        : undefined
+    };
+
+    // 2) Pousser vers le service
+    this.previewService.setPreview(preview);
+
+    // 3) Naviguer vers l’aperçu
+    this.router.navigate(['/facture-proforma-apercu']);
+  }
+
+  private getClientName(id: number): string {
+    const c = this.clients.find(c => c.id === id);
+    return c ? c.nomComplet : '';
+  }
+  private getEntrepriseName(id: number): string {
+    const e = this.entreprises.find(e => e.id === id);
+    return e ? e.nom : '';
   }
 
   

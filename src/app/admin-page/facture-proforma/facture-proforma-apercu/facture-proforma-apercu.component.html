@@ -1,0 +1,153 @@
+<div class="container_global" *ngIf="facture; else noData">
+    <!-- <div *ngIf="isLoading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div> -->
+
+    <div class="information_cadre" style="position: relative;">
+        <div class="info_titre_input">
+            <div class="content">
+                <!-- // header apercu  -->
+                <div class="header_apercu">
+                    <!-- // logo entreprise -->
+                    <div class="logo_entreprise">
+                        <img src="/assets/img/logo.jpeg" >
+                    </div>
+                    <!-- entete entreprise  -->
+                    <div class="entete_entreprise">
+                        <div class="content_entete">
+                            <p class="para1">Groupe XpertPro - Le groupe des xperts et professionnels</p>
+                            <p class="para2">Formation - Communication - Informatique</p>
+                            <div class="para3">Email : <a href="mailto">Groupexpertpro&#64;gmail.com</a> Téléphone : 93 33 56 21 / 79 87 33 75</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- // Ligne  -->
+                <hr>
+                <hr>
+                <!-- // titre  -->
+                <div class="titre">
+                    <!-- <h2>Facture proforma n˚{{ facture.numeroFacture || '000-00-2025' }}</h2> -->
+                    <h2>Facture proforma n˚<span style="color: #0000003e;">xxx-xx-xxxx</span></h2>
+                </div>
+                <!-- // date  -->
+                <div class="date">
+                    <!-- <p>Bamako, le 12 Mai 2025</p> -->
+                    <p>Bamako, le {{ facture.dateCreation | date:'dd MMMM yyyy' }}</p>
+                </div>
+
+                <!-- nom et object  -->
+                <div class="droit" *ngIf="facture.client">
+                    <h4>Client : </h4> 
+                    <p>{{ facture.client.nomComplet}}</p>
+                </div>
+
+                <!-- nom et object  -->
+                <div class="droit" *ngIf="facture.entrepriseClient">
+                    <h4>Entreprise :</h4> 
+                    <p>{{ facture.entrepriseClient.nom }}</p>
+                </div>
+
+                <div class="object">
+                    <h4>OBJECT :</h4>
+                    <p>{{ facture.description }}</p>
+                </div>
+
+                <!-- // Table  -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Désignation</th>
+                            <th style="width: 260px;">Description</th>
+                            <th>Prix Unitaire (FCFA)</th>
+                            <th>Quantité</th>
+                            <!-- <th>Durée</th> -->
+                            <th>Montant (FCFA)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let ligne of facture.lignesFacture">
+                            <td class="td_left">{{ ligne.produit.nom }}</td>
+                            <td class="td_left">{{ ligne.ligneDescription }}</td>
+                            <td>{{ ligne.prixUnitaire | customNumber }}</td>
+                            <td>{{ ligne.quantite }}</td>
+                            <!-- <td>15 000</td> -->
+                            <td>{{ (ligne.prixUnitaire * ligne.quantite) | customNumber }}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                          <td colspan="4">Total HT</td>
+                          <td>{{ facture.totalHT | customNumber }}</td>
+                        </tr>
+                        <tr *ngIf="facture.remise">
+                          <td colspan="4">Remise ({{ facture.remise }}%)</td>
+                          <td>{{ ((facture.totalHT * facture.remise/100) | customNumber) }}</td>
+                        </tr>
+                        <!-- Montant Commercial  -->
+                        <tr *ngIf="facture.remise != null">
+                            <td colspan="4">MONTANT COMMERCIAL</td>
+                            <td>
+                              {{
+                                (facture.totalHT - (facture.totalHT * facture.remise / 100)) | customNumber
+                              }}
+                            </td>
+                        </tr>
+                        <!-- TVA à 18% sur le montant commercial -->
+                        <tr *ngIf="facture.tva">
+                            <td colspan="4">TVA (18%)</td>
+                            <td>
+                              {{
+                                ((facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) * 0.18) | customNumber
+                              }}
+                            </td>
+                        </tr>
+                        <tr>
+                          <td colspan="4">Montant TTC</td>
+                          <td>{{ facture.totalFacture | customNumber }}</td>
+                        </tr>
+                      </tfoot>
+                </table>
+
+                <!-- // contenu_bottom  -->
+                <div class="contenu_bottom">
+                    <p><span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>{{ facture.totalFacture | enLettres }}.</p>
+                </div>
+
+                <!-- // sachet  -->
+                <div class="cachet_container">
+                    <div></div>
+                    <div class="cachet">
+                        <h6>Le Directeur Général</h6>
+                        <h6 class="name_directeur">Moussa H. OUOLOGUEM</h6>
+                    </div>
+                </div>
+                
+                
+
+            </div>
+        </div>
+
+        <!-- // Footer  -->
+        <div class="container_footer">
+            <div class="footer">
+                <!-- // Ligne  -->
+                <hr style="margin-top: 40px;">
+                    <p><strong>www.groupexpertpro.com</strong></p>
+                    <div>
+                        <em>
+                            NINA : 41709196001399D ; RCCM : MA.BKO.2017.B.5998 ;NIF :086143196K ; Banque : 38063502001 88 BMS
+                        </em>
+                    </div>
+                   <div style="margin-top: -4px;">
+                        <em >
+                            Adresse : Faladjé Sema, Rue du Gouverneur, Près de l'Hotel Fiesta /Bamako-Mali
+                        </em>
+                   </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #noData>
+    <p>Aucune donnée d’aperçu… <a (click)="router.navigate(['/add-facture-proforma'])">Retour</a></p>
+</ng-template>

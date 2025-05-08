@@ -10,6 +10,7 @@ export interface UserRequest {
   pays: string;
   adresseEntreprise: string;
   logoEntreprise : string,
+  siege: string;
   boutiques: {
     id: number;
     nomBoutique: string;

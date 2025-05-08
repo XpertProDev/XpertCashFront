@@ -7,5 +7,6 @@ export interface Entreprise {
     pays: string;
     siege: string;
     secteur: string;
+    
 }
 

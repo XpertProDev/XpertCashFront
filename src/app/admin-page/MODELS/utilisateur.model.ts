@@ -12,7 +12,7 @@ export class Users {
     constructor(
         id?: number,
         nomComplet?: string, email?: string, password?: string, phone?: string,
-        pays?: string, nomEntreprise?: string, 
+        pays?: string, nomEntreprise?: string,
     ) {
         this.id = id;
         this.nomComplet = nomComplet;

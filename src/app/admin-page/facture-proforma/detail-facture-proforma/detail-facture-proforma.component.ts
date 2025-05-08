@@ -25,12 +25,27 @@ export class DetailFactureProformaComponent implements OnInit {
   errorMessage: string = '';
   userEntrepriseId: number | null = null;
   nomEntreprise: string = '';
+  siege: string = '';
   produits: Produit[] = [];
   // Nouvelle variable pour stocker les ajustements locaux
   pendingAdjustments: any[] = [];
   newProduitId: number | null = null;
-  inputLignes: { produitId: number | null; quantite: number }[] = [{ produitId: null, quantite: 1 }];
-  confirmedLignes: { produitId: number | null; quantite: number }[] = [];
+  // inputLignes: { 
+  //   produitId: number | null; quantite: number 
+  // }[] = [{ produitId: null, quantite: 1 }];
+  // confirmedLignes: { produitId: number | null; quantite: number }[] = [];
+
+  inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; }[] = [{
+    produitId: null, quantite: 1,
+    ligneDescription: null 
+  }];
+
+  confirmedLignes: {
+    produitId: number | null;
+    quantite: number;
+    ligneDescription: string | null;
+  }[] = [];
+
   factureId!: number;
   showDuplicatePopup: boolean = false;
 
@@ -67,6 +82,7 @@ export class DetailFactureProformaComponent implements OnInit {
   factureProForma: FactureProForma = {
     id: 0,
     numeroFacture: '',
+    siege: '',
     dateCreation: '',
     description: '',
     totalHT: 0,
@@ -115,7 +131,8 @@ export class DetailFactureProformaComponent implements OnInit {
          // Initialise les lignes confirmées avec les données existantes
         this.confirmedLignes = data.lignesFacture.map(l => ({
           produitId: l.produit.id,
-          quantite: l.quantite
+          quantite: l.quantite,
+          ligneDescription: l.ligneDescription ?? ''
         }));
       
         // Correction 1 : Utilisez l'opérateur de coalescence null
@@ -191,6 +208,7 @@ export class DetailFactureProformaComponent implements OnInit {
       next: (user) => {
         this.nomEntreprise = user.nomEntreprise;
         this.userEntrepriseId = user.entrepriseId;
+        this.siege = user.siege;
 
         this.getProduits().then(() => { 
           this.loadFactureProforma(this.factureId); 
@@ -250,7 +268,10 @@ export class DetailFactureProformaComponent implements OnInit {
       }
   
       this.confirmedLignes.push({...ligne});
-      this.inputLignes = [{ produitId: null, quantite: 1 }];
+      this.inputLignes = [{
+        produitId: null, quantite: 1,
+        ligneDescription: null
+      }];
     }
   }
 
@@ -275,7 +296,8 @@ export class DetailFactureProformaComponent implements OnInit {
         id: line.id,
         produit: { id: line.produit.id },
         quantite: line.quantite,
-        prixUnitaire: line.prixUnitaire
+        prixUnitaire: line.prixUnitaire,
+        ligneDescription: line.ligneDescription
       }))
       // Ajouter ici les autres propriétés autorisées si nécessaire
     };
@@ -287,11 +309,10 @@ export class DetailFactureProformaComponent implements OnInit {
       description: this.factureProForma.description,
       // Utilisez confirmedLignes puisque c'est là que se trouvent les modifications (ajouts, suppressions, etc.)
       lignesFacture: this.confirmedLignes.map(l => ({
-        // Si une ligne existait déjà, vous pouvez éventuellement inclure l'id
-        // id: l.id, // si disponible
         produit: { id: l.produitId },
         quantite: l.quantite,
-        prixUnitaire: this.getPrixVente(l.produitId)
+        prixUnitaire: this.getPrixVente(l.produitId),
+        ligneDescription: l.ligneDescription
       }))
     };
     
@@ -301,7 +322,8 @@ export class DetailFactureProformaComponent implements OnInit {
       .map(l => ({
         produit: { id: l.produitId! },
         quantite: l.quantite,
-        prixUnitaire: this.getPrixVente(l.produitId!)
+        prixUnitaire: this.getPrixVente(l.produitId!),
+        ligneDescription: l.ligneDescription
       }));
     
     payload.lignesFacture = [
@@ -325,7 +347,6 @@ export class DetailFactureProformaComponent implements OnInit {
       }
     });
   }
-  
 
   // Ajouter ces méthodes
   canApprove(): boolean {
@@ -388,46 +409,45 @@ export class DetailFactureProformaComponent implements OnInit {
     return allowedTransitions[currentStatut]?.includes(newStatut) || false;
   }
 
-// Ajouter cette méthode publique pour le template
-canTransitionTo(targetStatus: StatutFactureProForma): boolean {
-  return this.isStatusTransitionAllowed(targetStatus);
-}
+  // Ajouter cette méthode publique pour le template
+  canTransitionTo(targetStatus: StatutFactureProForma): boolean {
+    return this.isStatusTransitionAllowed(targetStatus);
+  }
 
-confirmStatusChange(): void {
-  if (!this.pendingStatut) return;
+  confirmStatusChange(): void {
+    if (!this.pendingStatut) return;
 
-  const selectedUsers = this.users
-  .filter(user => user.selected)
-  .map(user => user.id);
+    const selectedUsers = this.users
+    .filter(user => user.selected)
+    .map(user => user.id);
 
-  const modifications: Partial<FactureProForma> = {
-    statut: this.pendingStatut,
-    ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
-      ? { dateRelance: this.dateRelance }
-      : {})
-  };
+    const modifications: Partial<FactureProForma> = {
+      statut: this.pendingStatut,
+      ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
+        ? { dateRelance: this.dateRelance }
+        : {})
+    };
 
-  this.factureProFormaService.updateFactureProforma(
-    this.factureId,
-    undefined,
-    undefined,
-    modifications,
-    this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
-  ).subscribe({
-    next: (updatedFacture) => {
-      this.factureProForma = updatedFacture;
-      this.showStatusConfirmation = false;
-      this.pendingStatut = null;
-      this.dateRelance = undefined;
-    },
-    error: (err) => {
-      console.error('Erreur de mise à jour', err);
-      alert('Échec de la mise à jour du statut');
-      this.showStatusConfirmation = false;
-    }
-  });
-}
-
+    this.factureProFormaService.updateFactureProforma(
+      this.factureId,
+      undefined,
+      undefined,
+      modifications,
+      this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
+    ).subscribe({
+      next: (updatedFacture) => {
+        this.factureProForma = updatedFacture;
+        this.showStatusConfirmation = false;
+        this.pendingStatut = null;
+        this.dateRelance = undefined;
+      },
+      error: (err) => {
+        console.error('Erreur de mise à jour', err);
+        alert('Échec de la mise à jour du statut');
+        this.showStatusConfirmation = false;
+      }
+    });
+  }
 
   cancelStatusChange(): void {
     this.showStatusConfirmation = false;
