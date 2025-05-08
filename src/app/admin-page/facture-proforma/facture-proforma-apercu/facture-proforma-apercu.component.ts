@@ -37,6 +37,6 @@ export class FactureProformaApercuComponent implements OnInit {
     });
   }
 
-  creerFactureProforma() {}
+
   
 }

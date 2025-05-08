@@ -1,4 +1,4 @@
-<div class="container_global" *ngIf="facture; noData">
+<div class="container_global" *ngIf="facture; else noData">
     <!-- <div *ngIf="isLoading" class="loading-overlay">
         <div class="spinner"></div>
     </div> -->
@@ -11,7 +11,7 @@
             </div>
             <!-- // enregistrer  -->
             <div class="btn_ajouter">
-                <p class="btn_save" (click)="creerFactureProforma()">
+                <p class="btn_save">
                   <!-- {{ inputLignes.length > 0 ? 'Ajouter la facture' : 'Créer facture' }} -->
                   Créer facture
                 </p>
