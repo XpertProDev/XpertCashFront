@@ -241,7 +241,31 @@ export class AddfactureProformaComponent implements OnInit {
     return produit?.nom || '';
   }
 
+  // goToFacture() {
+  //   this.router.navigate(['/facture-proforma']);
+  // }
+
   goToFacture() {
+    // Réinitialiser tous les champs
+    this.description = '';
+    this.typeDestinataire = 'client';
+    this.selectedClientId = null;
+    this.selectedEntrepriseId = null;
+    this.selectedEntreprise = null;
+    this.inputLignes = [{ 
+      produitId: null, 
+      quantite: 0,
+      ligneDescription: null 
+    }];
+    this.confirmedLignes = [];
+    this.activeRemise = false;
+    this.remisePourcentage = 0;
+    this.activeTva = false;
+    
+    // Nettoyer le state sauvegardé
+    this.formStateService.clearState();
+    
+    // Navigation
     this.router.navigate(['/facture-proforma']);
   }
 

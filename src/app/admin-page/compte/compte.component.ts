@@ -219,11 +219,11 @@ export class CompteComponent  implements OnInit {
     this.isLoading = true;
   
     console.log("Données envoyées :", request);
-    console.log("Token utilisé :", token);
+    //console.log("Token utilisé :", token);
   
     this.usersService.addUserToEntreprise(request, token).subscribe({
       next: (response) => {
-        console.log("Réponse du serveur :", response);
+        //console.log("Réponse du serveur :", response);
   
         if (typeof response === 'string' && response.includes('succès')) {
           this.successMessage = response;
