@@ -36,6 +36,8 @@ export class AddfactureProformaComponent implements OnInit {
   typeDestinataire: string = 'client';
   selectedClientId: number | null = null;
   selectedEntrepriseId: number | null = null;
+  // remplace ou ajoute à côté de selectedEntrepriseId
+  selectedEntreprise: { id: number; nom: string } | null = null;
   nomEntreprise: string = '';
   boutiqueIds: number[] | undefined;
   produits: Produit[] = [];
@@ -406,7 +408,10 @@ export class AddfactureProformaComponent implements OnInit {
     // 1) Construire l'objet FactureProForma en mémoire
     const lignes = [
       ...this.confirmedLignes.map(l => ({
-        produit: { id: l.produitId! },
+        produit: {
+          id: l.produitId!,
+          nom: this.getProduitNom(l.produitId!)   // ← AJOUTÉ
+        },
         quantite: l.quantite,
         ligneDescription: l.ligneDescription,
         prixUnitaire: this.getPrixVente(l.produitId),
@@ -415,7 +420,10 @@ export class AddfactureProformaComponent implements OnInit {
       ...this.inputLignes
         .filter(l => l.produitId && l.quantite > 0)
         .map(l => ({
-          produit: { id: l.produitId! },
+          produit: {
+            id: l.produitId!,
+            nom: this.getProduitNom(l.produitId!) // ← AJOUTÉ
+          },
           quantite: l.quantite,
           ligneDescription: l.ligneDescription,
           prixUnitaire: this.getPrixVente(l.produitId),
@@ -424,7 +432,7 @@ export class AddfactureProformaComponent implements OnInit {
 
     const preview: FactureProForma = {
       id: 0,
-      numeroFacture: '—', // vous pouvez générer ou laisser vide pour l’aperçu
+      numeroFacture: '—',
       dateCreation: new Date().toISOString(),
       description: this.description,
       totalHT: this.getTotalHT(),
@@ -435,9 +443,13 @@ export class AddfactureProformaComponent implements OnInit {
       client: this.typeDestinataire === 'client' && this.selectedClientId
         ? { id: this.selectedClientId, nomComplet: this.getClientName(this.selectedClientId) }
         : undefined,
-      entrepriseClient: this.typeDestinataire === 'entreprise' && this.selectedEntrepriseId
-        ? { id: this.selectedEntrepriseId, nom: this.getEntrepriseName(this.selectedEntrepriseId) }
-        : undefined
+      entrepriseClient: this.typeDestinataire === 'entreprise' && this.selectedEntreprise
+      ? {
+          id: this.selectedEntreprise.id,
+          nom: this.selectedEntreprise.nom
+        }
+      : undefined,
+      
     };
 
     // 2) Pousser vers le service

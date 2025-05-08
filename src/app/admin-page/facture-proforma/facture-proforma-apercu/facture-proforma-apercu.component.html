@@ -43,9 +43,13 @@
 
                 <!-- nom et object  -->
                 <div class="droit" *ngIf="facture.entrepriseClient">
-                    <h4>Entreprise :</h4> 
+                    <h4>Entreprise :</h4>
                     <p>{{ facture.entrepriseClient.nom }}</p>
                 </div>
+
+                <!-- <div>
+                    {{facture|json}}
+                </div> -->
 
                 <div class="object">
                     <h4>OBJECT :</h4>

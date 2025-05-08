@@ -41,12 +41,25 @@
                       </select>
         
                       <!-- Select Entreprise -->
-                      <select *ngIf="typeDestinataire === 'entreprise'" class="input_focus" [(ngModel)]="selectedEntrepriseId" name="entreprise_id" required [ngModelOptions]="{ standalone: true }" >
+                      <!-- <select *ngIf="typeDestinataire === 'entreprise'" class="input_focus" [(ngModel)]="selectedEntrepriseId" name="entreprise_id" required [ngModelOptions]="{ standalone: true }" >
                         <option [ngValue]="null">Sélectionner une entreprise</option>
                         <option *ngFor="let entreprise of entreprises" [value]="entreprise.id">
                           {{ entreprise.nom }}
                         </option>
+                      </select> -->
+                      <select *ngIf="typeDestinataire === 'entreprise'"
+                              [(ngModel)]="selectedEntreprise"
+                              name="entreprise"
+                              class="input_focus"
+                              [ngModelOptions]="{ standalone: true }"
+                              required>
+                        <option [ngValue]="null">Sélectionner une entreprise</option>
+                        <option *ngFor="let entreprise of entreprises"
+                                [ngValue]="entreprise">
+                          {{ entreprise.nom }}
+                        </option>
                       </select>
+
                     </div>
 
                     <!-- Object -->
