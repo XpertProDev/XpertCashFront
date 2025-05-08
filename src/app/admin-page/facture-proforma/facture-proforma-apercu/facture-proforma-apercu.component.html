@@ -26,12 +26,13 @@
                 <hr>
                 <!-- // titre  -->
                 <div class="titre">
-                    <h2>Facture proforma n˚{{ facture.numeroFacture || '—' }}</h2>
+                    <!-- <h2>Facture proforma n˚{{ facture.numeroFacture || '000-00-2025' }}</h2> -->
+                    <h2>Facture proforma n˚<span style="color: #0000003e;">xxx-xx-xxxx</span></h2>
                 </div>
                 <!-- // date  -->
                 <div class="date">
                     <!-- <p>Bamako, le 12 Mai 2025</p> -->
-                    <p>{{ facture.dateCreation | date:'dd MMMM yyyy' }}</p>
+                    <p>Bamako, le {{ facture.dateCreation | date:'dd MMMM yyyy' }}</p>
                 </div>
 
                 <!-- nom et object  -->
@@ -83,14 +84,22 @@
                           <td>{{ ((facture.totalHT * facture.remise/100) | customNumber) }}</td>
                         </tr>
                         <!-- Montant Commercial  -->
-                        <tr *ngIf="facture.remise">
+                        <tr *ngIf="facture.remise != null">
                             <td colspan="4">MONTANT COMMERCIAL</td>
-                            <td>---</td>
+                            <td>
+                              {{
+                                (facture.totalHT - (facture.totalHT * facture.remise / 100)) | customNumber
+                              }}
+                            </td>
                         </tr>
-                        <!-- tva  -->
-                        <tr *ngIf="facture.remise">
-                            <td colspan="4">TVA 18% </td>
-                            <td>---</td>
+                        <!-- TVA à 18% sur le montant commercial -->
+                        <tr *ngIf="facture.tva">
+                            <td colspan="4">TVA (18%)</td>
+                            <td>
+                              {{
+                                ((facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) * 0.18) | customNumber
+                              }}
+                            </td>
                         </tr>
                         <tr>
                           <td colspan="4">Montant TTC</td>
@@ -101,7 +110,7 @@
 
                 <!-- // contenu_bottom  -->
                 <div class="contenu_bottom">
-                    <p><span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>Trente-un-mille Francs CFA.</p>
+                    <p><span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>{{ facture.totalFacture | enLettres }}.</p>
                 </div>
 
                 <!-- // sachet  -->

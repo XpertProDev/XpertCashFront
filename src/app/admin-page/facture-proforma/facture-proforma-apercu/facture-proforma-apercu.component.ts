@@ -9,11 +9,12 @@ import { FormsModule } from '@angular/forms';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { FactureProForma } from '../../MODELS/FactureProForma.model';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
+import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 
 @Component({
   selector: 'app-facture-proforma-apercu',
   standalone: true,
-  imports: [CommonModule, FormsModule, CustomNumberPipe],
+  imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe],
   templateUrl: './facture-proforma-apercu.component.html',
   styleUrls: ['./facture-proforma-apercu.component.scss']
 })
