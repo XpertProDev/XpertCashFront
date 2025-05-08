@@ -1,9 +1,22 @@
-<div class="container_global" *ngIf="facture; else noData">
+<div class="container_global" *ngIf="facture; noData">
     <!-- <div *ngIf="isLoading" class="loading-overlay">
         <div class="spinner"></div>
     </div> -->
 
     <div class="information_cadre" style="position: relative;">
+        <div class="cadre_retour">
+            <!-- // icon  -->
+            <div class="retour_icon" routerLink="/addfacture-proforma">
+                <i class="ri-arrow-left-long-fill"></i>
+            </div>
+            <!-- // enregistrer  -->
+            <div class="btn_ajouter">
+                <p class="btn_save" (click)="creerFactureProforma()">
+                  <!-- {{ inputLignes.length > 0 ? 'Ajouter la facture' : 'Créer facture' }} -->
+                  Créer facture
+                </p>
+            </div>
+        </div>
         <div class="info_titre_input">
             <div class="content">
                 <!-- // header apercu  -->

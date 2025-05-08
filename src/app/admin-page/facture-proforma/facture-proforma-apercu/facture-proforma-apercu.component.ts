@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { UsersService } from '../../SERVICES/users.service';
 import { ProduitService } from '../../SERVICES/produit.service';
@@ -14,7 +14,7 @@ import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 @Component({
   selector: 'app-facture-proforma-apercu',
   standalone: true,
-  imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe],
+  imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe, RouterLink],
   templateUrl: './facture-proforma-apercu.component.html',
   styleUrls: ['./facture-proforma-apercu.component.scss']
 })
@@ -36,5 +36,7 @@ export class FactureProformaApercuComponent implements OnInit {
       }
     });
   }
+
+  creerFactureProforma() {}
   
 }
