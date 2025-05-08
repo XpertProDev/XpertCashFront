@@ -14,6 +14,7 @@ import { HttpHeaders, HttpParams } from '@angular/common/http';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { FactureProForma } from '../../MODELS/FactureProForma.model';
+import { FormStateService } from '../../SERVICES/form-state.service';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -37,6 +38,8 @@ export class AddfactureProformaComponent implements OnInit {
   typeDestinataire: string = 'client';
   selectedClientId: number | null = null;
   selectedEntrepriseId: number | null = null;
+  // remplace ou ajoute à côté de selectedEntrepriseId
+  selectedEntreprise: { id: number; nom: string } | null = null;
   nomEntreprise: string = '';
   boutiqueIds: number[] | undefined;
   produits: Produit[] = [];
@@ -53,7 +56,7 @@ export class AddfactureProformaComponent implements OnInit {
   totalClients = 0;
   noClientsAvailable = false;
   entreprises: any[] = [];
-  activeRemise: boolean = true;
+  activeRemise: boolean = false;
   activeTva: boolean = false;
   remisePourcentage: number = 0;
   tva: number = 0;
@@ -74,13 +77,38 @@ export class AddfactureProformaComponent implements OnInit {
     private produitService: ProduitService,
     private usersService: UsersService,
     private previewService: FacturePreviewService,
+    private formStateService: FormStateService
   ) {}
 
-  ngOnInit(): void {
-    this.getListClients();
-    this.getListEntreprise();
-    this.getProduits();
-    this.getUserInfo();
+  // Modification de ngOnInit()
+  async ngOnInit(): Promise<void> {
+    await this.getUserInfo(); // Charger d'abord les infos utilisateur
+    
+    await Promise.all([
+      this.getListClients(),
+      this.getListEntreprise(),
+      this.getProduits()
+    ]);
+
+    // Restaurer l'état APRÈS le chargement des données
+    const savedState = this.formStateService.getState();
+    if (savedState) {
+      this.typeDestinataire = savedState.typeDestinataire;
+      this.selectedClientId = savedState.selectedClientId;
+      this.selectedEntreprise = savedState.selectedEntreprise;
+      this.description = savedState.description;
+      this.inputLignes = savedState.inputLignes;
+      this.confirmedLignes = savedState.confirmedLignes;
+      this.activeRemise = savedState.activeRemise;
+      this.remisePourcentage = savedState.remisePourcentage;
+      this.activeTva = savedState.activeTva;
+    }
+  }
+
+  // Modification de la méthode navigateBack() dans le composant d'aperçu
+  navigateBack() {
+    // Ne pas effacer l'état ici
+    this.router.navigate(['/addfacture-proforma']);
   }
 
   // Toggle remise / TVA
@@ -214,7 +242,31 @@ export class AddfactureProformaComponent implements OnInit {
     return produit?.nom || '';
   }
 
+  // goToFacture() {
+  //   this.router.navigate(['/facture-proforma']);
+  // }
+
   goToFacture() {
+    // Réinitialiser tous les champs
+    this.description = '';
+    this.typeDestinataire = 'client';
+    this.selectedClientId = null;
+    this.selectedEntrepriseId = null;
+    this.selectedEntreprise = null;
+    this.inputLignes = [{ 
+      produitId: null, 
+      quantite: 0,
+      ligneDescription: null 
+    }];
+    this.confirmedLignes = [];
+    this.activeRemise = false;
+    this.remisePourcentage = 0;
+    this.activeTva = false;
+    
+    // Nettoyer le state sauvegardé
+    this.formStateService.clearState();
+    
+    // Navigation
     this.router.navigate(['/facture-proforma']);
   }
 
@@ -262,7 +314,7 @@ export class AddfactureProformaComponent implements OnInit {
   getProduits() {
     const token = localStorage.getItem('authToken');
     if (token && this.userEntrepriseId) {
-      this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
+      this.produitService.getProduitsParEntreprise(this.userEntrepriseId!).subscribe({
         next: (data: Produit[]) => {
           console.log('Produits récupérés :', data);
           this.produits = data;
@@ -376,6 +428,19 @@ export class AddfactureProformaComponent implements OnInit {
       produitId: null, quantite: 1,
       ligneDescription: null
     }];
+
+    // Par (avec les vrais paramètres) :
+    this.factureProFormaService.creerFactureProforma(
+      facture,
+      this.activeRemise ? this.remisePourcentage : undefined,
+      this.activeTva,
+      (this.activeRemise || this.activeTva)
+    ).subscribe({
+      next: (res) => {
+        this.formStateService.clearState();
+        this.router.navigate(['/facture-proforma']);
+      }
+    });
   }
 
   removePendingAdjustment(index: number): void {
@@ -404,10 +469,26 @@ export class AddfactureProformaComponent implements OnInit {
   // }
 
   apercuFactureProforma(): void {
+    // Sauvegarder l'état actuel
+    this.formStateService.saveState({
+      typeDestinataire: this.typeDestinataire,
+      selectedClientId: this.selectedClientId,
+      selectedEntreprise: this.selectedEntreprise,
+      description: this.description,
+      inputLignes: this.inputLignes,
+      confirmedLignes: this.confirmedLignes,
+      activeRemise: this.activeRemise,
+      remisePourcentage: this.remisePourcentage,
+      activeTva: this.activeTva
+    });
+
     // 1) Construire l'objet FactureProForma en mémoire
     const lignes = [
       ...this.confirmedLignes.map(l => ({
-        produit: { id: l.produitId! },
+        produit: {
+          id: l.produitId!,
+          nom: this.getProduitNom(l.produitId!)   // ← AJOUTÉ
+        },
         quantite: l.quantite,
         ligneDescription: l.ligneDescription,
         prixUnitaire: this.getPrixVente(l.produitId),
@@ -416,7 +497,10 @@ export class AddfactureProformaComponent implements OnInit {
       ...this.inputLignes
         .filter(l => l.produitId && l.quantite > 0)
         .map(l => ({
-          produit: { id: l.produitId! },
+          produit: {
+            id: l.produitId!,
+            nom: this.getProduitNom(l.produitId!) // ← AJOUTÉ
+          },
           quantite: l.quantite,
           ligneDescription: l.ligneDescription,
           prixUnitaire: this.getPrixVente(l.produitId),
@@ -425,7 +509,7 @@ export class AddfactureProformaComponent implements OnInit {
 
     const preview: FactureProForma = {
       id: 0,
-      numeroFacture: '—', // vous pouvez générer ou laisser vide pour l’aperçu
+      numeroFacture: '—',
       dateCreation: new Date().toISOString(),
       siege: this.siege,
       description: this.description,
@@ -437,9 +521,13 @@ export class AddfactureProformaComponent implements OnInit {
       client: this.typeDestinataire === 'client' && this.selectedClientId
         ? { id: this.selectedClientId, nomComplet: this.getClientName(this.selectedClientId) }
         : undefined,
-      entrepriseClient: this.typeDestinataire === 'entreprise' && this.selectedEntrepriseId
-        ? { id: this.selectedEntrepriseId, nom: this.getEntrepriseName(this.selectedEntrepriseId) }
-        : undefined
+      entrepriseClient: this.typeDestinataire === 'entreprise' && this.selectedEntreprise
+      ? {
+          id: this.selectedEntreprise.id,
+          nom: this.selectedEntreprise.nom
+        }
+      : undefined,
+      
     };
 
     // 2) Pousser vers le service

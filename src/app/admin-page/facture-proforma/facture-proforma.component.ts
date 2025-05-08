@@ -9,6 +9,8 @@ import { UsersService } from '../SERVICES/users.service';
 import { Clients } from '../MODELS/clients-model';
 import { Produit } from '../MODELS/produit.model';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-facture-proforma',
@@ -17,6 +19,8 @@ import { CustomNumberPipe } from '../MODELS/customNumberPipe';
     FormsModule,
     ReactiveFormsModule,
     CustomNumberPipe,
+    MatInputModule,
+    MatPaginatorModule,
   ],
   templateUrl: './facture-proforma.component.html',
   styleUrl: './facture-proforma.component.scss'
@@ -48,8 +52,16 @@ export class FactureProformaComponent implements OnInit {
     userEntrepriseId: number | null = null;
     isLoading: boolean = false;
     facturesproforma: any[] = [];
+    // Variables existantes...
+    isListView = true;
+    showDropdown = false;
+    searchTerm: string = '';
 
-  searchTerm: string = '';
+    // Pagination
+    pageSize = 6;
+    currentPage = 0;
+    sortField: string = 'numeroFacture'; // Au lieu de 'any'
+    sortDirection: 'asc' | 'desc' = 'asc';
 
     constructor(
       private router: Router,
@@ -60,10 +72,15 @@ export class FactureProformaComponent implements OnInit {
     ) {}
 
   ngOnInit(): void{
-
+    const savedView = localStorage.getItem('factureView');
+    this.isListView = savedView !== 'grid';
     this.getUserInfo();
   }
 
+  toggleView(viewType: 'list' | 'grid') {
+    this.isListView = viewType === 'list';
+    localStorage.setItem('factureView', viewType);
+  }
 
   goToAddProduit() {
     this.router.navigate(['/addfacture-proforma']);
@@ -73,6 +90,35 @@ export class FactureProformaComponent implements OnInit {
     this.searchTerm = '';
   }
 
+  // Corriger la signature de la méthode sort
+  sort(field: string) { // Spécifier le type string explicitement
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field; // Maintenant le type correspond
+      this.sortDirection = 'asc';
+    }
+
+    this.facturesproforma.sort((a, b) => {
+      const valueA = a[field]?.toString().toLowerCase() ?? '';
+      const valueB = b[field]?.toString().toLowerCase() ?? '';
+      return valueA.localeCompare(valueB) * (this.sortDirection === 'asc' ? 1 : -1);
+    });
+  }
+
+  onPageChange(event: PageEvent) {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+  }
+
+  get paginatedFactures(): any[] {
+      const start = this.currentPage * this.pageSize;
+      return this.facturesproforma.slice(start, start + this.pageSize);
+  }
+
+  getTotalFacture(facture: any): number {
+      return facture.ligneFactureProforma?.reduce((acc: number, ligne: any) => acc + ligne.montantTotal, 0) || 0;
+  }
 
   getUserInfo(): void {
     this.usersService.getUserInfo().subscribe({

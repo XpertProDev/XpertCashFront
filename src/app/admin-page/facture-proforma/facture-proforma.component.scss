@@ -17,11 +17,19 @@ table {
 tr {
     font-size: 13px;
 }
+
+tr.tr {
+    font-size: 18px;
+}
   
 th{
     border-bottom: 1px solid #dddddd94;
     padding: 8px;
-
+}
+  
+th.th {
+    border-bottom: 1px solid #dddddd94;
+    padding: 10px;
 }
 
 td {
@@ -75,7 +83,7 @@ tr:hover {
   
   
 .contentIcon i{
-    padding: 0 15px;
+    // padding: 0 15px;
     font-size: 20px;
     cursor: pointer;
 }
@@ -573,8 +581,8 @@ mat-paginator {
 }
 
 .cadre_cahier:hover {
-    // transform: translateY(-1px);
-    transform: scale(1.01);
+    transform: translateY(-1px);
+    // transform: scale(1.01);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -636,12 +644,26 @@ th, td {
     font-size: 8px;
 }
 
+th.th, td.td {
+    border-bottom: 1px solid #dddddd94;
+    padding: 20px;
+    font-size: 12px;
+}
+
 tr:nth-child(even) {
     background-color: #ffffff;
 }
   
 tr:hover {
     background-color: #fefefe;
+}
+
+tr.tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+  
+tr.tr:hover {
+    background-color: #ddd;
 }
 
 .tb_total {
@@ -729,3 +751,9 @@ tr:hover {
     color: #fff;
   }
   
+
+  .pagination {
+    display: flex;
+    justify-content: right;
+    margin-top: 20px;
+  }
