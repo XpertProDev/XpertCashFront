@@ -42,6 +42,7 @@
     <!-- Vue Tableau -->
     <table *ngIf="isListView">
       <thead>
+        <th>Photo</th>
         <th>Nom</th>
         <th (click)="sort('email')">
           Email 
@@ -54,33 +55,69 @@
 
       <tbody>
           <tr *ngFor="let fournisseur of paginatedFournisseurs" (click)="openDetail(fournisseur.id)">
-              <td>{{ fournisseur.nomComplet || 'Non renseigné' }}</td>
-              <td>{{ fournisseur.email || 'Non renseigné' }}</td>
-              <td>{{ fournisseur.adresse || 'Non renseigné' }}</td>
-              <td>{{ fournisseur.telephone || 'Non renseigné' }}</td>
-              <td>{{ fournisseur.createdAt | date: 'dd/MM/yyyy' }}</td>
+            <td>
+              <div class="imgClient">
+                <!-- <img [src]="product.photo"> -->
+                <img src="assets/img/profil.png" alt="Photo fournisseur">
+                <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/image_product.png' : product.photo"> -->
+              </div>
+            </td>
+            <td>{{ fournisseur.nomComplet || 'Non renseigné' }}</td>
+            <td>{{ fournisseur.email || 'Non renseigné' }}</td>
+            <td>{{ fournisseur.adresse || 'Non renseigné' }}</td>
+            <td>{{ fournisseur.telephone || 'Non renseigné' }}</td>
+            <td>{{ fournisseur.createdAt | date: 'dd/MM/yyyy' }}</td>
           </tr>
       </tbody>
     </table>
     
     <!-- Vue Cadre -->
-    <div class="container_cadre" *ngIf="!isListView">
+    <!-- <div class="container_cadre" *ngIf="!isListView">
       <div class="grid-view">
         <div class="client-card" *ngFor="let fournisseur of paginatedFournisseurs" (click)="openDetail(fournisseur.id)">
           <div class="name_icon">
             <h3>{{ fournisseur.nomComplet }}</h3>
             <span class="dateCreat">{{ fournisseur.createdAt | date: 'dd/MM/yyyy' }}</span>
           </div>
-          <!-- <div class="content_cadre_double"> -->
             <div class="info_cadre">
                 <p><i class="ri-mail-line"></i>{{ fournisseur.email || 'Non renseigné' }}</p>
                 <p><i class="ri-map-pin-line"></i>{{ fournisseur.adresse || 'Non renseigné' }}</p>
                 <p><i class="ri-phone-line"></i>{{ fournisseur.telephone || 'Non renseigné' }}</p>
             </div>
-            <!-- <div class="imgClient_grid">
-              <img src="assets/img/supplier-icon.png" alt="Icon fournisseur">
-            </div> -->
+        </div>
+      </div>
+    </div> -->
+
+    <div class="container_cadre" *ngIf="!isListView">
+      <div class="grid-view">
+        <div class="client-card" *ngFor="let fournisseur of paginatedFournisseurs" (click)="openDetail(fournisseur.id)">
+          <div class="content_img_info">
+            <!-- // image  -->
+            <div class="imgFourni_grid">
+              <img src="assets/img/profil.png" alt="Icon fournisseur">
+            </div>
+            <!-- '// info' -->
+            <div class="info_fourni">
+              <!-- // nom  -->
+              <div class="info_name">
+                <h3>{{ fournisseur.nomComplet }}</h3>
+              </div>
+              <!-- email  -->
+              <div class="info_email">
+              <p style="margin: 0; font-size: 12px;"><i class="ri-mail-line"></i>{{ fournisseur.email || 'Non renseigné' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- <div class="info_fourni_tel_adresse"> -->
+          <div class="info_tel">
+            <p style="font-size: 12px; margin-bottom: 0;"> <i class="ri-phone-line"></i> {{ fournisseur.telephone || 'Non renseigné' }}</p>
+          </div>
           <!-- </div> -->
+          <div class="info_adresse">
+            <p style="font-size: 12px; margin: 0;"><i class="ri-map-pin-line"></i> {{ fournisseur.adresse || 'Non renseigné' }}</p>
+          </div>
+
         </div>
       </div>
     </div>
