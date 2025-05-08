@@ -34,7 +34,7 @@ export class FactureProformaApercuComponent implements OnInit {
     this.previewService.getPreview().subscribe(data => {
       if (!data) {
         // Si pas de données, on revient en arrière
-        this.router.navigate(['/add-facture-proforma']);
+        this.router.navigate(['/addfacture-proforma']);
       } else {
         this.facture = data;
       }
