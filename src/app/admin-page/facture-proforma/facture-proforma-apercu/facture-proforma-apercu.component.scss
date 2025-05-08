@@ -213,8 +213,17 @@ td.td_left {
     top: 60px;
 }
 
+.container_footer {
+  display: flex;
+  // align-items: center;
+  justify-content: center;
+}
+
 .footer {
     text-align: center;
+    position: absolute;
+    bottom: 45px;
+    width: 96%;
 }
 
 .footer p {

@@ -48,6 +48,12 @@ export class EnLettresPipe implements PipeTransform {
       const reste = n % 1000;
       return (m > 1 ? this.numberToWords(m) + ' mille' : 'mille') + (reste ? ' ' + this.numberToWords(reste) : '');
     }
+    if (n < 1000000000) {
+        const millions = Math.floor(n / 1000000);
+        const reste = n % 1000000;
+        return (millions > 1 ? this.numberToWords(millions) + ' millions' : 'un million') +
+          (reste ? ' ' + this.numberToWords(reste) : '');
+    }
     return 'nombre trop grand';
   }
 }
