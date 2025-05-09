@@ -198,7 +198,11 @@ export class DetailEditEntrepriseClientComponent {
       telephone: this.entrepriseClientForm.get('telephone')?.value,
       adresse: this.entrepriseClientForm.get('adresse')?.value,
       siege: this.client.entrepriseClient?.siege,
-      secteur: this.client.entrepriseClient?.secteur
+      secteur: this.client.entrepriseClient?.secteur,
+      logo: this.client.entrepriseClient?.logo,
+      nif: this.client.entrepriseClient?.nif,
+      nina: this.client.entrepriseClient?.nina,
+      banque: this.client.entrepriseClient?.banque
     };
   }
 

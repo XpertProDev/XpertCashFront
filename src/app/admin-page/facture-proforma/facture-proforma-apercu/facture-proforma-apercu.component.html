@@ -22,14 +22,14 @@
                 <div class="header_apercu">
                     <!-- // logo entreprise -->
                     <div class="logo_entreprise">
-                        <img src="/assets/img/logo.jpeg" >
+                        <img [src]="logo" alt="Logo de l'entreprise">
                     </div>
                     <!-- entete entreprise  -->
                     <div class="entete_entreprise">
                         <div class="content_entete">
-                            <p class="para1">Groupe XpertPro - Le groupe des xperts et professionnels</p>
-                            <p class="para2">Formation - Communication - Informatique</p>
-                            <div class="para3">Email : <a href="mail">Groupexpertpro&#64;gmail.com</a> Téléphone : 93 33 56 21 / 79 87 33 75</div>
+                            <p class="para1">{{nom}}</p>
+                            <p class="para2">Secterur: {{secteur}}</p>
+                            <div class="para3">Email : <a href="mail">{{email}}</a> Téléphone : {{telephone}}</div>
                         </div>
                     </div>
                 </div>
@@ -151,12 +151,12 @@
                     <p><strong>www.groupexpertpro.com</strong></p>
                     <div>
                         <em>
-                            NINA : 41709196001399D ; RCCM : MA.BKO.2017.B.5998 ;NIF :086143196K ; Banque : 38063502001 88 BMS
+                            NINA : {{nina}} ; RCCM : MA.BKO.2017.B.5998 ;NIF :{{nif}} ; Banque : {{banque}}
                         </em>
                     </div>
                    <div style="margin-top: -4px;">
                         <em >
-                            Adresse : Faladjé Sema, Rue du Gouverneur, Près de l'Hotel Fiesta /Bamako-Mali
+                            Adresse : {{adresse}} /{{siege}}-{{pays}}
                         </em>
                    </div>
             </div>

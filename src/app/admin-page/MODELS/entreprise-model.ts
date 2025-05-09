@@ -7,6 +7,11 @@ export interface Entreprise {
     pays: string;
     siege: string;
     secteur: string;
+    logo: string;
+    nif: string;
+    nina: string;
+    banque: string;
+
     
 }
 

@@ -361,6 +361,10 @@ export class DetailEditClientComponent {
       adresse: this.entrepriseForm.value.adresse,
       siege: this.entrepriseForm.value.siege,
       secteur: this.entrepriseForm.value.secteur,
+      logo: this.newPhotoUrl || '',
+      nif: this.entrepriseForm.value.nif,
+      nina: this.entrepriseForm.value.nina,
+      banque: this.entrepriseForm.value.banque,
 
     };
   

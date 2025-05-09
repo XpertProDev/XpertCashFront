@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, catchError, Observable, tap, throwError } from "rxjs";
+import { BehaviorSubject, catchError, Observable, switchMap, tap, throwError } from "rxjs";
 import { Entreprise } from "../MODELS/entreprise-model";
 
 @Injectable({
@@ -53,5 +53,85 @@ export class EntrepriseService {
         this.entrepriseSubject.next(data);
       })
     )
+  }
+
+
+  // Recuperer information d'une entreprise de la user connecter
+  getEntrepriseById(id: number): Observable<Entreprise> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.get<Entreprise>(`${this.apiUrl}/entreprises/${id}`, { headers }).pipe(
+      catchError(error => {
+        let errorMsg = 'Erreur inconnue';
+        if (error.error instanceof ErrorEvent) {
+          errorMsg = `Erreur: ${error.error.message}`;
+        } else if (error.status === 404) {
+          errorMsg = 'Entreprise non trouvée';
+        }
+        return throwError(() => new Error(errorMsg));
+      })
+    );
+  }
+
+  // Get entreprise d'un user
+  getEntrepriseInfo(): Observable<Entreprise> {
+    const token = localStorage.getItem('authToken');
+
+    if (!token) {
+      console.error('Aucun token trouvé');
+      return throwError(() => new Error('Aucun token trouvé'));
+    }
+
+    const decodedToken = this.decodeJwt(token);
+    const isTokenExpired = this.isTokenExpired(decodedToken);
+
+    if (isTokenExpired) {
+      return this.getNewTokenFromApi().pipe(
+        switchMap((newTokenResponse) => {
+          localStorage.setItem('authToken', newTokenResponse.token);
+
+          const headers = new HttpHeaders({
+            Authorization: `Bearer ${newTokenResponse.token}`
+          });
+
+          return this.http.get<Entreprise>(`${this.apiUrl}/myEntreprise`, { headers }).pipe(
+            tap(entreprise => {
+              localStorage.setItem('entreprise', JSON.stringify(entreprise));
+            })
+          );
+        })
+      );
+    } else {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+
+      return this.http.get<Entreprise>(`${this.apiUrl}/myEntreprise`, { headers }).pipe(
+        tap(entreprise => {
+          localStorage.setItem('entreprise', JSON.stringify(entreprise));
+        })
+      );
+    }
+  }
+
+  // Simpl dcodage JWT pour vérifier si le token est expiré
+  decodeJwt(token: string): any {
+    return JSON.parse(atob(token.split('.')[1]));
+  }
+  
+  // Vérifier si le token est expiré
+  isTokenExpired(decodedToken: any): boolean {
+    const expirationDate = new Date(decodedToken.exp * 1000);
+    return expirationDate < new Date();
+  }
+    
+  // Rafraîchir le token avec un refresh token (si applicable)
+  getNewTokenFromApi(): Observable<{ token: string }> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    return this.http.post<{ token: string }>(`${this.apiUrl}/refresh-token`, { refreshToken });
   }
 }

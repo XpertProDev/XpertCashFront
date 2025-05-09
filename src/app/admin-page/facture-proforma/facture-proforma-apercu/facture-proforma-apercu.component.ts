@@ -8,6 +8,9 @@ import { FactureProForma } from '../../MODELS/FactureProForma.model';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 import { FormStateService } from '../../SERVICES/form-state.service';
+import { UsersService } from '../../SERVICES/users.service';
+import { EntrepriseService } from '../../SERVICES/entreprise-service';
+
 
 @Component({
   selector: 'app-facture-proforma-apercu',
@@ -19,15 +22,31 @@ import { FormStateService } from '../../SERVICES/form-state.service';
 export class FactureProformaApercuComponent implements OnInit {
   facture: FactureProForma | null = null;
 
+  nom: string | null = null; // Declare the property
+  siege!: string;
+  email!: string;
+  logo: string | null = null; 
+  secteur!: string;
+  telephone!: string;
+  adresse!: string;
+  nif!: string;
+  banque!: string;
+  nina!: string;
+  pays!: string;
+
+
   constructor(
     private previewService: FacturePreviewService,
+    private userService: UsersService,
     private factureService: FactureProFormaService, // Utiliser le bon nom
     private formStateService: FormStateService, // Ajouter le service
-    public router: Router
+    public router: Router,
+    private entrepriseService: EntrepriseService
   ) {}
 
   ngOnInit(): void {
     this.getFacturePreview();
+    this.getUserEntrepriseInfo();
   }
 
   getFacturePreview () {
@@ -76,6 +95,34 @@ export class FactureProformaApercuComponent implements OnInit {
   navigateBack() {
     this.router.navigate(['/addfacture-proforma']);
   }
+
+
+  getUserEntrepriseInfo(): void {
+    this.entrepriseService.getEntrepriseInfo().subscribe({
+      next: (entreprise) => {
+        console.log("Entreprise reçue :", entreprise);
+        this.nom = entreprise.nom; 
+        this.siege = entreprise.siege;
+        this.email = entreprise.email;
+        this.logo = entreprise.logo;
+        this.secteur = entreprise.secteur;
+        this.telephone = entreprise.telephone;
+        this.adresse = entreprise.adresse;
+        this.nif = entreprise.nif;
+        this.banque = entreprise.banque;
+        this.nina = entreprise.nina;
+        this.pays = entreprise.pays;
+
+  
+        // Ajout du préfixe si nécessaire
+        this.logo = 'http://localhost:8080' + entreprise.logo;
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des infos utilisateur :", err);
+      }
+    });
+  }
+  
 
   
 }

@@ -336,6 +336,10 @@ export class AddClientsComponent implements OnInit {
       adresse: this.entrepriseForm.value.adresse,
       siege: this.entrepriseForm.value.siege,
       secteur: this.entrepriseForm.value.secteur,
+      logo : this.entrepriseForm.value.logo,
+      nif: this.entrepriseForm.value.nif,
+      nina: this.entrepriseForm.value.nina,
+      banque: this.entrepriseForm.value.banque,
     };
   
     this.entrepriseService.addEntreprise(newEntreprise).subscribe({
