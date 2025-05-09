@@ -1,1 +1,85 @@
-<p>{{ factureReel | json }}</p>
+<!-- <p>{{ factureReel | json }}</p> -->
+
+<div class="containerTable">
+    <!-- En-tête -->
+    <div class="tasks-header">
+      <h1 class="title">Factures Réelles</h1>
+    </div>
+  
+    <!-- Vue Grille -->
+    <div class="parent">
+      <div class="cadre_cahier" *ngFor="let facture of paginatedFacturesReel" (click)="showDetails(facture.id)">
+        <div class="title_facture">
+          <h5>Facture Réelle</h5>
+        </div>
+  
+        <div class="information_cadre">
+          <div class="num_facture">
+            <span>{{ facture.numeroFacture }}</span>
+          </div>
+          
+          <div class="double_info">
+            <span class="left_name">Client :</span>
+            <span class="right_name">
+              {{ facture.client?.nom || facture.entrepriseClient?.nom }}
+            </span>
+          </div>
+  
+          <div class="double_info">
+            <span class="left_name">Date :</span>
+            <span class="right_name date_name">
+              {{ facture.dateCreation | date: 'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+  
+        <table>
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Quantité</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngIf="facture.lignesFacture?.length; else noLines">
+              <tr *ngFor="let ligne of facture.lignesFacture.slice(0, 2)">
+                <td>{{ ligne.produitNom }}</td>
+                <td>{{ ligne.quantite }}</td>
+                <td class="tb_total">{{ ligne.montantTotal | customNumber }}</td>
+              </tr>
+              <tr *ngIf="facture.lignesFacture.length > 2" class="facture_trois">
+                <td>||</td>
+                <td>||</td>
+                <td class="tb_total">||</td>
+              </tr>
+            </ng-container>
+            
+            <ng-template #noLines>
+              <tr>
+                <td colspan="3" class="text-center">Aucun produit</td>
+              </tr>
+            </ng-template>
+          </tbody>
+        </table>
+  
+        <div class="image_etiquette">
+          <img [src]="getImageSrc(facture.statutPaiement)" alt="Étiquette">
+          <div class="etat" [ngClass]="getStatutClass(facture.statutPaiement)">
+            <p class="tilte_etat">- État -</p>
+            <span>{{ facture.statutPaiement }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Pagination -->
+    <div class="pagination">
+      <mat-paginator [length]="factureReel.length" 
+                     [pageSize]="pageSize" 
+                     [pageSizeOptions]="[6, 10, 25, 100]"
+                     (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+</div>
+  
