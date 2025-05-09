@@ -1,4 +1,4 @@
-<div class="container_global" *ngIf="facture as f; else noData">
+<div class="container_global">
     <!-- <div *ngIf="isLoading" class="loading-overlay">
         <div class="spinner"></div>
     </div> -->
@@ -10,12 +10,10 @@
                 <i class="ri-arrow-left-long-fill"></i>
             </div>
             <!-- // enregistrer  -->
-            <div class="btn_ajouter">
-                <button class="btn_save" (click)="onCreate()">
-                    {{ f.lignesFacture.length > 0 ? 'Ajouter la facture' : 'Créer la facture' }}
-                </button>                  
+            <div class="icon_printer">
+                <i class="ri-printer-cloud-line"></i>                
             </div>
-        </div>
+        </div> 
         <div class="info_titre_input">
             <div class="content">
                 <!-- // header apercu  -->
@@ -44,19 +42,19 @@
                 <!-- // date  -->
                 <div class="date">
                     <!-- <p>Bamako, le 12 Mai 2025</p> -->
-                    <p>{{siege}}, le {{ facture.dateCreation | date:'dd MMMM yyyy' }}</p>
+                    <p>{{siege}}, le 09 mai 2025</p>
                 </div>
 
                 <!-- nom et object  -->
-                <div class="droit" *ngIf="facture.client">
+                <div class="droit">
                     <h4>Client : </h4> 
-                    <p>{{ facture.client.nomComplet}}</p>
+                    <p>Nom de client individuel</p>
                 </div>
 
                 <!-- nom et object  -->
-                <div class="droit" *ngIf="facture.entrepriseClient">
+                <div class="droit">
                     <h4>Entreprise :</h4>
-                    <p>{{ facture.entrepriseClient.nom }}</p>
+                    <p>Nom de client entreprise</p>
                 </div>
 
                 <!-- <div>
@@ -65,7 +63,7 @@
 
                 <div class="object">
                     <h4>OBJECT :</h4>
-                    <p>{{ facture.description }}</p>
+                    <p>Une petite description de l'object</p>
                 </div>
 
                 <!-- // Table  -->
@@ -81,52 +79,63 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let ligne of facture.lignesFacture">
-                            <td class="td_left">{{ ligne.produit.nom }}</td>
-                            <td class="td_left">{{ ligne.ligneDescription }}</td>
-                            <td>{{ ligne.prixUnitaire | customNumber }}</td>
-                            <td>{{ ligne.quantite }}</td>
+                        <tr>
+                            <td class="td_left">Produit nom</td>
+                            <td class="td_left">Produit description</td>
+                            <td>00000</td>
+                            <td>00</td>
                             <!-- <td>15 000</td> -->
-                            <td>{{ (ligne.prixUnitaire * ligne.quantite) | customNumber }}</td>
+                            <td> prixUnitaire * ligne.quantite</td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                           <td colspan="4">Total HT</td>
-                          <td>{{ facture.totalHT | customNumber }}</td>
+                          <td>00000</td>
                         </tr>
-                        <tr *ngIf="facture.remise">
-                          <td colspan="4">Remise ({{ facture.remise }}%)</td>
-                          <td>{{ ((facture.totalHT * facture.remise/100) | customNumber) }}</td>
+                        <tr>
+                          <td colspan="4">Remise 0 %</td>
+                          <td>
+                            <!-- {{ ((facture.totalHT * facture.remise/100) | customNumber) }} -->
+                              000000
+                        </td>
                         </tr>
                         <!-- Montant Commercial  -->
-                        <tr *ngIf="facture.remise != null">
+                        <tr>
                             <td colspan="4">MONTANT COMMERCIAL</td>
                             <td>
-                              {{
+                              <!-- {{
                                 (facture.totalHT - (facture.totalHT * facture.remise / 100)) | customNumber
-                              }}
+                              }} -->
+                                0000
                             </td>
                         </tr>
                         <!-- TVA à 18% sur le montant commercial -->
-                        <tr *ngIf="facture.tva">
+                        <tr>
                             <td colspan="4">TVA (18%)</td>
                             <td>
-                              {{
+                              <!-- {{
                                 ((facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) * 0.18) | customNumber
-                              }}
+                              }} -->
+                                0000
                             </td>
                         </tr>
                         <tr>
                           <td colspan="4">Montant TTC</td>
-                          <td>{{ facture.totalFacture | customNumber }}</td>
+                          <td>
+                            <!-- {{ facture.totalFacture | customNumber }} -->
+                              0000
+                        </td>
                         </tr>
                       </tfoot>
                 </table>
 
                 <!-- // contenu_bottom  -->
                 <div class="contenu_bottom">
-                    <p><span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>{{ facture.totalFacture | enLettres }}.</p>
+                    <p><span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>
+                    <!-- {{ facture.totalFacture | enLettres }}. -->
+                      Mille neuf cent .....
+                </p>
                 </div>
 
                 <!-- // sachet  -->
@@ -163,7 +172,3 @@
         </div>
     </div>
 </div>
-
-<ng-template #noData>
-    <p>Aucune donnée d’aperçu… <a (click)="router.navigate(['/add-facture-proforma'])">Retour</a></p>
-</ng-template>

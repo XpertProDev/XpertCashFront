@@ -340,6 +340,7 @@ export class AddClientsComponent implements OnInit {
       nif: this.entrepriseForm.value.nif,
       nina: this.entrepriseForm.value.nina,
       banque: this.entrepriseForm.value.banque,
+      rccm: this.entrepriseForm.value.rccm,
     };
   
     this.entrepriseService.addEntreprise(newEntreprise).subscribe({

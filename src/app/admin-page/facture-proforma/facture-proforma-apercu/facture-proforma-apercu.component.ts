@@ -22,7 +22,7 @@ import { EntrepriseService } from '../../SERVICES/entreprise-service';
 export class FactureProformaApercuComponent implements OnInit {
   facture: FactureProForma | null = null;
 
-  nom: string | null = null; // Declare the property
+  nom: string | null = null;
   siege!: string;
   email!: string;
   logo: string | null = null; 
@@ -33,6 +33,7 @@ export class FactureProformaApercuComponent implements OnInit {
   banque!: string;
   nina!: string;
   pays!: string;
+  rccm!: string;
 
 
   constructor(
@@ -112,6 +113,7 @@ export class FactureProformaApercuComponent implements OnInit {
         this.banque = entreprise.banque;
         this.nina = entreprise.nina;
         this.pays = entreprise.pays;
+        this.rccm = entreprise.rccm;
 
   
         // Ajout du préfixe si nécessaire

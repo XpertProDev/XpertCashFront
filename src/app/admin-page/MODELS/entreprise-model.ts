@@ -11,6 +11,7 @@ export interface Entreprise {
     nif: string;
     nina: string;
     banque: string;
+    rccm: string;
 
     
 }
