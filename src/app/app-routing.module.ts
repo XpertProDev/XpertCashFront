@@ -294,6 +294,12 @@ const routes: Routes = [
         path: 'facture-proforma-apercu/:id',
         loadComponent: () => import('./admin-page/facture-proforma/facture-proforma-apercu/facture-proforma-apercu.component').then(m => m.FactureProformaApercuComponent),
         canActivate: [authGuard]
+      },
+      // Facture reel detail
+      {
+        path: 'facture-reel-details/:id',
+        loadComponent: () => import('./admin-page/facture-reel/facture-reel-details/facture-reel-details.component').then(m => m.FactureReelDetailsComponent),
+        canActivate: [authGuard]
       }
 
     ]
