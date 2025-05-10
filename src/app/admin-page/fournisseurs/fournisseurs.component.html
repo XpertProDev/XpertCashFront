@@ -104,7 +104,10 @@
               </div>
               <!-- email  -->
               <div class="info_email">
-              <p style="margin: 0; font-size: 12px;"><i class="ri-mail-line"></i>{{ fournisseur.email || 'Non renseigné' }}</p>
+              <p style="margin: 0; font-size: 12px;">
+                <i class="ri-mail-line"></i>
+                <!-- {{ fournisseur.email || truncateEmail }}</p> -->
+                {{ fournisseur.email ? (fournisseur.email | truncateEmail) : 'Non renseigné' }}
               </div>
             </div>
           </div>
