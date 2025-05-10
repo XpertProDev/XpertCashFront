@@ -9,7 +9,7 @@ import { StockService } from '../SERVICES/stocks.service';
 import { TransfertService } from '../SERVICES/transfert-service';
 import { Fournisseurs } from '../MODELS/fournisseurs-model';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { TruncateEmailPipe } from '../truncate-email.pipe';
+import { TruncateEmailPipe } from '../MODELS/truncate-email.pipe';
 
 @Component({
   selector: 'app-fournisseurs',
