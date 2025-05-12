@@ -1,3 +1,6 @@
+.container_global {
+  margin-right: 28%;
+}
 
 table {
   width: 100%;
@@ -126,12 +129,12 @@ th {
 }
 
 .info_titre_input {
-  padding: 20px; 
+  padding: 10px 20px 10px; 
 }
 
 .info_titre_input h4 {
-  font-size: 16px;
-  margin-bottom: 10px;
+  font-size: 14px;
+  margin-bottom: 0px;
   letter-spacing: 0.60px;
 }
 
@@ -139,7 +142,7 @@ th {
 
 .champ_input {
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 6px;
   margin-right: 0;
 }
 
@@ -388,7 +391,7 @@ input:checked + .slider:before {
   display: flex; 
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  // margin-bottom: -8px;
 
 }
 
@@ -492,7 +495,7 @@ input:checked + .slider:before {
 .champ_input_list_stock {
   display: block; 
   position: relative;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .double_input_ttc {
@@ -569,14 +572,7 @@ input:checked + .slider:before {
 //     100% { transform: rotate(360deg); }
 //   }
   
-  
-  
-  
-  
-  
-  .container_global {
-      margin-right: 25%;
-  }
+ 
   
 //   .title {
 //       font-size: 18px;

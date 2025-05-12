@@ -202,7 +202,7 @@
                                         <th class="">Montant (FCFA)</th>
                                     </tr>
                                 </thead>
-                                <!-- List produit quantite  -->
+                                <!-- List produit quantite  --> 
                                 <tbody>
                                     <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of confirmedLignes; let i = index">
                                         <!-- // Produit  -->
@@ -261,7 +261,7 @@
                                         <!-- // Produit  -->
                                         <div class="champ_input" style="margin-right: 15px;">
                                             <td>
-                                                <select class="input_focus_type" [(ngModel)]="ligne.produitId" (ngModelChange)="updateCalculs()" [ngModelOptions]="{standalone: true}">
+                                                <select class="input_focus_type input_focus_type_select" [(ngModel)]="ligne.produitId" (ngModelChange)="updateCalculs()" [ngModelOptions]="{standalone: true}">
                                                   <option [ngValue]="null">Sélectionner un produit</option>
                                                   <option *ngFor="let produit of produits" [ngValue]="produit.id">
                                                     {{ produit.nom }}
@@ -323,7 +323,7 @@
                                     <tr class="tr_stock">
                                         <!-- // Produit  -->
                                         <td >
-                                            <h5>MONTANT TOTAL HT </h5>
+                                            <h4>MONTANT TOTAL HT </h4>
                                         </td>
                                         <!-- // Description -->
                                         <td></td>
@@ -354,7 +354,7 @@
                 <!-- Remise -->
                 <div class="information_cadre">
                     <div class="info_titre_input">
-                    <h4>Remise et TVA</h4>
+                    <!-- <h4>Remise</h4> -->
             
                     <div class="champ_input_inventaire">
                         <p>Application de REMISE</p>
@@ -393,9 +393,9 @@
                         <h4> MONTANT COMMERCIAL </h4>
                         <!-- Montant Commercial -->
                         <div class="montantTTC">
-                            <h4>
+                            <!-- <h4> -->
                                 {{ getTotalCommercial() | customNumber  }} CFA
-                            </h4>
+                            <!-- </h4> -->
                         </div>
                     </div>
                 </div>
@@ -404,7 +404,7 @@
                 <!-- TVA -->
                 <div class="information_cadre">
                     <div class="info_titre_input">
-                    <h4> TVA </h4>
+                    <!-- <h4> TVA </h4> -->
             
                     <div class="champ_input_inventaire">
                         <p>Application de TVA</p>
@@ -438,7 +438,7 @@
                             <h4>MONTANT TOTAL TTC </h4>
                             <div class="montantTTC">
                                 {{ getTotalTTC() | customNumber }} CFA
-                              </div>
+                            </div>
                         </div>
                     </div>
                 </div>

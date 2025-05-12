@@ -1,3 +1,6 @@
+.container_global {
+  margin-right: 28%;
+}
 
 table {
     width: 100%;
@@ -134,7 +137,7 @@ th {
 
 
 .info_titre_input {
-    padding: 20px; 
+  padding: 10px 20px 10px; 
 }
 
 .info_titre_input h2 span {
@@ -162,7 +165,7 @@ th {
   
 .champ_input {
     position: relative;
-    margin-bottom: 25px;
+    margin-bottom: 6px;
     margin-right: 0;
 }
 
@@ -417,7 +420,7 @@ th {
     display: flex; 
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    // margin-bottom: 10px;
   
   }
   
@@ -542,9 +545,13 @@ th {
     align-items: center;
 }
 
+// .double_input_ttc h4 {
+//   margin-bottom: 0;
+// }
+
 .info_titre_input h4 {
-    font-size: 16px;
-    margin-bottom: 10px;
+    font-size: 14px;
+    margin-bottom: 0px;
     letter-spacing: 0.60px;
   }
 
