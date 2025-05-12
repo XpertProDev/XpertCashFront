@@ -214,7 +214,11 @@
                                         <!-- // Description -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                              <input type="text" [(ngModel)]="ligne.ligneDescription" [ngModelOptions]="{standalone: true}"  class="input_focus_type" style="resize: none;" placeholder="Description">
+                                              <textarea style="margin-bottom: -7px; min-width: 120px; resize: none;"
+                                                type="text" [(ngModel)]="ligne.ligneDescription" 
+                                                [ngModelOptions]="{standalone: true}"  
+                                                class="input_focus_type"
+                                                placeholder="Description"></textarea>
                                             </div>                         
                                         </td>
                                         <!-- // Quantité  -->
@@ -272,13 +276,12 @@
                                         <!-- // Description -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                                <input
+                                                <textarea style="margin-bottom: -7px; min-width: 120px; resize: none;"
                                                 type="text"
                                                 [(ngModel)]="ligne.ligneDescription"
                                                 [ngModelOptions]="{ standalone: true }"
                                                 class="input_focus_type"
-                                                style="resize: none;"
-                                                placeholder="Description">                                              
+                                                placeholder="Description"></textarea>
                                             </div>                         
                                         </td>
                                         <!-- // Quantité  -->
@@ -468,6 +471,59 @@
         </div>
     </div>
 
+    <!-- Brouillon  -->
+    <div class="brouillon_facture">
+        <!-- Créé par -->
+        <div class="brouillon_double">
+            <h5 class="titre_brouillont">Crée par :</h5>
+            <div class="contenue_brouillont">
+                <h6>{{ factureProForma.utilisateurModificateur?.nomComplet || 'Non spécifié' }}</h6>
+            </div>
+        </div>
+    
+        <!-- Modifié par -->
+        <div class="brouillon_double">
+            <h5 class="titre_brouillont">Modifier par :</h5>
+            <div class="contenue_brouillont">
+                <h6>{{ factureProForma.utilisateurModificateur?.nomComplet || 'Aucune modification' }}</h6>
+            </div>
+        </div>
+    
+        <!-- Approuvé par -->
+        <div class="brouillon_double">
+            <h5 class="titre_brouillont">Approuver par :</h5>
+            <div class="contenue_brouillont">
+                <h6 *ngIf="factureProForma.utilisateurApprobateur">
+                    {{ factureProForma.utilisateurApprobateur.nomComplet }}
+                </h6>
+                <div *ngIf="(factureProForma.approbateurs ?? []).length > 0">
+                    <h6 *ngFor="let approbateur of factureProForma.approbateurs">
+                      {{ approbateur.nomComplet }}
+                    </h6>
+                  </div>
+                <h6 *ngIf="!factureProForma.utilisateurApprobateur && !factureProForma.approbateurs?.length">
+                    En attente d'approbation
+                </h6>
+            </div>
+        </div>
+    
+        <!-- Date de création -->
+        <div class="brouillon_double">
+            <h5 class="titre_brouillont">Date de création :</h5>
+            <div class="contenue_brouillont">
+                <h6>{{ factureProForma.dateCreation | date: 'dd/MM/yyyy' }}</h6>
+            </div>
+        </div>
+    
+        <!-- Date de modification (si disponible) -->
+        <div class="brouillon_double" *ngIf="factureProForma.dateApprobation">
+            <h5 class="titre_brouillont">Date d'approbation :</h5>
+            <div class="contenue_brouillont">
+                <h6>{{ factureProForma.dateApprobation | date: 'dd/MM/yyyy' }}</h6>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 
@@ -476,7 +532,7 @@
       <p>Ce produit est déjà dans la liste.</p>
       <button (click)="closePopup()">OK</button>
     </div>
-  </div>
+</div>
 
 <!-- Popup de confirmation -->
 <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
@@ -494,52 +550,47 @@
         <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
       </div>
     </div>
-  </div>
+</div>
 
-  <!-- Liste des utilisateurs à cocher si statut = Approbation -->
-  <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
-    <div class="popup-content">
-      <h4>Confirmer le changement de statut</h4>
-      <p>
-        Êtes-vous sûr de vouloir 
-        <span class="highlighted-status">{{ selectedStatutLabel }}</span> 
-        cette facture ?
-      </p>
-  
-      <!-- Affichage conditionnel selon le statut -->
-      <div *ngIf="pendingStatut === 'ENVOYE'" class="form-group">
-        <label for="relanceDate" style="font-size: 12px;">Date de relance (facultative) :</label>
-        <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control" />
-      </div>
-  
-      <!-- ✅ Liste des utilisateurs pour l'approbation -->
-      <div *ngIf="pendingStatut === 'APPROBATION'" class="form-group">
-        <label style="font-size: 12px;">Sélectionnez les utilisateurs à notifier :</label>
-        <div *ngIf="users.length === 0">Aucun utilisateur à afficher</div>
+<!-- Liste des utilisateurs à cocher si statut = Approbation -->
+<div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
+<div class="popup-content">
+    <h4>Confirmer le changement de statut</h4>
+    <p>
+    Êtes-vous sûr de vouloir 
+    <span class="highlighted-status">{{ selectedStatutLabel }}</span> 
+    cette facture ?
+    </p>
 
-            <div *ngFor="let user of users" style="display: flex; align-items: center;">
-            <input
-                type="checkbox"
-                [(ngModel)]="user.selected"
-                id="user_{{ user.id }}"
-                style="margin-right: 8px; margin-bottom: 8px;"
-            />
-            <label for="user_{{ user.id }}">
-                {{ user.nomComplet }} - {{ user.phone }}
-            </label>
-            </div>
-
-      </div>
-  
-      <div class="popup-actions">
-        <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
-        <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
-      </div>
+    <!-- Affichage conditionnel selon le statut -->
+    <div *ngIf="pendingStatut === 'ENVOYE'" class="form-group">
+    <label for="relanceDate" style="font-size: 12px;">Date de relance (facultative) :</label>
+    <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control" />
     </div>
-  </div>
-  
 
+    <!-- ✅ Liste des utilisateurs pour l'approbation -->
+    <div *ngIf="pendingStatut === 'APPROBATION'" class="form-group">
+    <label style="font-size: 12px;">Sélectionnez les utilisateurs à notifier :</label>
+    <div *ngIf="users.length === 0">Aucun utilisateur à afficher</div>
 
-  
-  
-  
+        <div *ngFor="let user of users" style="display: flex; align-items: center;">
+        <input
+            type="checkbox"
+            [(ngModel)]="user.selected"
+            id="user_{{ user.id }}"
+            style="margin-right: 8px; margin-bottom: 8px;"
+        />
+        <label for="user_{{ user.id }}">
+            {{ user.nomComplet }} - {{ user.phone }}
+        </label>
+        </div>
+
+    </div>
+
+    <div class="popup-actions">
+    <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
+    <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
+    </div>
+</div>
+</div>
+

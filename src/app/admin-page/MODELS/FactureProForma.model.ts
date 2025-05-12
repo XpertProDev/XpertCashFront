@@ -40,12 +40,23 @@ export interface FactureProForma {
     siege: string;
     dateCreation: string;
     dateApprobation?: string;
+    utilisateurModificateur?: {
+        nomComplet: string;
+        email: string;
+    };
+    utilisateurApprobateur?: {
+        nomComplet: string;
+    };
+    approbateurs?: { nomComplet: string }[]; // Optionnel
+    entreprise?: {
+        siege: string;
+    };
     description: string;
     totalHT: number;
     remise?: number;
     tva: boolean;
     totalFacture: number;
-    statut?: string; // Ajouté si nécessaire
+    statut?: string;
     client?: {
       id: number;
       nomComplet: string;
