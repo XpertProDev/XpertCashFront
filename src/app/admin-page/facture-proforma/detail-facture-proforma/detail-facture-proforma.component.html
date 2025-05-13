@@ -506,6 +506,28 @@
                 </h6>
             </div>
         </div>
+
+        <!-- Validé par (si le statut est VALIDE) -->
+        <div class="brouillon_double" *ngIf="factureProForma.statut === 'VALIDE'">
+            <h5 class="titre_brouillont">Valider par :</h5>
+            <div class="contenue_brouillont">
+                <!-- Utilisateur approbateur direct -->
+                <h6 *ngIf="factureProForma.utilisateurApprobateur?.nomComplet">
+                    {{ factureProForma.utilisateurApprobateur?.nomComplet }}
+                </h6>
+                
+                <!-- Premier approbateur de la liste -->
+                <h6 *ngIf="!factureProForma.utilisateurApprobateur && (factureProForma.approbateurs ?? []).length > 0">
+                    {{ (factureProForma.approbateurs ?? [])[0]?.nomComplet }}
+                    <!-- {{ getFirstApprobateurName() }} -->
+                </h6>
+        
+                <!-- Fallback si aucune information -->
+                <h6 *ngIf="!factureProForma.utilisateurApprobateur && (factureProForma.approbateurs ?? []).length === 0">
+                    Information non disponible
+                </h6>
+            </div>
+        </div>
     
         <!-- Date de création -->
         <div class="brouillon_double">

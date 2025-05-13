@@ -10,11 +10,11 @@
                 <i class="ri-arrow-left-long-fill"></i>
             </div>
             <!-- // enregistrer  -->
-            <div class="btn_ajouter">
+            <!-- <div class="btn_ajouter">
                 <button class="btn_save" (click)="onCreate()">
                     {{ f.lignesFacture.length > 0 ? 'Ajouter la facture' : 'Créer la facture' }}
                 </button>                  
-            </div>
+            </div> -->
         </div>
         <div class="info_titre_input">
             <div class="content">
@@ -22,7 +22,8 @@
                 <div class="header_apercu">
                     <!-- // logo entreprise -->
                     <div class="logo_entreprise">
-                        <img [src]="logo" alt="Logo de l'entreprise">
+                        <img [src]="logo" (error)="logo='http://localhost:8080/defaultLogo/Votre.png'" 
+                        alt="Logo de l'entreprise">
                     </div>
                     <!-- entete entreprise  -->
                     <div class="entete_entreprise">
@@ -148,7 +149,7 @@
             <div class="footer">
                 <!-- // Ligne  -->
                 <hr style="margin-top: 40px;">
-                    <p><strong>www.groupexpertpro.com</strong></p>
+                    <p><strong>{{siteWeb}}</strong></p>
                     <div>
                         <em>
                             NINA : {{nina}} ; RCCM : {{rccm}} ;NIF :{{nif}} ; Banque : {{banque}}

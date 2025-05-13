@@ -34,6 +34,7 @@ export class FactureProformaApercuComponent implements OnInit {
   nina!: string;
   pays!: string;
   rccm!: string;
+  siteWeb!: string;
 
 
   constructor(
@@ -114,6 +115,7 @@ export class FactureProformaApercuComponent implements OnInit {
         this.nina = entreprise.nina;
         this.pays = entreprise.pays;
         this.rccm = entreprise.rccm;
+        this.siteWeb = entreprise.siteWeb
 
   
         // Ajout du préfixe si nécessaire

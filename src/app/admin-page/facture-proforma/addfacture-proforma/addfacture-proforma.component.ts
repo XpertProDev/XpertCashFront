@@ -409,19 +409,19 @@ export class AddfactureProformaComponent implements OnInit {
       return;
     }
 
-    // Appel du service avec 4 paramètres
-    this.factureProFormaService.creerFactureProforma(
-      facture,
-      this.activeRemise ? this.remisePourcentage : undefined,
-      this.activeTva,
-      (this.activeRemise || this.activeTva)
-    ).subscribe({
-      next: (res) => {
-        console.log('Facture créée avec succès:', res);
-        this.router.navigate(['/facture-proforma']);
-      },
-      error: (err) => console.error('Erreur création facture :', err)
-    });
+    // // Appel du service avec 4 paramètres
+    // this.factureProFormaService.creerFactureProforma(
+    //   facture,
+    //   this.activeRemise ? this.remisePourcentage : undefined,
+    //   this.activeTva,
+    //   (this.activeRemise || this.activeTva)
+    // ).subscribe({
+    //   next: (res) => {
+    //     console.log('Facture créée avec succès:', res);
+    //     this.router.navigate(['/facture-proforma']);
+    //   },
+    //   error: (err) => console.error('Erreur création facture :', err)
+    // });
 
     this.confirmedLignes = [];
     this.inputLignes = [{
@@ -437,9 +437,14 @@ export class AddfactureProformaComponent implements OnInit {
       (this.activeRemise || this.activeTva)
     ).subscribe({
       next: (res) => {
+        console.log('Facture créée avec succès:', res);
         this.formStateService.clearState();
+        // Réinitialisation de ton formulaire si besoin
+        this.confirmedLignes = [];
+        this.inputLignes = [{ produitId: null, quantite: 1, ligneDescription: null }];
         this.router.navigate(['/facture-proforma']);
-      }
+      },
+      error: (err) => console.error('Erreur création facture :', err)
     });
   }
 

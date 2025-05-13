@@ -282,9 +282,12 @@ export class DetailFactureProformaComponent implements OnInit {
     this.confirmedLignes.splice(index, 1);
   }
   
-  
   trackByFn(index: number, item: any): number {
     return index;
+  }
+
+  getFirstApprobateurName(): string | undefined {
+    return this.factureProForma?.approbateurs?.[0]?.nomComplet;
   }
 
   cleanFactureForUpdate(facture: FactureProForma): any {
