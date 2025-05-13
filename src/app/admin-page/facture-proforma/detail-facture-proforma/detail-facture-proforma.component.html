@@ -477,7 +477,7 @@
         <div class="brouillon_double">
             <h5 class="titre_brouillont">Crée par :</h5>
             <div class="contenue_brouillont">
-                <h6>Non spécifié</h6>
+                <h6>{{ factureProForma.utilisateurCreateur?.nomComplet || 'Non spécifié' }}</h6>
             </div>
         </div>
     
@@ -511,7 +511,7 @@
          <div class="brouillon_double">
             <h5 class="titre_brouillont">Dernière action :</h5>
             <div class="contenue_brouillont">
-                <h6>Aucune activité</h6>
+                <h6>{{ factureProForma.statut || 'Aucune activité' }}</h6>
             </div>
         </div>
 
