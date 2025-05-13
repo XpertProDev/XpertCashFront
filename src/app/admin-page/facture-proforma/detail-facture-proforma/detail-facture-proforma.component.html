@@ -477,7 +477,7 @@
         <div class="brouillon_double">
             <h5 class="titre_brouillont">Crée par :</h5>
             <div class="contenue_brouillont">
-                <h6>{{ factureProForma.utilisateurModificateur?.nomComplet || 'Non spécifié' }}</h6>
+                <h6>Non spécifié</h6>
             </div>
         </div>
     
@@ -504,6 +504,14 @@
                 <h6 *ngIf="!factureProForma.utilisateurApprobateur && !factureProForma.approbateurs?.length">
                     En attente d'approbation
                 </h6>
+            </div>
+        </div>
+
+         <!-- Action par -->
+         <div class="brouillon_double">
+            <h5 class="titre_brouillont">Dernière action :</h5>
+            <div class="contenue_brouillont">
+                <h6>Aucune activité</h6>
             </div>
         </div>
 

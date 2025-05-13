@@ -281,6 +281,28 @@ export class DetailFactureProformaComponent implements OnInit {
     // Optionnel : mettre à jour confirmedLignes si vous l'utilisez pour la vue
     this.confirmedLignes.splice(index, 1);
   }
+
+  getDerniereActionDate(): string {
+    const dates: Date[] = [];
+    
+    if (this.factureProForma.dateCreation) {
+      dates.push(new Date(this.factureProForma.dateCreation));
+    }
+    
+    if (this.factureProForma.dateApprobation) {
+      dates.push(new Date(this.factureProForma.dateApprobation));
+    }
+  
+    // Utilisez la dateRelance de l'interface mise à jour
+    if (this.factureProForma.dateRelance) {
+      dates.push(new Date(this.factureProForma.dateRelance));
+    }
+  
+    if (dates.length === 0) return 'Aucune activité';
+    
+    const lastDate = dates.reduce((a, b) => a > b ? a : b);
+    return lastDate.toLocaleDateString('fr-FR');
+  }
   
   trackByFn(index: number, item: any): number {
     return index;

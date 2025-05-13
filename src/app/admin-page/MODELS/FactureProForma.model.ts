@@ -40,10 +40,15 @@ export interface FactureProForma {
     siege: string;
     dateCreation: string;
     dateApprobation?: string;
+    
+    utilisateurCreateur?: {
+      nomComplet: string;
+    };
     utilisateurModificateur?: {
         nomComplet: string;
         email: string;
     };
+    dateRelance?: string
     utilisateurApprobateur?: {
         nomComplet: string;
     };
