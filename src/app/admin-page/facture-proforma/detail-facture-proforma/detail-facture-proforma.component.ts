@@ -431,15 +431,34 @@ export class DetailFactureProformaComponent implements OnInit {
         : {})
     };
 
+    // const modifications: Partial<FactureProForma> = {
+    //   statut: this.pendingStatut,
+    //   // Réinitialise les approbateurs si on revient en arrière
+    //   ...(this.pendingStatut === StatutFactureProForma.BROUILLON && {
+    //     approbateurs: [],
+    //     utilisateurApprobateur: null
+    //   })
+    // };
+    
     this.factureProFormaService.updateFactureProforma(
       this.factureId,
       undefined,
       undefined,
-      modifications,
+      {
+        statut: this.pendingStatut,
+        // Réinitialiser les approbateurs si on change de statut
+        ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
+          approbateurs: []
+        })
+      },
       this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
     ).subscribe({
       next: (updatedFacture) => {
+        if (this.pendingStatut === StatutFactureProForma.APPROBATION) {
+          updatedFacture.approbateurs = this.users.filter(u => selectedUsers.includes(u.id));
+        }
         this.factureProForma = updatedFacture;
+        
         this.showStatusConfirmation = false;
         this.pendingStatut = null;
         this.dateRelance = undefined;
