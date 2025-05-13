@@ -468,6 +468,24 @@ export class AddfactureProformaComponent implements OnInit {
     });
   }
 
+  onProduitChange(produitId: number | null, ligne: any) {
+    // Mettre à jour l'ID du produit
+    ligne.produitId = produitId;
+  
+    // Trouver le produit correspondant
+    if (produitId) {
+      const produit = this.produits.find(p => p.id === produitId);
+      if (produit) {
+        // Mettre à jour la description avec celle du produit
+        ligne.ligneDescription = produit.description; // Assurez-vous que 'description' existe dans votre modèle Produit
+      }
+    } else {
+      ligne.ligneDescription = null;
+    }
+  
+    // Forcer la mise à jour des calculs
+    this.updateCalculs();
+  }
 
   // apercuFactureProforma(): void {
   //   this.router.navigate(['/facture-proforma-apercu']);
