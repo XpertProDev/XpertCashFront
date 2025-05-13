@@ -104,7 +104,7 @@ hr {
 ///////////////// Tire
 
 .titre h2 {
-    font-size: 28px;
+    font-size: 18px;
     text-decoration: underline;
     text-transform: uppercase;
     letter-spacing: 0.60px;
@@ -115,6 +115,7 @@ hr {
 .date p {
     text-align: right;
     margin-right: 18%;
+    font-size: 12px;
 }
 
 .droit,
@@ -130,7 +131,8 @@ hr {
 .object h4 
 {
     text-decoration: underline;
-    font-size: 16px;
+    font-size: 13px;
+    font-weight: bold;
 }
 
 
@@ -138,6 +140,7 @@ hr {
 .droit p,
 .object p {
     margin: 0;
+    font-size: 12;
 }
 
 .header {
@@ -156,9 +159,10 @@ h2 {
 }
 
 table {
-    width: 100%;
+    width: 90%;
     border-collapse: collapse;
-    margin: 20px 0;
+    margin: 20px 37px;
+    font-size: 11px;
 }
 
 th, td {

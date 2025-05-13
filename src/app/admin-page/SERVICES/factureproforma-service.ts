@@ -117,4 +117,17 @@ export class FactureProFormaService {
     );
   }
 
+  //Get History Facture
+
+getHistoriqueFacture(factureId: number): Observable<any> {
+  const token = localStorage.getItem('authToken');
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+  });
+
+  return this.http.get<any>(`${this.apiUrl}/factures/${factureId}/historique`, { headers });
+}
+
+
+
 }

@@ -470,14 +470,14 @@
             
         </div>
     </div>
-
+ 
     <!-- Brouillon  -->
     <div class="brouillon_facture">
         <!-- Créé par -->
         <div class="brouillon_double">
             <h5 class="titre_brouillont">Crée par :</h5>
             <div class="contenue_brouillont">
-                <h6>Non spécifié</h6>
+                <h6>{{ factureProForma.utilisateurModificateur?.nomComplet || 'Non spécifié' }}</h6>
             </div>
         </div>
     
@@ -504,14 +504,6 @@
                 <h6 *ngIf="!factureProForma.utilisateurApprobateur && !factureProForma.approbateurs?.length">
                     En attente d'approbation
                 </h6>
-            </div>
-        </div>
-
-         <!-- Action par -->
-         <div class="brouillon_double">
-            <h5 class="titre_brouillont">Dernière action :</h5>
-            <div class="contenue_brouillont">
-                <h6>Aucune activité</h6>
             </div>
         </div>
 
@@ -552,7 +544,37 @@
                 <h6>{{ factureProForma.dateApprobation | date: 'dd/MM/yyyy' }}</h6>
             </div>
         </div>
+
+
+            <!--
+            <ul class="notifications">
+                <li class="notification">
+                    <div class="media">
+                    <img class="img-radius" src="assets/img/profil.png" alt="User Image" />
+                    <div class="media-body">
+                        <p class="user-info">
+                        <strong> {{ factureProForma.utilisateurCreateur?.nomComplet }}</strong>
+                        <span class="role">(Administrateur)</span>
+                        <span class="n-time text-muted">
+                            <i class="icon feather icon-clock"></i>
+                        {{ factureProForma.dateCreation | date: 'dd/MM/yyyy' }}
+                        </span> 
+                        </p>
+                        <p class="action-info">
+                        <b>Création</b>
+                        </p>
+                        <p class="description">Facture créée avec succès</p>
+                    </div>
+                    </div>
+                </li>
+            </ul>
+            -->
     </div>
+
+
+
+
+
 
 </div>
 
