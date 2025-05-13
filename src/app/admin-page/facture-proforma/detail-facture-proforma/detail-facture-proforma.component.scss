@@ -852,3 +852,33 @@ th {
   font-size: 12px;
   color: #555;
 }
+
+
+.chat-container {
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.chat-bubble {
+  background-color: #e1f5fe;
+  border-left: 4px solid #0288d1;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: #0288d1;
+}
+
+.chat-message {
+  font-size: 1rem;
+  color: #333;
+}
