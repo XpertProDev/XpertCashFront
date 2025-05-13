@@ -327,16 +327,21 @@
             </div>
 
             <!-- Boutons -->
-            <div class="information_cadre information_cadre_save">
+            <div class="information_cadre information_cadre_save" style="display: flex; align-items: center; justify-content: space-between;">
+
+              <div style="cursor: pointer; text-align: right; margin-left: 20px;" (click)="apercuFactureProforma()">
+                <a style="color: #0672E4;" title="Voir l'aperçu de facture proforma">Aperçu <i class="ri-eye-2-line"></i></a>
+              </div>
+
               <div class="info_titre_input info_titre_input_btn" style="display: flex; justify-content: flex-end; gap: 10px;">
                 <div class="btn_annuler">
                   <button class="btn_cancel" type="button" (click)="goToFacture()">Annuler</button>
                 </div>
-                <div class="btn_ajouter" (click)="apercuFactureProforma()">
+                <!-- <div class="btn_ajouter" (click)="apercuFactureProforma()">
                   <button class="btn_save">
                     Aperçu 
                   </button>
-                </div>
+                </div> -->
                 <div class="btn_ajouter">
                   <!-- <button class="btn_save" (click)="creerFactureProforma()">
                     {{ inputLignes.length > 0 ? 'Ajouter la facture' : 'Créer facture' }}
