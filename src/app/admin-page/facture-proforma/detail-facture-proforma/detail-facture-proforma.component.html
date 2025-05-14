@@ -100,7 +100,7 @@
                     <div class="info_titre_input">
                         <div class="champ_input">
                             <!-- <input [value]="factureProForma.description" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object"> -->
-                            <input [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object">
+                            <textarea [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus2" required placeholder="Saisis l'object"></textarea>
                             <label for="object" class="label"> Object </label>
                         </div>
                     </div>

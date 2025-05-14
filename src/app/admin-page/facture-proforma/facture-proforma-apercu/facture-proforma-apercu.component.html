@@ -101,12 +101,13 @@
                           <td>{{ ((facture.totalHT * facture.remise/100) | customNumber) }}</td>
                         </tr>
                         <!-- Montant Commercial  -->
-                        <tr *ngIf="facture.remise != null">
+                        <tr *ngIf="facture.remise && facture.remise > 0">
                             <td colspan="4">Montant commercial</td>
                             <td>
-                              {{
+                                <!-- (facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) | customNumber -->
+                                {{
                                 (facture.totalHT - (facture.totalHT * facture.remise / 100)) | customNumber
-                              }}
+                                }}
                             </td>
                         </tr>
                         <!-- TVA à 18% sur le montant commercial -->
@@ -118,7 +119,7 @@
                               }}
                             </td>
                         </tr>
-                        <tr>
+                        <tr *ngIf="facture.tva">
                           <td colspan="4">Montant TTC</td>
                           <td>{{ facture.totalFacture | customNumber }}</td>
                         </tr>

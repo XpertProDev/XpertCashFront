@@ -39,7 +39,8 @@ export class FactureProFormaService {
     return this.http.post(`${this.apiUrl}/ajouter`, facture, { headers, params }).pipe(
       tap(response => console.log('Facture créée avec succès:', response)),
       catchError(error => {
-        console.error('Erreur lors de la création de la facture :', error);
+        console.error('Erreur détaillée:', error);
+        console.log('Corps de la réponse:', error.error);
         return throwError(() => error);
       })
     );

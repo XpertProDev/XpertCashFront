@@ -64,7 +64,7 @@
 
                     <!-- Object -->
                     <div class="champ_input">
-                      <input type="text" class="input_focus2" id="description" name="description" [(ngModel)]="description" [ngModelOptions]="{ standalone: true }" placeholder="Saisis l'object" />
+                      <textarea type="text" class="input_focus2" id="description" name="description" [(ngModel)]="description" [ngModelOptions]="{ standalone: true }" placeholder="Saisis l'object"></textarea>
                       <label for="description" class="label">Object</label>
                     </div>
                 </div>
@@ -369,3 +369,10 @@
   </div>
 </div>
 
+<!-- Popup d'erreur de facture existante -->
+<div *ngIf="showExistingInvoiceError" class="duplicate-popup">
+  <div class="popup-content">
+    <p>{{ errorMessage }}</p>
+    <button (click)="showExistingInvoiceError = false">OK</button>
+  </div>
+</div>
