@@ -71,6 +71,7 @@ export class AddfactureProformaComponent implements OnInit {
   showExistingInvoiceError = false;
   errorMessage = '';
   hasDuplicateError = false;
+  duplicateIndex: number | null = null;
 
 
   constructor(
@@ -202,20 +203,23 @@ export class AddfactureProformaComponent implements OnInit {
 
   // Méthode pour fermer le popup
   closePopup() {
+    if (this.duplicateIndex !== null) {
+      const idx = this.duplicateIndex;
+      // On remet la ligne à zéro
+      this.inputLignes[idx] = {
+        produitId: null,
+        quantite: 1,
+        ligneDescription: null,
+        isDuplicate: false
+      };
+      this.duplicateIndex = null;
+    }
+  
     this.showDuplicatePopup = false;
-    
-    // Créer une nouvelle référence du tableau
-    this.inputLignes = this.inputLignes.map(ligne => ({
-      ...ligne,
-      produitId: null,
-      ligneDescription: null,
-      isDuplicate: false
-    }));
-    
-    // Forcer la mise à jour avec une nouvelle référence
-    this.inputLignes = [...this.inputLignes];
+    // Pour forcer la MAJ de l’affichage
+    this.updateCalculs();
     this.cdr.detectChanges();
-  }
+  }     
 
   trackByFn(index: number, item: any): number {
     return index; // ou un identifiant unique si disponible
@@ -475,43 +479,42 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
 
-// Modifiez la méthode onProduitChange
+  // Modifiez la méthode on Produit Change
   onProduitChange(produitId: number | null, ligne: any, index: number) {
     ligne.produitId = produitId;
     ligne.isDuplicate = false;
-
+  
     if (produitId) {
-      const produit = this.produits.find(p => p.id === produitId);
-      if (produit) {
-        ligne.ligneDescription = produit.description;
-      }
-      
-      
-
+      // Recherche du doublon
       const isInConfirmed = this.confirmedLignes.some(l => l.produitId === produitId);
-      const isInInput = this.inputLignes.some((l, i) => 
-        i !== index && l.produitId === produitId
-      );
-
+      const isInInput     = this.inputLignes.some((l, i) => i !== index && l.produitId === produitId);
+  
       if (isInConfirmed || isInInput) {
+        this.duplicateIndex = index;
         this.showDuplicatePopup = true;
-        ligne.produitId = null;
-        ligne.ligneDescription = null;
-        ligne.isDuplicate = true;
-        
+  
+        // On décale à la prochaine boucle d'événement la remise à null
         setTimeout(() => {
-          ligne.isDuplicate = false;
+          ligne.produitId = null;
+          ligne.ligneDescription = null;
+          this.updateCalculs();
           this.cdr.detectChanges();
-        }, 500);
+        }, 0);
+  
+        return;
       }
+  
+      // si pas doublon, on récupère la description
+      const produit = this.produits.find(p => p.id === produitId);
+      ligne.ligneDescription = produit?.description || null;
     } else {
       ligne.ligneDescription = null;
     }
-
+  
     this.updateCalculs();
-  }
+  }  
 
-// Modifiez ajouterLigneFacture pour une vérification supplémentaire
+  // Modifiez ajouter Ligne Facture pour une vérification supplémentaire
   ajouterLigneFacture(index: number) {
     const ligne = this.inputLignes[index];
     
@@ -521,6 +524,7 @@ export class AddfactureProformaComponent implements OnInit {
         .some(l => l.produitId === ligne.produitId);
 
       if (produitExiste) {
+        this.duplicateIndex = index;
         this.showDuplicatePopup = true;
         ligne.isDuplicate = true;
         setTimeout(() => ligne.isDuplicate = false, 500);
