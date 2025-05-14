@@ -158,6 +158,11 @@
 
   </div>
 
+  <!-- Message vide -->
+  <div *ngIf="facturesproforma.length === 0" class="no-client-message">
+    Aucun facture pro forma trouvé
+  </div>
+
   <!-- Pagination -->
   <div class="pagination">
     <mat-paginator [length]="facturesproforma.length" [pageSize]="pageSize" [pageSizeOptions]="[6, 10, 25, 100]"

@@ -12,7 +12,7 @@ import { UsersService } from '../../SERVICES/users.service';
 
 @Component({
   selector: 'app-detail-facture-proforma',
-  imports: [ FormsModule, CommonModule, ReactiveFormsModule, RouterLink, CustomNumberPipe],
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe],
   templateUrl: './detail-facture-proforma.component.html',
   styleUrl: './detail-facture-proforma.component.scss'
 })
@@ -76,6 +76,11 @@ export class DetailFactureProformaComponent implements OnInit {
       this.factureId = +idParam;
       this.getUserInfo();
     }
+  }
+
+  // dans DetailFactureProformaComponent
+  get isValidated(): boolean {
+    return this.factureProForma.statut === this.statusOptions.VALIDE;
   }
 
   factureProForma: FactureProForma = {
@@ -419,59 +424,106 @@ export class DetailFactureProformaComponent implements OnInit {
     return this.isStatusTransitionAllowed(targetStatus);
   }
 
+  // confirmStatusChange(): void {
+  //   if (!this.pendingStatut) return;
+
+  //   const selectedUsers = this.users
+  //   .filter(user => user.selected)
+  //   .map(user => user.id);
+
+  //   const modifications: Partial<FactureProForma> = {
+  //     statut: this.pendingStatut,
+  //     ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
+  //       ? { dateRelance: this.dateRelance }
+  //       : {})
+  //   };
+
+  //   // const modifications: Partial<FactureProForma> = {
+  //   //   statut: this.pendingStatut,
+  //   //   // Réinitialise les approbateurs si on revient en arrière
+  //   //   ...(this.pendingStatut === StatutFactureProForma.BROUILLON && {
+  //   //     approbateurs: [],
+  //   //     utilisateurApprobateur: null
+  //   //   })
+  //   // };
+    
+  //   this.factureProFormaService.updateFactureProforma(
+  //     this.factureId,
+  //     undefined,
+  //     undefined,
+  //     {
+  //       statut: this.pendingStatut,
+  //       // Réinitialiser les approbateurs si on change de statut
+  //       ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
+  //         approbateurs: []
+  //       })
+  //     },
+  //     this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
+  //   ).subscribe({
+  //     next: (updatedFacture) => {
+  //       if (this.pendingStatut === StatutFactureProForma.APPROBATION) {
+  //         updatedFacture.approbateurs = this.users.filter(u => selectedUsers.includes(u.id));
+  //       }
+  //       this.factureProForma = updatedFacture;
+        
+  //       this.showStatusConfirmation = false;
+  //       this.pendingStatut = null;
+  //       this.dateRelance = undefined;
+  //     },
+  //     error: (err) => {
+  //       console.error('Erreur de mise à jour', err);
+  //       alert('Échec de la mise à jour du statut');
+  //       this.showStatusConfirmation = false;
+  //     }
+  //   });
+  // }
+
   confirmStatusChange(): void {
     if (!this.pendingStatut) return;
-
-    const selectedUsers = this.users
-    .filter(user => user.selected)
-    .map(user => user.id);
-
+    const selectedUsers = this.users.filter(u => u.selected).map(u => u.id);
+  
+    // Préparez toujours vos valeurs de remise & tva
+    const remisePourKg = this.activeRemise ? this.remisePourcentage : 0;
+    const tvaFlag     = this.activeTva;
+  
+    // Construisez votre payload de statut
     const modifications: Partial<FactureProForma> = {
       statut: this.pendingStatut,
       ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
         ? { dateRelance: this.dateRelance }
-        : {})
+        : {}),
+      // facultatif : remettez vos approbateurs à vide quand on sort d'Approbation
+      ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
+        approbateurs: []
+      })
     };
-
-    // const modifications: Partial<FactureProForma> = {
-    //   statut: this.pendingStatut,
-    //   // Réinitialise les approbateurs si on revient en arrière
-    //   ...(this.pendingStatut === StatutFactureProForma.BROUILLON && {
-    //     approbateurs: [],
-    //     utilisateurApprobateur: null
-    //   })
-    // };
-    
+  
     this.factureProFormaService.updateFactureProforma(
       this.factureId,
-      undefined,
-      undefined,
-      {
-        statut: this.pendingStatut,
-        // Réinitialiser les approbateurs si on change de statut
-        ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
-          approbateurs: []
-        })
-      },
+      remisePourKg,
+      tvaFlag,
+      modifications,
       this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
     ).subscribe({
-      next: (updatedFacture) => {
-        if (this.pendingStatut === StatutFactureProForma.APPROBATION) {
-          updatedFacture.approbateurs = this.users.filter(u => selectedUsers.includes(u.id));
-        }
+      next: updatedFacture => {
         this.factureProForma = updatedFacture;
-        
+        // rechargez/remettez vos flags localement
+        this.activeRemise = (updatedFacture.remise ?? 0) > 0;
+        this.remisePourcentage = this.activeRemise
+          ? ((updatedFacture.remise ?? 0) / (updatedFacture.totalHT || 1)) * 100
+          : 0;
+        this.activeTva    = updatedFacture.tva;
         this.showStatusConfirmation = false;
         this.pendingStatut = null;
         this.dateRelance = undefined;
       },
-      error: (err) => {
+      error: err => {
         console.error('Erreur de mise à jour', err);
         alert('Échec de la mise à jour du statut');
         this.showStatusConfirmation = false;
       }
     });
-  }
+  }  
 
   cancelStatusChange(): void {
     this.showStatusConfirmation = false;
@@ -543,6 +595,10 @@ export class DetailFactureProformaComponent implements OnInit {
     }
 
     this.updateCalculs();
+  }
+
+  getAnnulerDetail() {
+    this.router.navigate(['/facture-proforma']);
   }
 
 
