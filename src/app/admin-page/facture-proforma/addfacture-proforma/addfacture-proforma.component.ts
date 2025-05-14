@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Router, RouterLink } from '@angular/router';
@@ -43,14 +43,16 @@ export class AddfactureProformaComponent implements OnInit {
   nomEntreprise: string = '';
   boutiqueIds: number[] | undefined;
   produits: Produit[] = [];
-  inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; }[] = [{
+  inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; isDuplicate: boolean; }[] = [{
     produitId: null, quantite: 0,
-    ligneDescription: null 
+    ligneDescription: null,
+    isDuplicate: false,
   }];
   confirmedLignes: {
     produitId: number | null;
     quantite: number;
     ligneDescription: string | null;
+    isDuplicate: boolean;
   }[] = [];
   clients: Clients[] = [];
   totalClients = 0;
@@ -68,8 +70,7 @@ export class AddfactureProformaComponent implements OnInit {
   showDuplicatePopup: boolean = false;
   showExistingInvoiceError = false;
   errorMessage = '';
-  // apiUrl: any;
-  // http: any;
+  hasDuplicateError = false;
 
 
   constructor(
@@ -79,7 +80,8 @@ export class AddfactureProformaComponent implements OnInit {
     private produitService: ProduitService,
     private usersService: UsersService,
     private previewService: FacturePreviewService,
-    private formStateService: FormStateService
+    private formStateService: FormStateService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   // Modification de ngOnInit()
@@ -190,31 +192,6 @@ export class AddfactureProformaComponent implements OnInit {
   //     this.confirmedLignes = [...this.confirmedLignes];
   //   }
   // }
-
-  ajouterLigneFacture(index: number) {
-    const ligne = this.inputLignes[index];
-    if (ligne.produitId && ligne.quantite > 0) {
-      const produitExiste = this.confirmedLignes.some(
-        l => l.produitId === ligne.produitId
-      );
-      if (produitExiste) {
-        this.showDuplicatePopup = true;
-        return;
-      }
-      // On clone bien avec description
-      this.confirmedLignes.push({
-        produitId: ligne.produitId,
-        quantite: ligne.quantite,
-        ligneDescription: ligne.ligneDescription
-      });
-      // Réinitialisation
-      this.inputLignes = [{
-        produitId: null,
-        quantite: 1,
-        ligneDescription: null
-      }];
-    }
-  }
   
 
   updateCalculs() {
@@ -226,6 +203,18 @@ export class AddfactureProformaComponent implements OnInit {
   // Méthode pour fermer le popup
   closePopup() {
     this.showDuplicatePopup = false;
+    
+    // Créer une nouvelle référence du tableau
+    this.inputLignes = this.inputLignes.map(ligne => ({
+      ...ligne,
+      produitId: null,
+      ligneDescription: null,
+      isDuplicate: false
+    }));
+    
+    // Forcer la mise à jour avec une nouvelle référence
+    this.inputLignes = [...this.inputLignes];
+    this.cdr.detectChanges();
   }
 
   trackByFn(index: number, item: any): number {
@@ -258,7 +247,8 @@ export class AddfactureProformaComponent implements OnInit {
     this.inputLignes = [{ 
       produitId: null, 
       quantite: 0,
-      ligneDescription: null 
+      ligneDescription: null ,
+      isDuplicate: false,
     }];
     this.confirmedLignes = [];
     this.activeRemise = false;
@@ -434,7 +424,8 @@ export class AddfactureProformaComponent implements OnInit {
     this.confirmedLignes = [];
     this.inputLignes = [{
       produitId: null, quantite: 1,
-      ligneDescription: null
+      ligneDescription: null,
+      isDuplicate: false,
     }];
 
     // Par (avec les vrais paramètres) :
@@ -449,7 +440,7 @@ export class AddfactureProformaComponent implements OnInit {
         this.formStateService.clearState();
         // Réinitialisation de ton formulaire si besoin
         this.confirmedLignes = [];
-        this.inputLignes = [{ produitId: null, quantite: 1, ligneDescription: null }];
+        this.inputLignes = [{ produitId: null, quantite: 1, ligneDescription: null, isDuplicate: false }];
         this.router.navigate(['/facture-proforma']);
       },
       error: (err) => {
@@ -483,23 +474,67 @@ export class AddfactureProformaComponent implements OnInit {
     });
   }
 
-  onProduitChange(produitId: number | null, ligne: any) {
-    // Mettre à jour l'ID du produit
+
+// Modifiez la méthode onProduitChange
+  onProduitChange(produitId: number | null, ligne: any, index: number) {
     ligne.produitId = produitId;
-  
-    // Trouver le produit correspondant
+    ligne.isDuplicate = false;
+
     if (produitId) {
       const produit = this.produits.find(p => p.id === produitId);
       if (produit) {
-        // Mettre à jour la description avec celle du produit
-        ligne.ligneDescription = produit.description; // Assurez-vous que 'description' existe dans votre modèle Produit
+        ligne.ligneDescription = produit.description;
+      }
+      
+      
+
+      const isInConfirmed = this.confirmedLignes.some(l => l.produitId === produitId);
+      const isInInput = this.inputLignes.some((l, i) => 
+        i !== index && l.produitId === produitId
+      );
+
+      if (isInConfirmed || isInInput) {
+        this.showDuplicatePopup = true;
+        ligne.produitId = null;
+        ligne.ligneDescription = null;
+        ligne.isDuplicate = true;
+        
+        setTimeout(() => {
+          ligne.isDuplicate = false;
+          this.cdr.detectChanges();
+        }, 500);
       }
     } else {
       ligne.ligneDescription = null;
     }
-  
-    // Forcer la mise à jour des calculs
+
     this.updateCalculs();
+  }
+
+// Modifiez ajouterLigneFacture pour une vérification supplémentaire
+  ajouterLigneFacture(index: number) {
+    const ligne = this.inputLignes[index];
+    
+    if (ligne.produitId && ligne.quantite > 0) {
+      const allLignes = [...this.confirmedLignes, ...this.inputLignes];
+      const produitExiste = allLignes.filter(l => l !== ligne)
+        .some(l => l.produitId === ligne.produitId);
+
+      if (produitExiste) {
+        this.showDuplicatePopup = true;
+        ligne.isDuplicate = true;
+        setTimeout(() => ligne.isDuplicate = false, 500);
+        return;
+      }
+
+      this.confirmedLignes.push({...ligne});
+      this.inputLignes = [{
+        produitId: null,
+        quantite: 1,
+        ligneDescription: null,
+        isDuplicate: false
+      }];
+    }
   }
 
   // apercuFactureProforma(): void {

@@ -142,11 +142,12 @@
                                   <td>
                                       <div class="champ_input" style="margin-right: 15px;">
                                         <select 
-                                          class="input_focus_type input_focus_type_select" 
-                                          [ngModel]="ligne.produitId"
-                                          (ngModelChange)="onProduitChange($event, ligne)"
-                                          [ngModelOptions]="{ standalone: true }" 
-                                          required>
+                                            class="input_focus_type input_focus_type_select" 
+                                            [ngClass]="{ 'duplicate': ligne.isDuplicate }"
+                                            [ngModel]="ligne.produitId"
+                                            (ngModelChange)="onProduitChange($event, ligne, i)"
+                                            [ngModelOptions]="{ standalone: true }" 
+                                            required>
                                           <option [ngValue]="null">Sélectionner un produit</option>
                                           <option *ngFor="let produit of produits" [ngValue]="produit.id">
                                             {{ produit.nom }}
@@ -364,8 +365,8 @@
 <!-- Popup de duplication -->
 <div *ngIf="showDuplicatePopup" class="duplicate-popup">
   <div class="popup-content">
-    <p>Ce produit est déjà dans la liste.</p>
-    <button (click)="closePopup()">OK</button>
+    <p class="modal-content-text">Ce produit est déjà dans la liste.</p>
+    <button class="modal-content-text-button" (click)="closePopup()" (keyup.enter)="closePopup()">OK</button>
   </div>
 </div>
 

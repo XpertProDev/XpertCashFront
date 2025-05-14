@@ -516,22 +516,69 @@ input:checked + .slider:before {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  border-radius: 4px;
+  gap: 15px;
+  color: #d32f2f;
+  animation: shake 0.4s ease-in-out;
 }
 
+
+
 .popup-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
   text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  animation: fadeInDown 0.3s ease;
+  position: relative;
 }
 
 .popup-content button {
   margin-top: 10px;
-  padding: 8px 20px;
+  padding: 8px 15px;
   background: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.modal-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.modal-content-text {
+  margin: 0;
+  font-size: 14px;
+}
+
+.modal-content-text-button {
+  background: none;
+  border: 1px solid #d32f2f;
+  color: #d32f2f;
+  padding: 5px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.modal-content-text-button:hover {
+  background: #d32f2f;
+  color: white;
+}
+
+.input_focus_type_select.duplicate {
+  border-color: #ff4444 !important;
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
 }
