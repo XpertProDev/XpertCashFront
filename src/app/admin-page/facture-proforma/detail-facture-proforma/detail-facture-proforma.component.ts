@@ -35,9 +35,8 @@ export class DetailFactureProformaComponent implements OnInit {
   // }[] = [{ produitId: null, quantite: 1 }];
   // confirmedLignes: { produitId: number | null; quantite: number }[] = [];
 
-  inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; }[] = [{
-    produitId: null, quantite: 1,
-    ligneDescription: null 
+  inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; isDuplicate: boolean }[] = [{
+    produitId: null, quantite: 1, ligneDescription: null, isDuplicate: false
   }];
 
   confirmedLignes: {
@@ -222,10 +221,12 @@ export class DetailFactureProformaComponent implements OnInit {
     });
   }
 
-    // Méthode pour fermer le popup
-    closePopup() {
-      this.showDuplicatePopup = false;
-    }
+  // Méthode pour fermer le popup
+  closePopup() {
+    this.showDuplicatePopup = false;
+    // Tu peux aussi forcer la MAJ si besoin :
+    this.updateCalculs();
+  }
 
   // Méthode de mise à jour des calculs
   updateCalculs() {
@@ -270,7 +271,8 @@ export class DetailFactureProformaComponent implements OnInit {
       this.confirmedLignes.push({...ligne});
       this.inputLignes = [{
         produitId: null, quantite: 1,
-        ligneDescription: null
+        ligneDescription: null,
+        isDuplicate: false
       }];
     }
   }
@@ -507,23 +509,42 @@ export class DetailFactureProformaComponent implements OnInit {
     });
   }
 
-  onProduitChange(produitId: number | null, ligne: any) {
-    // Mettre à jour l'ID du produit
+  // Méthode appelée au changement de <select>
+  onProduitChange(produitId: number | null, ligne: any, index: number) {
     ligne.produitId = produitId;
-  
-    // Trouver le produit correspondant
+    ligne.isDuplicate = false;
+
     if (produitId) {
-      const produit = this.produits.find(p => p.id === produitId);
-      if (produit) {
-        // Mettre à jour la description avec celle du produit
-        ligne.ligneDescription = produit.description; // Assurez-vous que 'description' existe dans votre modèle Produit
+      // Vérifie dans les lignes déjà confirmées…
+      const inConfirmed = this.confirmedLignes.some(l => l.produitId === produitId);
+      // …et dans les autres lignes en cours (hors index courant)
+      const inInput     = this.inputLignes
+                            .filter((_, i) => i !== index)
+                            .some(l => l.produitId === produitId);
+
+      if (inConfirmed || inInput) {
+        this.showDuplicatePopup = true;
+        ligne.isDuplicate = true;
+        // on retarde la remise à null pour laisser Angular traiter le change event
+        setTimeout(() => {
+          ligne.produitId = null;
+          ligne.ligneDescription = null;
+          ligne.isDuplicate = false;
+          this.updateCalculs();
+        }, 0);
+        return;
       }
+
+      // Si pas doublon, on met à jour la description
+      const prod = this.produits.find(p => p.id === produitId);
+      ligne.ligneDescription = prod?.description ?? null;
     } else {
       ligne.ligneDescription = null;
     }
-  
-    // Forcer la mise à jour des calculs
+
     this.updateCalculs();
   }
+
+
 
 }

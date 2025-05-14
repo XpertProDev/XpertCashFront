@@ -274,18 +274,20 @@
                                                     {{ produit.nom }}
                                                   </option>
                                                 </select> -->
-
                                                 <select 
+                                                    name="produit{{i}}"
                                                     class="input_focus_type input_focus_type_select" 
-                                                    [ngModel]="ligne.produitId"
-                                                    (ngModelChange)="onProduitChange($event, ligne)"
+                                                    [(ngModel)]="ligne.produitId"
+                                                    (ngModelChange)="onProduitChange($event, ligne, i)"
                                                     [ngModelOptions]="{ standalone: true }" 
+                                                    [ngClass]="{ 'duplicate': ligne.isDuplicate }"
                                                     required>
-                                                    <option [ngValue]="null">Sélectionner un produit</option>
+                                                <option [ngValue]="null">Sélectionner un produit</option>
                                                     <option *ngFor="let produit of produits" [ngValue]="produit.id">
                                                         {{ produit.nom }}
                                                     </option>
                                                 </select>
+
                                               </td>
                                         </div>
                                         <!-- // Description -->
