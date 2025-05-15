@@ -168,7 +168,17 @@ gap: 20px;
   //padding-left: 10px;
   background: none;
   // color: #695c5c;
-  color: #0672E4;
+  color: #000000;
+  // color: #0672E4;
+}
+
+.btn_apercu {
+  border: none;
+  padding: 2px 20px;
+  border-radius: 5px;
+  background-color: #d0d0d0;
+  color: #001225;
+  // color: #0672E4;
 }
 
 .champ_input .label {
@@ -227,7 +237,8 @@ gap: 20px;
   border-radius: 5px;
   padding-top: 10px;
   border-bottom: 1px solid rgb(53, 50, 50);
-  color: #0672E4;
+  // color: #0672E4;
+  color: #000000;
 }
 
 .input_focus2:hover {
@@ -277,6 +288,15 @@ gap: 20px;
 
 .input_focus_type_select {
   min-width: 200px;
+}
+
+.champ_grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    gap: 20px;
 }
 
 // .input_focus_type_quantite {

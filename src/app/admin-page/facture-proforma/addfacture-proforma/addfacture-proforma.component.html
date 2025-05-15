@@ -31,14 +31,22 @@
                           Entreprise
                         </label>
                       </div>
-        
-                      <!-- Select Client -->
-                      <select *ngIf="typeDestinataire === 'client'" class="input_focus" [(ngModel)]="selectedClientId" name="client_id" required>
-                        <option [ngValue]="null">Sélectionner un client</option>
-                        <option *ngFor="let client of clients" [ngValue]="client.id">
-                          {{ client.nomComplet }} <span *ngIf="client.entrepriseClient"> - {{ client.entrepriseClient.nom }}</span>
-                        </option>
-                      </select>
+
+                      <div class="champ_grid">
+                        <!-- Select Client -->
+                        <select *ngIf="typeDestinataire === 'client'" class="input_focus" [(ngModel)]="selectedClientId" name="client_id" required>
+                          <option [ngValue]="null">Sélectionner un client</option>
+                          <option *ngFor="let client of clients" [ngValue]="client.id">
+                            {{ client.nomComplet }} <span *ngIf="client.entrepriseClient"> - {{ client.entrepriseClient.nom }}</span>
+                          </option>
+                        </select>
+
+                        <div class="champ_input">
+                          <label for="relanceDate" style="font-size: 12px; position: relative; top: 0px;">Date de facture</label>
+                          <input type="datetime-local" id="relanceDate" class="input_focus" style=" position: relative; top: -21px;"/>
+                        </div>
+
+                      </div>
         
                       <!-- Select Entreprise -->
                       <!-- <select *ngIf="typeDestinataire === 'entreprise'" class="input_focus" [(ngModel)]="selectedEntrepriseId" name="entreprise_id" required [ngModelOptions]="{ standalone: true }" >
@@ -333,7 +341,7 @@
             <div class="information_cadre information_cadre_save" style="display: flex; align-items: center; justify-content: space-between;">
 
               <div style="cursor: pointer; text-align: right; margin-left: 20px;" (click)="apercuFactureProforma()">
-                <a style="color: #0672E4;" title="Voir l'aperçu de facture proforma">Aperçu <i class="ri-eye-2-line"></i></a>
+                <button class="btn_apercu" title="Voir l'aperçu de facture proforma">Aperçu <i class="ri-eye-2-line"></i></button>
               </div>
 
               <div class="info_titre_input info_titre_input_btn" style="display: flex; justify-content: flex-end; gap: 10px;">

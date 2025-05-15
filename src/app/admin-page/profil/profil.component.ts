@@ -282,13 +282,14 @@ export class ProfilComponent  implements OnInit{
       this.errorMessage = "Veuillez remplir tous les champs correctement";
       return;
     }
-
+  
     const boutiqueId = this.nomBoutiqueForm.value.selectedBoutique;
     const nomBoutique = this.nomBoutiqueForm.value.nomBoutique;
     const adresse = this.nomBoutiqueForm.value.adresse;
   
     this.usersService.updateBoutique(boutiqueId, { nomBoutique, adresse }).subscribe({
       next: (response) => {
+        // Mettre à jour le tableau local
         const index = this.boutiques.findIndex(b => b.id === boutiqueId);
         if (index > -1) {
           this.boutiques[index] = { 
@@ -297,10 +298,8 @@ export class ProfilComponent  implements OnInit{
             adresse: adresse 
           };
         }
-
-        this.cd.detectChanges();
-
-        this.successMessage = response.message ? response.message : "Boutique mise à jour avec succès !";
+  
+        this.successMessage = "Boutique mise à jour avec succès !";
         this.isNomBoutiqueFormVisible = false;
         this.nomBoutiqueForm.reset();
         setTimeout(() => this.successMessage = null, 10000);
@@ -311,6 +310,17 @@ export class ProfilComponent  implements OnInit{
         }
         setTimeout(() => this.errorMessage = null, 10000);
       },
+    });
+  }
+
+  private refreshBoutiques(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        this.boutiques = user.boutiques || [];
+      },
+      error: (err) => {
+        console.error("Erreur rafraîchissement boutiques:", err);
+      }
     });
   }
 
