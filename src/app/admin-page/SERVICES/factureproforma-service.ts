@@ -35,7 +35,7 @@ export class FactureProFormaService {
         params = params.set('appliquerTVA', appliquerTVA.toString());
       }
     }
-  
+
     return this.http.post(`${this.apiUrl}/ajouter`, facture, { headers, params }).pipe(
       tap(response => console.log('Facture créée avec succès:', response)),
       catchError(error => {
@@ -45,7 +45,7 @@ export class FactureProFormaService {
       })
     );
   }
-  
+
   //Get facture proformat
   getAlFactproformaOfEntreprise(entrepriseId: number): Observable<any[]> {
     const token = localStorage.getItem('authToken');

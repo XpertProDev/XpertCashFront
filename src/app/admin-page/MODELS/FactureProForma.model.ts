@@ -33,7 +33,6 @@ export interface UpdateFactureProFormaDTO {
   // Ajouter d'autres champs optionnels si besoin
 }
 
-
 export interface FactureProForma {
   id: number;
   numeroFacture: string;
