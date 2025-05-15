@@ -34,30 +34,29 @@ export class DetailFactureProformaComponent implements OnInit {
   //   produitId: number | null; quantite: number 
   // }[] = [{ produitId: null, quantite: 1 }];
   // confirmedLignes: { produitId: number | null; quantite: number }[] = [];
-
   inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; isDuplicate: boolean }[] = [{
     produitId: null, quantite: 1, ligneDescription: null, isDuplicate: false
   }];
-
   confirmedLignes: {
     produitId: number | null;
     quantite: number;
     ligneDescription: string | null;
   }[] = [];
-
   factureId!: number;
   showDuplicatePopup: boolean = false;
-
   // Ajouter ces variables dans la classe
   showStatusConfirmation = false;
   pendingStatut: StatutFactureProForma | null = null;
   selectedStatutLabel = '';
   statusOptions = StatutFactureProForma;
-
   dateRelance?: string;
-
   users: any[] = [];
   filteredUsers: any[] = [];
+
+  // Nouvelles variables pour l'email
+  emailDestinataires: string = '';
+  emailSujet: string = '';
+  emailMessage: string = '';
 
   constructor(
       private router: Router,
@@ -601,6 +600,7 @@ export class DetailFactureProformaComponent implements OnInit {
     this.router.navigate(['/facture-proforma']);
   }
 
+  confirmEmailSend(){}
 
 
 }

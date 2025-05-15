@@ -828,3 +828,154 @@ th {
   75% { transform: translateX(-5px); }
 }
 
+/* Styles pour la popup d'envoi d'email */
+.email-popup .popup-content-envoyer {
+    max-width: 700px;
+}
+
+////////////////////// CADRE 
+
+.status-confirmation-popup-envoyer {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.283);
+  // backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+  
+.popup-content-envoyer {
+  background-color: #f9f9f9;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+  // padding: 1.5rem;
+  width: 90%;
+  max-width: 350px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  animation: popUp 0.25s ease-in-out;
+  height: 60vh;
+  position: relative;
+}
+
+.envoyer_croix {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  margin: 0 20px;
+}
+
+
+
+.titre_etat p{
+  font-size: 16px;
+  margin: 0;
+}
+
+.icon_croix i {
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.barre {
+  background-color: #0000001a;
+  width: 100%;
+  height: 1px;
+  // margin: 20px 0;
+}
+
+.contenue_form_envoyer {
+  margin-top: 10px;
+}
+
+.input_table_des {
+  // height: 35px;
+  width: 100%;
+  outline: none;
+  border-bottom:  1px solid #f9f9f9;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  margin: 10px 0 0;
+  transition: all 0.3s;
+  font-size: 14px;
+  background: none;
+  color: #000000;
+}
+
+.input_table_des:hover {
+  border-bottom: 1px solid #0000008d;
+  transition: all ease-in-out ;
+}
+
+.email_field {
+  display: grid;
+  grid-template-columns: 10% 90%;
+  align-items: center;
+}
+
+.titre_email_field {
+  margin-bottom: -5px;
+  text-align: left;
+  margin-left: 15px;
+}
+
+.editable-content {
+  // border: 1px solid #ccc;
+  border: none;
+  padding: 12px;
+  min-height: 200px;
+  white-space: pre-wrap;
+  text-align: left;
+  line-height: 1.5;
+  font-size: 12px;
+}
+
+.editable-content[contenteditable="true"]:empty::before {
+  content: attr(data-placeholder);
+  color: #999;
+  text-align: left; /* Placeholder aussi à gauche */
+}
+
+.editable-content strong {
+  background: #fff3d6;
+  padding: 2px 4px;
+  border-radius: 3px;
+  display: inline-block; /* Empêche le débordement */
+}
+
+.footer_btn {
+  position: absolute;
+  bottom: 0;
+  // background-color: #0671e446;
+  width: 100%;
+  border-top: 1px solid #0000001a;
+}
+
+.contenue_footer_btn {
+  display: flex;
+  align-items: center;
+  margin: 15px 0 15px 10px;
+  gap: 10px;
+}
+
+.btn_envoie_save .btn,
+.btn_envoie_ignore .btn 
+{
+  border: none;
+  padding: 5px 20px;
+  border-radius: 5px;
+}
+
+.btn_envoie_save .btn {
+  background-color: #0672E4;
+  color: #ffffff;
+}
+
+.btn_envoie_ignore .btn {
+  background-color: rgb(215, 215, 215);
+}
