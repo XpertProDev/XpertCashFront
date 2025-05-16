@@ -680,13 +680,29 @@
             <!-- // email field  -->
             <div class="email_field">
                 <!-- // Titre email field -->
-                <div class="titre_email_field">
+                <div class="titre_email_field titre_email_field_vers">
                     Vers
                 </div>
                 <!-- // Input email field -->
                 <div class="input_email_field">
                     <div class="champ_input" style="margin-right: 15px;">
-                        <input class="input_focus_type" type="text" class="input_table_des" placeholder="Ajouter des destinataires..." >
+                        <div class="email-input-container">
+                            <!-- Emails sous forme de puces dans l'input -->
+                            <span *ngFor="let email of emailDestinatairesList; let i = index" class="email-chip">
+                                {{email}}
+                                <span class="remove-chip" (click)="removeEmail(i)">✖</span>
+                            </span>
+                            
+                            <!-- Champ de saisie intégré -->
+                            <input 
+                                type="text"
+                                [(ngModel)]="currentEmail"
+                                (keydown.enter)="addEmail()"
+                                (keydown.backspace)="handleBackspace()"
+                                placeholder="Ajouter des destinataires..."
+                                class="inline-email-input"
+                            >
+                        </div>
                     </div>
                 </div>
             </div>
@@ -758,9 +774,9 @@
                         <i class="ri-attachment-2" title="Ajouter une pièce jointe"></i>
                     </div>
 
-                    <div class="icon_relance">
+                    <!-- <div class="icon_relance">
                         <i class="ri-time-line" title="Date de relance"></i>
-                    </div>
+                    </div> -->
 
                 </div>
 

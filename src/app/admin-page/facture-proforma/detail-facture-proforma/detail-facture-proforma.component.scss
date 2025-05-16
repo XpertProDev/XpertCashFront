@@ -927,6 +927,9 @@ th {
   font-size: 14px;
   background: none;
   color: #000000;
+  flex-grow: 1;
+  min-width: 150px;
+  padding: 5px;
 }
 
 .input_table_des:hover {
@@ -944,6 +947,11 @@ th {
   margin-bottom: -5px;
   text-align: left;
   margin-left: 15px;
+}
+
+.titre_email_field_vers {
+  position: relative;
+  top: -6px;
 }
 
 .editable-content {
@@ -1119,4 +1127,58 @@ ul li {
 
 .form-group .form-control-date {
   width: 57%;
+}
+
+
+.email-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  // padding: 5px;
+  // border-radius: 4px;
+}
+
+.email-input-container {
+  // border: 1px solid #ccc;
+  border-radius: 4px;
+  // padding: 6px 12px;
+  min-height: 38px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+
+.email-chip {
+  background: #d4d8e7;
+  padding: 0px 25px 0px 10px;
+  border-radius: 15px;
+  position: relative;
+  font-size: 11px;
+}
+
+.remove-chip {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;
+  font-size: 12px;
+}
+
+.inline-email-input {
+  border: none !important;
+  outline: none !important;
+  flex-grow: 1;
+  min-width: 120px;
+  padding: 5px 0;
+  height: 20px;
+  background-color: transparent;
+}
+
+/* Supprime le style par défaut d'Angular Material */
+input.input_focus_type:focus {
+  box-shadow: none !important;
 }

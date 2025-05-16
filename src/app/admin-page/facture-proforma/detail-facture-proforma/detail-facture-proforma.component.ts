@@ -76,6 +76,10 @@ export class DetailFactureProformaComponent implements OnInit {
   attachments: File[] = [];
   selectedFile: File | null = null;
 
+  // Variables pour la gestion des emails
+  emailDestinatairesList: string[] = [];
+  currentEmail = '';
+
     // Ajoutez cette propriété en haut de votre classe
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -777,6 +781,35 @@ export class DetailFactureProformaComponent implements OnInit {
   // Supprime une pièce jointe
   removeAttachment(index: number): void {
       this.attachments.splice(index, 1);
+  }
+
+  // Ajouter un email
+  addEmail(): void {
+    const email = this.currentEmail.trim();
+    if (email && this.validateEmail(email)) {
+      if (!this.emailDestinatairesList.includes(email)) {
+        this.emailDestinatairesList.push(email);
+      }
+      this.currentEmail = '';
+    }
+  }
+
+  // Supprimer un email
+  removeEmail(index: number): void {
+    this.emailDestinatairesList.splice(index, 1);
+  }
+
+  // Validation simple d'email
+  validateEmail(email: string): boolean {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  // Gestion de la touche retour
+  handleBackspace(): void {
+    if (!this.currentEmail && this.emailDestinatairesList.length > 0) {
+      this.emailDestinatairesList.pop();
+    }
   }
 
 
