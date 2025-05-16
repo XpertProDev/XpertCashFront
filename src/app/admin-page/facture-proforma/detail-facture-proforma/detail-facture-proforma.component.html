@@ -698,9 +698,9 @@
         <div class="envoyer_croix" (mousedown)="startDrag($event)">
             <div class="titre_etat">
                 <p>Envoyer</p>
-                <select (mousedown)="$event.stopPropagation()">
-                    <option value="">Physique</option>
-                    <option value="">Email</option>
+                <select (mousedown)="$event.stopPropagation()" [(ngModel)]="methodeEnvoi" (change)="onMethodeEnvoiChange()">
+                    <option value="physique">Physique</option>
+                    <option value="email">Email</option>
                 </select>
             </div>
             <div class="icon_croix" (click)="showEmailPopup = false" (mousedown)="$event.stopPropagation()">
@@ -710,7 +710,7 @@
 
         <div class="barre"></div>
 
-        <div class="contenue_form_envoyer">
+        <div class="contenue_form_envoyer" *ngIf="methodeEnvoi === 'email'">
             <!-- // email field  -->
             <div class="email_field">
                 <!-- // Titre email field -->
@@ -794,17 +794,24 @@
             </div>
         </div>
 
+        <div class="contenue_form_envoyer contenue_form_image_physique" *ngIf="methodeEnvoi === 'physique'">
+            <div class="image_delivery">
+                <img src="assets/img/image_product.png">
+            </div>
+        </div>
+
         <div class="footer_btn">
             <div class="content_footer">
                 <div class="contenue_footer_btn">
                     <div class="btn_envoie_save">
-                        <button class="btn" (click)="confirmEmailSend()">Envoyer</button>
+                        <button *ngIf="methodeEnvoi === 'email'" class="btn" (click)="confirmEmailSend()">Envoyer</button>
+                        <button *ngIf="methodeEnvoi === 'physique'" class="btn" (click)="confirmEmailSend()">Confirmer</button>
                     </div>
                     <div class="btn_envoie_ignore">
                         <button class="btn" (click)="showEmailPopup = false">Annuler</button>
                     </div>
 
-                    <div class="icon_attach" (click)="triggerFileInput()">
+                    <div class="icon_attach" (click)="triggerFileInput()" *ngIf="methodeEnvoi === 'email'">
                         <i class="ri-attachment-2" title="Ajouter une pièce jointe"></i>
                     </div>
 
