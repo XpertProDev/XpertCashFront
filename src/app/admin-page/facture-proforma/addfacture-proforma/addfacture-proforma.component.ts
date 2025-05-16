@@ -66,6 +66,8 @@ export class AddfactureProformaComponent implements OnInit {
   facturesproforma: any[] = [];
   totalHT: number = 0;
   showDuplicatePopup: boolean = false;
+  showExistingInvoiceError = false;
+  errorMessage = '';
   // apiUrl: any;
   // http: any;
 
@@ -370,6 +372,12 @@ export class AddfactureProformaComponent implements OnInit {
       return;
     }
 
+    if (!this.selectedClientId && !this.selectedEntreprise) {
+      this.errorMessage = 'Sélectionnez un client ou une entreprise';
+      this.showExistingInvoiceError = true;
+      return;
+    }
+
     const allLignes = [...this.confirmedLignes];
 
     const currentLine = this.inputLignes[0];
@@ -444,7 +452,14 @@ export class AddfactureProformaComponent implements OnInit {
         this.inputLignes = [{ produitId: null, quantite: 1, ligneDescription: null }];
         this.router.navigate(['/facture-proforma']);
       },
-      error: (err) => console.error('Erreur création facture :', err)
+      error: (err) => {
+        // choix 2 : récupérer le message même si c’est une String brute
+        const serverMessage = typeof err.error === 'string'
+          ? err.error
+          : err.error?.message;
+        this.errorMessage = serverMessage || 'Erreur lors de la création : erreur inconnue';
+        this.showExistingInvoiceError = true;
+      }
     });
   }
 
@@ -468,6 +483,24 @@ export class AddfactureProformaComponent implements OnInit {
     });
   }
 
+  onProduitChange(produitId: number | null, ligne: any) {
+    // Mettre à jour l'ID du produit
+    ligne.produitId = produitId;
+  
+    // Trouver le produit correspondant
+    if (produitId) {
+      const produit = this.produits.find(p => p.id === produitId);
+      if (produit) {
+        // Mettre à jour la description avec celle du produit
+        ligne.ligneDescription = produit.description; // Assurez-vous que 'description' existe dans votre modèle Produit
+      }
+    } else {
+      ligne.ligneDescription = null;
+    }
+  
+    // Forcer la mise à jour des calculs
+    this.updateCalculs();
+  }
 
   // apercuFactureProforma(): void {
   //   this.router.navigate(['/facture-proforma-apercu']);

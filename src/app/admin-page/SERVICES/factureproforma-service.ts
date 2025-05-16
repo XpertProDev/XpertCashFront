@@ -39,7 +39,8 @@ export class FactureProFormaService {
     return this.http.post(`${this.apiUrl}/ajouter`, facture, { headers, params }).pipe(
       tap(response => console.log('Facture créée avec succès:', response)),
       catchError(error => {
-        console.error('Erreur lors de la création de la facture :', error);
+        console.error('Erreur détaillée:', error);
+        console.log('Corps de la réponse:', error.error);
         return throwError(() => error);
       })
     );
@@ -116,6 +117,40 @@ export class FactureProFormaService {
       })
     );
   }
+
+  //Envoyer Facture par mail :
+
+  envoyerFactureEmail(
+  factureId: number,
+  emailRequest: {
+    to: string;
+    subject: string;
+    body: string;
+  }
+): Observable<any> {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    return throwError(() => new Error('Token manquant'));
+  }
+
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  });
+
+  return this.http.post(
+    `${this.apiUrl}/factures/${factureId}/envoyer-email`,
+    emailRequest,
+    { headers }
+  ).pipe(
+    tap(() => console.log('📧 Email envoyé')),
+    catchError(error => {
+      console.error('Erreur lors de l’envoi du mail :', error);
+      return throwError(() => error);
+    })
+  );
+}
+
 
   //Get History Facture
 

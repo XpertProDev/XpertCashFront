@@ -35,46 +35,45 @@ export interface UpdateFactureProFormaDTO {
 
 
 export interface FactureProForma {
+  id: number;
+  numeroFacture: string;
+  siege: string;
+  dateCreation: string;
+  dateApprobation?: string;
+  utilisateurModificateur?: {
+      nomComplet: string;
+      email: string;
+  };
+  utilisateurApprobateur?: {
+      nomComplet: string;
+  };
+  approbateurs?: { nomComplet: string }[];
+  entreprise?: {
+      siege: string;
+  };
+  description: string;
+  totalHT: number;
+  remise?: number;
+  tva: boolean;
+  totalFacture: number;
+  statut?: string;
+  client?: {
     id: number;
-    numeroFacture: string;
-    siege: string;
-    dateCreation: string;
-    dateApprobation?: string;
-    
-    utilisateurCreateur?: {
+    nomComplet: string;
+    email?: string;
+    adresse?: string;
+    telephone?: string;
+  };
+  entrepriseClient?: {
+    id: number;
+    nom: string;
+    email?: string;
+    adresse?: string;
+    telephone?: string;
+  };
+  lignesFacture: LigneFactureProforma[];
+  // Ajout de utilisateurCreateur
+  utilisateurCreateur?: {
       nomComplet: string;
-    };
-    utilisateurModificateur?: {
-        nomComplet: string;
-        email: string;
-    };
-    dateRelance?: string
-    utilisateurApprobateur?: {
-        nomComplet: string;
-    };
-    approbateurs?: { nomComplet: string }[]; // Optionnel
-    entreprise?: {
-        siege: string;
-    };
-    description: string;
-    totalHT: number;
-    remise?: number;
-    tva: boolean;
-    totalFacture: number;
-    statut?: string;
-    client?: {
-      id: number;
-      nomComplet: string;
-      email?: string;
-      adresse?: string;
-      telephone?: string;
-    };
-    entrepriseClient?: {
-      id: number;
-      nom: string;
-      email?: string;
-      adresse?: string;
-      telephone?: string;
-    };
-    lignesFacture: LigneFactureProforma[];
+  };
 }

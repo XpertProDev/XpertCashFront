@@ -60,6 +60,14 @@ export class DetailFactureProformaComponent implements OnInit {
   users: any[] = [];
   filteredUsers: any[] = [];
 
+emailClient: string = '';
+emailSubject: string = '';
+emailBody: string = '';
+selectedFile: File | null = null;
+
+methodeEnvoi: string = 'PHYSIQUE';
+
+
   constructor(
       private router: Router,
       private produitService: ProduitService,
@@ -145,6 +153,7 @@ export class DetailFactureProformaComponent implements OnInit {
 
         this.activeTva = data.tva;
         this.isLoading = false;
+        this.emailClient = this.factureProForma.client?.email ?? '';
       },
       error: (err) => {
         console.error('Erreur:', err);
@@ -281,28 +290,6 @@ export class DetailFactureProformaComponent implements OnInit {
     // Optionnel : mettre à jour confirmedLignes si vous l'utilisez pour la vue
     this.confirmedLignes.splice(index, 1);
   }
-
-  getDerniereActionDate(): string {
-    const dates: Date[] = [];
-    
-    if (this.factureProForma.dateCreation) {
-      dates.push(new Date(this.factureProForma.dateCreation));
-    }
-    
-    if (this.factureProForma.dateApprobation) {
-      dates.push(new Date(this.factureProForma.dateApprobation));
-    }
-  
-    // Utilisez la dateRelance de l'interface mise à jour
-    if (this.factureProForma.dateRelance) {
-      dates.push(new Date(this.factureProForma.dateRelance));
-    }
-  
-    if (dates.length === 0) return 'Aucune activité';
-    
-    const lastDate = dates.reduce((a, b) => a > b ? a : b);
-    return lastDate.toLocaleDateString('fr-FR');
-  }
   
   trackByFn(index: number, item: any): number {
     return index;
@@ -329,49 +316,83 @@ export class DetailFactureProformaComponent implements OnInit {
   }
   
   submitUpdateForm() {
-    const payload = {
-      client: this.factureProForma.client ? { id: this.factureProForma.client.id } : null,
-      description: this.factureProForma.description,
-      // Utilisez confirmedLignes puisque c'est là que se trouvent les modifications (ajouts, suppressions, etc.)
-      lignesFacture: this.confirmedLignes.map(l => ({
-        produit: { id: l.produitId },
-        quantite: l.quantite,
-        prixUnitaire: this.getPrixVente(l.produitId),
-        ligneDescription: l.ligneDescription
-      }))
-    };
-    
-    // Si vous avez aussi des lignes en cours d'ajout dans inputLignes, vous pouvez les concaténer :
-    const nouvellesLignes = this.inputLignes
-      .filter(l => l.produitId && l.quantite > 0)
-      .map(l => ({
-        produit: { id: l.produitId! },
-        quantite: l.quantite,
-        prixUnitaire: this.getPrixVente(l.produitId!),
-        ligneDescription: l.ligneDescription
-      }));
-    
-    payload.lignesFacture = [
-      ...payload.lignesFacture,
-      ...nouvellesLignes
-    ];
-    
+  const payload = {
+    client: this.factureProForma.client ? { id: this.factureProForma.client.id } : null,
+    description: this.factureProForma.description,
+    lignesFacture: this.confirmedLignes.map(l => ({
+      produit: { id: l.produitId },
+      quantite: l.quantite,
+      prixUnitaire: this.getPrixVente(l.produitId),
+      ligneDescription: l.ligneDescription
+    })),
+    statut: 'ENVOYE',
+    methodeEnvoi: 'EMAIL',
+  };
+
+  const nouvellesLignes = this.inputLignes
+    .filter(l => l.produitId && l.quantite > 0)
+    .map(l => ({
+      produit: { id: l.produitId! },
+      quantite: l.quantite,
+      prixUnitaire: this.getPrixVente(l.produitId!),
+      ligneDescription: l.ligneDescription
+    }));
+
+  payload.lignesFacture = [
+    ...payload.lignesFacture,
+    ...nouvellesLignes
+  ];
+
     this.factureProFormaService.updateFactureProforma(
       this.factureId,
       this.activeRemise ? this.remisePourcentage : undefined,
       this.activeTva,
-      payload as Partial<FactureProForma>
+      payload as unknown as Partial<FactureProForma>
     ).subscribe({
-      next: (res) => {
-        console.log('Mise à jour réussie !', res);
+    next: (res) => {
+      console.log('✅ Facture mise à jour :', res);
+
+      // 👉 Vérifie les conditions pour envoyer un mail
+      if (payload.statut === 'ENVOYE' && payload.methodeEnvoi === 'EMAIL') {
+        const email = this.factureProForma.client?.email;
+        if (!email) {
+        console.warn('❗ Aucun email client disponible, envoi annulé.');
         this.router.navigate(['/facture-proforma']);
-      },
-      error: (err) => {
-        console.error('Échec de la mise à jour', err);
-        this.errorMessage = err.error.message || 'Erreur lors de la modification';
+        return; // juste un return vide pour stopper l'exécution ici
       }
-    });
-  }
+
+
+        const emailRequest = {
+          to: this.emailClient,
+          subject: this.emailSubject || `Facture Pro format ${res.numeroFacture}`,
+          body: this.emailBody || this.generateEmailBody(res),
+          // ⚠️ si tu veux envoyer le fichier, il faudra l'inclure dans FormData
+        };
+
+
+        this.factureProFormaService.envoyerFactureEmail(this.factureId, emailRequest)
+          .subscribe({
+            next: () => {
+              console.log('📧 Email envoyé avec succès');
+              this.router.navigate(['/facture-proforma']);
+            },
+            error: err => {
+              console.error('❌ Erreur lors de l’envoi de l’email', err);
+              this.errorMessage = 'Facture enregistrée, mais l’e-mail n’a pas pu être envoyé.';
+              this.router.navigate(['/facture-proforma']);
+            }
+          });
+      } else {
+        this.router.navigate(['/facture-proforma']);
+      }
+    },
+    error: (err) => {
+      console.error('❌ Échec de la mise à jour', err);
+      this.errorMessage = err.error.message || 'Erreur lors de la modification';
+    }
+  });
+}
+
 
   // Ajouter ces méthodes
   canApprove(): boolean {
@@ -453,15 +474,34 @@ export class DetailFactureProformaComponent implements OnInit {
         : {})
     };
 
+    // const modifications: Partial<FactureProForma> = {
+    //   statut: this.pendingStatut,
+    //   // Réinitialise les approbateurs si on revient en arrière
+    //   ...(this.pendingStatut === StatutFactureProForma.BROUILLON && {
+    //     approbateurs: [],
+    //     utilisateurApprobateur: null
+    //   })
+    // };
+    
     this.factureProFormaService.updateFactureProforma(
       this.factureId,
       undefined,
       undefined,
-      modifications,
+      {
+        statut: this.pendingStatut,
+        // Réinitialiser les approbateurs si on change de statut
+        ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
+          approbateurs: []
+        })
+      },
       this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
     ).subscribe({
       next: (updatedFacture) => {
+        if (this.pendingStatut === StatutFactureProForma.APPROBATION) {
+          updatedFacture.approbateurs = this.users.filter(u => selectedUsers.includes(u.id));
+        }
         this.factureProForma = updatedFacture;
+        
         this.showStatusConfirmation = false;
         this.pendingStatut = null;
         this.dateRelance = undefined;
@@ -509,5 +549,47 @@ export class DetailFactureProformaComponent implements OnInit {
       }
     });
   }
+
+  onProduitChange(produitId: number | null, ligne: any) {
+    // Mettre à jour l'ID du produit
+    ligne.produitId = produitId;
+  
+    // Trouver le produit correspondant
+    if (produitId) {
+      const produit = this.produits.find(p => p.id === produitId);
+      if (produit) {
+        // Mettre à jour la description avec celle du produit
+        ligne.ligneDescription = produit.description; // Assurez-vous que 'description' existe dans votre modèle Produit
+      }
+    } else {
+      ligne.ligneDescription = null;
+    }
+  
+    // Forcer la mise à jour des calculs
+    this.updateCalculs();
+  }
+
+  generateEmailBody(facture: any): string {
+  const clientName = facture.client?.nomComplet || 'client';
+
+  return `
+    <html>
+      <body style="font-family: Arial, sans-serif;">
+        <p>Bonjour ${clientName},</p>
+        <p>Voici votre facture pro forma n° <strong>${facture.numeroFacture}</strong>.</p>
+        <p>Merci de votre confiance.</p>
+        <p style="font-size: 12px; color: gray;">L’équipe XpertCash</p>
+      </body>
+    </html>
+  `;
+}
+
+onFileSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    this.selectedFile = input.files[0];
+    console.log('📎 Fichier sélectionné :', this.selectedFile.name);
+  }
+}
 
 }

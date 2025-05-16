@@ -176,6 +176,9 @@ export class AddStockAjustementComponent {
   // select de produit
   selectedProduct: Produit | null = null;
   tasks: Produit[] = [];
+
+  selectFournisseur: Fournisseurs | null = null;
+
   fournisseurs: Fournisseurs[] = [];
 
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
@@ -353,6 +356,11 @@ export class AddStockAjustementComponent {
       this.errorMessage = 'Quantité invalide';
       return;
     }
+
+    if (!this.selectFournisseur) {
+      this.errorMessage = 'Veuillez sélectionner un fournisseur';
+      return;
+    }
   
     // Ajout dans la liste avec descriptionAjout incluse
     this.pendingAdjustments = [
@@ -366,15 +374,16 @@ export class AddStockAjustementComponent {
         prixVente: this.selectedProduct.prixVente,
         descriptionAjout: this.descriptionAjout ,
         codeFournisseur: this.codeFournisseur,
-        fournisseurId: this.fournisseurs.find(f => f.nomComplet === this.codeFournisseur)?.id
+        fournisseurId: this.selectFournisseur.id
       }
     ];
 
     // Réinitialisation
     this.selectedProduct = null;
     this.quantiteAjoute = null;
-    this.descriptionAjout = ''; // Réinitialiser le champ de description si besoin
-    this.codeFournisseur
+    this.descriptionAjout = '';
+    this.codeFournisseur,
+    this.selectFournisseur = null
   }
 
   // Méthode pour ajouter un ajustement à la liste
@@ -485,7 +494,7 @@ export class AddStockAjustementComponent {
           stockActuel: this.selectedProduct.quantite,
           stockApres: this.selectedProduct.quantite + this.quantiteAjoute,
           prixVente: this.selectedProduct.prixVente,
-          fournisseurId: this.ajusteForm.value.fournisseurId  // ✅ bien utiliser un champ fournisseurId
+          fournisseurId: this.selectFournisseur?.id
         });
       }
     }
@@ -497,7 +506,6 @@ export class AddStockAjustementComponent {
       }, {} as { [key: string]: number });
   
       const descriptionGlobal = this.ajusteForm.value.descriptionGlobal || '';
-      const fournisseurId = this.ajusteForm.value.fournisseurId || null;
       const codeFournisseur = this.ajusteForm.value.codeFournisseur || '';
   
       // ✅ construire dynamiquement l'objet à envoyer
@@ -506,9 +514,7 @@ export class AddStockAjustementComponent {
         description: descriptionGlobal,
         codeFournisseur
       };
-      if (fournisseurId) {
-        dataToSend.fournisseurId = fournisseurId;
-      }
+      
   
       this.stockService.ajouterStock(dataToSend).subscribe({
         next: (response) => {

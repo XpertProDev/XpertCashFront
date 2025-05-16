@@ -100,7 +100,7 @@
                     <div class="info_titre_input">
                         <div class="champ_input">
                             <!-- <input [value]="factureProForma.description" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object"> -->
-                            <input [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object">
+                            <textarea [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus2" required placeholder="Saisis l'object"></textarea>
                             <label for="object" class="label"> Object </label>
                         </div>
                     </div>
@@ -265,11 +265,26 @@
                                         <!-- // Produit  -->
                                         <div class="champ_input" style="margin-right: 15px;">
                                             <td>
-                                                <select class="input_focus_type input_focus_type_select" [(ngModel)]="ligne.produitId" (ngModelChange)="updateCalculs()" [ngModelOptions]="{standalone: true}">
+                                                <!-- <select class="input_focus_type input_focus_type_select" 
+                                                [(ngModel)]="ligne.produitId" 
+                                                (ngModelChange)="updateCalculs()" 
+                                                [ngModelOptions]="{standalone: true}">
                                                   <option [ngValue]="null">Sélectionner un produit</option>
                                                   <option *ngFor="let produit of produits" [ngValue]="produit.id">
                                                     {{ produit.nom }}
                                                   </option>
+                                                </select> -->
+
+                                                <select 
+                                                    class="input_focus_type input_focus_type_select" 
+                                                    [ngModel]="ligne.produitId"
+                                                    (ngModelChange)="onProduitChange($event, ligne)"
+                                                    [ngModelOptions]="{ standalone: true }" 
+                                                    required>
+                                                    <option [ngValue]="null">Sélectionner un produit</option>
+                                                    <option *ngFor="let produit of produits" [ngValue]="produit.id">
+                                                        {{ produit.nom }}
+                                                    </option>
                                                 </select>
                                               </td>
                                         </div>
@@ -472,76 +487,103 @@
     </div>
  
     <!-- Brouillon  -->
-    <div class="brouillon_facture">
-        <!-- Créé par -->
-        <div class="brouillon_double">
-            <h5 class="titre_brouillont">Crée par :</h5>
-            <div class="contenue_brouillont">
-                <h6>{{ factureProForma.utilisateurModificateur?.nomComplet || 'Non spécifié' }}</h6>
+    <div class="container_brouillon_facture">
+        <div class="brouillon_facture">
+            <!-- Créé par -->
+            <div class="brouillon_double">
+                <h5 class="titre_brouillont">Crée par :</h5>
+                <div class="contenue_brouillont">
+                    <h6>{{ factureProForma.utilisateurCreateur?.nomComplet || 'Non spécifié' }}</h6>
+                </div>
             </div>
-        </div>
-    
-        <!-- Modifié par -->
-        <div class="brouillon_double">
-            <h5 class="titre_brouillont">Modifier par :</h5>
-            <div class="contenue_brouillont">
-                <h6>{{ factureProForma.utilisateurModificateur?.nomComplet || 'Aucune modification' }}</h6>
-            </div>
-        </div>
-    
-        <!-- Approuvé par -->
-        <div class="brouillon_double">
-            <h5 class="titre_brouillont">Approuver par :</h5>
-            <div class="contenue_brouillont">
-                <h6 *ngIf="factureProForma.utilisateurApprobateur">
-                    {{ factureProForma.utilisateurApprobateur.nomComplet }}
-                </h6>
-                <div *ngIf="(factureProForma.approbateurs ?? []).length > 0">
-                    <h6 *ngFor="let approbateur of factureProForma.approbateurs">
-                      {{ approbateur.nomComplet }}
-                    </h6>
-                  </div>
-                <h6 *ngIf="!factureProForma.utilisateurApprobateur && !factureProForma.approbateurs?.length">
-                    En attente d'approbation
-                </h6>
-            </div>
-        </div>
-
-        <!-- Validé par (si le statut est VALIDE) -->
-        <div class="brouillon_double" *ngIf="factureProForma.statut === 'VALIDE'">
-            <h5 class="titre_brouillont">Valider par :</h5>
-            <div class="contenue_brouillont">
-                <!-- Utilisateur approbateur direct -->
-                <h6 *ngIf="factureProForma.utilisateurApprobateur?.nomComplet">
-                    {{ factureProForma.utilisateurApprobateur?.nomComplet }}
-                </h6>
-                
-                <!-- Premier approbateur de la liste -->
-                <h6 *ngIf="!factureProForma.utilisateurApprobateur && (factureProForma.approbateurs ?? []).length > 0">
-                    {{ (factureProForma.approbateurs ?? [])[0]?.nomComplet }}
-                    <!-- {{ getFirstApprobateurName() }} -->
-                </h6>
         
-                <!-- Fallback si aucune information -->
-                <h6 *ngIf="!factureProForma.utilisateurApprobateur && (factureProForma.approbateurs ?? []).length === 0">
-                    Information non disponible
-                </h6>
+            <!-- Modifié par -->
+            <div class="brouillon_double">
+                <h5 class="titre_brouillont">Modifier par :</h5>
+                <div class="contenue_brouillont">
+                    <h6>{{ factureProForma.utilisateurModificateur?.nomComplet || 'Aucune modification' }}</h6>
+                </div>
             </div>
-        </div>
-    
-        <!-- Date de création -->
-        <div class="brouillon_double">
-            <h5 class="titre_brouillont">Date de création :</h5>
-            <div class="contenue_brouillont">
-                <h6>{{ factureProForma.dateCreation | date: 'dd/MM/yyyy' }}</h6>
+        
+            <!-- Section "Approuver par" modifiée -->
+            <div class="brouillon_double">
+                <h5 class="titre_brouillont">
+                {{ factureProForma.statut === statusOptions.APPROBATION ? 'Personnes à approuver' : 'Approuvé par' }} :
+                </h5>
+                <div class="contenue_brouillont">
+                <!-- Mode approbation en cours -->
+                <div *ngIf="factureProForma.statut === statusOptions.APPROBATION">
+                    <h6 *ngFor="let approbateur of factureProForma.approbateurs">
+                    {{ approbateur.nomComplet }} (en attente)
+                    </h6>
+                </div>
+            
+                <!-- Mode déjà approuvé -->
+                <div *ngIf="factureProForma.statut !== statusOptions.APPROBATION">
+                    <!-- Afficher uniquement l'approbateur effectif -->
+                    <h6 *ngIf="factureProForma.utilisateurApprobateur">
+                    {{ factureProForma.utilisateurApprobateur.nomComplet }}
+                    </h6>
+                    <h6 *ngIf="!factureProForma.utilisateurApprobateur">
+                    Aucune approbation validée
+                    </h6>
+                </div>
+                </div>
             </div>
-        </div>
     
-        <!-- Date de modification (si disponible) -->
-        <div class="brouillon_double" *ngIf="factureProForma.dateApprobation">
-            <h5 class="titre_brouillont">Date d'approbation :</h5>
-            <div class="contenue_brouillont">
-                <h6>{{ factureProForma.dateApprobation | date: 'dd/MM/yyyy' }}</h6>
+             <!-- Action par -->
+             <div class="brouillon_double">
+                <h5 class="titre_brouillont">Dernière action :</h5>
+                <div class="contenue_brouillont">
+                  <h6>
+                    <!-- Affichage personnalisé du statut -->
+                    <span *ngIf="factureProForma.statut === statusOptions.APPROBATION">
+                      En attente d'approbation
+                    </span>
+                    <span *ngIf="factureProForma.statut !== statusOptions.APPROBATION">
+                      {{ factureProForma.statut || 'Aucune activité' }}
+                    </span>
+                  </h6>
+                </div>
+              </div>
+    
+            <!-- Validé par (si le statut est VALIDE) -->
+            <div class="brouillon_double" *ngIf="factureProForma.statut === 'VALIDE'">
+                <h5 class="titre_brouillont">Valider par :</h5>
+                <div class="contenue_brouillont">
+                    <!-- Utilisateur approbateur direct -->
+                    <!-- <h6 *ngIf="factureProForma.utilisateurApprobateur?.nomComplet">
+                        {{ factureProForma.utilisateurApprobateur?.nomComplet }}
+                    </h6> -->
+                    <h6>{{ factureProForma.utilisateurModificateur?.nomComplet || 'Aucune modification' }}</h6>
+                    
+                    <!-- Premier approbateur de la liste -->
+                    <h6 *ngIf="!factureProForma.utilisateurApprobateur && (factureProForma.approbateurs ?? []).length > 0">
+                        {{ (factureProForma.approbateurs ?? [])[0].nomComplet }}
+                        <!-- {{ getFirstApprobateurName() }} -->
+                    </h6>
+            
+                    <!-- Fallback si aucune information -->
+                    <h6 *ngIf="!factureProForma.utilisateurApprobateur && (factureProForma.approbateurs ?? []).length === 0">
+                        Information non disponible
+                    </h6>
+                </div>
+            </div>
+        
+            <!-- Date de création -->
+            <div class="brouillon_double">
+                <h5 class="titre_brouillont">Date de création :</h5>
+                <div class="contenue_brouillont">
+                    <h6>{{ factureProForma.dateCreation | date: 'dd/MM/yyyy' }}</h6>
+                </div>
+            </div>
+        
+            <!-- Date de modification (si disponible) -->
+            <div class="brouillon_double" *ngIf="factureProForma.dateApprobation">
+                <h5 class="titre_brouillont">Date d'approbation :</h5>
+                <div class="contenue_brouillont">
+                    <h6>{{ factureProForma.dateApprobation | date: 'dd/MM/yyyy' }}</h6>
+                </div>
             </div>
         </div>
 
