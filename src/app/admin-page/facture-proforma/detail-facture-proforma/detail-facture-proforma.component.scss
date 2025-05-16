@@ -883,7 +883,21 @@ th {
   user-select: none;
 }
 
+.titre_etat {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
 
+.titre_etat select {
+  width: 100%;
+  min-width: 100px;
+  padding: 2px 5px;
+}
+
+.titre_etat select option {
+  padding: 0;
+}
 
 .titre_etat p{
   font-size: 16px;

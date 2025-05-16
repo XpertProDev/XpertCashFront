@@ -698,6 +698,10 @@
         <div class="envoyer_croix" (mousedown)="startDrag($event)">
             <div class="titre_etat">
                 <p>Envoyer</p>
+                <select (mousedown)="$event.stopPropagation()">
+                    <option value="">Physique</option>
+                    <option value="">Email</option>
+                </select>
             </div>
             <div class="icon_croix" (click)="showEmailPopup = false" (mousedown)="$event.stopPropagation()">
                 <i class="ri-close-large-line"></i>
@@ -774,7 +778,7 @@
                     <!-- Facture PDF existante -->
                     <li class="cadre_pdf">
                         <a class="text-truncate" href="/web/content/487?download=true">Facture pro forma - {{ factureProForma.numeroFacture }}.pdf</a>
-                        <button class="btn flex-shrink-0"><i class="fa fa-fw fa-times" style="opacity: 0;"></i></button>
+                        <button  style="opacity: 0;" class="btn flex-shrink-0"><i class="fa fa-fw fa-times"></i></button>
                     </li>
                     <!-- Pièces jointes ajoutées -->
                     <li class="cadre_pdf" *ngFor="let file of attachments; let i = index">
