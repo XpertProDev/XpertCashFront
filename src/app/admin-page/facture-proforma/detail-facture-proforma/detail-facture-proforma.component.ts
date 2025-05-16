@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProduitService } from '../../SERVICES/produit.service';
@@ -64,12 +64,21 @@ export class DetailFactureProformaComponent implements OnInit {
   emailSujet: string = '';
   emailMessage: string = '';
 
+  // Variables pour le déplacement
+  isDragging = false;
+  startX = 0;
+  startY = 0;
+  initialX = 0;
+  initialY = 0;
+  popupOffset = { x: 0, y: 0 };
+
   constructor(
       private router: Router,
       private produitService: ProduitService,
       private route: ActivatedRoute,
       private factureProFormaService: FactureProFormaService,
       private usersService: UsersService,
+      private cdr: ChangeDetectorRef
     ) {}
 
   ngOnInit(): void {
@@ -689,6 +698,44 @@ export class DetailFactureProformaComponent implements OnInit {
     this.factureProForma.statut = StatutFactureProForma.ENVOYE;
     
     // Ajouter ici la logique d'envoi d'email
+  }
+
+
+  // Début du drag
+  startDrag(event: MouseEvent): void {
+    event.preventDefault();
+    this.isDragging = true;
+    this.startX = event.clientX;
+    this.startY = event.clientY;
+    this.initialX = this.popupOffset.x;
+    this.initialY = this.popupOffset.y;
+
+    // Écouteurs d'événements globaux
+    document.addEventListener('mousemove', this.onMouseMove);
+    document.addEventListener('mouseup', this.onMouseUp);
+  }
+
+  // Mouvement de la souris
+  onMouseMove = (event: MouseEvent): void => {
+  if (!this.isDragging) return;
+  
+  // Utilisez requestAnimationFrame pour fluidité
+  requestAnimationFrame(() => {
+    const deltaX = event.clientX - this.startX;
+    const deltaY = event.clientY - this.startY;
+    this.popupOffset.x = this.initialX + deltaX;
+    this.popupOffset.y = this.initialY + deltaY;
+    
+    // Force la détection de changement
+    this.cdr.detectChanges();
+  });
+}
+
+  // Fin du drag
+  onMouseUp = (): void => {
+    this.isDragging = false;
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('mouseup', this.onMouseUp);
   }
 
 

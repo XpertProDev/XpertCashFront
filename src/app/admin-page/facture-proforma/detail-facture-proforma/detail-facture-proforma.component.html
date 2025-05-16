@@ -663,12 +663,13 @@
 
 <!-- Ajouter dans le template existant -->
 <div *ngIf="showEmailPopup" class="status-confirmation-popup-envoyer email-popup">
-    <div class="popup-content-envoyer">
-        <div class="envoyer_croix">
+    <div class="popup-content-envoyer"[ngStyle]="{
+       'transform': 'translate3d(' + popupOffset.x + 'px, ' + popupOffset.y + 'px, 0)'}">
+        <div class="envoyer_croix" (mousedown)="startDrag($event)">
             <div class="titre_etat">
                 <p>Envoyer</p>
             </div>
-            <div class="icon_croix" (click)="showEmailPopup = false">
+            <div class="icon_croix" (click)="showEmailPopup = false" (mousedown)="$event.stopPropagation()">
                 <i class="ri-close-large-line"></i>
             </div>
         </div>
@@ -740,6 +741,15 @@
                 <div class="btn_envoie_ignore">
                     <button class="btn" (click)="showEmailPopup = false">Annuler</button>
                 </div>
+
+                <div class="icon_attach">
+                    <i class="ri-attachment-2" title="Ajouter une pièce jointe"></i>
+                </div>
+
+                <div class="icon_relance">
+                    <i class="ri-time-line" title="Date de relance"></i>
+                </div>
+
             </div>
         </div>
     </div>

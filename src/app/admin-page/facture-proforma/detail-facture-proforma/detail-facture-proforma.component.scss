@@ -833,6 +833,10 @@ th {
     max-width: 700px;
 }
 
+.email-popup {
+  contain: strict;
+}
+
 ////////////////////// CADRE 
 
 .status-confirmation-popup-envoyer {
@@ -860,17 +864,14 @@ th {
    display: flex; /* Ajouter */
   flex-direction: column; /* Ajouter */
   height: 60vh; 
-  position: relative;
+  // position: relative;
+  // position: fixed;
+  // top: 50%;
+  // left: 50%;
+  // transform: translate(-50%, -50%);
+  // transition: transform 0.2s; 
+  will-change: transform;
 }
-
-// .popup-content-envoyer {
-//   background: white;
-//   padding: 20px;
-//   border-radius: 8px;
-//   width: 50%;
-//   max-height: 90vh;
-//   overflow-y: auto;
-// }
 
 .envoyer_croix {
   display: flex;
@@ -878,6 +879,8 @@ th {
   justify-content: space-between;
   padding: 12px 0;
   margin: 0 20px;
+  cursor: move;
+  user-select: none;
 }
 
 
@@ -1072,4 +1075,17 @@ th {
 
 .text-truncate {
   color: #0672E4;
+}
+
+.icon_attach {
+  margin-left: 15px;
+}
+
+.icon_attach i,
+.icon_relance i 
+{
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 5px;
 }
