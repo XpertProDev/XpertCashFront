@@ -1,0 +1,80 @@
+<div class="status-confirmation-popup-envoyer email-popup">
+    <div class="popup-content-envoyer">
+        <div class="envoyer_croix">
+            <div class="titre_etat">
+                <p>Envoyer</p>
+            </div>
+            <div class="icon_croix">
+                <i class="ri-close-large-line"></i>
+            </div>
+        </div>
+
+        <!-- // Bare  -->
+        <div class="barre"></div>
+
+        <!-- // contenue form envoyer -->
+        <div class="contenue_form_envoyer">
+            <!-- // email field  -->
+            <div class="email_field">
+                <!-- // Titre email field -->
+                <div class="titre_email_field">
+                    Vers
+                </div>
+                <!-- // Input email field -->
+                <div class="input_email_field">
+                    <div class="champ_input" style="margin-right: 15px;">
+                        <input class="input_focus_type" type="text" class="input_table_des" placeholder="Ajouter des destinataires...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- // Suject field  -->
+            <div class="email_field">
+                <!-- // Titre email field -->
+                <div class="titre_email_field">
+                    Suject
+                </div>
+                <!-- // Input email field -->
+                <div class="input_email_field">
+                    <div class="champ_input" style="margin-right: 15px;">
+                        <input class="input_focus_type" type="text" class="input_table_des" placeholder="Bienvenue à MyCompany !" value="sytechsy Commande (Ref S00001)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Corps du message -->
+            <div class="email-body">
+                <div 
+                    class="editable-content"
+                    contenteditable="true"
+                    data-placeholder="Commencez à taper...">
+                    Bonjour,<br><br>
+
+                    Votre facture <strong style="user-select: none" contenteditable="false">{{ factureProForma.numeroFacture }}</strong> 
+                    d'un montant de <strong style="user-select: none" contenteditable="false">{{ getTotalTTC() | customNumber }} CFA</strong> 
+                    a été confirmée.<br>
+
+                    Merci pour votre confiance !<br><br>
+                    N'hésitez pas à nous contacter pour toute question.<br><br>
+
+                    ---<br>
+                    L'équipe SyTech
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- // footer btn  -->
+        <div class="footer_btn">
+            <div class="contenue_footer_btn">
+                <div class="btn_envoie_save">
+                    <button class="btn">Envoyer</button>
+                </div>
+                <div class="btn_envoie_ignore">
+                    <button class="btn">Ignorer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

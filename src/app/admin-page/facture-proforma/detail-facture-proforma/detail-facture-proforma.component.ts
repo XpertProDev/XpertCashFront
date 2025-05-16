@@ -9,6 +9,9 @@ import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { RoundPipe } from '../../MODELS/round.pipe';
 import { UsersService } from '../../SERVICES/users.service';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as pdfjsLib from 'pdfjs-dist';
 
 @Component({
   selector: 'app-detail-facture-proforma',
@@ -47,6 +50,9 @@ export class DetailFactureProformaComponent implements OnInit {
   // Ajouter ces variables dans la classe
   showStatusConfirmation = false;
   pendingStatut: StatutFactureProForma | null = null;
+  showEmailPopup: boolean = false;
+  previewPDFUrl: string | null = null;
+  loadingPreview: boolean = false;
   selectedStatutLabel = '';
   statusOptions = StatutFactureProForma;
   dateRelance?: string;
@@ -375,6 +381,11 @@ export class DetailFactureProformaComponent implements OnInit {
   }
 
   openStatusConfirmation(newStatut: StatutFactureProForma): void {
+     if (newStatut === StatutFactureProForma.ENVOYE) {
+      this.openEmailPopup(); // Appeler la méthode qui gère la popup
+      return;
+    }
+
     if (this.isStatusTransitionAllowed(newStatut)) {
       this.pendingStatut = newStatut;
       this.selectedStatutLabel = this.getStatusLabel(newStatut);
@@ -384,6 +395,77 @@ export class DetailFactureProformaComponent implements OnInit {
         this.loadUsersOfEntreprise(this.userEntrepriseId!);
       }
     }
+  }
+
+  // Modifier la partie de génération des données du tableau
+  async generatePDF(preview: boolean = false): Promise<string> {
+  const doc = new jsPDF();
+  
+  // Contenu du PDF
+  doc.setFontSize(18);
+  doc.text(`FACTURE PRO FORMA - ${this.factureProForma.numeroFacture}`, 15, 20);
+  
+  // Ajouter le tableau avec autoTable
+  const headers = [['Produit', 'Quantité', 'Prix Unitaire', 'Total']];
+  const data = this.confirmedLignes.map(ligne => [
+    this.getProduitNom(ligne.produitId),
+    ligne.quantite.toString(),
+    this.getPrixVente(ligne.produitId).toLocaleString('fr-FR') + ' CFA',
+    this.getMontantTotal(ligne).toLocaleString('fr-FR') + ' CFA'
+  ]);
+
+  (doc as any).autoTable({
+    head: headers,
+    body: data,
+    startY: 30,
+    theme: 'grid'
+  });
+
+  if (preview) {
+    const pdfBlob = doc.output('blob');
+    return URL.createObjectURL(pdfBlob);
+  }
+  
+  doc.save(`Facture proforma - N˚${this.factureProForma.numeroFacture}.pdf`);
+  return '';
+  }
+
+  async loadPDFPreview(url: string) {
+  this.loadingPreview = true;
+  this.previewPDFUrl = null;
+
+  try {
+    const pdf = await pdfjsLib.getDocument(url).promise;
+    const page = await pdf.getPage(1);
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      throw new Error('Context Canvas 2D non disponible');
+    }
+
+    const viewport = page.getViewport({ scale: 0.5 });
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise;
+
+    this.previewPDFUrl = canvas.toDataURL();
+  } catch (error) {
+    console.error('Erreur de prévisualisation PDF:', error);
+    // Optionnel : Afficher un message à l'utilisateur
+  } finally {
+    this.loadingPreview = false;
+  }
+}
+
+  async openEmailPopup() {
+    this.showEmailPopup = true;
+    const pdfUrl = await this.generatePDF(true);
+    await this.loadPDFPreview(pdfUrl);
   }
 
   // Modifier la configuration des transitions
@@ -600,7 +682,14 @@ export class DetailFactureProformaComponent implements OnInit {
     this.router.navigate(['/facture-proforma']);
   }
 
-  confirmEmailSend(){}
+  confirmEmailSend() {
+    // Générer le PDF final
+    this.generatePDF(); // Sans paramètre pour le téléchargement
+    this.showEmailPopup = false;
+    this.factureProForma.statut = StatutFactureProForma.ENVOYE;
+    
+    // Ajouter ici la logique d'envoi d'email
+  }
 
 
 }
