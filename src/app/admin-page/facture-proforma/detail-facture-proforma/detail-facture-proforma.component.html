@@ -750,14 +750,14 @@
                 <!-- // Input email field -->
                 <div class="input_email_field">
                     <div class="champ_input" style="margin-right: 15px;">
-                        <input class="input_focus_type" type="text" class="input_table_des" placeholder="Bienvenue à MyCompany !" value="sytechsy Commande (Ref S00001)">
+                        <input #subjectInput class="input_focus_type" type="text" class="input_table_des" placeholder="Bienvenue à MyCompany !" value="sytechsy Commande (Ref S00001)">
                     </div>
                 </div>
             </div>
 
             <!-- Contenu existant de l'email -->
             <div class="email-body">
-                <div class="editable-content" contenteditable="true">
+                <div class="editable-content" contenteditable="true" #editableContent>
                     Bonjour,<br><br>
                     Votre facture <strong>{{ factureProForma.numeroFacture }}</strong>
                     d'un montant de : <strong>{{ getTotalTTC() | customNumber }} CFA</strong>

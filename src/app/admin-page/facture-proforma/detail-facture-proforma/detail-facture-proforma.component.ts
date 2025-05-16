@@ -64,6 +64,8 @@ export class DetailFactureProformaComponent implements OnInit {
   emailSujet: string = '';
   emailMessage: string = '';
 
+  methodeEnvoi: string = 'EMAIL';
+
   // Variables pour le déplacement
   isDragging = false;
   startX = 0;
@@ -79,6 +81,9 @@ export class DetailFactureProformaComponent implements OnInit {
   // Variables pour la gestion des emails
   emailDestinatairesList: string[] = [];
   currentEmail = '';
+
+  @ViewChild('editableContent', { static: false }) editableContent!: ElementRef;
+  @ViewChild('subjectInput', { static: false }) subjectInput!: ElementRef;
 
     // Ajoutez cette propriété en haut de votre classe
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -375,6 +380,7 @@ export class DetailFactureProformaComponent implements OnInit {
     ).subscribe({
       next: (res) => {
         console.log('Mise à jour réussie !', res);
+        
         this.router.navigate(['/facture-proforma']);
       },
       error: (err) => {
@@ -703,14 +709,70 @@ export class DetailFactureProformaComponent implements OnInit {
     this.router.navigate(['/facture-proforma']);
   }
 
-  confirmEmailSend() {
-    // Générer le PDF final
-    // this.generatePDF(); 
-    this.showEmailPopup = false;
-    this.factureProForma.statut = StatutFactureProForma.ENVOYE;
-    
-    // Ajouter ici la logique d'envoi d'email
+confirmEmailSend() {
+  // Ajout du dernier email tapé s'il y en a un
+  if (this.currentEmail && this.currentEmail.trim() !== '') {
+    this.emailDestinatairesList.push(this.currentEmail.trim());
+    this.currentEmail = '';
   }
+
+  // ✅ Vérification des destinataires
+  if (this.emailDestinatairesList.length === 0) {
+    console.warn("❌ Aucun destinataire fourni.");
+    return;
+  }
+
+  const to = this.emailDestinatairesList.join(',');
+  const subject = this.subjectInput.nativeElement.value.trim();
+  const body = this.editableContent.nativeElement.innerHTML;
+
+  // Vérification sujet et corps du message
+  if (!subject || !body) {
+    console.warn("❌ Sujet ou contenu du mail manquant.");
+    return;
+  }
+
+  // Fermer la popup visuellement
+  this.showEmailPopup = false;
+
+  const payload: Partial<FactureProForma> = {
+    statut: StatutFactureProForma.ENVOYE,
+    methodeEnvoi: 'EMAIL'
+  };
+
+  this.factureProFormaService.updateFactureProforma(
+    this.factureId,
+    undefined, // pas de remise à appliquer ici
+    this.activeTva,
+    payload
+  ).subscribe({
+    next: () => {
+      // Ensuite on envoie l’email
+      const emailPayload = { to, subject, body };
+
+      console.log("📨 Envoi email avec données :", emailPayload);
+
+      this.factureProFormaService.envoyerFactureEmail(this.factureId, emailPayload)
+        .subscribe({
+          next: () => {
+            console.log("✅ Email envoyé avec succès !");
+            // Optionnel : affichage de toast ou rafraîchissement
+          },
+          error: (err) => {
+            console.error("❌ Erreur lors de l'envoi de l'email :", err?.error?.message || err.message || 'Erreur inconnue');
+            this.errorMessage = err?.error?.message || 'Erreur inconnue lors de l’envoi de l’email';
+          }
+        });
+    },
+    error: (err) => {
+      console.error("❌ Erreur lors de la mise à jour du statut :", err?.error?.message || err.message || 'Erreur inconnue');
+      this.errorMessage = err?.error?.message || 'Erreur lors de la mise à jour du statut de la facture.';
+    }
+  });
+}
+
+
+
 
 
   // Début du drag

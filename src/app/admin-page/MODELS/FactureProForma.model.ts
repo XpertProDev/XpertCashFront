@@ -39,6 +39,8 @@ export interface FactureProForma {
   siege: string;
   dateCreation: string;
   dateApprobation?: string;
+  methodeEnvoi?: 'EMAIL' | 'PHYSIQUE';
+
   utilisateurModificateur?: {
       nomComplet: string;
       email: string;

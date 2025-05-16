@@ -118,6 +118,40 @@ export class FactureProFormaService {
     );
   }
 
+  //Envoyer Facture par mail :
+
+  envoyerFactureEmail(
+  factureId: number,
+  emailRequest: {
+    to: string;
+    subject: string;
+    body: string;
+  }
+): Observable<string> {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    return throwError(() => new Error('Token manquant'));
+  }
+
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  });
+
+  return this.http.post(
+    `${this.apiUrl}/factures/${factureId}/envoyer-email`,
+    emailRequest,
+   { headers, responseType: 'text' }
+  ).pipe(
+    tap(() => console.log('📧 Email envoyé')),
+    catchError(error => {
+      console.error('Erreur lors de l’envoi du mail :', error);
+      return throwError(() => error);
+    })
+  );
+}
+
+
   //Get History Facture
 
 getHistoriqueFacture(factureId: number): Observable<any> {
