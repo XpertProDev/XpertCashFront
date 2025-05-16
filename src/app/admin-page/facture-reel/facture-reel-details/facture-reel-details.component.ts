@@ -22,6 +22,7 @@ export class FactureReelDetailsComponent implements OnInit {
   nina!: string;
   pays!: string;
   rccm!: string;
+  siteWeb!: string
 
   ngOnInit(): void {
     this.getUserEntrepriseInfo();
@@ -48,6 +49,7 @@ export class FactureReelDetailsComponent implements OnInit {
         this.nina = entreprise.nina;
         this.pays = entreprise.pays;
         this.rccm = entreprise.rccm;
+        this.siteWeb = entreprise.siteWeb
 
   
         // Ajout du préfixe si nécessaire
