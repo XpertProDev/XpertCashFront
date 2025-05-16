@@ -857,7 +857,9 @@ th {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   text-align: center;
   animation: popUp 0.25s ease-in-out;
-  height: 60vh;
+   display: flex; /* Ajouter */
+  flex-direction: column; /* Ajouter */
+  height: 60vh; 
   position: relative;
 }
 
@@ -898,7 +900,15 @@ th {
 }
 
 .contenue_form_envoyer {
+  flex: 1; /* Prendre l'espace disponible */
+  overflow-y: auto; /* Activer le scroll vertical */
   margin-top: 10px;
+  padding: 0 20px; /* Ajouter un padding latéral */
+}
+
+/* Ajuster le header et footer */
+.envoyer_croix, .barre {
+  flex-shrink: 0; /* Empêcher le rétrécissement */
 }
 
 .input_table_des {
@@ -957,12 +967,19 @@ th {
   display: inline-block; /* Empêche le débordement */
 }
 
+// .footer_btn {
+//   position: absolute;
+//   bottom: 0;
+//   width: 100%;
+//   border-top: 1px solid #0000001a;
+// }
+
 .footer_btn {
-  position: absolute;
-  bottom: 0;
-  // background-color: #0671e446;
-  width: 100%;
+  position: static;
+  flex-shrink: 0;
+  // padding: 15px 20px;
   border-top: 1px solid #0000001a;
+  background: white;
 }
 
 .contenue_footer_btn {
@@ -970,6 +987,21 @@ th {
   align-items: center;
   margin: 15px 0 15px 10px;
   gap: 10px;
+}
+
+.contenue_form_envoyer > * {
+  margin: 10px 0;
+}
+
+
+/* Optionnel - Custom scrollbar */
+.contenue_form_envoyer::-webkit-scrollbar {
+  width: 2px;
+}
+
+.contenue_form_envoyer::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
 }
 
 .btn_envoie_save .btn,
@@ -1021,6 +1053,23 @@ th {
   color: #666;
 }
 
-.spinner {
-  /* Ajouter votre animation de spinner ici */
+.section_img_pdf {
+  display: flex;
+  justify-content: left;
+}
+
+.section_img_pdf ul {
+  padding: 0 0 0 15px;
+}
+
+.cadre_pdf {
+  background-color: #e2e2e2;
+  border-radius: 5px;
+  display: inline-block;
+  position: relative;
+  padding: 0 0 0 10px;
+}
+
+.text-truncate {
+  color: #0672E4;
 }

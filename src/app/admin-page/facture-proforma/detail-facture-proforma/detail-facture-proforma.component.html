@@ -722,15 +722,13 @@
             </div>
 
             <!-- Remplacer la section pdf -->
-            <div class="pdf-preview-container">
-            <div *ngIf="loadingPreview" class="loading-pdf">
-                <div class="spinner"></div>
-                <p>Génération de l'aperçu...</p>
-            </div>
-            <img *ngIf="previewPDFUrl && !loadingPreview" 
-                [src]="previewPDFUrl" 
-                alt="Aperçu PDF"
-                class="pdf-preview-image">
+            <div class="section_img_pdf">
+                <ul>
+                    <li class="cadre_pdf">
+                        <a class="text-truncate" href="/web/content/487?download=true">Facture pro forma - {{ factureProForma.numeroFacture }}.pdf</a>
+                        <button class="btn flex-shrink-0"><i class="fa fa-fw fa-times"></i></button>
+                    </li>
+                </ul>
             </div>
         </div>
 
