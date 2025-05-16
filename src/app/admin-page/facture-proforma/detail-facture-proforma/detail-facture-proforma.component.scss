@@ -985,6 +985,12 @@ th {
   background: white;
 }
 
+.content_footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .contenue_footer_btn {
   display: flex;
   align-items: center;
@@ -1063,14 +1069,19 @@ th {
 
 .section_img_pdf ul {
   padding: 0 0 0 15px;
+  margin: 0;
 }
 
 .cadre_pdf {
   background-color: #e2e2e2;
   border-radius: 5px;
-  display: inline-block;
+  // display: inline-block;
   position: relative;
   padding: 0 0 0 10px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .text-truncate {
@@ -1078,7 +1089,7 @@ th {
 }
 
 .icon_attach {
-  margin-left: 15px;
+  margin-left: 5px;
 }
 
 .icon_attach i,
@@ -1086,6 +1097,26 @@ th {
 {
   font-size: 16px;
   cursor: pointer;
-  padding: 5px 10px;
+  padding: 5px;
   border-radius: 5px;
+}
+
+ul li {
+  list-style-type: none;
+  text-align: left;
+}
+
+.form-group {
+  display: flex;
+  margin: 0 0px 0 0;
+  gap: 10px;
+  align-items: center;
+}
+
+.form-group label {
+  margin: 0;
+}
+
+.form-group .form-control-date {
+  width: 57%;
 }

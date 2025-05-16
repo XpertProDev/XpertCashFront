@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProduitService } from '../../SERVICES/produit.service';
@@ -72,13 +72,21 @@ export class DetailFactureProformaComponent implements OnInit {
   initialY = 0;
   popupOffset = { x: 0, y: 0 };
 
+  // Piece joindre
+  attachments: File[] = [];
+  selectedFile: File | null = null;
+
+    // Ajoutez cette propriété en haut de votre classe
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   constructor(
       private router: Router,
       private produitService: ProduitService,
       private route: ActivatedRoute,
       private factureProFormaService: FactureProFormaService,
       private usersService: UsersService,
-      private cdr: ChangeDetectorRef
+      private cdr: ChangeDetectorRef,
+      private renderer: Renderer2
     ) {}
 
   ngOnInit(): void {
@@ -407,37 +415,37 @@ export class DetailFactureProformaComponent implements OnInit {
   }
 
   // Modifier la partie de génération des données du tableau
-  async generatePDF(preview: boolean = false): Promise<string> {
-  const doc = new jsPDF();
+  // async generatePDF(preview: boolean = false): Promise<string> {
+  // const doc = new jsPDF();
   
-  // Contenu du PDF
-  doc.setFontSize(18);
-  doc.text(`FACTURE PRO FORMA - ${this.factureProForma.numeroFacture}`, 15, 20);
+  // // Contenu du PDF
+  // doc.setFontSize(18);
+  // doc.text(`FACTURE PRO FORMA - ${this.factureProForma.numeroFacture}`, 15, 20);
   
-  // Ajouter le tableau avec autoTable
-  const headers = [['Produit', 'Quantité', 'Prix Unitaire', 'Total']];
-  const data = this.confirmedLignes.map(ligne => [
-    this.getProduitNom(ligne.produitId),
-    ligne.quantite.toString(),
-    this.getPrixVente(ligne.produitId).toLocaleString('fr-FR') + ' CFA',
-    this.getMontantTotal(ligne).toLocaleString('fr-FR') + ' CFA'
-  ]);
+  // // Ajouter le tableau avec autoTable
+  // const headers = [['Produit', 'Quantité', 'Prix Unitaire', 'Total']];
+  // const data = this.confirmedLignes.map(ligne => [
+  //   this.getProduitNom(ligne.produitId),
+  //   ligne.quantite.toString(),
+  //   this.getPrixVente(ligne.produitId).toLocaleString('fr-FR') + ' CFA',
+  //   this.getMontantTotal(ligne).toLocaleString('fr-FR') + ' CFA'
+  // ]);
 
-  (doc as any).autoTable({
-    head: headers,
-    body: data,
-    startY: 30,
-    theme: 'grid'
-  });
+  // (doc as any).autoTable({
+  //   head: headers,
+  //   body: data,
+  //   startY: 30,
+  //   theme: 'grid'
+  // });
 
-  if (preview) {
-    const pdfBlob = doc.output('blob');
-    return URL.createObjectURL(pdfBlob);
-  }
+  // if (preview) {
+  //   const pdfBlob = doc.output('blob');
+  //   return URL.createObjectURL(pdfBlob);
+  // }
   
-  doc.save(`Facture proforma - N˚${this.factureProForma.numeroFacture}.pdf`);
-  return '';
-  }
+  // doc.save(`Facture proforma - N˚${this.factureProForma.numeroFacture}.pdf`);
+  // return '';
+  // }
 
   async loadPDFPreview(url: string) {
   this.loadingPreview = true;
@@ -473,8 +481,8 @@ export class DetailFactureProformaComponent implements OnInit {
 
   async openEmailPopup() {
     this.showEmailPopup = true;
-    const pdfUrl = await this.generatePDF(true);
-    await this.loadPDFPreview(pdfUrl);
+    // const pdfUrl = await this.generatePDF(true);
+    // await this.loadPDFPreview(pdfUrl);
   }
 
   // Modifier la configuration des transitions
@@ -693,7 +701,7 @@ export class DetailFactureProformaComponent implements OnInit {
 
   confirmEmailSend() {
     // Générer le PDF final
-    this.generatePDF(); // Sans paramètre pour le téléchargement
+    // this.generatePDF(); 
     this.showEmailPopup = false;
     this.factureProForma.statut = StatutFactureProForma.ENVOYE;
     
@@ -736,6 +744,39 @@ export class DetailFactureProformaComponent implements OnInit {
     this.isDragging = false;
     document.removeEventListener('mousemove', this.onMouseMove);
     document.removeEventListener('mouseup', this.onMouseUp);
+  }
+
+  // Modifiez la méthode triggerFileInput
+  triggerFileInput(): void {
+      if (this.fileInput?.nativeElement) {
+          this.fileInput.nativeElement.click();
+      }
+  }
+
+  // Gère la sélection de fichiers
+  onFileSelected(event: Event): void {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files.length > 0) {
+          const newFiles = Array.from(input.files);
+          
+          // Vérifier les doublons
+          newFiles.forEach(newFile => {
+              const isDuplicate = this.attachments.some(
+                  existingFile => existingFile.name === newFile.name
+              );
+              
+              if (!isDuplicate) {
+                  this.attachments.push(newFile);
+              }
+          });
+          
+          input.value = ''; // Réinitialise l'input
+      }
+  }
+
+  // Supprime une pièce jointe
+  removeAttachment(index: number): void {
+      this.attachments.splice(index, 1);
   }
 
 

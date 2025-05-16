@@ -631,8 +631,8 @@
 
         <!-- Affichage conditionnel selon le statut -->
         <div *ngIf="pendingStatut === 'ENVOYE'" class="form-group">
-        <label for="relanceDate" style="font-size: 12px;">Date de relance (facultative) :</label>
-        <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control" />
+            <label for="relanceDate" style="font-size: 12px;">Date de relance (facultative) :</label>
+            <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control" />
         </div>
 
         <!-- ✅ Liste des utilisateurs pour l'approbation -->
@@ -686,7 +686,7 @@
                 <!-- // Input email field -->
                 <div class="input_email_field">
                     <div class="champ_input" style="margin-right: 15px;">
-                        <input class="input_focus_type" type="text" class="input_table_des" placeholder="Ajouter des destinataires...">
+                        <input class="input_focus_type" type="text" class="input_table_des" placeholder="Ajouter des destinataires..." >
                     </div>
                 </div>
             </div>
@@ -725,31 +725,50 @@
             <!-- Remplacer la section pdf -->
             <div class="section_img_pdf">
                 <ul>
+                    <!-- Facture PDF existante -->
                     <li class="cadre_pdf">
                         <a class="text-truncate" href="/web/content/487?download=true">Facture pro forma - {{ factureProForma.numeroFacture }}.pdf</a>
-                        <button class="btn flex-shrink-0"><i class="fa fa-fw fa-times"></i></button>
+                        <button class="btn flex-shrink-0"><i class="fa fa-fw fa-times" style="opacity: 0;"></i></button>
+                    </li>
+                    <!-- Pièces jointes ajoutées -->
+                    <li class="cadre_pdf" *ngFor="let file of attachments; let i = index">
+                        <a class="text-truncate">{{ file.name }}</a>
+                        <button class="btn flex-shrink-0" (click)="removeAttachment(i)">
+                            <i class="fa fa-fw fa-times"></i>
+                        </button>
                     </li>
                 </ul>
+
+                <!-- Input file caché -->
+                <input #fileInput type="file" hidden (change)="onFileSelected($event)" multiple>
             </div>
         </div>
 
         <div class="footer_btn">
-            <div class="contenue_footer_btn">
-                <div class="btn_envoie_save">
-                    <button class="btn" (click)="confirmEmailSend()">Envoyer</button>
-                </div>
-                <div class="btn_envoie_ignore">
-                    <button class="btn" (click)="showEmailPopup = false">Annuler</button>
+            <div class="content_footer">
+                <div class="contenue_footer_btn">
+                    <div class="btn_envoie_save">
+                        <button class="btn" (click)="confirmEmailSend()">Envoyer</button>
+                    </div>
+                    <div class="btn_envoie_ignore">
+                        <button class="btn" (click)="showEmailPopup = false">Annuler</button>
+                    </div>
+
+                    <div class="icon_attach" (click)="triggerFileInput()">
+                        <i class="ri-attachment-2" title="Ajouter une pièce jointe"></i>
+                    </div>
+
+                    <div class="icon_relance">
+                        <i class="ri-time-line" title="Date de relance"></i>
+                    </div>
+
                 </div>
 
-                <div class="icon_attach">
-                    <i class="ri-attachment-2" title="Ajouter une pièce jointe"></i>
+                <!-- Affichage conditionnel selon le statut  *ngIf="pendingStatut === 'ENVOYE'" -->
+                <div class="form-group">
+                    <label for="relanceDate" style="font-size: 12px;">Date de relance (fac) :</label>
+                    <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control form-control-date" />
                 </div>
-
-                <div class="icon_relance">
-                    <i class="ri-time-line" title="Date de relance"></i>
-                </div>
-
             </div>
         </div>
     </div>
