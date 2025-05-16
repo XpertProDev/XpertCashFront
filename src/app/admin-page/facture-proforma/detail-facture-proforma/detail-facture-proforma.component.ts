@@ -710,90 +710,105 @@ export class DetailFactureProformaComponent implements OnInit {
     this.router.navigate(['/facture-proforma']);
   }
 
-  confirmEmailSend() {
-    // Si méthode est Email
-    if (this.methodeEnvoi === 'email') {
-      // Ajouter le dernier email saisi
-      if (this.currentEmail && this.currentEmail.trim() !== '') {
-        this.emailDestinatairesList.push(this.currentEmail.trim());
-        this.currentEmail = '';
-      }
+  async confirmEmailSend() {
+    try {
+        // Préparation des données communes
+        const payload: Partial<FactureProForma> = {
+            statut: StatutFactureProForma.ENVOYE,
+            methodeEnvoi: this.methodeEnvoi.toUpperCase() as 'EMAIL' | 'PHYSIQUE',
+            ...(this.dateRelance && { dateRelance: new Date(this.dateRelance).toISOString() })
+        };
 
-      // Validation des champs email
-      if (this.emailDestinatairesList.length === 0) {
-        console.warn("❌ Aucun destinataire fourni.");
-        this.errorMessage = "Veuillez ajouter au moins un destinataire";
-        return;
-      }
+        // Mise à jour de la facture
+        const remise = this.activeRemise ? this.remisePourcentage : 0;
+        const tva = this.activeTva;
 
-      const subject = this.subjectInput.nativeElement.value.trim();
-      const body = this.editableContent.nativeElement.innerHTML;
+        await this.factureProFormaService.updateFactureProforma(
+            this.factureId,
+            remise,
+            tva,
+            payload
+        ).toPromise();
 
-      if (!subject || !body) {
-        console.warn("❌ Sujet ou contenu du mail manquant.");
-        this.errorMessage = "Sujet et contenu de l'email sont obligatoires";
-        return;
-      }
-    }
-
-    // Préparation du payload commun
-    const payload: Partial<FactureProForma> = {
-      statut: StatutFactureProForma.ENVOYE,
-      methodeEnvoi: this.methodeEnvoi.toUpperCase() as 'EMAIL' | 'PHYSIQUE'
-    };
-
-    // Mise à jour de la facture
-    this.factureProFormaService.updateFactureProforma(
-      this.factureId,
-      undefined,
-      this.activeTva,
-      payload
-    ).subscribe({
-      next: () => {
-        // Si envoi par email
+        // Traitement spécifique à l'email
         if (this.methodeEnvoi === 'email') {
-          const emailPayload = {
-            to: this.emailDestinatairesList.join(','),
-            subject: this.subjectInput.nativeElement.value.trim(),
-            body: this.editableContent.nativeElement.innerHTML
-          };
-
-          this.factureProFormaService.envoyerFactureEmail(this.factureId, emailPayload)
-            .subscribe({
-              next: () => {
-                console.log("✅ Email envoyé avec succès !");
-                this.resetEmailForm();
-              },
-              error: (err) => this.handleEmailError(err)
-            });
-        } else {
-          // Si envoi physique
-          console.log("✅ Statut physique confirmé !");
-          this.showEmailPopup = false;
+            await this.processEmailSending();
         }
-      },
-      error: (err) => this.handleUpdateError(err)
-    });
+
+        this.showEmailPopup = false;
+        this.refreshInvoiceData();
+
+    } catch (error) {
+        this.handleError(error);
+    }
+}
+
+  private async processEmailSending() {
+      // Validation des champs email
+      if (this.currentEmail.trim()) {
+          this.emailDestinatairesList.push(this.currentEmail.trim());
+          this.currentEmail = '';
+      }
+
+      if (this.emailDestinatairesList.length === 0) {
+          throw new Error('Veuillez ajouter au moins un destinataire');
+      }
+
+      const sujet = this.subjectInput.nativeElement.value.trim();
+      const corps = this.editableContent.nativeElement.innerHTML;
+
+      if (!sujet || !corps) {
+          throw new Error('Sujet et contenu du mail sont obligatoires');
+      }
+
+      // Envoi de l'email via le service
+      await this.factureProFormaService.envoyerFactureEmail(
+          this.factureId,
+          {
+              to: this.emailDestinatairesList.join(','),
+              subject: sujet,
+              body: corps
+          }
+      ).toPromise();
+
+      // Réinitialisation du formulaire email
+      this.emailDestinatairesList = [];
+      this.currentEmail = '';
+      this.editableContent.nativeElement.innerHTML = '';
   }
 
-// Méthodes helper
-private resetEmailForm() {
-  this.emailDestinatairesList = [];
-  this.currentEmail = '';
-  this.showEmailPopup = false;
-}
+  private refreshInvoiceData() {
+      this.factureProFormaService.getFactureProformaById(this.factureId)
+          .subscribe(facture => {
+              this.factureProForma = facture;
+              this.cdr.detectChanges();
+          });
+  }
 
-private handleEmailError(err: any) {
-  console.error("❌ Erreur d'envoi email :", err);
-  this.errorMessage = err?.error?.message || 'Échec de l\'envoi de l\'email';
-  this.showEmailPopup = false;
-}
+  private handleError(error: any) {
+      console.error('Erreur:', error);
+      this.errorMessage = error.message || 'Une erreur est survenue';
+      setTimeout(() => this.errorMessage = '', 5000);
+  }
 
-private handleUpdateError(err: any) {
-  console.error("❌ Erreur de mise à jour :", err);
-  this.errorMessage = err?.error?.message || 'Échec de la mise à jour du statut';
-  this.showEmailPopup = false;
-}
+  // Méthodes helper
+  private resetEmailForm() {
+    this.emailDestinatairesList = [];
+    this.currentEmail = '';
+    this.showEmailPopup = false;
+  }
+
+  private handleEmailError(err: any) {
+    console.error("❌ Erreur d'envoi email :", err);
+    this.errorMessage = err?.error?.message || 'Échec de l\'envoi de l\'email';
+    this.showEmailPopup = false;
+  }
+
+  private handleUpdateError(err: any) {
+    console.error("❌ Erreur de mise à jour :", err);
+    this.errorMessage = err?.error?.message || 'Échec de la mise à jour du statut';
+    this.showEmailPopup = false;
+  }
 
   // Début du drag
   startDrag(event: MouseEvent): void {

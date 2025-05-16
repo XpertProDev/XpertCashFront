@@ -750,7 +750,12 @@
                 <!-- // Input email field -->
                 <div class="input_email_field">
                     <div class="champ_input" style="margin-right: 15px;">
-                        <input #subjectInput class="input_focus_type" type="text" class="input_table_des" placeholder="Bienvenue à MyCompany !" value="sytechsy Commande (Ref S00001)">
+                        <!-- <input #subjectInput class="input_focus_type" type="text" class="input_table_des" placeholder="Bienvenue à MyCompany !" value="Facture pro forma ${factureProForma.numeroFacture}"> -->
+                         <input #subjectInput 
+                            class="input_focus_type input_table_des" 
+                            type="text" 
+                            placeholder="Bienvenue à MyCompany !" 
+                            [value]="'Facture pro forma ' + (factureProForma?.numeroFacture || '')">
                     </div>
                 </div>
             </div>
@@ -804,8 +809,21 @@
             <div class="content_footer">
                 <div class="contenue_footer_btn">
                     <div class="btn_envoie_save">
-                        <button *ngIf="methodeEnvoi === 'email'" class="btn" (click)="confirmEmailSend()">Envoyer</button>
-                        <button *ngIf="methodeEnvoi === 'physique'" class="btn" (click)="confirmEmailSend()">Confirmer</button>
+                        <!-- Bouton adapté à la méthode -->
+                        <button 
+                            *ngIf="methodeEnvoi === 'email'" 
+                            class="btn" 
+                            (click)="confirmEmailSend()"
+                            [disabled]="methodeEnvoi === 'email' && emailDestinatairesList.length === 0">
+                            Envoyer
+                        </button>
+                        
+                        <button 
+                            *ngIf="methodeEnvoi === 'physique'" 
+                            class="btn" 
+                            (click)="confirmEmailSend()">
+                            Confirmer
+                        </button>
                     </div>
                     <div class="btn_envoie_ignore">
                         <button class="btn" (click)="showEmailPopup = false">Annuler</button>
