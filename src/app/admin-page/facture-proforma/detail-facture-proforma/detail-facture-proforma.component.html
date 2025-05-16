@@ -9,6 +9,8 @@
     <div *ngIf="factureProForma" class="content_formulaire">
         <div class="modal-body">
             <form class="container_formulaire">
+
+              <fieldset [disabled]="isValidated">
                 <!-- // Titre -->
                 <div class="Title">
                     <h3>Détails de la facture pro forma</h3>
@@ -16,8 +18,8 @@
                 <!-- Les informations de l'etat  -->
                 <div class="information_cadre">
                     <div class="info_titre_etat">
-                      <h4>État</h4>
-                      <div class="etat_container">
+                    <h4>État</h4>
+                    <div class="etat_container">
                         <!-- Section des états -->
                         <div class="etat_content" [class.has-active]="factureProForma.statut">
 
@@ -31,15 +33,15 @@
                                 </button>
                             </div>
 
-                             <!-- Bouton Approbation -->
-                             <div class="etat_approbation" *ngIf="!factureProForma.dateApprobation">
+                            <!-- Bouton Approbation -->
+                            <div class="etat_approbation" *ngIf="!factureProForma.dateApprobation">
                                 <button class="btn_etat" 
                                         [class.active]="factureProForma.statut === statusOptions.APPROBATION"
                                         [disabled]="!canTransitionTo(statusOptions.APPROBATION)"
                                         (click)="openStatusConfirmation(statusOptions.APPROBATION)">
-                                  Approbation
+                                Approbation
                                 </button>
-                              </div>
+                            </div>
                             
                             <!-- Bouton Approuver -->
                             <div class="etat_approuver">
@@ -57,7 +59,7 @@
                                         [class.active]="factureProForma.statut === statusOptions.ENVOYE"
                                         [disabled]="!canTransitionTo(statusOptions.ENVOYE)"
                                         (click)="openStatusConfirmation(statusOptions.ENVOYE)">
-                                  Envoyer
+                                Envoyer
                                 </button>
                             </div>
                             
@@ -67,11 +69,11 @@
                                         [class.active]="factureProForma.statut === statusOptions.VALIDE"
                                         [disabled]="!canTransitionTo(statusOptions.VALIDE)"
                                         (click)="openStatusConfirmation(statusOptions.VALIDE)">
-                                  Valider
+                                Valider
                                 </button>
                             </div>
                         </div>
-  
+
                         <!-- Popup de confirmation -->
                         <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
                             <div class="popup-content">
@@ -83,7 +85,7 @@
                             </div>
                             </div>
                         </div>
-                      </div>
+                    </div>
                     </div>
                 </div>
 
@@ -106,16 +108,15 @@
                     </div>
                 </div>
                 
-
                 <!-- Les informations pour utilisateur  -->
                 <div class="information_cadre">
                     <div class="info_titre_input">
                         <div *ngIf="factureProForma.client">
                             <h5>Client</h5>
                             <!-- // Nom complet et email  -->
-                             <!-- <div>
+                            <!-- <div>
                                 {{factureProForma | json}}
-                             </div> -->
+                            </div> -->
                             <div class="double_input_grid">
                                 <div class="champ_input">
                                     <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.client.email" type="email" class="input_focus" required placeholder="Saisis l'email">
@@ -136,7 +137,7 @@
                                 </div>
     
                                 <div class="champ_input">
-                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.client.telephone" type="number" class="input_focus" required placeholder="00 00 00 00">
+                                    <input autocomplete="off" style="cursor: no-drop;" disabled readonly [value]="factureProForma.client.telephone" type="number" class="input_focus" required placeholder="00 00 00 00">
                                     <label for="numero" class="label"> Numéro téléphone </label>
                                 </div>
                             </div>
@@ -185,6 +186,7 @@
                     </div>
                 </div>
 
+                <!-- // produit ligne  -->
                 <div class="information_cadre">
                     <div class="info_titre_input">
                         <div class="add_new_quantite_stock">
@@ -214,7 +216,7 @@
                                         <!-- // Description -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                              <textarea style="margin-bottom: -7px; min-width: 120px; resize: none;"
+                                            <textarea style="margin-bottom: -7px; min-width: 120px; resize: none;"
                                                 type="text" [(ngModel)]="ligne.ligneDescription" 
                                                 [ngModelOptions]="{standalone: true}"  
                                                 class="input_focus_type"
@@ -231,30 +233,30 @@
                                         <!-- // Prix Unitaire  -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                              <input 
-                                              [value]="getPrixVente(ligne.produitId) | customNumber"
+                                            <input 
+                                            [value]="getPrixVente(ligne.produitId) | customNumber"
                                                 type="text" 
                                                 class="input_focus_type" 
                                                 placeholder="Prix unitaire"
                                                 readonly
                                                 style="cursor: no-drop;"
-                                              >
+                                            >
                                             </div>
                                         </td>
                                         <!-- // Stock actuel -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                              <input  [value]="getMontantTotal(ligne) | customNumber"
-                                                     type="text" 
-                                                     class="input_focus_type" 
-                                                     disabled
-                                                     style="cursor: no-drop;" >
+                                            <input  [value]="getMontantTotal(ligne) | customNumber"
+                                                    type="text" 
+                                                    class="input_focus_type" 
+                                                    disabled
+                                                    style="cursor: no-drop;" >
                                             </div>                         
-                                          </td>
+                                        </td>
                                         <td>
                                             <!-- // Button de delele  -->
-                                            <div class="btn_delete_icon_add" (click)="supprimerLigneConfirmee(i)">
-                                              <i class="ri-delete-bin-5-fill"></i>
+                                            <div *ngIf="!isValidated" class="btn_delete_icon_add" (click)="supprimerLigneConfirmee(i)">
+                                                <i class="ri-delete-bin-5-fill"></i>
                                             </div>
                                         </td>
                                     </tr>
@@ -269,24 +271,26 @@
                                                 [(ngModel)]="ligne.produitId" 
                                                 (ngModelChange)="updateCalculs()" 
                                                 [ngModelOptions]="{standalone: true}">
-                                                  <option [ngValue]="null">Sélectionner un produit</option>
-                                                  <option *ngFor="let produit of produits" [ngValue]="produit.id">
+                                                <option [ngValue]="null">Sélectionner un produit</option>
+                                                <option *ngFor="let produit of produits" [ngValue]="produit.id">
                                                     {{ produit.nom }}
-                                                  </option>
+                                                </option>
                                                 </select> -->
-
                                                 <select 
+                                                    name="produit{{i}}"
                                                     class="input_focus_type input_focus_type_select" 
-                                                    [ngModel]="ligne.produitId"
-                                                    (ngModelChange)="onProduitChange($event, ligne)"
+                                                    [(ngModel)]="ligne.produitId"
+                                                    (ngModelChange)="onProduitChange($event, ligne, i)"
                                                     [ngModelOptions]="{ standalone: true }" 
+                                                    [ngClass]="{ 'duplicate': ligne.isDuplicate }"
                                                     required>
-                                                    <option [ngValue]="null">Sélectionner un produit</option>
+                                                <option [ngValue]="null">Sélectionner un produit</option>
                                                     <option *ngFor="let produit of produits" [ngValue]="produit.id">
                                                         {{ produit.nom }}
                                                     </option>
                                                 </select>
-                                              </td>
+
+                                            </td>
                                         </div>
                                         <!-- // Description -->
                                         <td>
@@ -303,9 +307,9 @@
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <input type="number" [(ngModel)]="ligne.quantite" 
-                                                   (ngModelChange)="updateCalculs()" [ngModelOptions]="{standalone: true}"
-                                                   class="input_focus_type" 
-                                                   placeholder="Quantité">
+                                                (ngModelChange)="updateCalculs()" [ngModelOptions]="{standalone: true}"
+                                                class="input_focus_type" 
+                                                placeholder="Quantité">
                                             </div>
                                         </td>
                                         <!-- // Prix Unitaire  -->
@@ -327,12 +331,12 @@
                                                     style="cursor: no-drop;"
                                                 >
                                             </div>
-                                          </td>
+                                        </td>
                                         <!-- // Button de ajouter  -->
                                         <td>
-                                          <div class="btn_ajouter_icon_add" (click)="ajouterLigneFacture(i)">
+                                        <div *ngIf="!isValidated" class="btn_ajouter_icon_add" (click)="ajouterLigneFacture(i)">
                                             <i class="ri-add-fill"></i>
-                                          </div>
+                                        </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -352,13 +356,13 @@
                                         <!-- // Stock actuel -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                              <input 
+                                            <input 
                                                 type="text" 
                                                 class="input_focus_type" 
                                                 disabled 
                                                 [value]="getTotalHT() | customNumber" 
                                                 style="cursor: no-drop; text-align: center;"
-                                              >
+                                            >
                                             </div>                         
                                         </td>
                                         <td></td>
@@ -397,27 +401,27 @@
                         readonly
                         [value]="getMontantRemise() | customNumber" style="cursor: no-drop;"/>
                             <label class="label">Montant (CFA)</label>
-                          </div>
+                        </div>
                     </div>
             
                     </div>
                 </div>
 
-                 <!-- // Toatal TTC  -->
-            <div class="information_cadre">
-                <div class="info_titre_input">
-                    <!-- // Remise et Total hors taxe  -->
-                    <div class="double_input_ttc">
-                        <h4> MONTANT COMMERCIAL </h4>
-                        <!-- Montant Commercial -->
-                        <div class="montantTTC">
-                            <!-- <h4> -->
-                                {{ getTotalCommercial() | customNumber  }} CFA
-                            <!-- </h4> -->
+                <!-- // Toatal TTC  -->
+                <div class="information_cadre">
+                    <div class="info_titre_input">
+                        <!-- // Remise et Total hors taxe  -->
+                        <div class="double_input_ttc">
+                            <h4> MONTANT COMMERCIAL </h4>
+                            <!-- Montant Commercial -->
+                            <div class="montantTTC">
+                                <!-- <h4> -->
+                                    {{ getTotalCommercial() | customNumber  }} CFA
+                                <!-- </h4> -->
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
                 <!-- TVA -->
                 <div class="information_cadre">
@@ -460,6 +464,7 @@
                         </div>
                     </div>
                 </div>
+              </fieldset>
 
                 <!-- Buttom ajouter et annuler  -->
                 <div class="information_cadre">
@@ -473,16 +478,15 @@
                     <div class="info_titre_input info_titre_input_btn">
                         <!-- Input de produits  -->
                         <div class="btn_annuler">
-                            <button class="btn_cancel" routerLink="/facture-proforma">Annuler</button>
+                            <button class="btn_cancel" (click)="getAnnulerDetail()">Annuler</button>
                         </div>
         
                         <div class="btn_ajouter">
-                            <button class="btn_save" type="submit" (click)="submitUpdateForm()">Modifier</button>
+                            <button *ngIf="!isValidated" class="btn_save" type="submit" (click)="submitUpdateForm()">Modifier</button>
                         </div>
                     </div>
                 </div>
             </form>
-            
         </div>
     </div>
  
@@ -620,7 +624,6 @@
 
 </div>
 
-
 <div *ngIf="showDuplicatePopup" class="duplicate-popup">
     <div class="popup-content">
       <p>Ce produit est déjà dans la liste.</p>
@@ -648,43 +651,171 @@
 
 <!-- Liste des utilisateurs à cocher si statut = Approbation -->
 <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
-<div class="popup-content">
-    <h4>Confirmer le changement de statut</h4>
-    <p>
-    Êtes-vous sûr de vouloir 
-    <span class="highlighted-status">{{ selectedStatutLabel }}</span> 
-    cette facture ?
-    </p>
+    <div class="popup-content">
+        <h4>Confirmer le changement de statut</h4>
+        <p>
+        Êtes-vous sûr de vouloir 
+        <span class="highlighted-status">{{ selectedStatutLabel }}</span> 
+        cette facture ?
+        </p>
 
-    <!-- Affichage conditionnel selon le statut -->
-    <div *ngIf="pendingStatut === 'ENVOYE'" class="form-group">
-    <label for="relanceDate" style="font-size: 12px;">Date de relance (facultative) :</label>
-    <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control" />
-    </div>
-
-    <!-- ✅ Liste des utilisateurs pour l'approbation -->
-    <div *ngIf="pendingStatut === 'APPROBATION'" class="form-group">
-    <label style="font-size: 12px;">Sélectionnez les utilisateurs à notifier :</label>
-    <div *ngIf="users.length === 0">Aucun utilisateur à afficher</div>
-
-        <div *ngFor="let user of users" style="display: flex; align-items: center;">
-        <input
-            type="checkbox"
-            [(ngModel)]="user.selected"
-            id="user_{{ user.id }}"
-            style="margin-right: 8px; margin-bottom: 8px;"
-        />
-        <label for="user_{{ user.id }}">
-            {{ user.nomComplet }} - {{ user.phone }}
-        </label>
+        <!-- Affichage conditionnel selon le statut -->
+        <div *ngIf="pendingStatut === 'ENVOYE'" class="form-group">
+            <label for="relanceDate" style="font-size: 12px;">Date de relance (facultative) :</label>
+            <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control" />
         </div>
 
-    </div>
+        <!-- ✅ Liste des utilisateurs pour l'approbation -->
+        <div *ngIf="pendingStatut === 'APPROBATION'" class="form-group">
+        <label style="font-size: 12px;">Sélectionnez les utilisateurs à notifier :</label>
+        <div *ngIf="users.length === 0">Aucun utilisateur à afficher</div>
 
-    <div class="popup-actions">
-    <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
-    <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
+            <div *ngFor="let user of users" style="display: flex; align-items: center;">
+            <input
+                type="checkbox"
+                [(ngModel)]="user.selected"
+                id="user_{{ user.id }}"
+                style="margin-right: 8px; margin-bottom: 8px;"
+            />
+            <label for="user_{{ user.id }}">
+                {{ user.nomComplet }} - {{ user.phone }}
+            </label>
+            </div>
+
+        </div>
+
+        <div class="popup-actions">
+        <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
+        <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
+        </div>
     </div>
 </div>
-</div>
 
+<!-- Ajouter dans le template existant -->
+<div *ngIf="showEmailPopup" class="status-confirmation-popup-envoyer email-popup">
+    <div class="popup-content-envoyer"[ngStyle]="{
+       'transform': 'translate3d(' + popupOffset.x + 'px, ' + popupOffset.y + 'px, 0)'}">
+        <div class="envoyer_croix" (mousedown)="startDrag($event)">
+            <div class="titre_etat">
+                <p>Envoyer</p>
+            </div>
+            <div class="icon_croix" (click)="showEmailPopup = false" (mousedown)="$event.stopPropagation()">
+                <i class="ri-close-large-line"></i>
+            </div>
+        </div>
+
+        <div class="barre"></div>
+
+        <div class="contenue_form_envoyer">
+            <!-- // email field  -->
+            <div class="email_field">
+                <!-- // Titre email field -->
+                <div class="titre_email_field titre_email_field_vers">
+                    Vers
+                </div>
+                <!-- // Input email field -->
+                <div class="input_email_field">
+                    <div class="champ_input" style="margin-right: 15px;">
+                        <div class="email-input-container">
+                            <!-- Emails sous forme de puces dans l'input -->
+                            <span *ngFor="let email of emailDestinatairesList; let i = index" class="email-chip">
+                                {{email}}
+                                <span class="remove-chip" (click)="removeEmail(i)">✖</span>
+                            </span>
+                            
+                            <!-- Champ de saisie intégré -->
+                            <input 
+                                type="text"
+                                [(ngModel)]="currentEmail"
+                                (keydown.enter)="addEmail()"
+                                (keydown.backspace)="handleBackspace()"
+                                placeholder="Ajouter des destinataires..."
+                                class="inline-email-input"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- // Suject field  -->
+            <div class="email_field">
+                <!-- // Titre email field -->
+                <div class="titre_email_field">
+                    Suject
+                </div>
+                <!-- // Input email field -->
+                <div class="input_email_field">
+                    <div class="champ_input" style="margin-right: 15px;">
+                        <input #subjectInput class="input_focus_type" type="text" class="input_table_des" placeholder="Bienvenue à MyCompany !" value="sytechsy Commande (Ref S00001)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu existant de l'email -->
+            <div class="email-body">
+                <div class="editable-content" contenteditable="true" #editableContent>
+                    Bonjour,<br><br>
+                    Votre facture <strong>{{ factureProForma.numeroFacture }}</strong>
+                    d'un montant de : <strong>{{ getTotalTTC() | customNumber }} CFA</strong>
+                    a été confirmée.<br>
+
+                    Merci pour votre confiance !<br><br>
+                    N'hésitez pas à nous contacter pour toute question.<br><br>
+
+                    ---<br>
+
+                    {{ nomEntreprise }}
+                </div>
+            </div>
+
+            <!-- Remplacer la section pdf -->
+            <div class="section_img_pdf">
+                <ul>
+                    <!-- Facture PDF existante -->
+                    <li class="cadre_pdf">
+                        <a class="text-truncate" href="/web/content/487?download=true">Facture pro forma - {{ factureProForma.numeroFacture }}.pdf</a>
+                        <button class="btn flex-shrink-0"><i class="fa fa-fw fa-times" style="opacity: 0;"></i></button>
+                    </li>
+                    <!-- Pièces jointes ajoutées -->
+                    <li class="cadre_pdf" *ngFor="let file of attachments; let i = index">
+                        <a class="text-truncate">{{ file.name }}</a>
+                        <button class="btn flex-shrink-0" (click)="removeAttachment(i)">
+                            <i class="fa fa-fw fa-times"></i>
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Input file caché -->
+                <input #fileInput type="file" hidden (change)="onFileSelected($event)" multiple>
+            </div>
+        </div>
+
+        <div class="footer_btn">
+            <div class="content_footer">
+                <div class="contenue_footer_btn">
+                    <div class="btn_envoie_save">
+                        <button class="btn" (click)="confirmEmailSend()">Envoyer</button>
+                    </div>
+                    <div class="btn_envoie_ignore">
+                        <button class="btn" (click)="showEmailPopup = false">Annuler</button>
+                    </div>
+
+                    <div class="icon_attach" (click)="triggerFileInput()">
+                        <i class="ri-attachment-2" title="Ajouter une pièce jointe"></i>
+                    </div>
+
+                    <!-- <div class="icon_relance">
+                        <i class="ri-time-line" title="Date de relance"></i>
+                    </div> -->
+
+                </div>
+
+                <!-- Affichage conditionnel selon le statut  *ngIf="pendingStatut === 'ENVOYE'" -->
+                <div class="form-group">
+                    <label for="relanceDate" style="font-size: 12px;">Date de relance (fac) :</label>
+                    <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control form-control-date" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

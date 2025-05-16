@@ -104,8 +104,8 @@ export class FournisseursComponent {
   }
 
   // Méthode pour ouvrir le détail d'un fournisseur
-  openDetail(id: number) {
-    this.router.navigate(['/detail-fournisseur', id]);
+  openDetail(fournisseurId: number) {
+    this.router.navigate(['/detail-fournisseur', fournisseurId]);
   }
   
   

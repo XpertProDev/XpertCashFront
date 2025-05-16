@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProduitService } from '../../SERVICES/produit.service';
@@ -9,10 +9,13 @@ import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { RoundPipe } from '../../MODELS/round.pipe';
 import { UsersService } from '../../SERVICES/users.service';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as pdfjsLib from 'pdfjs-dist';
 
 @Component({
   selector: 'app-detail-facture-proforma',
-  imports: [ FormsModule, CommonModule, ReactiveFormsModule, RouterLink, CustomNumberPipe],
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe],
   templateUrl: './detail-facture-proforma.component.html',
   styleUrl: './detail-facture-proforma.component.scss'
 })
@@ -34,39 +37,56 @@ export class DetailFactureProformaComponent implements OnInit {
   //   produitId: number | null; quantite: number 
   // }[] = [{ produitId: null, quantite: 1 }];
   // confirmedLignes: { produitId: number | null; quantite: number }[] = [];
-
-  inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; }[] = [{
-    produitId: null, quantite: 1,
-    ligneDescription: null 
+  inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; isDuplicate: boolean }[] = [{
+    produitId: null, quantite: 1, ligneDescription: null, isDuplicate: false
   }];
-
   confirmedLignes: {
     produitId: number | null;
     quantite: number;
     ligneDescription: string | null;
   }[] = [];
-
   factureId!: number;
   showDuplicatePopup: boolean = false;
-
   // Ajouter ces variables dans la classe
   showStatusConfirmation = false;
   pendingStatut: StatutFactureProForma | null = null;
+  showEmailPopup: boolean = false;
+  previewPDFUrl: string | null = null;
+  loadingPreview: boolean = false;
   selectedStatutLabel = '';
   statusOptions = StatutFactureProForma;
-
   dateRelance?: string;
-
   users: any[] = [];
   filteredUsers: any[] = [];
 
-emailClient: string = '';
-emailSubject: string = '';
-emailBody: string = '';
-selectedFile: File | null = null;
+  // Nouvelles variables pour l'email
+  emailDestinataires: string = '';
+  emailSujet: string = '';
+  emailMessage: string = '';
 
-methodeEnvoi: string = 'PHYSIQUE';
+  methodeEnvoi: string = 'EMAIL';
 
+  // Variables pour le déplacement
+  isDragging = false;
+  startX = 0;
+  startY = 0;
+  initialX = 0;
+  initialY = 0;
+  popupOffset = { x: 0, y: 0 };
+
+  // Piece joindre
+  attachments: File[] = [];
+  selectedFile: File | null = null;
+
+  // Variables pour la gestion des emails
+  emailDestinatairesList: string[] = [];
+  currentEmail = '';
+
+  @ViewChild('editableContent', { static: false }) editableContent!: ElementRef;
+  @ViewChild('subjectInput', { static: false }) subjectInput!: ElementRef;
+
+    // Ajoutez cette propriété en haut de votre classe
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
       private router: Router,
@@ -74,6 +94,8 @@ methodeEnvoi: string = 'PHYSIQUE';
       private route: ActivatedRoute,
       private factureProFormaService: FactureProFormaService,
       private usersService: UsersService,
+      private cdr: ChangeDetectorRef,
+      private renderer: Renderer2
     ) {}
 
   ngOnInit(): void {
@@ -85,6 +107,11 @@ methodeEnvoi: string = 'PHYSIQUE';
       this.factureId = +idParam;
       this.getUserInfo();
     }
+  }
+
+  // dans DetailFactureProformaComponent
+  get isValidated(): boolean {
+    return this.factureProForma.statut === this.statusOptions.VALIDE;
   }
 
   factureProForma: FactureProForma = {
@@ -153,7 +180,6 @@ methodeEnvoi: string = 'PHYSIQUE';
 
         this.activeTva = data.tva;
         this.isLoading = false;
-        this.emailClient = this.factureProForma.client?.email ?? '';
       },
       error: (err) => {
         console.error('Erreur:', err);
@@ -231,10 +257,12 @@ methodeEnvoi: string = 'PHYSIQUE';
     });
   }
 
-    // Méthode pour fermer le popup
-    closePopup() {
-      this.showDuplicatePopup = false;
-    }
+  // Méthode pour fermer le popup
+  closePopup() {
+    this.showDuplicatePopup = false;
+    // Tu peux aussi forcer la MAJ si besoin :
+    this.updateCalculs();
+  }
 
   // Méthode de mise à jour des calculs
   updateCalculs() {
@@ -279,7 +307,8 @@ methodeEnvoi: string = 'PHYSIQUE';
       this.confirmedLignes.push({...ligne});
       this.inputLignes = [{
         produitId: null, quantite: 1,
-        ligneDescription: null
+        ligneDescription: null,
+        isDuplicate: false
       }];
     }
   }
@@ -316,83 +345,50 @@ methodeEnvoi: string = 'PHYSIQUE';
   }
   
   submitUpdateForm() {
-  const payload = {
-    client: this.factureProForma.client ? { id: this.factureProForma.client.id } : null,
-    description: this.factureProForma.description,
-    lignesFacture: this.confirmedLignes.map(l => ({
-      produit: { id: l.produitId },
-      quantite: l.quantite,
-      prixUnitaire: this.getPrixVente(l.produitId),
-      ligneDescription: l.ligneDescription
-    })),
-    statut: 'ENVOYE',
-    methodeEnvoi: 'EMAIL',
-  };
-
-  const nouvellesLignes = this.inputLignes
-    .filter(l => l.produitId && l.quantite > 0)
-    .map(l => ({
-      produit: { id: l.produitId! },
-      quantite: l.quantite,
-      prixUnitaire: this.getPrixVente(l.produitId!),
-      ligneDescription: l.ligneDescription
-    }));
-
-  payload.lignesFacture = [
-    ...payload.lignesFacture,
-    ...nouvellesLignes
-  ];
-
+    const payload = {
+      client: this.factureProForma.client ? { id: this.factureProForma.client.id } : null,
+      description: this.factureProForma.description,
+      // Utilisez confirmedLignes puisque c'est là que se trouvent les modifications (ajouts, suppressions, etc.)
+      lignesFacture: this.confirmedLignes.map(l => ({
+        produit: { id: l.produitId },
+        quantite: l.quantite,
+        prixUnitaire: this.getPrixVente(l.produitId),
+        ligneDescription: l.ligneDescription
+      }))
+    };
+    
+    // Si vous avez aussi des lignes en cours d'ajout dans inputLignes, vous pouvez les concaténer :
+    const nouvellesLignes = this.inputLignes
+      .filter(l => l.produitId && l.quantite > 0)
+      .map(l => ({
+        produit: { id: l.produitId! },
+        quantite: l.quantite,
+        prixUnitaire: this.getPrixVente(l.produitId!),
+        ligneDescription: l.ligneDescription
+      }));
+    
+    payload.lignesFacture = [
+      ...payload.lignesFacture,
+      ...nouvellesLignes
+    ];
+    
     this.factureProFormaService.updateFactureProforma(
       this.factureId,
       this.activeRemise ? this.remisePourcentage : undefined,
       this.activeTva,
-      payload as unknown as Partial<FactureProForma>
+      payload as Partial<FactureProForma>
     ).subscribe({
-    next: (res) => {
-      console.log('✅ Facture mise à jour :', res);
-
-      // 👉 Vérifie les conditions pour envoyer un mail
-      if (payload.statut === 'ENVOYE' && payload.methodeEnvoi === 'EMAIL') {
-        const email = this.factureProForma.client?.email;
-        if (!email) {
-        console.warn('❗ Aucun email client disponible, envoi annulé.');
+      next: (res) => {
+        console.log('Mise à jour réussie !', res);
+        
         this.router.navigate(['/facture-proforma']);
-        return; // juste un return vide pour stopper l'exécution ici
+      },
+      error: (err) => {
+        console.error('Échec de la mise à jour', err);
+        this.errorMessage = err.error.message || 'Erreur lors de la modification';
       }
-
-
-        const emailRequest = {
-          to: this.emailClient,
-          subject: this.emailSubject || `Facture Pro format ${res.numeroFacture}`,
-          body: this.emailBody || this.generateEmailBody(res),
-          // ⚠️ si tu veux envoyer le fichier, il faudra l'inclure dans FormData
-        };
-
-
-        this.factureProFormaService.envoyerFactureEmail(this.factureId, emailRequest)
-          .subscribe({
-            next: () => {
-              console.log('📧 Email envoyé avec succès');
-              this.router.navigate(['/facture-proforma']);
-            },
-            error: err => {
-              console.error('❌ Erreur lors de l’envoi de l’email', err);
-              this.errorMessage = 'Facture enregistrée, mais l’e-mail n’a pas pu être envoyé.';
-              this.router.navigate(['/facture-proforma']);
-            }
-          });
-      } else {
-        this.router.navigate(['/facture-proforma']);
-      }
-    },
-    error: (err) => {
-      console.error('❌ Échec de la mise à jour', err);
-      this.errorMessage = err.error.message || 'Erreur lors de la modification';
-    }
-  });
-}
-
+    });
+  }
 
   // Ajouter ces méthodes
   canApprove(): boolean {
@@ -412,6 +408,11 @@ methodeEnvoi: string = 'PHYSIQUE';
   }
 
   openStatusConfirmation(newStatut: StatutFactureProForma): void {
+     if (newStatut === StatutFactureProForma.ENVOYE) {
+      this.openEmailPopup(); // Appeler la méthode qui gère la popup
+      return;
+    }
+
     if (this.isStatusTransitionAllowed(newStatut)) {
       this.pendingStatut = newStatut;
       this.selectedStatutLabel = this.getStatusLabel(newStatut);
@@ -421,6 +422,77 @@ methodeEnvoi: string = 'PHYSIQUE';
         this.loadUsersOfEntreprise(this.userEntrepriseId!);
       }
     }
+  }
+
+  // Modifier la partie de génération des données du tableau
+  // async generatePDF(preview: boolean = false): Promise<string> {
+  // const doc = new jsPDF();
+  
+  // // Contenu du PDF
+  // doc.setFontSize(18);
+  // doc.text(`FACTURE PRO FORMA - ${this.factureProForma.numeroFacture}`, 15, 20);
+  
+  // // Ajouter le tableau avec autoTable
+  // const headers = [['Produit', 'Quantité', 'Prix Unitaire', 'Total']];
+  // const data = this.confirmedLignes.map(ligne => [
+  //   this.getProduitNom(ligne.produitId),
+  //   ligne.quantite.toString(),
+  //   this.getPrixVente(ligne.produitId).toLocaleString('fr-FR') + ' CFA',
+  //   this.getMontantTotal(ligne).toLocaleString('fr-FR') + ' CFA'
+  // ]);
+
+  // (doc as any).autoTable({
+  //   head: headers,
+  //   body: data,
+  //   startY: 30,
+  //   theme: 'grid'
+  // });
+
+  // if (preview) {
+  //   const pdfBlob = doc.output('blob');
+  //   return URL.createObjectURL(pdfBlob);
+  // }
+  
+  // doc.save(`Facture proforma - N˚${this.factureProForma.numeroFacture}.pdf`);
+  // return '';
+  // }
+
+  async loadPDFPreview(url: string) {
+  this.loadingPreview = true;
+  this.previewPDFUrl = null;
+
+  try {
+    const pdf = await pdfjsLib.getDocument(url).promise;
+    const page = await pdf.getPage(1);
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      throw new Error('Context Canvas 2D non disponible');
+    }
+
+    const viewport = page.getViewport({ scale: 0.5 });
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise;
+
+    this.previewPDFUrl = canvas.toDataURL();
+  } catch (error) {
+    console.error('Erreur de prévisualisation PDF:', error);
+    // Optionnel : Afficher un message à l'utilisateur
+  } finally {
+    this.loadingPreview = false;
+  }
+}
+
+  async openEmailPopup() {
+    this.showEmailPopup = true;
+    // const pdfUrl = await this.generatePDF(true);
+    // await this.loadPDFPreview(pdfUrl);
   }
 
   // Modifier la configuration des transitions
@@ -460,59 +532,106 @@ methodeEnvoi: string = 'PHYSIQUE';
     return this.isStatusTransitionAllowed(targetStatus);
   }
 
+  // confirmStatusChange(): void {
+  //   if (!this.pendingStatut) return;
+
+  //   const selectedUsers = this.users
+  //   .filter(user => user.selected)
+  //   .map(user => user.id);
+
+  //   const modifications: Partial<FactureProForma> = {
+  //     statut: this.pendingStatut,
+  //     ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
+  //       ? { dateRelance: this.dateRelance }
+  //       : {})
+  //   };
+
+  //   // const modifications: Partial<FactureProForma> = {
+  //   //   statut: this.pendingStatut,
+  //   //   // Réinitialise les approbateurs si on revient en arrière
+  //   //   ...(this.pendingStatut === StatutFactureProForma.BROUILLON && {
+  //   //     approbateurs: [],
+  //   //     utilisateurApprobateur: null
+  //   //   })
+  //   // };
+    
+  //   this.factureProFormaService.updateFactureProforma(
+  //     this.factureId,
+  //     undefined,
+  //     undefined,
+  //     {
+  //       statut: this.pendingStatut,
+  //       // Réinitialiser les approbateurs si on change de statut
+  //       ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
+  //         approbateurs: []
+  //       })
+  //     },
+  //     this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
+  //   ).subscribe({
+  //     next: (updatedFacture) => {
+  //       if (this.pendingStatut === StatutFactureProForma.APPROBATION) {
+  //         updatedFacture.approbateurs = this.users.filter(u => selectedUsers.includes(u.id));
+  //       }
+  //       this.factureProForma = updatedFacture;
+        
+  //       this.showStatusConfirmation = false;
+  //       this.pendingStatut = null;
+  //       this.dateRelance = undefined;
+  //     },
+  //     error: (err) => {
+  //       console.error('Erreur de mise à jour', err);
+  //       alert('Échec de la mise à jour du statut');
+  //       this.showStatusConfirmation = false;
+  //     }
+  //   });
+  // }
+
   confirmStatusChange(): void {
     if (!this.pendingStatut) return;
-
-    const selectedUsers = this.users
-    .filter(user => user.selected)
-    .map(user => user.id);
-
+    const selectedUsers = this.users.filter(u => u.selected).map(u => u.id);
+  
+    // Préparez toujours vos valeurs de remise & tva
+    const remisePourKg = this.activeRemise ? this.remisePourcentage : 0;
+    const tvaFlag     = this.activeTva;
+  
+    // Construisez votre payload de statut
     const modifications: Partial<FactureProForma> = {
       statut: this.pendingStatut,
       ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
         ? { dateRelance: this.dateRelance }
-        : {})
+        : {}),
+      // facultatif : remettez vos approbateurs à vide quand on sort d'Approbation
+      ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
+        approbateurs: []
+      })
     };
-
-    // const modifications: Partial<FactureProForma> = {
-    //   statut: this.pendingStatut,
-    //   // Réinitialise les approbateurs si on revient en arrière
-    //   ...(this.pendingStatut === StatutFactureProForma.BROUILLON && {
-    //     approbateurs: [],
-    //     utilisateurApprobateur: null
-    //   })
-    // };
-    
+  
     this.factureProFormaService.updateFactureProforma(
       this.factureId,
-      undefined,
-      undefined,
-      {
-        statut: this.pendingStatut,
-        // Réinitialiser les approbateurs si on change de statut
-        ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
-          approbateurs: []
-        })
-      },
+      remisePourKg,
+      tvaFlag,
+      modifications,
       this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
     ).subscribe({
-      next: (updatedFacture) => {
-        if (this.pendingStatut === StatutFactureProForma.APPROBATION) {
-          updatedFacture.approbateurs = this.users.filter(u => selectedUsers.includes(u.id));
-        }
+      next: updatedFacture => {
         this.factureProForma = updatedFacture;
-        
+        // rechargez/remettez vos flags localement
+        this.activeRemise = (updatedFacture.remise ?? 0) > 0;
+        this.remisePourcentage = this.activeRemise
+          ? ((updatedFacture.remise ?? 0) / (updatedFacture.totalHT || 1)) * 100
+          : 0;
+        this.activeTva    = updatedFacture.tva;
         this.showStatusConfirmation = false;
         this.pendingStatut = null;
         this.dateRelance = undefined;
       },
-      error: (err) => {
+      error: err => {
         console.error('Erreur de mise à jour', err);
         alert('Échec de la mise à jour du statut');
         this.showStatusConfirmation = false;
       }
     });
-  }
+  }  
 
   cancelStatusChange(): void {
     this.showStatusConfirmation = false;
@@ -550,46 +669,210 @@ methodeEnvoi: string = 'PHYSIQUE';
     });
   }
 
-  onProduitChange(produitId: number | null, ligne: any) {
-    // Mettre à jour l'ID du produit
+  // Méthode appelée au changement de <select>
+  onProduitChange(produitId: number | null, ligne: any, index: number) {
     ligne.produitId = produitId;
-  
-    // Trouver le produit correspondant
+    ligne.isDuplicate = false;
+
     if (produitId) {
-      const produit = this.produits.find(p => p.id === produitId);
-      if (produit) {
-        // Mettre à jour la description avec celle du produit
-        ligne.ligneDescription = produit.description; // Assurez-vous que 'description' existe dans votre modèle Produit
+      // Vérifie dans les lignes déjà confirmées…
+      const inConfirmed = this.confirmedLignes.some(l => l.produitId === produitId);
+      // …et dans les autres lignes en cours (hors index courant)
+      const inInput     = this.inputLignes
+                            .filter((_, i) => i !== index)
+                            .some(l => l.produitId === produitId);
+
+      if (inConfirmed || inInput) {
+        this.showDuplicatePopup = true;
+        ligne.isDuplicate = true;
+        // on retarde la remise à null pour laisser Angular traiter le change event
+        setTimeout(() => {
+          ligne.produitId = null;
+          ligne.ligneDescription = null;
+          ligne.isDuplicate = false;
+          this.updateCalculs();
+        }, 0);
+        return;
       }
+
+      // Si pas doublon, on met à jour la description
+      const prod = this.produits.find(p => p.id === produitId);
+      ligne.ligneDescription = prod?.description ?? null;
     } else {
       ligne.ligneDescription = null;
     }
-  
-    // Forcer la mise à jour des calculs
+
     this.updateCalculs();
   }
 
-  generateEmailBody(facture: any): string {
-  const clientName = facture.client?.nomComplet || 'client';
-
-  return `
-    <html>
-      <body style="font-family: Arial, sans-serif;">
-        <p>Bonjour ${clientName},</p>
-        <p>Voici votre facture pro forma n° <strong>${facture.numeroFacture}</strong>.</p>
-        <p>Merci de votre confiance.</p>
-        <p style="font-size: 12px; color: gray;">L’équipe XpertCash</p>
-      </body>
-    </html>
-  `;
-}
-
-onFileSelected(event: Event): void {
-  const input = event.target as HTMLInputElement;
-  if (input.files && input.files.length > 0) {
-    this.selectedFile = input.files[0];
-    console.log('📎 Fichier sélectionné :', this.selectedFile.name);
+  getAnnulerDetail() {
+    this.router.navigate(['/facture-proforma']);
   }
+
+confirmEmailSend() {
+  // Ajout du dernier email tapé s'il y en a un
+  if (this.currentEmail && this.currentEmail.trim() !== '') {
+    this.emailDestinatairesList.push(this.currentEmail.trim());
+    this.currentEmail = '';
+  }
+
+  // ✅ Vérification des destinataires
+  if (this.emailDestinatairesList.length === 0) {
+    console.warn("❌ Aucun destinataire fourni.");
+    return;
+  }
+
+  const to = this.emailDestinatairesList.join(',');
+  const subject = this.subjectInput.nativeElement.value.trim();
+  const body = this.editableContent.nativeElement.innerHTML;
+
+  // Vérification sujet et corps du message
+  if (!subject || !body) {
+    console.warn("❌ Sujet ou contenu du mail manquant.");
+    return;
+  }
+
+  // Fermer la popup visuellement
+  this.showEmailPopup = false;
+
+  const payload: Partial<FactureProForma> = {
+    statut: StatutFactureProForma.ENVOYE,
+    methodeEnvoi: 'EMAIL'
+  };
+
+  this.factureProFormaService.updateFactureProforma(
+    this.factureId,
+    undefined, // pas de remise à appliquer ici
+    this.activeTva,
+    payload
+  ).subscribe({
+    next: () => {
+      // Ensuite on envoie l’email
+      const emailPayload = { to, subject, body };
+
+      console.log("📨 Envoi email avec données :", emailPayload);
+
+      this.factureProFormaService.envoyerFactureEmail(this.factureId, emailPayload)
+        .subscribe({
+          next: () => {
+            console.log("✅ Email envoyé avec succès !");
+            // Optionnel : affichage de toast ou rafraîchissement
+          },
+          error: (err) => {
+            console.error("❌ Erreur lors de l'envoi de l'email :", err?.error?.message || err.message || 'Erreur inconnue');
+            this.errorMessage = err?.error?.message || 'Erreur inconnue lors de l’envoi de l’email';
+          }
+        });
+    },
+    error: (err) => {
+      console.error("❌ Erreur lors de la mise à jour du statut :", err?.error?.message || err.message || 'Erreur inconnue');
+      this.errorMessage = err?.error?.message || 'Erreur lors de la mise à jour du statut de la facture.';
+    }
+  });
 }
+
+
+
+
+
+  // Début du drag
+  startDrag(event: MouseEvent): void {
+    event.preventDefault();
+    this.isDragging = true;
+    this.startX = event.clientX;
+    this.startY = event.clientY;
+    this.initialX = this.popupOffset.x;
+    this.initialY = this.popupOffset.y;
+
+    // Écouteurs d'événements globaux
+    document.addEventListener('mousemove', this.onMouseMove);
+    document.addEventListener('mouseup', this.onMouseUp);
+  }
+
+  // Mouvement de la souris
+  onMouseMove = (event: MouseEvent): void => {
+  if (!this.isDragging) return;
+  
+  // Utilisez requestAnimationFrame pour fluidité
+  requestAnimationFrame(() => {
+    const deltaX = event.clientX - this.startX;
+    const deltaY = event.clientY - this.startY;
+    this.popupOffset.x = this.initialX + deltaX;
+    this.popupOffset.y = this.initialY + deltaY;
+    
+    // Force la détection de changement
+    this.cdr.detectChanges();
+  });
+}
+
+  // Fin du drag
+  onMouseUp = (): void => {
+    this.isDragging = false;
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('mouseup', this.onMouseUp);
+  }
+
+  // Modifiez la méthode triggerFileInput
+  triggerFileInput(): void {
+      if (this.fileInput?.nativeElement) {
+          this.fileInput.nativeElement.click();
+      }
+  }
+
+  // Gère la sélection de fichiers
+  onFileSelected(event: Event): void {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files.length > 0) {
+          const newFiles = Array.from(input.files);
+          
+          // Vérifier les doublons
+          newFiles.forEach(newFile => {
+              const isDuplicate = this.attachments.some(
+                  existingFile => existingFile.name === newFile.name
+              );
+              
+              if (!isDuplicate) {
+                  this.attachments.push(newFile);
+              }
+          });
+          
+          input.value = ''; // Réinitialise l'input
+      }
+  }
+
+  // Supprime une pièce jointe
+  removeAttachment(index: number): void {
+      this.attachments.splice(index, 1);
+  }
+
+  // Ajouter un email
+  addEmail(): void {
+    const email = this.currentEmail.trim();
+    if (email && this.validateEmail(email)) {
+      if (!this.emailDestinatairesList.includes(email)) {
+        this.emailDestinatairesList.push(email);
+      }
+      this.currentEmail = '';
+    }
+  }
+
+  // Supprimer un email
+  removeEmail(index: number): void {
+    this.emailDestinatairesList.splice(index, 1);
+  }
+
+  // Validation simple d'email
+  validateEmail(email: string): boolean {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  // Gestion de la touche retour
+  handleBackspace(): void {
+    if (!this.currentEmail && this.emailDestinatairesList.length > 0) {
+      this.emailDestinatairesList.pop();
+    }
+  }
+
 
 }

@@ -33,13 +33,14 @@ export interface UpdateFactureProFormaDTO {
   // Ajouter d'autres champs optionnels si besoin
 }
 
-
 export interface FactureProForma {
   id: number;
   numeroFacture: string;
   siege: string;
   dateCreation: string;
   dateApprobation?: string;
+  methodeEnvoi?: 'EMAIL' | 'PHYSIQUE';
+
   utilisateurModificateur?: {
       nomComplet: string;
       email: string;

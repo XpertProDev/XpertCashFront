@@ -38,22 +38,37 @@
           <label for="email">Email address</label>
           <input type="email" id="email" value="{{email}}" readonly>
         </div>
-        <div class="form-row div4">
-          <label for="firstName">Boutique</label>
-          <input type="text" id="firstName" value="{{nomBoutique}}" readonly>
+        <!-- <div class="form-row div4">
+          <label for="firstName" for="boutiques">Boutiques</label>
+          <div id="boutiques" class="boutiques-list">
+            <span *ngFor="let boutique of boutiques" class="boutique-tag">
+              {{ boutique.nomBoutique }}
+            </span>
+            <span *ngIf="boutiques.length === 0">Aucune boutique</span>
+          </div>
         </div>
         <div class="form-row div5">
           <label for="country">Device</label>
           <input type="text" id="Device" value="FCFA" readonly>
-        </div>
-      
-        <div class="form-row div7">
+        </div> -->
+
+        <div class="form-row div4">
           <label for="city">Pays</label>
           <input type="text" id="city" value="{{pays}} {{ flagPays }}" readonly>
         </div>
-        <div class="form-row div8">
+        <div class="form-row div5">
           <label for="lastName">Téléphone</label>
           <input type="text" id="lastName" value="{{phone}}" readonly>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top: 20px;"> 
+        <label for="boutiques">Boutiques</label>
+        <div id="boutiques" class="boutiques-list">
+          <span *ngFor="let boutique of boutiques" class="boutique-tag">
+            {{ boutique.nomBoutique }}
+          </span>
+          <span *ngIf="boutiques.length === 0">Aucune boutique</span>
         </div>
       </div>
     </main>
@@ -172,53 +187,42 @@
               
             </div>
 
-               <!-- Modification Boutique -->
-               <div class="information_cadre information_cadre_visible" [class.visible]="isNomBoutiqueFormVisible">
-                <form [formGroup]="nomBoutiqueForm" (ngSubmit)="onSubmitNomBoutique()" class="info_titre_input">
-                  <h5>Modifier nom de boutique</h5>
-
-                  <!-- Nom de la boutique -->
-                  <div class="champ_input">
-                    <input 
-                      formControlName="nomBoutique" 
-                      class="input_focus" 
-                      placeholder="Saisis le nom de la boutique"
-                    >
-                    <label class="label labelColor">Nom de la Boutique</label>
-                    <div *ngIf="nomBoutiqueControl?.touched && nomBoutiqueControl?.invalid">
-                      <small class="text-danger" *ngIf="nomBoutiqueControl?.errors?.['required']">
-                        Ce champ est obligatoire
-                      </small>
-                    </div>
-                  </div>
-
-                  <!-- Adresse de la boutique -->
-                  <div class="champ_input">
-                    <input 
-                      formControlName="adresse" 
-                      class="input_focus" 
-                      placeholder="Saisis l'adresse de la boutique"
-                    >
-                    <label class="label labelColor">Adresse de la Boutique</label>
-                    <!-- <div *ngIf="adresseControl?.touched && adresseControl?.invalid">
-                      <small class="text-danger" *ngIf="adresseControl?.errors?.['required']">
-                        Ce champ est obligatoire
-                      </small>
-                    </div> -->
-                  </div>
-
-                  <!-- Bouton de soumission -->
-                  <div class="btn_save">
-                    <button 
-                      type="submit" 
-                      class="btn"
-                      [disabled]="nomBoutiqueForm.invalid || isLoading"
-                    >
-                      <span *ngIf="!isLoading">Confirmer</span>
-                    </button>
-                  </div>
-                </form>
-              </div>
+            <!-- Modification Boutique -->
+            <div class="information_cadre information_cadre_visible" [class.visible]="isNomBoutiqueFormVisible">
+              <form [formGroup]="nomBoutiqueForm" (ngSubmit)="onSubmitNomBoutique()" class="info_titre_input">
+                <h5>Modifier nom de boutique</h5>
+            
+                <!-- Sélection de la boutique -->
+                <div class="champ_input">
+                  <select formControlName="selectedBoutique" class="form-control" (change)="onBoutiqueSelect()">
+                    <option value="">Sélectionner une boutique</option>
+                    <option *ngFor="let boutique of boutiques" [value]="boutique.id">
+                      {{ boutique.nomBoutique }}
+                    </option>
+                  </select>
+                  <!-- <label class="label labelColor">Boutique à modifier</label> -->
+                </div>
+            
+                <!-- Nom de la boutique -->
+                <div class="champ_input">
+                  <input formControlName="nomBoutique" class="input_focus" placeholder="Saisis le nom de la boutique">
+                  <label class="label">Nouveau nom</label>
+                </div>
+            
+                <!-- Adresse de la boutique -->
+                <div class="champ_input">
+                  <input formControlName="adresse" class="input_focus" placeholder="Saisis l'adresse de la boutique">
+                  <label class="label">Nouvelle adresse</label>
+                </div>
+            
+                <!-- Bouton de soumission -->
+                <div class="btn_save">
+                  <button type="submit" class="btn" [disabled]="nomBoutiqueForm.invalid || isLoading">
+                    <span *ngIf="!isLoading">Confirmer</span>
+                  </button>
+                </div>
+              </form>
+            </div>
             
             <div class="groupe_cadre">
               <!-- // Modifier le mot de passe  -->

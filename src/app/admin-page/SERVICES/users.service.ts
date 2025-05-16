@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ChangeDetectorRef, Injectable } from '@angular/core';
 import { Users } from '../MODELS/utilisateur.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, switchMap, tap, throwError } from 'rxjs';
@@ -14,7 +14,9 @@ export class UsersService {
   public isLocked: boolean = false;
   
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+  ) {}
 
   // Méthode pour récupérer le token
   getToken(): string | null {

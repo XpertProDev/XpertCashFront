@@ -123,7 +123,7 @@
 .container_form_profil {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
     gap: 20px
 }
     
@@ -147,16 +147,16 @@
     grid-row-start: 2;
 }
 
-.div7 {
-    grid-column: span 2 / span 2;
-    grid-row-start: 3;
-}
+// .div7 {
+//     grid-column: span 2 / span 2;
+//     grid-row-start: 3;
+// }
 
-.div8 {
-    grid-column: span 2 / span 2;
-    grid-column-start: 3;
-    grid-row-start: 3;
-}
+// .div8 {
+//     grid-column: span 2 / span 2;
+//     grid-column-start: 3;
+//     grid-row-start: 3;
+// }
 
 ///////// PARAMETRE DE COMPTE
 /////
@@ -418,3 +418,36 @@
   }
 }
 
+.boutiques-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.boutique-tag {
+  background-color: #f0f0f0;
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid #ddd;
+  font-size: 0.9em;
+  transition: all 0.3s ease;
+}
+
+.boutique-tag-updated {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+  transform: scale(1.05);
+}
+
+select.form-control {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.champ_input {
+  position: relative;
+  margin-bottom: 1.5rem;
+}

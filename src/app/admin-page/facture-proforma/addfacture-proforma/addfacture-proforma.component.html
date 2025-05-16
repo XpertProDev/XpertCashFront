@@ -31,14 +31,22 @@
                           Entreprise
                         </label>
                       </div>
-        
-                      <!-- Select Client -->
-                      <select *ngIf="typeDestinataire === 'client'" class="input_focus" [(ngModel)]="selectedClientId" name="client_id" required>
-                        <option [ngValue]="null">Sélectionner un client</option>
-                        <option *ngFor="let client of clients" [ngValue]="client.id">
-                          {{ client.nomComplet }} <span *ngIf="client.entrepriseClient"> - {{ client.entrepriseClient.nom }}</span>
-                        </option>
-                      </select>
+
+                      <div class="champ_grid">
+                        <!-- Select Client -->
+                        <select *ngIf="typeDestinataire === 'client'" class="input_focus" [(ngModel)]="selectedClientId" name="client_id" required>
+                          <option [ngValue]="null">Sélectionner un client</option>
+                          <option *ngFor="let client of clients" [ngValue]="client.id">
+                            {{ client.nomComplet }} <span *ngIf="client.entrepriseClient"> - {{ client.entrepriseClient.nom }}</span>
+                          </option>
+                        </select>
+
+                        <div class="champ_input">
+                          <label for="relanceDate" style="font-size: 12px; position: relative; top: 0px;">Date de facture</label>
+                          <input type="datetime-local" id="relanceDate" class="input_focus" style=" position: relative; top: -21px;"/>
+                        </div>
+
+                      </div>
         
                       <!-- Select Entreprise -->
                       <!-- <select *ngIf="typeDestinataire === 'entreprise'" class="input_focus" [(ngModel)]="selectedEntrepriseId" name="entreprise_id" required [ngModelOptions]="{ standalone: true }" >
@@ -141,11 +149,13 @@
                                   <!-- // Produit  -->
                                   <td>
                                       <div class="champ_input" style="margin-right: 15px;">
-                                        <select 
-                                          class="input_focus_type input_focus_type_select" 
-                                          [ngModel]="ligne.produitId"
-                                          (ngModelChange)="onProduitChange($event, ligne)"
-                                          [ngModelOptions]="{ standalone: true }" 
+                                        <select
+                                          name="produit{{i}}"
+                                          class="input_focus_type input_focus_type_select"
+                                          [ngClass]="{ 'duplicate': ligne.isDuplicate }"
+                                          [(ngModel)]="ligne.produitId"
+                                          (ngModelChange)="onProduitChange($event, ligne, i)"
+                                          [ngModelOptions]="{ standalone: true }"
                                           required>
                                           <option [ngValue]="null">Sélectionner un produit</option>
                                           <option *ngFor="let produit of produits" [ngValue]="produit.id">
@@ -331,7 +341,7 @@
             <div class="information_cadre information_cadre_save" style="display: flex; align-items: center; justify-content: space-between;">
 
               <div style="cursor: pointer; text-align: right; margin-left: 20px;" (click)="apercuFactureProforma()">
-                <a style="color: #0672E4;" title="Voir l'aperçu de facture proforma">Aperçu <i class="ri-eye-2-line"></i></a>
+                <button class="btn_apercu" title="Voir l'aperçu de facture proforma">Aperçu <i class="ri-eye-2-line"></i></button>
               </div>
 
               <div class="info_titre_input info_titre_input_btn" style="display: flex; justify-content: flex-end; gap: 10px;">
@@ -364,8 +374,8 @@
 <!-- Popup de duplication -->
 <div *ngIf="showDuplicatePopup" class="duplicate-popup">
   <div class="popup-content">
-    <p>Ce produit est déjà dans la liste.</p>
-    <button (click)="closePopup()">OK</button>
+    <p class="modal-content-text">Ce produit est déjà dans la liste.</p>
+    <button class="modal-content-text-button" (click)="closePopup()" (keyup.enter)="closePopup()">OK</button>
   </div>
 </div>
 

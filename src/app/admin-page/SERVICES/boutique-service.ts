@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Boutique } from "../MODELS/boutique-model";
-import { Observable } from "rxjs";
+import { Observable, throwError } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +11,23 @@ export class BoutiqueService {
 
   constructor(private http: HttpClient) { }
 
-   // Nouvelle méthode pour récupérer les détails d'un produit par son ID
+    // LL recuperation de boutique dans e/ses
+    getBoutiquesByEntreprise(): Observable<any[]> {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError('Aucun token trouvé');
+      }
+    
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+    
+      return this.http.get<any[]>(`${this.apiUrl}/boutiqueEntreprise`, { headers });
+    }
+
+    // Nouvelle méthode pour récupérer les détails d'un produit par son ID
     getBoutiqueById(id: number): Observable<Boutique> {
       const token = localStorage.getItem('authToken') || '';
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });

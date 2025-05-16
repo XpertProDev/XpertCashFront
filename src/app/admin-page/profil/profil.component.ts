@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { AuthService } from '../SERVICES/auth.service';
 import { UpdateUserRequest } from '../MODELS/profil.model';
@@ -40,6 +40,7 @@ export class ProfilComponent  implements OnInit{
   personalCode: string = '';
   isNomBoutiqueFormVisible = false;
   isUserFormVisible = false;
+  boutiques: any[] = [];
 
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
@@ -88,12 +89,12 @@ export class ProfilComponent  implements OnInit{
   toggleUserForm() {
     this.isUserFormVisible = !this.isUserFormVisible;
   }
-  
 
   constructor(
     private fb: FormBuilder,
     private profilService: ProfilService,
     private usersService: UsersService,
+    private cd: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -110,8 +111,9 @@ export class ProfilComponent  implements OnInit{
     }, { validators: this.passwordMatchValidator });
 
     this.nomBoutiqueForm = this.fb.group({
+      selectedBoutique: ['', [Validators.required]],
       nomBoutique: ['', [Validators.required]],
-      // adresse: ['', [Validators.required]]
+      adresse: ['']
     });
 
     this.nomCompletForm = this.fb.group({
@@ -249,6 +251,8 @@ export class ProfilComponent  implements OnInit{
         this.pays = user.pays;
         this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';
         this.flagPays = this.paysFlags[this.pays] || '';
+        this.boutiques = user.boutiques || [];
+        console.log("Liste des boutiques:", this.boutiques);
         console.log("Infos utilisateur récupérées :", user);
         
       },
@@ -258,8 +262,17 @@ export class ProfilComponent  implements OnInit{
     });
   }
 
-  
-
+  onBoutiqueSelect() {
+    const boutiqueId = this.nomBoutiqueForm.get('selectedBoutique')?.value;
+    const selectedBoutique = this.boutiques.find(b => b.id === boutiqueId);
+    
+    if (selectedBoutique) {
+      this.nomBoutiqueForm.patchValue({
+        nomBoutique: selectedBoutique.nomBoutique,
+        adresse: selectedBoutique.adresse
+      });
+    }
+  }
 
   onSubmitNomBoutique(): void {
     this.errorMessage = null;
@@ -270,12 +283,23 @@ export class ProfilComponent  implements OnInit{
       return;
     }
   
+    const boutiqueId = this.nomBoutiqueForm.value.selectedBoutique;
     const nomBoutique = this.nomBoutiqueForm.value.nomBoutique;
     const adresse = this.nomBoutiqueForm.value.adresse;
   
-    this.usersService.updateBoutique(this.userId, { nomBoutique, adresse }).subscribe({
+    this.usersService.updateBoutique(boutiqueId, { nomBoutique, adresse }).subscribe({
       next: (response) => {
-        this.successMessage = response.message ? response.message : "Boutique mise à jour avec succès !";
+        // Mettre à jour le tableau local
+        const index = this.boutiques.findIndex(b => b.id === boutiqueId);
+        if (index > -1) {
+          this.boutiques[index] = { 
+            ...this.boutiques[index], 
+            nomBoutique: nomBoutique,
+            adresse: adresse 
+          };
+        }
+  
+        this.successMessage = "Boutique mise à jour avec succès !";
         this.isNomBoutiqueFormVisible = false;
         this.nomBoutiqueForm.reset();
         setTimeout(() => this.successMessage = null, 10000);
@@ -286,6 +310,17 @@ export class ProfilComponent  implements OnInit{
         }
         setTimeout(() => this.errorMessage = null, 10000);
       },
+    });
+  }
+
+  private refreshBoutiques(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        this.boutiques = user.boutiques || [];
+      },
+      error: (err) => {
+        console.error("Erreur rafraîchissement boutiques:", err);
+      }
     });
   }
 
