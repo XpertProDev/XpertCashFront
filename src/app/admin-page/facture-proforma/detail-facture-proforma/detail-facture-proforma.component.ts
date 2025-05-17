@@ -930,127 +930,127 @@ onFileSelected(event: Event): void {
   }
   
   async generatePDF(preview: boolean = false): Promise<string> {
-  const doc = new jsPDF();
+    const doc = new jsPDF();
 
-  // En-tête inspiré de la page des factures réelles
-  doc.setFontSize(18);
-  doc.setTextColor(6, 114, 228); // Couleur bleue #0672E4
-  doc.text(`Facture Pro Forma`, 15, 20);
-  doc.setFontSize(12);
-  doc.setTextColor(0, 0, 0);
-  doc.text(`N° ${this.factureProForma.numeroFacture}`, 15, 28);
-  doc.text(`${this.siege}, le ${this.factureProForma.dateCreation ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR') : ''}`, 140, 28, { align: 'right' });
+    // En-tête inspiré de la page des factures réelles
+    doc.setFontSize(18);
+    doc.setTextColor(6, 114, 228); // Couleur bleue #0672E4
+    doc.text(`Facture Pro Forma`, 15, 20);
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`N° ${this.factureProForma.numeroFacture}`, 15, 28);
+    doc.text(`${this.siege}, le ${this.factureProForma.dateCreation ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR') : ''}`, 140, 28, { align: 'right' });
 
-  // Informations client
-  doc.setFontSize(10);
-  doc.text('Client :', 15, 40);
-  doc.text(this.factureProForma.client?.nomComplet || this.factureProForma.entrepriseClient?.nom || 'Non spécifié', 35, 40);
-  doc.text('Adresse :', 15, 46);
-  doc.text(this.factureProForma.client?.adresse || this.factureProForma.entrepriseClient?.adresse || 'Non spécifié', 35, 46);
-  doc.text('Téléphone :', 15, 52);
-  doc.text(this.factureProForma.client?.telephone || this.factureProForma.entrepriseClient?.telephone || 'Non spécifié', 35, 52);
+    // Informations client
+    doc.setFontSize(10);
+    doc.text('Client :', 15, 40);
+    doc.text(this.factureProForma.client?.nomComplet || this.factureProForma.entrepriseClient?.nom || 'Non spécifié', 35, 40);
+    doc.text('Adresse :', 15, 46);
+    doc.text(this.factureProForma.client?.adresse || this.factureProForma.entrepriseClient?.adresse || 'Non spécifié', 35, 46);
+    doc.text('Téléphone :', 15, 52);
+    doc.text(this.factureProForma.client?.telephone || this.factureProForma.entrepriseClient?.telephone || 'Non spécifié', 35, 52);
 
-  // Tableau des produits
-  const headers = [['Produit', 'Description', 'Quantité', 'Prix Unitaire', 'Total']];
-  const data = this.confirmedLignes.map(ligne => [
-    this.getProduitNom(ligne.produitId) || 'N/A',
-    ligne.ligneDescription || '',
-    ligne.quantite.toString(),
-    `${this.getPrixVente(ligne.produitId).toLocaleString('fr-FR')} CFA`,
-    `${this.getMontantTotal(ligne).toLocaleString('fr-FR')} CFA`
-  ]);
+    // Tableau des produits
+    const headers = [['Produit', 'Description', 'Quantité', 'Prix Unitaire', 'Total']];
+    const data = this.confirmedLignes.map(ligne => [
+      this.getProduitNom(ligne.produitId) || 'N/A',
+      ligne.ligneDescription || '',
+      ligne.quantite.toString(),
+      `${this.getPrixVente(ligne.produitId).toLocaleString('fr-FR')} CFA`,
+      `${this.getMontantTotal(ligne).toLocaleString('fr-FR')} CFA`
+    ]);
 
-  (doc as any).autoTable({
-    head: headers,
-    body: data,
-    startY: 60,
-    theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 10 },
-    alternateRowStyles: { fillColor: [249, 249, 249] },
-    margin: { left: 15, right: 15 }
-  });
+    (doc as any).autoTable({
+      head: headers,
+      body: data,
+      startY: 60,
+      theme: 'grid',
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 10 },
+      alternateRowStyles: { fillColor: [249, 249, 249] },
+      margin: { left: 15, right: 15 }
+    });
 
-  // Totaux
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
-  doc.setFontSize(10);
-  doc.text(`Total HT : ${this.getTotalHT().toLocaleString('fr-FR')} CFA`, 15, finalY);
-  if (this.activeRemise) {
-    doc.text(`Remise : ${this.getMontantRemise().toLocaleString('fr-FR')} CFA`, 15, finalY + 6);
+    // Totaux
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    doc.setFontSize(10);
+    doc.text(`Total HT : ${this.getTotalHT().toLocaleString('fr-FR')} CFA`, 15, finalY);
+    if (this.activeRemise) {
+      doc.text(`Remise : ${this.getMontantRemise().toLocaleString('fr-FR')} CFA`, 15, finalY + 6);
+    }
+    if (this.activeTva) {
+      doc.text(`TVA (18%) : ${this.getMontantTVA().toLocaleString('fr-FR')} CFA`, 15, finalY + 12);
+    }
+    doc.setFontSize(12);
+    doc.setTextColor(6, 114, 228);
+    doc.text(`Total TTC : ${this.getTotalTTC().toLocaleString('fr-FR')} CFA`, 15, finalY + 18);
+
+    // Si preview est requis, retourner une URL blob
+    if (preview) {
+      const pdfBlob = doc.output('blob');
+      return URL.createObjectURL(pdfBlob);
+    }
+
+    // Sinon, sauvegarder le PDF
+    doc.save(`Facture proforma - ${this.factureProForma.numeroFacture}.pdf`);
+    return '';
   }
-  if (this.activeTva) {
-    doc.text(`TVA (18%) : ${this.getMontantTVA().toLocaleString('fr-FR')} CFA`, 15, finalY + 12);
-  }
-  doc.setFontSize(12);
-  doc.setTextColor(6, 114, 228);
-  doc.text(`Total TTC : ${this.getTotalTTC().toLocaleString('fr-FR')} CFA`, 15, finalY + 18);
 
-  // Si preview est requis, retourner une URL blob
-  if (preview) {
+  async generatePDFAttachment(): Promise<File> {
+    const doc = new jsPDF();
+
+    // Même contenu que generatePDF
+    doc.setFontSize(18);
+    doc.setTextColor(6, 114, 228);
+    doc.text(`Facture Pro Forma`, 15, 20);
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`${this.factureProForma.numeroFacture}`, 15, 28);
+    doc.text(`${this.siege}, le ${this.factureProForma.dateCreation ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR') : ''}`, 140, 28, { align: 'right' });
+
+    doc.setFontSize(10);
+    doc.text('Client :', 15, 40);
+    doc.text(this.factureProForma.client?.nomComplet || this.factureProForma.entrepriseClient?.nom || 'Non spécifié', 35, 40);
+    // doc.text('Adresse :', 15, 46);
+    // doc.text(this.factureProForma.client?.adresse || this.factureProForma.entrepriseClient?.adresse || 'Non spécifié', 35, 46);
+    doc.text('Téléphone :', 15, 52);
+    doc.text(this.factureProForma.client?.telephone || this.factureProForma.entrepriseClient?.telephone || 'Non spécifié', 35, 52);
+
+    const headers = [['Produit', 'Description', 'Quantité', 'Prix Unitaire', 'Total']];
+    const data = this.confirmedLignes.map(ligne => [
+      this.getProduitNom(ligne.produitId) || 'N/A',
+      ligne.ligneDescription || '',
+      ligne.quantite.toString(),
+      `${this.getPrixVente(ligne.produitId).toLocaleString('fr-FR')} CFA`,
+      `${this.getMontantTotal(ligne).toLocaleString('fr-FR')} CFA`
+    ]);
+
+    (doc as any).autoTable({
+      head: headers,
+      body: data,
+      startY: 60,
+      theme: 'grid',
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 10 },
+      alternateRowStyles: { fillColor: [249, 249, 249] },
+      margin: { left: 15, right: 15 }
+    });
+
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    doc.setFontSize(10);
+    doc.text(`Total HT : ${this.getTotalHT().toLocaleString('fr-FR')} CFA`, 15, finalY);
+    if (this.activeRemise) {
+      doc.text(`Remise : ${this.getMontantRemise().toLocaleString('fr-FR')} CFA`, 15, finalY + 6);
+    }
+    if (this.activeTva) {
+      doc.text(`TVA (18%) : ${this.getMontantTVA().toLocaleString('fr-FR')} CFA`, 15, finalY + 12);
+    }
+    doc.setFontSize(12);
+    doc.setTextColor(6, 114, 228);
+    doc.text(`Total TTC : ${this.getTotalTTC().toLocaleString('fr-FR')} CFA`, 15, finalY + 18);
+
     const pdfBlob = doc.output('blob');
-    return URL.createObjectURL(pdfBlob);
+    return new File([pdfBlob], `Facture proforma - ${this.factureProForma.numeroFacture}.pdf`, { type: 'application/pdf' });
   }
-
-  // Sinon, sauvegarder le PDF
-  doc.save(`Facture proforma - ${this.factureProForma.numeroFacture}.pdf`);
-  return '';
-}
-
-async generatePDFAttachment(): Promise<File> {
-  const doc = new jsPDF();
-
-  // Même contenu que generatePDF
-  doc.setFontSize(18);
-  doc.setTextColor(6, 114, 228);
-  doc.text(`Facture Pro Forma`, 15, 20);
-  doc.setFontSize(12);
-  doc.setTextColor(0, 0, 0);
-  doc.text(`${this.factureProForma.numeroFacture}`, 15, 28);
-  doc.text(`${this.siege}, le ${this.factureProForma.dateCreation ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR') : ''}`, 140, 28, { align: 'right' });
-
-  doc.setFontSize(10);
-  doc.text('Client :', 15, 40);
-  doc.text(this.factureProForma.client?.nomComplet || this.factureProForma.entrepriseClient?.nom || 'Non spécifié', 35, 40);
-  // doc.text('Adresse :', 15, 46);
-  // doc.text(this.factureProForma.client?.adresse || this.factureProForma.entrepriseClient?.adresse || 'Non spécifié', 35, 46);
-  doc.text('Téléphone :', 15, 52);
-  doc.text(this.factureProForma.client?.telephone || this.factureProForma.entrepriseClient?.telephone || 'Non spécifié', 35, 52);
-
-  const headers = [['Produit', 'Description', 'Quantité', 'Prix Unitaire', 'Total']];
-  const data = this.confirmedLignes.map(ligne => [
-    this.getProduitNom(ligne.produitId) || 'N/A',
-    ligne.ligneDescription || '',
-    ligne.quantite.toString(),
-    `${this.getPrixVente(ligne.produitId).toLocaleString('fr-FR')} CFA`,
-    `${this.getMontantTotal(ligne).toLocaleString('fr-FR')} CFA`
-  ]);
-
-  (doc as any).autoTable({
-    head: headers,
-    body: data,
-    startY: 60,
-    theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 10 },
-    alternateRowStyles: { fillColor: [249, 249, 249] },
-    margin: { left: 15, right: 15 }
-  });
-
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
-  doc.setFontSize(10);
-  doc.text(`Total HT : ${this.getTotalHT().toLocaleString('fr-FR')} CFA`, 15, finalY);
-  if (this.activeRemise) {
-    doc.text(`Remise : ${this.getMontantRemise().toLocaleString('fr-FR')} CFA`, 15, finalY + 6);
-  }
-  if (this.activeTva) {
-    doc.text(`TVA (18%) : ${this.getMontantTVA().toLocaleString('fr-FR')} CFA`, 15, finalY + 12);
-  }
-  doc.setFontSize(12);
-  doc.setTextColor(6, 114, 228);
-  doc.text(`Total TTC : ${this.getTotalTTC().toLocaleString('fr-FR')} CFA`, 15, finalY + 18);
-
-  const pdfBlob = doc.output('blob');
-  return new File([pdfBlob], `Facture proforma - ${this.factureProForma.numeroFacture}.pdf`, { type: 'application/pdf' });
-}
 
 }
