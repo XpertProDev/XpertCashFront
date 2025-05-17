@@ -37,8 +37,10 @@ export interface FactureProForma {
   id: number;
   numeroFacture: string;
   siege: string;
+  dateRelance?: string;
   dateCreation: string;
   dateApprobation?: string;
+  // dateAnnulation?: string;
   methodeEnvoi?: 'EMAIL' | 'PHYSIQUE';
 
   utilisateurModificateur?: {

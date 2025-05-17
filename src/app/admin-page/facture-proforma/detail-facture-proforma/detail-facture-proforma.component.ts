@@ -13,6 +13,12 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as pdfjsLib from 'pdfjs-dist';
 
+// Ajouter cette interface pour les pièces jointes
+interface EmailAttachment {
+  name: string;
+  file: File;
+}
+
 @Component({
   selector: 'app-detail-facture-proforma',
   imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe],
@@ -76,12 +82,18 @@ export class DetailFactureProformaComponent implements OnInit {
   popupOffset = { x: 0, y: 0 };
 
   // Piece joindre
-  attachments: File[] = [];
+  // attachments: File[] = [];
   selectedFile: File | null = null;
 
   // Variables pour la gestion des emails
   emailDestinatairesList: string[] = [];
   currentEmail = '';
+
+
+
+// Dans la classe du composant
+  attachments: EmailAttachment[] = [];
+  currentAttachment: File | null = null;
 
   @ViewChild('editableContent', { static: false }) editableContent!: ElementRef;
   @ViewChild('subjectInput', { static: false }) subjectInput!: ElementRef;
@@ -711,37 +723,59 @@ export class DetailFactureProformaComponent implements OnInit {
   }
 
   async confirmEmailSend() {
-    try {
-        // Préparation des données communes
-        const payload: Partial<FactureProForma> = {
-            statut: StatutFactureProForma.ENVOYE,
-            methodeEnvoi: this.methodeEnvoi.toUpperCase() as 'EMAIL' | 'PHYSIQUE',
-            ...(this.dateRelance && { dateRelance: new Date(this.dateRelance).toISOString() })
-        };
+  try {
+    // Mettre à jour la facture d'abord
+    const payload: Partial<FactureProForma> = {
+      statut: StatutFactureProForma.ENVOYE,
+      methodeEnvoi: this.methodeEnvoi.toUpperCase() as 'EMAIL' | 'PHYSIQUE',
+      // Corriger la conversion de date
+      dateRelance: this.dateRelance ? new Date(this.dateRelance).toISOString() : undefined
+    };
 
-        // Mise à jour de la facture
-        const remise = this.activeRemise ? this.remisePourcentage : 0;
-        const tva = this.activeTva;
+    const updatedFacture = await this.factureProFormaService.updateFactureProforma(
+      this.factureId,
+      this.activeRemise ? this.remisePourcentage : undefined,
+      this.activeTva,
+      payload
+    ).toPromise();
 
-        await this.factureProFormaService.updateFactureProforma(
-            this.factureId,
-            remise,
-            tva,
-            payload
-        ).toPromise();
-
-        // Traitement spécifique à l'email
-        if (this.methodeEnvoi === 'email') {
-            await this.processEmailSending();
-        }
-
-        this.showEmailPopup = false;
-        this.refreshInvoiceData();
-
-    } catch (error) {
-        this.handleError(error);
+    if (this.methodeEnvoi === 'email') {
+      await this.handleEmailSending();
     }
+
+    this.showEmailPopup = false;
+    this.router.navigate(['/facture-proforma']);
+  } catch (error) {
+    this.handleError(error);
+  }
 }
+
+
+private async handleEmailSending() {
+  // Collecter les données de l'email
+  const emailData = {
+    to: this.emailDestinatairesList.join(','),
+    subject: this.subjectInput.nativeElement.value.trim(),
+    body: this.editableContent.nativeElement.innerHTML,
+    attachments: await this.prepareAttachments()
+  };
+
+  // Envoyer l'email via le service
+  await this.factureProFormaService.envoyerFactureEmail(
+    this.factureId,
+    emailData
+  ).toPromise();
+
+  // Réinitialiser le formulaire
+  this.resetEmailForm();
+}
+
+private async prepareAttachments(): Promise<File[]> {
+  return Promise.all(this.attachments.map(async (attachment) => {
+    return attachment.file;
+  }));
+}
+
 
   private async processEmailSending() {
       // Validation des champs email
@@ -786,17 +820,18 @@ export class DetailFactureProformaComponent implements OnInit {
   }
 
   private handleError(error: any) {
-      console.error('Erreur:', error);
-      this.errorMessage = error.message || 'Une erreur est survenue';
-      setTimeout(() => this.errorMessage = '', 5000);
+    console.error('Erreur:', error);
+    this.errorMessage = error.message || 'Une erreur est survenue';
+    this.showEmailPopup = false;
   }
 
   // Méthodes helper
   private resetEmailForm() {
-    this.emailDestinatairesList = [];
-    this.currentEmail = '';
-    this.showEmailPopup = false;
-  }
+  this.emailDestinatairesList = [];
+  this.currentEmail = '';
+  this.attachments = [];
+  this.editableContent.nativeElement.innerHTML = ''; // Réinitialiser le contenu éditable
+}
 
   private handleEmailError(err: any) {
     console.error("❌ Erreur d'envoi email :", err);
@@ -855,25 +890,29 @@ export class DetailFactureProformaComponent implements OnInit {
   }
 
   // Gère la sélection de fichiers
-  onFileSelected(event: Event): void {
-      const input = event.target as HTMLInputElement;
-      if (input.files && input.files.length > 0) {
-          const newFiles = Array.from(input.files);
-          
-          // Vérifier les doublons
-          newFiles.forEach(newFile => {
-              const isDuplicate = this.attachments.some(
-                  existingFile => existingFile.name === newFile.name
-              );
-              
-              if (!isDuplicate) {
-                  this.attachments.push(newFile);
-              }
-          });
-          
-          input.value = ''; // Réinitialise l'input
-      }
-  }
+  // Corriger la méthode onFileSelected
+onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+        const newFiles = Array.from(input.files);
+        
+        newFiles.forEach(newFile => {
+            const isDuplicate = this.attachments.some(
+                existing => existing.name === newFile.name
+            );
+            
+            if (!isDuplicate) {
+                // Créer un objet EmailAttachment correct
+                this.attachments.push({ 
+                    name: newFile.name,
+                    file: newFile
+                });
+            }
+        });
+        
+        input.value = '';
+    }
+}
 
   // Supprime une pièce jointe
   removeAttachment(index: number): void {

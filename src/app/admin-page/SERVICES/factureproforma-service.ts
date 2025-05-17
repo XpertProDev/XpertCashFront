@@ -3,6 +3,7 @@ import { Injectable } from "@angular/core";
 import { catchError, Observable, tap, throwError } from "rxjs";
 import { FactureProForma, UpdateFactureProFormaDTO } from "../MODELS/FactureProForma.model";
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -120,34 +121,36 @@ export class FactureProFormaService {
 
   //Envoyer Facture par mail :
 
-  envoyerFactureEmail(
+  // Dans FactureProFormaService
+envoyerFactureEmail(
   factureId: number,
   emailRequest: {
     to: string;
     subject: string;
     body: string;
+    attachments?: File[];
   }
 ): Observable<string> {
-  const token = localStorage.getItem('authToken');
-  if (!token) {
-    return throwError(() => new Error('Token manquant'));
+  const formData = new FormData();
+  formData.append('to', emailRequest.to);
+  formData.append('subject', emailRequest.subject);
+  formData.append('body', emailRequest.body);
+
+  if (emailRequest.attachments) {
+    emailRequest.attachments.forEach((file, index) => {
+      formData.append(`attachments`, file, file.name);
+    });
   }
 
+  const token = localStorage.getItem('authToken');
   const headers = new HttpHeaders({
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    'Authorization': `Bearer ${token}`
   });
 
   return this.http.post(
     `${this.apiUrl}/factures/${factureId}/envoyer-email`,
-    emailRequest,
-   { headers, responseType: 'text' }
-  ).pipe(
-    tap(() => console.log('📧 Email envoyé')),
-    catchError(error => {
-      console.error('Erreur lors de l’envoi du mail :', error);
-      return throwError(() => error);
-    })
+    formData,
+    { headers, responseType: 'text' }
   );
 }
 

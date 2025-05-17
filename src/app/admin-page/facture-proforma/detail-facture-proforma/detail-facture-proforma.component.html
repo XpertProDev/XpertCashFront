@@ -780,22 +780,23 @@
             <!-- Remplacer la section pdf -->
             <div class="section_img_pdf">
                 <ul>
-                    <!-- Facture PDF existante -->
                     <li class="cadre_pdf">
                         <a class="text-truncate" href="/web/content/487?download=true">Facture pro forma - {{ factureProForma.numeroFacture }}.pdf</a>
                         <button  style="opacity: 0;" class="btn flex-shrink-0"><i class="fa fa-fw fa-times"></i></button>
                     </li>
-                    <!-- Pièces jointes ajoutées -->
-                    <li class="cadre_pdf" *ngFor="let file of attachments; let i = index">
-                        <a class="text-truncate">{{ file.name }}</a>
+                    <!-- // piece a joindre  -->
+                    <li class="cadre_pdf" *ngFor="let att of attachments; let i = index">
+                        <span class="text-truncate">{{ att.name }}</span>
                         <button class="btn flex-shrink-0" (click)="removeAttachment(i)">
-                            <i class="fa fa-fw fa-times"></i>
+                        <i class="fa fa-fw fa-times"></i>
                         </button>
                     </li>
                 </ul>
 
-                <!-- Input file caché -->
-                <input #fileInput type="file" hidden (change)="onFileSelected($event)" multiple>
+                <input #fileInput type="file" hidden 
+           (change)="onFileSelected($event)" 
+           multiple
+           accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png">
             </div>
         </div>
 
@@ -810,28 +811,29 @@
                 <div class="contenue_footer_btn">
                     <div class="btn_envoie_save">
                         <!-- Bouton adapté à la méthode -->
-                        <button 
-                            *ngIf="methodeEnvoi === 'email'" 
-                            class="btn" 
-                            (click)="confirmEmailSend()"
-                            [disabled]="methodeEnvoi === 'email' && emailDestinatairesList.length === 0">
-                            Envoyer
-                        </button>
-                        
-                        <button 
-                            *ngIf="methodeEnvoi === 'physique'" 
-                            class="btn" 
-                            (click)="confirmEmailSend()">
-                            Confirmer
-                        </button>
+                        <button *ngIf="methodeEnvoi === 'email'" 
+                class="btn" 
+                (click)="confirmEmailSend()"
+                [disabled]="!emailDestinatairesList.length">
+          Envoyer
+        </button>
+        
+        <button *ngIf="methodeEnvoi === 'physique'" 
+                class="btn" 
+                (click)="confirmEmailSend()">
+          Confirmer l'envoi physique
+        </button>
                     </div>
                     <div class="btn_envoie_ignore">
                         <button class="btn" (click)="showEmailPopup = false">Annuler</button>
                     </div>
 
-                    <div class="icon_attach" (click)="triggerFileInput()" *ngIf="methodeEnvoi === 'email'">
-                        <i class="ri-attachment-2" title="Ajouter une pièce jointe"></i>
-                    </div>
+                    <div class="icon_attach" 
+           (click)="triggerFileInput()" 
+           *ngIf="methodeEnvoi === 'email'"
+           title="Ajouter des pièces jointes">
+        <i class="ri-attachment-2"></i>
+      </div>
 
                     <!-- <div class="icon_relance">
                         <i class="ri-time-line" title="Date de relance"></i>
@@ -840,10 +842,14 @@
                 </div>
 
                 <!-- Affichage conditionnel selon le statut  *ngIf="pendingStatut === 'ENVOYE'" -->
-                <div class="form-group">
-                    <label for="relanceDate" style="font-size: 12px;">Date de relance (fac) :</label>
-                    <input type="datetime-local" id="relanceDate" [(ngModel)]="dateRelance" class="form-control form-control-date" />
-                </div>
+                 <!-- Sélecteur de date de relance -->
+    <div class="form-group">
+      <label for="relanceDate">Date de relance :</label>
+      <input type="datetime-local" 
+             id="relanceDate" 
+             [(ngModel)]="dateRelance" 
+             class="form-control form-control-date">
+    </div>
             </div>
         </div>
     </div>
