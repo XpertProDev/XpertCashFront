@@ -780,23 +780,19 @@
             <!-- Remplacer la section pdf -->
             <div class="section_img_pdf">
                 <ul>
-                    <li class="cadre_pdf">
-                        <a class="text-truncate" href="/web/content/487?download=true">Facture pro forma - {{ factureProForma.numeroFacture }}.pdf</a>
-                        <button  style="opacity: 0;" class="btn flex-shrink-0"><i class="fa fa-fw fa-times"></i></button>
-                    </li>
-                    <!-- // piece a joindre  -->
+                    <!-- Afficher toutes les pièces jointes, y compris le PDF généré -->
                     <li class="cadre_pdf" *ngFor="let att of attachments; let i = index">
-                        <span class="text-truncate">{{ att.name }}</span>
-                        <button class="btn flex-shrink-0" (click)="removeAttachment(i)">
+                    <span class="text-truncate">{{ att.name }}</span>
+                    <button class="btn flex-shrink-0" (click)="removeAttachment(i)">
                         <i class="fa fa-fw fa-times"></i>
-                        </button>
+                    </button>
                     </li>
                 </ul>
 
                 <input #fileInput type="file" hidden 
-           (change)="onFileSelected($event)" 
-           multiple
-           accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png">
+                    (change)="onFileSelected($event)" 
+                    multiple
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png">
             </div>
         </div>
 
