@@ -951,12 +951,12 @@ onFileSelected(event: Event): void {
     doc.text(this.factureProForma.client?.telephone || this.factureProForma.entrepriseClient?.telephone || 'Non spécifié', 35, 52);
 
     // Tableau des produits
-    const headers = [['Produit', 'Description', 'Quantité', 'Prix Unitaire', 'Total']];
+    const headers = [['Produit', 'Description', 'Prix Unitaire', 'Quantité', 'Total']];
     const data = this.confirmedLignes.map(ligne => [
       this.getProduitNom(ligne.produitId) || 'N/A',
       ligne.ligneDescription || '',
-      ligne.quantite.toString(),
       `${this.getPrixVente(ligne.produitId).toLocaleString('fr-FR')} CFA`,
+      ligne.quantite.toString(),
       `${this.getMontantTotal(ligne).toLocaleString('fr-FR')} CFA`
     ]);
 
