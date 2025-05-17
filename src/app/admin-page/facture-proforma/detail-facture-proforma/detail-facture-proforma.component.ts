@@ -89,6 +89,7 @@ export class DetailFactureProformaComponent implements OnInit {
   emailDestinatairesList: string[] = [];
   currentEmail = '';
 
+  isSending: boolean = false;
 
 
 // Dans la classe du composant
@@ -695,6 +696,11 @@ export class DetailFactureProformaComponent implements OnInit {
   }
 
   async confirmEmailSend() {
+    this.isSending = true;
+  
+    // Simuler un chargement de 3 secondes
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
   try {
     // Mettre à jour la facture d'abord
     const payload: Partial<FactureProForma> = {

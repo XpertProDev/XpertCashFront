@@ -132,7 +132,7 @@
                             <!-- // Adresse et téléphone  -->
                             <div class="double_input_grid">
                                 <div class="champ_input">
-                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.client.adresse" type="text" class="input_focus" required placeholder="Saisis l'adresse">
+                                    <input autocomplete="off" style="cursor: no-drop;" disabled readonly [value]="factureProForma.client.adresse" type="text" class="input_focus" required placeholder="Saisis l'adresse">
                                     <label for="adresse" class="label"> Adresse </label>
                                 </div>
     
@@ -808,28 +808,31 @@
                     <div class="btn_envoie_save">
                         <!-- Bouton adapté à la méthode -->
                         <button *ngIf="methodeEnvoi === 'email'" 
-                class="btn" 
-                (click)="confirmEmailSend()"
-                [disabled]="!emailDestinatairesList.length">
-          Envoyer
-        </button>
-        
-        <button *ngIf="methodeEnvoi === 'physique'" 
-                class="btn" 
-                (click)="confirmEmailSend()">
-          Confirmer l'envoi physique
-        </button>
+                                class="btn" 
+                                (click)="confirmEmailSend()"
+                                [disabled]="!emailDestinatairesList.length || isSending">
+                            <span *ngIf="!isSending">Envoyer</span>
+                            <div *ngIf="isSending" class="mini-spinner"></div>
+                        </button>
+                        
+                        <button *ngIf="methodeEnvoi === 'physique'" 
+                                class="btn" 
+                                (click)="confirmEmailSend()"
+                                [disabled]="isSending">
+                            <span *ngIf="!isSending">Confirmer l'envoi physique</span>
+                            <div *ngIf="isSending" class="mini-spinner"></div>
+                        </button>
                     </div>
                     <div class="btn_envoie_ignore">
                         <button class="btn" (click)="showEmailPopup = false">Annuler</button>
                     </div>
 
                     <div class="icon_attach" 
-           (click)="triggerFileInput()" 
-           *ngIf="methodeEnvoi === 'email'"
-           title="Ajouter des pièces jointes">
-        <i class="ri-attachment-2"></i>
-      </div>
+                        (click)="triggerFileInput()" 
+                        *ngIf="methodeEnvoi === 'email'"
+                        title="Ajouter des pièces jointes">
+                        <i class="ri-attachment-2"></i>
+                    </div>
 
                     <!-- <div class="icon_relance">
                         <i class="ri-time-line" title="Date de relance"></i>
@@ -838,14 +841,14 @@
                 </div>
 
                 <!-- Affichage conditionnel selon le statut  *ngIf="pendingStatut === 'ENVOYE'" -->
-                 <!-- Sélecteur de date de relance -->
-    <div class="form-group">
-      <label for="relanceDate">Date de relance :</label>
-      <input type="datetime-local" 
-             id="relanceDate" 
-             [(ngModel)]="dateRelance" 
-             class="form-control form-control-date">
-    </div>
+                <!-- Sélecteur de date de relance -->
+                <div class="form-group">
+                <label for="relanceDate">Date de relance :</label>
+                <input type="datetime-local" 
+                        id="relanceDate" 
+                        [(ngModel)]="dateRelance" 
+                        class="form-control form-control-date">
+                </div>
             </div>
         </div>
     </div>
