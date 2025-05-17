@@ -6,6 +6,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { Router, RouterLink } from "@angular/router";
 import { ClientService } from "../SERVICES/client-service";
 import { Clients } from "../MODELS/clients-model";
+import { TruncateEmailPipe } from "../MODELS/truncate-email.pipe";
 
 
 @Component({
@@ -16,6 +17,7 @@ import { Clients } from "../MODELS/clients-model";
     FormsModule,
     MatPaginatorModule,
     RouterLink,
+    TruncateEmailPipe
   ],
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.scss'],
