@@ -342,6 +342,8 @@ export class AddClientsComponent implements OnInit {
       banque: this.entrepriseForm.value.banque,
       rccm: this.entrepriseForm.value.rccm,
       siteWeb: this.entrepriseForm.value.siteWeb,
+      signataire: this.entrepriseForm.value.signataire,
+      signataireNom: this.entrepriseForm.value.signataireNom,
 
     };
   

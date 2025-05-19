@@ -1171,7 +1171,7 @@ ul li {
   position: relative;
   font-size: 11px;
 }
-
+/* 
 .remove-chip {
   position: absolute;
   right: 6px;
@@ -1180,6 +1180,17 @@ ul li {
   cursor: pointer;
   color: #666;
   font-size: 12px;
+}
+  */
+
+.remove-chip[_ngcontent-ng-c3765948371] {
+    position: relative;
+    right: 0px;
+    top: 44%;
+    transform: translateY(0%);
+    cursor: pointer;
+    color: #666;
+    font-size: 12px;
 }
 
 .inline-email-input {

@@ -12,6 +12,13 @@ import { UsersService } from '../../SERVICES/users.service';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as pdfjsLib from 'pdfjs-dist';
+import { EntrepriseService } from '../../SERVICES/entreprise-service';
+import { firstValueFrom } from 'rxjs';
+import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
+
+
+
+
 
 // Ajouter cette interface pour les pièces jointes
 interface EmailAttachment {
@@ -21,11 +28,14 @@ interface EmailAttachment {
 
 @Component({
   selector: 'app-detail-facture-proforma',
-  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe],
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe,  EnLettresPipe],
   templateUrl: './detail-facture-proforma.component.html',
   styleUrl: './detail-facture-proforma.component.scss'
 })
 export class DetailFactureProformaComponent implements OnInit {
+
+   private enLettresPipe = new EnLettresPipe();
+
   isLoading: boolean = false;
   activeRemise: boolean = false;
   activeTva: boolean = false;
@@ -34,7 +44,6 @@ export class DetailFactureProformaComponent implements OnInit {
   errorMessage: string = '';
   userEntrepriseId: number | null = null;
   nomEntreprise: string = '';
-  siege: string = '';
   produits: Produit[] = [];
   // Nouvelle variable pour stocker les ajustements locaux
   pendingAdjustments: any[] = [];
@@ -90,15 +99,33 @@ export class DetailFactureProformaComponent implements OnInit {
   currentEmail = '';
 
 
+  facture: FactureProForma | null = null;
 
-// Dans la classe du composant
+  nom: string | null = null;
+  siege!: string;
+  email!: string;
+  logo: string | null = null; 
+  secteur!: string;
+  telephone!: string;
+  adresse!: string;
+  nif!: string;
+  banque!: string;
+  nina!: string;
+  pays!: string;
+  rccm!: string;
+  siteWeb!: string;
+  signataire!: string
+  signataireNom!: string;
+
+
+
+
   attachments: EmailAttachment[] = [];
   currentAttachment: File | null = null;
 
   @ViewChild('editableContent', { static: false }) editableContent!: ElementRef;
   @ViewChild('subjectInput', { static: false }) subjectInput!: ElementRef;
 
-    // Ajoutez cette propriété en haut de votre classe
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
@@ -108,10 +135,13 @@ export class DetailFactureProformaComponent implements OnInit {
       private factureProFormaService: FactureProFormaService,
       private usersService: UsersService,
       private cdr: ChangeDetectorRef,
-      private renderer: Renderer2
+      private renderer: Renderer2,
+     private entrepriseService: EntrepriseService
+      
     ) {}
 
   ngOnInit(): void {
+    this. getUserEntrepriseInfo();
     this.getProduits();
     this.getUserInfo();
     this.loadUsersOfEntreprise(this.userEntrepriseId!);
@@ -122,7 +152,6 @@ export class DetailFactureProformaComponent implements OnInit {
     }
   }
 
-  // dans DetailFactureProformaComponent
   get isValidated(): boolean {
     return this.factureProForma.statut === this.statusOptions.VALIDE;
   }
@@ -997,60 +1026,393 @@ onFileSelected(event: Event): void {
 }
 
 async generatePDFAttachment(): Promise<File> {
-  const doc = new jsPDF();
 
-  // Même contenu que generatePDF
-  doc.setFontSize(18);
-  doc.setTextColor(6, 114, 228);
-  doc.text(`Facture Pro Forma`, 15, 20);
-  doc.setFontSize(12);
-  doc.setTextColor(0, 0, 0);
-  doc.text(`${this.factureProForma.numeroFacture}`, 15, 28);
-  doc.text(`${this.siege}, le ${this.factureProForma.dateCreation ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR') : ''}`, 140, 28, { align: 'right' });
+    try {
+    const entreprise = await firstValueFrom(this.entrepriseService.getEntrepriseInfo());
+    this.nomEntreprise = entreprise.nom ?? '—';
+    this.siege = entreprise.siege ?? '—';
+    this.email = entreprise.email ?? '—';
+    this.logo     = 'http://localhost:8080' + entreprise.logo;
+    this.secteur = entreprise.secteur ?? '—';
+    this.telephone = entreprise.telephone ?? '—';
+    this.adresse = entreprise.adresse ?? '—';
+    this.nif      = entreprise.nif      ?? '—';
+    this.banque   = entreprise.banque   ?? '—';
+    this.nina     = entreprise.nina     ?? '—';
+    this.pays     = entreprise.pays     ?? '—';
+    this.rccm     = entreprise.rccm     ?? '—';
+    this.siteWeb  = entreprise.siteWeb  ?? '—';
+    this.signataire  = entreprise.signataire  ?? '—';
+    this.signataireNom  = entreprise.signataireNom  ?? '—';
 
-  doc.setFontSize(10);
-  doc.text('Client :', 15, 40);
-  doc.text(this.factureProForma.client?.nomComplet || this.factureProForma.entrepriseClient?.nom || 'Non spécifié', 35, 40);
-  // doc.text('Adresse :', 15, 46);
-  // doc.text(this.factureProForma.client?.adresse || this.factureProForma.entrepriseClient?.adresse || 'Non spécifié', 35, 46);
-  doc.text('Téléphone :', 15, 52);
-  doc.text(this.factureProForma.client?.telephone || this.factureProForma.entrepriseClient?.telephone || 'Non spécifié', 35, 52);
 
-  const headers = [['Produit', 'Description', 'Quantité', 'Prix Unitaire', 'Total']];
-  const data = this.confirmedLignes.map(ligne => [
+   
+  } catch (error) {
+    console.error('Erreur de récupération des infos entreprise :', error);
+  }
+
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const imgData = this.logo;
+
+
+  /*************** ——— 1. HEADER ——— ****************/
+  if (imgData) {
+   doc.addImage(imgData, 'PNG', 15, 10, 47, 17);
+  }
+
+/*************** ——— 1. INFOS SOCIÉTÉ ——— ****************/
+const infoX = 70;
+const infoY_EmailTel = 22;
+doc.setFontSize(10);
+
+doc.setFont('helvetica', 'bold');
+doc.text(this.nomEntreprise || 'Nom Entreprise', infoX, 12);
+
+doc.setFont('helvetica', 'normal');
+doc.text(`Secteur : ${this.secteur || 'default'}`,  infoX, 17);
+doc.text(`Email : ${this.email || 'default'}`, infoX, infoY_EmailTel);
+
+// Calcul d’un X décalé pour le téléphone, selon la largeur de l’email
+const emailText = `Email : ${this.email || 'default'}`;
+const emailWidth = doc.getTextWidth(emailText);
+const spacing = 5; // espace entre email et téléphone
+
+doc.text(
+  `Téléphone : ${this.telephone || 'default'}`,
+  infoX + emailWidth + spacing,
+  infoY_EmailTel
+);
+// ► 1) Calcul de la position Y immédiatement après la dernière info
+const lastInfoY = 27;          // ta dernière ligne d’info
+const gapBelowInfo = 5;        // petit espace avant la ligne
+const sepY = lastInfoY + gapBelowInfo;   // = 32
+
+// ► 2) Double séparateur (<hr>)
+doc.setDrawColor(200);
+doc.line(15, sepY,     195, sepY);       // premier trait
+doc.line(15, sepY + 2, 195, sepY + 2);   // deuxième trait (2 px plus bas)
+
+/*************** ——— 2. TITRE PRINCIPAL ——— ****************/
+const gapBelowSep = 10;                   // espace visuel avant le titre
+const titleY = sepY + gapBelowSep;       // = 42
+doc.setFontSize(14);
+doc.setFont('helvetica', 'bold');
+const numeroFacture = this.factureProForma.numeroFacture || 'XXX‑XX‑XXXX';
+doc.text(`FACTURE PROFORMA ${numeroFacture}`, 105, titleY, { align: 'center' });
+
+// Soulignement du titre
+doc.setDrawColor(0);
+doc.line(60, titleY + 2, 150, titleY + 2);
+
+/*************** ——— 3. DATE & LIEU ——— ****************/
+doc.setFontSize(10);
+doc.setFont('helvetica', 'normal');
+
+doc.text(
+  `${this.siege || 'default'}, le ${
+    this.factureProForma.dateCreation
+      ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR')
+      : ''
+  }`,
+  195,
+  titleY + 10,                        // 8 px sous le titre
+  { align: 'right' }
+);
+
+  /*************** ——— 3. INFOS CLIENT & OBJET ——— ****************/
+const label = 'Client :';
+const labelX = 15;
+const labelY = 65;
+
+doc.setFont('helvetica', 'bold');
+doc.text(label, labelX, labelY);
+
+// Soulignement précis
+const labelWidth = doc.getTextWidth(label);
+doc.line(labelX, labelY + 0.8, labelX + labelWidth, labelY + 0.8);
+
+doc.setFont('helvetica', 'normal');
+doc.text(
+  this.factureProForma.client?.nomComplet ||
+    this.factureProForma.entrepriseClient?.nom ||
+    'Non spécifié',
+  35,
+  labelY
+);
+
+
+const objectLabel = 'OBJECT :';
+const objectLabelX = 15;
+// Ici on décale verticalement
+const objectLabelY = 72;
+
+doc.setFont('helvetica', 'bold');
+doc.text(objectLabel, objectLabelX, objectLabelY);
+
+// Soulignement précis sous le texte
+const objectLabelWidth = doc.getTextWidth(objectLabel);
+doc.line(objectLabelX, objectLabelY + 0.8, objectLabelX + objectLabelWidth, objectLabelY + 0.8);
+
+doc.setFont('helvetica', 'normal');
+doc.text(this.factureProForma.description || 'Objet', 35, objectLabelY);
+
+
+  /*************** ——— 4. TABLE PRODUITS ——— ****************/
+  const headers = [
+    ['Désignation', 'Description', 'Prix Unitaire (FCFA)', 'Quantité', 'Montant (FCFA)'],
+  ];
+  const data = this.confirmedLignes.map((ligne) => [
     this.getProduitNom(ligne.produitId) || 'N/A',
     ligne.ligneDescription || '',
+    this.getPrixVente(ligne.produitId).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '),
     ligne.quantite.toString(),
-    `${this.getPrixVente(ligne.produitId).toLocaleString('fr-FR')} CFA`,
-    `${this.getMontantTotal(ligne).toLocaleString('fr-FR')} CFA`
+    this.getMontantTotal(ligne).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+
   ]);
 
   (doc as any).autoTable({
     head: headers,
     body: data,
-    startY: 60,
+    startY: 80,
     theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 10 },
+    styles: { fontSize: 9, cellPadding: 2, halign: 'center',},
+    headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 10, halign: 'center',},
     alternateRowStyles: { fillColor: [249, 249, 249] },
-    margin: { left: 15, right: 15 }
+    margin: { left: 15, right: 15 },
+    columnStyles: {
+      0: { halign: 'left' },
+      1: { halign: 'left' }, 
+    },
   });
 
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
+  /*************** ——— 5. TOTAUX ——— ****************/
+  
+  let y = (doc as any).lastAutoTable.finalY + 5;
+   y += 6;
   doc.setFontSize(10);
-  doc.text(`Total HT : ${this.getTotalHT().toLocaleString('fr-FR')} CFA`, 15, finalY);
+
+  const addTotalLine = (label: string, value: string) => {
+    doc.text(label, 150, y, { align: 'right' });
+    doc.text(value, 195, y, { align: 'right' });
+    y += 6;
+  };
+
+  addTotalLine('Total HT', `${this.getTotalHT().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`);
+
   if (this.activeRemise) {
-    doc.text(`Remise : ${this.getMontantRemise().toLocaleString('fr-FR')} CFA`, 15, finalY + 6);
+    addTotalLine(
+      `Remise (${this.remisePourcentage || 10}%)`,
+      `${this.getMontantRemise().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+    );
   }
+
+  addTotalLine(
+    'Montant commercial',
+    `${this.getTotalCommercial().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+  );
+
   if (this.activeTva) {
-    doc.text(`TVA (18%) : ${this.getMontantTVA().toLocaleString('fr-FR')} CFA`, 15, finalY + 12);
+    addTotalLine(
+      'TVA (18%)',
+      `${this.getMontantTVA().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+    );
   }
-  doc.setFontSize(12);
-  doc.setTextColor(6, 114, 228);
-  doc.text(`Total TTC : ${this.getTotalTTC().toLocaleString('fr-FR')} CFA`, 15, finalY + 18);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  addTotalLine(
+    'Montant TTC',
+    `${this.getTotalTTC().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+  );
+
+  /*************** ——— 6. MONTANT EN LETTRES ——— ****************/
+
+  y += 18;
+const libelle = 'Arrêté la présente facture à la somme de : ';
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(10);
+doc.text(libelle, 15, y);
+
+// largeur du libellé pour connaître le point de départ du texte en lettres
+const libelleWidth = doc.getTextWidth(libelle);
+const startX = 15 + libelleWidth;
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(10);
+const montantLettreRaw =
+  this.enLettresPipe.transform(this.getTotalTTC()) + ' Francs CFA';
+
+const maxWidth = 195 - startX; 
+
+const lines = doc.splitTextToSize(montantLettreRaw, maxWidth);
+
+doc.text(lines[0], startX, y);
+
+for (let i = 1; i < lines.length; i++) {
+  y += 6;
+  doc.text(lines[i], 15, y);
+}
+
+
+  /*************** ——— 7. SIGNATURE / CACHET ——— ****************/
+// 1. Texte du nom (en bas)
+doc.setFontSize(12);
+doc.setFont('helvetica', 'normal');
+const nom = this.signataireNom || 'Nom du signataire';
+const nomWidth = doc.getTextWidth(nom);
+
+// ➤ On déplace le bloc vers la droite (ex : centré autour de x = 160mm)
+const blocCenterX = 180;
+const nomX = blocCenterX - nomWidth / 2;
+
+// Texte du rôle (juste au-dessus)
+doc.setFontSize(10);
+doc.setFont('helvetica', 'bold');
+const signataire = this.signataire || 'Directeur';
+const signataireWidth = doc.getTextWidth(signataire);
+const signataireX = blocCenterX - signataireWidth / 2;
+
+// Dessiner (moins d’espace entre les 2 lignes : 10 au lieu de 15)
+y += 50;
+doc.text(signataire, signataireX, y);
+y += 10;  // réduit l’espace vertical
+doc.setFontSize(12);
+doc.setFont('helvetica', 'normal');
+doc.text(nom, nomX, y);
+
+
+y += 12; // espace sous le nom classique
+
+doc.setFontSize(9);
+doc.setFont('times', 'italic');
+
+const nomSignatureWidth = doc.getTextWidth(nom);
+const nomSignatureX = blocCenterX - nomSignatureWidth / 2;
+
+// Ombre légère (gris, décalé)
+doc.setTextColor(150, 150, 150);
+doc.text(nom, nomSignatureX + 0.5, y + 0.5);
+
+// Texte principal en noir, italique
+doc.setTextColor(0, 0, 0);
+doc.text(nom, nomSignatureX, y);
+
+// Ligne ondulée sous le texte (signature stylisée)
+doc.setDrawColor(0, 0, 0);
+doc.setLineWidth(0.5);
+
+const waveStartX = nomSignatureX;
+const waveEndX = nomSignatureX + nomSignatureWidth;
+const waveY = y + 3; // un peu sous le texte
+const waveLength = 5;  // longueur d’une vague complète
+const amplitude = 1;   // hauteur de la vague
+
+let previousX = waveStartX;
+let previousY = waveY;
+
+for (let x = waveStartX + 0.5; x <= waveEndX; x += 0.5) {
+  // Calculer y avec une sinusoïde pour l’effet ondulé
+  const yOffset = amplitude * Math.sin(((x - waveStartX) / waveLength) * 2 * Math.PI);
+  const currentY = waveY + yOffset;
+  doc.line(previousX, previousY, x, currentY);
+  previousX = x;
+  previousY = currentY;
+}
+
+
+
+
+
+
+
+
+
+
+/*************** ——— 8. FOOTER  ——— ****************/
+const pageHeight = doc.internal.pageSize.height;
+const footerYStart = pageHeight - 20;
+
+doc.setFontSize(9);
+doc.setFont('Roboto', 'normal');  
+doc.setTextColor(100);
+
+doc.text(this.siteWeb || 'www.votre-entreprise.com', 105, footerYStart, { align: 'center' });
+
+doc.text(
+  `NINA : ${this.nina || 'default'} ; RCCM : ${this.rccm || 'default'} ; NIF : ${
+    this.nif || 'default'
+  } ; Banque : ${this.banque || 'default'}`,
+  105,
+  footerYStart + 5,
+  { align: 'center' }
+);
+
+doc.text(
+  `Adresse : ${this.adresse || 'default'} / ${this.siege || 'default'} - ${
+    this.pays || 'default'
+  }`,
+  105,
+  footerYStart + 10,
+  { align: 'center' }
+);
+
+doc.setTextColor(0);
+
 
   const pdfBlob = doc.output('blob');
-  return new File([pdfBlob], `Facture proforma - ${this.factureProForma.numeroFacture}.pdf`, { type: 'application/pdf' });
+  return new File(
+    [pdfBlob],
+    `Facture proforma - ${this.factureProForma.numeroFacture || 'XXX-XX-XXXX'}.pdf`,
+    { type: 'application/pdf' }
+  );
 }
 
+
+
+
+
+ getUserEntrepriseInfo(): void {
+    this.entrepriseService.getEntrepriseInfo().subscribe({
+      next: (entreprise) => {
+        console.log("Entreprise reçue :", entreprise);
+        this.nom = entreprise.nom; 
+        this.siege = entreprise.siege;
+        this.email = entreprise.email;
+        this.logo = entreprise.logo;
+        this.secteur = entreprise.secteur;
+        this.telephone = entreprise.telephone;
+        this.adresse = entreprise.adresse;
+        this.nif = entreprise.nif;
+        this.banque = entreprise.banque;
+        this.nina = entreprise.nina;
+        this.pays = entreprise.pays;
+        this.rccm = entreprise.rccm;
+        this.siteWeb = entreprise.siteWeb;
+        this.signataire = entreprise.signataire;
+        this.signataireNom = entreprise.signataireNom;
+
+  
+        this.logo = 'http://localhost:8080' + entreprise.logo;
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des infos utilisateur :", err);
+      }
+    });
+  }
+
+
+
+loadFontScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'assets/fonts/police/brittany.js';
+    script.onload = () => resolve();
+    script.onerror = () => reject('Erreur lors du chargement de la police');
+    document.body.appendChild(script);
+  });
 }
+
+
+}
+
+
