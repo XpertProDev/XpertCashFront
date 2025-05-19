@@ -19,9 +19,9 @@
                 <div class="information_cadre">
                     <div class="info_titre_etat">
                     <h4>État</h4>
-                    <div class="etat_container">
+                    <div class="etat_container" [class.has-active]="factureProForma.statut">
                         <!-- Section des états -->
-                        <div class="etat_content" [class.has-active]="factureProForma.statut">
+                        <div class="etat_content">
 
                             <!-- Bouton Brouillon -->
                             <div class="etat_brouillon">

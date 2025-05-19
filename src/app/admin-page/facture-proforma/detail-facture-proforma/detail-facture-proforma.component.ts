@@ -638,9 +638,14 @@ export class DetailFactureProformaComponent implements OnInit {
           status: this.pendingStatut!
         };
 
-        this.historicalEvents.unshift(newEvent);
-        this.historicalEvents = [...this.historicalEvents]; // Forcer la mise à jour
+        // On retire l’éventuel event existant pour ce même statut…
+        this.historicalEvents = this.historicalEvents
+          .filter(e => e.status !== newEvent.status);
 
+        // …et on l’ajoute en tête
+        this.historicalEvents.unshift(newEvent);
+
+      // mise à jour locale
         this.factureProForma = updatedFacture;
         // rechargez/remettez vos flags localement
         this.activeRemise = (updatedFacture.remise ?? 0) > 0;

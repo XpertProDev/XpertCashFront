@@ -1457,8 +1457,10 @@ input.input_focus_type:focus {
 
     .status-badge {
         position: absolute;
-        right: 10px;
-        top: 50%;
+        // right: 10px;
+        // top: 50%;
+        right: -8px;
+        top: 4%;
         transform: translateY(-50%);
         background: rgba(255,255,255,0.9);
         padding: 2px 8px;
