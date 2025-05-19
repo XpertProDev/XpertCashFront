@@ -113,7 +113,7 @@ export class DetailFactureProformaComponent implements OnInit {
   nina!: string;
   pays!: string;
   rccm!: string;
-  siteWeb!: string;
+  siteWeb!: string; 
   signataire!: string
   signataireNom!: string;
 
@@ -602,7 +602,7 @@ export class DetailFactureProformaComponent implements OnInit {
 
   confirmStatusChange(): void {
     if (!this.pendingStatut) return;
-    const selectedUsers = this.users.filter(u => u.selected).map(u => u.id);
+    const selectedUsers = this.users.filter(u => u.selected).map(u => u.id); 
   
     // Préparez toujours vos valeurs de remise & tva
     const remisePourKg = this.activeRemise ? this.remisePourcentage : 0;
@@ -1248,7 +1248,7 @@ const startX = 15 + libelleWidth;
 doc.setFont('helvetica', 'normal');
 doc.setFontSize(10);
 const montantLettreRaw =
-  this.enLettresPipe.transform(this.getTotalTTC()) + ' Francs CFA';
+  this.enLettresPipe.transform(this.getTotalTTC());
 
 const maxWidth = 195 - startX; 
 
