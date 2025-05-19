@@ -1075,7 +1075,7 @@ doc.text(`Email : ${this.email || 'default'}`, infoX, infoY_EmailTel);
 // Calcul d’un X décalé pour le téléphone, selon la largeur de l’email
 const emailText = `Email : ${this.email || 'default'}`;
 const emailWidth = doc.getTextWidth(emailText);
-const spacing = 5; // espace entre email et téléphone
+const spacing = 5;
 
 doc.text(
   `Téléphone : ${this.telephone || 'default'}`,
@@ -1083,24 +1083,23 @@ doc.text(
   infoY_EmailTel
 );
 // ► 1) Calcul de la position Y immédiatement après la dernière info
-const lastInfoY = 27;          // ta dernière ligne d’info
-const gapBelowInfo = 5;        // petit espace avant la ligne
-const sepY = lastInfoY + gapBelowInfo;   // = 32
+const lastInfoY = 27;
+const gapBelowInfo = 5;
+const sepY = lastInfoY + gapBelowInfo;
 
 // ► 2) Double séparateur (<hr>)
 doc.setDrawColor(200);
-doc.line(15, sepY,     195, sepY);       // premier trait
-doc.line(15, sepY + 2, 195, sepY + 2);   // deuxième trait (2 px plus bas)
+doc.line(15, sepY,     195, sepY);
+doc.line(15, sepY + 2, 195, sepY + 2);
 
 /*************** ——— 2. TITRE PRINCIPAL ——— ****************/
-const gapBelowSep = 10;                   // espace visuel avant le titre
-const titleY = sepY + gapBelowSep;       // = 42
+const gapBelowSep = 10;
+const titleY = sepY + gapBelowSep;
 doc.setFontSize(14);
 doc.setFont('helvetica', 'bold');
 const numeroFacture = this.factureProForma.numeroFacture || 'XXX‑XX‑XXXX';
 doc.text(`FACTURE PROFORMA ${numeroFacture}`, 105, titleY, { align: 'center' });
 
-// Soulignement du titre
 doc.setDrawColor(0);
 doc.line(60, titleY + 2, 150, titleY + 2);
 
@@ -1115,7 +1114,7 @@ doc.text(
       : ''
   }`,
   195,
-  titleY + 10,                        // 8 px sous le titre
+  titleY + 10,
   { align: 'right' }
 );
 
@@ -1127,7 +1126,6 @@ const labelY = 65;
 doc.setFont('helvetica', 'bold');
 doc.text(label, labelX, labelY);
 
-// Soulignement précis
 const labelWidth = doc.getTextWidth(label);
 doc.line(labelX, labelY + 0.8, labelX + labelWidth, labelY + 0.8);
 
@@ -1143,13 +1141,11 @@ doc.text(
 
 const objectLabel = 'OBJECT :';
 const objectLabelX = 15;
-// Ici on décale verticalement
 const objectLabelY = 72;
 
 doc.setFont('helvetica', 'bold');
 doc.text(objectLabel, objectLabelX, objectLabelY);
 
-// Soulignement précis sous le texte
 const objectLabelWidth = doc.getTextWidth(objectLabel);
 doc.line(objectLabelX, objectLabelY + 0.8, objectLabelX + objectLabelWidth, objectLabelY + 0.8);
 
@@ -1187,43 +1183,55 @@ doc.text(this.factureProForma.description || 'Objet', 35, objectLabelY);
 
   /*************** ——— 5. TOTAUX ——— ****************/
   
-  let y = (doc as any).lastAutoTable.finalY + 5;
-   y += 6;
-  doc.setFontSize(10);
+let y = (doc as any).lastAutoTable.finalY + 11;
+doc.setFontSize(10);
 
-  const addTotalLine = (label: string, value: string) => {
-    doc.text(label, 150, y, { align: 'right' });
-    doc.text(value, 195, y, { align: 'right' });
-    y += 6;
-  };
+const labelXCenter = (100 + 150) / 2;
+const valueXCenter = (150 + 195) / 2;
 
-  addTotalLine('Total HT', `${this.getTotalHT().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`);
-
-  if (this.activeRemise) {
-    addTotalLine(
-      `Remise (${this.remisePourcentage || 10}%)`,
-      `${this.getMontantRemise().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-    );
+const addTotalLine = (label: string, value: string, isBold = false) => {
+  if (isBold) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
   }
-
-  addTotalLine(
-    'Montant commercial',
-    `${this.getTotalCommercial().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-  );
-
-  if (this.activeTva) {
-    addTotalLine(
-      'TVA (18%)',
-      `${this.getMontantTVA().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-    );
+  doc.text(label, labelXCenter, y, { align: 'center' });
+  doc.text(value, valueXCenter, y, { align: 'center' });
+  if (isBold) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
   }
+  y += 6;
+};
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
+addTotalLine(
+  'Total HT',
+  `${this.getTotalHT().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+);
+
+if (this.activeRemise) {
   addTotalLine(
-    'Montant TTC',
-    `${this.getTotalTTC().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+    `Remise (${this.remisePourcentage || 10}%)`,
+    `${this.getMontantRemise().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
   );
+}
+
+addTotalLine(
+  'Montant commercial',
+  `${this.getTotalCommercial().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+);
+
+if (this.activeTva) {
+  addTotalLine(
+    'TVA (18%)',
+    `${this.getMontantTVA().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+  );
+}
+
+addTotalLine(
+  'Montant TTC',
+  `${this.getTotalTTC().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`,
+  true
+);
 
   /*************** ——— 6. MONTANT EN LETTRES ——— ****************/
 
@@ -1254,6 +1262,9 @@ for (let i = 1; i < lines.length; i++) {
 }
 
 
+
+
+
   /*************** ——— 7. SIGNATURE / CACHET ——— ****************/
 // 1. Texte du nom (en bas)
 doc.setFontSize(12);
@@ -1281,7 +1292,7 @@ doc.setFont('helvetica', 'normal');
 doc.text(nom, nomX, y);
 
 
-y += 12; // espace sous le nom classique
+y += 10; // espace sous le nom classique
 
 doc.setFontSize(9);
 doc.setFont('times', 'italic');
@@ -1322,6 +1333,17 @@ for (let x = waveStartX + 0.5; x <= waveEndX; x += 0.5) {
 
 
 
+// Séparateur presque pleine largeur
+const margin = 10;
+const pageWidth = doc.internal.pageSize.width;
+const x1 = margin;
+const x2 = pageWidth - margin;
+const pageHeight = doc.internal.pageSize.height;
+const footerYStart = pageHeight - 20;
+const separatorY = footerYStart - 5;
+doc.setLineWidth(0.2);
+doc.setDrawColor(150);
+doc.line(x1, separatorY, x2, separatorY);
 
 
 
@@ -1329,8 +1351,6 @@ for (let x = waveStartX + 0.5; x <= waveEndX; x += 0.5) {
 
 
 /*************** ——— 8. FOOTER  ——— ****************/
-const pageHeight = doc.internal.pageSize.height;
-const footerYStart = pageHeight - 20;
 
 doc.setFontSize(9);
 doc.setFont('Roboto', 'normal');  
