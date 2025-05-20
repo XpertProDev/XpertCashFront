@@ -522,8 +522,11 @@
                             'ri-shield-check-line': event.type === 'validation'
                         }"></i>
                         {{event.description}}
-                        <div class="status-badge" *ngIf="event.status">
-                            {{event.status}}
+                        <div *ngIf="event.type === 'approbation' && factureProForma.approbateurs?.length" 
+                            class="approbateurs-list">
+                            <span *ngFor="let approbateur of factureProForma.approbateurs">
+                            {{approbateur.nomComplet}}
+                            </span>
                         </div>
                     </div>
                 </div>

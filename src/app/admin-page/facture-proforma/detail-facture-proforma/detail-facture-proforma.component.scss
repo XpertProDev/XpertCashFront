@@ -1551,3 +1551,17 @@ input.input_focus_type:focus {
 .approbation .status-badge { color: #2ecc71; }
 .envoi .status-badge { color: #9b59b6; }
 .validation .status-badge { color: #2980b9; }
+
+.approbateurs-list {
+  margin-top: 5px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.approbateurs-list span {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 2px 5px;
+  background: #f0f2f5;
+  border-radius: 3px;
+}

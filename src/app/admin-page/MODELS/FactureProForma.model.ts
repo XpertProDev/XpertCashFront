@@ -50,7 +50,11 @@ export interface FactureProForma {
   utilisateurApprobateur?: {
       nomComplet: string;
   };
-  approbateurs?: { nomComplet: string }[];
+  approbateurs?: { 
+    id: number;
+    nomComplet: string;
+    email?: string;
+  }[];
   entreprise?: {
       siege: string;
   };

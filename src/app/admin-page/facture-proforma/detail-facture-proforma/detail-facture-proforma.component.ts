@@ -188,54 +188,59 @@ export class DetailFactureProformaComponent implements OnInit {
 
   // Modifier load Historical Events pour inclure tous les statuts
   private loadHistoricalEvents() {
-      this.historicalEvents = [];
+    this.historicalEvents = [];
 
+    // Événement de création
       // Événement de création
-      if (this.factureProForma.dateCreation) {
-          this.historicalEvents.push({
-              date: new Date(this.factureProForma.dateCreation),
-              user: this.factureProForma.utilisateurCreateur || { nomComplet: 'Système' },
-              type: 'creation',
-              description: 'Création de la facture',
-              status: StatutFactureProForma.BROUILLON
-          });
-      }
+    if (this.factureProForma.dateCreation) {
+      this.historicalEvents.push({
+        date: new Date(this.factureProForma.dateCreation),
+        user: this.factureProForma.utilisateurCreateur || { nomComplet: 'Système' },
+        type: 'creation',
+        description: 'Création de la facture',
+        status: StatutFactureProForma.BROUILLON
+      });
+    }
 
-      // Événement d'approbation
-      if (this.factureProForma.dateApprobation) {
-          this.historicalEvents.push({
-              date: new Date(this.factureProForma.dateApprobation),
-              user: this.factureProForma.utilisateurApprobateur || { nomComplet: 'Approbateur inconnu' },
-              type: 'approbation',
-              description: 'Facture approuvée',
-              status: StatutFactureProForma.APPROUVE
-          });
-      }
+    // Événement d'approbation
+    if (this.factureProForma.dateApprobation) {
+      const approbateurs = this.factureProForma.approbateurs 
+        ? this.factureProForma.approbateurs.map(a => a.nomComplet).join(', ')
+        : 'Aucun approbateur désigné';
 
-      // Événement d'envoi
-      if (this.factureProForma.dateRelance) {
-          this.historicalEvents.push({
-              date: new Date(this.factureProForma.dateRelance),
-              user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Utilisateur inconnu' },
-              type: 'envoi',
-              description: 'Facture envoyée au client',
-              status: StatutFactureProForma.ENVOYE
-          });
-      }
+      this.historicalEvents.push({
+        date: new Date(this.factureProForma.dateApprobation),
+        user: this.factureProForma.utilisateurApprobateur || { nomComplet: 'Approbateur inconnu' },
+        type: 'approbation',
+        description: `Demande d'approbation envoyée à : ${approbateurs}`,
+        status: StatutFactureProForma.APPROBATION
+      });
+    }
 
-      // Événement de validation
-      if (this.factureProForma.statut === StatutFactureProForma.VALIDE) {
-          this.historicalEvents.push({
-              date: new Date(), // À remplacer par la date réelle de validation si disponible
-              user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Validateur inconnu' },
-              type: 'validation',
-              description: 'Facture validée définitivement',
-              status: StatutFactureProForma.VALIDE
-          });
-      }
+    // Événement d'envoi
+    if (this.factureProForma.dateRelance) {
+        this.historicalEvents.push({
+            date: new Date(this.factureProForma.dateRelance),
+            user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Utilisateur inconnu' },
+            type: 'envoi',
+            description: 'Facture envoyée au client',
+            status: StatutFactureProForma.ENVOYE
+        });
+    }
 
-      // Trier par date décroissante
-      this.historicalEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
+    // Événement de validation
+    if (this.factureProForma.statut === StatutFactureProForma.VALIDE) {
+        this.historicalEvents.push({
+            date: new Date(), // À remplacer par la date réelle de validation si disponible
+            user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Validateur inconnu' },
+            type: 'validation',
+            description: 'Facture validée définitivement',
+            status: StatutFactureProForma.VALIDE
+        });
+    }
+
+    // Trier par date décroissante
+    this.historicalEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
   }
 
   private getResponsibleUser() {
@@ -623,46 +628,57 @@ export class DetailFactureProformaComponent implements OnInit {
   
     this.factureProFormaService.updateFactureProforma(
       this.factureId,
-      remisePourKg,
-      tvaFlag,
-      modifications,
-      this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
-    ).subscribe({
-      next: (updatedFacture) => {
-        // Mettre à jour l'historique immédiatement
-        const newEvent: HistoricalEvent = {
-          date: new Date(),
-          user: this.getCurrentUser(),
-          type: this.getEventType(this.pendingStatut!),
-          description: this.getStatusDescription(this.pendingStatut!),
-          status: this.pendingStatut!
-        };
-
-        // On retire l’éventuel event existant pour ce même statut…
-        this.historicalEvents = this.historicalEvents
-          .filter(e => e.status !== newEvent.status);
-
-        // …et on l’ajoute en tête
-        this.historicalEvents.unshift(newEvent);
-
-      // mise à jour locale
-        this.factureProForma = updatedFacture;
-        // rechargez/remettez vos flags localement
-        this.activeRemise = (updatedFacture.remise ?? 0) > 0;
-        this.remisePourcentage = this.activeRemise
-          ? ((updatedFacture.remise ?? 0) / (updatedFacture.totalHT || 1)) * 100
-          : 0;
-        this.activeTva    = updatedFacture.tva;
-        this.showStatusConfirmation = false;
-        this.pendingStatut = null;
-        this.dateRelance = undefined;
+      this.activeRemise ? this.remisePourcentage : undefined,
+      this.activeTva,
+      {
+        statut: this.pendingStatut,
+        // Après (correction)
+        approbateurs: this.pendingStatut === StatutFactureProForma.APPROBATION 
+          ? this.users
+              .filter(user => selectedUsers.includes(user.id))
+              .map(user => ({ 
+                id: user.id, 
+                nomComplet: user.nomComplet 
+              })) 
+          : []
       },
-      error: err => {
-        console.error('Erreur de mise à jour', err);
-        alert('Échec de la mise à jour du statut');
-        this.showStatusConfirmation = false;
-      }
-    });
+      this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
+      ).subscribe({
+        next: (updatedFacture) => {
+          // Mettre à jour l'historique immédiatement
+          const newEvent: HistoricalEvent = {
+            date: new Date(),
+            user: this.getCurrentUser(),
+            type: this.getEventType(this.pendingStatut!),
+            description: this.getStatusDescription(this.pendingStatut!),
+            status: this.pendingStatut!
+          };
+
+          // On retire l’éventuel event existant pour ce même statut…
+          this.historicalEvents = this.historicalEvents
+            .filter(e => e.status !== newEvent.status);
+
+          // …et on l’ajoute en tête
+          this.historicalEvents.unshift(newEvent);
+
+        // mise à jour locale
+          this.factureProForma = updatedFacture;
+          // rechargez/remettez vos flags localement
+          this.activeRemise = (updatedFacture.remise ?? 0) > 0;
+          this.remisePourcentage = this.activeRemise
+            ? ((updatedFacture.remise ?? 0) / (updatedFacture.totalHT || 1)) * 100
+            : 0;
+          this.activeTva    = updatedFacture.tva;
+          this.showStatusConfirmation = false;
+          this.pendingStatut = null;
+          this.dateRelance = undefined;
+        },
+        error: err => {
+          console.error('Erreur de mise à jour', err);
+          alert('Échec de la mise à jour du statut');
+          this.showStatusConfirmation = false;
+        }
+      });
   }
 
   private getStatusDescription(status: StatutFactureProForma): string {
