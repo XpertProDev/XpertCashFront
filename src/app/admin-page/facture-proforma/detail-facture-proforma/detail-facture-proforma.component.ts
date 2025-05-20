@@ -24,7 +24,7 @@ type EventType = 'creation' | 'modification' | 'approbation' | 'envoi' | 'valida
 // Interface modifiée
 interface HistoricalEvent {
   date: Date;
-  user: { nomComplet: string };
+  user: { nomComplet: string }; // Maintenant obligatoire
   type: EventType;
   description: string;
   status?: StatutFactureProForma;
@@ -191,9 +191,8 @@ export class DetailFactureProformaComponent implements OnInit {
     this.historicalEvents = [];
 
     // Événement de création
-      // Événement de création
     if (this.factureProForma.dateCreation) {
-      this.historicalEvents.push({
+       this.historicalEvents.push({
         date: new Date(this.factureProForma.dateCreation),
         user: this.factureProForma.utilisateurCreateur || { nomComplet: 'Système' },
         type: 'creation',
@@ -202,30 +201,41 @@ export class DetailFactureProformaComponent implements OnInit {
       });
     }
 
-    // Événement d'approbation
-    if (this.factureProForma.dateApprobation) {
-      const approbateurs = this.factureProForma.approbateurs 
-        ? this.factureProForma.approbateurs.map(a => a.nomComplet).join(', ')
-        : 'Aucun approbateur désigné';
+    // Événement de demande d'approbation
+    if (this.factureProForma.dateApprobation && this.factureProForma.approbateurs) {
+      const approbateurs = this.factureProForma.approbateurs
+        .map(a => a.nomComplet)
+        .join(', ');
 
       this.historicalEvents.push({
         date: new Date(this.factureProForma.dateApprobation),
-        user: this.factureProForma.utilisateurApprobateur || { nomComplet: 'Approbateur inconnu' },
+        user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Utilisateur inconnu' },
         type: 'approbation',
         description: `Demande d'approbation envoyée à : ${approbateurs}`,
         status: StatutFactureProForma.APPROBATION
       });
     }
 
+    // Événement d'approbation
+    if (this.factureProForma.dateApprobation) {
+      this.historicalEvents.push({
+        date: new Date(this.factureProForma.dateApprobation),
+        user: this.factureProForma.utilisateurApprobateur || { nomComplet: 'Approbateur' },
+        type: 'approbation',
+        description: 'Facture approuvée',
+        status: StatutFactureProForma.APPROUVE
+      });
+    }
+
     // Événement d'envoi
     if (this.factureProForma.dateRelance) {
-        this.historicalEvents.push({
-            date: new Date(this.factureProForma.dateRelance),
-            user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Utilisateur inconnu' },
-            type: 'envoi',
-            description: 'Facture envoyée au client',
-            status: StatutFactureProForma.ENVOYE
-        });
+      this.historicalEvents.push({
+        date: new Date(this.factureProForma.dateRelance),
+        user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Expéditeur' },
+        type: 'envoi',
+        description: 'Facture envoyée au client',
+        status: StatutFactureProForma.ENVOYE
+      });
     }
 
     // Événement de validation
@@ -608,6 +618,17 @@ export class DetailFactureProformaComponent implements OnInit {
 
   confirmStatusChange(): void {
     if (!this.pendingStatut) return;
+
+    // Sauvegarder la date appropriée selon le statut
+    switch(this.pendingStatut) {
+      case StatutFactureProForma.APPROUVE:
+        this.factureProForma.dateApprobation = new Date().toISOString();
+        break;
+      case StatutFactureProForma.ENVOYE:
+        this.factureProForma.dateRelance = new Date().toISOString();
+        break;
+    }
+    
     const selectedUsers = this.users.filter(u => u.selected).map(u => u.id);
   
     // Préparez toujours vos valeurs de remise & tva
