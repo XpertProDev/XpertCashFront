@@ -126,6 +126,7 @@ envoyerFactureEmail(
   factureId: number,
   emailRequest: {
     to: string;
+    cc: string;
     subject: string;
     body: string;
     attachments?: File[];
@@ -133,6 +134,7 @@ envoyerFactureEmail(
 ): Observable<string> {
   const formData = new FormData();
   formData.append('to', emailRequest.to);
+  formData.append('cc', emailRequest.cc);
   formData.append('subject', emailRequest.subject);
   formData.append('body', emailRequest.body);
 

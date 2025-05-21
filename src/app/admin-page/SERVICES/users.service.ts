@@ -178,16 +178,15 @@ export class UsersService {
 
 
   getAllUsersOfEntreprise(entrepriseId: number): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
-    
-    if (!token) {
-      console.error('Aucun token trouvé');
-      return throwError('Aucun token trouvé');
-    }
-  
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          console.error("Aucun token trouvé, requête annulée.");
+          return throwError(() => new Error("Aucun token trouvé"));
+        }
+      
+        const headers = new HttpHeaders({
+          Authorization: `Bearer ${token}`
+        });
   
     return this.http.get<any[]>(`${this.apiUrl}/entreprise/${entrepriseId}/allusers`, { headers });
   }

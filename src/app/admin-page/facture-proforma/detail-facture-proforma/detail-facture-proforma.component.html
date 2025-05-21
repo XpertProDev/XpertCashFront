@@ -490,132 +490,49 @@
         </div>
     </div>
  
-    <!-- Brouillon  -->
+         <!-- Remplacer toute la section container_brouillon_facture par -->
     <div class="container_brouillon_facture">
-        <div class="brouillon_facture">
-            <!-- Créé par -->
-            <div class="brouillon_double">
-                <h5 class="titre_brouillont">Crée par :</h5>
-                <div class="contenue_brouillont">
-                    <h6>{{ factureProForma.utilisateurCreateur?.nomComplet || 'Non spécifié' }}</h6>
-                </div>
+        <div class="historical-timeline">
+            <div class="title_historique">
+                <h6>Historique des actions</h6>
             </div>
-        
-            <!-- Modifié par -->
-            <div class="brouillon_double">
-                <h5 class="titre_brouillont">Modifier par :</h5>
-                <div class="contenue_brouillont">
-                    <h6>{{ factureProForma.utilisateurModificateur?.nomComplet || 'Aucune modification' }}</h6>
+            <div *ngFor="let event of historicalEvents" class="timeline-event">
+                <div class="event-avatar">
+                <img src="assets/img/profil.png" alt="Avatar" class="avatar">
                 </div>
-            </div>
-        
-            <!-- Section "Approuver par" modifiée -->
-            <div class="brouillon_double">
-                <h5 class="titre_brouillont">
-                {{ factureProForma.statut === statusOptions.APPROBATION ? 'Personnes à approuver' : 'Approuvé par' }} :
-                </h5>
-                <div class="contenue_brouillont">
-                <!-- Mode approbation en cours -->
-                <div *ngIf="factureProForma.statut === statusOptions.APPROBATION">
-                    <h6 *ngFor="let approbateur of factureProForma.approbateurs">
-                    {{ approbateur.nomComplet }} (en attente)
-                    </h6>
+                
+                <div class="event-content">
+                <div class="event-header">
+                    <span class="user-name">{{event.user.nomComplet}}</span>
+                    <span class="event-date">{{event.date | date: 'dd/MM/yyyy HH:mm'}}</span>
                 </div>
-            
-                <!-- Mode déjà approuvé -->
-                <div *ngIf="factureProForma.statut !== statusOptions.APPROBATION">
-                    <!-- Afficher uniquement l'approbateur effectif -->
-                    <h6 *ngIf="factureProForma.utilisateurApprobateur">
-                    {{ factureProForma.utilisateurApprobateur.nomComplet }}
-                    </h6>
-                    <h6 *ngIf="!factureProForma.utilisateurApprobateur">
-                    Aucune approbation validée
-                    </h6>
-                </div>
-                </div>
-            </div>
-    
-             <!-- Action par -->
-             <div class="brouillon_double">
-                <h5 class="titre_brouillont">Dernière action :</h5>
-                <div class="contenue_brouillont">
-                  <h6>
-                    <!-- Affichage personnalisé du statut -->
-                    <span *ngIf="factureProForma.statut === statusOptions.APPROBATION">
-                      En attente d'approbation
-                    </span>
-                    <span *ngIf="factureProForma.statut !== statusOptions.APPROBATION">
-                      {{ factureProForma.statut || 'Aucune activité' }}
-                    </span>
-                  </h6>
-                </div>
-              </div>
-    
-            <!-- Validé par (si le statut est VALIDE) -->
-            <div class="brouillon_double" *ngIf="factureProForma.statut === 'VALIDE'">
-                <h5 class="titre_brouillont">Valider par :</h5>
-                <div class="contenue_brouillont">
-                    <!-- Utilisateur approbateur direct -->
-                    <!-- <h6 *ngIf="factureProForma.utilisateurApprobateur?.nomComplet">
-                        {{ factureProForma.utilisateurApprobateur?.nomComplet }}
-                    </h6> -->
-                    <h6>{{ factureProForma.utilisateurModificateur?.nomComplet || 'Aucune modification' }}</h6>
+                
+                <div class="event-action" [ngClass]="{
+                    'creation': event.type === 'creation',
+                    'approbation': event.type === 'approbation',
+                    'envoi': event.type === 'envoi',
+                    'validation': event.type === 'validation'
+                }">
+                    <i class="action-icon" [ngClass]="{
+                    'ri-file-add-line': event.type === 'creation',
+                    'ri-checkbox-circle-line': event.type === 'approbation',
+                    'ri-send-plane-line': event.type === 'envoi',
+                    'ri-shield-check-line': event.type === 'validation'
+                    }"></i>
+                    {{event.description}}
                     
-                    <!-- Premier approbateur de la liste -->
-                    <h6 *ngIf="!factureProForma.utilisateurApprobateur && (factureProForma.approbateurs ?? []).length > 0">
-                        {{ (factureProForma.approbateurs ?? [])[0].nomComplet }}
-                        <!-- {{ getFirstApprobateurName() }} -->
-                    </h6>
-            
-                    <!-- Fallback si aucune information -->
-                    <h6 *ngIf="!factureProForma.utilisateurApprobateur && (factureProForma.approbateurs ?? []).length === 0">
-                        Information non disponible
-                    </h6>
+                    <!-- Afficher les approbateurs pour les demandes d'approbation -->
+                    <div *ngIf="event.status === 'APPROBATION'" class="approbateurs-list">
+                    <span *ngFor="let approbateur of factureProForma.approbateurs">
+                        {{approbateur.nomComplet}}
+                    </span>
+                    </div>
                 </div>
-            </div>
-        
-            <!-- Date de création -->
-            <div class="brouillon_double">
-                <h5 class="titre_brouillont">Date de création :</h5>
-                <div class="contenue_brouillont">
-                    <h6>{{ factureProForma.dateCreation | date: 'dd/MM/yyyy' }}</h6>
-                </div>
-            </div>
-        
-            <!-- Date de modification (si disponible) -->
-            <div class="brouillon_double" *ngIf="factureProForma.dateApprobation">
-                <h5 class="titre_brouillont">Date d'approbation :</h5>
-                <div class="contenue_brouillont">
-                    <h6>{{ factureProForma.dateApprobation | date: 'dd/MM/yyyy' }}</h6>
                 </div>
             </div>
         </div>
-
-
-            <!--
-            <ul class="notifications">
-                <li class="notification">
-                    <div class="media">
-                    <img class="img-radius" src="assets/img/profil.png" alt="User Image" />
-                    <div class="media-body">
-                        <p class="user-info">
-                        <strong> {{ factureProForma.utilisateurCreateur?.nomComplet }}</strong>
-                        <span class="role">(Administrateur)</span>
-                        <span class="n-time text-muted">
-                            <i class="icon feather icon-clock"></i>
-                        {{ factureProForma.dateCreation | date: 'dd/MM/yyyy' }}
-                        </span> 
-                        </p>
-                        <p class="action-info">
-                        <b>Création</b>
-                        </p>
-                        <p class="description">Facture créée avec succès</p>
-                    </div>
-                    </div>
-                </li>
-            </ul>
-            -->
     </div>
+    
 
 
 
@@ -715,7 +632,7 @@
             <div class="email_field">
                 <!-- // Titre email field -->
                 <div class="titre_email_field titre_email_field_vers">
-                    Vers
+                    À
                 </div>
                 <!-- // Input email field -->
                 <div class="input_email_field">
@@ -740,6 +657,39 @@
                     </div>
                 </div>
             </div>
+
+                 <!-- // Cc email field -->
+            <div class="email_field" >
+                <!-- // Titre email field -->
+                <div class="titre_email_field titre_email_field_vers">
+                    Cc
+                </div>
+                <!-- // Input email field -->
+                <div class="input_email_field">
+                    <div class="champ_input" style="margin-right: 15px;">
+                        <div class="email-input-container">
+                           <span *ngFor="let email of emailCcList; let i = index" class="email-chip">
+                            {{email}}
+                            <span 
+                                class="remove-chip" 
+                                *ngIf="email !== emailUtilisateur" 
+                                (click)="removeCcEmail(i)"
+                            >✖</span>
+                            </span>
+
+                            <input 
+                                type="text"
+                                [(ngModel)]="currentCcEmail"
+                                (keydown.enter)="addCcEmail()"
+                                (keydown.backspace)="handleCcBackspace()"
+                                placeholder="Ajouter des adresses en copie..."
+                                class="inline-email-input"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <!-- // Suject field  -->
             <div class="email_field">
@@ -798,7 +748,8 @@
 
         <div class="contenue_form_envoyer contenue_form_image_physique" *ngIf="methodeEnvoi === 'physique'">
             <div class="image_delivery">
-                <img src="assets/img/image_product.png">
+                <img src="assets/img/physique.png">
+                <p class="tchia">TCHAK3DA</p>
             </div>
         </div>
 
@@ -817,7 +768,7 @@
         <button *ngIf="methodeEnvoi === 'physique'" 
                 class="btn" 
                 (click)="confirmEmailSend()">
-          Confirmer l'envoi physique
+          Confirmer 
         </button>
                     </div>
                     <div class="btn_envoie_ignore">

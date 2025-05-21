@@ -26,6 +26,17 @@ interface EmailAttachment {
   file: File;
 }
 
+type EventType = 'creation' | 'modification' | 'approbation' | 'envoi' | 'validation';
+
+// Interface modifiée
+interface HistoricalEvent {
+  date: Date;
+  user: { nomComplet: string }; // Maintenant obligatoire
+  type: EventType;
+  description: string;
+  status?: StatutFactureProForma;
+}
+
 @Component({
   selector: 'app-detail-facture-proforma',
   imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe,  EnLettresPipe],
@@ -42,7 +53,6 @@ export class DetailFactureProformaComponent implements OnInit {
   remisePourcentage: number = 0;
   tva: number = 0;
   errorMessage: string = '';
-  userEntrepriseId: number | null = null;
   nomEntreprise: string = '';
   produits: Produit[] = [];
   // Nouvelle variable pour stocker les ajustements locaux
@@ -98,12 +108,17 @@ export class DetailFactureProformaComponent implements OnInit {
   emailDestinatairesList: string[] = [];
   currentEmail = '';
 
+  emailCcList: string[] = [];
+currentCcEmail: string = '';
+
+emailUtilisateur: string = '';
+
 
   facture: FactureProForma | null = null;
 
   nom: string | null = null;
   siege!: string;
-  email!: string;
+  email: string = '';
   logo: string | null = null; 
   secteur!: string;
   telephone!: string;
@@ -116,8 +131,10 @@ export class DetailFactureProformaComponent implements OnInit {
   siteWeb!: string; 
   signataire!: string
   signataireNom!: string;
+  userEntrepriseId!: number | null;
 
-
+ historicalEvents: HistoricalEvent[] = [];
+ 
 
 
   attachments: EmailAttachment[] = [];
@@ -141,10 +158,10 @@ export class DetailFactureProformaComponent implements OnInit {
     ) {}
 
   ngOnInit(): void {
-    this. getUserEntrepriseInfo();
+    this.getUserEntrepriseInfo(); 
     this.getProduits();
     this.getUserInfo();
-    this.loadUsersOfEntreprise(this.userEntrepriseId!);
+    
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.factureId = +idParam;
@@ -199,11 +216,89 @@ export class DetailFactureProformaComponent implements OnInit {
   getTotalTTC(): number {
     return this.getTotalApresRemise() + this.getMontantTVA();
   }
+   // Modifier load Historical Events pour inclure tous les statuts
+  private loadHistoricalEvents() {
+    this.historicalEvents = [];
+
+    // Événement de création
+    if (this.factureProForma.dateCreation) {
+       this.historicalEvents.push({
+        date: new Date(this.factureProForma.dateCreation),
+        user: this.factureProForma.utilisateurCreateur || { nomComplet: 'Système' },
+        type: 'creation',
+        description: 'Création de la facture',
+        status: StatutFactureProForma.BROUILLON
+      });
+    }
+     // Événement de demande d'approbation
+    if (this.factureProForma.dateApprobation && this.factureProForma.approbateurs) {
+      const approbateurs = this.factureProForma.approbateurs
+        .map(a => a.nomComplet)
+        .join(', ');
+
+      this.historicalEvents.push({
+        date: new Date(this.factureProForma.dateApprobation),
+        user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Utilisateur inconnu' },
+        type: 'approbation',
+        description: `Demande d'approbation envoyée à : ${approbateurs}`,
+        status: StatutFactureProForma.APPROBATION
+      });
+    }
+        // Événement d'approbation
+    if (this.factureProForma.dateApprobation) {
+      this.historicalEvents.push({
+        date: new Date(this.factureProForma.dateApprobation),
+        user: this.factureProForma.utilisateurApprobateur || { nomComplet: 'Approbateur' },
+        type: 'approbation',
+        description: 'Facture approuvée',
+        status: StatutFactureProForma.APPROUVE
+      });
+    }
+
+    // Événement d'envoi
+    if (this.factureProForma.dateRelance) {
+      this.historicalEvents.push({
+        date: new Date(this.factureProForma.dateRelance),
+        user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Expéditeur' },
+        type: 'envoi',
+        description: 'Facture envoyée au client',
+        status: StatutFactureProForma.ENVOYE
+      });
+    }
+
+    // Événement de validation
+    if (this.factureProForma.statut === StatutFactureProForma.VALIDE) {
+        this.historicalEvents.push({
+            date: new Date(), // À remplacer par la date réelle de validation si disponible
+            user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Validateur inconnu' },
+            type: 'validation',
+            description: 'Facture validée définitivement',
+            status: StatutFactureProForma.VALIDE
+        });
+    }
+
+    // Trier par date décroissante
+    this.historicalEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
+  }
+
+  private getResponsibleUser() {
+    switch(this.factureProForma.statut) {
+        case StatutFactureProForma.APPROUVE:
+            return this.factureProForma.utilisateurApprobateur || { nomComplet: 'Approbateur inconnu' };
+        case StatutFactureProForma.VALIDE:
+            return this.factureProForma.utilisateurModificateur || { nomComplet: 'Validateur inconnu' };
+        default:
+            return this.factureProForma.utilisateurModificateur || { nomComplet: 'Utilisateur inconnu' };
+    }
+  }
+
+
 
   loadFactureProforma(id: number): void {
     this.factureProFormaService.getFactureProformaById(id).subscribe({
       next: (data) => {
         this.factureProForma = data;
+        this.loadHistoricalEvents();
 
          // Initialise les lignes confirmées avec les données existantes
         this.confirmedLignes = data.lignesFacture.map(l => ({
@@ -264,8 +359,7 @@ export class DetailFactureProformaComponent implements OnInit {
   // Liste Produits
   async getProduits() {
     return new Promise<void>((resolve) => {
-      const token = localStorage.getItem('authToken');
-      if (token && this.userEntrepriseId) {
+      if (this.userEntrepriseId) {
         this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
           next: (data: Produit[]) => {
             this.produits = data;
@@ -274,8 +368,6 @@ export class DetailFactureProformaComponent implements OnInit {
           },
           error: (err) => console.error('Erreur récupération produits :', err)
         });
-      } else {
-        console.error('Token manquant ou entreprise ID non défini');
       }
     });
   }
@@ -286,10 +378,20 @@ export class DetailFactureProformaComponent implements OnInit {
         this.nomEntreprise = user.nomEntreprise;
         this.userEntrepriseId = user.entrepriseId;
         this.siege = user.siege;
+        this.email = user.email;
 
-        this.getProduits().then(() => { 
+
+
+        if (this.email && !this.emailCcList.includes(this.email)) {
+            this.emailCcList.push(this.email);
+          }
+
+        
+
+         this.getProduits().then(() => { 
           this.loadFactureProforma(this.factureId); 
         });
+
   
         console.log("Infos utilisateur récupérées :", user);
       },
@@ -546,6 +648,11 @@ export class DetailFactureProformaComponent implements OnInit {
     return this.isStatusTransitionAllowed(targetStatus);
   }
 
+   private updateHistoricalEvents(newEvent: any) {
+    this.historicalEvents.unshift(newEvent); // Ajoute en haut de la liste
+    this.cdr.detectChanges(); // Force la détection de changement
+  }
+
   // confirmStatusChange(): void {
   //   if (!this.pendingStatut) return;
 
@@ -627,25 +734,72 @@ export class DetailFactureProformaComponent implements OnInit {
       modifications,
       this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
     ).subscribe({
-      next: updatedFacture => {
-        this.factureProForma = updatedFacture;
-        // rechargez/remettez vos flags localement
-        this.activeRemise = (updatedFacture.remise ?? 0) > 0;
-        this.remisePourcentage = this.activeRemise
-          ? ((updatedFacture.remise ?? 0) / (updatedFacture.totalHT || 1)) * 100
-          : 0;
-        this.activeTva    = updatedFacture.tva;
-        this.showStatusConfirmation = false;
-        this.pendingStatut = null;
-        this.dateRelance = undefined;
-      },
-      error: err => {
-        console.error('Erreur de mise à jour', err);
-        alert('Échec de la mise à jour du statut');
-        this.showStatusConfirmation = false;
-      }
-    });
+      next: (updatedFacture) => {
+         // Mettre à jour l'historique immédiatement
+          const newEvent: HistoricalEvent = {
+            date: new Date(),
+            user: this.getCurrentUser(),
+            type: this.getEventType(this.pendingStatut!),
+            description: this.getStatusDescription(this.pendingStatut!),
+            status: this.pendingStatut!
+          };
+             // On retire l’éventuel event existant pour ce même statut…
+          this.historicalEvents = this.historicalEvents
+            .filter(e => e.status !== newEvent.status);
+
+          // …et on l’ajoute en tête
+          this.historicalEvents.unshift(newEvent);
+
+             // mise à jour locale
+          this.factureProForma = updatedFacture;
+          // rechargez/remettez vos flags localement
+          this.activeRemise = (updatedFacture.remise ?? 0) > 0;
+          this.remisePourcentage = this.activeRemise
+            ? ((updatedFacture.remise ?? 0) / (updatedFacture.totalHT || 1)) * 100
+            : 0;
+          this.activeTva    = updatedFacture.tva;
+          this.showStatusConfirmation = false;
+          this.pendingStatut = null;
+          this.dateRelance = undefined;
+        },
+        error: err => {
+          console.error('Erreur de mise à jour', err);
+          alert('Échec de la mise à jour du statut');
+          this.showStatusConfirmation = false;
+        }
+      });
   }  
+
+    private getStatusDescription(status: StatutFactureProForma): string {
+    const descriptions = {
+        [StatutFactureProForma.BROUILLON]: 'Retour au brouillon',
+        [StatutFactureProForma.APPROBATION]: 'Demande d\'approbation envoyée',
+        [StatutFactureProForma.APPROUVE]: 'Facture approuvée',
+        [StatutFactureProForma.ENVOYE]: 'Facture envoyée au client',
+        [StatutFactureProForma.VALIDE]: 'Facture validée définitivement'
+    };
+    return descriptions[status];
+  }
+
+  // Ajouter ces méthodes helper
+  private getCurrentUser() {
+      // À adapter selon votre système d'authentification
+      return { nomComplet: 'Utilisateur Actuel', id: 123 };
+  }
+
+  // Dans la classe du composant
+  private getEventType(status: StatutFactureProForma): EventType {
+    const statusMap: Record<StatutFactureProForma, EventType> = {
+      [StatutFactureProForma.BROUILLON]: 'modification',
+      [StatutFactureProForma.APPROBATION]: 'approbation',
+      [StatutFactureProForma.APPROUVE]: 'approbation',
+      [StatutFactureProForma.ENVOYE]: 'envoi',
+      [StatutFactureProForma.VALIDE]: 'validation'
+    };
+
+    return statusMap[status] || 'modification';
+  }
+
 
   cancelStatusChange(): void {
     this.showStatusConfirmation = false;
@@ -664,24 +818,30 @@ export class DetailFactureProformaComponent implements OnInit {
   }
     
   
-  loadUsersOfEntreprise(entrepriseId: number) {
-    this.isLoading = true;
-    this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
-      next: (data) => {
-        this.users = data.map(user => ({
-          ...user,
-          selected: false
-        }));
-        this.filteredUsers = this.users; // Mise à jour des utilisateurs filtrés
-        this.isLoading = false;
-        console.log('Utilisateurs récupérés:', this.users);
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des utilisateurs', err);
-        this.isLoading = false;
-      }
-    });
+loadUsersOfEntreprise(entrepriseId: number) {
+  if (entrepriseId == null) {
+    console.error('ID d’entreprise invalide:', entrepriseId);
+    return;
   }
+
+  this.isLoading = true;
+  this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
+    next: (data) => {
+      this.users = data.map(user => ({
+        ...user,
+        selected: false
+      }));
+      this.filteredUsers = this.users;
+      this.isLoading = false;
+      console.log('Utilisateurs récupérés:', this.users);
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des utilisateurs', err);
+      this.isLoading = false;
+    }
+  });
+}
+
 
   // Méthode appelée au changement de <select>
   onProduitChange(produitId: number | null, ligne: any, index: number) {
@@ -756,11 +916,13 @@ private async handleEmailSending() {
   // Collecter les données de l'email
   const emailData = {
     to: this.emailDestinatairesList.join(','),
+    cc: this.emailCcList.join(','),
     subject: this.subjectInput.nativeElement.value.trim(),
     body: this.editableContent.nativeElement.innerHTML,
     attachments: await this.prepareAttachments()
   };
-
+  console.log("les donner du mail", emailData);
+  
   // Envoyer l'email via le service
   await this.factureProFormaService.envoyerFactureEmail(
     this.factureId,
@@ -801,6 +963,7 @@ private async prepareAttachments(): Promise<File[]> {
           this.factureId,
           {
               to: this.emailDestinatairesList.join(','),
+              cc: this.emailCcList.join(','),
               subject: sujet,
               body: corps
           }
@@ -829,6 +992,8 @@ private async prepareAttachments(): Promise<File[]> {
   // Méthodes helper
   private resetEmailForm() {
   this.emailDestinatairesList = [];
+  this.emailCcList = [];
+  this.emailCcList = [];
   this.currentEmail = '';
   this.attachments = [];
   this.editableContent.nativeElement.innerHTML = ''; // Réinitialiser le contenu éditable
@@ -930,10 +1095,25 @@ onFileSelected(event: Event): void {
       this.currentEmail = '';
     }
   }
+addCcEmail(): void {
+  const email = this.currentCcEmail.trim();
+
+  if (email && this.validateEmail(email)) {
+    if (!this.emailCcList.includes(email)) {
+      this.emailCcList.push(email);
+    }
+    this.currentCcEmail = '';
+  }
+}
+
 
   // Supprimer un email
   removeEmail(index: number): void {
     this.emailDestinatairesList.splice(index, 1);
+  }
+
+   removeCcEmail(index: number): void {
+    this.emailCcList.splice(index, 1);
   }
 
   // Validation simple d'email
@@ -946,6 +1126,12 @@ onFileSelected(event: Event): void {
   handleBackspace(): void {
     if (!this.currentEmail && this.emailDestinatairesList.length > 0) {
       this.emailDestinatairesList.pop();
+    }
+  }
+
+    handleCcBackspace(): void {
+    if (!this.currentCcEmail && this.emailCcList.length > 0) {
+      this.emailCcList.pop();
     }
   }
 
@@ -1053,12 +1239,31 @@ async generatePDFAttachment(): Promise<File> {
 
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const imgData = this.logo;
+  let imageType = 'PNG';
+
 
 
   /*************** ——— 1. HEADER ——— ****************/
+   /*
   if (imgData) {
    doc.addImage(imgData, 'PNG', 15, 10, 47, 17);
   }
+  */
+
+
+  if (imgData) {
+  if (imgData.startsWith('data:image/jpeg') || imgData.startsWith('data:image/jpg')) {
+    imageType = 'JPEG';  // <- IMPORTANT : jsPDF attend 'JPEG'
+  } else if (imgData.startsWith('data:image/png')) {
+    imageType = 'PNG';
+  } else {
+    console.warn('Type d’image non reconnu, PNG utilisé par défaut');
+  }
+
+  doc.addImage(imgData, imageType, 15, 10, 47, 17);
+  console.log('Image ajoutée avec succès', imgData);
+}
+
 
 /*************** ——— 1. INFOS SOCIÉTÉ ——— ****************/
 const infoX = 70;
@@ -1395,6 +1600,8 @@ doc.setTextColor(0);
     this.entrepriseService.getEntrepriseInfo().subscribe({
       next: (entreprise) => {
         console.log("Entreprise reçue :", entreprise);
+        this.userEntrepriseId = entreprise.id ?? null;
+
         this.nom = entreprise.nom; 
         this.siege = entreprise.siege;
         this.email = entreprise.email;
@@ -1413,6 +1620,15 @@ doc.setTextColor(0);
 
   
         this.logo = 'http://localhost:8080' + entreprise.logo;
+
+          // ✅ Appelle ici loadUsersOfEntreprise une fois qu'on a l'ID
+      if (this.userEntrepriseId) {
+        this.loadUsersOfEntreprise(this.userEntrepriseId);
+      } else {
+        console.error('ID entreprise manquant après chargement');
+        console.log("Entreprise reçue :", JSON.stringify(entreprise, null, 2));
+
+      }
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);

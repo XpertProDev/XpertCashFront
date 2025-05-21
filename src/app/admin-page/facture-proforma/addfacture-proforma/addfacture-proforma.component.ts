@@ -139,7 +139,6 @@ export class AddfactureProformaComponent implements OnInit {
       this.tva = 0; // Réinitialise si désactivé
     }
   }
-
   onRemiseChange() {
     // Force la mise à jour des valeurs
     this.remisePourcentage = Number(this.remisePourcentage);
@@ -398,28 +397,38 @@ export class AddfactureProformaComponent implements OnInit {
   ? this.dateFacture.split('T')[0]
   : this.dateFacture;  
 
-  const [year, month, day] = dateSeule.split('-');
-  const dateFrench = `${day}-${month}-${year}`;
 
-    const facture: any = {
-      description: this.description,
-       dateFacture: dateFrench,
-      lignesFacture: allLignes.map(ligne => ({
-        produit: { id: ligne.produitId},
-        quantite: ligne.quantite,
-        ligneDescription: ligne.ligneDescription,
-      }))
-    };
+
+      const facture: any = {
+    description: this.description,
+    lignesFacture: allLignes.map(ligne => ({
+      produit: { id: ligne.produitId },
+      quantite: ligne.quantite,
+      ligneDescription: ligne.ligneDescription,
+    }))
+  };
+
+    // Inclure dateFacture uniquement si renseignée
+  if (this.dateFacture) {
+    const dateSeule = this.dateFacture.includes('T')
+      ? this.dateFacture.split('T')[0]
+      : this.dateFacture;
+    const [year, month, day] = dateSeule.split('-');
+    const dateFrench = `${day}-${month}-${year}`;
+    facture.dateFacture = dateFrench;
+  }
+
+
      console.log('dateFacture raw =', this.dateFacture);
 
     if (this.typeDestinataire === 'client' && this.selectedClientId) {
-      facture.client = { id: this.selectedClientId };
-    } else if (this.typeDestinataire === 'entreprise' && this.selectedEntrepriseId) {
-      facture.entrepriseClient = { id: this.selectedEntrepriseId };
-    } else {
-      console.error('Destinataire non spécifié');
-      return;
-    }
+    facture.client = { id: this.selectedClientId };
+  } else if (this.typeDestinataire === 'entreprise' && this.selectedEntrepriseId) {
+    facture.entrepriseClient = { id: this.selectedEntrepriseId };
+  } else {
+    console.error('Destinataire non spécifié');
+    return;
+  }
 
     // // Appel du service avec 4 paramètres
     // this.factureProFormaService.creerFactureProforma(
