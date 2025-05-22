@@ -35,6 +35,7 @@ interface HistoricalEvent {
   type: EventType;
   description: string;
   status?: StatutFactureProForma;
+  Montant?: number; // Montant de la facture
 }
 
 @Component({
@@ -1651,5 +1652,6 @@ async getBase64ImageFromURL(url: string): Promise<string> {
     reader.readAsDataURL(blob);
   });
 }
+
 
 }
