@@ -1000,13 +1000,12 @@ export class DetailFactureProformaComponent implements OnInit {
   }
 
   async generatePDFAttachment(): Promise<File> {
-
     try {
       const entreprise = await firstValueFrom(this.entrepriseService.getEntrepriseInfo());
       this.nomEntreprise = entreprise.nom ?? '—';
       this.siege = entreprise.siege ?? '—';
       this.email = entreprise.email ?? '—';
-      this.logo     = 'http://localhost:8080' + entreprise.logo;
+      this.logo = 'http://localhost:8080' + (entreprise.logo?.startsWith('/') ? entreprise.logo : '/' + entreprise.logo);
       this.secteur = entreprise.secteur ?? '—';
       this.telephone = entreprise.telephone ?? '—';
       this.adresse = entreprise.adresse ?? '—';
@@ -1018,27 +1017,24 @@ export class DetailFactureProformaComponent implements OnInit {
       this.siteWeb  = entreprise.siteWeb  ?? '—';
       this.signataire  = entreprise.signataire  ?? '—';
       this.signataireNom  = entreprise.signataireNom  ?? '—';
-
     } catch (error) {
       console.error('Erreur de récupération des infos entreprise :', error);
     }
 
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    const imgData = this.logo;
-    let imageType = 'PNG';
+    /*************** ——— 1. HEADER ——— ****************/
+    try {
+      if (this.logo) {
+          const imgData = await this.getBase64ImageFromURL(this.logo);
+          const formatMatch = imgData.match(/^data:image\/(png|jpeg);/);
+          const format = formatMatch ? formatMatch[1].toUpperCase() : 'PNG';
+          doc.addImage(imgData, format, 15, 10, 47, 17);
 
-    if (imgData) {
-      if (imgData.startsWith('data:image/jpeg') || imgData.startsWith('data:image/jpg')) {
-        imageType = 'JPEG';  // <- IMPORTANT : jsPDF attend 'JPEG'
-      } else if (imgData.startsWith('data:image/png')) {
-        imageType = 'PNG';
-      } else {
-        console.warn('Type d’image non reconnu, PNG utilisé par défaut');
       }
-
-      doc.addImage(imgData, imageType, 15, 10, 47, 17);
-      console.log('Image ajoutée avec succès', imgData);
+    } catch (imgErr) {
+      console.error('Erreur lors du chargement ou de l’ajout du logo :', imgErr);
     }
+
     /*************** ——— 1. INFOS SOCIÉTÉ ——— ****************/
     const infoX = 70;
     const infoY_EmailTel = 22;
@@ -1140,7 +1136,6 @@ export class DetailFactureProformaComponent implements OnInit {
       this.getPrixVente(ligne.produitId).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '),
       ligne.quantite.toString(),
       this.getMontantTotal(ligne).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-
     ]);
 
     (doc as any).autoTable({
@@ -1159,7 +1154,7 @@ export class DetailFactureProformaComponent implements OnInit {
     });
 
     /*************** ——— 5. TOTAUX ——— ****************/
-    
+      
     let y = (doc as any).lastAutoTable.finalY + 11;
     doc.setFontSize(10);
 
@@ -1225,7 +1220,7 @@ export class DetailFactureProformaComponent implements OnInit {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     const montantLettreRaw =
-      this.enLettresPipe.transform(this.getTotalTTC());
+    this.enLettresPipe.transform(this.getTotalTTC());
 
     const maxWidth = 195 - startX; 
 
@@ -1342,12 +1337,12 @@ export class DetailFactureProformaComponent implements OnInit {
     doc.setTextColor(0);
 
 
-      const pdfBlob = doc.output('blob');
-      return new File(
-        [pdfBlob],
-        `Facture proforma - ${this.factureProForma.numeroFacture || 'XXX-XX-XXXX'}.pdf`,
-        { type: 'application/pdf' }
-      );
+    const pdfBlob = doc.output('blob');
+    return new File(
+      [pdfBlob],
+      `Facture proforma - ${this.factureProForma.numeroFacture || 'XXX-XX-XXXX'}.pdf`,
+      { type: 'application/pdf' }
+    );
   }
 
   getUserEntrepriseInfo(): void {
@@ -1399,7 +1394,21 @@ export class DetailFactureProformaComponent implements OnInit {
     });
   }
 
+  async getBase64ImageFromURL(url: string): Promise<string> {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Erreur lors du chargement de l'image : ${response.statusText}`);
+    }
+    const blob = await response.blob();
+    console.log(`Type MIME de l'image chargée : ${blob.type}`);
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
 
 }
-
-
