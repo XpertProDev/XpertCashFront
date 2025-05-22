@@ -663,7 +663,7 @@
                     <div class="champ_input" style="margin-right: 15px;">
                         <div class="email-input-container">
                             <!-- Emails sous forme de puces dans l'input -->
-                            <span *ngFor="let email of emailDestinatairesList; let i = index" class="email-chip">
+                            <span *ngFor="let email of emailDestinatairesList; let i = index" class="email-chip  email-chip-cc">
                                 {{email}}
                                 <span class="remove-chip" (click)="removeEmail(i)">✖</span>
                             </span>
