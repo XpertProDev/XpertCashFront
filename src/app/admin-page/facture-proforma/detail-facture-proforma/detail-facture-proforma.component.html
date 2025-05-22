@@ -797,23 +797,6 @@
                             <span *ngIf="!isSending">Confirmer l'envoi physique</span>
                             <div *ngIf="isSending" class="mini-spinner"></div>
                         </button>
-                class="btn" 
-                (click)="confirmEmailSend()"
-                [disabled]="!emailDestinatairesList.length || isSending">
-                        <span *ngIf="!isSending">Envoyer</span>
-                            <div *ngIf="isSending" class="mini-spinner"></div>
-        </button>
-        
-        <button *ngIf="methodeEnvoi === 'physique'" 
-                class="btn" 
-                (click)="confirmEmailSend()"
-                [disabled]="isSending">
-            <span *ngIf="!isSending">Confirmer l'envoi physique</span>
-                            <div *ngIf="isSending" class="mini-spinner"></div>
-        </button>
-                    </div>
-                    <div class="btn_envoie_ignore">
-                        <button class="btn" (click)="showEmailPopup = false">Annuler</button>
                     </div>
 
                     <div class="icon_attach" 
