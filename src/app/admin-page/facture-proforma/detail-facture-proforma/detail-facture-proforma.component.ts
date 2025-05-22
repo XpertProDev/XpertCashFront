@@ -215,7 +215,8 @@ export class DetailFactureProformaComponent implements OnInit {
     const mapping: Record<string, EventType> = {
       'Création': 'creation',
       'Modification': 'modification',
-      'Approbation': 'approbation',
+      'Approbation': 'approbation', // Ajout explicite
+      'Approuver': 'approbation',   // Si le backend utilise ce libellé
       'Validation': 'validation',
       'Envoi': 'envoi',
       'Annulation': 'modification'
@@ -621,13 +622,14 @@ export class DetailFactureProformaComponent implements OnInit {
           };
              // On retire l’éventuel event existant pour ce même statut…
           this.historicalEvents = this.historicalEvents
-            .filter(e => e.status !== newEvent.status);
+          .filter(e => e.status !== newEvent.status);
 
           // …et on l’ajoute en tête
           this.historicalEvents.unshift(newEvent);
 
              // mise à jour locale
           this.factureProForma = updatedFacture;
+          // this.loadFactureProforma(this.factureId);
           // rechargez/remettez vos flags localement
           this.activeRemise = (updatedFacture.remise ?? 0) > 0;
           this.remisePourcentage = this.activeRemise
@@ -1350,6 +1352,7 @@ export class DetailFactureProformaComponent implements OnInit {
       next: (entreprise) => {
         console.log("Entreprise reçue :", entreprise);
         this.userEntrepriseId = entreprise.id ?? null;
+        this.loadFactureProforma(this.factureId);
 
         this.nom = entreprise.nom; 
         this.siege = entreprise.siege;
