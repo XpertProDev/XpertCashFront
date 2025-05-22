@@ -22,7 +22,9 @@ export class FactureReelDetailsComponent implements OnInit {
   nina!: string;
   pays!: string;
   rccm!: string;
-  siteWeb!: string
+  siteWeb!: string;
+  signateur!: string;
+  signateurNom!: string;
 
   ngOnInit(): void {
     this.getUserEntrepriseInfo();
@@ -49,7 +51,9 @@ export class FactureReelDetailsComponent implements OnInit {
         this.nina = entreprise.nina;
         this.pays = entreprise.pays;
         this.rccm = entreprise.rccm;
-        this.siteWeb = entreprise.siteWeb
+        this.siteWeb = entreprise.siteWeb;
+        this.signateur = entreprise.signataire;
+        this.signateurNom = entreprise.signataireNom;
 
   
         // Ajout du préfixe si nécessaire

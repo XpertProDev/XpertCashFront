@@ -177,7 +177,7 @@ export class AddStockAjustementComponent {
   selectedProduct: Produit | null = null;
   tasks: Produit[] = [];
 
-  selectFournisseur: Fournisseurs | null = null;
+   selectedFournisseur: Fournisseurs | null = null;
 
   fournisseurs: Fournisseurs[] = [];
 
@@ -332,7 +332,7 @@ export class AddStockAjustementComponent {
     this.ajusteForm = this.fb.group({
       descriptionGlobal: ['', [Validators.minLength(2), Validators.maxLength(100)]],
       codeFournisseur: ['', [Validators.minLength(4), Validators.maxLength(100)]],
-      fournisseurId: [null],
+     fournisseurId: [null, Validators.required],
 
     });
   }
@@ -357,10 +357,6 @@ export class AddStockAjustementComponent {
       return;
     }
 
-    if (!this.selectFournisseur) {
-      this.errorMessage = 'Veuillez sélectionner un fournisseur';
-      return;
-    }
   
     // Ajout dans la liste avec descriptionAjout incluse
     this.pendingAdjustments = [
@@ -374,7 +370,6 @@ export class AddStockAjustementComponent {
         prixVente: this.selectedProduct.prixVente,
         descriptionAjout: this.descriptionAjout ,
         codeFournisseur: this.codeFournisseur,
-        fournisseurId: this.selectFournisseur.id
       }
     ];
 
@@ -382,8 +377,7 @@ export class AddStockAjustementComponent {
     this.selectedProduct = null;
     this.quantiteAjoute = null;
     this.descriptionAjout = '';
-    this.codeFournisseur,
-    this.selectFournisseur = null
+    this.codeFournisseur
   }
 
   // Méthode pour ajouter un ajustement à la liste
@@ -494,7 +488,6 @@ export class AddStockAjustementComponent {
           stockActuel: this.selectedProduct.quantite,
           stockApres: this.selectedProduct.quantite + this.quantiteAjoute,
           prixVente: this.selectedProduct.prixVente,
-          fournisseurId: this.selectFournisseur?.id
         });
       }
     }
@@ -512,8 +505,12 @@ export class AddStockAjustementComponent {
       const dataToSend: any = {
         produitsQuantites,
         description: descriptionGlobal,
-        codeFournisseur
+        codeFournisseur,
+        fournisseurId: this.fournisseurCtrl.value
       };
+
+      console.log('Data à envoyer:', dataToSend);
+      
       
   
       this.stockService.ajouterStock(dataToSend).subscribe({
@@ -870,5 +867,18 @@ export class AddStockAjustementComponent {
     this.controlBoutiqueTransfert.reset();
     this.errorMessage = '';
 }
+
+get fournisseurCtrl() {
+  return this.ajusteForm.get('fournisseurId')!;
+}
+
+onFournisseurChange() {
+  const id = this.fournisseurCtrl.value as number;
+  const f = this.fournisseurs.find(x => x.id === id);
+  this.codeFournisseur = f ? f.nomComplet : '';
+  console.log('✅ ID:', id, 'Nom:', this.codeFournisseur);
+}
+
+
   
 }

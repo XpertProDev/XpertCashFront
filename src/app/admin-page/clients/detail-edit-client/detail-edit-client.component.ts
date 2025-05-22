@@ -366,7 +366,9 @@ export class DetailEditClientComponent {
       nina: this.entrepriseForm.value.nina,
       banque: this.entrepriseForm.value.banque,
       rccm: this.entrepriseForm.value.rccm,
-      siteWeb: this.entrepriseForm.value.siteWeb
+      siteWeb: this.entrepriseForm.value.siteWeb,
+      signataire: this.entrepriseForm.value.signataire,
+      signataireNom: this.entrepriseForm.value.signataireNom,
 
     };
   

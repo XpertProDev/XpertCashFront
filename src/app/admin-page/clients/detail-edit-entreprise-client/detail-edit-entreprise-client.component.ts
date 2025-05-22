@@ -204,7 +204,9 @@ export class DetailEditEntrepriseClientComponent {
       nina: this.client.entrepriseClient?.nina,
       banque: this.client.entrepriseClient?.banque,
       rccm: this.client.entrepriseClient?.rccm,
-      siteWeb: this.client.entrepriseClient?.siteWeb
+      siteWeb: this.client.entrepriseClient?.siteWeb,
+      signataire: this.client.entrepriseClient?.signataire,
+      signataireNom: this.client.entrepriseClient?.signataireNom,
 
     };
   }

@@ -565,6 +565,7 @@ mat-paginator {
     font-weight: 500;
 }
 
+
 .title_facture h5 {
     font-size: 12px;
     letter-spacing: 0.65px;
@@ -587,6 +588,16 @@ mat-paginator {
     display: flex;
     align-items: center;
     gap: 5px;
+}
+
+.double_info1 {
+   align-items: center;
+    gap: 5px;
+    font-size: 9px;
+    margin-top: 5%;
+    color: #6c757d;
+    text-align: end;
+    display: block;
 }
 
 table {

@@ -12,7 +12,9 @@ export interface Entreprise {
     nina: string;
     banque: string;
     rccm: string;
-    siteWeb: string
+    siteWeb: string;
+    signataire: string;
+    signataireNom: string;
 
     
 }
