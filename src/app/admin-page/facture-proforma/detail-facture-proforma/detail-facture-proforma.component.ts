@@ -30,6 +30,7 @@ interface HistoricalEvent {
   type: EventType;
   description: string;
   status?: StatutFactureProForma;
+  Montant?: number; // Montant de la facture
 }
 
 @Component({
@@ -1413,5 +1414,6 @@ export class DetailFactureProformaComponent implements OnInit {
       reader.readAsDataURL(blob);
     });
   }
+
 
 }

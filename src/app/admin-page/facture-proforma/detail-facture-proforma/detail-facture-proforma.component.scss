@@ -1483,13 +1483,26 @@ input.input_focus_type:focus {
   margin-top: 40px;
   background: #fff;
   margin-bottom: 20px;
+  height: 78%;
 }
 
 .historical-timeline {
     padding: 20px;
     border-radius: 8px;
     // max-height: 600px;
-    // overflow-y: auto;
+    overflow-y: auto;
+    max-height: 96%;
+    scroll-behavior: smooth;
+}
+
+/* Optionnel - Custom scrollbar */
+.historical-timeline::-webkit-scrollbar {
+  width: 2px;
+}
+
+.historical-timeline::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
 }
 
 .title_historique {
@@ -1498,7 +1511,7 @@ input.input_focus_type:focus {
 
 .timeline-event {
     display: flex;
-    margin-bottom: 25px;
+    margin-bottom: 14px;
     position: relative;
     
     &:not(:last-child):after {
@@ -1516,8 +1529,8 @@ input.input_focus_type:focus {
     margin-right: 15px;
     
     .avatar {
-        width: 40px;
-        height: 40px;
+        width: 35px;
+        height: 35px;
         border-radius: 50%;
         border: 2px solid #fff;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -1536,11 +1549,12 @@ input.input_focus_type:focus {
             font-weight: 600;
             color: #2c3e50;
             margin-right: 10px;
+            font-size: 12px;
         }
         
         .event-date {
             color: #95a5a6;
-            font-size: 0.85em;
+            font-size: 8px;
         }
     }
 }
@@ -1553,6 +1567,7 @@ input.input_focus_type:focus {
     margin-left: 10px;
     border: 1px solid #eee;
     position: relative;
+    font-size: 11px;
     
     .status-badge {
         position: absolute;
