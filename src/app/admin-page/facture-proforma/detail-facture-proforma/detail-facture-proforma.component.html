@@ -491,7 +491,8 @@
     </div>
  
          <!-- Remplacer toute la section container_brouillon_facture par -->
-    <div class="container_brouillon_facture">
+    
+             <div class="container_brouillon_facture">
         <div class="historical-timeline">
             <div class="title_historique">
                 <h6>Historique des actions</h6>
@@ -520,24 +521,26 @@
                     'ri-shield-check-line': event.type === 'validation'
                     }"></i>
                     {{event.description}}
+                    <div class="status-badge" *ngIf="event.status">
+                        {{event.status}}
+                    </div>
                     
                     <!-- Afficher les approbateurs pour les demandes d'approbation -->
                     <div *ngIf="event.status === 'APPROBATION'" class="approbateurs-list">
-                    <span *ngFor="let approbateur of factureProForma.approbateurs">
-                        {{approbateur.nomComplet}}
-                    </span>
+                        <span *ngFor="let approbateur of factureProForma.approbateurs">
+                            {{approbateur.nomComplet}}
+                        </span>
                     </div>
                 </div>
                 </div>
             </div>
         </div>
     </div>
-    
 
 
 
 
-
+        <!-- Fin -->
 
 </div>
 
@@ -787,14 +790,17 @@
                         <button *ngIf="methodeEnvoi === 'email'" 
                 class="btn" 
                 (click)="confirmEmailSend()"
-                [disabled]="!emailDestinatairesList.length">
-          Envoyer
+                [disabled]="!emailDestinatairesList.length || isSending">
+                        <span *ngIf="!isSending">Envoyer</span>
+                            <div *ngIf="isSending" class="mini-spinner"></div>
         </button>
         
         <button *ngIf="methodeEnvoi === 'physique'" 
                 class="btn" 
-                (click)="confirmEmailSend()">
-          Confirmer 
+                (click)="confirmEmailSend()"
+                [disabled]="isSending">
+            <span *ngIf="!isSending">Confirmer l'envoi physique</span>
+                            <div *ngIf="isSending" class="mini-spinner"></div>
         </button>
                     </div>
                     <div class="btn_envoie_ignore">
