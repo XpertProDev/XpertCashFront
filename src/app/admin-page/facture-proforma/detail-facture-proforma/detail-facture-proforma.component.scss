@@ -863,7 +863,7 @@ th {
   animation: popUp 0.25s ease-in-out;
    display: flex; /* Ajouter */
   flex-direction: column; /* Ajouter */
-  height: 60vh; 
+  height: 66vh; 
   // position: relative;
   // position: fixed;
   // top: 50%;
@@ -890,8 +890,8 @@ th {
 .titre_etat p {
   margin: 0;
   font-weight: 600;
-  font-size: 1.1rem;
   color: #333;
+  font-size: 12px;
 }
 
 .titre_etat {
@@ -900,20 +900,6 @@ th {
   gap: 12px;
 }
 
-.titre_etat select {
-  padding: 5px 8px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background: white;
-  transition: border-color 0.3s ease;
-}
-
-.titre_etat select:focus {
-  outline: none;
-  border-color: #73b4ff;
-  box-shadow: 0 0 5px #73b4ff;
-}
 
 .icon_croix {
   display: flex;
@@ -935,6 +921,75 @@ th {
     top: -39%;
     color: #495057;
 }
+
+.checkbox-group {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.custom-radio {
+  position: relative;
+  padding-left: 24px; /* moins de padding */
+  cursor: pointer;
+  font-size: 13px;
+  user-select: none;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.custom-radio input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.radio-mark {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 12px;
+  width: 12px;
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+  border: 1.5px solid #bbb;
+}
+
+.custom-radio:hover .radio-mark {
+  background-color: #d3d3d3;
+}
+
+.custom-radio input:checked ~ .radio-mark {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.radio-mark::after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.custom-radio input:checked ~ .radio-mark::after {
+  display: block;
+}
+
+.custom-radio .radio-mark::after {
+  top: 2px;
+  left: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: white;
+  position: absolute;
+}
+
+
+
+
 .barre {
   background-color: #0000001a;
   width: 100%;
@@ -964,12 +1019,12 @@ th {
   border-right: none;
   margin: 10px 0 0;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 13px;
   background: none;
   color: #000000;
   flex-grow: 1;
   min-width: 150px;
-  padding: 5px;
+  padding: 15px;
 }
 
 .input_table_des:hover {

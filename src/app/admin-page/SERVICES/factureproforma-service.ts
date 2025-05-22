@@ -120,53 +120,50 @@ export class FactureProFormaService {
   }
 
   //Envoyer Facture par mail :
+  envoyerFactureEmail(
+    factureId: number,
+    emailRequest: {
+      to: string;
+      cc: string;
+      subject: string;
+      body: string;
+      attachments?: File[];
+    }
+  ): Observable<string> {
+    const formData = new FormData();
+    formData.append('to', emailRequest.to);
+    formData.append('cc', emailRequest.cc);
+    formData.append('subject', emailRequest.subject);
+    formData.append('body', emailRequest.body);
 
-  // Dans FactureProFormaService
-envoyerFactureEmail(
-  factureId: number,
-  emailRequest: {
-    to: string;
-    cc: string;
-    subject: string;
-    body: string;
-    attachments?: File[];
-  }
-): Observable<string> {
-  const formData = new FormData();
-  formData.append('to', emailRequest.to);
-  formData.append('cc', emailRequest.cc);
-  formData.append('subject', emailRequest.subject);
-  formData.append('body', emailRequest.body);
+    if (emailRequest.attachments) {
+      emailRequest.attachments.forEach((file, index) => {
+        formData.append(`attachments`, file, file.name);
+      });
+    }
 
-  if (emailRequest.attachments) {
-    emailRequest.attachments.forEach((file, index) => {
-      formData.append(`attachments`, file, file.name);
+    const token = localStorage.getItem('authToken');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
     });
+
+    return this.http.post(
+      `${this.apiUrl}/factures/${factureId}/envoyer-email`,
+      formData,
+      { headers, responseType: 'text' }
+    );
   }
-
-  const token = localStorage.getItem('authToken');
-  const headers = new HttpHeaders({
-    'Authorization': `Bearer ${token}`
-  });
-
-  return this.http.post(
-    `${this.apiUrl}/factures/${factureId}/envoyer-email`,
-    formData,
-    { headers, responseType: 'text' }
-  );
-}
 
 
   //Get History Facture
+  getHistoriqueFacture(factureId: number): Observable<any> {
+    const token = localStorage.getItem('authToken');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
 
-getHistoriqueFacture(factureId: number): Observable<any> {
-  const token = localStorage.getItem('authToken');
-  const headers = new HttpHeaders({
-    'Authorization': `Bearer ${token}`
-  });
-
-  return this.http.get<any>(`${this.apiUrl}/factures/${factureId}/historique`, { headers });
-}
+    return this.http.get<any>(`${this.apiUrl}/factures/${factureId}/historique`, { headers });
+  }
 
 
 

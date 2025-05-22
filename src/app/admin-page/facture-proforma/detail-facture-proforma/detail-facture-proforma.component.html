@@ -613,17 +613,43 @@
     <div class="popup-content-envoyer"[ngStyle]="{
        'transform': 'translate3d(' + popupOffset.x + 'px, ' + popupOffset.y + 'px, 0)'}">
         <div class="envoyer_croix" (mousedown)="startDrag($event)">
-            <div class="titre_etat">
-                <p>Envoyer</p>
-                <select (mousedown)="$event.stopPropagation()" [(ngModel)]="methodeEnvoi" (change)="onMethodeEnvoiChange()">
-                    <option value="physique">Physique</option>
-                    <option value="email">Email</option>
-                </select>
-            </div>
+                    <div class="titre_etat">
+                        <p>Methode d'envoi : </p>
+
+                        <div class="checkbox-group" (mousedown)="$event.stopPropagation()">
+                        <label class="custom-radio">
+                            <input
+                            type="radio"
+                            name="methodeEnvoi"
+                            value="physique"
+                            [(ngModel)]="methodeEnvoi"
+                            (change)="onMethodeEnvoiChange()"
+                            />
+                            <span class="radio-mark"></span>
+                            Physique
+                        </label>
+
+                        <label class="custom-radio">
+                            <input
+                            type="radio"
+                            name="methodeEnvoi"
+                            value="email"
+                            [(ngModel)]="methodeEnvoi"
+                            (change)="onMethodeEnvoiChange()"
+                            />
+                            <span class="radio-mark"></span>
+                            Email
+                        </label>
+                        </div>
+                    </div>
+
             <div class="icon_croix" (click)="showEmailPopup = false" (mousedown)="$event.stopPropagation()">
                 <i class="ri-close-large-line"></i>
             </div>
         </div>
+
+
+
 
         <div class="barre"></div>
 
@@ -695,7 +721,7 @@
             <div class="email_field">
                 <!-- // Titre email field -->
                 <div class="titre_email_field">
-                    Suject
+                    Objet
                 </div>
                 <!-- // Input email field -->
                 <div class="input_email_field">
