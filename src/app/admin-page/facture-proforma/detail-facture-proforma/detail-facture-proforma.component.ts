@@ -7,7 +7,6 @@ import { Produit } from '../../MODELS/produit.model';
 import { FactureProForma, StatutFactureProForma } from '../../MODELS/FactureProForma.model';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
-import { RoundPipe } from '../../MODELS/round.pipe';
 import { UsersService } from '../../SERVICES/users.service';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -15,10 +14,6 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { firstValueFrom } from 'rxjs';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
-
-
-
-
 
 // Ajouter cette interface pour les pièces jointes
 interface EmailAttachment {
@@ -44,9 +39,7 @@ interface HistoricalEvent {
   styleUrl: './detail-facture-proforma.component.scss'
 })
 export class DetailFactureProformaComponent implements OnInit {
-
-   private enLettresPipe = new EnLettresPipe();
-
+  private enLettresPipe = new EnLettresPipe();
   isLoading: boolean = false;
   activeRemise: boolean = false;
   activeTva: boolean = false;
@@ -55,24 +48,14 @@ export class DetailFactureProformaComponent implements OnInit {
   errorMessage: string = '';
   nomEntreprise: string = '';
   produits: Produit[] = [];
-  // Nouvelle variable pour stocker les ajustements locaux
   pendingAdjustments: any[] = [];
   newProduitId: number | null = null;
-  // inputLignes: { 
-  //   produitId: number | null; quantite: number 
-  // }[] = [{ produitId: null, quantite: 1 }];
-  // confirmedLignes: { produitId: number | null; quantite: number }[] = [];
   inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; isDuplicate: boolean }[] = [{
     produitId: null, quantite: 1, ligneDescription: null, isDuplicate: false
   }];
-  confirmedLignes: {
-    produitId: number | null;
-    quantite: number;
-    ligneDescription: string | null;
-  }[] = [];
+  confirmedLignes: {produitId: number | null;quantite: number;ligneDescription: string | null;}[] = [];
   factureId!: number;
   showDuplicatePopup: boolean = false;
-  // Ajouter ces variables dans la classe
   showStatusConfirmation = false;
   pendingStatut: StatutFactureProForma | null = null;
   showEmailPopup: boolean = false;
@@ -83,15 +66,11 @@ export class DetailFactureProformaComponent implements OnInit {
   dateRelance?: string;
   users: any[] = [];
   filteredUsers: any[] = [];
-
-  // Nouvelles variables pour l'email
   emailDestinataires: string = '';
   emailSujet: string = '';
   emailMessage: string = '';
-
   // methodeEnvoi: string = 'EMAIL';
   methodeEnvoi: 'physique' | 'email' = 'physique'; // Valeur par défaut
-
   // Variables pour le déplacement
   isDragging = false;
   startX = 0;
@@ -99,23 +78,15 @@ export class DetailFactureProformaComponent implements OnInit {
   initialX = 0;
   initialY = 0;
   popupOffset = { x: 0, y: 0 };
-
-  // Piece joindre
   // attachments: File[] = [];
   selectedFile: File | null = null;
-
   // Variables pour la gestion des emails
   emailDestinatairesList: string[] = [];
   currentEmail = '';
-
   emailCcList: string[] = [];
-currentCcEmail: string = '';
-
-emailUtilisateur: string = '';
-
-
+  currentCcEmail: string = '';
+  emailUtilisateur: string = '';
   facture: FactureProForma | null = null;
-
   nom: string | null = null;
   siege!: string;
   email: string = '';
@@ -132,19 +103,12 @@ emailUtilisateur: string = '';
   signataire!: string
   signataireNom!: string;
   userEntrepriseId!: number | null;
-
- historicalEvents: HistoricalEvent[] = [];
-
- isSending: boolean = false;
- 
-
-
+  historicalEvents: HistoricalEvent[] = [];
+  isSending: boolean = false;
   attachments: EmailAttachment[] = [];
   currentAttachment: File | null = null;
-
   @ViewChild('editableContent', { static: false }) editableContent!: ElementRef;
   @ViewChild('subjectInput', { static: false }) subjectInput!: ElementRef;
-
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
@@ -155,8 +119,7 @@ emailUtilisateur: string = '';
       private usersService: UsersService,
       private cdr: ChangeDetectorRef,
       private renderer: Renderer2,
-     private entrepriseService: EntrepriseService
-      
+      private entrepriseService: EntrepriseService,
     ) {}
 
   ngOnInit(): void {
@@ -219,68 +182,55 @@ emailUtilisateur: string = '';
     return this.getTotalApresRemise() + this.getMontantTVA();
   }
 
-   // Modifier load Historical Events pour inclure tous les statuts
+  // Modifier load Historical Events pour inclure tous les statuts
   private loadHistoricalEvents() {
-  this.factureProFormaService.getHistoriqueFacture(this.factureId).subscribe({
-    next: (historique: any) => {
-      this.historicalEvents = historique.historiqueActions.map((action: any) => ({
-        date: new Date(action.date),
-        user: { nomComplet: action.utilisateur },
-        type: this.mapActionType(action.action),
-        description: action.details,
-        status: this.mapActionToStatus(action.action)
-      }));
-      
-      // Ajouter la création si manquante
-      if (!this.historicalEvents.some(e => e.type === 'creation')) {
-        this.historicalEvents.push({
-          date: new Date(this.factureProForma.dateCreation),
-          user: { nomComplet: this.factureProForma.utilisateurCreateur?.nomComplet || 'Système' },
-          type: 'creation',
-          description: 'Création de la facture'
-        });
-      }
+    this.factureProFormaService.getHistoriqueFacture(this.factureId).subscribe({
+      next: (historique: any) => {
+        this.historicalEvents = historique.historiqueActions.map((action: any) => ({
+          date: new Date(action.date),
+          user: { nomComplet: action.utilisateur },
+          type: this.mapActionType(action.action),
+          description: action.details,
+          status: this.mapActionToStatus(action.action)
+        }));
+        
+        // Ajouter la création si manquante
+        if (!this.historicalEvents.some(e => e.type === 'creation')) {
+          this.historicalEvents.push({
+            date: new Date(this.factureProForma.dateCreation),
+            user: { nomComplet: this.factureProForma.utilisateurCreateur?.nomComplet || 'Système' },
+            type: 'creation',
+            description: 'Création de la facture'
+          });
+        }
 
-      // Trier par date
-      this.historicalEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
-    },
-    error: (err) => console.error('Erreur historique', err)
+        // Trier par date
+        this.historicalEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
+      },
+      error: (err) => console.error('Erreur historique', err)
   });
 }
 
-private mapActionType(action: string): EventType {
-  const mapping: Record<string, EventType> = {
-    'Création': 'creation',
-    'Modification': 'modification',
-    'Approbation': 'approbation',
-    'Validation': 'validation',
-    'Envoi': 'envoi',
-    'Annulation': 'modification'
-  };
-  return mapping[action] || 'modification';
-}
-
-private mapActionToStatus(action: string): StatutFactureProForma | undefined {
-  const statusMap: Record<string, StatutFactureProForma> = {
-    'Facture approuvée': StatutFactureProForma.APPROUVE,
-    'Facture envoyée': StatutFactureProForma.ENVOYE,
-    'Facture validée': StatutFactureProForma.VALIDE
-  };
-  return statusMap[action];
-}
-
-  private getResponsibleUser() {
-    switch(this.factureProForma.statut) {
-        case StatutFactureProForma.APPROUVE:
-            return this.factureProForma.utilisateurApprobateur || { nomComplet: 'Approbateur inconnu' };
-        case StatutFactureProForma.VALIDE:
-            return this.factureProForma.utilisateurModificateur || { nomComplet: 'Validateur inconnu' };
-        default:
-            return this.factureProForma.utilisateurModificateur || { nomComplet: 'Utilisateur inconnu' };
-    }
+  private mapActionType(action: string): EventType {
+    const mapping: Record<string, EventType> = {
+      'Création': 'creation',
+      'Modification': 'modification',
+      'Approbation': 'approbation',
+      'Validation': 'validation',
+      'Envoi': 'envoi',
+      'Annulation': 'modification'
+    };
+    return mapping[action] || 'modification';
   }
 
-
+  private mapActionToStatus(action: string): StatutFactureProForma | undefined {
+    const statusMap: Record<string, StatutFactureProForma> = {
+      'Facture approuvée': StatutFactureProForma.APPROUVE,
+      'Facture envoyée': StatutFactureProForma.ENVOYE,
+      'Facture validée': StatutFactureProForma.VALIDE
+    };
+    return statusMap[action];
+  }
 
   loadFactureProforma(id: number): void {
     this.factureProFormaService.getFactureProformaById(id).subscribe({
@@ -422,7 +372,6 @@ private mapActionToStatus(action: string): StatutFactureProForma | undefined {
     }
   }
 
-
   ajouterLigneFacture(index: number) {
     const ligne = this.inputLignes[index];
     
@@ -556,48 +505,46 @@ private mapActionToStatus(action: string): StatutFactureProForma | undefined {
     }
   }
 
-  
-
   async loadPDFPreview(url: string) {
-  this.loadingPreview = true;
-  this.previewPDFUrl = null;
+    this.loadingPreview = true;
+    this.previewPDFUrl = null;
 
-  try {
-    const pdf = await pdfjsLib.getDocument(url).promise;
-    const page = await pdf.getPage(1);
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
+    try {
+      const pdf = await pdfjsLib.getDocument(url).promise;
+      const page = await pdf.getPage(1);
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
 
-    if (!context) {
-      throw new Error('Context Canvas 2D non disponible');
+      if (!context) {
+        throw new Error('Context Canvas 2D non disponible');
+      }
+
+      const viewport = page.getViewport({ scale: 0.5 });
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      await page.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise;
+
+      this.previewPDFUrl = canvas.toDataURL();
+    } catch (error) {
+      console.error('Erreur de prévisualisation PDF:', error);
+      // Optionnel : Afficher un message à l'utilisateur
+    } finally {
+      this.loadingPreview = false;
     }
-
-    const viewport = page.getViewport({ scale: 0.5 });
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-
-    await page.render({
-      canvasContext: context,
-      viewport: viewport
-    }).promise;
-
-    this.previewPDFUrl = canvas.toDataURL();
-  } catch (error) {
-    console.error('Erreur de prévisualisation PDF:', error);
-    // Optionnel : Afficher un message à l'utilisateur
-  } finally {
-    this.loadingPreview = false;
   }
-}
 
   async openEmailPopup() {
-  this.showEmailPopup = true;
+    this.showEmailPopup = true;
 
-  // Générer le PDF et l'ajouter aux pièces jointes
-  const pdfFile = await this.generatePDFAttachment();
-  this.attachments = []; // Réinitialiser les pièces jointes existantes
-  this.attachments.push({ name: pdfFile.name, file: pdfFile });
-}
+    // Générer le PDF et l'ajouter aux pièces jointes
+    const pdfFile = await this.generatePDFAttachment();
+    this.attachments = []; // Réinitialiser les pièces jointes existantes
+    this.attachments.push({ name: pdfFile.name, file: pdfFile });
+  }
 
   // Modifier la configuration des transitions
   private isStatusTransitionAllowed(newStatut: StatutFactureProForma): boolean {
@@ -635,65 +582,6 @@ private mapActionToStatus(action: string): StatutFactureProForma | undefined {
   canTransitionTo(targetStatus: StatutFactureProForma): boolean {
     return this.isStatusTransitionAllowed(targetStatus);
   }
-
-   private updateHistoricalEvents(newEvent: any) {
-    this.historicalEvents.unshift(newEvent); // Ajoute en haut de la liste
-    this.cdr.detectChanges(); // Force la détection de changement
-  }
-
-  // confirmStatusChange(): void {
-  //   if (!this.pendingStatut) return;
-
-  //   const selectedUsers = this.users
-  //   .filter(user => user.selected)
-  //   .map(user => user.id);
-
-  //   const modifications: Partial<FactureProForma> = {
-  //     statut: this.pendingStatut,
-  //     ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
-  //       ? { dateRelance: this.dateRelance }
-  //       : {})
-  //   };
-
-  //   // const modifications: Partial<FactureProForma> = {
-  //   //   statut: this.pendingStatut,
-  //   //   // Réinitialise les approbateurs si on revient en arrière
-  //   //   ...(this.pendingStatut === StatutFactureProForma.BROUILLON && {
-  //   //     approbateurs: [],
-  //   //     utilisateurApprobateur: null
-  //   //   })
-  //   // };
-    
-  //   this.factureProFormaService.updateFactureProforma(
-  //     this.factureId,
-  //     undefined,
-  //     undefined,
-  //     {
-  //       statut: this.pendingStatut,
-  //       // Réinitialiser les approbateurs si on change de statut
-  //       ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
-  //         approbateurs: []
-  //       })
-  //     },
-  //     this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
-  //   ).subscribe({
-  //     next: (updatedFacture) => {
-  //       if (this.pendingStatut === StatutFactureProForma.APPROBATION) {
-  //         updatedFacture.approbateurs = this.users.filter(u => selectedUsers.includes(u.id));
-  //       }
-  //       this.factureProForma = updatedFacture;
-        
-  //       this.showStatusConfirmation = false;
-  //       this.pendingStatut = null;
-  //       this.dateRelance = undefined;
-  //     },
-  //     error: (err) => {
-  //       console.error('Erreur de mise à jour', err);
-  //       alert('Échec de la mise à jour du statut');
-  //       this.showStatusConfirmation = false;
-  //     }
-  //   });
-  // }
 
   confirmStatusChange(): void {
     if (!this.pendingStatut) return;
@@ -758,7 +646,7 @@ private mapActionToStatus(action: string): StatutFactureProForma | undefined {
       });
   }  
 
-    private getStatusDescription(status: StatutFactureProForma): string {
+  private getStatusDescription(status: StatutFactureProForma): string {
     const descriptions = {
         [StatutFactureProForma.BROUILLON]: 'Retour au brouillon',
         [StatutFactureProForma.APPROBATION]: 'Demande d\'approbation envoyée',
@@ -788,7 +676,6 @@ private mapActionToStatus(action: string): StatutFactureProForma | undefined {
     return statusMap[status] || 'modification';
   }
 
-
   cancelStatusChange(): void {
     this.showStatusConfirmation = false;
     this.pendingStatut = null;
@@ -804,32 +691,30 @@ private mapActionToStatus(action: string): StatutFactureProForma | undefined {
     };
     return labels[statut];
   }
-    
-  
-loadUsersOfEntreprise(entrepriseId: number) {
-  if (entrepriseId == null) {
-    console.error('ID d’entreprise invalide:', entrepriseId);
-    return;
-  }
 
-  this.isLoading = true;
-  this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
-    next: (data) => {
-      this.users = data.map(user => ({
-        ...user,
-        selected: false
-      }));
-      this.filteredUsers = this.users;
-      this.isLoading = false;
-      console.log('Utilisateurs récupérés:', this.users);
-    },
-    error: (err) => {
-      console.error('Erreur lors du chargement des utilisateurs', err);
-      this.isLoading = false;
+  loadUsersOfEntreprise(entrepriseId: number) {
+    if (entrepriseId == null) {
+      console.error('ID d’entreprise invalide:', entrepriseId);
+      return;
     }
-  });
-}
 
+    this.isLoading = true;
+    this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
+      next: (data) => {
+        this.users = data.map(user => ({
+          ...user,
+          selected: false
+        }));
+        this.filteredUsers = this.users;
+        this.isLoading = false;
+        console.log('Utilisateurs récupérés:', this.users);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des utilisateurs', err);
+        this.isLoading = false;
+      }
+    });
+  }
 
   // Méthode appelée au changement de <select>
   onProduitChange(produitId: number | null, ligne: any, index: number) {
@@ -901,35 +786,34 @@ loadUsersOfEntreprise(entrepriseId: number) {
   } catch (error) {
     this.handleError(error);
   }
-}
+  }
 
+  private async handleEmailSending() {
+    // Collecter les données de l'email
+    const emailData = {
+      to: this.emailDestinatairesList.join(','),
+      cc: this.emailCcList.join(','),
+      subject: this.subjectInput.nativeElement.value.trim(),
+      body: this.editableContent.nativeElement.innerHTML,
+      attachments: await this.prepareAttachments()
+    };
+    console.log("les donner du mail", emailData);
+    
+    // Envoyer l'email via le service
+    await this.factureProFormaService.envoyerFactureEmail(
+      this.factureId,
+      emailData
+    ).toPromise();
 
-private async handleEmailSending() {
-  // Collecter les données de l'email
-  const emailData = {
-    to: this.emailDestinatairesList.join(','),
-    cc: this.emailCcList.join(','),
-    subject: this.subjectInput.nativeElement.value.trim(),
-    body: this.editableContent.nativeElement.innerHTML,
-    attachments: await this.prepareAttachments()
-  };
-  console.log("les donner du mail", emailData);
-  
-  // Envoyer l'email via le service
-  await this.factureProFormaService.envoyerFactureEmail(
-    this.factureId,
-    emailData
-  ).toPromise();
+    // Réinitialiser le formulaire
+    this.resetEmailForm();
+  }
 
-  // Réinitialiser le formulaire
-  this.resetEmailForm();
-}
-
-private async prepareAttachments(): Promise<File[]> {
-  return Promise.all(this.attachments.map(async (attachment) => {
-    return attachment.file;
-  }));
-}
+  private async prepareAttachments(): Promise<File[]> {
+    return Promise.all(this.attachments.map(async (attachment) => {
+      return attachment.file;
+    }));
+  }
 
 
   private async processEmailSending() {
@@ -967,14 +851,6 @@ private async prepareAttachments(): Promise<File[]> {
       this.editableContent.nativeElement.innerHTML = '';
   }
 
-  private refreshInvoiceData() {
-      this.factureProFormaService.getFactureProformaById(this.factureId)
-          .subscribe(facture => {
-              this.factureProForma = facture;
-              this.cdr.detectChanges();
-          });
-  }
-
   private handleError(error: any) {
     console.error('Erreur:', error);
     this.errorMessage = error.message || 'Une erreur est survenue';
@@ -989,18 +865,6 @@ private async prepareAttachments(): Promise<File[]> {
   this.currentEmail = '';
   this.attachments = [];
   this.editableContent.nativeElement.innerHTML = ''; // Réinitialiser le contenu éditable
-}
-
-  private handleEmailError(err: any) {
-    console.error("❌ Erreur d'envoi email :", err);
-    this.errorMessage = err?.error?.message || 'Échec de l\'envoi de l\'email';
-    this.showEmailPopup = false;
-  }
-
-  private handleUpdateError(err: any) {
-    console.error("❌ Erreur de mise à jour :", err);
-    this.errorMessage = err?.error?.message || 'Échec de la mise à jour du statut';
-    this.showEmailPopup = false;
   }
 
   // Début du drag
@@ -1031,7 +895,7 @@ private async prepareAttachments(): Promise<File[]> {
     // Force la détection de changement
     this.cdr.detectChanges();
   });
-}
+  }
 
   // Fin du drag
   onMouseUp = (): void => {
@@ -1047,30 +911,29 @@ private async prepareAttachments(): Promise<File[]> {
       }
   }
 
-  // Gère la sélection de fichiers
   // Corriger la méthode onFileSelected
-onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-        const newFiles = Array.from(input.files);
-        
-        newFiles.forEach(newFile => {
-            const isDuplicate = this.attachments.some(
-                existing => existing.name === newFile.name
-            );
-            
-            if (!isDuplicate) {
-                // Créer un objet EmailAttachment correct
-                this.attachments.push({ 
-                    name: newFile.name,
-                    file: newFile
-                });
-            }
-        });
-        
-        input.value = '';
-    }
-}
+  onFileSelected(event: Event): void {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files.length > 0) {
+          const newFiles = Array.from(input.files);
+          
+          newFiles.forEach(newFile => {
+              const isDuplicate = this.attachments.some(
+                  existing => existing.name === newFile.name
+              );
+              
+              if (!isDuplicate) {
+                  // Créer un objet EmailAttachment correct
+                  this.attachments.push({ 
+                      name: newFile.name,
+                      file: newFile
+                  });
+              }
+          });
+          
+          input.value = '';
+      }
+  }
 
   // Supprime une pièce jointe
   removeAttachment(index: number): void {
@@ -1087,17 +950,17 @@ onFileSelected(event: Event): void {
       this.currentEmail = '';
     }
   }
-addCcEmail(): void {
-  const email = this.currentCcEmail.trim();
 
-  if (email && this.validateEmail(email)) {
-    if (!this.emailCcList.includes(email)) {
-      this.emailCcList.push(email);
+  addCcEmail(): void {
+    const email = this.currentCcEmail.trim();
+
+    if (email && this.validateEmail(email)) {
+      if (!this.emailCcList.includes(email)) {
+        this.emailCcList.push(email);
+      }
+      this.currentCcEmail = '';
     }
-    this.currentCcEmail = '';
   }
-}
-
 
   // Supprimer un email
   removeEmail(index: number): void {
@@ -1135,460 +998,359 @@ addCcEmail(): void {
       this.currentEmail = '';
     }
   }
-  
-  async generatePDF(preview: boolean = false): Promise<string> {
-  const doc = new jsPDF();
 
-  // En-tête inspiré de la page des factures réelles
-  doc.setFontSize(18);
-  doc.setTextColor(6, 114, 228); // Couleur bleue #0672E4
-  doc.text(`Facture Pro Forma`, 15, 20);
-  doc.setFontSize(12);
-  doc.setTextColor(0, 0, 0);
-  doc.text(`N° ${this.factureProForma.numeroFacture}`, 15, 28);
-  doc.text(`${this.siege}, le ${this.factureProForma.dateCreation ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR') : ''}`, 140, 28, { align: 'right' });
-
-  // Informations client
-  doc.setFontSize(10);
-  doc.text('Client :', 15, 40);
-  doc.text(this.factureProForma.client?.nomComplet || this.factureProForma.entrepriseClient?.nom || 'Non spécifié', 35, 40);
-  doc.text('Adresse :', 15, 46);
-  doc.text(this.factureProForma.client?.adresse || this.factureProForma.entrepriseClient?.adresse || 'Non spécifié', 35, 46);
-  doc.text('Téléphone :', 15, 52);
-  doc.text(this.factureProForma.client?.telephone || this.factureProForma.entrepriseClient?.telephone || 'Non spécifié', 35, 52);
-
-  // Tableau des produits
-  const headers = [['Produit', 'Description', 'Quantité', 'Prix Unitaire', 'Total']];
-  const data = this.confirmedLignes.map(ligne => [
-    this.getProduitNom(ligne.produitId) || 'N/A',
-    ligne.ligneDescription || '',
-    ligne.quantite.toString(),
-    `${this.getPrixVente(ligne.produitId).toLocaleString('fr-FR')} CFA`,
-    `${this.getMontantTotal(ligne).toLocaleString('fr-FR')} CFA`
-  ]);
-
-  (doc as any).autoTable({
-    head: headers,
-    body: data,
-    startY: 60,
-    theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 10 },
-    alternateRowStyles: { fillColor: [249, 249, 249] },
-    margin: { left: 15, right: 15 }
-  });
-
-  // Totaux
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
-  doc.setFontSize(10);
-  doc.text(`Total HT : ${this.getTotalHT().toLocaleString('fr-FR')} CFA`, 15, finalY);
-  if (this.activeRemise) {
-    doc.text(`Remise : ${this.getMontantRemise().toLocaleString('fr-FR')} CFA`, 15, finalY + 6);
-  }
-  if (this.activeTva) {
-    doc.text(`TVA (18%) : ${this.getMontantTVA().toLocaleString('fr-FR')} CFA`, 15, finalY + 12);
-  }
-  doc.setFontSize(12);
-  doc.setTextColor(6, 114, 228);
-  doc.text(`Total TTC : ${this.getTotalTTC().toLocaleString('fr-FR')} CFA`, 15, finalY + 18);
-
-  // Si preview est requis, retourner une URL blob
-  if (preview) {
-    const pdfBlob = doc.output('blob');
-    return URL.createObjectURL(pdfBlob);
-  }
-
-  // Sinon, sauvegarder le PDF
-  doc.save(`Facture proforma - ${this.factureProForma.numeroFacture}.pdf`);
-  return '';
-}
-
-async generatePDFAttachment(): Promise<File> {
+  async generatePDFAttachment(): Promise<File> {
 
     try {
-    const entreprise = await firstValueFrom(this.entrepriseService.getEntrepriseInfo());
-    this.nomEntreprise = entreprise.nom ?? '—';
-    this.siege = entreprise.siege ?? '—';
-    this.email = entreprise.email ?? '—';
-    this.logo     = 'http://localhost:8080' + entreprise.logo;
-    this.secteur = entreprise.secteur ?? '—';
-    this.telephone = entreprise.telephone ?? '—';
-    this.adresse = entreprise.adresse ?? '—';
-    this.nif      = entreprise.nif      ?? '—';
-    this.banque   = entreprise.banque   ?? '—';
-    this.nina     = entreprise.nina     ?? '—';
-    this.pays     = entreprise.pays     ?? '—';
-    this.rccm     = entreprise.rccm     ?? '—';
-    this.siteWeb  = entreprise.siteWeb  ?? '—';
-    this.signataire  = entreprise.signataire  ?? '—';
-    this.signataireNom  = entreprise.signataireNom  ?? '—';
+      const entreprise = await firstValueFrom(this.entrepriseService.getEntrepriseInfo());
+      this.nomEntreprise = entreprise.nom ?? '—';
+      this.siege = entreprise.siege ?? '—';
+      this.email = entreprise.email ?? '—';
+      this.logo     = 'http://localhost:8080' + entreprise.logo;
+      this.secteur = entreprise.secteur ?? '—';
+      this.telephone = entreprise.telephone ?? '—';
+      this.adresse = entreprise.adresse ?? '—';
+      this.nif      = entreprise.nif      ?? '—';
+      this.banque   = entreprise.banque   ?? '—';
+      this.nina     = entreprise.nina     ?? '—';
+      this.pays     = entreprise.pays     ?? '—';
+      this.rccm     = entreprise.rccm     ?? '—';
+      this.siteWeb  = entreprise.siteWeb  ?? '—';
+      this.signataire  = entreprise.signataire  ?? '—';
+      this.signataireNom  = entreprise.signataireNom  ?? '—';
 
+    } catch (error) {
+      console.error('Erreur de récupération des infos entreprise :', error);
+    }
 
-   
-  } catch (error) {
-    console.error('Erreur de récupération des infos entreprise :', error);
-  }
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const imgData = this.logo;
+    let imageType = 'PNG';
 
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const imgData = this.logo;
-  let imageType = 'PNG';
+    if (imgData) {
+      if (imgData.startsWith('data:image/jpeg') || imgData.startsWith('data:image/jpg')) {
+        imageType = 'JPEG';  // <- IMPORTANT : jsPDF attend 'JPEG'
+      } else if (imgData.startsWith('data:image/png')) {
+        imageType = 'PNG';
+      } else {
+        console.warn('Type d’image non reconnu, PNG utilisé par défaut');
+      }
 
+      doc.addImage(imgData, imageType, 15, 10, 47, 17);
+      console.log('Image ajoutée avec succès', imgData);
+    }
+    /*************** ——— 1. INFOS SOCIÉTÉ ——— ****************/
+    const infoX = 70;
+    const infoY_EmailTel = 22;
+    doc.setFontSize(10);
 
+    doc.setFont('helvetica', 'bold');
+    doc.text(this.nomEntreprise || 'Nom Entreprise', infoX, 12);
 
-  /*************** ——— 1. HEADER ——— ****************/
-   /*
-  if (imgData) {
-   doc.addImage(imgData, 'PNG', 15, 10, 47, 17);
-  }
-  */
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Secteur : ${this.secteur || 'default'}`,  infoX, 17);
+    doc.text(`Email : ${this.email || 'default'}`, infoX, infoY_EmailTel);
 
+    // Calcul d’un X décalé pour le téléphone, selon la largeur de l’email
+    const emailText = `Email : ${this.email || 'default'}`;
+    const emailWidth = doc.getTextWidth(emailText);
+    const spacing = 5;
 
-  if (imgData) {
-  if (imgData.startsWith('data:image/jpeg') || imgData.startsWith('data:image/jpg')) {
-    imageType = 'JPEG';  // <- IMPORTANT : jsPDF attend 'JPEG'
-  } else if (imgData.startsWith('data:image/png')) {
-    imageType = 'PNG';
-  } else {
-    console.warn('Type d’image non reconnu, PNG utilisé par défaut');
-  }
+    doc.text(
+      `Téléphone : ${this.telephone || 'default'}`,
+      infoX + emailWidth + spacing,
+      infoY_EmailTel
+    );
+    // ► 1) Calcul de la position Y immédiatement après la dernière info
+    const lastInfoY = 27;
+    const gapBelowInfo = 5;
+    const sepY = lastInfoY + gapBelowInfo;
 
-  doc.addImage(imgData, imageType, 15, 10, 47, 17);
-  console.log('Image ajoutée avec succès', imgData);
-}
+    // ► 2) Double séparateur (<hr>)
+    doc.setDrawColor(200);
+    doc.line(15, sepY,     195, sepY);
+    doc.line(15, sepY + 2, 195, sepY + 2);
 
+    /*************** ——— 2. TITRE PRINCIPAL ——— ****************/
+    const gapBelowSep = 10;
+    const titleY = sepY + gapBelowSep;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    const numeroFacture = this.factureProForma.numeroFacture || 'XXX‑XX‑XXXX';
+    doc.text(`FACTURE PROFORMA ${numeroFacture}`, 105, titleY, { align: 'center' });
 
-/*************** ——— 1. INFOS SOCIÉTÉ ——— ****************/
-const infoX = 70;
-const infoY_EmailTel = 22;
-doc.setFontSize(10);
+    doc.setDrawColor(0);
+    doc.line(60, titleY + 2, 150, titleY + 2);
 
-doc.setFont('helvetica', 'bold');
-doc.text(this.nomEntreprise || 'Nom Entreprise', infoX, 12);
+    /*************** ——— 3. DATE & LIEU ——— ****************/
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
 
-doc.setFont('helvetica', 'normal');
-doc.text(`Secteur : ${this.secteur || 'default'}`,  infoX, 17);
-doc.text(`Email : ${this.email || 'default'}`, infoX, infoY_EmailTel);
+    doc.text(
+      `${this.siege || 'default'}, le ${
+        this.factureProForma.dateCreation
+          ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR')
+          : ''
+      }`,
+      195,
+      titleY + 10,
+      { align: 'right' }
+    );
 
-// Calcul d’un X décalé pour le téléphone, selon la largeur de l’email
-const emailText = `Email : ${this.email || 'default'}`;
-const emailWidth = doc.getTextWidth(emailText);
-const spacing = 5;
+    /*************** ——— 3. INFOS CLIENT & OBJET ——— ****************/
+    const label = 'Client :';
+    const labelX = 15;
+    const labelY = 65;
 
-doc.text(
-  `Téléphone : ${this.telephone || 'default'}`,
-  infoX + emailWidth + spacing,
-  infoY_EmailTel
-);
-// ► 1) Calcul de la position Y immédiatement après la dernière info
-const lastInfoY = 27;
-const gapBelowInfo = 5;
-const sepY = lastInfoY + gapBelowInfo;
+    doc.setFont('helvetica', 'bold');
+    doc.text(label, labelX, labelY);
 
-// ► 2) Double séparateur (<hr>)
-doc.setDrawColor(200);
-doc.line(15, sepY,     195, sepY);
-doc.line(15, sepY + 2, 195, sepY + 2);
+    const labelWidth = doc.getTextWidth(label);
+    doc.line(labelX, labelY + 0.8, labelX + labelWidth, labelY + 0.8);
 
-/*************** ——— 2. TITRE PRINCIPAL ——— ****************/
-const gapBelowSep = 10;
-const titleY = sepY + gapBelowSep;
-doc.setFontSize(14);
-doc.setFont('helvetica', 'bold');
-const numeroFacture = this.factureProForma.numeroFacture || 'XXX‑XX‑XXXX';
-doc.text(`FACTURE PROFORMA ${numeroFacture}`, 105, titleY, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      this.factureProForma.client?.nomComplet ||
+        this.factureProForma.entrepriseClient?.nom ||
+        'Non spécifié',
+      35,
+      labelY
+    );
 
-doc.setDrawColor(0);
-doc.line(60, titleY + 2, 150, titleY + 2);
+    const objectLabel = 'OBJECT :';
+    const objectLabelX = 15;
+    const objectLabelY = 72;
 
-/*************** ——— 3. DATE & LIEU ——— ****************/
-doc.setFontSize(10);
-doc.setFont('helvetica', 'normal');
+    doc.setFont('helvetica', 'bold');
+    doc.text(objectLabel, objectLabelX, objectLabelY);
 
-doc.text(
-  `${this.siege || 'default'}, le ${
-    this.factureProForma.dateCreation
-      ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR')
-      : ''
-  }`,
-  195,
-  titleY + 10,
-  { align: 'right' }
-);
+    const objectLabelWidth = doc.getTextWidth(objectLabel);
+    doc.line(objectLabelX, objectLabelY + 0.8, objectLabelX + objectLabelWidth, objectLabelY + 0.8);
 
-  /*************** ——— 3. INFOS CLIENT & OBJET ——— ****************/
-const label = 'Client :';
-const labelX = 15;
-const labelY = 65;
+    doc.setFont('helvetica', 'normal');
+    doc.text(this.factureProForma.description || 'Objet', 35, objectLabelY);
 
-doc.setFont('helvetica', 'bold');
-doc.text(label, labelX, labelY);
+    /*************** ——— 4. TABLE PRODUITS ——— ****************/
+    const headers = [
+      ['Désignation', 'Description', 'Prix Unitaire (FCFA)', 'Quantité', 'Montant (FCFA)'],
+    ];
+    const data = this.confirmedLignes.map((ligne) => [
+      this.getProduitNom(ligne.produitId) || 'N/A',
+      ligne.ligneDescription || '',
+      this.getPrixVente(ligne.produitId).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '),
+      ligne.quantite.toString(),
+      this.getMontantTotal(ligne).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 
-const labelWidth = doc.getTextWidth(label);
-doc.line(labelX, labelY + 0.8, labelX + labelWidth, labelY + 0.8);
+    ]);
 
-doc.setFont('helvetica', 'normal');
-doc.text(
-  this.factureProForma.client?.nomComplet ||
-    this.factureProForma.entrepriseClient?.nom ||
-    'Non spécifié',
-  35,
-  labelY
-);
+    (doc as any).autoTable({
+      head: headers,
+      body: data,
+      startY: 80,
+      theme: 'grid',
+      styles: { fontSize: 9, cellPadding: 2, halign: 'center',},
+      headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 10, halign: 'center',},
+      alternateRowStyles: { fillColor: [249, 249, 249] },
+      margin: { left: 15, right: 15 },
+      columnStyles: {
+        0: { halign: 'left' },
+        1: { halign: 'left' }, 
+      },
+    });
 
+    /*************** ——— 5. TOTAUX ——— ****************/
+    
+    let y = (doc as any).lastAutoTable.finalY + 11;
+    doc.setFontSize(10);
 
-const objectLabel = 'OBJECT :';
-const objectLabelX = 15;
-const objectLabelY = 72;
+    const labelXCenter = (100 + 150) / 2;
+    const valueXCenter = (150 + 195) / 2;
 
-doc.setFont('helvetica', 'bold');
-doc.text(objectLabel, objectLabelX, objectLabelY);
+    const addTotalLine = (label: string, value: string, isBold = false) => {
+      if (isBold) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+      }
+      doc.text(label, labelXCenter, y, { align: 'center' });
+      doc.text(value, valueXCenter, y, { align: 'center' });
+      if (isBold) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+      }
+      y += 6;
+    };
 
-const objectLabelWidth = doc.getTextWidth(objectLabel);
-doc.line(objectLabelX, objectLabelY + 0.8, objectLabelX + objectLabelWidth, objectLabelY + 0.8);
+    addTotalLine(
+      'Total HT',
+      `${this.getTotalHT().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+    );
 
-doc.setFont('helvetica', 'normal');
-doc.text(this.factureProForma.description || 'Objet', 35, objectLabelY);
+    if (this.activeRemise) {
+      addTotalLine(
+        `Remise (${this.remisePourcentage || 10}%)`,
+        `${this.getMontantRemise().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+      );
+    }
 
+    addTotalLine(
+      'Montant commercial',
+      `${this.getTotalCommercial().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+    );
 
-  /*************** ——— 4. TABLE PRODUITS ——— ****************/
-  const headers = [
-    ['Désignation', 'Description', 'Prix Unitaire (FCFA)', 'Quantité', 'Montant (FCFA)'],
-  ];
-  const data = this.confirmedLignes.map((ligne) => [
-    this.getProduitNom(ligne.produitId) || 'N/A',
-    ligne.ligneDescription || '',
-    this.getPrixVente(ligne.produitId).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '),
-    ligne.quantite.toString(),
-    this.getMontantTotal(ligne).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+    if (this.activeTva) {
+      addTotalLine(
+        'TVA (18%)',
+        `${this.getMontantTVA().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
+      );
+    }
 
-  ]);
+    addTotalLine(
+      'Montant TTC',
+      `${this.getTotalTTC().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`,
+      true
+    );
 
-  (doc as any).autoTable({
-    head: headers,
-    body: data,
-    startY: 80,
-    theme: 'grid',
-    styles: { fontSize: 9, cellPadding: 2, halign: 'center',},
-    headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 10, halign: 'center',},
-    alternateRowStyles: { fillColor: [249, 249, 249] },
-    margin: { left: 15, right: 15 },
-    columnStyles: {
-      0: { halign: 'left' },
-      1: { halign: 'left' }, 
-    },
-  });
+    /*************** ——— 6. MONTANT EN LETTRES ——— ****************/
 
-  /*************** ——— 5. TOTAUX ——— ****************/
-  
-let y = (doc as any).lastAutoTable.finalY + 11;
-doc.setFontSize(10);
-
-const labelXCenter = (100 + 150) / 2;
-const valueXCenter = (150 + 195) / 2;
-
-const addTotalLine = (label: string, value: string, isBold = false) => {
-  if (isBold) {
+    y += 18;
+    const libelle = 'Arrêté la présente facture à la somme de : ';
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
-  }
-  doc.text(label, labelXCenter, y, { align: 'center' });
-  doc.text(value, valueXCenter, y, { align: 'center' });
-  if (isBold) {
+    doc.text(libelle, 15, y);
+
+    // largeur du libellé pour connaître le point de départ du texte en lettres
+    const libelleWidth = doc.getTextWidth(libelle);
+    const startX = 15 + libelleWidth;
+
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
+    const montantLettreRaw =
+      this.enLettresPipe.transform(this.getTotalTTC());
+
+    const maxWidth = 195 - startX; 
+
+    const lines = doc.splitTextToSize(montantLettreRaw, maxWidth);
+
+    doc.text(lines[0], startX, y);
+
+    for (let i = 1; i < lines.length; i++) {
+      y += 6;
+      doc.text(lines[i], 15, y);
+    }
+
+    /*************** ——— 7. SIGNATURE / CACHET ——— ****************/
+    // 1. Texte du nom (en bas)
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    const nom = this.signataireNom || 'Nom du signataire';
+    const nomWidth = doc.getTextWidth(nom);
+
+    // ➤ On déplace le bloc vers la droite (ex : centré autour de x = 160mm)
+    const blocCenterX = 180;
+    const nomX = blocCenterX - nomWidth / 2;
+
+    // Texte du rôle (juste au-dessus)
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    const signataire = this.signataire || 'Directeur';
+    const signataireWidth = doc.getTextWidth(signataire);
+    const signataireX = blocCenterX - signataireWidth / 2;
+
+    // Dessiner (moins d’espace entre les 2 lignes : 10 au lieu de 15)
+    y += 50;
+    doc.text(signataire, signataireX, y);
+    y += 10;  // réduit l’espace vertical
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(nom, nomX, y);
+    y += 10; // espace sous le nom classique
+
+    doc.setFontSize(9);
+    doc.setFont('times', 'italic');
+
+    const nomSignatureWidth = doc.getTextWidth(nom);
+    const nomSignatureX = blocCenterX - nomSignatureWidth / 2;
+
+    // Ombre légère (gris, décalé)
+    doc.setTextColor(150, 150, 150);
+    doc.text(nom, nomSignatureX + 0.5, y + 0.5);
+
+    // Texte principal en noir, italique
+    doc.setTextColor(0, 0, 0);
+    doc.text(nom, nomSignatureX, y);
+
+    // Ligne ondulée sous le texte (signature stylisée)
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+
+    const waveStartX = nomSignatureX;
+    const waveEndX = nomSignatureX + nomSignatureWidth;
+    const waveY = y + 3; // un peu sous le texte
+    const waveLength = 5;  // longueur d’une vague complète
+    const amplitude = 1;   // hauteur de la vague
+
+    let previousX = waveStartX;
+    let previousY = waveY;
+
+    for (let x = waveStartX + 0.5; x <= waveEndX; x += 0.5) {
+      // Calculer y avec une sinusoïde pour l’effet ondulé
+      const yOffset = amplitude * Math.sin(((x - waveStartX) / waveLength) * 2 * Math.PI);
+      const currentY = waveY + yOffset;
+      doc.line(previousX, previousY, x, currentY);
+      previousX = x;
+      previousY = currentY;
+    }
+
+    // Séparateur presque pleine largeur
+    const margin = 10;
+    const pageWidth = doc.internal.pageSize.width;
+    const x1 = margin;
+    const x2 = pageWidth - margin;
+    const pageHeight = doc.internal.pageSize.height;
+    const footerYStart = pageHeight - 20;
+    const separatorY = footerYStart - 5;
+    doc.setLineWidth(0.2);
+    doc.setDrawColor(150);
+    doc.line(x1, separatorY, x2, separatorY);
+
+    /*************** ——— 8. FOOTER  ——— ****************/
+
+    doc.setFontSize(9);
+    doc.setFont('Roboto', 'normal');  
+    doc.setTextColor(100);
+
+    doc.text(this.siteWeb || 'www.votre-entreprise.com', 105, footerYStart, { align: 'center' });
+
+    doc.text(
+      `NINA : ${this.nina || 'default'} ; RCCM : ${this.rccm || 'default'} ; NIF : ${
+        this.nif || 'default'
+      } ; Banque : ${this.banque || 'default'}`,
+      105,
+      footerYStart + 5,
+      { align: 'center' }
+    );
+
+    doc.text(
+      `Adresse : ${this.adresse || 'default'} / ${this.siege || 'default'} - ${
+        this.pays || 'default'
+      }`,
+      105,
+      footerYStart + 10,
+      { align: 'center' }
+    );
+
+    doc.setTextColor(0);
+
+
+      const pdfBlob = doc.output('blob');
+      return new File(
+        [pdfBlob],
+        `Facture proforma - ${this.factureProForma.numeroFacture || 'XXX-XX-XXXX'}.pdf`,
+        { type: 'application/pdf' }
+      );
   }
-  y += 6;
-};
 
-addTotalLine(
-  'Total HT',
-  `${this.getTotalHT().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-);
-
-if (this.activeRemise) {
-  addTotalLine(
-    `Remise (${this.remisePourcentage || 10}%)`,
-    `${this.getMontantRemise().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-  );
-}
-
-addTotalLine(
-  'Montant commercial',
-  `${this.getTotalCommercial().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-);
-
-if (this.activeTva) {
-  addTotalLine(
-    'TVA (18%)',
-    `${this.getMontantTVA().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-  );
-}
-
-addTotalLine(
-  'Montant TTC',
-  `${this.getTotalTTC().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`,
-  true
-);
-
-  /*************** ——— 6. MONTANT EN LETTRES ——— ****************/
-
-  y += 18;
-const libelle = 'Arrêté la présente facture à la somme de : ';
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(10);
-doc.text(libelle, 15, y);
-
-// largeur du libellé pour connaître le point de départ du texte en lettres
-const libelleWidth = doc.getTextWidth(libelle);
-const startX = 15 + libelleWidth;
-
-doc.setFont('helvetica', 'normal');
-doc.setFontSize(10);
-const montantLettreRaw =
-  this.enLettresPipe.transform(this.getTotalTTC());
-
-const maxWidth = 195 - startX; 
-
-const lines = doc.splitTextToSize(montantLettreRaw, maxWidth);
-
-doc.text(lines[0], startX, y);
-
-for (let i = 1; i < lines.length; i++) {
-  y += 6;
-  doc.text(lines[i], 15, y);
-}
-
-
-
-
-
-  /*************** ——— 7. SIGNATURE / CACHET ——— ****************/
-// 1. Texte du nom (en bas)
-doc.setFontSize(12);
-doc.setFont('helvetica', 'normal');
-const nom = this.signataireNom || 'Nom du signataire';
-const nomWidth = doc.getTextWidth(nom);
-
-// ➤ On déplace le bloc vers la droite (ex : centré autour de x = 160mm)
-const blocCenterX = 180;
-const nomX = blocCenterX - nomWidth / 2;
-
-// Texte du rôle (juste au-dessus)
-doc.setFontSize(10);
-doc.setFont('helvetica', 'bold');
-const signataire = this.signataire || 'Directeur';
-const signataireWidth = doc.getTextWidth(signataire);
-const signataireX = blocCenterX - signataireWidth / 2;
-
-// Dessiner (moins d’espace entre les 2 lignes : 10 au lieu de 15)
-y += 50;
-doc.text(signataire, signataireX, y);
-y += 10;  // réduit l’espace vertical
-doc.setFontSize(12);
-doc.setFont('helvetica', 'normal');
-doc.text(nom, nomX, y);
-
-
-y += 10; // espace sous le nom classique
-
-doc.setFontSize(9);
-doc.setFont('times', 'italic');
-
-const nomSignatureWidth = doc.getTextWidth(nom);
-const nomSignatureX = blocCenterX - nomSignatureWidth / 2;
-
-// Ombre légère (gris, décalé)
-doc.setTextColor(150, 150, 150);
-doc.text(nom, nomSignatureX + 0.5, y + 0.5);
-
-// Texte principal en noir, italique
-doc.setTextColor(0, 0, 0);
-doc.text(nom, nomSignatureX, y);
-
-// Ligne ondulée sous le texte (signature stylisée)
-doc.setDrawColor(0, 0, 0);
-doc.setLineWidth(0.5);
-
-const waveStartX = nomSignatureX;
-const waveEndX = nomSignatureX + nomSignatureWidth;
-const waveY = y + 3; // un peu sous le texte
-const waveLength = 5;  // longueur d’une vague complète
-const amplitude = 1;   // hauteur de la vague
-
-let previousX = waveStartX;
-let previousY = waveY;
-
-for (let x = waveStartX + 0.5; x <= waveEndX; x += 0.5) {
-  // Calculer y avec une sinusoïde pour l’effet ondulé
-  const yOffset = amplitude * Math.sin(((x - waveStartX) / waveLength) * 2 * Math.PI);
-  const currentY = waveY + yOffset;
-  doc.line(previousX, previousY, x, currentY);
-  previousX = x;
-  previousY = currentY;
-}
-
-
-
-
-// Séparateur presque pleine largeur
-const margin = 10;
-const pageWidth = doc.internal.pageSize.width;
-const x1 = margin;
-const x2 = pageWidth - margin;
-const pageHeight = doc.internal.pageSize.height;
-const footerYStart = pageHeight - 20;
-const separatorY = footerYStart - 5;
-doc.setLineWidth(0.2);
-doc.setDrawColor(150);
-doc.line(x1, separatorY, x2, separatorY);
-
-
-
-
-
-
-/*************** ——— 8. FOOTER  ——— ****************/
-
-doc.setFontSize(9);
-doc.setFont('Roboto', 'normal');  
-doc.setTextColor(100);
-
-doc.text(this.siteWeb || 'www.votre-entreprise.com', 105, footerYStart, { align: 'center' });
-
-doc.text(
-  `NINA : ${this.nina || 'default'} ; RCCM : ${this.rccm || 'default'} ; NIF : ${
-    this.nif || 'default'
-  } ; Banque : ${this.banque || 'default'}`,
-  105,
-  footerYStart + 5,
-  { align: 'center' }
-);
-
-doc.text(
-  `Adresse : ${this.adresse || 'default'} / ${this.siege || 'default'} - ${
-    this.pays || 'default'
-  }`,
-  105,
-  footerYStart + 10,
-  { align: 'center' }
-);
-
-doc.setTextColor(0);
-
-
-  const pdfBlob = doc.output('blob');
-  return new File(
-    [pdfBlob],
-    `Facture proforma - ${this.factureProForma.numeroFacture || 'XXX-XX-XXXX'}.pdf`,
-    { type: 'application/pdf' }
-  );
-}
-
-
-
-
-
- getUserEntrepriseInfo(): void {
+  getUserEntrepriseInfo(): void {
     this.entrepriseService.getEntrepriseInfo().subscribe({
       next: (entreprise) => {
         console.log("Entreprise reçue :", entreprise);
@@ -1610,7 +1372,6 @@ doc.setTextColor(0);
         this.signataire = entreprise.signataire;
         this.signataireNom = entreprise.signataireNom;
 
-  
         this.logo = 'http://localhost:8080' + entreprise.logo;
 
           // ✅ Appelle ici loadUsersOfEntreprise une fois qu'on a l'ID
@@ -1628,17 +1389,15 @@ doc.setTextColor(0);
     });
   }
 
-
-
-loadFontScript(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = 'assets/fonts/police/brittany.js';
-    script.onload = () => resolve();
-    script.onerror = () => reject('Erreur lors du chargement de la police');
-    document.body.appendChild(script);
-  });
-}
+  loadFontScript(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'assets/fonts/police/brittany.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject('Erreur lors du chargement de la police');
+      document.body.appendChild(script);
+    });
+  }
 
 
 }
