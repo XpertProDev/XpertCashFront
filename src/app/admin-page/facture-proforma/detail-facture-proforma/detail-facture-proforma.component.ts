@@ -188,81 +188,53 @@ export class DetailFactureProformaComponent implements OnInit {
 
   // Modifier load Historical Events pour inclure tous les statuts
   private loadHistoricalEvents() {
-    this.historicalEvents = [];
-
-    // Événement de création
-    if (this.factureProForma.dateCreation) {
-       this.historicalEvents.push({
-        date: new Date(this.factureProForma.dateCreation),
-        user: this.factureProForma.utilisateurCreateur || { nomComplet: 'Système' },
-        type: 'creation',
-        description: 'Création de la facture',
-        status: StatutFactureProForma.BROUILLON
-      });
-    }
-
-    // Événement de demande d'approbation
-    if (this.factureProForma.dateApprobation && this.factureProForma.approbateurs) {
-      const approbateurs = this.factureProForma.approbateurs
-        .map(a => a.nomComplet)
-        .join(', ');
-
-      this.historicalEvents.push({
-        date: new Date(this.factureProForma.dateApprobation),
-        user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Utilisateur inconnu' },
-        type: 'approbation',
-        description: `Demande d'approbation envoyée à : ${approbateurs}`,
-        status: StatutFactureProForma.APPROBATION
-      });
-    }
-
-    // Événement d'approbation
-    if (this.factureProForma.dateApprobation) {
-      this.historicalEvents.push({
-        date: new Date(this.factureProForma.dateApprobation),
-        user: this.factureProForma.utilisateurApprobateur || { nomComplet: 'Approbateur' },
-        type: 'approbation',
-        description: 'Facture approuvée',
-        status: StatutFactureProForma.APPROUVE
-      });
-    }
-
-    // Événement d'envoi
-    if (this.factureProForma.dateRelance) {
-      this.historicalEvents.push({
-        date: new Date(this.factureProForma.dateRelance),
-        user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Expéditeur' },
-        type: 'envoi',
-        description: 'Facture envoyée au client',
-        status: StatutFactureProForma.ENVOYE
-      });
-    }
-
-    // Événement de validation
-    if (this.factureProForma.statut === StatutFactureProForma.VALIDE) {
+  this.factureProFormaService.getHistoriqueFacture(this.factureId).subscribe({
+    next: (historique: any) => {
+      this.historicalEvents = historique.historiqueActions.map((action: any) => ({
+        date: new Date(action.date),
+        user: { nomComplet: action.utilisateur },
+        type: this.mapActionType(action.action),
+        description: action.details,
+        status: this.mapActionToStatus(action.action)
+      }));
+      
+      // Ajouter la création si manquante
+      if (!this.historicalEvents.some(e => e.type === 'creation')) {
         this.historicalEvents.push({
-            date: new Date(), // À remplacer par la date réelle de validation si disponible
-            user: this.factureProForma.utilisateurModificateur || { nomComplet: 'Validateur inconnu' },
-            type: 'validation',
-            description: 'Facture validée définitivement',
-            status: StatutFactureProForma.VALIDE
+          date: new Date(this.factureProForma.dateCreation),
+          user: { nomComplet: this.factureProForma.utilisateurCreateur?.nomComplet || 'Système' },
+          type: 'creation',
+          description: 'Création de la facture'
         });
-    }
+      }
 
-    // Trier par date décroissante
-    this.historicalEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
-  }
+      // Trier par date
+      this.historicalEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
+    },
+    error: (err) => console.error('Erreur historique', err)
+  });
+}
 
-  private getResponsibleUser() {
-    switch(this.factureProForma.statut) {
-        case StatutFactureProForma.APPROUVE:
-            return this.factureProForma.utilisateurApprobateur || { nomComplet: 'Approbateur inconnu' };
-        case StatutFactureProForma.VALIDE:
-            return this.factureProForma.utilisateurModificateur || { nomComplet: 'Validateur inconnu' };
-        default:
-            return this.factureProForma.utilisateurModificateur || { nomComplet: 'Utilisateur inconnu' };
-    }
-  }
+private mapActionType(action: string): EventType {
+  const mapping: Record<string, EventType> = {
+    'Création': 'creation',
+    'Modification': 'modification',
+    'Approbation': 'approbation',
+    'Validation': 'validation',
+    'Envoi': 'envoi',
+    'Annulation': 'modification'
+  };
+  return mapping[action] || 'modification';
+}
+
+private mapActionToStatus(action: string): StatutFactureProForma | undefined {
+  const statusMap: Record<string, StatutFactureProForma> = {
+    'Facture approuvée': StatutFactureProForma.APPROUVE,
+    'Facture envoyée': StatutFactureProForma.ENVOYE,
+    'Facture validée': StatutFactureProForma.VALIDE
+  };
+  return statusMap[action];
+}
 
   loadFactureProforma(id: number): void {
     this.factureProFormaService.getFactureProformaById(id).subscribe({
