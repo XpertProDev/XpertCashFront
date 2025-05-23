@@ -2,6 +2,7 @@ export interface UserNewRequest {
     id: number;
     personalCode: string;
     nomComplet: string;
+    photo: string;
     email: string;
     roleType: string;
     phone: string;

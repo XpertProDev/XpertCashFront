@@ -139,7 +139,7 @@
             <div class="info_cadre">
               <p>
                 <i class="ri-mail-line"></i>
-                <span *ngIf="client.email; else noEmail">{{ client.email }}</span>
+                <span *ngIf="client.email; else noEmail">{{ client.email | truncateEmail }}</span>
                 <ng-template #noEmail>
                   <span class="no-phone-text">Non email</span>
                 </ng-template>

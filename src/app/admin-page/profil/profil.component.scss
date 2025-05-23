@@ -24,11 +24,124 @@
     font-size: 12px;
   }
 
-  .profile-img {
-    width: 100px;
-    border-radius: 50%;
-    margin-bottom: 10px;
+
+
+
+.profile-img-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.profile-img-wrapper:hover {
+  transform: scale(1.03);
+}
+
+.profile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.profile-img-wrapper:hover .overlay {
+  opacity: 1;
+}
+
+.camera-icon {
+  width: 30px; /* ajuste selon la taille voulue */
+  height: 30px;
+  background: #ffffff;
+  padding: 6px;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
+}
+
+
+@keyframes modalFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
   }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.photo-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeInBackdrop 0.3s ease-out;
+}
+
+@keyframes fadeInBackdrop {
+  from { background: rgba(0,0,0,0); }
+  to   { background: rgba(0,0,0,0.7); }
+}
+
+.photo-modal-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  animation: modalFadeIn 0.4s ease-out;
+  transform-origin: center center;
+}
+
+.photo-modal-content img {
+  max-width: 100%;
+  max-height: 50vh;
+  border-radius: 10px;
+}
+
+.fermer-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 23px;
+  height: 23px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.fermer-btn:hover {
+  background: #cc0000;
+}
+
+
+
   
   .stats {
     display: flex;

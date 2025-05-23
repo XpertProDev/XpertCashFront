@@ -5,6 +5,7 @@ export interface UserRequest {
   nomComplet: string;
   nomEntreprise: string;
   email: string;
+  photo: string;
   roleType: string;
   phone: string;
   pays: string;

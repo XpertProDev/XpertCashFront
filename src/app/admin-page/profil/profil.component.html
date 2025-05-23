@@ -9,37 +9,89 @@
 
 </div>
 
-<div class="container">
-    <aside class="sidebar">
-      <div class="profile">
-        <img src="assets/img/profil.png" alt="Chet Faker" class="profile-img">
-        <h2>{{userName}}</h2>
-        <p class="profil_email">{{email}}</p>
-        <h5 style="color: #0672E4; letter-spacing: 0.60px;">{{roleType}}</h5>
-        <div class="stats">
-          <!-- <div>12<br>Utilisateurs</div> -->
+  <div class="container">
+      <aside class="sidebar">
+        <div class="profile">
+          <!-- Image de profil avec actions -->
+      <div class="profile-img-wrapper" (click)="visualiserPhoto($event)">
+            <img
+              [src]="photo || 'assets/img/profil.png'"
+              alt="Photo de profil"
+              class="profile-img" />
 
-          <div>Code Personnel<br><span style="font-style: italic; color: red;">{{personalCode}}</span></div>
-          
-        </div>
+              <div class="overlay">
+                <img
+                  src="assets/img/appareil.jpg"
+                  alt="Modifier"
+                  class="camera-icon"
+                  (click)="changerPhoto($event)" />
+              </div>
       </div>
-      
-    </aside>
-    <main class="main-content">
-      <header>
-        <h1>Profil</h1>
-      </header>
-      <div class="container_form_profil">
-        <div class="form-row div1">
-          <label for="company">Entreprise</label>
-          <input type="text" id="company" value="{{ nomEntreprise }}" readonly>
+
+          <input
+            type="file"
+            id="fileInput"
+            accept="image/*"
+            (change)="onFileSelected($event)"
+            hidden />
+
+            <!-- Lightbox de visualisation -->
+            <div class="photo-modal" *ngIf="isModalOpen" (click)="fermerModal()">
+              <div class="photo-modal-content" (click)="$event.stopPropagation()">
+                <img [src]="photo || 'assets/img/profil.png'" alt="Aperçu" />
+                <button class="fermer-btn" (click)="fermerModal()">✕</button>
+              </div>
+            </div>
+
+              <h2>{{ userName }}</h2>
+              <p class="profil_email">{{ email }}</p>
+              <h5 style="color: #0672E4; letter-spacing: 0.60px;">{{ roleType }}</h5>
+              <div class="stats">
+                <div>Code Personnel<br><span style="font-style: italic; color: red;">{{ personalCode }}</span>
+                </div>
+              </div>
+          </div>
+      </aside>
+
+      <main class="main-content">
+        <header>
+          <h1>Profil</h1>
+        </header>
+        <div class="container_form_profil">
+          <div class="form-row div1">
+            <label for="company">Entreprise</label>
+            <input type="text" id="company" value="{{ nomEntreprise }}" readonly>
+          </div>
+          <div class="form-row div3">
+            <label for="email">Email address</label>
+            <input type="email" id="email" value="{{email}}" readonly>
+          </div>
+          <!-- <div class="form-row div4">
+            <label for="firstName" for="boutiques">Boutiques</label>
+            <div id="boutiques" class="boutiques-list">
+              <span *ngFor="let boutique of boutiques" class="boutique-tag">
+                {{ boutique.nomBoutique }}
+              </span>
+              <span *ngIf="boutiques.length === 0">Aucune boutique</span>
+            </div>
+          </div>
+          <div class="form-row div5">
+            <label for="country">Device</label>
+            <input type="text" id="Device" value="FCFA" readonly>
+          </div> -->
+
+          <div class="form-row div4">
+            <label for="city">Pays</label>
+            <input type="text" id="city" value="{{pays}} {{ flagPays }}" readonly>
+          </div>
+          <div class="form-row div5">
+            <label for="lastName">Téléphone</label>
+            <input type="text" id="lastName" value="{{phone}}" readonly>
+          </div>
         </div>
-        <div class="form-row div3">
-          <label for="email">Email address</label>
-          <input type="email" id="email" value="{{email}}" readonly>
-        </div>
-        <!-- <div class="form-row div4">
-          <label for="firstName" for="boutiques">Boutiques</label>
+
+        <div class="form-row" style="margin-top: 20px;"> 
+          <label for="boutiques">Boutiques</label>
           <div id="boutiques" class="boutiques-list">
             <span *ngFor="let boutique of boutiques" class="boutique-tag">
               {{ boutique.nomBoutique }}
@@ -47,32 +99,8 @@
             <span *ngIf="boutiques.length === 0">Aucune boutique</span>
           </div>
         </div>
-        <div class="form-row div5">
-          <label for="country">Device</label>
-          <input type="text" id="Device" value="FCFA" readonly>
-        </div> -->
-
-        <div class="form-row div4">
-          <label for="city">Pays</label>
-          <input type="text" id="city" value="{{pays}} {{ flagPays }}" readonly>
-        </div>
-        <div class="form-row div5">
-          <label for="lastName">Téléphone</label>
-          <input type="text" id="lastName" value="{{phone}}" readonly>
-        </div>
-      </div>
-
-      <div class="form-row" style="margin-top: 20px;"> 
-        <label for="boutiques">Boutiques</label>
-        <div id="boutiques" class="boutiques-list">
-          <span *ngFor="let boutique of boutiques" class="boutique-tag">
-            {{ boutique.nomBoutique }}
-          </span>
-          <span *ngIf="boutiques.length === 0">Aucune boutique</span>
-        </div>
-      </div>
-    </main>
-</div>
+      </main>
+  </div>
 
 <!-- // PARAMETRE  -->
 <div class="container_parametre">
@@ -99,6 +127,18 @@
               <form [formGroup]="nomCompletForm" (ngSubmit)="onSubmitUpdateUser()" class="info_titre_input">
                 <h5>Modification Profil</h5>
             
+                <!-- Photo de profil -->
+                <div class="champ_input">
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    (change)="onFileSelected($event)"
+                    class="input_focus"
+                  >
+                  <label class="label labelColor">Photo de profil</label>
+                </div>
+
+
                 <!-- Nom -->
                 <div class="champ_input">
                   <input 

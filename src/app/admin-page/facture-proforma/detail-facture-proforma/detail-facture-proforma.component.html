@@ -19,9 +19,9 @@
                 <div class="information_cadre">
                     <div class="info_titre_etat">
                     <h4>État</h4>
-                    <div class="etat_container">
+                    <div class="etat_container" [class.has-active]="factureProForma.statut">
                         <!-- Section des états -->
-                        <div class="etat_content" [class.has-active]="factureProForma.statut">
+                        <div class="etat_content">
 
                             <!-- Bouton Brouillon -->
                             <div class="etat_brouillon">
@@ -32,6 +32,7 @@
                                 Brouillon
                                 </button>
                             </div>
+                            
 
                             <!-- Bouton Approbation -->
                             <div class="etat_approbation" *ngIf="!factureProForma.dateApprobation">
@@ -132,7 +133,7 @@
                             <!-- // Adresse et téléphone  -->
                             <div class="double_input_grid">
                                 <div class="champ_input">
-                                    <input autocomplete="off" style="cursor: no-drop;" readonly [value]="factureProForma.client.adresse" type="text" class="input_focus" required placeholder="Saisis l'adresse">
+                                    <input autocomplete="off" style="cursor: no-drop;" disabled readonly [value]="factureProForma.client.adresse" type="text" class="input_focus" required placeholder="Saisis l'adresse">
                                     <label for="adresse" class="label"> Adresse </label>
                                 </div>
     
@@ -499,7 +500,7 @@
                 </div>
                 <div *ngFor="let event of historicalEvents" class="timeline-event">
                     <div class="event-avatar">
-                    <img src="assets/img/profil.png" alt="Avatar" class="avatar">
+                    <img [src]="event.user.photo || 'assets/img/profil.png'" alt="Avatar" class="avatar">
                     </div>
                     
                     <div class="event-content">
@@ -668,7 +669,7 @@
                     <div class="champ_input" style="margin-right: 15px;">
                         <div class="email-input-container">
                             <!-- Emails sous forme de puces dans l'input -->
-                            <span *ngFor="let email of emailDestinatairesList; let i = index" class="email-chip">
+                            <span *ngFor="let email of emailDestinatairesList; let i = index" class="email-chip  email-chip-cc">
                                 {{email}}
                                 <span class="remove-chip" (click)="removeEmail(i)">✖</span>
                             </span>
@@ -734,7 +735,7 @@
                             class="input_focus_type input_table_des" 
                             type="text" 
                             placeholder="Bienvenue à MyCompany !" 
-                            [value]="'Facture pro forma ' + (factureProForma?.numeroFacture || '')">
+                            [value]="'Facture pro forma ' + (factureProForma.numeroFacture || '')">
                     </div>
                 </div>
             </div>

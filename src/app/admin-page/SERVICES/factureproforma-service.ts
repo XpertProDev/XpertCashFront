@@ -162,8 +162,12 @@ export class FactureProFormaService {
       'Authorization': `Bearer ${token}`
     });
 
-    return this.http.get<any>(`${this.apiUrl}/factpro/${factureId}/historique`, { headers });
-  }
+  return this.http.get<any>(`${this.apiUrl}/factpro/${factureId}/historique`, { headers });
+}
+
+// getHistoriqueActions(factureId: number): Observable<any> {
+//   return this.http.get(`${this.apiUrl}/factpro/${factureId}/historique`);
+// }
 
 
 

@@ -161,7 +161,7 @@ export class UsersService {
     return this.http.put<{ message?: string; error?: string }>(`${this.apiUrl}/updatedBoutique/${id}`, updates, { headers });
   }
 
-  updateUser(id: number, updates: { nomComplet: string; phone: string; password: string }): Observable<{ message?: string; error?: string }> {
+updateUser(id: number, formData: FormData): Observable<any> {
     const token = localStorage.getItem('authToken');
     
     if (!token) {
@@ -173,7 +173,7 @@ export class UsersService {
       Authorization: `Bearer ${token}`
     });
     
-    return this.http.patch<{ message?: string; error?: string }>(`${this.apiUrl}/updateUsers/${id}`, updates, { headers });
+    return this.http.patch(`${this.apiUrl}/updateUsers/${id}`, formData, { headers, responseType: 'text' });
   }
 
 

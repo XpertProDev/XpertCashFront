@@ -70,7 +70,8 @@
                   </span>
               </td>
               <td class="td">
-                  {{ getTotalFacture(facture) | customNumber }}
+                  <!-- {{ getTotalFacture(facture) | customNumber }} -->
+                {{ facture.totalFacture| customNumber  }} CFA
               </td>
           </tr>
       </tbody>
@@ -119,13 +120,13 @@
         </thead>
         <tbody>
           <ng-container *ngIf="facture.ligneFactureProforma?.length; else noLines">
-            <tr *ngFor="let ligne of facture.ligneFactureProforma.slice(0, 2)">
+            <tr *ngFor="let ligne of facture.ligneFactureProforma.slice(0, 1)">
               <td> {{ ligne.nomProduit }} </td>
               <td> {{ ligne.quantite }} </td>
               <td class="tb_total"> {{ ligne.montantTotal | customNumber }} </td>
             </tr>
             <!-- Affiche les || s'il y a plus de 3 articles -->
-            <tr *ngIf="facture.ligneFactureProforma.length > 2" class="facture_trois">
+            <tr *ngIf="facture.ligneFactureProforma.length > 1" class="facture_trois">
               <td>||</td>
               <td>||</td>
               <td class="tb_total">||</td>
