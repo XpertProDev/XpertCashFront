@@ -3,7 +3,7 @@ import { Permission } from '../MODELS/permition.interface';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Users } from '../MODELS/utilisateur.model';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UsersService } from '../SERVICES/users.service';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
 
@@ -14,6 +14,7 @@ import { UserNewRequest } from '../MODELS/user-new-request.model';
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
+    // RouterLink,
   ],
   templateUrl: './permission.component.html',
   styleUrl: './permission.component.scss'

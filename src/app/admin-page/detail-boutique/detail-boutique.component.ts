@@ -1,24 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BoutiqueService } from '../SERVICES/boutique-service';
 import { Boutique } from '../MODELS/boutique-model';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-detail-boutique',
   imports: [
-    CommonModule
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
   ],
   templateUrl: './detail-boutique.component.html',
   styleUrl: './detail-boutique.component.scss'
 })
 export class DetailBoutiqueComponent implements OnInit {
-
+  isModificationFormVisible = false;
   boutique: Boutique | null = null;
   isLoading = false;
   errorMessage: string | null = null;
+  boutiqueForm!: FormGroup;
+  successMessage: string | null = null;
+  successMessageTimeout: any;
+  updateTimeout: any;
 
   isUpdating = false;
+  isUpdating_boutique = false;
   showConfirmationModal = false;
   confirmationTitle = '';
   confirmationMessage = '';
@@ -29,12 +37,22 @@ export class DetailBoutiqueComponent implements OnInit {
     private route: ActivatedRoute,
     private boutiqueService: BoutiqueService,
     private router: Router,
+    private fb: FormBuilder,
+    private cd: ChangeDetectorRef
   ) {
 
   }
 
   ngOnInit(): void {
+    this.initForm();
     this.loadBoutique();
+  }
+
+  private initForm(): void {
+    this.boutiqueForm = this.fb.group({
+      nomBoutique: ['', Validators.required],
+      adresse: ['']
+    });
   }
 
   private loadBoutique(): void {
@@ -49,6 +67,10 @@ export class DetailBoutiqueComponent implements OnInit {
     this.boutiqueService.getBoutiqueById(+id).subscribe({
       next: (boutique) => {
         this.boutique = boutique;
+        this.boutiqueForm.patchValue({
+          nomBoutique: boutique.nomBoutique,
+          adresse: boutique.adresse
+        });
         this.isLoading = false;
       },
       error: (err) => {
@@ -127,5 +149,53 @@ export class DetailBoutiqueComponent implements OnInit {
   private showErrorMessage(): void {
     alert('Échec de la mise à jour du statut');
   }
+
+  onSubmitBoutique(): void {
+    if (this.boutiqueForm.invalid || !this.boutique) return;
+
+    this.isUpdating_boutique = true;
+    this.errorMessage = null;
+    this.successMessage = null;
+
+    // Clear les timeouts précédents
+    clearTimeout(this.successMessageTimeout);
+    clearTimeout(this.updateTimeout);
+
+    this.boutiqueService.updateBoutique(this.boutique.id, this.boutiqueForm.value)
+      .subscribe({
+          next: (response) => {
+            if (this.boutique) {
+              this.boutique = { 
+                ...this.boutique, 
+                ...this.boutiqueForm.value 
+              };
+            }
+            
+            // Clear les timeouts précédents
+            clearTimeout(this.successMessageTimeout);
+            clearTimeout(this.updateTimeout);
+
+            // Désactiver le loading après 2 secondes
+            this.updateTimeout = setTimeout(() => {
+              this.isUpdating_boutique = false;
+              // Afficher le message de succès après la fin du loading
+              this.successMessage = 'Boutique mise à jour avec succès !';
+              this.successMessageTimeout = setTimeout(() => {
+                this.successMessage = null;
+              }, 5000);
+            }, 2000);
+          },error: (err) => {
+          this.isUpdating_boutique = false;
+          this.errorMessage = err.error?.message || 'Erreur lors de la mise à jour';
+        }
+      });
+  }
+
+  toggleModificationForm() {
+    this.isModificationFormVisible = !this.isModificationFormVisible;
+    this.cd.detectChanges(); // Force la mise à jour du DOM
+  }
+
+  
 
 }

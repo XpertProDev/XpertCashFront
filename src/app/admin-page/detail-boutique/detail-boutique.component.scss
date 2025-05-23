@@ -23,16 +23,6 @@
     letter-spacing: 1px;
 }
 
-.card_permission_detail_boutique {
-    background-color: #ffffff;
-    box-shadow: rgba(0, 0, 0, 0.065) 0px 4px 12px;
-    border-radius: 10px;
-    padding: 20px 15px;
-    width: 100%;
-    position: relative;
-    transition: background 0.3s ease;
-}
-
 .name_permission {
     font-weight: bold;
     letter-spacing: 0.60px;
@@ -69,7 +59,27 @@
 .div9_detail_boutique { grid-area: 3 / 3 / 4 / 4; }
 
 .card_permission_detail_boutique:hover {
-    background: rgba(0,0,0,0.03);
+    background: #00000003;
+}
+
+/* Style pour le curseur */
+.div8_detail_boutique {
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.div8_detail_boutique:hover {
+    background-color: rgba(0, 114, 228, 0.05);
+}
+
+
+/* Ajouter une transition pour le chevron */
+.icon_cadre i {
+    transition: transform 0.3s ease;
+}
+
+.icon_cadre.rotated i {
+    transform: rotate(90deg);
 }
 
 .card_permission_detail_boutique {
@@ -81,6 +91,7 @@
   position: relative;
   transition: background 0.3s ease;
 }
+
 
 .card_permission_detail_boutique_check {
   display: flex;
@@ -767,4 +778,171 @@ input[disabled] + label {
       }
     }
   }
+}
+
+.information_cadre {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-20px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+/* Animation améliorée */
+// .information_cadre_visible {
+//   max-height: 0;
+//   overflow: hidden;
+//   opacity: 0;
+//   transform: translateY(-20px);
+//   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+//   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+//   border-radius: 8px;
+// }
+
+.information_cadre.visible {
+  max-height: 500px; 
+  opacity: 1;
+  transform: translateY(0);
+  margin: 20px 0;
+  overflow: visible;
+}
+
+.info_titre_input {
+  padding: 20px; 
+}
+
+.info_titre_input h5 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  letter-spacing: 0.60px;
+}
+
+
+.champ_input {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+.input_focus {
+  width: 100%;
+  min-width: 250px;
+  height: 49px;
+  outline: none;
+  border-bottom: 1px solid rgb(53, 50, 50);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  margin: 10px 0 0;
+  transition: all 0.3s;
+  font-size: 14px;
+  //padding-left: 10px;
+  background: none;
+  color: #695c5c;
+}
+
+.champ_input .label {
+  position: absolute;
+  top: 22px;
+  left: 4px;
+  pointer-events: none;
+  color: rgb(107, 102, 102);
+}
+
+.input_focus:hover {
+  border-bottom: 1px solid #0672E4;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.input_focus:not(:placeholder-shown) + .label,
+.input_focus:focus + .label {
+  color: #0672E4;
+  top: 0;
+  left: 0;
+  transition: all 0.3s ease-in-out;
+  background: none;
+  font-size: 11px;
+  padding: 0;
+}
+
+.input_focus::placeholder {
+  opacity: 0;
+}
+
+.input_focus:focus::placeholder {
+  opacity: 1;
+  animation-delay: 1s;
+  font-size: 12px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn_save {
+  text-align: right;
+  margin-top: 10px;
+}
+
+.btn_save .btn {
+  padding: 5px 28px;
+  background-color: #0672E4;
+  color: #fff;
+  border: none;
+}
+
+.btn_save .btn:hover {
+  background-color: #0263cb;
+  transition: all .5;
+}
+
+.text-danger {
+  color: #dc3545;
+  font-size: 0.875em;
+  margin-top: 5px;
+  display: block;
+}
+
+.alert {
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 4px;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+/* Animation pour le message */
+.alert-success-message {
+    // background: #d4edda;
+    color: #155724;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    // animation: fadeInOut 5s forwards;
+}
+
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-10px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Style pendant le chargement */
+button[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
 }

@@ -11,6 +11,21 @@ export class BoutiqueService {
 
   constructor(private http: HttpClient) { }
 
+    updateBoutique(id: number, updates: { nomBoutique: string; adresse: string }): Observable<{ message?: string; error?: string }> {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError('Aucun token trouvé');
+      }
+      
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+      
+      return this.http.put<{ message?: string; error?: string }>(`${this.apiUrl}/updatedBoutique/${id}`, updates, { headers });
+    }
+
     // LL recuperation de boutique dans e/ses
     getBoutiquesByEntreprise(): Observable<any[]> {
       const token = localStorage.getItem('authToken');
