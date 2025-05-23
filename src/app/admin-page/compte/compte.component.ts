@@ -37,6 +37,8 @@ export class CompteComponent  implements OnInit {
   users: any[] = [];
   filteredUsers: any[] = [];
 
+  entrepriseId!: number;
+
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
     'Sénégal': '🇸🇳',
@@ -75,20 +77,18 @@ export class CompteComponent  implements OnInit {
     this.initForm();
     
     this.usersService.getUserInfo().subscribe({
-      next: (userData) => {
-        if (userData && userData.id) {
-          const entrepriseId = userData.id;
-          this.loadUsersOfEntreprise(entrepriseId);
-        } else {
-          console.error("Impossible de récupérer l'ID de l'entreprise.");
-        }
-      },
-      error: (err) => {
-        console.error("Erreur lors de la récupération des informations utilisateur :", err);
+    next: (userData) => {
+      if (userData && userData.id) {
+        this.entrepriseId = userData.id; // Stocker dans une propriété de classe
+        this.loadUsersOfEntreprise(this.entrepriseId);
       }
-    });
-    
-    this.filteredUsers = this.users;
+    },
+    error: (err) => {
+      console.error("Erreur lors de la récupération des informations utilisateur :", err);
+    }
+  });
+  
+  this.filteredUsers = this.users;
   }
 
 
@@ -225,13 +225,17 @@ export class CompteComponent  implements OnInit {
       next: (response) => {
         //console.log("Réponse du serveur :", response);
   
-        if (typeof response === 'string' && response.includes('succès')) {
-          this.successMessage = response;
-        } else {
+        if (response.id) {
           this.successMessage = "Utilisateur ajouté avec succès !";
+          this.userForm.reset();
+          this.closePopup();
+          
+          // Redirection avec l'ID du nouvel utilisateur
+          this.router.navigate(['/userPermission', response.id]);
+          
+          // Rafraîchir la liste avec l'ID stocké
+          this.loadUsersOfEntreprise(this.entrepriseId);
         }
-  
-        this.userForm.reset();
   
         // Rafraîchir la liste des utilisateurs
         this.usersService.getUserInfo().subscribe({
