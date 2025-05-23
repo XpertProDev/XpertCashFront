@@ -28,6 +28,12 @@ export class PermissionComponent implements OnInit {
   validationError: string | null = null;
   originalSelectedPermissions: Set<number> = new Set();
 
+  showConfirmationModal = false;
+  confirmationTitle = '';
+  confirmationMessage = '';
+  pendingAction: 'suspend' | 'activate' | null = null;
+  private checkboxRef?: HTMLInputElement;
+
   constructor(
       private usersService: UsersService,
       private route: ActivatedRoute,
@@ -227,24 +233,54 @@ export class PermissionComponent implements OnInit {
 
   // Suspendre user
   onSuspendChange(event: Event) {
-    const isChecked = (event.target as HTMLInputElement).checked;
-    const userId = this.route.snapshot.params['userId'];
+    event.preventDefault();
+    this.checkboxRef = event.target as HTMLInputElement;
+    this.pendingAction = this.user?.enabledLien ? 'suspend' : 'activate';
     
+    this.confirmationTitle = this.pendingAction === 'suspend' 
+      ? 'Suspendre l\'utilisateur' 
+      : 'Activer l\'utilisateur';
+    
+    this.confirmationMessage = this.pendingAction === 'suspend'
+      ? 'Êtes-vous sûr de vouloir suspendre cet utilisateur ? Il ne pourra plus accéder au système.'
+      : 'Êtes-vous sûr de vouloir réactiver cet utilisateur ?';
+    
+    this.showConfirmationModal = true;
+  }
+
+  // Ajoutez ces nouvelles méthodes
+  cancelAction() {
+    this.showConfirmationModal = false;
+    if (this.checkboxRef) {
+      this.checkboxRef.checked = !this.checkboxRef.checked;
+    }
+    this.pendingAction = null;
+  }
+
+  handleSuspendAction() {
+    if (!this.pendingAction || !this.checkboxRef) return;
+
+    const userId = this.route.snapshot.params['userId'];
+    const isChecked = this.pendingAction === 'suspend';
+
     this.usersService.suspendUser(userId, isChecked).subscribe({
-        next: (response: string) => { 
-            this.successMessage = response;
-            if (this.user) {
-                this.user.enabledLien = !isChecked;
-            }
-            setTimeout(() => this.successMessage = null, 5000);
-        },
-        error: (err) => {
-            this.errorMessage = err.error || "Erreur lors de l'opération";
-            console.error(err);
-            setTimeout(() => this.errorMessage = null, 5000);
+      next: (response: string) => {
+        this.successMessage = response;
+        if (this.user) {
+          this.user.enabledLien = !isChecked;
         }
+        this.showConfirmationModal = false;
+        setTimeout(() => this.successMessage = null, 5000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error || "Erreur lors de l'opération";
+        console.error(err);
+        this.checkboxRef!.checked = !isChecked;
+        this.showConfirmationModal = false;
+        setTimeout(() => this.errorMessage = null, 5000);
+      }
     });
-  } 
+  }
   
   private showSuccessMessage(isChecked: boolean) {
     this.successMessage = `Utilisateur ${isChecked ? 'suspendu' : 'réactivé'} avec succès`;

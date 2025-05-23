@@ -35,7 +35,7 @@ interface HistoricalEvent {
 
 @Component({
   selector: 'app-detail-facture-proforma',
-  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe,  EnLettresPipe],
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe,], //EnLettresPipe,
   templateUrl: './detail-facture-proforma.component.html',
   styleUrl: './detail-facture-proforma.component.scss'
 })
