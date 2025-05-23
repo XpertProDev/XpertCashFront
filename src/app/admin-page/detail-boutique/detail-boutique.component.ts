@@ -19,6 +19,11 @@ export class DetailBoutiqueComponent implements OnInit {
   errorMessage: string | null = null;
 
   isUpdating = false;
+  showConfirmationModal = false;
+  confirmationTitle = '';
+  confirmationMessage = '';
+  pendingStatusChange: boolean | null = null;
+  private checkboxRef?: HTMLInputElement;
 
   constructor(
     private route: ActivatedRoute,
@@ -61,30 +66,58 @@ export class DetailBoutiqueComponent implements OnInit {
       return this.boutique?.actif ? '#008000' : '#ff0000';
   }
 
-  toggleBoutiqueStatus(event: any): void {
-    if (!this.boutique) return;
+// Modifiez la méthode existante
+  toggleBoutiqueStatus(event: Event): void {
+    event.preventDefault();
+    this.checkboxRef = event.target as HTMLInputElement;
+    const newStatus = this.checkboxRef.checked;
+    this.pendingStatusChange = newStatus;
 
-    const newStatus = event.target.checked;
+    this.confirmationTitle = newStatus 
+      ? 'Activation de la boutique' 
+      : 'Désactivation de la boutique';
+
+    this.confirmationMessage = newStatus
+      ? 'Êtes-vous sûr de vouloir activer cette boutique ? Les utilisateurs pourront y accéder.'
+      : 'Êtes-vous sûr de vouloir désactiver cette boutique ? L\'accès sera bloqué.';
+
+    this.showConfirmationModal = true;
+  }
+
+  // Ajoutez ces nouvelles méthodes
+  cancelAction(): void {
+    this.showConfirmationModal = false;
+    if (this.checkboxRef) {
+      this.checkboxRef.checked = !this.checkboxRef.checked;
+    }
+    this.pendingStatusChange = null;
+  }
+
+  handleStatusChange(): void {
+    if (!this.boutique || this.pendingStatusChange === null) return;
+
     this.isUpdating = true;
+    this.showConfirmationModal = false;
 
-    const operation$ = newStatus 
-        ? this.boutiqueService.activerBoutique(this.boutique.id)
-        : this.boutiqueService.desactiverBoutique(this.boutique.id);
+    const operation$ = this.pendingStatusChange 
+      ? this.boutiqueService.activerBoutique(this.boutique.id)
+      : this.boutiqueService.desactiverBoutique(this.boutique.id);
 
     operation$.subscribe({
-        next: () => {
-            // Rafraîchir les données après modification
-            this.loadBoutique(); 
-            this.isUpdating = false;
-        },
-        error: (err) => {
-            console.error(err);
-            event.target.checked = !newStatus;
-            this.isUpdating = false;
-            this.showErrorMessage();
+      next: () => {
+        this.loadBoutique();
+        this.isUpdating = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.isUpdating = false;
+        if (this.checkboxRef) {
+          this.checkboxRef.checked = !this.pendingStatusChange;
         }
+        this.showErrorMessage();
+      }
     });
-}
+  }
 
   private showSuccessMessage(action: string): void {
     // Implémenter une notification ou message temporaire

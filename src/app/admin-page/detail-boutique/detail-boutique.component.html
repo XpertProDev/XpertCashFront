@@ -113,3 +113,15 @@
 <div *ngIf="errorMessage" class="error-message">
     {{ errorMessage }}
 </div>
+
+<!-- Ajoutez ceci en bas du template -->
+<div class="confirmation-modal" *ngIf="showConfirmationModal">
+  <div class="modal-content">
+    <h4>{{ confirmationTitle }}</h4>
+    <p>{{ confirmationMessage }}</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="cancelAction()">Annuler</button>
+      <button class="btn-confirm" (click)="handleStatusChange()">Confirmer</button>
+    </div>
+  </div>
+</div>
