@@ -51,7 +51,9 @@ export class DetailBoutiqueComponent implements OnInit {
   private initForm(): void {
     this.boutiqueForm = this.fb.group({
       nomBoutique: ['', Validators.required],
-      adresse: ['']
+      adresse: [''],
+      email: [''],
+      telephone: ['', [Validators.pattern(/^\d{8,15}$/)]],
     });
   }
 
