@@ -546,6 +546,14 @@ th {
     align-items: center;
 }
 
+.btn_apercu {
+  border: none;
+  padding: 2px 20px;
+  border-radius: 5px;
+  background-color: #d0d0d0;
+  color: #001225;
+}
+
 // .double_input_ttc h4 {
 //   margin-bottom: 0;
 // }
@@ -1483,7 +1491,7 @@ input.input_focus_type:focus {
   margin-top: 40px;
   background: #fff;
   margin-bottom: 20px;
-  height: 78%;
+  height: 56%;
 }
 
 .historical-timeline {
@@ -1558,6 +1566,7 @@ input.input_focus_type:focus {
         }
     }
 }
+
 
 .event-action {
     padding: 12px;

@@ -32,6 +32,7 @@
                                 Brouillon
                                 </button>
                             </div>
+                            
 
                             <!-- Bouton Approbation -->
                             <div class="etat_approbation" *ngIf="!factureProForma.dateApprobation">
@@ -467,14 +468,11 @@
               </fieldset>
 
                 <!-- Buttom ajouter et annuler  -->
-                <div class="information_cadre">
-                    <!-- Message d'erreur global -->
-                    <div class="container_error_message">
-                        <div *ngIf="errorMessage" class="error-message">
-                            {{ errorMessage }}
-                        </div>
+                <div class="information_cadre" style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="cursor: pointer; text-align: left; margin-left: 20px;">
+                        <button class="btn_apercu" title="Voir l'aperçu de facture proforma" (click)="apercuFactureProformaDansDetail()">Aperçu  <i class="ri-eye-2-line"></i></button>
                     </div>
-    
+                    <!-- /////////  -->
                     <div class="info_titre_input info_titre_input_btn">
                         <!-- Input de produits  -->
                         <div class="btn_annuler">
@@ -486,8 +484,11 @@
                         </div>
                     </div>
                 </div>
-                <div style="cursor: pointer; text-align: left;">
-                    <button class="btn_apercu" title="Voir l'aperçu de facture proforma" (click)="apercuFactureProformaDansDetail()">Aperçu dans détail <i class="ri-eye-2-line"></i></button>
+                <!-- Message d'erreur global -->
+                <div class="container_error_message">
+                    <div *ngIf="errorMessage" class="error-message">
+                        {{ errorMessage }}
+                    </div>
                 </div>
             </form>
         </div>

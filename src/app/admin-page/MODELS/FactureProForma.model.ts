@@ -3,7 +3,8 @@ export enum StatutFactureProForma {
   APPROBATION = 'APPROBATION',
   APPROUVE = 'APPROUVE',
   ENVOYE = 'ENVOYE',
-  VALIDE   = 'VALIDE'
+  VALIDE   = 'VALIDE',
+  
 }
 
 // Dans ton modèle FactureProForma
@@ -46,6 +47,7 @@ export interface FactureProForma {
   utilisateurModificateur?: {
       nomComplet: string;
       email: string;
+      photo: string;
   };
   utilisateurApprobateur?: {
       nomComplet: string;
@@ -54,6 +56,7 @@ export interface FactureProForma {
     id: number;
     nomComplet: string;
     email?: string;
+    photo?: string;
   }[];
   entreprise?: {
       siege: string;
@@ -82,6 +85,7 @@ export interface FactureProForma {
   // Ajout de utilisateurCreateur
   utilisateurCreateur?: {
       nomComplet: string;
+      photo: string;
   };
   
 }

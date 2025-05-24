@@ -27,7 +27,10 @@ type EventType = 'creation' | 'modification' | 'approbation' | 'envoi' | 'valida
 // Interface modifiée
 interface HistoricalEvent {
   date: Date;
-  user: { nomComplet: string }; // Maintenant obligatoire
+    user: {
+    nomComplet: string;
+    photo?: string | null;
+  };
   type: EventType;
   description: string;
   status?: StatutFactureProForma;
@@ -187,32 +190,44 @@ export class DetailFactureProformaComponent implements OnInit {
 
   // Modifier load Historical Events pour inclure tous les statuts
   private loadHistoricalEvents() {
-    this.factureProFormaService.getHistoriqueFacture(this.factureId).subscribe({
-      next: (historique: any) => {
-        this.historicalEvents = historique.historiqueActions.map((action: any) => ({
-          date: new Date(action.date),
-          user: { nomComplet: action.utilisateur },
-          type: this.mapActionType(action.action),
-          description: action.details,
-          status: this.mapActionToStatus(action.action)
-        }));
-        
-        // Ajouter la création si manquante
-        if (!this.historicalEvents.some(e => e.type === 'creation')) {
-          this.historicalEvents.push({
-            date: new Date(this.factureProForma.dateCreation),
-            user: { nomComplet: this.factureProForma.utilisateurCreateur?.nomComplet || 'Système' },
-            type: 'creation',
-            description: 'Création de la facture'
-          });
-        }
+  this.factureProFormaService.getHistoriqueFacture(this.factureId).subscribe({
+    next: (historique: any) => {
+      this.historicalEvents = historique.historiqueActions.map((action: any) => ({
+        date: new Date(action.date),
+           user: {
+              nomComplet: action.utilisateur || 'Utilisateur inconnu',
+              photo: action.photo ? `http://localhost:8080${action.photo}` : null
+            },
+        type: this.mapActionType(action.action),
+        description: action.details,
+        status: this.mapActionToStatus(action.action)
+      }));
 
-        // Trier par date
-        this.historicalEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
-      },
-      error: (err) => console.error('Erreur historique', err)
+      // Ajouter la création si manquante
+      if (!this.historicalEvents.some(e => e.type === 'creation')) {
+        this.historicalEvents.push({
+          date: new Date(this.factureProForma.dateCreation),
+         user: {
+            nomComplet: this.factureProForma.utilisateurCreateur?.nomComplet || 'Système',
+            photo: this.factureProForma.utilisateurCreateur?.photo || null
+          },
+
+          type: 'creation',
+          description: 'Création de la facture',
+        });
+        console.log( "les information ", this.historicalEvents);
+      }
+
+      
+      
+
+      // Trier par date
+      this.historicalEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
+    },
+    error: (err) => console.error('Erreur historique', err)
   });
 }
+
 
   private mapActionType(action: string): EventType {
     const mapping: Record<string, EventType> = {
@@ -272,7 +287,6 @@ export class DetailFactureProformaComponent implements OnInit {
     if (!produitId) return 0;
     const produit = this.produits.find(p => p.id === produitId);
     if (!produit) {
-      console.error('Produit non trouvé pour ID:', produitId);
       return 0;
     }
     return produit.prixVente || 0;
