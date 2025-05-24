@@ -308,6 +308,12 @@ const routes: Routes = [
         path: 'facture-reel-details/:id',
         loadComponent: () => import('./admin-page/facture-reel/facture-reel-details/facture-reel-details.component').then(m => m.FactureReelDetailsComponent),
         canActivate: [authGuard]
+      },
+      // Facture account settings
+      {
+        path: 'account-settings',
+        loadComponent: () => import('./admin-page/account-settings/account-settings.component').then(m => m.AccountSettingsComponent),
+        canActivate: [authGuard]
       }
 
     ]

@@ -105,9 +105,6 @@ export const NavigationItems: NavigationItem[] = [
         classes: 'nav-item',
         icon: 'feather icon-list'
       },
-
-     
-
       {
         id: 'factures',
         title: 'Factures',
@@ -202,27 +199,13 @@ export const NavigationItems: NavigationItem[] = [
     icon: 'icon-group',
     children: [
       {
-        id: 'basic',
+        id: 'parametres',
         title: 'Parametres',
-        type: 'collapse',
-        icon: 'feather icon-box',
-        children: [
-          // {
-          //   id: 'compte',
-          //   title: 'Comptes',
-          //   type: 'item',
-          //   url: '/compte',
-          //   //classes: 'nav-item',
-          // },
-          // {
-          //   id: 'profil',
-          //   title: 'Profil',
-          //   type: 'item',
-          //   url: '/profil',
-          //   //classes: 'nav-item',
-          // },
-        ]
-      }
+        type: 'item',
+        url: '/account-settings',
+        classes: 'nav-item',
+        icon: 'feather icon-settings'
+      },
     ]
   },
 

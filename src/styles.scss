@@ -2,6 +2,7 @@
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
+// @import '~@angular/material/prebuilt-themes/indigo-pink.css';
 
 html {
   @include mat.theme((
@@ -94,4 +95,9 @@ mark {
   src: url('./assets/fonts/police/Brittany.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+}
+
+.mat-mdc-tab-group.mat-mdc-tab-group-stretch-tabs>.mat-mdc-tab-header .mat-mdc-tab {
+  flex-grow: 0!important;
+  padding: 0 20px;
 }
