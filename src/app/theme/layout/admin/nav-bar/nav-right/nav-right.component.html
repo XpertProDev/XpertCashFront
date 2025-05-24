@@ -118,13 +118,13 @@
       <a class="nameBoutiqueHover" href="javascript:" ngbDropdownToggle>
         {{ nomEntreprise }}
       </a>
-    </div>
+    </div> 
   </li>
 
   <li>
     <div class="dropdown drp-user" ngbDropdown placement="auto">
       <a href="javascript:" ngbDropdownToggle>
-        <img src="assets/img/profil.png" class="img-radius wid-40" alt="User-Profile-Image" />
+        <img [src]="photo || 'assets/img/profil.png'" class="img-radius wid-40" alt="User-Profile-Image" />
       </a>
       <div class="dropdown-menu dropdown-menu-end profile-notification" ngbDropdownMenu>
         <!--pro-head-->

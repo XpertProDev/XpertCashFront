@@ -41,6 +41,8 @@ export class NavRightComponent implements OnInit{
   friendId!: number;
   userName: string = '';
   nomEntreprise = '';
+  photo: string = '';
+
 
   // constructor
   constructor(
@@ -53,10 +55,29 @@ export class NavRightComponent implements OnInit{
     
   }
 
+    // Fonction fléchée pour éviter les problèmes de "this"
+  private updatePhotoListener = () => {
+    const newPhoto = localStorage.getItem('photo');
+    if (newPhoto) {
+      this.photo = newPhoto;
+    }
+  };
+
   ngOnInit(): void {
     this.getUserInfo();
     this.getAllhistorique();
+
+      const savedPhoto = localStorage.getItem('photo');
+      if (savedPhoto) {
+        this.photo = savedPhoto;
+    }
+      window.addEventListener('storage-photo-update', this.updatePhotoListener);
   }
+
+   ngOnDestroy(): void {
+    window.removeEventListener('storage-photo-update', this.updatePhotoListener);
+  }
+  
 
   // public method 
   // eslint-disable-next-line

@@ -416,11 +416,13 @@ onFileSelected(event: Event): void {
     reader.onload = (e: any) => {
       const base64 = e.target.result;
 
-      // Afficher l'image immédiatement
+      // Afficher l'image immédiatement 
       this.photo = base64;
 
       // Stocker en localStorage pour éviter chargement serveur
       localStorage.setItem('photo', base64);
+
+      window.dispatchEvent(new Event('storage-photo-update'));
     };
 
     reader.readAsDataURL(file);
