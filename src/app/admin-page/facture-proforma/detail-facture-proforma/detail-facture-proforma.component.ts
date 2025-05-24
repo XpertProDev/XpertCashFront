@@ -14,6 +14,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { firstValueFrom } from 'rxjs';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
+import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 
 // Ajouter cette interface pour les pièces jointes
 interface EmailAttachment {
@@ -38,7 +39,7 @@ interface HistoricalEvent {
 
 @Component({
   selector: 'app-detail-facture-proforma',
-  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe],
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe,], //EnLettresPipe,
   templateUrl: './detail-facture-proforma.component.html',
   styleUrl: './detail-facture-proforma.component.scss'
 })
@@ -124,6 +125,7 @@ export class DetailFactureProformaComponent implements OnInit {
       private cdr: ChangeDetectorRef,
       private renderer: Renderer2,
       private entrepriseService: EntrepriseService,
+          private previewService: FacturePreviewService,
     ) {}
 
   ngOnInit(): void {
@@ -451,7 +453,8 @@ export class DetailFactureProformaComponent implements OnInit {
         quantite: l.quantite,
         prixUnitaire: this.getPrixVente(l.produitId),
         ligneDescription: l.ligneDescription
-      }))
+      })),
+      remise: this.activeRemise ? this.remisePourcentage : null,
     };
     
     // Si vous avez aussi des lignes en cours d'ajout dans inputLignes, vous pouvez les concaténer :
@@ -1427,6 +1430,47 @@ export class DetailFactureProformaComponent implements OnInit {
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
+  }
+
+  goToPreview(): void {
+    this.router.navigate(['/detail-facture-proforma-apercu', this.factureId]);
+  }
+
+  apercuFactureProformaDansDetail(): void {
+    const lignes = [
+      ...this.confirmedLignes.map(l => ({
+        produit: {
+          id: l.produitId!,
+          nom: this.getProduitNom(l.produitId!)
+        },
+        quantite: l.quantite,
+        ligneDescription: l.ligneDescription,
+        prixUnitaire: this.getPrixVente(l.produitId)
+      })),
+      ...this.inputLignes
+        .filter(l => l.produitId && l.quantite > 0)
+        .map(l => ({
+          produit: {
+            id: l.produitId!,
+            nom: this.getProduitNom(l.produitId!)
+          },
+          quantite: l.quantite,
+          ligneDescription: l.ligneDescription,
+          prixUnitaire: this.getPrixVente(l.produitId)
+        }))
+    ];
+
+    const preview: FactureProForma = {
+      ...this.factureProForma,
+      totalHT: this.getTotalHT(),
+      remise: this.activeRemise ? this.remisePourcentage : 0,
+      tva: this.activeTva,
+      totalFacture: this.getTotalTTC(),
+      lignesFacture: lignes as any
+    };
+
+    this.previewService.setPreview(preview);
+    this.router.navigate(['/detail-facture-proforma-apercu']);
   }
 
 

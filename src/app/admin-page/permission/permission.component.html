@@ -54,7 +54,7 @@
                 <label class="btn-lock" for="inpLock">
                     <div class="name_permission">
                         {{ user?.enabledLien ? 'Suspendre utilisateur' : 'Activer utilisateur' }}
-                      </div>
+                    </div>
                     
                     <div class="suspendre_check suspendre_check_cadre">
                         <svg width="19" height="30" viewBox="0 0 36 60">
@@ -187,3 +187,21 @@
     </div>
 </div>
 
+<!-- Popup de confirmation -->
+<div class="confirmation-modal" *ngIf="showConfirmationModal">
+  <div class="modal-content">
+    <h4>{{ confirmationTitle }}</h4>
+    <p>{{ confirmationMessage }}</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="cancelAction()">Annuler</button>
+      <button class="btn-confirm" (click)="handleSuspendAction()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- 
+<div class="Container_terminer">
+    <button class="btn_terminer" routerLink="/utilisateur">
+        OK
+    </button>
+</div> -->

@@ -546,6 +546,14 @@ th {
     align-items: center;
 }
 
+.btn_apercu {
+  border: none;
+  padding: 2px 20px;
+  border-radius: 5px;
+  background-color: #d0d0d0;
+  color: #001225;
+}
+
 // .double_input_ttc h4 {
 //   margin-bottom: 0;
 // }
@@ -1491,8 +1499,18 @@ input.input_focus_type:focus {
     border-radius: 8px;
     // max-height: 600px;
     overflow-y: auto;
-     max-height: 96%;
-     scroll-behavior: smooth;
+    max-height: 96%;
+    scroll-behavior: smooth;
+}
+
+/* Optionnel - Custom scrollbar */
+.historical-timeline::-webkit-scrollbar {
+  width: 2px;
+}
+
+.historical-timeline::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
 }
 
 .title_historique {

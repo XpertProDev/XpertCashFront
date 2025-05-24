@@ -468,14 +468,11 @@
               </fieldset>
 
                 <!-- Buttom ajouter et annuler  -->
-                <div class="information_cadre">
-                    <!-- Message d'erreur global -->
-                    <div class="container_error_message">
-                        <div *ngIf="errorMessage" class="error-message">
-                            {{ errorMessage }}
-                        </div>
+                <div class="information_cadre" style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="cursor: pointer; text-align: left; margin-left: 20px;">
+                        <button class="btn_apercu" title="Voir l'aperçu de facture proforma" (click)="apercuFactureProformaDansDetail()">Aperçu  <i class="ri-eye-2-line"></i></button>
                     </div>
-    
+                    <!-- /////////  -->
                     <div class="info_titre_input info_titre_input_btn">
                         <!-- Input de produits  -->
                         <div class="btn_annuler">
@@ -487,62 +484,62 @@
                         </div>
                     </div>
                 </div>
+                <!-- Message d'erreur global -->
+                <div class="container_error_message">
+                    <div *ngIf="errorMessage" class="error-message">
+                        {{ errorMessage }}
+                    </div>
+                </div>
             </form>
         </div>
     </div>
  
-         <!-- Remplacer toute la section container_brouillon_facture par -->
-    
-        <div class="container_brouillon_facture">
-            <div class="historical-timeline">
-                <div class="title_historique">
-                    <h6>Historique des actions</h6>
+    <!-- Remplacer toute la section container_brouillon_facture par -->
+    <div class="container_brouillon_facture">
+        <div class="historical-timeline">
+            <div class="title_historique">
+                <h6>Historique des actions</h6>
+            </div>
+            <div *ngFor="let event of historicalEvents" class="timeline-event">
+                <div class="event-avatar">
+                <img src="assets/img/profil.png" alt="Avatar" class="avatar">
                 </div>
-                <div *ngFor="let event of historicalEvents" class="timeline-event">
-                    <div class="event-avatar">
-                    <img [src]="event.user.photo || 'assets/img/profil.png'" alt="Avatar" class="avatar">
+                
+                <div class="event-content">
+                <div class="event-header">
+                    <span class="user-name">{{event.user.nomComplet}}</span>
+                    <span class="event-date">{{event.date | date: 'dd/MM/yyyy HH:mm'}}</span>
+                </div>
+                
+                <div class="event-action" [ngClass]="{
+                    'creation': event.type === 'creation',
+                    'approbation': event.type === 'approbation',
+                    'envoi': event.type === 'envoi',
+                    'validation': event.type === 'validation'
+                }">
+                    <i class="action-icon" [ngClass]="{
+                    'ri-file-add-line': event.type === 'creation',
+                    'ri-checkbox-circle-line': event.type === 'approbation',
+                    'ri-send-plane-line': event.type === 'envoi',
+                    'ri-shield-check-line': event.type === 'validation'
+                    }"></i>
+                    {{event.description}}
+                    <div class="status-badge" *ngIf="event.status">
+                        {{event.status}}
                     </div>
                     
-                    <div class="event-content">
-                    <div class="event-header">
-                        <span class="user-name">{{event.user.nomComplet}}</span>
-                        <span class="event-date">{{event.date | date: 'dd/MM/yyyy HH:mm'}}</span>
+                    <!-- Afficher les approbateurs pour les demandes d'approbation -->
+                    <div *ngIf="event.status === 'APPROBATION'" class="approbateurs-list">
+                        <span *ngFor="let approbateur of factureProForma.approbateurs">
+                            {{approbateur.nomComplet}}
+                        </span>
                     </div>
-                    
-                    <div class="event-action" [ngClass]="{
-                        'creation': event.type === 'creation',
-                        'approbation': event.type === 'approbation',
-                        'envoi': event.type === 'envoi',
-                        'validation': event.type === 'validation'
-                    }">
-                        <i class="action-icon" [ngClass]="{
-                        'ri-file-add-line': event.type === 'creation',
-                        'ri-checkbox-circle-line': event.type === 'approbation',
-                        'ri-send-plane-line': event.type === 'envoi',
-                        'ri-shield-check-line': event.type === 'validation'
-                        }"></i>
-                        {{event.description}}
-                        <div class="status-badge" *ngIf="event.status">
-                            {{event.status}}
-                        </div>
-                        
-                        <!-- Afficher les approbateurs pour les demandes d'approbation -->
-                        <div *ngIf="event.status === 'APPROBATION'" class="approbateurs-list">
-                            <span *ngFor="let approbateur of factureProForma.approbateurs">
-                                {{approbateur.nomComplet}}
-                            </span>
-                        </div>
-                    </div>
-                    </div>
+                </div>
                 </div>
             </div>
         </div>
-
-
-
-
-        <!-- Fin -->
-
+    </div>
+    
 </div>
 
 <div *ngIf="showDuplicatePopup" class="duplicate-popup">

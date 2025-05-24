@@ -134,11 +134,15 @@ export class UsersService {
     }
   }
 
-  addUserToEntreprise(userData: any, token: string): Observable<string> {
-    const headers = { Authorization: `Bearer ${token}` };
-    return this.http.post<string>(`${this.apiUrl}/addNewUsers`, userData, { headers });
-  }
-    
+  // addUserToEntreprise(userData: any, token: string): Observable<string> {
+  //   const headers = { Authorization: `Bearer ${token}` };
+  //   return this.http.post<string>(`${this.apiUrl}/addNewUsers`, userData, { headers });
+  // }
+  
+  addUserToEntreprise(userData: any, token: string): Observable<UserNewRequest> {
+  const headers = { Authorization: `Bearer ${token}` };
+  return this.http.post<UserNewRequest>(`${this.apiUrl}/addNewUsers`, userData, { headers });
+}
 
   // // Connexion
   //   ccc(credentials: { email: string; password: string }): Observable<{ message?: string; token?: string; error?: string }> {
