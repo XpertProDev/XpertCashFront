@@ -58,7 +58,13 @@ export class DetailFactureProformaApercuComponent implements OnInit {
   }
 
   navigateBack() {
-    this.router.navigate(['/facture-proforma/detail', this.facture?.id]);
+    if (this.facture?.id) {
+      this.router.navigate(['/facture-proforma-details', this.facture.id]);
+    } else {
+      console.error('ID de la facture non disponible');
+      // Optionnel : Naviguer vers une page par défaut, par exemple :
+      this.router.navigate(['/facture-proforma']);
+    }
   }
 
   getUserEntrepriseInfo(): void {

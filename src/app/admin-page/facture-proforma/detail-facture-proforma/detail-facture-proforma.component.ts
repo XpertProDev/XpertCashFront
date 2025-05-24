@@ -1422,20 +1422,9 @@ export class DetailFactureProformaComponent implements OnInit {
     this.router.navigate(['/detail-facture-proforma-apercu', this.factureId]);
   }
 
-apercuFactureProformaDansDetail(): void {
-  const lignes = [
-    ...this.confirmedLignes.map(l => ({
-      produit: {
-        id: l.produitId!,
-        nom: this.getProduitNom(l.produitId!)
-      },
-      quantite: l.quantite,
-      ligneDescription: l.ligneDescription,
-      prixUnitaire: this.getPrixVente(l.produitId)
-    })),
-    ...this.inputLignes
-      .filter(l => l.produitId && l.quantite > 0)
-      .map(l => ({
+  apercuFactureProformaDansDetail(): void {
+    const lignes = [
+      ...this.confirmedLignes.map(l => ({
         produit: {
           id: l.produitId!,
           nom: this.getProduitNom(l.produitId!)
@@ -1443,21 +1432,32 @@ apercuFactureProformaDansDetail(): void {
         quantite: l.quantite,
         ligneDescription: l.ligneDescription,
         prixUnitaire: this.getPrixVente(l.produitId)
-      }))
-  ];
+      })),
+      ...this.inputLignes
+        .filter(l => l.produitId && l.quantite > 0)
+        .map(l => ({
+          produit: {
+            id: l.produitId!,
+            nom: this.getProduitNom(l.produitId!)
+          },
+          quantite: l.quantite,
+          ligneDescription: l.ligneDescription,
+          prixUnitaire: this.getPrixVente(l.produitId)
+        }))
+    ];
 
-  const preview: FactureProForma = {
-    ...this.factureProForma,
-    totalHT: this.getTotalHT(),
-    remise: this.activeRemise ? this.remisePourcentage : 0,
-    tva: this.activeTva,
-    totalFacture: this.getTotalTTC(),
-    lignesFacture: lignes as any
-  };
+    const preview: FactureProForma = {
+      ...this.factureProForma,
+      totalHT: this.getTotalHT(),
+      remise: this.activeRemise ? this.remisePourcentage : 0,
+      tva: this.activeTva,
+      totalFacture: this.getTotalTTC(),
+      lignesFacture: lignes as any
+    };
 
-  this.previewService.setPreview(preview);
-  this.router.navigate(['/detail-facture-proforma-apercu']);
-}
+    this.previewService.setPreview(preview);
+    this.router.navigate(['/detail-facture-proforma-apercu']);
+  }
 
 
 }
