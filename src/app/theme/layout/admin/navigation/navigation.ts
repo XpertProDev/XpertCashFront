@@ -116,7 +116,7 @@ export const NavigationItems: NavigationItem[] = [
         children: [
           {
             id: 'basic',
-            title: 'FACTURES',
+            title: 'FACTURATION',
             type: 'collapse',
             icon: 'feather icon-file',
             children: [

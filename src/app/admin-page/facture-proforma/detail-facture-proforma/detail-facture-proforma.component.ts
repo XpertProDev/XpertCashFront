@@ -437,7 +437,8 @@ export class DetailFactureProformaComponent implements OnInit {
         quantite: l.quantite,
         prixUnitaire: this.getPrixVente(l.produitId),
         ligneDescription: l.ligneDescription
-      }))
+      })),
+      remise: this.activeRemise ? this.remisePourcentage : null,
     };
     
     // Si vous avez aussi des lignes en cours d'ajout dans inputLignes, vous pouvez les concaténer :
@@ -1413,6 +1414,10 @@ export class DetailFactureProformaComponent implements OnInit {
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
+  }
+
+  goToPreview(): void {
+    this.router.navigate(['/detail-facture-proforma-apercu', this.factureId]);
   }
 
 
