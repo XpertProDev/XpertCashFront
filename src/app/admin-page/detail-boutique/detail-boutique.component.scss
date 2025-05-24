@@ -274,6 +274,15 @@
   .cyber-checkbox input:checked + .cyber-checkbox__mark .particle-8 {
     animation: particle-8 0.4s ease-out forwards 0.15s;
   }
+
+  .champ_grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    gap: 20px;
+  }
   
   /* Particle animations for uncheck */
   .cyber-checkbox input:not(:checked) + .cyber-checkbox__mark .particle-1 {

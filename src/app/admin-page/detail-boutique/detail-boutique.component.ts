@@ -71,7 +71,9 @@ export class DetailBoutiqueComponent implements OnInit {
         this.boutique = boutique;
         this.boutiqueForm.patchValue({
           nomBoutique: boutique.nomBoutique,
-          adresse: boutique.adresse
+          adresse: boutique.adresse,
+          email: boutique.email,
+          telephone: boutique.telephone
         });
         this.isLoading = false;
       },

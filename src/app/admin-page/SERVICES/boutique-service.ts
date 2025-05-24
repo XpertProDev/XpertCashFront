@@ -11,7 +11,7 @@ export class BoutiqueService {
 
   constructor(private http: HttpClient) { }
 
-    updateBoutique(id: number, updates: { nomBoutique: string; adresse: string; }): Observable<{ message?: string; error?: string }> {
+    updateBoutique(id: number, updates: { nomBoutique: string; adresse: string; telephone: string; email: string }): Observable<{ message?: string; error?: string }> {
       const token = localStorage.getItem('authToken');
       
       if (!token) {

@@ -116,25 +116,44 @@
 
             <!-- Nom de la boutique -->
             <div class="champ_input">
-            <input 
-                formControlName="nomBoutique" 
-                class="input_focus" 
-                placeholder="Saisis le nom de la boutique"
-            >
-            <label class="label">Nouveau nom</label>
-            <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
-                <small class="text-danger">Ce champ est obligatoire</small>
-            </div>
+                <input 
+                    formControlName="nomBoutique" 
+                    class="input_focus" 
+                    placeholder="Saisis le nom de la boutique"
+                >
+                <label class="label">Nouveau nom</label>
+                <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
+                    <small class="text-danger">Ce champ est obligatoire</small>
+                </div>
             </div>
 
             <!-- Adresse de la boutique -->
             <div class="champ_input">
-            <input 
-                formControlName="adresse" 
-                class="input_focus" 
-                placeholder="Saisis l'adresse de la boutique"
-            >
-            <label class="label">Nouvelle adresse</label>
+                <input 
+                    formControlName="adresse" 
+                    class="input_focus" 
+                    placeholder="Saisis l'adresse de la boutique"
+                >
+                <label class="label">Nouvelle adresse</label>
+            </div>
+
+            <div class="champ_grid">
+                <div class="champ_input">
+                    <input 
+                        formControlName="email" 
+                        class="input_focus" 
+                        placeholder="Saisis l'email"
+                    >
+                    <label class="label">Nouvelle email</label>
+                </div>
+                <div class="champ_input">
+                    <input 
+                        formControlName="telephone" 
+                        class="input_focus" 
+                        placeholder="Saisis telephone"
+                    >
+                    <label class="label">Nouvelle telephone</label>
+                </div>
             </div>
 
             <!-- Bouton de soumission -->
