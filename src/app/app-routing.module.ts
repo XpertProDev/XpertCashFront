@@ -292,7 +292,7 @@ const routes: Routes = [
 
       // Ajouter cette route pour l'aperçu sans ID
       {
-        path: 'detail-facture-proforma-apercu/:id',
+        path: 'detail-facture-proforma-apercu',
         loadComponent: () => import('./admin-page/facture-proforma/detail-facture-proforma-apercu/detail-facture-proforma-apercu.component').then(m => m.DetailFactureProformaApercuComponent),
         canActivate: [authGuard]
       },

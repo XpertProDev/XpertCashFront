@@ -14,6 +14,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { firstValueFrom } from 'rxjs';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
+import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 
 // Ajouter cette interface pour les pièces jointes
 interface EmailAttachment {
@@ -121,6 +122,7 @@ export class DetailFactureProformaComponent implements OnInit {
       private cdr: ChangeDetectorRef,
       private renderer: Renderer2,
       private entrepriseService: EntrepriseService,
+          private previewService: FacturePreviewService,
     ) {}
 
   ngOnInit(): void {
@@ -1419,6 +1421,43 @@ export class DetailFactureProformaComponent implements OnInit {
   goToPreview(): void {
     this.router.navigate(['/detail-facture-proforma-apercu', this.factureId]);
   }
+
+apercuFactureProformaDansDetail(): void {
+  const lignes = [
+    ...this.confirmedLignes.map(l => ({
+      produit: {
+        id: l.produitId!,
+        nom: this.getProduitNom(l.produitId!)
+      },
+      quantite: l.quantite,
+      ligneDescription: l.ligneDescription,
+      prixUnitaire: this.getPrixVente(l.produitId)
+    })),
+    ...this.inputLignes
+      .filter(l => l.produitId && l.quantite > 0)
+      .map(l => ({
+        produit: {
+          id: l.produitId!,
+          nom: this.getProduitNom(l.produitId!)
+        },
+        quantite: l.quantite,
+        ligneDescription: l.ligneDescription,
+        prixUnitaire: this.getPrixVente(l.produitId)
+      }))
+  ];
+
+  const preview: FactureProForma = {
+    ...this.factureProForma,
+    totalHT: this.getTotalHT(),
+    remise: this.activeRemise ? this.remisePourcentage : 0,
+    tva: this.activeTva,
+    totalFacture: this.getTotalTTC(),
+    lignesFacture: lignes as any
+  };
+
+  this.previewService.setPreview(preview);
+  this.router.navigate(['/detail-facture-proforma-apercu']);
+}
 
 
 }
