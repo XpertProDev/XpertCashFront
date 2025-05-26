@@ -1,0 +1,192 @@
+<div class="account-settings">
+    <!-- Section Paramètres du compte -->
+    <div class="information_cadre">
+        <div class="section">
+            <h6 class="section_title">Paramètres du compte</h6>
+        </div>
+    </div>
+    <!-- Section list navbar  -->
+    <div class="information_cadre">
+        <div class="section_navbar">
+            <mat-tab-group [selectedIndex]="2" class="custom-tabs">
+                <!-- // Compte  -->
+                <mat-tab label="Compte">
+                    <div class="tab-content">
+                    Contenu du compte
+                    </div>
+                </mat-tab>
+                <!-- // Notifications  -->
+                <mat-tab label="Notifications">
+                    <div class="tab-content">
+                    Contenu des notifications
+                    </div>
+                </mat-tab>
+                <!-- // Factures  -->
+                <mat-tab label="Factures">
+                    <div class="tab-content">
+                        <mat-accordion>
+                            <!-- // Informations de l'entreprise  -->
+                            <mat-expansion-panel class="cardWithShadow" (opened)="panelOpenState = true"
+                                (closed)="panelOpenState = false">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title class="f-w-600 title_panel">
+                                        Informations de l'entreprise
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+                                
+                                <div class="champ_grid">
+                                    <!-- // Input de Nom entreprise  -->
+                                    <div class="champ_input ">
+                                        <input class="input_focus" type="text" formControlName="nomEntreprise" placeholder="Saisis le nom entreprise">
+                                        <label class="label">Nom entreprise</label>
+                                        <!-- <div>
+                                            <small class="error"></small>
+                                        </div> -->
+                                    </div>
+
+                                    <!-- Input de secteur  -->
+                                    <div class="champ_input">
+                                        <input class="input_focus" type="text" formControlName="secteur" placeholder="Saisis le secteur">
+                                        <label class="label">Secteur</label>
+                                        <!-- <div>
+                                            <small class="error"></small>
+                                        </div> -->
+                                    </div>
+                                </div>
+                                
+                                <div class="champ_grid">
+                                    <!-- // Input de site Web  -->
+                                    <div class="champ_input ">
+                                        <input class="input_focus" type="text" formControlName="siteWeb" placeholder="Saisis le site Web">
+                                        <label class="label">Site web</label>
+                                        <!-- <div>
+                                            <small class="error"></small>
+                                        </div> -->
+                                    </div>
+
+                                    <!-- Input de logo  -->
+                                    <div class="champ_input">
+                                        <label for="file" class="custum-file-upload">
+                                            <div class="text">
+                                                <span>Click pour changer logo</span>
+                                            </div>
+                                            <input id="file" type="file">
+                                        </label>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel>
+
+                            <!-- // COORDONNÉES DE L’ENTREPRISE  -->
+                            <mat-expansion-panel class="cardWithShadow" (opened)="panelOpenState = true"
+                                (closed)="panelOpenState = false">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title class="f-w-600 title_panel">
+                                        Coordonées de l'entreprise
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+                                
+                                <div class="champ_grid">
+                                    <!-- // Input de Nom entreprise  -->
+                                    <div class="champ_input ">
+                                        <input class="input_focus" type="email" formControlName="email" placeholder="Saisis l'email">
+                                        <label class="label">Email</label>
+                                    </div>
+
+                                    <!-- Input de secteur  -->
+                                    <div class="champ_input">
+                                        <input class="input_focus" type="text" formControlName="adresse" placeholder="Saisis le adresse">
+                                        <label class="label">Adresse</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="champ_grid">
+                                    <!-- // Input de Nom entreprise  -->
+                                    <div class="champ_input ">
+                                        <input class="input_focus" type="text" formControlName="pays" placeholder="Saisis le pays">
+                                        <label class="label">Pays</label>
+                                    </div>
+
+                                    <!-- Input de secteur  -->
+                                    <div class="champ_input">
+                                        <input class="input_focus" type="number" formControlName="telephone" placeholder="00 00 00 00">
+                                        <label class="label">Téléphone</label>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel>
+
+                            <!-- // INFORMATIONS LÉGALES & BANCAIRES  -->
+                            <mat-expansion-panel class="cardWithShadow" (opened)="panelOpenState = true"
+                                (closed)="panelOpenState = false">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title class="f-w-600 title_panel">
+                                        Informations légales & bancaires
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+                                
+                                <div class="champ_grid">
+                                    <!-- // Input de Nina   -->
+                                    <div class="champ_input ">
+                                        <input class="input_focus" type="text" formControlName="nina" placeholder="Saisis nina">
+                                        <label class="label">NINA</label>
+                                    </div>
+
+                                    <!-- Input de rccm  -->
+                                    <div class="champ_input">
+                                        <input class="input_focus" type="text" formControlName="rccm" placeholder="Saisis le registre du commerce et du crédit mobilier">
+                                        <label class="label">RCCM</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="champ_grid">
+                                    <!-- // Input de NIF   -->
+                                    <div class="champ_input ">
+                                        <input class="input_focus" type="text" formControlName="nif" placeholder="Saisis le numéro d'identification fiscale">
+                                        <label class="label">NIF</label>
+                                    </div>
+
+                                    <!-- Input de Banque  -->
+                                    <div class="champ_input">
+                                        <input class="input_focus" type="text" formControlName="banque" placeholder="Saisis le référence bancaires">
+                                        <label class="label">Banque</label>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel>
+
+                            <!-- // VALIDATION ET MÉTADONNÉES FACTURE  -->
+                            <mat-expansion-panel class="cardWithShadow" (opened)="panelOpenState = true"
+                                (closed)="panelOpenState = false">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title class="f-w-600 title_panel">
+                                        Métadonnées facture
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+                                
+                                <div class="champ_grid">
+                                    <!-- Input de Nom signataire  -->
+                                    <div class="champ_input">
+                                        <input class="input_focus" type="text" formControlName="signataire" placeholder="Saisis le  signataire">
+                                        <label class="label">Nom signataire</label>
+                                    </div>
+
+                                    <!-- // Input de Signature   -->
+                                    <div class="champ_input ">
+                                        <input class="input_focus" type="text" formControlName="post" placeholder="Saisis le post de signataire">
+                                        <label class="label">Poste</label>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel>
+
+                        </mat-accordion>
+                    </div>
+                </mat-tab>
+                <!-- // Securite  -->
+                <mat-tab label="Sécurité">
+                    <div class="tab-content">
+                    Contenu de la sécurité
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+
+</div>
