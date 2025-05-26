@@ -38,9 +38,9 @@
                                         <!-- entete entreprise  -->
                                         <div class="entete_entreprise">
                                             <div class="content_entete">
-                                                <p class="para1">Entreprise</p>
-                                                <p class="para2">Secterur: xxxx</p>
-                                                <div class="para3">Email : <a href="mail">email&#64;gmail.com</a> Téléphone : 00 00 00 00</div>
+                                                <p class="para1">{{ form.get('nomEntreprise')?.value }}</p>
+                                                <p class="para2">Secterur: {{ form.get('secteur')?.value }}</p>
+                                                <div class="para3">Email : <a href="mail"> {{ form.get('email')?.value }}</a> Téléphone : {{ form.get('telephone')?.value }}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -55,7 +55,7 @@
                                     <!-- // date  -->
                                     <div class="date">
                                         <!-- <p>Bamako, le 12 Mai 2025</p> -->
-                                        <p>Bamako, le 26 mai 2025</p>
+                                        <p>Bamako, le dd/MM/yyyy</p>
                                     </div>
 
                                     <!-- nom et object  -->
@@ -144,8 +144,8 @@
                                     <div class="cachet_container">
                                         <div></div>
                                         <div class="cachet">
-                                            <h6>Le Directeur Général</h6>
-                                            <h6 class="name_directeur">Moussa H. OUOLOGUEM</h6>
+                                            <h6>{{ form.get('post')?.value }}</h6>
+                                            <h6 class="name_directeur">{{ form.get('signataire')?.value }}</h6>
                                         </div>
                                     </div>
                                 </div>
@@ -158,15 +158,15 @@
                                             <div class="footer">
                                                 <!-- // Ligne  -->
                                                 <hr>
-                                                <p><strong>www.xpertpro.com</strong></p>
+                                                <p><strong>{{form.get('siteWeb')?.value }}</strong></p>
                                                 <div>
                                                     <em>
-                                                        NINA : xxxx ; RCCM : xxxx ; NIF : xxxx ; Banque : xxxx
+                                                        NINA : {{form.get('nina')?.value }} ; RCCM : {{form.get('rccm')?.value }} ; NIF : {{form.get('nif')?.value }} ; Banque : {{form.get('banque')?.value }}
                                                     </em>
                                                 </div>
                                                 <div style="margin-top: -4px;">
                                                     <em >
-                                                        Adresse : xxxxxx / siege - pays
+                                                        Adresse : {{ form.get('adresse')?.value }} / {{ form.get('pays')?.value }}
                                                     </em>
                                                 </div>
                                             </div>
@@ -178,7 +178,7 @@
 
                             <!-- // Champs de la modification de facture dans setting  -->
                             <div class="champs_setting_facture">
-                                <div class="content_edit_facture">
+                                <div class="content_edit_facture" [formGroup]="form">
                                     <!-- // Informations de l'entreprise  -->
                                     <div class="titre_champ">
                                         <h6>Informations de coordonées</h6>
@@ -286,10 +286,18 @@
                                         </div>
 
                                         <!-- // Input de Signature   -->
-                                        <div class="champ_input ">
+                                        <div class="champ_input">
                                             <input class="input_focus" type="text" formControlName="post" placeholder="Saisis le post de signataire">
                                             <label class="label">Poste</label>
                                         </div>
+
+                                    </div>
+
+                                    <!-- // Btn confirm   -->
+                                    <div class="champ_input">
+                                        <button class="btn">
+                                        Confirmer
+                                        </button>
                                     </div>
                                 </div>
                             </div>
