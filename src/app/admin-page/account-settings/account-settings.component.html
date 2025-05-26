@@ -33,7 +33,7 @@
                                     <div class="header_apercu">
                                         <!-- // logo entreprise -->
                                         <div class="logo_entreprise">
-                                            <img src="assets/img/logo.jpeg" alt="Logo de l'entreprise">
+                                            <img [src]="logoUrl" alt="Logo de l'entreprise">
                                         </div>
                                         <!-- entete entreprise  -->
                                         <div class="entete_entreprise">
@@ -55,7 +55,7 @@
                                     <!-- // date  -->
                                     <div class="date">
                                         <!-- <p>Bamako, le 12 Mai 2025</p> -->
-                                        <p>Bamako, le dd/MM/yyyy</p>
+                                        <p>dd/MM/yyyy</p>
                                     </div>
 
                                     <!-- nom et object  -->
@@ -166,7 +166,7 @@
                                                 </div>
                                                 <div style="margin-top: -4px;">
                                                     <em >
-                                                        Adresse : {{ form.get('adresse')?.value }} / {{ form.get('pays')?.value }}
+                                                        Adresse : {{ form.get('adresse')?.value }} /{{ form.get('pays')?.value }}
                                                     </em>
                                                 </div>
                                             </div>
@@ -213,14 +213,14 @@
 
                                         <!-- Input de Pays  -->
                                         <div class="champ_input">
-                                            <!-- <input class="input_focus" type="text" formControlName="pays" placeholder="Votre pays"> -->
-                                             <select class="input_focus">
+                                            <input class="input_focus" type="text" formControlName="pays" placeholder="Votre pays">
+                                             <!-- <select class="input_focus">
                                                 <option value="">Pays</option>
                                                 <option value="">Mali</option>
                                                 <option value="">Côte d'ivoire</option>
                                                 <option value="">Sénégal</option>
-                                             </select>
-                                            <!-- <label class="label">Pays</label> -->
+                                             </select> -->
+                                            <label class="label">Pays</label>
                                         </div>
 
                                         <!-- Input de Téléphone  -->
@@ -230,8 +230,21 @@
                                         </div>
                                     </div>
 
+                                    <input type="file" 
+                                        accept="image/*" 
+                                        #fileInput 
+                                        (change)="onFileSelected($event)"
+                                        style="display: none;"
+                                        id="uniqueFileInputId">
+
                                     <div class="champ_grid" style="margin: 10px 0 0;">
-                                        <p style="margin: 0;">Changer logo <a style="padding-left: 5px;" href="">ICI</a></p>
+                                        <p style="margin: 0;">
+                                            Changer logo 
+                                            <a style="padding-left: 5px;" 
+                                                href="javascript:void(0)" 
+                                                (click)="fileInput.click()">
+                                                ICI
+                                            </a> </p>
                                     </div>
 
                                     <!-- // Informations légales & bancaires  -->
