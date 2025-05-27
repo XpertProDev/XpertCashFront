@@ -15,6 +15,7 @@ import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { firstValueFrom } from 'rxjs';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
+import { MatDialog } from '@angular/material/dialog';
 
 // Ajouter cette interface pour les pièces jointes
 interface EmailAttachment {
@@ -125,12 +126,15 @@ export class DetailFactureProformaComponent implements OnInit {
   successMessage: string | null = null;
 
 
+
   isNotebookOpen = false;
   isAddNotePopupOpen = false;
   newNote = '';
   notes: Note[] = [];
   noteModification: string = '';
  isAddNoteInputVisible: boolean = false;
+   infoMessage: string | null = null;
+   confirmDeleteIndex: number | null = null;
 
 
 
@@ -147,7 +151,8 @@ export class DetailFactureProformaComponent implements OnInit {
       private cdr: ChangeDetectorRef,
       private renderer: Renderer2,
       private entrepriseService: EntrepriseService,
-          private previewService: FacturePreviewService,
+      private previewService: FacturePreviewService,
+      private dialog: MatDialog
     ) {}
 
   ngOnInit(): void {
@@ -346,7 +351,6 @@ export class DetailFactureProformaComponent implements OnInit {
           next: (data: Produit[]) => {
             this.produits = data;
             resolve();
-            console.log('PRODUITS RÉCUPÉRÉS:', this.produits); // <=== Ajoutez ceci
           },
           error: (err) => console.error('Erreur récupération produits :', err)
         });
@@ -376,7 +380,7 @@ export class DetailFactureProformaComponent implements OnInit {
         });
 
   
-        console.log("Infos utilisateur récupérées :", user);
+        //console.log("Infos utilisateur récupérées :", user);
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
@@ -550,10 +554,25 @@ submitNote() {
       next: (res) => {
         console.log('Note mise à jour avec succès !', res);
         this.successMessage = 'Note modifiée avec succès.';
+         this.loadNotes();
+
+            const derniereNoteId = res?.noteId || res?.id || null;
+            if (derniereNoteId) {
+              this.factureProFormaService.getNoteById(this.factureId, derniereNoteId).subscribe({
+                next: (note) => {
+                  this.notes.unshift(note);
+                },
+                error: (err) => {
+                  console.error('Erreur lors de la récupération de la note ajoutée', err);
+                }
+              });
+            } else {
+              console.warn('ID de la note non retourné dans la réponse.');
+            }
 
         // Mise à jour locale de la note
         this.notes[this.noteEditingIndex!].content = this.noteModification;
-        this.notes[this.noteEditingIndex!].dateModification = new Date(); // optionnel si tu stockes la date modif
+        this.notes[this.noteEditingIndex!].dateModification = new Date();
 
         // Réinitialisation
         this.noteModification = '';
@@ -589,7 +608,7 @@ submitNote() {
       next: (res) => {
         console.log('Note ajoutée avec succès !', res);
         this.successMessage = 'Note enregistrée avec succès.';
-
+        this.loadNotes();
         this.notes.unshift(nouvelleNote);
         this.noteModification = '';
         this.isAddNoteInputVisible = false;
@@ -603,6 +622,9 @@ submitNote() {
     });
   }
 }
+
+
+
 
 
 
@@ -1537,7 +1559,7 @@ submitNote() {
       throw new Error(`Erreur lors du chargement de l'image : ${response.statusText}`);
     }
     const blob = await response.blob();
-    console.log(`Type MIME de l'image chargée : ${blob.type}`);
+    //console.log(`Type MIME de l'image chargée : ${blob.type}`);
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -1589,23 +1611,42 @@ submitNote() {
     this.router.navigate(['/detail-facture-proforma-apercu']);
   }
 
-  loadNotes() {
+
+loadNotes() {
   this.factureProFormaService.getNotesFactureProforma(this.factureId).subscribe({
-    next: (response) => {
+    next: (response: any) => {
+      // Si le backend envoie un message au lieu d'une liste
+      if (!Array.isArray(response)) {
+        this.notes = [];
+        this.infoMessage = response.message || "Aucune note disponible.";
+        return;
+      }
+
+      if (response.length === 0) {
+        this.notes = [];
+        this.infoMessage = "Aucune note pour cette facture.";
+        return;
+      }
+
+      // Sinon, traitement normal
       this.notes = response.map((note: any) => ({
-        content: note.note, 
-        dateCreation: new Date(note.dateCreation),
+        id: note.id,
+        content: note.note,
+        dateCreation: note.dateCreation ? new Date(note.dateCreation) : new Date(0),
         auteur: note.auteur,
         modifiee: note.modifiee
       }));
+
+      this.infoMessage = null;
       console.log("Notes chargées :", this.notes);
     },
     error: (err) => {
       console.error("Erreur lors du chargement des notes", err);
+      this.infoMessage = err.error?.message || "Erreur lors de la récupération des notes.";
     }
   });
 }
-//Mehthode pour modifier les notes
+
 
 
 
@@ -1648,6 +1689,7 @@ toggleAddNoteInput() {
 activeMenuIndex: number | null = null;
 toggleNoteMenu(index: number): void {
   this.activeMenuIndex = this.activeMenuIndex === index ? null : index;
+  this.confirmDeleteIndex = null;
 }
 
 editNote(index: number): void {
@@ -1660,9 +1702,38 @@ editNote(index: number): void {
 }
 
 
-deleteNote(index: number): void {
-  this.notes.splice(index, 1);
+
+askDelete(index: number) {
+  this.confirmDeleteIndex = index;
+}
+
+confirmDelete(index: number) {
+  const note = this.notes[index];
+  if (!note || !note.id) return;
+
+  this.factureProFormaService.deletNoteFactureProforma(this.factureId, note.id)
+    .subscribe({
+      next: () => {
+        // Rechercher la note par ID, pour éviter les erreurs d'index après suppression
+        const idIndex = this.notes.findIndex(n => n.id === note.id);
+        if (idIndex !== -1) {
+          this.notes.splice(idIndex, 1);
+        }
+        this.confirmDeleteIndex = null;
+        this.activeMenuIndex = null;
+        console.log('Note supprimée avec succès');
+      },
+      error: (err) => {
+        console.error('Erreur lors de la suppression de la note :', err);
+      }
+    });
+}
+
+
+cancelDelete() {
+  this.confirmDeleteIndex = null;
   this.activeMenuIndex = null;
 }
+
 
 }

@@ -17,7 +17,8 @@ import { StockService } from 'src/app/admin-page/SERVICES/stocks.service';
   selector: 'app-nav-right',
   imports: [
     SharedModule,
-    RouterLink
+    RouterLink,
+
   ],
   templateUrl: './nav-right.component.html',
   styleUrls: ['./nav-right.component.scss'],
@@ -41,7 +42,11 @@ export class NavRightComponent implements OnInit{
   friendId!: number;
   userName: string = '';
   nomEntreprise = '';
-  photo: string = '';
+
+  photo: string | null = null;
+  photoUrl: string | null = null;
+
+
 
 
   // constructor
@@ -56,22 +61,26 @@ export class NavRightComponent implements OnInit{
   }
 
     // Fonction fléchée pour éviter les problèmes de "this"
-  private updatePhotoListener = () => {
-    const newPhoto = localStorage.getItem('photo');
-    if (newPhoto) {
-      this.photo = newPhoto;
-    }
-  };
+ private updatePhotoListener = () => {
+  const newPhoto = localStorage.getItem('photo');
+  if (newPhoto) {
+    this.photo = newPhoto;
+    this.photoUrl = this.base64ToObjectUrl(newPhoto);
+  }
+};
+
 
   ngOnInit(): void {
     this.getUserInfo();
     this.getAllhistorique();
 
       const savedPhoto = localStorage.getItem('photo');
-      if (savedPhoto) {
-        this.photo = savedPhoto;
+    if (savedPhoto) {
+    this.photo = savedPhoto;
+    this.photoUrl = this.base64ToObjectUrl(savedPhoto);
     }
-      window.addEventListener('storage-photo-update', this.updatePhotoListener);
+
+  window.addEventListener('storage-photo-update', this.updatePhotoListener);
   }
 
    ngOnDestroy(): void {
@@ -153,4 +162,19 @@ export class NavRightComponent implements OnInit{
   onLogout(): void {
     this.userService.logoutUser();
   }
+
+  private base64ToObjectUrl(base64: string): string {
+  const byteString = atob(base64.split(',')[1]);
+  const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+
+  const blob = new Blob([ab], { type: mimeString });
+  return URL.createObjectURL(blob);
+}
+
 }

@@ -320,7 +320,6 @@ async loadImageAsBase64(url: string): Promise<string> {
     }
 
     const base64String = await this.blobToBase64(blob);
-    console.log(base64String);
     return base64String;
   } catch (error) {
     console.error('Erreur lors du chargement de l\'image:', error);

@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { catchError, Observable, tap, throwError } from "rxjs";
 import { FactureProForma, UpdateFactureProFormaDTO } from "../MODELS/FactureProForma.model";
+import { Note } from "../MODELS/Note.model";
 
 
 @Injectable({
@@ -179,6 +180,22 @@ export class FactureProFormaService {
     return this.http.get<any>(`${this.apiUrl}/factures/${id}/notes`, { headers });
   }
 
+  //Note by Id
+    getNoteById(factureId: number, noteId: number): Observable<Note> {
+    const token = localStorage.getItem('authToken');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json'
+    });
+
+    return this.http.get<Note>(
+      `${this.apiUrl}/auth/${factureId}/notes/${noteId}`, 
+      { headers }
+    );
+  }
+
+
+
   //Endpoint pour modifier les notes
 
    updateNote(factureId: number, noteId: number, nouveauContenu: string): Observable<any> {
@@ -199,6 +216,18 @@ export class FactureProFormaService {
       })
     );
   }
+
+  deletNoteFactureProforma(factureId: number, noteId: number): Observable<any> {
+  const token = localStorage.getItem('authToken');
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/json'
+  });
+
+  return this.http.delete<any>(
+    `${this.apiUrl}/${factureId}/notes/${noteId}/supprimer`,{ headers }
+  );
+}
 
  
 }
