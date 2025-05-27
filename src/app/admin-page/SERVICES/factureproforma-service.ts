@@ -169,6 +169,39 @@ export class FactureProFormaService {
 //   return this.http.get(`${this.apiUrl}/factpro/${factureId}/historique`);
 // }
 
+//Endpoint pour recuperer les notes d'une facture proforma
+  getNotesFactureProforma(id: number): Observable<any> {
+    const token = localStorage.getItem('authToken');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
 
+    return this.http.get<any>(`${this.apiUrl}/factures/${id}/notes`, { headers });
+  }
 
+  //Endpoint pour modifier les notes
+
+   updateNote(factureId: number, noteId: number, nouveauContenu: string): Observable<any> {
+    const token = localStorage.getItem('authToken');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+
+    const url = `${this.apiUrl}/${factureId}/notes/${noteId}`;
+    const body = { nouveauContenu };
+
+    return this.http.put<any>(url, body, { headers }).pipe(
+      tap(response => console.log('Note modifiée avec succès:', response)),
+      catchError(error => {
+        console.error('Erreur lors de la modification de la note:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+ 
 }
+
+
+

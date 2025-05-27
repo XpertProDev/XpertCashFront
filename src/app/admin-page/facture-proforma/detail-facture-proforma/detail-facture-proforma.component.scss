@@ -1688,3 +1688,196 @@ input.input_focus_type:focus {
   background: #f0f2f5;
   border-radius: 3px;
 }
+
+.note-notebook {
+  margin-bottom: 11%;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: #f9f9f9;
+  border-left: 4px solid #007bff;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.notebook-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+
+  .title{
+    font-size: 10px;
+  }
+}
+
+.add-icon {
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #007bff;
+}
+.close-icon {
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #ff1500;
+}
+
+
+
+.note-item {
+  background: #f0d6b273;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  margin-bottom: 0.5rem;
+}
+
+.note-text {
+  font-size: 11px;
+  margin-bottom: 0.25rem;
+  color: #494c4e;
+}
+
+.note-meta {
+  font-size: 8px;
+  color: #666;
+}
+
+
+.add-note-inline {
+  margin: 1rem 0;
+}
+
+.add-note-inline textarea {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.icon-save {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+
+
+.icon-save.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+
+
+
+.note-item {
+  position: relative;
+  padding: 1rem;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  background-color: #f7f1ea;
+}
+
+.note-options {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.note-options i {
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.2rem;
+}
+
+.note-menu {
+  position: absolute;
+  top: 1.8rem;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  min-width: 120px;
+}
+
+.note-menu button {
+  display: block;
+  padding: 0.4rem 0.8rem;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.note-menu button:hover {
+  background: #f0f0f0;
+}
+
+
+
+
+/* Conteneur du toast */
+.toast-container {
+  position: fixed;
+  top: 60px;
+  right: 35px;
+  z-index: 9999;
+}
+
+//toast
+.toast-message-danger {
+  background-color: #F3D8DA;
+  border: 1px solid #E7B1B6;
+  color: #000;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: fadeInOut 3s ease-in-out;
+  transform: translateY(-20px);
+}
+
+/* Animation pour faire apparaître et disparaître le toast */
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}
+
+.badge-modified {
+    background-color: #f93b2d;
+    color: #ffffff;
+    font-size: 6px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 30px;
+}

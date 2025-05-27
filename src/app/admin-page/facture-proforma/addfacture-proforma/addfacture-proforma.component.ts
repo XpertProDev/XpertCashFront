@@ -393,33 +393,27 @@ export class AddfactureProformaComponent implements OnInit {
       return;
     }
 
-   const dateSeule = this.dateFacture.includes('T')
+  const dateSeule = this.dateFacture.includes('T')
   ? this.dateFacture.split('T')[0]
-  : this.dateFacture;  
+  : this.dateFacture;
 
+const facture: any = {
+  description: this.description,
+  lignesFacture: allLignes.map(ligne => ({
+    produit: { id: ligne.produitId },
+    quantite: ligne.quantite,
+    ligneDescription: ligne.ligneDescription,
+  }))
+};
 
+// Inclure dateFacture uniquement si renseignée
+if (this.dateFacture) {
+  facture.dateFacture = dateSeule; // Garde le format ISO: yyyy-MM-dd
+}
 
-      const facture: any = {
-    description: this.description,
-    lignesFacture: allLignes.map(ligne => ({
-      produit: { id: ligne.produitId },
-      quantite: ligne.quantite,
-      ligneDescription: ligne.ligneDescription,
-    }))
-  };
+console.log('dateFacture raw =', this.dateFacture);
+console.log('dateFacture envoyée =', facture.dateFacture);
 
-    // Inclure dateFacture uniquement si renseignée
-  if (this.dateFacture) {
-    const dateSeule = this.dateFacture.includes('T')
-      ? this.dateFacture.split('T')[0]
-      : this.dateFacture;
-    const [year, month, day] = dateSeule.split('-');
-    const dateFrench = `${day}-${month}-${year}`;
-    facture.dateFacture = dateFrench;
-  }
-
-
-     console.log('dateFacture raw =', this.dateFacture);
 
     if (this.typeDestinataire === 'client' && this.selectedClientId) {
     facture.client = { id: this.selectedClientId };
