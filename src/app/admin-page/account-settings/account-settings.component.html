@@ -6,7 +6,7 @@
         </div>
     </div>
     <!-- Section list navbar  -->
-    <div class="information_cadre" style="height: 80vh;">
+    <div class="information_cadre">
         <div class="section_navbar">
             <mat-tab-group [selectedIndex]="2" class="custom-tabs">
                 <!-- // Compte  -->
@@ -26,154 +26,162 @@
                     <div class="tab-content">
                         <div class="content_setting_facture">
                             <!-- // Facture de vue edit  -->
-                            <div class="facture_model">
-                                <!-- // cadre de facture de model  -->
-                                <div class="content">
-                                    <!-- // header apercu  -->
-                                    <div class="header_apercu">
-                                        <!-- // logo entreprise -->
-                                        <div class="logo_entreprise">
-                                            <img [src]="logoUrl" alt="Logo de l'entreprise">
-                                        </div>
-                                        <!-- entete entreprise  -->
-                                        <div class="entete_entreprise">
-                                            <div class="content_entete">
-                                                <p class="para1">{{ form.get('nomEntreprise')?.value }}</p>
-                                                <p class="para2">Secterur: {{ form.get('secteur')?.value }}</p>
-                                                <div class="para3">Email : <a href="mail"> {{ form.get('email')?.value }}</a> Téléphone : {{ form.get('telephone')?.value }}</div>
+                            <div class="contenu_left_facture">
+                                <div class="facture_model">
+                                    <!-- // cadre de facture de model  -->
+                                    <div class="content">
+                                        <!-- // header apercu  -->
+                                        <div class="header_apercu">
+                                            <!-- // logo entreprise -->
+                                            <div class="logo_entreprise">
+                                                <img [src]="logoUrl" alt="Logo de l'entreprise">
+                                            </div>
+                                            <!-- entete entreprise  -->
+                                            <div class="entete_entreprise">
+                                                <div class="content_entete">
+                                                    <p class="para1">{{ form.get('nomEntreprise')?.value }}</p>
+                                                    <p class="para2">Secterur: {{ form.get('secteur')?.value }}</p>
+                                                    <div class="para3">Email : <a href="mail"> {{ form.get('email')?.value }}</a> Téléphone : {{ form.get('telephone')?.value }}</div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <!-- // Ligne  -->
-                                    <hr>
-                                    <hr>
-                                    <!-- // titre  -->
-                                    <div class="titre">
-                                        <!-- <h2>Facture proforma n˚{{ facture.numeroFacture || '000-00-2025' }}</h2> -->
-                                        <h2>Facture proforma n˚<span style="color: #0000003e;">xxx-xx-xxxx</span></h2>
-                                    </div>
-                                    <!-- // date  -->
-                                    <div class="date">
-                                        <!-- <p>Bamako, le 12 Mai 2025</p> -->
-                                        <p>dd/MM/yyyy</p>
-                                    </div>
-
-                                    <!-- nom et object  -->
-                                    <div class="droit">
-                                        <h4>Client : </h4> 
-                                        <p>Nom de client </p>
-                                    </div>
-
-                                    <!-- nom et object  -->
-                                    <div class="object">
-                                        <h4>OBJECT :</h4>
-                                        <p>Une petite description de l'object</p>
-                                    </div>
-
-                                    <!-- // Table  -->
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Désignation</th>
-                                                <th style="width: 70px!important;">Description</th>
-                                                <th>PU</th>
-                                                <th>Quantité</th>
-                                                <!-- <th>Durée</th> -->
-                                                <th>Montant (FCFA)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td class="td_left">Produit nom</td>
-                                                <td class="td_left">Produit description</td>
-                                                <td>00</td>
-                                                <td>00</td>
-                                                <!-- <td>15 000</td> -->
-                                                <td> 0000</td>
-                                            </tr>
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                            <td colspan="4">Total HT</td>
-                                            <td>0000</td>
-                                            </tr>
-                                            <tr>
-                                            <td colspan="4">Remise 0 %</td>
-                                            <td>
-                                                <!-- {{ ((facture.totalHT * facture.remise/100) | customNumber) }} -->
-                                                0000
-                                            </td>
-                                            </tr>
-                                            <!-- Montant Commercial  -->
-                                            <tr>
-                                                <td colspan="4">Montant commercial</td>
-                                                <td>
-                                                <!-- {{
-                                                    (facture.totalHT - (facture.totalHT * facture.remise / 100)) | customNumber
-                                                }} -->
-                                                    0000
-                                                </td>
-                                            </tr>
-                                            <!-- TVA à 18% sur le montant commercial -->
-                                            <tr>
-                                                <td colspan="4">TVA (18%)</td>
-                                                <td>
-                                                <!-- {{
-                                                    ((facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) * 0.18) | customNumber
-                                                }} -->
-                                                    0000
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                            <td colspan="4">Montant TTC</td>
-                                            <td>
-                                                <!-- {{ facture.totalFacture | customNumber }} -->
-                                                0000
-                                            </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-
-                                    <!-- // contenu_bottom  -->
-                                    <div class="contenu_bottom">
-                                        <p><span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>
-                                        Zero .....</p>
-                                    </div>
-
-                                    <!-- // sachet  -->
-                                    <div class="cachet_container">
-                                        <div></div>
-                                        <div class="cachet">
-                                            <h6>{{ form.get('post')?.value }}</h6>
-                                            <h6 class="name_directeur">{{ form.get('signataire')?.value }}</h6>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- // Footer  -->
-                                <div class="container_footer">
-                                    <div class="footer">
                                         <!-- // Ligne  -->
-                                        <div class="container_footer">
-                                            <div class="footer">
-                                                <!-- // Ligne  -->
-                                                <hr>
-                                                <p><strong>{{form.get('siteWeb')?.value }}</strong></p>
-                                                <div>
-                                                    <em>
-                                                        NINA : {{form.get('nina')?.value }} ; RCCM : {{form.get('rccm')?.value }} ; NIF : {{form.get('nif')?.value }} ; Banque : {{form.get('banque')?.value }}
-                                                    </em>
-                                                </div>
-                                                <div style="margin-top: -4px;">
-                                                    <em >
-                                                        Adresse : {{ form.get('adresse')?.value }} /{{ form.get('pays')?.value }}
-                                                    </em>
+                                        <hr>
+                                        <hr>
+                                        <!-- // titre  -->
+                                        <div class="titre">
+                                            <!-- <h2>Facture proforma n˚{{ facture.numeroFacture || '000-00-2025' }}</h2> -->
+                                            <h2>Facture proforma n˚<span style="color: #0000003e;">xxx-xx-xxxx</span></h2>
+                                        </div>
+                                        <!-- // date  -->
+                                        <div class="date">
+                                            <!-- <p>Bamako, le 12 Mai 2025</p> -->
+                                            <p>dd/MM/yyyy</p>
+                                        </div>
+
+                                        <!-- nom et object  -->
+                                        <div class="droit">
+                                            <h4>Client : </h4> 
+                                            <p>Nom de client </p>
+                                        </div>
+
+                                        <!-- nom et object  -->
+                                        <div class="object">
+                                            <h4>OBJECT :</h4>
+                                            <p>Une petite description de l'object</p>
+                                        </div>
+
+                                        <!-- // Table  -->
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Désignation</th>
+                                                    <th style="width: 70px!important;">Description</th>
+                                                    <th>PU</th>
+                                                    <th>Quantité</th>
+                                                    <!-- <th>Durée</th> -->
+                                                    <th>Montant (FCFA)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="td_left">Produit nom</td>
+                                                    <td class="td_left">Desc...</td>
+                                                    <td>00</td>
+                                                    <td>00</td>
+                                                    <!-- <td>15 000</td> -->
+                                                    <td> 0000</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                <td colspan="4">Total HT</td>
+                                                <td>0000</td>
+                                                </tr>
+                                                <tr>
+                                                <td colspan="4">Remise 0 %</td>
+                                                <td>
+                                                    <!-- {{ ((facture.totalHT * facture.remise/100) | customNumber) }} -->
+                                                    0000
+                                                </td>
+                                                </tr>
+                                                <!-- Montant Commercial  -->
+                                                <tr>
+                                                    <td colspan="4">Montant commercial</td>
+                                                    <td>
+                                                    <!-- {{
+                                                        (facture.totalHT - (facture.totalHT * facture.remise / 100)) | customNumber
+                                                    }} -->
+                                                        0000
+                                                    </td>
+                                                </tr>
+                                                <!-- TVA à 18% sur le montant commercial -->
+                                                <tr>
+                                                    <td colspan="4">TVA (18%)</td>
+                                                    <td>
+                                                    <!-- {{
+                                                        ((facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) * 0.18) | customNumber
+                                                    }} -->
+                                                        0000
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                <td colspan="4">Montant TTC</td>
+                                                <td>
+                                                    <!-- {{ facture.totalFacture | customNumber }} -->
+                                                    0000
+                                                </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+
+                                        <!-- // contenu_bottom  -->
+                                        <div class="contenu_bottom">
+                                            <p><span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>
+                                            Zero .....</p>
+                                        </div>
+
+                                        <!-- // sachet  -->
+                                        <div class="cachet_container">
+                                            <div></div>
+                                            <div class="cachet">
+                                                <h6>{{ form.get('post')?.value }}</h6>
+                                                <h6 class="name_directeur">{{ form.get('signataire')?.value }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- // Footer  -->
+                                    <div class="container_footer">
+                                        <div class="footer">
+                                            <!-- // Ligne  -->
+                                            <div class="container_footer">
+                                                <div class="footer">
+                                                    <!-- // Ligne  -->
+                                                    <hr>
+                                                    <p><strong>{{form.get('siteWeb')?.value }}</strong></p>
+                                                    <div>
+                                                        <em>
+                                                            NINA : {{form.get('nina')?.value }} ; RCCM : {{form.get('rccm')?.value }} ; NIF : {{form.get('nif')?.value }} ; Banque : {{form.get('banque')?.value }}
+                                                        </em>
+                                                    </div>
+                                                    <div style="margin-top: -9px;">
+                                                        <em >
+                                                            Adresse : {{ form.get('adresse')?.value }} /{{ form.get('siege')?.value }}-{{ form.get('pays')?.value }}
+                                                        </em>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
+                                </div>
+                                <!-- // autre Paramètres de la facture  -->
+                                <div class="cadre_setting">
+                                    <div class="titre_autre">
+                                        <p>L'apparance de la facture</p>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- // Champs de la modification de facture dans setting  -->
@@ -284,6 +292,12 @@
                                             <input class="input_focus" type="text" formControlName="nif" placeholder="Saisis le nif">
                                             <label class="label">NIF</label>
                                         </div>
+
+                                        <!-- // Input de siege   -->
+                                        <div class="champ_input">
+                                            <input class="input_focus" type="text" formControlName="siege" placeholder="Saisis le siege">
+                                            <label class="label">Siege</label>
+                                        </div>
                                     </div>
 
                                     <!-- // Informations légales & bancaires  -->
@@ -303,7 +317,6 @@
                                             <input class="input_focus" type="text" formControlName="post" placeholder="Saisis le post de signataire">
                                             <label class="label">Poste</label>
                                         </div>
-
                                     </div>
 
                                     <!-- // Btn confirm   -->
@@ -315,6 +328,27 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- // L'apparance de la facture  -->
+                        <!-- <div class="autre_setting_facture">
+                            <div class="titre_autre">
+                                <h6>L'apparance de la facture</h6>
+                            </div>
+
+                            <div class="container_model_facteur">
+                                <div class="content_model_facteur">
+                                    <div class="model1">
+                                        
+                                    </div>
+                                    <div class="model1">
+                                        
+                                    </div>
+                                    <div class="model1">
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
                     </div>
                 </mat-tab>
                 <!-- // Securite  -->

@@ -47,6 +47,7 @@ export class AccountSettingsComponent implements OnInit {
       telephone: ['xx xx xx xx'],
       siteWeb: ['www.xpertpro.com'],
       banque: ['xxxx'],
+      siege: ['xxxx'],
       nina: ['xxxx'],
       rccm: ['xxxx'],
       nif: ['xxxx'],
