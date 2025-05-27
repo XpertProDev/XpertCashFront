@@ -77,13 +77,16 @@ export class EntrepriseService {
     );
   }
 
-  updateEntreprise(id: number, formData: FormData): Observable<any> {
+  updateEntreprise(id: number, formData: FormData): Observable<string> {
     const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
 
-    return this.http.patch(`${this.apiUrl}/updateEntreprise/${id}`, formData, { headers }).pipe(
+    return this.http.patch(`${this.apiUrl}/updateEntreprise/${id}`, formData, { 
+      headers, 
+      responseType: 'text' // Indique que la réponse est du texte brut
+    }).pipe(
       catchError(error => {
         let errorMsg = 'Erreur inconnue';
         if (error.error instanceof ErrorEvent) {
@@ -95,6 +98,25 @@ export class EntrepriseService {
       })
     );
   }
+
+  // updateEntreprise(id: number, formData: FormData): Observable<any> {
+  //   const token = localStorage.getItem('authToken') || '';
+  //   const headers = new HttpHeaders({
+  //     'Authorization': `Bearer ${token}`
+  //   });
+
+  //   return this.http.patch(`${this.apiUrl}/updateEntreprise/${id}`, formData, { headers }).pipe(
+  //     catchError(error => {
+  //       let errorMsg = 'Erreur inconnue';
+  //       if (error.error instanceof ErrorEvent) {
+  //         errorMsg = `Erreur: ${error.error.message}`;
+  //       } else if (error.status === 400) {
+  //         errorMsg = error.error || 'Données invalides';
+  //       }
+  //       return throwError(() => new Error(errorMsg));
+  //     })
+  //   );
+  // }
 
   // Get entreprise d'un user
   getEntrepriseInfo(): Observable<Entreprise> {

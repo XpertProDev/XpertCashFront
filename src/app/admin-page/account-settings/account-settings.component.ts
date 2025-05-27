@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import {MatTabsModule} from '@angular/material/tabs';
 import { EntrepriseService } from '../SERVICES/entreprise-service';
 import { Entreprise } from '../MODELS/entreprise-model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-account-settings',
@@ -30,13 +31,15 @@ export class AccountSettingsComponent implements OnInit {
   logoUrl: string = 'assets/img/logo.jpeg';
   selectedLogoFile: File | null = null;
   entrepriseId: number | null = null;
+  isLoading: boolean = false;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
 
   constructor(
     private fb: FormBuilder,
     private entrepriseService: EntrepriseService,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -85,7 +88,6 @@ export class AccountSettingsComponent implements OnInit {
   getEntrepriseInfo() {
     this.entrepriseService.getEntrepriseInfo().subscribe({
       next: (entreprise: Entreprise) => {
-        // this.entrepriseId = entreprise.id;
         this.entrepriseId = entreprise.id !== undefined ? entreprise.id : null;
         this.form.patchValue({
           nom: entreprise.nom,
@@ -103,7 +105,8 @@ export class AccountSettingsComponent implements OnInit {
           signataire: entreprise.signataire,
           signataireNom: entreprise.signataireNom
         });
-        this.logoUrl = entreprise.logo || 'assets/img/logo.jpeg';
+        // Construire l'URL complète du logo
+        this.logoUrl = entreprise.logo ? `http://localhost:8080/${entreprise.logo}` : 'assets/img/logo.jpeg';
         this.cdRef.markForCheck();
       },
       error: (error) => {
@@ -155,6 +158,8 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
 
+    this.isLoading = true; // Active le loading
+
     const formData = new FormData();
     const entrepriseData = this.form.value;
     formData.append('entreprise', JSON.stringify(entrepriseData));
@@ -162,16 +167,22 @@ export class AccountSettingsComponent implements OnInit {
       formData.append('logo', this.selectedLogoFile);
     }
 
-    this.entrepriseService.updateEntreprise(this.entrepriseId, formData).subscribe({
-      next: (response) => {
-        console.log('Entreprise mise à jour avec succès', response);
-        // Optionnel : Afficher un message de succès à l'utilisateur
-        this.selectedLogoFile = null; // Réinitialiser le fichier sélectionné
-      },
-      error: (error) => {
-        console.error('Erreur lors de la mise à jour de l\'entreprise', error);
-        // Optionnel : Afficher un message d'erreur à l'utilisateur
-      }
-    });
+    // Crée un délai de 3 secondes avant l'envoi
+    setTimeout(() => {
+      this.entrepriseService.updateEntreprise(this.entrepriseId!, formData).subscribe({
+        next: (response) => {
+          this.isLoading = false; // Désactive le loading
+          this.snackBar.open(response, 'Fermer', { duration: 3000 }); // Affiche le succès
+          this.getEntrepriseInfo();
+          this.selectedLogoFile = null;
+        },
+        error: (error) => {
+          this.isLoading = false; // Désactive le loading
+          const errorMessage = error.error || 'Erreur lors de la mise à jour';
+          this.snackBar.open(errorMessage, 'Fermer', { duration: 3000 }); // Affiche l'erreur
+        }
+      });
+    }, 3000); // Délai de 3 secondes
   }
+
 }

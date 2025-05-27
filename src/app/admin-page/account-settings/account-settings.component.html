@@ -1,4 +1,10 @@
 <div class="account-settings">
+    <div *ngIf="isLoading" class="loading-overlay">
+        <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Modification en cours...</p>
+        </div>
+    </div>
     <!-- Section Paramètres du compte -->
     <div class="information_cadre">
         <div class="section">
@@ -22,7 +28,7 @@
                     </div>
                 </mat-tab>
                 <!-- // Factures  -->
-                <mat-tab label="Factures">
+                 <mat-tab label="Factures">
                     <div class="tab-content">
                         <div class="content_setting_facture">
                             <!-- // Facture de vue edit  -->
@@ -34,7 +40,7 @@
                                         <div class="header_apercu">
                                             <!-- // logo entreprise -->
                                             <div class="logo_entreprise">
-                                                <img [src]="logoUrl" alt="Logo de l'entreprise">
+                                                <img [src]="logoUrl">
                                             </div>
                                             <!-- entete entreprise  -->
                                             <div class="entete_entreprise">
@@ -165,7 +171,7 @@
                                                             NINA : {{form.get('nina')?.value }} ; RCCM : {{form.get('rccm')?.value }} ; NIF : {{form.get('nif')?.value }} ; Banque : {{form.get('banque')?.value }}
                                                         </em>
                                                     </div>
-                                                    <div style="">
+                                                    <div>
                                                         <em >
                                                             Adresse : {{ form.get('adresse')?.value }} /{{ form.get('siege')?.value }}-{{ form.get('pays')?.value }}
                                                         </em>
@@ -322,7 +328,7 @@
                                     <!-- // Btn confirm   -->
                                     <!-- Remplacez la ligne du bouton existant -->
                                     <div class="champ_input">
-                                    <button class="btn" (click)="onSubmit()">Confirmer</button>
+                                        <button class="btn" (click)="onSubmit()">Confirmer</button>
                                     </div>
                                 </div>
                             </div>
