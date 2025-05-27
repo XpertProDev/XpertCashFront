@@ -53,7 +53,7 @@
 
 .facture_model {
   // width: 30%;
-  height: 43vh;
+  height: 64%;
   background-color: #ffffff;
   // box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   border: 1px solid #b9b9b9;
@@ -247,10 +247,11 @@ td.td_left {
   // bottom: 45px;
   width: 100%;
   bottom: 2px;
+  line-height: 9px;
 }
 
 .footer p {
-  letter-spacing: 0.60px;
+  // letter-spacing: 0.60px;
   margin: 0;
 }
 

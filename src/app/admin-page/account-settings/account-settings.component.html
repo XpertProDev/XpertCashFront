@@ -39,7 +39,7 @@
                                             <!-- entete entreprise  -->
                                             <div class="entete_entreprise">
                                                 <div class="content_entete">
-                                                    <p class="para1">{{ form.get('nomEntreprise')?.value }}</p>
+                                                    <p class="para1">{{ form.get('nom')?.value }}</p>
                                                     <p class="para2">Secterur: {{ form.get('secteur')?.value }}</p>
                                                     <div class="para3">Email : <a href="mail"> {{ form.get('email')?.value }}</a> Téléphone : {{ form.get('telephone')?.value }}</div>
                                                 </div>
@@ -145,8 +145,8 @@
                                         <div class="cachet_container">
                                             <div></div>
                                             <div class="cachet">
-                                                <h6>{{ form.get('post')?.value }}</h6>
-                                                <h6 class="name_directeur">{{ form.get('signataire')?.value }}</h6>
+                                                <h6>{{ form.get('signataire')?.value }}</h6>
+                                                <h6 class="name_directeur">{{ form.get('signataireNom')?.value }}</h6>
                                             </div>
                                         </div>
                                     </div>
@@ -165,7 +165,7 @@
                                                             NINA : {{form.get('nina')?.value }} ; RCCM : {{form.get('rccm')?.value }} ; NIF : {{form.get('nif')?.value }} ; Banque : {{form.get('banque')?.value }}
                                                         </em>
                                                     </div>
-                                                    <div style="margin-top: -9px;">
+                                                    <div style="">
                                                         <em >
                                                             Adresse : {{ form.get('adresse')?.value }} /{{ form.get('siege')?.value }}-{{ form.get('pays')?.value }}
                                                         </em>
@@ -195,7 +195,7 @@
                                     <div class="champ_grid">
                                         <!-- // Input de Nom entreprise  -->
                                         <div class="champ_input ">
-                                            <input class="input_focus" type="text" formControlName="nomEntreprise" placeholder="Saisis le nom entreprise">
+                                            <input class="input_focus" type="text" formControlName="nom" readonly placeholder="Saisis le nom entreprise" style="cursor: no-drop;">
                                             <label class="label">Nom entreprise</label>
                                         </div>
 
@@ -308,22 +308,21 @@
                                     <div class="champ_grid">
                                         <!-- Input de Nom signataire  -->
                                         <div class="champ_input">
-                                            <input class="input_focus" type="text" formControlName="signataire" placeholder="Saisis le  signataire">
+                                            <input class="input_focus" type="text" formControlName="signataireNom" placeholder="Saisis le nom du signataire">
                                             <label class="label">Nom signataire</label>
                                         </div>
 
                                         <!-- // Input de Signature   -->
                                         <div class="champ_input">
-                                            <input class="input_focus" type="text" formControlName="post" placeholder="Saisis le post de signataire">
+                                            <input class="input_focus" type="text" formControlName="signataire" placeholder="Saisis le post de signataire">
                                             <label class="label">Poste</label>
                                         </div>
                                     </div>
 
                                     <!-- // Btn confirm   -->
+                                    <!-- Remplacez la ligne du bouton existant -->
                                     <div class="champ_input">
-                                        <button class="btn">
-                                        Confirmer
-                                        </button>
+                                    <button class="btn" (click)="onSubmit()">Confirmer</button>
                                     </div>
                                 </div>
                             </div>
