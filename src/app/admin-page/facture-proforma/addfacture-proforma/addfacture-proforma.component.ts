@@ -15,6 +15,9 @@ import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { FactureProForma } from '../../MODELS/FactureProForma.model';
 import { FormStateService } from '../../SERVICES/form-state.service';
+import { ProduitFormComponent } from '../../produits/produit-form/produit-form.component';
+import { MatIconModule } from '@angular/material/icon';
+import { NgxBarcode6Module } from 'ngx-barcode6';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -25,6 +28,7 @@ import { FormStateService } from '../../SERVICES/form-state.service';
     ReactiveFormsModule,
     MatAutocompleteModule,
     CustomNumberPipe,
+    ProduitFormComponent, NgxBarcode6Module, MatIconModule
   ],
   templateUrl: './addfacture-proforma.component.html',
   styleUrl: './addfacture-proforma.component.scss'
@@ -634,6 +638,22 @@ console.log('dateFacture envoyée =', facture.dateFacture);
   private getEntrepriseName(id: number): string {
     const e = this.entreprises.find(e => e.id === id);
     return e ? e.nom : '';
+  }
+
+  onProduitAjoute(nouveauProduit: Produit) {
+    // Ajouter le produit réel à la liste
+    this.produits.push(nouveauProduit);
+    
+    // Sélectionner automatiquement le nouveau produit
+    if (this.inputLignes.length > 0) {
+      this.inputLignes[0].produitId = nouveauProduit.id;
+      
+      // Pré-remplir la description
+      this.inputLignes[0].ligneDescription = nouveauProduit.description;
+      
+      // Forcer la mise à jour de l'interface
+      this.cdr.detectChanges();
+    }
   }
 
   

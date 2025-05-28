@@ -1,6 +1,7 @@
 .container_global {
   display: grid;
   grid-template-columns: 72% 28%;
+  position: relative;
 }
 
 table {
@@ -600,3 +601,19 @@ input:checked + .slider:before {
   25% { transform: translateX(5px); }
   75% { transform: translateX(-5px); }
 }
+
+// cadre add produit
+
+.content_cadre_right {
+  width: 600px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 9999;
+  overflow: scroll;
+}
+

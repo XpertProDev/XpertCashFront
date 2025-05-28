@@ -22,6 +22,8 @@ import { MatDialogModule }          from '@angular/material/dialog';
 import { MatButtonModule }          from '@angular/material/button';
 import { CodeInputModule }          from 'angular-code-input';
 import { DragDropModule }           from '@angular/cdk/drag-drop';
+import { ProduitFormComponent } from './admin-page/produits/produit-form/produit-form.component';
+import { AddfactureProformaComponent } from './admin-page/facture-proforma/addfacture-proforma/addfacture-proforma.component';
 
 registerLocaleData(localeFr);
 
@@ -31,6 +33,8 @@ registerLocaleData(localeFr);
     InscriptionComponent,
     CustomNumberPipe,
     UnlockDialogComponent,
+    ProduitFormComponent,
+    AddfactureProformaComponent,
   ],
   imports: [
     CommonModule,
