@@ -452,7 +452,6 @@ onFileSelected(event: Event): void {
 }
 
 
-
 changerPhoto(event: Event) {
   event.stopPropagation();
   const fileInput = document.getElementById('fileInput') as HTMLInputElement;
@@ -466,12 +465,8 @@ visualiserPhoto(event: Event) {
   this.isModalOpen = true;
 }
 
-fermerModal() {
-  this.isModalOpen = false;
-}
-
-
-
-
+  fermerModal() {
+    this.isModalOpen = false;
+  }
   
 }

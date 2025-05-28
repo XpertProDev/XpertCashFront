@@ -15,6 +15,7 @@ import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { firstValueFrom } from 'rxjs';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
+import { MatDialog } from '@angular/material/dialog';
 
 // Ajouter cette interface pour les pièces jointes
 interface EmailAttachment {
@@ -24,9 +25,19 @@ interface EmailAttachment {
 
 type EventType = 'creation' | 'modification' | 'approbation' | 'envoi' | 'validation';
 
+interface Note {
+  id: number;
+  content: string;
+  dateCreation: Date;
+  auteur: string;
+  modifiee?: boolean;
+  dateModification?: Date;
+}
+
 // Interface modifiée
 interface HistoricalEvent {
   date: Date;
+  montant: number;
     user: {
     nomComplet: string;
     photo?: string | null;
@@ -50,7 +61,7 @@ export class DetailFactureProformaComponent implements OnInit {
   activeTva: boolean = false;
   remisePourcentage: number = 0;
   tva: number = 0;
-  errorMessage: string = '';
+  errorMessage: string | null = null;
   nomEntreprise: string = '';
   produits: Produit[] = [];
   pendingAdjustments: any[] = [];
@@ -112,6 +123,21 @@ export class DetailFactureProformaComponent implements OnInit {
   isSending: boolean = false;
   attachments: EmailAttachment[] = [];
   currentAttachment: File | null = null;
+  successMessage: string | null = null;
+
+
+
+  isNotebookOpen = false;
+  isAddNotePopupOpen = false;
+  newNote = '';
+  notes: Note[] = [];
+  noteModification: string = '';
+ isAddNoteInputVisible: boolean = false;
+   infoMessage: string | null = null;
+   confirmDeleteIndex: number | null = null;
+
+
+
   @ViewChild('editableContent', { static: false }) editableContent!: ElementRef;
   @ViewChild('subjectInput', { static: false }) subjectInput!: ElementRef;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -125,7 +151,8 @@ export class DetailFactureProformaComponent implements OnInit {
       private cdr: ChangeDetectorRef,
       private renderer: Renderer2,
       private entrepriseService: EntrepriseService,
-          private previewService: FacturePreviewService,
+      private previewService: FacturePreviewService,
+      private dialog: MatDialog
     ) {}
 
   ngOnInit(): void {
@@ -137,6 +164,9 @@ export class DetailFactureProformaComponent implements OnInit {
     if (idParam) {
       this.factureId = +idParam;
       this.getUserInfo();
+      this.loadNotes();
+      
+
     }
   }
 
@@ -207,13 +237,14 @@ export class DetailFactureProformaComponent implements OnInit {
       if (!this.historicalEvents.some(e => e.type === 'creation')) {
         this.historicalEvents.push({
           date: new Date(this.factureProForma.dateCreation),
+          montant: this.factureProForma.totalHT,
          user: {
             nomComplet: this.factureProForma.utilisateurCreateur?.nomComplet || 'Système',
             photo: this.factureProForma.utilisateurCreateur?.photo || null
           },
 
           type: 'creation',
-          description: 'Création de la facture',
+          description: 'Création de la facture ' + this.factureProForma.totalFacture,
         });
         console.log( "les information ", this.historicalEvents);
       }
@@ -320,7 +351,6 @@ export class DetailFactureProformaComponent implements OnInit {
           next: (data: Produit[]) => {
             this.produits = data;
             resolve();
-            console.log('PRODUITS RÉCUPÉRÉS:', this.produits); // <=== Ajoutez ceci
           },
           error: (err) => console.error('Erreur récupération produits :', err)
         });
@@ -335,6 +365,7 @@ export class DetailFactureProformaComponent implements OnInit {
         this.userEntrepriseId = user.entrepriseId;
         this.siege = user.siege;
         this.email = user.email;
+       
 
 
 
@@ -349,7 +380,7 @@ export class DetailFactureProformaComponent implements OnInit {
         });
 
   
-        console.log("Infos utilisateur récupérées :", user);
+        //console.log("Infos utilisateur récupérées :", user);
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
@@ -444,9 +475,12 @@ export class DetailFactureProformaComponent implements OnInit {
   }
   
   submitUpdateForm() {
+     this.errorMessage = null;
+    this.successMessage = null;
     const payload = {
       client: this.factureProForma.client ? { id: this.factureProForma.client.id } : null,
       description: this.factureProForma.description,
+
       // Utilisez confirmedLignes puisque c'est là que se trouvent les modifications (ajouts, suppressions, etc.)
       lignesFacture: this.confirmedLignes.map(l => ({
         produit: { id: l.produitId },
@@ -455,6 +489,7 @@ export class DetailFactureProformaComponent implements OnInit {
         ligneDescription: l.ligneDescription
       })),
       remise: this.activeRemise ? this.remisePourcentage : null,
+      noteModification: this.noteModification || null,
     };
     
     // Si vous avez aussi des lignes en cours d'ajout dans inputLignes, vous pouvez les concaténer :
@@ -476,7 +511,9 @@ export class DetailFactureProformaComponent implements OnInit {
       this.factureId,
       this.activeRemise ? this.remisePourcentage : undefined,
       this.activeTva,
-      payload as Partial<FactureProForma>
+      
+      
+      payload as unknown as Partial<FactureProForma>
     ).subscribe({
       next: (res) => {
         console.log('Mise à jour réussie !', res);
@@ -485,10 +522,111 @@ export class DetailFactureProformaComponent implements OnInit {
       },
       error: (err) => {
         console.error('Échec de la mise à jour', err);
-        this.errorMessage = err.error.message || 'Erreur lors de la modification';
+        const fullError = err.error?.error || 'Erreur lors de la modification';
+        const splitMessage = fullError.split(':');
+        this.errorMessage = splitMessage.length > 1 ? splitMessage[1].trim() : fullError;
       }
     });
   }
+noteEditingIndex: number | null = null;
+
+  
+submitNote() {
+  this.errorMessage = null;
+  this.successMessage = null;
+
+  if (this.noteEditingIndex !== null && this.notes[this.noteEditingIndex]) {
+    // Cas modification d'une note existante
+    const noteToUpdate = this.notes[this.noteEditingIndex];
+    console.log('Note à modifier dans submitNote:', noteToUpdate);
+    const noteId = Number(noteToUpdate.id);
+    if (!noteId) {
+      this.errorMessage = 'ID invalide pour la note sélectionnée';
+      return;
+    }
+
+
+    this.factureProFormaService.updateNote(
+      this.factureId,
+      noteId,
+      this.noteModification || ''
+    ).subscribe({
+      next: (res) => {
+        console.log('Note mise à jour avec succès !', res);
+        this.successMessage = 'Note modifiée avec succès.';
+         this.loadNotes();
+
+            const derniereNoteId = res?.noteId || res?.id || null;
+            if (derniereNoteId) {
+              this.factureProFormaService.getNoteById(this.factureId, derniereNoteId).subscribe({
+                next: (note) => {
+                  this.notes.unshift(note);
+                },
+                error: (err) => {
+                  console.error('Erreur lors de la récupération de la note ajoutée', err);
+                }
+              });
+            } else {
+              console.warn('ID de la note non retourné dans la réponse.');
+            }
+
+        // Mise à jour locale de la note
+        this.notes[this.noteEditingIndex!].content = this.noteModification;
+        this.notes[this.noteEditingIndex!].dateModification = new Date();
+
+        // Réinitialisation
+        this.noteModification = '';
+        this.isAddNoteInputVisible = false;
+        this.noteEditingIndex = null;
+      },
+      error: (err) => {
+        console.error('Échec de la mise à jour de la note', err);
+        const fullError = err.error?.error || 'Erreur lors de la modification de la note';
+        const splitMessage = fullError.split(':');
+        this.errorMessage = splitMessage.length > 1 ? splitMessage[1].trim() : fullError;
+      }
+    });
+  } else {
+    // Cas ajout d'une nouvelle note
+    const payload = {
+      noteModification: this.noteModification || null,
+    };
+
+    const nouvelleNote: Note = {
+      id: Date.now(), // ou un ID généré par le backend
+      content: this.noteModification,
+      dateCreation: new Date(),
+      auteur: this.getCurrentUser().nomComplet || 'Utilisateur inconnu'
+    };
+
+    this.factureProFormaService.updateFactureProforma(
+      this.factureId,
+      undefined,
+      undefined,
+      payload as Partial<FactureProForma>
+    ).subscribe({
+      next: (res) => {
+        console.log('Note ajoutée avec succès !', res);
+        this.successMessage = 'Note enregistrée avec succès.';
+        this.loadNotes();
+        this.notes.unshift(nouvelleNote);
+        this.noteModification = '';
+        this.isAddNoteInputVisible = false;
+      },
+      error: (err) => {
+        console.error('Échec de l\'ajout de la note', err);
+        const fullError = err.error?.error || 'Erreur lors de l\'ajout de la note';
+        const splitMessage = fullError.split(':');
+        this.errorMessage = splitMessage.length > 1 ? splitMessage[1].trim() : fullError;
+      }
+    });
+  }
+}
+
+
+
+
+
 
   // Ajouter ces méthodes
   canApprove(): boolean {
@@ -633,6 +771,7 @@ export class DetailFactureProformaComponent implements OnInit {
          // Mettre à jour l'historique immédiatement
           const newEvent: HistoricalEvent = {
             date: new Date(),
+            montant: this.factureProForma.totalHT,
             user: this.getCurrentUser(),
             type: this.getEventType(this.pendingStatut!),
             description: this.getStatusDescription(this.pendingStatut!),
@@ -679,7 +818,6 @@ export class DetailFactureProformaComponent implements OnInit {
 
   // Ajouter ces méthodes helper
   private getCurrentUser() {
-      // À adapter selon votre système d'authentification
       return { nomComplet: 'Utilisateur Actuel', id: 123 };
   }
 
@@ -1421,7 +1559,7 @@ export class DetailFactureProformaComponent implements OnInit {
       throw new Error(`Erreur lors du chargement de l'image : ${response.statusText}`);
     }
     const blob = await response.blob();
-    console.log(`Type MIME de l'image chargée : ${blob.type}`);
+    //console.log(`Type MIME de l'image chargée : ${blob.type}`);
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -1472,6 +1610,130 @@ export class DetailFactureProformaComponent implements OnInit {
     this.previewService.setPreview(preview);
     this.router.navigate(['/detail-facture-proforma-apercu']);
   }
+
+
+loadNotes() {
+  this.factureProFormaService.getNotesFactureProforma(this.factureId).subscribe({
+    next: (response: any) => {
+      // Si le backend envoie un message au lieu d'une liste
+      if (!Array.isArray(response)) {
+        this.notes = [];
+        this.infoMessage = response.message || "Aucune note disponible.";
+        return;
+      }
+
+      if (response.length === 0) {
+        this.notes = [];
+        this.infoMessage = "Aucune note pour cette facture.";
+        return;
+      }
+
+      // Sinon, traitement normal
+      this.notes = response.map((note: any) => ({
+        id: note.id,
+        content: note.note,
+        dateCreation: note.dateCreation ? new Date(note.dateCreation) : new Date(0),
+        auteur: note.auteur,
+        modifiee: note.modifiee
+      }));
+
+      this.infoMessage = null;
+      console.log("Notes chargées :", this.notes);
+    },
+    error: (err) => {
+      console.error("Erreur lors du chargement des notes", err);
+      this.infoMessage = err.error?.message || "Erreur lors de la récupération des notes.";
+    }
+  });
+}
+
+
+
+
+ 
+
+
+toggleNotebook() {
+  this.isNotebookOpen = !this.isNotebookOpen;
+}
+  
+  
+ // Et dans la classe
+toggleAddNoteInput() {
+  this.isAddNoteInputVisible = !this.isAddNoteInputVisible;
+}
+
+
+  closeNotebook() {
+    this.isNotebookOpen = false;
+  }
+
+    addNote() {
+    if (this.newNote.trim()) {
+      this.notes.push({
+        id: Date.now(),
+        content: this.newNote.trim(),
+        dateCreation: new Date(),
+        auteur: this.getCurrentUser().nomComplet
+      });
+      this.newNote = '';
+      this.isAddNotePopupOpen = false;
+    }
+  }
+
+  closeNoteInput() {
+  this.noteModification = '';
+  this.isAddNoteInputVisible = false;
+}
+
+activeMenuIndex: number | null = null;
+toggleNoteMenu(index: number): void {
+  this.activeMenuIndex = this.activeMenuIndex === index ? null : index;
+  this.confirmDeleteIndex = null;
+}
+
+editNote(index: number): void {
+  const note = this.notes[index];
+  console.log('Note sélectionnée pour modification:', note);
+  this.noteModification = note.content;
+  this.isAddNoteInputVisible = true;
+  this.activeMenuIndex = null;
+  this.noteEditingIndex = index;
+}
+
+
+
+askDelete(index: number) {
+  this.confirmDeleteIndex = index;
+}
+
+confirmDelete(index: number) {
+  const note = this.notes[index];
+  if (!note || !note.id) return;
+
+  this.factureProFormaService.deletNoteFactureProforma(this.factureId, note.id)
+    .subscribe({
+      next: () => {
+        // Rechercher la note par ID, pour éviter les erreurs d'index après suppression
+        const idIndex = this.notes.findIndex(n => n.id === note.id);
+        if (idIndex !== -1) {
+          this.notes.splice(idIndex, 1);
+        }
+        this.confirmDeleteIndex = null;
+        this.activeMenuIndex = null;
+        console.log('Note supprimée avec succès');
+      },
+      error: (err) => {
+        console.error('Erreur lors de la suppression de la note :', err);
+      }
+    });
+}
+
+
+cancelDelete() {
+  this.confirmDeleteIndex = null;
+  this.activeMenuIndex = null;
+}
 
 
 }
