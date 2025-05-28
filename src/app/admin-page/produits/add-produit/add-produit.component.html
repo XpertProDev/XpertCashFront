@@ -111,17 +111,14 @@
                     </div>
                   </div>
 
-                   <div class="triple" >
+                  <!-- Type  -->
+                     <div class="triple" >
                       <div class="champ_input" class="form-group">
-                        <label for="typeProduit">Type de produit</label>
-                        <select id="typeProduit" formControlName="typeProduit" class="form-control">
+                        <select class="input_focus " id="typeProduit" formControlName="typeProduit">
                           <option value="PHYSIQUE">Produit physique</option>
                           <option value="SERVICE">Service</option>
                         </select>
-                        
                       </div>
-                    
-              
                   </div>
 
                   <div class="double_input2">
@@ -155,6 +152,40 @@
                       <i class="ri-arrow-down-s-line" style="font-size: 20px;"></i>
                     </div>
                   </div>
+
+                  <!-- // -->
+                   <div class="double_input2">
+                    <div class="champ_input champ_input2">
+                      <input autocomplete="off" type="text" placeholder="Saisis l'unité de mesure" 
+                            matInput [formControl]="uniteControl" class="input_focus"
+                            [matAutocomplete]="autoUnite" style="cursor: pointer;">
+                      <label for="uniteId" class="label">Unité de mesure</label>
+                      <mat-autocomplete #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
+
+                        <mat-option class="select-option" (click)="onCreateUniteClick()">
+                          <div style="display: flex; align-items: center; color: #0672E4;">
+                            <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                            <span style="margin-left: 8px;">Créer une unité</span>
+                          </div>
+                        </mat-option>
+
+                        <mat-option *ngFor="let option of filteredNomUnite | async" [value]="option">
+                          <div class="option-content">
+                            {{ option.nom }}
+                          </div>
+                        </mat-option>
+                      
+                      </mat-autocomplete>
+                      
+                    </div>
+                    <!-- <div class="btn_add_categoryDiv2">
+                      <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
+                    </div> -->
+                    <div class="arrow_bas" style="position: absolute; right: 5px; top: 20px;">
+                      <i class="ri-arrow-down-s-line" style="font-size: 20px;"></i>
+                    </div>
+                  </div>
+
                 </div>
 
                 <div class="double_input_grid">
@@ -183,6 +214,13 @@
                   </div>
 
                 </div>
+
+
+               
+        
+          
+            
+
 
                 
               </div>
