@@ -167,11 +167,11 @@
                                         placeholder="Sélectionner un produit"
                                         class="input_focus_type input_focus_type_select" 
                                         [ngClass]="{ 'duplicate': inputLignes[0].isDuplicate }"
-                                        (focus)="onFocus()"
+                                        (focus)="onFocus()" 
                                       >
                                       <mat-autocomplete #autoProduits="matAutocomplete" [displayWith]="displayProduit" (optionSelected)="onProduitSelected($event)">
-                                        <mat-option>
-                                          <div style="display: flex; align-items: center; color: #0672E4;">
+                                        <mat-option [value]="null">
+                                          <div style="display: flex; align-items: center; color: #0672E4;" (click)="openProductFormPanel()">
                                             <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
                                             <span style="margin-left: 8px;">Créer un produit</span>
                                           </div>
@@ -388,13 +388,18 @@
     </div>
   </div>
 
-  <div class="container_cadre_facture">
-    <div class="content_cadre_right">
+  <!-- Modifier le conteneur du panneau -->
+  <div class="container_cadre_facture" 
+      [class.show]="showProductFormPanel"
+      [class.slide-in]="panelAnimationState === 'visible'"
+      [class.slide-out]="panelAnimationState === 'hidden'">
+    <div class="overlay" (click)="closeProductFormPanel()"></div>
+    <div class="content_cadre_right" (click)="$event.stopPropagation()">
       <div class="cadre_right">
         <div class="add_produit">
-          <!-- Intégrer le nouveau composant -->
           <app-produit-form 
-            (produitAjoute)="onProduitAjoute($event)">
+            (produitAjoute)="onProduitAjoute($event)"
+            (close)="closeProductFormPanel()">
           </app-produit-form>
         </div>
       </div>

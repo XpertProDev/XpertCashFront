@@ -24,6 +24,7 @@ import { NgxBarcode6Module } from 'ngx-barcode6';
 })
 export class ProduitFormComponent {
   @Output() produitAjoute = new EventEmitter<any>();
+  @Output() close = new EventEmitter<void>();
   isChecked = false;
   showPopup: boolean = false;
   boutiqueName: string = '';
@@ -827,6 +828,10 @@ export class ProduitFormComponent {
   //   this.quantitesMap = {};
   //   this.seuilsMap = {};
   // }
+
+  closeForm(): void {
+    this.close.emit();
+  }
 
   // Méthode utilitaire pour marquer tous les champs comme touchés
   private markFormGroupTouched(formGroup: FormGroup) {

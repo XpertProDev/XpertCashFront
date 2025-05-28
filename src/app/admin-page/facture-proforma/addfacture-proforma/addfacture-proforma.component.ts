@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Router } from '@angular/router';
 import { ClientService } from '../../SERVICES/client-service';
 import { Clients } from '../../MODELS/clients-model';
@@ -79,6 +79,10 @@ export class AddfactureProformaComponent implements OnInit {
   // Ajouts pour mat-autocomplete
   productControl = new FormControl();
   filteredProduits: Observable<Produit[]>;
+
+  // Ajouter ces variables
+  showProductFormPanel: boolean = false;
+  panelAnimationState: 'hidden' | 'visible' = 'hidden';
 
   constructor(
     private router: Router,
@@ -525,8 +529,11 @@ export class AddfactureProformaComponent implements OnInit {
 
   // Méthode appelée au focus
   onFocus() {
+  if (!this.productControl.value) {
     this.productControl.setValue('');
   }
+}
+
 
   // Méthodes pour mat-autocomplete
   // private _filterProduits(name: string): Produit[] {
@@ -552,11 +559,35 @@ export class AddfactureProformaComponent implements OnInit {
     return produit && produit.nom ? produit.nom : '';
   }
 
-  onProduitSelected(event: any) {
-    const selectedProduit = event.option.value;
+
+  // Méthode pour ouvrir le panneau
+  openProductFormPanel(): void {
+    this.showProductFormPanel = true;
+    this.panelAnimationState = 'visible';
+  }
+
+  // Méthode pour fermer le panneau
+  closeProductFormPanel(): void {
+    this.panelAnimationState = 'hidden';
+    setTimeout(() => {
+      this.showProductFormPanel = false;
+    }, 300); // Correspond à la durée de l'animation
+  }
+
+  onProduitSelected(event: MatAutocompleteSelectedEvent) {
+      const selectedProduit: Produit = event.option.value;
+
+     // Si c'est l'option de création de produit
+    if (selectedProduit === null) {
+      this.openProductFormPanel();
+      return;
+    }
+
     if (selectedProduit && selectedProduit.id) {
       const ligne = this.inputLignes[0];
       ligne.produitId = selectedProduit.id;
+      ligne.ligneDescription = selectedProduit.description || null;
+
       ligne.isDuplicate = false;
 
       const isInConfirmed = this.confirmedLignes.some(l => l.produitId === selectedProduit.id);
@@ -573,8 +604,12 @@ export class AddfactureProformaComponent implements OnInit {
         return;
       }
 
-      ligne.ligneDescription = selectedProduit.description || null;
+      // 4) **mettre à jour le FormControl** pour que l’input affiche bien le nom
+      this.productControl.setValue(selectedProduit);
+
+      // 5) recalcul
       this.updateCalculs();
+
     }
   }
 

@@ -603,43 +603,56 @@ input:checked + .slider:before {
 }
 
 // cadre add produit
-
 .container_cadre_facture {
-   position: fixed;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-end; // Aligner à droite
   z-index: 1000;
-  display: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s;
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .content_cadre_right {
+    width: 700px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 2;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  // Animation d'entrée
+  &.slide-in .content_cadre_right {
+    transform: translateX(0);
+  }
+
+  // Animation de sortie
+  &.slide-out .content_cadre_right {
+    transform: translateX(100%);
+  }
 }
 
-.content_cadre_right {
-  width: 600px;
-  height: 100%;
-  background-color: #fff;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 9999;
-  overflow: scroll;
-}
-
-/* Dans votre fichier SCSS */
-.mat-autocomplete-panel {
-  z-index: 1000 !important;
-  position: absolute !important;
-}
-
-.boutique-selection-panel {
-  z-index: 1001 !important;
-}
 
 mat-option {
     align-items: center;
