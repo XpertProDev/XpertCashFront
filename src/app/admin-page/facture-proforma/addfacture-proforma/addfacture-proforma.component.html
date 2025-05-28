@@ -380,13 +380,15 @@
     </div>
   </div>
 
-  <div class="content_cadre_right">
-    <div class="cadre_right">
-      <div class="add_produit">
-        <!-- Intégrer le nouveau composant -->
-        <app-produit-form 
-          (produitAjoute)="onProduitAjoute($event)">
-        </app-produit-form>
+  <div class="container_cadre_facture">
+    <div class="content_cadre_right">
+      <div class="cadre_right">
+        <div class="add_produit">
+          <!-- Intégrer le nouveau composant -->
+          <app-produit-form 
+            (produitAjoute)="onProduitAjoute($event)">
+          </app-produit-form>
+        </div>
       </div>
     </div>
   </div>
