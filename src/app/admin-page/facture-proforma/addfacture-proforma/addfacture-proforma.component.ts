@@ -1,16 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ClientService } from '../../SERVICES/client-service';
 import { Clients } from '../../MODELS/clients-model';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { Produit } from '../../MODELS/produit.model';
 import { ProduitService } from '../../SERVICES/produit.service';
 import { UsersService } from '../../SERVICES/users.service';
-import { catchError, Observable, tap, throwError } from 'rxjs';
-import { HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable, map, startWith } from 'rxjs';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { FactureProForma } from '../../MODELS/FactureProForma.model';
@@ -21,21 +20,20 @@ import { NgxBarcode6Module } from 'ngx-barcode6';
 
 @Component({
   selector: 'app-addfacture-proforma',
-  // standalone: true,
   imports: [
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
     CustomNumberPipe,
-    ProduitFormComponent, NgxBarcode6Module, MatIconModule
+    ProduitFormComponent,
+    MatIconModule,
+    NgxBarcode6Module
   ],
   templateUrl: './addfacture-proforma.component.html',
-  styleUrl: './addfacture-proforma.component.scss'
+  styleUrls: ['./addfacture-proforma.component.scss']
 })
-
 export class AddfactureProformaComponent implements OnInit {
-
   pendingAdjustments: any[] = [];
   description: string = '';
   dateFacture: string = '';
@@ -43,13 +41,13 @@ export class AddfactureProformaComponent implements OnInit {
   typeDestinataire: string = 'client';
   selectedClientId: number | null = null;
   selectedEntrepriseId: number | null = null;
-  // remplace ou ajoute à côté de selectedEntrepriseId
   selectedEntreprise: { id: number; nom: string } | null = null;
   nomEntreprise: string = '';
   boutiqueIds: number[] | undefined;
   produits: Produit[] = [];
   inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; isDuplicate: boolean; }[] = [{
-    produitId: null, quantite: 0,
+    produitId: null,
+    quantite: 0,
     ligneDescription: null,
     isDuplicate: false,
   }];
@@ -78,6 +76,9 @@ export class AddfactureProformaComponent implements OnInit {
   hasDuplicateError = false;
   duplicateIndex: number | null = null;
 
+  // Ajouts pour mat-autocomplete
+  productControl = new FormControl();
+  filteredProduits: Observable<Produit[]>;
 
   constructor(
     private router: Router,
@@ -87,20 +88,24 @@ export class AddfactureProformaComponent implements OnInit {
     private usersService: UsersService,
     private previewService: FacturePreviewService,
     private formStateService: FormStateService,
-    private cdr: ChangeDetectorRef,
-  ) {}
+    private cdr: ChangeDetectorRef
+  ) {
+    // Initialisation du filtre pour l'autocomplete
+    this.filteredProduits = this.productControl.valueChanges.pipe(
+      startWith(null),
+      map(value => typeof value === 'string' ? value : value?.nom),
+      map(name => name ? this._filterProduits(name) : this.produits.slice())
+    );
+  }
 
-  // Modification de ngOnInit()
   async ngOnInit(): Promise<void> {
-    await this.getUserInfo(); // Charger d'abord les infos utilisateur
-    
+    await this.getUserInfo();
     await Promise.all([
       this.getListClients(),
       this.getListEntreprise(),
       this.getProduits()
     ]);
 
-    // Restaurer l'état APRÈS le chargement des données
     const savedState = this.formStateService.getState();
     if (savedState) {
       this.typeDestinataire = savedState.typeDestinataire;
@@ -115,55 +120,39 @@ export class AddfactureProformaComponent implements OnInit {
     }
   }
 
-  // Modification de la méthode navigateBack() dans le composant d'aperçu
   navigateBack() {
-    // Ne pas effacer l'état ici
     this.router.navigate(['/addfacture-proforma']);
   }
 
-  // Toggle remise / TVA
-  // onToggleRemiseTVA() {
-  //   if (!this.remiseTVAActive) {
-  //     this.remisePourcentage = 0;
-  //     this.tva = 0;
-  //   }
-  // }
-
-  // onToggleRemiseTVA() {}
-
-  // Toggle remise / TVA
   onToggleRemise() {
     if (!this.activeRemise) {
-      this.remisePourcentage = 0; // Réinitialise si désactivé
+      this.remisePourcentage = 0;
     }
   }
-  
+
   onToggleTVA() {
     if (!this.activeTva) {
-      this.tva = 0; // Réinitialise si désactivé
+      this.tva = 0;
     }
   }
+
   onRemiseChange() {
-    // Force la mise à jour des valeurs
     this.remisePourcentage = Number(this.remisePourcentage);
   }
 
-  // Calcul du montant de la remise
   getMontantRemise(): number {
     return (this.getTotalHT() * this.remisePourcentage) / 100;
   }
 
-  // Calcul du montant HT après remise
   getTotalApresRemise(): number {
     return this.getTotalHT() - this.getMontantRemise();
   }
 
-  // Exemple pour la TVA
   getMontantTVA(): number {
     return this.activeTva ? (this.getTotalApresRemise() * 0.18) : 0;
   }
 
-  getTotalCommercial() : number {
+  getTotalCommercial(): number {
     return this.getTotalApresRemise();
   }
 
@@ -171,45 +160,14 @@ export class AddfactureProformaComponent implements OnInit {
     return this.getTotalApresRemise() + this.getMontantTVA();
   }
 
-  // ajouterLigneFacture(index: number) {
-  //   const ligne = this.inputLignes[index];
-    
-  //   if (ligne.produitId && ligne.quantite > 0) {
-  //     // Vérifier si le produit existe déjà dans la liste confirmée
-  //     const produitExiste = this.confirmedLignes.some(
-  //       l => l.produitId === ligne.produitId
-  //     );
-  
-  //     if (produitExiste) {
-  //       this.showDuplicatePopup = true; // Afficher le popup
-  //       return; // Ne pas ajouter le produit
-  //     }
-  
-  //     const nouvelleLigne = {
-  //       ...ligne,
-  //       montantTotal: this.getMontantTotal(ligne)
-  //     };
-      
-  //     this.confirmedLignes.push(nouvelleLigne);
-  //     // Réinitialiser la ligne d'entrée après ajout
-  //     this.inputLignes = [{ produitId: null, quantite: 1 }];
-      
-  //     this.confirmedLignes = [...this.confirmedLignes];
-  //   }
-  // }
-  
-
   updateCalculs() {
-    // Force la mise à jour des valeurs
     this.inputLignes = [...this.inputLignes];
     this.confirmedLignes = [...this.confirmedLignes];
   }
 
-  // Méthode pour fermer le popup
   closePopup() {
     if (this.duplicateIndex !== null) {
       const idx = this.duplicateIndex;
-      // On remet la ligne à zéro
       this.inputLignes[idx] = {
         produitId: null,
         quantite: 1,
@@ -218,21 +176,18 @@ export class AddfactureProformaComponent implements OnInit {
       };
       this.duplicateIndex = null;
     }
-  
     this.showDuplicatePopup = false;
-    // Pour forcer la MAJ de l’affichage
     this.updateCalculs();
     this.cdr.detectChanges();
-  }     
-
-  trackByFn(index: number, item: any): number {
-    return index; // ou un identifiant unique si disponible
   }
 
-  // Supprimer ligne
+  trackByFn(index: number, item: any): number {
+    return index;
+  }
+
   supprimerLigneConfirmee(index: number) {
     this.confirmedLignes.splice(index, 1);
-    this.confirmedLignes = [...this.confirmedLignes]; // Force la mise à jour
+    this.confirmedLignes = [...this.confirmedLignes];
   }
 
   getProduitNom(produitId: number | null): string {
@@ -241,36 +196,26 @@ export class AddfactureProformaComponent implements OnInit {
     return produit?.nom || '';
   }
 
-  // goToFacture() {
-  //   this.router.navigate(['/facture-proforma']);
-  // }
-
   goToFacture() {
-    // Réinitialiser tous les champs
     this.description = '';
     this.typeDestinataire = 'client';
     this.selectedClientId = null;
     this.selectedEntrepriseId = null;
     this.selectedEntreprise = null;
-    this.inputLignes = [{ 
-      produitId: null, 
+    this.inputLignes = [{
+      produitId: null,
       quantite: 0,
-      ligneDescription: null ,
+      ligneDescription: null,
       isDuplicate: false,
     }];
     this.confirmedLignes = [];
     this.activeRemise = false;
     this.remisePourcentage = 0;
     this.activeTva = false;
-    
-    // Nettoyer le state sauvegardé
     this.formStateService.clearState();
-    
-    // Navigation
     this.router.navigate(['/facture-proforma']);
   }
 
-  // Liste Clients
   getListClients() {
     const token = localStorage.getItem('authToken');
     if (token) {
@@ -279,10 +224,7 @@ export class AddfactureProformaComponent implements OnInit {
           this.clients = data.map(client => ({
             ...client,
             entrepriseClient: client.entrepriseClient
-              ? {
-                  id: client.entrepriseClient.id,
-                  nom: client.entrepriseClient.nom
-                }
+              ? { id: client.entrepriseClient.id, nom: client.entrepriseClient.nom }
               : null
           })).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
           this.totalClients = this.clients.length;
@@ -295,9 +237,8 @@ export class AddfactureProformaComponent implements OnInit {
     }
   }
 
-  // Liste Entreprises
   getListEntreprise() {
-    const token = this.usersService.getToken(); 
+    const token = this.usersService.getToken();
     if (token) {
       this.clientService.getListEntreprises().subscribe({
         next: (data) => {
@@ -309,8 +250,7 @@ export class AddfactureProformaComponent implements OnInit {
       console.error('Token manquant pour entreprises');
     }
   }
-  
-  // Liste Produits
+
   getProduits() {
     const token = localStorage.getItem('authToken');
     if (token && this.userEntrepriseId) {
@@ -318,51 +258,35 @@ export class AddfactureProformaComponent implements OnInit {
         next: (data: Produit[]) => {
           console.log('Produits récupérés :', data);
           this.produits = data;
-          // if (this.lignesFacture.length === 0) {
-          //   this.lignesFacture.push({ produitId: data[0]?.id || 0, quantite: 1 });
-          // }
         },
         error: (err) => console.error('Erreur récupération produits :', err)
       });
     }
   }
 
-  // getStockActuel(produitId: number | null): number {
-  //   if (!produitId) return 0;
-  //   const produit = this.produits.find(p => p.id === produitId);
-  //   return produit?.quantite ?? 0;
-  // }
-
-  // Récupère le prix unitaire d'un produit
   getPrixVente(produitId: number | null): number {
     if (!produitId) return 0;
     const produit = this.produits.find(p => p.id === produitId);
     return produit?.prixVente || 0;
   }
 
-  // Calcule le montant total pour une ligne
   getMontantTotal(ligne: any): number {
     const prix = this.getPrixVente(ligne.produitId);
     return prix * (ligne.quantite || 0);
   }
 
   getTotalHT(): number {
-    // Calcul des lignes confirmées
-    const totalConfirmed = this.confirmedLignes.reduce((total, ligne) => 
+    const totalConfirmed = this.confirmedLignes.reduce((total, ligne) =>
       total + this.getMontantTotal(ligne), 0);
-    
-    // Calcul des lignes en cours d'édition
     const totalInput = this.inputLignes.reduce((total, ligne) => {
       if (ligne.produitId && ligne.quantite > 0) {
         return total + this.getMontantTotal(ligne);
       }
       return total;
     }, 0);
-  
     return totalConfirmed + totalInput;
   }
 
-  // Création de facture
   creerFactureProforma() {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -377,79 +301,47 @@ export class AddfactureProformaComponent implements OnInit {
     }
 
     const allLignes = [...this.confirmedLignes];
-
     const currentLine = this.inputLignes[0];
     if (currentLine.produitId && currentLine.quantite > 0) {
-      // Vérifier si le produit existe déjà
       const produitExiste = allLignes.some(l => l.produitId === currentLine.produitId);
-      
       if (produitExiste) {
         this.showDuplicatePopup = true;
         return;
       }
-      
       allLignes.push(currentLine);
     }
 
-    // Vérifier qu'il y a au moins une ligne valide
     if (allLignes.length === 0) {
       alert('Ajoutez au moins un produit');
       return;
     }
 
-  const dateSeule = this.dateFacture.includes('T')
-  ? this.dateFacture.split('T')[0]
-  : this.dateFacture;
+    const dateSeule = this.dateFacture.includes('T')
+      ? this.dateFacture.split('T')[0]
+      : this.dateFacture;
 
-const facture: any = {
-  description: this.description,
-  lignesFacture: allLignes.map(ligne => ({
-    produit: { id: ligne.produitId },
-    quantite: ligne.quantite,
-    ligneDescription: ligne.ligneDescription,
-  }))
-};
+    const facture: any = {
+      description: this.description,
+      lignesFacture: allLignes.map(ligne => ({
+        produit: { id: ligne.produitId },
+        quantite: ligne.quantite,
+        ligneDescription: ligne.ligneDescription,
+      }))
+    };
 
-// Inclure dateFacture uniquement si renseignée
-if (this.dateFacture) {
-  facture.dateFacture = dateSeule; // Garde le format ISO: yyyy-MM-dd
-}
-
-console.log('dateFacture raw =', this.dateFacture);
-console.log('dateFacture envoyée =', facture.dateFacture);
-
+    if (this.dateFacture) {
+      facture.dateFacture = dateSeule;
+    }
 
     if (this.typeDestinataire === 'client' && this.selectedClientId) {
-    facture.client = { id: this.selectedClientId };
-  } else if (this.typeDestinataire === 'entreprise' && this.selectedEntrepriseId) {
-    facture.entrepriseClient = { id: this.selectedEntrepriseId };
-  } else {
-    console.error('Destinataire non spécifié');
-    return;
-  }
+      facture.client = { id: this.selectedClientId };
+    } else if (this.typeDestinataire === 'entreprise' && this.selectedEntreprise) {
+      facture.entrepriseClient = { id: this.selectedEntreprise.id };
+    } else {
+      console.error('Destinataire non spécifié');
+      return;
+    }
 
-    // // Appel du service avec 4 paramètres
-    // this.factureProFormaService.creerFactureProforma(
-    //   facture,
-    //   this.activeRemise ? this.remisePourcentage : undefined,
-    //   this.activeTva,
-    //   (this.activeRemise || this.activeTva)
-    // ).subscribe({
-    //   next: (res) => {
-    //     console.log('Facture créée avec succès:', res);
-    //     this.router.navigate(['/facture-proforma']);
-    //   },
-    //   error: (err) => console.error('Erreur création facture :', err)
-    // });
-
-    this.confirmedLignes = [];
-    this.inputLignes = [{
-      produitId: null, quantite: 1,
-      ligneDescription: null,
-      isDuplicate: false,
-    }];
-
-    // Par (avec les vrais paramètres) :
     this.factureProFormaService.creerFactureProforma(
       facture,
       this.activeRemise ? this.remisePourcentage : undefined,
@@ -459,13 +351,16 @@ console.log('dateFacture envoyée =', facture.dateFacture);
       next: (res) => {
         console.log('Facture créée avec succès:', res);
         this.formStateService.clearState();
-        // Réinitialisation de ton formulaire si besoin
         this.confirmedLignes = [];
-        this.inputLignes = [{ produitId: null, quantite: 1, ligneDescription: null, isDuplicate: false }];
+        this.inputLignes = [{
+          produitId: null,
+          quantite: 1,
+          ligneDescription: null,
+          isDuplicate: false
+        }];
         this.router.navigate(['/facture-proforma']);
       },
       error: (err) => {
-        // choix 2 : récupérer le message même si c’est une String brute
         const serverMessage = typeof err.error === 'string'
           ? err.error
           : err.error?.message;
@@ -484,9 +379,7 @@ console.log('dateFacture envoyée =', facture.dateFacture);
       next: (user) => {
         this.nomEntreprise = user.nomEntreprise;
         this.userEntrepriseId = user.entrepriseId;
-  
         console.log("Infos utilisateur récupérées :", user);
-  
         this.getProduits();
       },
       error: (err) => {
@@ -495,46 +388,38 @@ console.log('dateFacture envoyée =', facture.dateFacture);
     });
   }
 
-
-  // Modifiez la méthode on Produit Change
   onProduitChange(produitId: number | null, ligne: any, index: number) {
     ligne.produitId = produitId;
     ligne.isDuplicate = false;
-  
+
     if (produitId) {
-      // Recherche du doublon
       const isInConfirmed = this.confirmedLignes.some(l => l.produitId === produitId);
-      const isInInput     = this.inputLignes.some((l, i) => i !== index && l.produitId === produitId);
-  
+      const isInInput = this.inputLignes.some((l, i) => i !== index && l.produitId === produitId);
+
       if (isInConfirmed || isInInput) {
         this.duplicateIndex = index;
         this.showDuplicatePopup = true;
-  
-        // On décale à la prochaine boucle d'événement la remise à null
         setTimeout(() => {
           ligne.produitId = null;
           ligne.ligneDescription = null;
           this.updateCalculs();
           this.cdr.detectChanges();
         }, 0);
-  
         return;
       }
-  
-      // si pas doublon, on récupère la description
+
       const produit = this.produits.find(p => p.id === produitId);
       ligne.ligneDescription = produit?.description || null;
     } else {
       ligne.ligneDescription = null;
     }
-  
-    this.updateCalculs();
-  }  
 
-  // Modifiez ajouter Ligne Facture pour une vérification supplémentaire
+    this.updateCalculs();
+  }
+
   ajouterLigneFacture(index: number) {
     const ligne = this.inputLignes[index];
-    
+
     if (ligne.produitId && ligne.quantite > 0) {
       const allLignes = [...this.confirmedLignes, ...this.inputLignes];
       const produitExiste = allLignes.filter(l => l !== ligne)
@@ -548,22 +433,18 @@ console.log('dateFacture envoyée =', facture.dateFacture);
         return;
       }
 
-      this.confirmedLignes.push({...ligne});
+      this.confirmedLignes.push({ ...ligne });
       this.inputLignes = [{
         produitId: null,
         quantite: 1,
         ligneDescription: null,
         isDuplicate: false
       }];
+      this.productControl.setValue(null); // Réinitialiser l'autocomplete
     }
   }
 
-  // apercuFactureProforma(): void {
-  //   this.router.navigate(['/facture-proforma-apercu']);
-  // }
-
   apercuFactureProforma(): void {
-    // Sauvegarder l'état actuel
     this.formStateService.saveState({
       typeDestinataire: this.typeDestinataire,
       selectedClientId: this.selectedClientId,
@@ -576,24 +457,22 @@ console.log('dateFacture envoyée =', facture.dateFacture);
       activeTva: this.activeTva
     });
 
-    // 1) Construire l'objet FactureProForma en mémoire
     const lignes = [
       ...this.confirmedLignes.map(l => ({
         produit: {
           id: l.produitId!,
-          nom: this.getProduitNom(l.produitId!)   // ← AJOUTÉ
+          nom: this.getProduitNom(l.produitId!)
         },
         quantite: l.quantite,
         ligneDescription: l.ligneDescription,
         prixUnitaire: this.getPrixVente(l.produitId),
       })),
-      // si inputLignes non vide et valide, on peut l’ajouter
       ...this.inputLignes
         .filter(l => l.produitId && l.quantite > 0)
         .map(l => ({
           produit: {
             id: l.produitId!,
-            nom: this.getProduitNom(l.produitId!) // ← AJOUTÉ
+            nom: this.getProduitNom(l.produitId!)
           },
           quantite: l.quantite,
           ligneDescription: l.ligneDescription,
@@ -616,18 +495,11 @@ console.log('dateFacture envoyée =', facture.dateFacture);
         ? { id: this.selectedClientId, nomComplet: this.getClientName(this.selectedClientId) }
         : undefined,
       entrepriseClient: this.typeDestinataire === 'entreprise' && this.selectedEntreprise
-      ? {
-          id: this.selectedEntreprise.id,
-          nom: this.selectedEntreprise.nom
-        }
-      : undefined,
-      
+        ? { id: this.selectedEntreprise.id, nom: this.selectedEntreprise.nom }
+        : undefined,
     };
 
-    // 2) Pousser vers le service
     this.previewService.setPreview(preview);
-
-    // 3) Naviguer vers l’aperçu
     this.router.navigate(['/facture-proforma-apercu']);
   }
 
@@ -635,24 +507,74 @@ console.log('dateFacture envoyée =', facture.dateFacture);
     const c = this.clients.find(c => c.id === id);
     return c ? c.nomComplet : '';
   }
+
   private getEntrepriseName(id: number): string {
     const e = this.entreprises.find(e => e.id === id);
     return e ? e.nom : '';
   }
 
   onProduitAjoute(nouveauProduit: Produit) {
-    // Ajouter le produit réel à la liste
     this.produits.push(nouveauProduit);
-    
-    // Sélectionner automatiquement le nouveau produit
     if (this.inputLignes.length > 0) {
       this.inputLignes[0].produitId = nouveauProduit.id;
-      
-      // Pré-remplir la description
       this.inputLignes[0].ligneDescription = nouveauProduit.description;
-      
-      // Forcer la mise à jour de l'interface
+      this.productControl.setValue(nouveauProduit); // Pré-remplir l'autocomplete
       this.cdr.detectChanges();
+    }
+  }
+
+  // Méthode appelée au focus
+  onFocus() {
+    this.productControl.setValue('');
+  }
+
+  // Méthodes pour mat-autocomplete
+  // private _filterProduits(name: string): Produit[] {
+  //   const filterValue = name.toLowerCase();
+  //   return this.produits.filter(produit => produit.nom.toLowerCase().includes(filterValue));
+  // }
+
+  // Logique de filtrage
+  private _filterProduits(name: string): Produit[] {
+    if (!name) {
+      return this.produits.slice();
+    }
+    const filterValue = name.toLowerCase();
+    return this.produits.filter(produit => produit.nom.toLowerCase().includes(filterValue));
+  }
+
+  // displayProduit(produit: Produit): string {
+  //   return produit ? produit.nom : '';
+  // }
+  
+  // Affichage du nom du produit dans l'input
+  displayProduit(produit: Produit): string {
+    return produit && produit.nom ? produit.nom : '';
+  }
+
+  onProduitSelected(event: any) {
+    const selectedProduit = event.option.value;
+    if (selectedProduit && selectedProduit.id) {
+      const ligne = this.inputLignes[0];
+      ligne.produitId = selectedProduit.id;
+      ligne.isDuplicate = false;
+
+      const isInConfirmed = this.confirmedLignes.some(l => l.produitId === selectedProduit.id);
+      if (isInConfirmed) {
+        this.duplicateIndex = 0;
+        this.showDuplicatePopup = true;
+        setTimeout(() => {
+          ligne.produitId = null;
+          ligne.ligneDescription = null;
+          this.productControl.setValue(null);
+          this.updateCalculs();
+          this.cdr.detectChanges();
+        }, 0);
+        return;
+      }
+
+      ligne.ligneDescription = selectedProduit.description || null;
+      this.updateCalculs();
     }
   }
 

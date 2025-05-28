@@ -640,3 +640,14 @@ input:checked + .slider:before {
 .boutique-selection-panel {
   z-index: 1001 !important;
 }
+
+mat-option {
+    align-items: center;
+    background: rgba(0,0,0,0);
+    /* margin: 3px; */
+    /* background: red; */
+    /* height: 0px; */
+    font-size: 13px;
+    min-height: 30px!important;
+    padding: 0 12px;
+}
