@@ -22,6 +22,7 @@ import { MatDialogModule }          from '@angular/material/dialog';
 import { MatButtonModule }          from '@angular/material/button';
 import { CodeInputModule }          from 'angular-code-input';
 import { DragDropModule }           from '@angular/cdk/drag-drop';
+import { MatSelectModule } from '@angular/material/select';
 
 registerLocaleData(localeFr);
 
@@ -46,7 +47,8 @@ registerLocaleData(localeFr);
     MatDialogModule,
     MatButtonModule,
     CodeInputModule,
-    DragDropModule
+    DragDropModule,
+    MatSelectModule
   ],
   providers: [
     provideHttpClient(),

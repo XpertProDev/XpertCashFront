@@ -24,6 +24,7 @@ export interface Produit {
   lastUpdated?: string;
   boutiqueId: number | null;
   nomBoutique?: string;
+  typeProduit?: string;
   
   boutiques?: Boutique[];
 }

@@ -89,9 +89,9 @@ export class ProfilComponent  implements OnInit{
     this.isPasswordFormVisible = !this.isPasswordFormVisible;
   }
 
-    toggleNomBoutiqueForm() {
-    this.isNomBoutiqueFormVisible = !this.isNomBoutiqueFormVisible;
-  }
+  // toggleNomBoutiqueForm() {
+  //   this.isNomBoutiqueFormVisible = !this.isNomBoutiqueFormVisible;
+  // }
 
   toggleUserForm() {
     this.isUserFormVisible = !this.isUserFormVisible;

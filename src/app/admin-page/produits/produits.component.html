@@ -74,6 +74,7 @@
         <th>Coût du produit</th>
         <!-- <th style="background-color: #0671e44a;">En stock</th> -->
         <th>Unité</th>
+        <th>Type</th>
         <ng-container *ngIf="!selectedBoutique">
           <th>Boutique</th>
         </ng-container>
@@ -106,6 +107,7 @@
         <td>{{ product.prixAchat | customNumber }}</td>
         <!-- <td style="background-color: #0671e410;" [innerHTML]="highlightMatch(product.quantite.toString())"></td> -->
         <td>{{ product.nomUnite || 'Non unité'}}</td>
+        <td>{{ product.typeProduit || 'type Produit'}}</td>
         <!-- <td>
           <span *ngIf="product.boutiques && product.boutiques.length > 0">
             {{ product.boutiques.map(b => b.nom).join(', ') }}

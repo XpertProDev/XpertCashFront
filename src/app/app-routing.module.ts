@@ -314,6 +314,12 @@ const routes: Routes = [
         path: 'account-settings',
         loadComponent: () => import('./admin-page/account-settings/account-settings.component').then(m => m.AccountSettingsComponent),
         canActivate: [authGuard]
+      },
+      // Facture style
+      {
+        path: 'style-facture',
+        loadComponent: () => import('./admin-page/facture-proforma/style-facture/style-facture.component').then(m => m.StyleFactureComponent),
+        canActivate: [authGuard]
       }
 
     ]
