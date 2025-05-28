@@ -1776,7 +1776,7 @@ input.input_focus_type:focus {
 }
 
 .note-list {
-  max-height: 400px;
+  max-height: 460px;
   overflow-y: auto;
   padding-right: 8px;
   margin: 0;
@@ -1793,7 +1793,7 @@ input.input_focus_type:focus {
   padding: 1rem;
   border: 1px solid #eee;
   border-radius: 6px;
-  margin-bottom: 0.5rem;
+  margin-bottom: 30px;
   background-color: #f7f1ea;
 }
 
@@ -1820,6 +1820,7 @@ input.input_focus_type:focus {
   z-index: 10;
   min-width: 110px;
   font-size: 10px;
+
 }
 
 .note-menu button {
@@ -1891,17 +1892,21 @@ input.input_focus_type:focus {
 }
  
 .confirm-dialog {
-  margin-top: 8px;
+  position: absolute;
+  left: -41px;
+  top: -21px;
+  width: 150px;
   padding: 8px;
   background-color: #fff3f3;
   border: 1px solid #f44336;
   border-radius: 4px;
   font-size: 6px;
+  z-index: 10;
 }
 
 .confirm-dialog p {
   margin: 0 0 8px 0;
-  font-size: 7px;
+  font-size: 10px;
 }
 
 /* Conteneur des boutons en flex row */
@@ -1926,6 +1931,8 @@ input.input_focus_type:focus {
 
 .confirm-dialog {
   display: block;
+  font-size: 9px;
+  justify-items: center;
 }
 
 .confirm-dialog-buttons {
@@ -1938,7 +1945,15 @@ input.input_focus_type:focus {
     color: #ff2828;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    font-size: 8px;
+    justify-content: center;
+    font-size: 9px;
 }
 
+.meta-numeroIdentifiant{
+  right: 5%;
+    position: absolute;
+    bottom: 2px;
+    color: #4099ff;
+    font-size: 10px;
+    font-weight: bolder;
+}

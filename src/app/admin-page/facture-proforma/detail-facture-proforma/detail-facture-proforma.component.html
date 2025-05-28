@@ -509,7 +509,7 @@
                             <!-- Titre + icône -->
                             <div class="title_historique" style="display: flex; align-items: center; justify-content: space-between;">
                                 <h6 style="margin: 0;">Historique des actions</h6>
-                                <i class="ri-sticky-note-line" 
+                                <i class="ri-file-edit-line" 
                                     style="font-size: 1.1rem; cursor: pointer; color: #555;"
                                     (click)="toggleNotebook()"
                                     title="Voir le cahier de notes">
@@ -573,27 +573,33 @@
                                             ></i>
 
                                             <!-- Menu déroulant -->
-                                            <div class="note-menu" *ngIf="activeMenuIndex === i">
-                                                <button (click)="editNote(i)">✏️ Modifier</button>
-                                                <button (click)="askDelete(i)">🗑️ Supprimer</button>
-                                               <div *ngIf="confirmDeleteIndex === i" class="confirm-dialog">
+                                         <div class="note-menu" *ngIf="activeMenuIndex === i">
+                                            <button (click)="editNote(i)">✏️ Modifier</button>
+                                            <ng-container *ngIf="confirmDeleteIndex === i; else showDeleteButton">
+                                                <div class="confirm-dialog">
                                                     <p>Voulez-vous vraiment supprimer cette note ?</p>
                                                     <div class="confirm-dialog-buttons">
                                                         <button (click)="confirmDelete(i)">Oui</button>
                                                         <button (click)="cancelDelete()">Non</button>
                                                     </div>
                                                 </div>
+                                            </ng-container>
+                                            <ng-template #showDeleteButton>
+                                                <button (click)="askDelete(i)">🗑️ Supprimer</button>
+                                            </ng-template>
+                                        </div>
 
-                                            </div>
                                         </div>
                                         <!-- Contenu de la note -->
-                                        <div class="note-text">{{ note.content }}</div>
-                                        <div class="note-meta">
-                                            <span class="meta-date">{{ note.dateCreation | date:'dd/MM/yyyy HH:mm' }}</span>
+                                        
 
-                                            •
+                                        <div class="note-text">{{ note.content }}</div>
+
+                                        <div class="note-meta">
+                                            <span *ngIf="note.dateCreation" class="meta-date">{{ note.dateCreation | date:'dd/MM/yyyy HH:mm' }} ⦿ </span>
                                             <span class="meta-author">{{ note.auteur }}</span>
                                             <span *ngIf="note.modifiee" class="badge-modified">Modifiée</span>
+                                            <span class="meta-numeroIdentifiant">{{ note.numeroIdentifiant }}</span>
                                         </div>
                                         </div>
                                     </li>
