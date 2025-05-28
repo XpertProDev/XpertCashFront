@@ -1666,18 +1666,17 @@ loadNotes() {
 
 toggleNotebook() {
   this.isNotebookOpen = !this.isNotebookOpen;
+  this.activeMenuIndex = null;
 }
   
   
  // Et dans la classe
 toggleAddNoteInput() {
   this.isAddNoteInputVisible = !this.isAddNoteInputVisible;
+  this.activeMenuIndex = null;
 }
 
 
-  closeNotebook() {
-    this.isNotebookOpen = false;
-  }
 
     addNote() {
     if (this.newNote.trim()) {
