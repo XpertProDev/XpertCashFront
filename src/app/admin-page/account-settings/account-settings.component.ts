@@ -28,7 +28,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class AccountSettingsComponent implements OnInit {
   // panelOpenState = false;
   form!: FormGroup;
-  logoUrl: string = 'assets/img/logo.jpeg';
+  // logo: string = 'assets/img/logo.jpeg';
+  logo: string | null = null; 
   selectedLogoFile: File | null = null;
   entrepriseId: number | null = null;
   isLoading: boolean = false;
@@ -103,10 +104,13 @@ export class AccountSettingsComponent implements OnInit {
           rccm: entreprise.rccm,
           nif: entreprise.nif,
           signataire: entreprise.signataire,
-          signataireNom: entreprise.signataireNom
+          signataireNom: entreprise.signataireNom,
+          logo: entreprise.logo
         });
         // Construire l'URL complète du logo
-        this.logoUrl = entreprise.logo ? `http://localhost:8080/${entreprise.logo}` : 'assets/img/logo.jpeg';
+        console.log('Logo path from server:', entreprise.logo);
+        // this.logoUrl = entreprise.logo ? `http://localhost:8080/${entreprise.logo}` : 'assets/img/logo.jpeg';
+        this.logo = 'http://localhost:8080' + entreprise.logo;
         this.cdRef.markForCheck();
       },
       error: (error) => {
@@ -140,9 +144,9 @@ export class AccountSettingsComponent implements OnInit {
             canvas.width = img.width * ratio;
             canvas.height = img.height * ratio;
             ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-            this.logoUrl = canvas.toDataURL('image/jpeg', 0.8);
+            this.logo = canvas.toDataURL('image/jpeg', 0.8);
           } else {
-            this.logoUrl = e.target.result;
+            this.logo = e.target.result;
           }
           this.cdRef.markForCheck();
           this.fileInput.nativeElement.value = '';
