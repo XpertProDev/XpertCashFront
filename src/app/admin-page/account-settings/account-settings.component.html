@@ -33,7 +33,7 @@
                         <div class="content_setting_facture">
                             <!-- // Facture de vue edit  -->
                             <div class="contenu_left_facture">
-                                <div class="facture_model">
+                                <div class="facture_model" title="Cliquer pour voir l'aperçu" (click)="openPreview()">
                                     <!-- // cadre de facture de model  -->
                                     <div class="content">
                                         <!-- // header apercu  -->
@@ -198,6 +198,23 @@
                                     <div class="titre_champ">
                                         <h6>Informations de coordonées</h6>
                                     </div>
+
+                                    <input type="file" 
+                                        accept="image/*" 
+                                        #fileInput 
+                                        (change)="onFileSelected($event)"
+                                        style="display: none;"
+                                        id="uniqueFileInputId">
+
+                                    <div class="champ_grid" style="margin: 10px 0 15px;">
+                                        <p style="margin: 0; font-size: 12px;">
+                                            Changer logo 
+                                            <a style="padding-left: 5px;" 
+                                                href="javascript:void(0)" 
+                                                (click)="fileInput.click()">
+                                                ICI
+                                            </a> </p>
+                                    </div>
                                 
                                     <div class="champ_grid">
                                         <!-- // Input de Nom entreprise  -->
@@ -243,23 +260,6 @@
                                             <input class="input_focus" type="telephone" formControlName="telephone" placeholder="00 00 00 00">
                                             <label class="label">Téléphone</label>
                                         </div>
-                                    </div>
-
-                                    <input type="file" 
-                                        accept="image/*" 
-                                        #fileInput 
-                                        (change)="onFileSelected($event)"
-                                        style="display: none;"
-                                        id="uniqueFileInputId">
-
-                                    <div class="champ_grid" style="margin: 10px 0 0;">
-                                        <p style="margin: 0;">
-                                            Changer logo 
-                                            <a style="padding-left: 5px;" 
-                                                href="javascript:void(0)" 
-                                                (click)="fileInput.click()">
-                                                ICI
-                                            </a> </p>
                                     </div>
 
                                     <!-- // Informations légales & bancaires  -->
@@ -367,4 +367,170 @@
         </div>
     </div>
 
+</div>
+
+
+<!-- Ajoutez ce popup à la fin de votre template -->
+<div *ngIf="showPreview" class="preview-overlay" (click)="closePreview()">
+  <div class="preview-content" (click)="$event.stopPropagation()">
+    <!-- <div class="preview-header">
+      <h3>Aperçu de la facture</h3>
+      <button mat-icon-button (click)="closePreview()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div> -->
+    <div class="facture_model_preview">
+      
+         <div class="preview-close" (click)="closePreview()">
+            <i class="ri-close-large-fill"></i>
+         </div>
+        <!-- // cadre de facture de model  -->
+        <div class="content">
+            <!-- // header apercu  -->
+            <div class="header_apercu">
+                <!-- // logo entreprise -->
+                <div class="logo_entreprise_preview">
+                    <img [src]="logo"  (error)="logo='http://localhost:8080/assets/img/logo.jpeg'"
+                    alt="Logo de l'entreprise">
+                </div>
+                <!-- entete entreprise  -->
+                <div class="entete_entreprise">
+                    <div class="content_entete content_entete_preview">
+                        <p class="para1 para_preview">{{ form.get('nom')?.value }}</p>
+                        <p class="para2 para_preview">Secterur: {{ form.get('secteur')?.value }}</p>
+                        <div class="para3 para_preview">Email : <a href="mail"> {{ form.get('email')?.value }}</a> Téléphone : {{ form.get('telephone')?.value }}</div>
+                    </div>
+                </div>
+            </div>
+            <!-- // Ligne  -->
+            <hr>
+            <hr>
+            <!-- // titre  -->
+            <div class="titre">
+                <!-- <h2>Facture proforma n˚{{ facture.numeroFacture || '000-00-2025' }}</h2> -->
+                <h2 style="font-size: 12px;">Facture proforma n˚<span style="color: #0000003e;">xxx-xx-xxxx</span></h2>
+            </div>
+            <!-- // date  -->
+            <div class="date">
+                <!-- <p>Bamako, le 12 Mai 2025</p> -->
+                <p style="font-size: 10px;">dd/MM/yyyy</p>
+            </div>
+
+            <!-- nom et object  -->
+            <div class="droit droit_preview">
+                <h4>Client : </h4> 
+                <p>Nom de client </p>
+            </div>
+
+            <!-- nom et object  -->
+            <div class="object droit_preview">
+                <h4>OBJECT :</h4>
+                <p>Une petite description de l'object</p>
+            </div>
+
+            <!-- // Table  -->
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="th">Désignation</th>
+                        <th class="th" style="width: 70px!important;">Description</th>
+                        <th class="th">PU</th>
+                        <th class="th">Quantité</th>
+                        <!-- <th>Durée</th> -->
+                        <th class="th">Montant (FCFA)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="td_left td">Produit nom</td>
+                        <td class="td_left td">Desc...</td>
+                        <td class="td">00</td>
+                        <td class="td">00</td>
+                        <!-- <td>15 000</td> -->
+                        <td class="td"> 0000</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                    <td class="td" colspan="4">Total HT</td>
+                    <td class="td">0000</td>
+                    </tr>
+                    <tr>
+                    <td class="td" colspan="4">Remise 0 %</td>
+                    <td class="td">
+                        <!-- {{ ((facture.totalHT * facture.remise/100) | customNumber) }} -->
+                        0000
+                    </td>
+                    </tr>
+                    <!-- Montant Commercial  -->
+                    <tr>
+                        <td class="td" colspan="4">Montant commercial</td>
+                        <td class="td">
+                        <!-- {{
+                            (facture.totalHT - (facture.totalHT * facture.remise / 100)) | customNumber
+                        }} -->
+                            0000
+                        </td>
+                    </tr>
+                    <!-- TVA à 18% sur le montant commercial -->
+                    <tr>
+                        <td class="td" colspan="4">TVA (18%)</td>
+                        <td class="td">
+                        <!-- {{
+                            ((facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) * 0.18) | customNumber
+                        }} -->
+                            0000
+                        </td>
+                    </tr>
+                    <tr>
+                    <td class="td" colspan="4">Montant TTC</td>
+                    <td class="td">
+                        <!-- {{ facture.totalFacture | customNumber }} -->
+                        0000
+                    </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- // contenu_bottom  -->
+            <div class="contenu_bottom">
+                <p style="font-size: 8px;"><span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>
+                Zero .....</p>
+            </div>
+
+            <!-- // sachet  -->
+            <div class="cachet_container">
+                <div></div>
+                <div class="cachet_preview">
+                    <h6>{{ form.get('signataire')?.value }}</h6>
+                    <h6 class="name_directeur_preview">{{ form.get('signataireNom')?.value }}</h6>
+                </div>
+            </div>
+        </div>
+
+        <!-- // Footer  -->
+        <div class="container_footer">
+            <div class="footer">
+                <!-- // Ligne  -->
+                <div class="container_footer">
+                    <div class="footer" style="line-height: 12px;">
+                        <!-- // Ligne  -->
+                        <hr>
+                        <p><strong style="font-size: 10px;">{{form.get('siteWeb')?.value }}</strong></p>
+                        <div>
+                            <em class="em_footer">
+                                NINA : {{form.get('nina')?.value }} ; RCCM : {{form.get('rccm')?.value }} ; NIF : {{form.get('nif')?.value }} ; Banque : {{form.get('banque')?.value }}
+                            </em>
+                        </div>
+                        <div>
+                            <em class="em_footer">
+                                Adresse : {{ form.get('adresse')?.value }} /{{ form.get('siege')?.value }}-{{ form.get('pays')?.value }}
+                            </em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
 </div>

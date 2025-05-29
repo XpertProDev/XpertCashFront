@@ -8,6 +8,7 @@ import {MatTabsModule} from '@angular/material/tabs';
 import { EntrepriseService } from '../SERVICES/entreprise-service';
 import { Entreprise } from '../MODELS/entreprise-model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-account-settings',
@@ -19,7 +20,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatTabsModule,
     MatExpansionModule, 
     MatFormFieldModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatIconModule
   ],
   templateUrl: './account-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +35,7 @@ export class AccountSettingsComponent implements OnInit {
   selectedLogoFile: File | null = null;
   entrepriseId: number | null = null;
   isLoading: boolean = false;
+  showPreview: boolean = false;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
 
@@ -122,6 +125,15 @@ export class AccountSettingsComponent implements OnInit {
   // Gestionnaire de clic pour le lien "ICI"
   onChangeLogoClick(): void {
     this.fileInput.nativeElement.click();
+  }
+
+  // Ajoutez ces méthodes pour gérer le popup
+  openPreview(): void {
+    this.showPreview = true;
+  }
+
+  closePreview(): void {
+    this.showPreview = false;
   }
 
   // Gestionnaire de sélection de fichier
