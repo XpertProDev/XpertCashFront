@@ -84,6 +84,10 @@ export class AddfactureProformaComponent implements OnInit {
   showProductFormPanel: boolean = false;
   panelAnimationState: 'hidden' | 'visible' = 'hidden';
 
+  clientControl = new FormControl();
+  filteredClients: Observable<Clients[]>;
+  showClientFormPanel: boolean = false;
+
   constructor(
     private router: Router,
     private clientService: ClientService,
@@ -100,6 +104,45 @@ export class AddfactureProformaComponent implements OnInit {
       map(value => typeof value === 'string' ? value : value?.nom),
       map(name => name ? this._filterProduits(name) : this.produits.slice())
     );
+
+    this.filteredClients = this.clientControl.valueChanges.pipe(
+      startWith(''),
+      map(value => typeof value === 'string' ? value : value?.nomComplet),
+      map(name => name ? this._filterClients(name) : this.clients.slice())
+    );
+  }
+
+  private _filterClients(name: string): Clients[] {
+    const filterValue = name.toLowerCase();
+    return this.clients.filter(client => 
+      client.nomComplet.toLowerCase().includes(filterValue) ||
+      (client.entrepriseClient?.nom.toLowerCase().includes(filterValue))
+    );
+  }
+
+  displayClient(client: Clients): string {
+    if (!client) return '';
+    return client.entrepriseClient 
+      ? `${client.nomComplet} - ${client.entrepriseClient.nom}`
+      : client.nomComplet;
+  }
+
+  onClientSelected(event: MatAutocompleteSelectedEvent) {
+    this.selectedClientId = event.option.value.id;
+  }
+
+  onClientFocus() {
+    if (!this.clientControl.value) {
+      this.clientControl.setValue('');
+    }
+  }
+
+  openClientFormPanel() {
+    this.showClientFormPanel = true;
+  }
+
+  closeClientFormPanel() {
+    this.showClientFormPanel = false;
   }
 
   async ngOnInit(): Promise<void> {
@@ -121,6 +164,10 @@ export class AddfactureProformaComponent implements OnInit {
       this.activeRemise = savedState.activeRemise;
       this.remisePourcentage = savedState.remisePourcentage;
       this.activeTva = savedState.activeTva;
+      
+      if (savedState.clientControl) {
+        this.clientControl.setValue(savedState.clientControl);
+      }
     }
   }
 
@@ -147,6 +194,7 @@ export class AddfactureProformaComponent implements OnInit {
   getMontantRemise(): number {
     return (this.getTotalHT() * this.remisePourcentage) / 100;
   }
+  
 
   getTotalApresRemise(): number {
     return this.getTotalHT() - this.getMontantRemise();
@@ -231,6 +279,8 @@ export class AddfactureProformaComponent implements OnInit {
               ? { id: client.entrepriseClient.id, nom: client.entrepriseClient.nom }
               : null
           })).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+
+          this.clientControl.setValue(null);
           this.totalClients = this.clients.length;
           this.noClientsAvailable = this.clients.length === 0;
         },
@@ -458,7 +508,8 @@ export class AddfactureProformaComponent implements OnInit {
       confirmedLignes: this.confirmedLignes,
       activeRemise: this.activeRemise,
       remisePourcentage: this.remisePourcentage,
-      activeTva: this.activeTva
+      activeTva: this.activeTva,
+      clientControl: this.clientControl.value
     });
 
     const lignes = [

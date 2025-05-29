@@ -34,13 +34,33 @@
 
                       <div class="champ_grid">
                         <!-- Select Client -->
-                        <select *ngIf="typeDestinataire === 'client'" class="input_focus" [(ngModel)]="selectedClientId" name="client_id" required>
-                          <option [ngValue]="null">Sélectionner un client</option>
-                          <option *ngFor="let client of clients" [ngValue]="client.id">
-                            {{ client.nomComplet }} <span *ngIf="client.entrepriseClient"> - {{ client.entrepriseClient.nom }}</span>
-                          </option>
-                        </select>
-
+                        <!-- Remplacez le bloc select client par ceci -->
+                        <div *ngIf="typeDestinataire === 'client'">
+                          <div class="champ_input" style="margin-right: 15px;">
+                            <input
+                              matInput
+                              [formControl]="clientControl"
+                              [matAutocomplete]="autoClients"
+                              placeholder="Sélectionner un client"
+                              class="input_focus"
+                              (focus)="onClientFocus()"
+                            >
+                            <label for="description" class="label">Clients</label>
+                            <mat-autocomplete #autoClients="matAutocomplete" [displayWith]="displayClient" (optionSelected)="onClientSelected($event)">
+                              <mat-option [value]="null">
+                                <div style="display: flex; align-items: center; color: #0672E4;" (click)="openClientFormPanel()">
+                                  <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                                  <span style="margin-left: 8px;">Créer un client</span>
+                                </div>
+                              </mat-option>
+                              <mat-option *ngFor="let client of filteredClients | async" [value]="client">
+                                <div class="option-content">
+                                  {{ client.nomComplet }} <span *ngIf="client.entrepriseClient">- {{ client.entrepriseClient.nom }}</span>
+                                </div>
+                              </mat-option>
+                            </mat-autocomplete>
+                          </div>
+                        </div>
 
                         <select *ngIf="typeDestinataire === 'entreprise'"
                                 [(ngModel)]="selectedEntreprise"
