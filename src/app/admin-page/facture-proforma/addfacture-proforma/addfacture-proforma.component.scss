@@ -1,6 +1,7 @@
 .container_global {
   display: grid;
   grid-template-columns: 72% 28%;
+  position: relative;
 }
 
 table {
@@ -599,4 +600,68 @@ input:checked + .slider:before {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(5px); }
   75% { transform: translateX(-5px); }
+}
+
+// cadre add produit
+.container_cadre_facture {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end; // Aligner à droite
+  // z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s;
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+  }
+
+  .content_cadre_right {
+    width: 700px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 2;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  // Animation d'entrée
+  &.slide-in .content_cadre_right {
+    transform: translateX(0);
+  }
+
+  // Animation de sortie
+  &.slide-out .content_cadre_right {
+    transform: translateX(100%);
+  }
+}
+
+
+mat-option {
+    align-items: center;
+    background: rgba(0,0,0,0);
+    /* margin: 3px; */
+    /* background: red; */
+    /* height: 0px; */
+    font-size: 13px;
+    min-height: 30px!important;
+    padding: 0 12px;
 }

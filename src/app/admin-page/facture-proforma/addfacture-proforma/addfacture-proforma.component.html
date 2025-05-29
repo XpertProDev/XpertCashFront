@@ -159,21 +159,30 @@
                               <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of inputLignes; let i = index; trackBy: trackByFn">
                                   <!-- // Produit  -->
                                   <td>
-                                      <div class="champ_input" style="margin-right: 15px;">
-                                        <select
-                                          name="produit{{i}}"
-                                          class="input_focus_type input_focus_type_select"
-                                          [ngClass]="{ 'duplicate': ligne.isDuplicate }"
-                                          [(ngModel)]="ligne.produitId"
-                                          (ngModelChange)="onProduitChange($event, ligne, i)"
-                                          [ngModelOptions]="{ standalone: true }"
-                                          required>
-                                          <option [ngValue]="null">Sélectionner un produit</option>
-                                          <option *ngFor="let produit of produits" [ngValue]="produit.id">
+                                    <div class="champ_input" style="margin-right: 15px;">
+                                      <input
+                                        matInput
+                                        [formControl]="productControl"
+                                        [matAutocomplete]="autoProduits"
+                                        placeholder="Sélectionner un produit"
+                                        class="input_focus_type input_focus_type_select" 
+                                        [ngClass]="{ 'duplicate': inputLignes[0].isDuplicate }"
+                                        (focus)="onFocus()" 
+                                      >
+                                      <mat-autocomplete #autoProduits="matAutocomplete" [displayWith]="displayProduit" (optionSelected)="onProduitSelected($event)">
+                                        <mat-option [value]="null">
+                                          <div style="display: flex; align-items: center; color: #0672E4;" (click)="openProductFormPanel()">
+                                            <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                                            <span style="margin-left: 8px;">Créer un produit</span>
+                                          </div>
+                                        </mat-option>
+                                        <mat-option *ngFor="let produit of filteredProduits | async" [value]="produit">
+                                          <div class="option-content">
                                             {{ produit.nom }}
-                                          </option>
-                                        </select>
-                                      </div>
+                                          </div>
+                                        </mat-option>
+                                      </mat-autocomplete>
+                                    </div>
                                   </td>
                                   <!-- // Description -->
                                   <td>
@@ -202,8 +211,7 @@
                                         [value]="getPrixVente(ligne.produitId) | customNumber" 
                                         placeholder="Prix unitaire"
                                         readonly
-                                        style="cursor: no-drop;"
-                                      >
+                                        style="cursor: no-drop;">
                                     </div>
                                   </td>
                                   <!-- // Montant total -->
@@ -380,6 +388,24 @@
     </div>
   </div>
 
+  <!-- Modifier le conteneur du panneau -->
+  <div class="container_cadre_facture" 
+      [class.show]="showProductFormPanel"
+      [class.slide-in]="panelAnimationState === 'visible'"
+      [class.slide-out]="panelAnimationState === 'hidden'">
+    <div class="overlay" (click)="closeProductFormPanel()"></div>
+    <div class="content_cadre_right" (click)="$event.stopPropagation()">
+      <div class="cadre_right">
+        <div class="add_produit">
+          <app-produit-form 
+            (produitAjoute)="onProduitAjoute($event)"
+            (close)="closeProductFormPanel()">
+          </app-produit-form>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- Popup de duplication -->
@@ -397,3 +423,5 @@
     <button (click)="showExistingInvoiceError = false">OK</button>
   </div>
 </div>
+
+

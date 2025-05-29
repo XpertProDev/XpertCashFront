@@ -1,0 +1,540 @@
+<div class="container_global">
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Connexion en cours...</p>
+    </div>
+  </div>
+  
+
+  <div class="content_formulaire">
+
+    <div class="modal-body">
+
+      <form class="container_formulaire" [formGroup]="ajouteProduitForm">
+
+        <!-- Titre d'ajout de produits  -->
+        <div class="Title">
+          <h3>Ajouter des produits</h3>
+        </div>
+
+        <div class="form_left_right">
+
+          <!-- Formular ajouter produit  -->
+          <div class="formulaire">
+            
+            <!-- Les information des magasin  -->
+            <div class="information_cadre">
+              <div class="info_titre_input">
+                <h4>Boutique</h4>
+                <!-- Input de nom magasin  -->
+                <!-- <div class="champ_input">
+                  <input type="text" class="input_focus input_focus_petit" [value]="boutiqueName" disabled required id="nomMagasin" name="nomMagasin" placeholder="Saisis le nom de magasin">
+                  <label for="nomMagasin" class="label labelColor">Nom magasin</label>
+                </div> -->
+                <div class="double_input2">
+                  <div class="champ_input">
+                    <input autocomplete="off" 
+                           type="text" 
+                           placeholder="Saisis le nom de boutique"
+                           class="input_focus" 
+                           matInput 
+                           [formControl]="controlBoutique" 
+                           (click)="toggleBoutiqueSelectionPanel()"
+                           style="cursor: pointer;">
+                    <label for="boutiqueId" class="label">Boutique</label>
+                  
+                    <!-- Commenté pour désactiver l'autocomplete -->
+                    <!--
+                    <mat-autocomplete #autoBoutique="matAutocomplete" 
+                                     (optionSelected)="onBoutiqueSelected($event)" 
+                                     [displayWith]="displayFnBoutique">
+                      <mat-option (click)="toggleBoutiqueSelectionPanel()" class="select-option">
+                        <div style="display: flex; align-items: center; color: #0672E4;">
+                          <i class="ri-checkbox-multiple-line"></i>
+                          <span style="margin-left: 8px;">Sélectionner des boutiques</span>
+                        </div>
+                      </mat-option>
+                      
+                      <mat-option *ngFor="let street of filteredStreetsBoutique | async" [value]="street">
+                        {{ street }}
+                      </mat-option>
+                    </mat-autocomplete>
+                    -->
+                  
+                    <!-- Panel de sélection des boutiques -->
+                    <div class="boutique-selection-panel" *ngIf="showBoutiqueSelectionPanel">
+                      <div class="panel-header">
+                        <h4>Sélectionner des boutiques</h4>
+                        <button class="close-btn" (click)="toggleBoutiqueSelectionPanel()">&times;</button>
+                      </div>
+                      <div class="panel-body">
+                        <div *ngFor="let boutique of boutiquesList" class="boutique-item">
+                          <label>
+                            <input type="checkbox" 
+                                   [(ngModel)]="boutique.selected"
+                                   (change)="updateSelectedBoutiques()"
+                                   [ngModelOptions]="{standalone: true}">
+                            {{ boutique.nomBoutique }}
+                          </label>
+                        </div>
+                      </div>
+                      <div class="panel-footer">
+                        <button class="btn-confirm" (click)="confirmBoutiqueSelection()">Confirmer</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="btn_add_categoryDiv2">
+                    <button class="btn_add_category2" (click)="openPopupBoutique()">Créer une boutique</button>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+            
+            <!-- Les information des produit  -->
+            <div class="information_cadre">
+              <div class="info_titre_input"> 
+                <h4>Information des produits</h4>
+
+                <div class="double_input_grid">
+                  <!-- Input de nom produits  -->
+                  <div class="champ_input">
+                    <input autocomplete="off" formControlName="nom" type="text" class="input_focus " required id="nom" name="nom" placeholder="Saisis le nom de produit">
+                    <label for="nom" class="label">Nom produit</label>
+                    <div *ngIf="f['nom'].touched && f['nom'].invalid" class="error-message">
+                      <span *ngIf="f['nom'].errors?.['required']">Le nom produit est vide.</span>
+                      <span *ngIf="f['nom'].errors?.['minlength']">Le nom doit avoir au moins 2 caractères.</span>
+                    </div>
+                  </div>
+
+                  <div class="double_input2">
+                    <div class="champ_input">
+                      <input autocomplete="off" type="text" placeholder="Saisis le nom de catégorie"
+                             class="input_focus" matInput [formControl]="myControl" 
+                             [matAutocomplete]="auto" style="cursor: pointer;">
+                      <label for="categorieId" class="label">Catégorie</label>
+                      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
+
+                        <mat-option class="select-option" (click)="onCreateCategoryClick()">
+                          <div style="display: flex; align-items: center; color: #0672E4;">
+                            <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                            <span style="margin-left: 8px;">Créer une catégorie</span>
+                          </div>
+                        </mat-option>
+
+                        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+                          <div class="option-content">
+                            {{ option.nom }}
+                          </div>
+                        </mat-option>
+                      </mat-autocomplete>
+                      
+                    </div>
+
+                    <!-- <div class="btn_add_categoryDiv2">
+                      <button class="btn_add_category2" (click)="onCreateCategoryClick()">Créer une catégorie</button>
+                    </div> -->
+                    <div class="arrow_bas" style="position: absolute; right: 5px; top: 20px;">
+                      <i class="ri-arrow-down-s-line" style="font-size: 20px;"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="double_input_grid">
+                  <!-- Input de nom produits  -->
+                  <div class="champ_input">
+                    <input autocomplete="off" formControlName="prixVente" type="number" class="input_focus " required id="prixVente" name="prixVente" placeholder="Saisis le nom de magasin" (input)="formatPrixVente()">
+                    <label for="prixVente" class="label">Prix de vente</label>
+                    <div class="nombreDevise" *ngIf="formattedPrixVente">
+                      <p>{{ formattedPrixVente }}</p>
+                    </div>
+                    <div *ngIf="f['prixVente'].touched && f['prixVente'].invalid" class="error-message">
+                      Le prix de vente est vide.
+                    </div>
+                  </div>
+                  
+                  <!-- Input de prixAchat  -->
+                  <div class="champ_input">
+                    <input autocomplete="off" formControlName="prixAchat" type="number" class="input_focus " required id="prixAchat" name="prixAchat" placeholder="Saisis le prix d'achat" (input)="formatCoutProduit()">
+                    <label for="prixAchat" class="label">Coût du produit</label>
+                    <div class="nombreDevise" *ngIf="formattedCoutProduit">
+                      <p>{{ formattedCoutProduit }}</p>
+                    </div>
+                    <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
+                      Le coût du produit est vide.
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="double_input_grid">
+                  <div class="double_input2">
+                    <div class="champ_input champ_input2">
+                      <input autocomplete="off" type="text" placeholder="Saisis l'unité de mesure" 
+                            matInput [formControl]="uniteControl" class="input_focus"
+                            [matAutocomplete]="autoUnite" style="cursor: pointer;">
+                      <label for="uniteId" class="label">Unité de mesure</label>
+                      <mat-autocomplete #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
+
+                        <mat-option class="select-option" (click)="onCreateUniteClick()">
+                          <div style="display: flex; align-items: center; color: #0672E4;">
+                            <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                            <span style="margin-left: 8px;">Créer une unité</span>
+                          </div>
+                        </mat-option>
+
+                        <mat-option *ngFor="let option of filteredNomUnite | async" [value]="option">
+                          <div class="option-content">
+                            {{ option.nom }}
+                          </div>
+                        </mat-option>
+                      
+                      </mat-autocomplete>
+                      
+                    </div>
+                    <!-- <div class="btn_add_categoryDiv2">
+                      <button class="btn_add_category2" type="button" (click)="onCreateUniteClick()">Créer une unité</button>
+                    </div> -->
+                    <div class="arrow_bas" style="position: absolute; right: 5px; top: 20px;">
+                      <i class="ri-arrow-down-s-line" style="font-size: 20px;"></i>
+                    </div>
+                  </div>
+
+                </div>
+                
+              </div>
+            </div>
+            
+            <!-- Les information des produit identite  -->
+            <div class="information_cadre">
+              <div class="info_titre_input">
+                <h4>Identité de produit</h4>
+
+                <!--  -->
+
+                <!-- Input de produits  -->
+                <div class="champs_code_bare_double">
+                  <div class="champ_input">
+                    <input 
+                        type="text" 
+                        formControlName="codeBare"
+                        autocomplete="off"
+                        class="input_focus"
+                        id="codeBar"
+                        name="codeBar"
+                        placeholder="Numéro code barre"
+                        inputmode="numeric"
+                        maxlength="13"
+                        pattern="[0-9]*"
+                        (keypress)="validateNumericInput($event)"> 
+                    <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
+                    <div *ngIf="f['codeBare'].touched && f['codeBare'].invalid" class="error-message">
+                      <span *ngIf="f['codeBare'].errors?.['minlength']">Le code barre doit avoir au moins 8 caractères.</span>
+                      <span *ngIf="f['codeBare'].errors?.['maxlength']">Le code barre ne doit pas dépasser 13 caractères.</span>
+                    </div>
+                  </div>
+                
+                  <div style="margin-left: 15px;" *ngIf="showBarcode">
+                    <ngx-barcode6
+                      [bc-value]="f['codeBare'].value"
+                      bc-format="CODE128"
+                      [bc-line-color]="'#000000'"
+                      [bc-width]="1"
+                      [bc-height]="40"
+                      [bc-font-size]="12"
+                      [bc-display-value]="true">
+                    </ngx-barcode6>
+                  </div>
+                </div>
+
+                <div class="champ_input">
+                  <textarea formControlName="description" class="input_focus2" id="description" name="description" maxlength="150" placeholder="Saisis Une description pour ce produit"></textarea>
+                  <label for="description" class="label labelColor">Description (Facultatif)</label>
+                </div>
+                
+              </div>
+            </div>
+            
+            <!-- Les information des produit Inventaire  -->
+            <div class="information_cadre">
+              <div class="info_titre_input">
+                <h4>Inventaire</h4>
+            
+                <div class="champ_input_inventaire">
+                  <p>Ajouter dans les stocks</p>
+            
+                  <label class="switch">
+                    <input type="checkbox" [(ngModel)]="isChecked" (change)="onToggleChange($event)" [ngModelOptions]="{standalone: true}"/>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+            
+                <div *ngIf="isChecked">
+                  <ng-container *ngFor="let boutique of boutiquesList">
+                    <div *ngIf="boutique.selected" class=" double_input_grid">
+                      <div class="champ_input champ_input2">
+                        <!-- Quantité -->
+                        <input  [ngModel]="quantitesMap[boutique.id] || 0" 
+                          (ngModelChange)="quantitesMap[boutique.id] = $event"  
+                          [ngModelOptions]="{standalone: true}" type="number" class="input_focus" 
+                          required placeholder="Saisis la quantité">
+                        <label for="quantite" class="label labelColor">Quantité en stock pour {{ boutique.nomBoutique }}</label>
+                      </div>
+                
+                      <!-- Seuil d'alerte -->
+                      <div class="champ_input champ_input2">
+                        <input 
+                          [(ngModel)]="seuilsMap[boutique.id]" 
+                          [ngModelOptions]="{standalone: true}" 
+                          type="number" 
+                          class="input_focus" 
+                          placeholder="Seuil d'alerte pour {{ boutique.nomBoutique }}">
+                        <label for="seuilAlert" class="label labelColor">Seuil d'alerte pour {{ boutique.nomBoutique }}</label>
+                      </div>
+                    </div>
+                  </ng-container>
+                </div>
+                
+              </div>
+            </div>
+            
+            
+            <!-- Les information des produit Photo  -->
+            <div class="information_cadre">
+              <div class="info_titre_input">
+                <h4>Ajouter une image</h4>
+
+
+                <!-- <p *ngIf="!errorMessage" style="font-size: 12px; float: right;">Taille : 2 Mo max</p>
+                <p *ngIf="errorMessage" style="font-size: 12px; float: right; color: red;">{{ errorMessage }}</p> -->
+
+                <!-- Input de produits photo -->
+                <div class="container_file"> 
+                  <div class="header_file"> 
+                    <!-- <img class="roudel" [src]="newPhotoUrl || urllink" alt="Aperçu de l'image" style="max-width:200px;"> -->
+                    <img class="roudel" [src]="newPhotoUrl || urllink" alt="Aperçu de l'image" style="max-width:200px;">
+                  </div> 
+                  <button *ngIf="newPhotoUrl && newPhotoUrl !== urllink" (click)="clearImage()" class="clear-image-btn">
+                    <i class="ri-delete-bin-5-line"></i>
+                  </button>
+                  
+                  <div>
+                    <label for="file" class="footer_file"> 
+                      <i class="ri-file-3-fill"></i>
+                      <p>Choisir un fichier</p>
+                    </label> 
+                    <input type="file" accept="image/*" id="file" (change)="onFileSelected($event)" hidden>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Buttom ajouter et annuler  -->
+            <div class="information_cadre information_cadre_save">
+
+              <!-- Message d'erreur global -->
+              <div class="container_error_message">
+                <div *ngIf="errorMessage" class="error-message">
+                  {{ errorMessage }}
+                </div>
+              </div>
+
+              <div class="info_titre_input info_titre_input_btn">
+
+                <!-- Input de produits  -->
+                <div class="btn_annuler">
+                  <button class="btn_cancel" (click)="closeForm()">Annuler</button>
+                </div>
+
+                <div class="btn_ajouter">
+                  <button class="btn_save" (click)="onSubmit()">Sauvegarder</button>
+                </div>
+                
+              </div>
+            </div>
+
+            <!-- Popup de confirmation / d'erreur -->
+            <div class="modal-overlay" *ngIf="showPopup">
+              <div class="modal-content" [ngClass]="{'error': popupData.type === 'error'}">
+                <div class="popup-header">
+                  <div class="popup-img">
+                      <img [src]="popupData.image" alt="Icone" class="popup-icon2">
+                  </div>
+                  <h2>{{ popupData.title }}</h2>
+                </div>
+                <p>{{ popupData.message }}</p>
+                <button (click)="closePopup()">OK</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+        
+      </form>
+
+    </div>
+
+    <!-- Cadre ou on cree  -->
+    
+
+</div>
+</div>
+
+ <!-- Popup overlay -->
+<div class="popup-overlay" *ngIf="showPopupBoutique">
+  <div class="popup-content">
+      <div class="popup-headerBoutique">
+          <h4>Ajouter une boutique</h4>
+          <button class="close-btn" (click)="closePopupBoutique()">&times;</button>
+      </div>
+      <form [formGroup]="boutiqueForm">
+        <div class="popup-body">
+          
+          <div class="champ_grid">
+            <!-- Input de nom de boutique  -->
+            <div class="champ_input">
+              <input class="input_focus" style="min-width: 150px;" type="text" formControlName="nomBoutique" placeholder="Saisis le nom de boutique">
+              <label class="label">Nom boutque</label>
+              <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
+                <small class="error">Le nom est vide.</small>
+              </div>
+            </div>
+
+            <!-- Input d'email'  -->
+            <div class="champ_input">
+              <input class="input_focus" style="min-width: 150px;" type="email" formControlName="emailBoutique" placeholder="Saisis l'email">
+              <label class="label">Email</label>
+              <div *ngIf="boutiqueForm.get('emailBoutique')?.invalid && boutiqueForm.get('emailBoutique')?.touched">
+                <small class="error">Email invalide.</small>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Input pour pays et phone  -->
+          <div class="champ_grid">
+            <!-- // Input de telephone Boutique  -->
+            <div class="champ_input">
+              <input class="input_focus" style="min-width: 150px;" type="number" formControlName="telephoneBoutique" placeholder="00 00 00 00">
+              <label class="label">Phone</label>
+              <div *ngIf="boutiqueForm.get('telephoneBoutique')?.invalid && boutiqueForm.get('telephoneBoutique')?.touched">
+                <small class="error">Le numéro de téléphone est requis.</small>
+              </div>
+            </div>
+
+            <!-- Input Numero de téléphone  -->
+            <div class="champ_input">
+                <input class="input_focus" style="min-width: 150px;" type="text" formControlName="adresseBoutique" placeholder="Saisis l'adresse">
+                <label class="label">Adresse boutique</label>
+            </div>
+          </div>
+
+          <div class="errorAPI" *ngIf="messageAPI">
+            <img [src]="apiMessageType === 'success' ? 'assets/img/succcccc.png' : 'assets/img/error.png'" alt="Message API">
+            <span>{{ messageAPI }}</span>
+          </div>
+
+          
+        </div>
+        <div class="popup-footer">
+            <button class="btn-cancel" (click)="closePopupBoutique()">Annuler</button>
+            <button class="btn-submit" 
+                    [disabled]="boutiqueForm.invalid" 
+                    [style.backgroundColor]="boutiqueForm.valid ? '#0672E4' : '#0671e434'"
+                    [style.color]="boutiqueForm.valid ? '#ffffff' : '#00000073'"
+                    [style.cursor]="boutiqueForm.valid ? 'pointer' : 'no-drop'"
+                    (click)="onSubmitBoutique()">
+              Ajouter
+            </button>
+        </div>
+      </form>
+  </div>
+</div>
+
+<!-- Popup pour créer une catégorie -->
+<div class="popup-overlay" *ngIf="showPopupCategory">
+  <div class="popup-content" style="max-width: 350px;">
+    <div class="popup-headerBoutique">
+      <h4>Créer une catégorie</h4>
+      <button class="close-btn" (click)="closePopupCategory()">&times;</button>
+    </div>
+    <form [formGroup]="ajouteCategoryForm">
+      <div class="popup-body">
+        <div class="champ_input" style="margin-top: 15px;">
+          <input autocomplete="off" formControlName="categoryName" type="text" 
+                 class="input_focus input_focus_cree_cate" required id="categoryName" 
+                 name="categoryName" placeholder="Saisis le nom de catégorie">
+          <label for="categoryName" class="label labelColor">Nom catégorie</label>
+          <div *ngIf="c['categoryName'].touched && c['categoryName'].invalid" class="error-message">
+            <span *ngIf="c['categoryName'].errors?.['minlength']">Le nom doit avoir au moins 3 caractères.</span>
+            <span *ngIf="c['categoryName'].errors?.['maxlength']">Le nom ne doit pas dépasser 20 caractères.</span>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessageCategory" class="error-message-category">
+          {{ errorMessageCategory }}
+        </div>
+
+        <div class="errorAPI" *ngIf="messageAPI">
+          <img [src]="apiMessageType === 'success' ? 'assets/img/succcccc.png' : 'assets/img/error.png'" alt="Message API">
+          <span>{{ messageAPI }}</span>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopupCategory()">Annuler</button>
+        <button class="btn-submit" 
+                [disabled]="ajouteCategoryForm.invalid" 
+                [style.backgroundColor]="ajouteCategoryForm.valid ? '#0672E4' : '#0671e434'"
+                (click)="submitFormCategory()">
+          Ajouter
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Popup pour créer une unité -->
+<div class="popup-overlay" *ngIf="showPopupUnit">
+  <div class="popup-content" style="max-width: 350px;">
+    <div class="popup-headerBoutique">
+      <h4>Créer une unité</h4>
+      <button class="close-btn" (click)="closePopupUnit()">&times;</button>
+    </div>
+    <form [formGroup]="ajouteUniteForm">
+      <div class="popup-body">
+        <div class="champ_input" style="margin-top: 15px;">
+          <input autocomplete="off" formControlName="unityName" type="text" 
+                 class="input_focus input_focus_cree_cate" required id="unityName" 
+                 name="unityName" placeholder="Saisis le nom de unité">
+          <label for="unityName" class="label labelColor">Nom unité</label>
+          <div *ngIf="u['unityName'].touched && u['unityName'].invalid" class="error-message">
+            <span *ngIf="u['unityName'].errors?.['minlength']">Le nom doit avoir au moins 2 caractères.</span>
+            <span *ngIf="u['unityName'].errors?.['maxlength']">Le nom ne doit pas dépasser 20 caractères.</span>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessageUnity" class="error-message-category">
+          {{ errorMessageUnity }}
+        </div>
+
+        <div class="errorAPI" *ngIf="messageAPI">
+          <img [src]="apiMessageType === 'success' ? 'assets/img/succcccc.png' : 'assets/img/error.png'" alt="Message API">
+          <span>{{ messageAPI }}</span>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopupUnit()">Annuler</button>
+        <button class="btn-submit" 
+                [disabled]="ajouteUniteForm.invalid" 
+                [style.backgroundColor]="ajouteUniteForm.valid ? '#0672E4' : '#0671e434'"
+                (click)="submitFormUnity()">
+          Ajouter
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
