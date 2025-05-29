@@ -22,6 +22,7 @@ import { MatDialogModule }          from '@angular/material/dialog';
 import { MatButtonModule }          from '@angular/material/button';
 import { CodeInputModule }          from 'angular-code-input';
 import { DragDropModule }           from '@angular/cdk/drag-drop';
+import { MatSelectModule } from '@angular/material/select';
 import { ProduitFormComponent } from './admin-page/produits/produit-form/produit-form.component';
 import { AddfactureProformaComponent } from './admin-page/facture-proforma/addfacture-proforma/addfacture-proforma.component';
 
@@ -50,7 +51,8 @@ registerLocaleData(localeFr);
     MatDialogModule,
     MatButtonModule,
     CodeInputModule,
-    DragDropModule
+    DragDropModule,
+    MatSelectModule
   ],
   providers: [
     provideHttpClient(),

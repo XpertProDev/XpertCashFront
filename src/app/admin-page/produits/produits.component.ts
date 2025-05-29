@@ -423,6 +423,7 @@ export class ProduitsComponent implements OnInit {
             createdAt: createdAt,
             categorieId: prod.categorieId || 0,
             uniteId: prod.uniteId || 0,
+            typeProduit: prod.typeProduit || 'Non défini',
             boutiques: prod.boutiques || []
           } as Produit;
         }).sort((a, b) => {

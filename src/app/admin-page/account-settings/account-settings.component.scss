@@ -264,13 +264,13 @@ td.td_left {
 
 .cachet_preview {
   position: relative;
-  top: 120px;
+  top: 50px;
   right: 10px;
 }
 
 .cachet_preview h6 {
   text-align: center;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .name_directeur_preview {
@@ -549,7 +549,7 @@ td.td_left {
 }
 
 .preview-content {
-  background-color: white;
+  // background-color: white;
   border-radius: 8px;
   // width: 80%;
   // max-width: 900px;
@@ -557,9 +557,9 @@ td.td_left {
   // overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   animation: scaleIn 0.3s ease-out;
-  width: 138mm;
-  min-height: 180mm;
-  margin-top: 20px;
+  // width: 120mm;
+  // min-height: 150mm;
+  margin-top: 10%;
   
   .preview-header {
     display: flex;
@@ -583,8 +583,8 @@ td.td_left {
   transform: scale(1.1);
   // padding: 30px;
   background-color: white;
-  width: 138mm;
-  min-height: 190mm;
+  width: 120mm;
+  min-height: 160mm;
   position: relative;
   
   .content {

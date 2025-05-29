@@ -32,6 +32,9 @@ interface Note {
   auteur: string;
   modifiee?: boolean;
   dateModification?: Date;
+  numeroIdentifiant: string;
+
+
 }
 
 // Interface modifiée
@@ -590,13 +593,16 @@ submitNote() {
     // Cas ajout d'une nouvelle note
     const payload = {
       noteModification: this.noteModification || null,
+      //numeroIdentifiant
+      
     };
 
     const nouvelleNote: Note = {
       id: Date.now(), // ou un ID généré par le backend
       content: this.noteModification,
       dateCreation: new Date(),
-      auteur: this.getCurrentUser().nomComplet || 'Utilisateur inconnu'
+      auteur: this.getCurrentUser().nomComplet || 'Utilisateur inconnu',
+      numeroIdentifiant: this.noteModification || '', // Ajout du champ requis
     };
 
     this.factureProFormaService.updateFactureProforma(
@@ -1615,30 +1621,34 @@ submitNote() {
 loadNotes() {
   this.factureProFormaService.getNotesFactureProforma(this.factureId).subscribe({
     next: (response: any) => {
-      // Si le backend envoie un message au lieu d'une liste
-      if (!Array.isArray(response)) {
+      console.log("Réponse des notes :", response);
+
+      const notesValides = response?.filter((note: any) => note.note?.trim());
+
+      if (!notesValides || notesValides.length === 0) {
+        this.infoMessage = "Aucune note trouvée pour cette facture";
         this.notes = [];
-        this.infoMessage = response.message || "Aucune note disponible.";
         return;
       }
 
-      if (response.length === 0) {
-        this.notes = [];
-        this.infoMessage = "Aucune note pour cette facture.";
-        return;
-      }
+       // Tri
+      notesValides.sort((a: any, b: any) => {
+        const dateA = new Date(a.dateCreation).getTime();
+        const dateB = new Date(b.dateCreation).getTime();
+        return dateB - dateA;
+      });
+      
 
-      // Sinon, traitement normal
-      this.notes = response.map((note: any) => ({
+      this.notes = notesValides.map((note: any) => ({
         id: note.id,
         content: note.note,
-        dateCreation: note.dateCreation ? new Date(note.dateCreation) : new Date(0),
+        dateCreation: note.dateCreation ? new Date(note.dateCreation) : null,
         auteur: note.auteur,
-        modifiee: note.modifiee
+        modifiee: note.modifiee,
+        numeroIdentifiant: note.numeroIdentifiant || note.id
       }));
 
       this.infoMessage = null;
-      console.log("Notes chargées :", this.notes);
     },
     error: (err) => {
       console.error("Erreur lors du chargement des notes", err);
@@ -1650,23 +1660,23 @@ loadNotes() {
 
 
 
+
  
 
 
 toggleNotebook() {
   this.isNotebookOpen = !this.isNotebookOpen;
+  this.activeMenuIndex = null;
 }
   
   
  // Et dans la classe
 toggleAddNoteInput() {
   this.isAddNoteInputVisible = !this.isAddNoteInputVisible;
+  this.activeMenuIndex = null;
 }
 
 
-  closeNotebook() {
-    this.isNotebookOpen = false;
-  }
 
     addNote() {
     if (this.newNote.trim()) {
@@ -1674,7 +1684,8 @@ toggleAddNoteInput() {
         id: Date.now(),
         content: this.newNote.trim(),
         dateCreation: new Date(),
-        auteur: this.getCurrentUser().nomComplet
+        auteur: this.getCurrentUser().nomComplet,
+        numeroIdentifiant: this.newNote.trim(),
       });
       this.newNote = '';
       this.isAddNotePopupOpen = false;
@@ -1722,6 +1733,8 @@ confirmDelete(index: number) {
         this.confirmDeleteIndex = null;
         this.activeMenuIndex = null;
         console.log('Note supprimée avec succès');
+        this.loadHistoricalEvents();
+        this.loadNotes();
       },
       error: (err) => {
         console.error('Erreur lors de la suppression de la note :', err);

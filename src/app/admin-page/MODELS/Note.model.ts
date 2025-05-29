@@ -5,5 +5,6 @@ export interface Note {
   auteur: string;
   modifiee?: boolean;
   dateModification?: Date;
+  numeroIdentifiant: string;
 }
         

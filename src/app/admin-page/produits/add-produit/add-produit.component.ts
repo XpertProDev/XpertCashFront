@@ -15,12 +15,13 @@ import imageCompression from 'browser-image-compression';
 import { NgxBarcode6Module } from 'ngx-barcode6';
 import { ProduitService } from '../../SERVICES/produit.service';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
 
 
 @Component({
   selector: 'app-add-produit',
   standalone: true,
-  imports: [ FormsModule, CommonModule, ReactiveFormsModule, MatAutocompleteModule, NgxBarcode6Module, MatIconModule ],
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, MatAutocompleteModule, NgxBarcode6Module, MatIconModule, MatSelectModule],
   templateUrl: './add-produit.component.html',
   styleUrl: './add-produit.component.scss'
 })
@@ -270,6 +271,7 @@ export class AddProduitComponent implements OnInit {
       codeBare: ['', [Validators.minLength(8), Validators.maxLength(13)]],
       categorieId: [''],
       uniteId: [''],
+      typeProduit: ['PHYSIQUE', Validators.required]
     });
 
     this.ajouteCategoryForm = this.fb.group({
