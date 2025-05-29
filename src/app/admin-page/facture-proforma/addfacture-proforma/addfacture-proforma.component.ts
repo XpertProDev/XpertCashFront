@@ -88,6 +88,10 @@ export class AddfactureProformaComponent implements OnInit {
   filteredClients: Observable<Clients[]>;
   showClientFormPanel: boolean = false;
 
+  entrepriseControl = new FormControl();
+  filteredEntreprises: Observable<any[]>;
+  showEntrepriseFormPanel: boolean = false;
+
   constructor(
     private router: Router,
     private clientService: ClientService,
@@ -110,6 +114,13 @@ export class AddfactureProformaComponent implements OnInit {
       map(value => typeof value === 'string' ? value : value?.nomComplet),
       map(name => name ? this._filterClients(name) : this.clients.slice())
     );
+
+    // Ajoutez après les autres initialisations
+    this.filteredEntreprises = this.entrepriseControl.valueChanges.pipe(
+      startWith(''),
+      map(value => typeof value === 'string' ? value : value?.nom),
+      map(name => name ? this._filterEntreprises(name) : this.entreprises.slice())
+    );
   }
 
   private _filterClients(name: string): Clients[] {
@@ -128,7 +139,11 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
   onClientSelected(event: MatAutocompleteSelectedEvent) {
-    this.selectedClientId = event.option.value.id;
+    if (event.option.value === null) {
+      this.openClientFormPanel();
+    } else {
+      this.selectedClientId = event.option.value.id;
+    }
   }
 
   onClientFocus() {
@@ -137,16 +152,33 @@ export class AddfactureProformaComponent implements OnInit {
     }
   }
 
-  openClientFormPanel() {
-    this.showClientFormPanel = true;
+  private _filterEntreprises(name: string): any[] {
+    const filterValue = name.toLowerCase();
+    return this.entreprises.filter(entreprise => 
+      entreprise.nom.toLowerCase().includes(filterValue)
+    );
   }
 
-  closeClientFormPanel() {
-    this.showClientFormPanel = false;
+  displayEntreprise(entreprise: any): string {
+    return entreprise && entreprise.nom ? entreprise.nom : '';
+  }
+
+  onEntrepriseSelected(event: MatAutocompleteSelectedEvent) {
+    if (event.option.value === null) {
+      this.openEntrepriseFormPanel();
+    } else {
+      this.selectedEntreprise = event.option.value;
+    }
+  }
+
+  onEntrepriseFocus() {
+    if (!this.entrepriseControl.value) {
+      this.entrepriseControl.setValue('');
+    }
   }
 
   async ngOnInit(): Promise<void> {
-    await this.getUserInfo();
+    this.getUserInfo();
     await Promise.all([
       this.getListClients(),
       this.getListEntreprise(),
@@ -164,9 +196,13 @@ export class AddfactureProformaComponent implements OnInit {
       this.activeRemise = savedState.activeRemise;
       this.remisePourcentage = savedState.remisePourcentage;
       this.activeTva = savedState.activeTva;
-      
+
       if (savedState.clientControl) {
         this.clientControl.setValue(savedState.clientControl);
+      }
+
+      if (savedState.entrepriseControl) {
+        this.entrepriseControl.setValue(savedState.entrepriseControl);
       }
     }
   }
@@ -297,6 +333,7 @@ export class AddfactureProformaComponent implements OnInit {
       this.clientService.getListEntreprises().subscribe({
         next: (data) => {
           this.entreprises = data.sort((a: any, b: any) => (b.id ?? 0) - (a.id ?? 0));
+          this.entrepriseControl.setValue(null);
         },
         error: (err) => console.error('Erreur récupération entreprises :', err)
       });
@@ -509,7 +546,8 @@ export class AddfactureProformaComponent implements OnInit {
       activeRemise: this.activeRemise,
       remisePourcentage: this.remisePourcentage,
       activeTva: this.activeTva,
-      clientControl: this.clientControl.value
+      clientControl: this.clientControl.value,
+      entrepriseControl: this.entrepriseControl.value
     });
 
     const lignes = [
@@ -610,7 +648,6 @@ export class AddfactureProformaComponent implements OnInit {
     return produit && produit.nom ? produit.nom : '';
   }
 
-
   // Méthode pour ouvrir le panneau
   openProductFormPanel(): void {
     this.showProductFormPanel = true;
@@ -623,6 +660,30 @@ export class AddfactureProformaComponent implements OnInit {
     setTimeout(() => {
       this.showProductFormPanel = false;
     }, 300); // Correspond à la durée de l'animation
+  }
+
+  openClientFormPanel() {
+    this.showClientFormPanel = true;
+    this.panelAnimationState = 'visible';
+  }
+
+  closeClientFormPanel() {
+    this.panelAnimationState = 'hidden';
+    setTimeout(() => {
+      this.showClientFormPanel = false;
+    }, 300);
+  }
+
+  openEntrepriseFormPanel() {
+    this.showEntrepriseFormPanel = true;
+    this.panelAnimationState = 'visible';
+  }
+
+  closeEntrepriseFormPanel() {
+    this.panelAnimationState = 'hidden';
+    setTimeout(() => {
+      this.showEntrepriseFormPanel = false;
+    }, 300);
   }
 
   onProduitSelected(event: MatAutocompleteSelectedEvent) {
