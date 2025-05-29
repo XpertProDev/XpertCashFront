@@ -1,3 +1,9 @@
+.container_global {
+  display: grid;
+  grid-template-columns: 72% 28%;
+  position: relative;
+}
+
 .content_formulaire {
   display: flex;
 }

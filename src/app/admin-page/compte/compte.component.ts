@@ -10,6 +10,7 @@ import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
 import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 import { Users } from '../MODELS/utilisateur.model';
 import { log } from 'console';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-compte',
@@ -17,6 +18,7 @@ import { log } from 'console';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    MatPaginatorModule,
   ],
   templateUrl: './compte.component.html',
   styleUrl: './compte.component.scss'
@@ -38,6 +40,11 @@ export class CompteComponent  implements OnInit {
   filteredUsers: any[] = [];
 
   entrepriseId!: number;
+  messageNoClient = 'Aucun utilisateur disponible.';
+
+  pageSize = 5;
+  currentPage = 0;
+  paginatedUsers: any[] = [];
 
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
@@ -75,6 +82,7 @@ export class CompteComponent  implements OnInit {
   ngOnInit() {
     this.loadRoles();
     this.initForm();
+    this.updatePaginatedUsers();
     
     this.usersService.getUserInfo().subscribe({
     next: (userData) => {
@@ -141,7 +149,16 @@ export class CompteComponent  implements OnInit {
     }
   }
   
-  
+  onPageChange(event: PageEvent) {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updatePaginatedUsers();
+  }
+
+  updatePaginatedUsers() {
+    const startIndex = this.currentPage * this.pageSize;
+    this.paginatedUsers = this.filteredUsers.slice(startIndex, startIndex + this.pageSize);
+  }
 
   loadRoles() {
     const token = localStorage.getItem('authToken'); 
@@ -166,6 +183,7 @@ export class CompteComponent  implements OnInit {
           flag: this.paysFlags[user.pays] || ''
         }));
         this.filteredUsers = this.users; // Mise à jour des utilisateurs filtrés
+        this.updatePaginatedUsers();
         this.isLoading = false;
         console.log('Utilisateurs récupérés:', this.users);
       },
@@ -273,6 +291,7 @@ export class CompteComponent  implements OnInit {
       return 0;
     });
     this.isAscending = !this.isAscending;
+    this.updatePaginatedUsers();
   }
 
   filterUsers(event: Event) {
@@ -280,11 +299,15 @@ export class CompteComponent  implements OnInit {
     this.filteredUsers = this.users.filter(user =>
       user.nomComplet.toLowerCase().includes(this.searchTerm)
     );
+    this.currentPage = 0;
+    this.updatePaginatedUsers();
   }
 
   clearSearch(inputElement: HTMLInputElement) {
     this.searchTerm = '';
     this.filteredUsers = this.users;
+    this.currentPage = 0; // Réinitialiser à la première page
+    this.updatePaginatedUsers();
     inputElement.value = '';
   }
   

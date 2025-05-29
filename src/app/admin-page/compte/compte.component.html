@@ -61,6 +61,21 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Message quand il n'y a pas d'utilisateur -->
+  <div *ngIf="filteredUsers.length === 0" class="no-client-message">
+    {{ messageNoClient }}
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="filteredUsers.length > 0">
+    <mat-paginator
+      [length]="filteredUsers.length"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 25, 100]"
+      (page)="onPageChange($event)">
+    </mat-paginator>
+  </div>
   
   </div>
   
