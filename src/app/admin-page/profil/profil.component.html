@@ -15,7 +15,7 @@
           <!-- Image de profil avec actions -->
       <div class="profile-img-wrapper" (click)="visualiserPhoto($event)">
             <img
-              [src]="photo || 'assets/img/profil.png'"
+              [src]="photo || 'assets/img/profil.png'"(error)="photo = 'assets/img/profil.png'"
               alt="Photo de profil"
               class="profile-img" />
 
@@ -38,7 +38,7 @@
             <!-- Lightbox de visualisation -->
             <div class="photo-modal" *ngIf="isModalOpen" (click)="fermerModal()">
               <div class="photo-modal-content" (click)="$event.stopPropagation()">
-                <img [src]="photo || 'assets/img/profil.png'" alt="Aperçu" />
+                <img [src]="photo || 'assets/img/profil.png'"(error)="photo = 'assets/img/profil.png'">
                 <button class="fermer-btn" (click)="fermerModal()">✕</button>
               </div>
             </div>

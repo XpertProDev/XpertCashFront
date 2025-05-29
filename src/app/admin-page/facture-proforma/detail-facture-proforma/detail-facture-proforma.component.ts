@@ -220,9 +220,6 @@ export class DetailFactureProformaComponent implements OnInit {
   getTotalTTC(): number {
     return this.getTotalApresRemise() + this.getMontantTVA();
   }
-onImgError(event: Event) {
-  (event.target as HTMLImageElement).src = 'assets/images/user.png';
-}
 
   // Modifier load Historical Events pour inclure tous les statuts
   private loadHistoricalEvents() {
@@ -232,7 +229,7 @@ onImgError(event: Event) {
         date: new Date(action.date),
            user: {
               nomComplet: action.utilisateur || 'Utilisateur inconnu',
-              photo: action.photo ? `http://localhost:8080${action.photo}` : 'assets/images/user.png',
+              photo: action.photo ? `http://localhost:8080${action.photo}` : null 
             },
         type: this.mapActionType(action.action),
         description: action.details,
