@@ -611,7 +611,7 @@ input:checked + .slider:before {
   height: 100%;
   display: flex;
   justify-content: flex-end; // Aligner à droite
-  z-index: 1000;
+  // z-index: 1000;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s;
@@ -628,6 +628,7 @@ input:checked + .slider:before {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
   }
 
   .content_cadre_right {
