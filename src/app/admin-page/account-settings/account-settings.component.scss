@@ -79,7 +79,7 @@
 }
 
 .logo_entreprise {
-  width: 70px;
+  width: 50px;
   height: 50px;
 }
 
@@ -116,12 +116,12 @@
 
 .content_entete p {
   margin: 0;
-  font-size: 7px;
+  font-size: 6px;
   letter-spacing: 0.50px;
 }
 
 .para3 {
-  font-size: 7px;
+  font-size: 6px;
 }
 
 .content_entete .para1,
@@ -338,7 +338,7 @@ td.td_left {
     border-right: none;
     margin: 10px 0 0;
     transition: all 0.3s;
-    font-size: 14px;
+    font-size: 12px;
     //padding-left: 10px;
     background: none;
     color: #695c5c;
@@ -545,7 +545,7 @@ td.td_left {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(5px);
+  // backdrop-filter: blur(1px);
 }
 
 .preview-content {

@@ -198,6 +198,23 @@
                                     <div class="titre_champ">
                                         <h6>Informations de coordonées</h6>
                                     </div>
+
+                                    <input type="file" 
+                                        accept="image/*" 
+                                        #fileInput 
+                                        (change)="onFileSelected($event)"
+                                        style="display: none;"
+                                        id="uniqueFileInputId">
+
+                                    <div class="champ_grid" style="margin: 10px 0 15px;">
+                                        <p style="margin: 0; font-size: 12px;">
+                                            Changer logo 
+                                            <a style="padding-left: 5px;" 
+                                                href="javascript:void(0)" 
+                                                (click)="fileInput.click()">
+                                                ICI
+                                            </a> </p>
+                                    </div>
                                 
                                     <div class="champ_grid">
                                         <!-- // Input de Nom entreprise  -->
@@ -243,23 +260,6 @@
                                             <input class="input_focus" type="telephone" formControlName="telephone" placeholder="00 00 00 00">
                                             <label class="label">Téléphone</label>
                                         </div>
-                                    </div>
-
-                                    <input type="file" 
-                                        accept="image/*" 
-                                        #fileInput 
-                                        (change)="onFileSelected($event)"
-                                        style="display: none;"
-                                        id="uniqueFileInputId">
-
-                                    <div class="champ_grid" style="margin: 10px 0 0;">
-                                        <p style="margin: 0;">
-                                            Changer logo 
-                                            <a style="padding-left: 5px;" 
-                                                href="javascript:void(0)" 
-                                                (click)="fileInput.click()">
-                                                ICI
-                                            </a> </p>
                                     </div>
 
                                     <!-- // Informations légales & bancaires  -->
