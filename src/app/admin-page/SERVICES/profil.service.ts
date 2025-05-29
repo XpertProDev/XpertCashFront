@@ -12,12 +12,15 @@ export class ProfilService {
 
   constructor(private http: HttpClient) { }
   
-  updatePassword(userId: number, request: UpdateUserRequest): Observable<any> {
-    return this.http.patch(
-      `${this.apiUrl}/updateUsers/${userId}`,
-      request,
-      { responseType: 'text' } // Force le traitement en texte
-    );
-  }
+updatePassword(userId: number, request: UpdateUserRequest): Observable<any> {
+  const formData = new FormData();
+  formData.append('user', JSON.stringify(request));
+  return this.http.patch(
+    `${this.apiUrl}/updateUsers/${userId}`,
+    formData,
+    { responseType: 'text' }
+  );
+}
+
 
 }

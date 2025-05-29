@@ -1741,6 +1741,8 @@ confirmDelete(index: number) {
         console.error('Erreur lors de la suppression de la note :', err);
         //affiche erre errorMessage
         this.errorMessage = err.error?.message || 'Erreur lors de la suppression de la note.';
+        this.activeMenuIndex = null;
+
       }
 
       
