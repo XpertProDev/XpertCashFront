@@ -220,6 +220,9 @@ export class DetailFactureProformaComponent implements OnInit {
   getTotalTTC(): number {
     return this.getTotalApresRemise() + this.getMontantTVA();
   }
+onImgError(event: Event) {
+  (event.target as HTMLImageElement).src = 'assets/images/user.png';
+}
 
   // Modifier load Historical Events pour inclure tous les statuts
   private loadHistoricalEvents() {
@@ -229,7 +232,7 @@ export class DetailFactureProformaComponent implements OnInit {
         date: new Date(action.date),
            user: {
               nomComplet: action.utilisateur || 'Utilisateur inconnu',
-              photo: action.photo ? `http://localhost:8080${action.photo}` : null
+              photo: action.photo ? `http://localhost:8080${action.photo}` : 'assets/images/user.png',
             },
         type: this.mapActionType(action.action),
         description: action.details,
@@ -1719,6 +1722,7 @@ askDelete(index: number) {
 }
 
 confirmDelete(index: number) {
+  this.errorMessage = null;
   const note = this.notes[index];
   if (!note || !note.id) return;
 
@@ -1738,7 +1742,11 @@ confirmDelete(index: number) {
       },
       error: (err) => {
         console.error('Erreur lors de la suppression de la note :', err);
+        //affiche erre errorMessage
+        this.errorMessage = err.error?.message || 'Erreur lors de la suppression de la note.';
       }
+
+      
     });
 }
 
