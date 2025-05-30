@@ -208,7 +208,8 @@ export class DetailEditEntrepriseClientComponent {
       signataire: this.client.entrepriseClient?.signataire,
       signataireNom: this.client.entrepriseClient?.signataireNom,
       prefixe: this.client.entrepriseClient?.prefixe,
-      suffixe: this.client.entrepriseClient?.suffixe
+      suffixe: this.client.entrepriseClient?.suffixe,
+      tauxTva: this.client.entrepriseClient?.tauxTva
 
     };
   }

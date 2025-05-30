@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Router } from '@angular/router';
 import { ClientService } from '../../SERVICES/client-service';
@@ -19,6 +19,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgxBarcode6Module } from 'ngx-barcode6';
 import { ClientFormComponent } from '../../clients/client-form/client-form.component';
 import { EntrepriseFormComponent } from '../../clients/entreprise-form/entreprise-form.component';
+import { EntrepriseService } from '../../SERVICES/entreprise-service';
+import { Entreprise } from '../../MODELS/entreprise-model';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -104,7 +106,11 @@ export class AddfactureProformaComponent implements OnInit {
     private usersService: UsersService,
     private previewService: FacturePreviewService,
     private formStateService: FormStateService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private entrepriseService: EntrepriseService,
+    private cdRef: ChangeDetectorRef,
+    private fb: FormBuilder,
+    
   ) {
     // Initialisation du filtre pour l'autocomplete
     this.filteredProduits = this.productControl.valueChanges.pipe(
@@ -186,7 +192,9 @@ export class AddfactureProformaComponent implements OnInit {
     await Promise.all([
       this.getListClients(),
       this.getListEntreprise(),
-      this.getProduits()
+      this.getProduits(),
+      this.getFormInit(),
+    this.getEntrepriseInfo()
     ]);
 
     const savedState = this.formStateService.getState();
@@ -240,9 +248,14 @@ export class AddfactureProformaComponent implements OnInit {
     return this.getTotalHT() - this.getMontantRemise();
   }
 
-  getMontantTVA(): number {
-    return this.activeTva ? (this.getTotalApresRemise() * 0.18) : 0;
-  }
+ getMontantTVA(): number {
+  if (!this.activeTva) return 0;
+
+  const taux = this.form.get('tauxTva')?.value || 0;
+  const montant = this.getTotalApresRemise() * taux;
+  return Math.round(montant * 100) / 100;
+}
+
 
   getTotalCommercial(): number {
     return this.getTotalApresRemise();
@@ -729,5 +742,32 @@ export class AddfactureProformaComponent implements OnInit {
     }
   }
 
+  getFormInit() {
+    this.form = this.fb.group({
+
+     tauxTva: [null]
+
+    });
+  }
+
+    form!: FormGroup;
+  
+
+   getEntrepriseInfo() {
+      this.entrepriseService.getEntrepriseInfo().subscribe({
+        next: (entreprise: Entreprise) => {
+          this.form.patchValue({
+      
+            tauxTva: entreprise.tauxTva
+          });
+          console.log("data dentreprise", entreprise);
+          
+         
+        },
+        error: (error) => {
+          console.error('Erreur lors de la récupération des informations de l\'entreprise', error);
+        }
+      });
+    }
   
 }

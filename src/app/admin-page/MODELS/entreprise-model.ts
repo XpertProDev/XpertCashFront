@@ -17,6 +17,7 @@ export interface Entreprise {
     signataireNom: string;
     prefixe: String;
     suffixe: String;
+    tauxTva: number;
 
     
 }

@@ -48,11 +48,15 @@ export class AccountSettingsComponent implements OnInit {
   ngOnInit() {
     this.getFormInit();
     this.getEntrepriseInfo();
-
-    this.getFormInit();
     this.listenToPrefixSuffixChanges();
   
   }
+
+get tauxTvaAffiche(): string {
+  const tva = this.form.get('tauxTva')?.value;
+  return tva !== null ? `${(tva * 100).toFixed(0)}%` : '';
+}
+
 
 
   getFormInit() {
@@ -72,7 +76,9 @@ export class AccountSettingsComponent implements OnInit {
       signataire: ['Monsieur X'],
       signataireNom: ['Le Directeur Général'],
       prefixe: ['xxxx'],
-      suffixe: ['xxxx']
+      suffixe: ['xxxx'],
+     tauxTva: [null]
+
     });
   }
 
@@ -98,7 +104,8 @@ export class AccountSettingsComponent implements OnInit {
           signataireNom: entreprise.signataireNom,
           logo: entreprise.logo,
           prefixe: entreprise.prefixe,
-          suffixe: entreprise.suffixe
+          suffixe: entreprise.suffixe,
+          tauxTva: entreprise.tauxTva
         });
         // Construire l'URL complète du logo
         console.log('Logo path from server:', entreprise);
@@ -245,5 +252,9 @@ export class AccountSettingsComponent implements OnInit {
     
     return '';
   }
+
+ 
+
+ 
 
 }

@@ -124,7 +124,7 @@
                                                 </tr>
                                                 <!-- TVA à 18% sur le montant commercial -->
                                                 <tr>
-                                                    <td colspan="4">TVA (18%)</td>
+                                                    <td colspan="4">{{ tauxTvaAffiche }}</td>
                                                     <td>
                                                     <!-- {{
                                                         ((facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) * 0.18) | customNumber
@@ -323,6 +323,13 @@
                                             <input class="input_focus" type="text" formControlName="signataire" placeholder="Saisis le post de signataire">
                                             <label class="label">Poste</label>
                                         </div>
+
+                                        <!-- // Input de Signature   -->
+                                        <div class="champ_input">
+                                            <input class="input_focus" type="number" formControlName="tauxTva" placeholder="Ex: 0.18">
+                                            <label class="label">TVA (ex: 0.18 = 18%)</label>
+                                        </div>
+
                                     </div>
 
                                      <!-- Input Prefixe et Suffiche -->

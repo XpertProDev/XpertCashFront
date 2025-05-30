@@ -25,7 +25,7 @@ export class FactureProformaApercuComponent implements OnInit {
   nom: string | null = null;
   siege!: string;
   email!: string;
-  logo: string | null = null; 
+  logo: string | null = null;  
   secteur!: string;
   telephone!: string;
   adresse!: string;
@@ -35,8 +35,10 @@ export class FactureProformaApercuComponent implements OnInit {
   pays!: string;
   rccm!: string;
   siteWeb!: string;
-  signataire!: string
+  signataire!: string;
   signataireNom!: string;
+ tauxTva?: number | null;
+
 
 
   constructor(
@@ -120,6 +122,7 @@ export class FactureProformaApercuComponent implements OnInit {
         this.siteWeb = entreprise.siteWeb;
         this.signataire = entreprise.signataire;
         this.signataireNom = entreprise.signataireNom;
+        this.tauxTva = entreprise.tauxTva;
 
   
         // Ajout du préfixe si nécessaire

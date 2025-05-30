@@ -345,14 +345,16 @@ export class ClientFormComponent {
       signataire: this.entrepriseForm.value.signataire,
       signataireNom: this.entrepriseForm.value.signataireNom,
       prefixe: this.entrepriseForm.value.prefixe,
-      suffixe: this.entrepriseForm.value.suffixe
+      suffixe: this.entrepriseForm.value.suffixe,
+      tauxTva: this.entrepriseForm.value.tauxTva
+
 
     };
   
     this.entrepriseService.addEntreprise(newEntreprise).subscribe({
       next: (createdEntreprise) => {
         const current = this.optionsEntreprise$.value;
-        this.optionsEntreprise$.next([createdEntreprise, ...current]); // Nouvelle entreprise en tête
+        this.optionsEntreprise$.next([createdEntreprise, ...current]);
         this.control.setValue(createdEntreprise);
         this.closePopup();
         this.entrepriseForm.reset();
