@@ -610,15 +610,35 @@ export class AddfactureProformaComponent implements OnInit {
     return e ? e.nom : '';
   }
 
-  onProduitAjoute(nouveauProduit: Produit) {
-    this.produits.push(nouveauProduit);
-    if (this.inputLignes.length > 0) {
-      this.inputLignes[0].produitId = nouveauProduit.id;
-      this.inputLignes[0].ligneDescription = nouveauProduit.description;
-      this.productControl.setValue(nouveauProduit); // Pré-remplir l'autocomplete
-      this.cdr.detectChanges();
-    }
+onProduitAjoute(nouveauProduit: Produit) {
+  // Ajouter le nouveau produit à la liste des produits
+  this.produits.push(nouveauProduit);
+
+  // Mettre à jour la ligne de facture actuelle
+  if (this.inputLignes.length > 0) {
+    this.inputLignes[0].produitId = nouveauProduit.id;
+    this.inputLignes[0].ligneDescription = nouveauProduit.description || null;
+    this.inputLignes[0].quantite = 1; // Quantité par défaut
+    this.inputLignes[0].isDuplicate = false;
+
+    // Mettre à jour l'autocomplete pour afficher le nom du nouveau produit
+    this.productControl.setValue(nouveauProduit);
+
+    // Forcer la mise à jour des options filtrées
+    this.filteredProduits = this.productControl.valueChanges.pipe(
+      startWith(nouveauProduit),
+      map(value => (typeof value === 'string' ? value : value?.nom)),
+      map(name => (name ? this._filterProduits(name) : this.produits.slice()))
+    );
+
+    // Déclencher une mise à jour de l'interface utilisateur
+    this.updateCalculs();
+    this.cdr.detectChanges();
   }
+
+  // Fermer le panneau du formulaire
+  this.closeProductFormPanel();
+}
 
   // Méthode appelée au focus
   onFocus() {
@@ -635,13 +655,13 @@ export class AddfactureProformaComponent implements OnInit {
   // }
 
   // Logique de filtrage
-  private _filterProduits(name: string): Produit[] {
-    if (!name) {
-      return this.produits.slice();
-    }
-    const filterValue = name.toLowerCase();
-    return this.produits.filter(produit => produit.nom.toLowerCase().includes(filterValue));
+private _filterProduits(name: string): Produit[] {
+  if (!name) {
+    return this.produits.slice();
   }
+  const filterValue = name.toLowerCase();
+  return this.produits.filter(produit => produit.nom.toLowerCase().includes(filterValue));
+}
 
   // displayProduit(produit: Produit): string {
   //   return produit ? produit.nom : '';
@@ -690,44 +710,44 @@ export class AddfactureProformaComponent implements OnInit {
     }, 300);
   }
 
-  onProduitSelected(event: MatAutocompleteSelectedEvent) {
-      const selectedProduit: Produit = event.option.value;
+onProduitSelected(event: MatAutocompleteSelectedEvent) {
+  const selectedProduit: Produit = event.option.value;
 
-     // Si c'est l'option de création de produit
-    if (selectedProduit === null) {
-      this.openProductFormPanel();
+  // Si c'est l'option de création de produit
+  if (selectedProduit === null) {
+    this.openProductFormPanel();
+    return;
+  }
+
+  if (selectedProduit && selectedProduit.id) {
+    const ligne = this.inputLignes[0];
+    ligne.produitId = selectedProduit.id;
+    ligne.ligneDescription = selectedProduit.description || null;
+    ligne.quantite = ligne.quantite || 1; // Assurer une quantité par défaut
+    ligne.isDuplicate = false;
+
+    // Vérifier les doublons
+    const isInConfirmed = this.confirmedLignes.some(l => l.produitId === selectedProduit.id);
+    if (isInConfirmed) {
+      this.duplicateIndex = 0;
+      this.showDuplicatePopup = true;
+      setTimeout(() => {
+        ligne.produitId = null;
+        ligne.ligneDescription = null;
+        ligne.quantite = 1;
+        this.productControl.setValue(null);
+        this.updateCalculs();
+        this.cdr.detectChanges();
+      }, 0);
       return;
     }
 
-    if (selectedProduit && selectedProduit.id) {
-      const ligne = this.inputLignes[0];
-      ligne.produitId = selectedProduit.id;
-      ligne.ligneDescription = selectedProduit.description || null;
-
-      ligne.isDuplicate = false;
-
-      const isInConfirmed = this.confirmedLignes.some(l => l.produitId === selectedProduit.id);
-      if (isInConfirmed) {
-        this.duplicateIndex = 0;
-        this.showDuplicatePopup = true;
-        setTimeout(() => {
-          ligne.produitId = null;
-          ligne.ligneDescription = null;
-          this.productControl.setValue(null);
-          this.updateCalculs();
-          this.cdr.detectChanges();
-        }, 0);
-        return;
-      }
-
-      // 4) **mettre à jour le FormControl** pour que l’input affiche bien le nom
-      this.productControl.setValue(selectedProduit);
-
-      // 5) recalcul
-      this.updateCalculs();
-
-    }
+    // Mettre à jour l'autocomplete
+    this.productControl.setValue(selectedProduit);
+    this.updateCalculs();
+    this.cdr.detectChanges();
   }
+}
 
   
 }

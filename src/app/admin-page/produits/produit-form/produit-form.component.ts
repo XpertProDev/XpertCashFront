@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
 import { NgxBarcode6Module } from 'ngx-barcode6';
+import { Produit } from '../../MODELS/produit.model';
 
 @Component({
   selector: 'app-produit-form',
@@ -86,6 +87,7 @@ export class ProduitFormComponent {
     showPopupBoutique = false;
     showBoutiqueSelectionPanel: boolean = false;
     selectedBoutiques: any[] = [];
+    isSending: boolean = false;
     // Variable regroupant toutes les informations du popup
     popupData: PopupData = { title: '', message: '', image: '', type: 'success' };
     // Getter pour faciliter l'accès aux contrôles dans le template
@@ -546,9 +548,8 @@ export class ProduitFormComponent {
         this.errorMessage = "Veuillez vérifier les informations saisies.";
         return;
       }
-      this.isLoading = true;
+     this.isSending = true;
       const produit = this.ajouteProduitForm.value;
-      console.log('Produit soumis:', produit);
       const tokenStored = localStorage.getItem('authToken');
       if (!tokenStored) {
         this.showPopupMessage({
@@ -557,85 +558,96 @@ export class ProduitFormComponent {
           image: 'assets/img/error.png',
           type: 'error'
         });
-        this.isLoading = false;
+        this.isSending = false;
         return;
       }
-      // const token = `Bearer ${tokenStored}`;
+
       const addToStock = this.isChecked;
+
       try {
         let finalImage: File;
-        // Si une image a été sélectionnée
         if (this.imageFile && this.imageFile.name !== 'default.svg') {
-          console.log('Compression de l\'image en cours...');
-          // Options de compression
           const options = {
             maxSizeMB: 1,
             maxWidthOrHeight: 1000,
             useWebWorker: true,
           };
           const compressedFile = await imageCompression(this.imageFile, options);
-          console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
-          // Vérification du type MIME du fichier compressé
           if (compressedFile.type !== 'image/png' && compressedFile.type !== 'image/jpeg') {
             this.errorMessage = 'Le fichier compressé n\'est pas un format valide (PNG ou JPEG).';
-            this.isLoading = false;
+            this.isSending = false;
             return;
           }
-          // Changer le nom du fichier en fonction du type MIME
           const extension = compressedFile.type === 'image/png' ? '.png' : '.jpeg';
           finalImage = new File([compressedFile], this.imageFile.name.replace(/\..+$/, extension), {
-            type: compressedFile.type, // Forcer le type MIME à PNG ou JPEG
+            type: compressedFile.type,
             lastModified: Date.now()
           });
-          console.log('Final Image:', finalImage);
         } else {
-          // Si aucune image n'a été sélectionnée, utiliser l'image SVG générée
-          const productName = produit.nom.trim()[0]; // Récupérer la première lettre du nom du produit
+          const productName = produit.nom.trim()[0];
           finalImage = this.dataURLtoFile(this.generateImageFromLetter(productName), 'default.svg');
-          console.log('Image par défaut utilisée:', finalImage);
         }
-        // const boutiqueId = this.boutiqueIdSelected;
-        // const boutiqueId = this.boutiqueIdSelected || this.boutiquesList[0]?.id;
+
         if (this.boutiqueIdSelected.length === 0) {
           this.errorMessage = "Veuillez sélectionner au moins une boutique.";
-          this.isLoading = false;
+          this.isSending = false;
           return;
         }
+
         const quantitesSelected = this.boutiqueIdSelected.map(id => Number(this.quantitesMap[id]) || 0);
         const seuilsSelected = this.boutiqueIdSelected.map(id => Number(this.seuilsMap[id]) || 0);
+
         this.produitService
           .ajouterProduit(
-              this.boutiqueIdSelected, 
-              quantitesSelected, 
-              seuilsSelected,
-              produit, 
-              finalImage, 
-              addToStock
-          ).subscribe({
-            next: data => {
-              this.showPopupMessage({
-                title: 'Succès',
-                message: 'Produit créé avec succès',
-                image: 'assets/img/succcccc.png',
-                type: 'success',
-              });
-              this.ajouteProduitForm.reset();
-              this.myControl.reset();
-              this.uniteControl.reset();
-              this.imageFile = null;
-              this.selectedFile = null;
-              this.newPhotoUrl = null;
-              this.isLoading = false;
-              this.router.navigate(['/addfacture-proforma']);
+            this.boutiqueIdSelected,
+            quantitesSelected,
+            seuilsSelected,
+            produit,
+            finalImage,
+            addToStock
+          )
+          .subscribe({
+            next: (produits: Produit[]) => {
+              const newProduit = produits[0];
+              if (newProduit) {
+                const updatedProduit: Produit = {
+                  id: newProduit.id,
+                  nom: produit.nom,
+                  description: produit.description || '', // Valeur par défaut si undefined
+                  prixVente: produit.prixVente,
+                  prixAchat: produit.prixAchat,
+                  categorieId: produit.categorieId,
+                  uniteId: produit.uniteId,
+                  typeProduit: produit.typeProduit,
+                  codeBare: produit.codeBare || '', // Valeur par défaut si undefined
+                  codeGenerique: newProduit.codeGenerique || '', // Valeur par défaut si undefined
+                  quantite: quantitesSelected[0] || 0, // Valeur par défaut si undefined
+                  seuilAlert: seuilsSelected[0] || 0, // Valeur par défaut si undefined
+                  photo: newProduit.photo || '', // Valeur par défaut si undefined
+                  enStock: addToStock,
+                  boutiqueId: this.boutiqueIdSelected?.length > 0 ? this.boutiqueIdSelected[0] : null // Ajout de boutiqueId
+                };
+
+                this.produitAjoute.emit(updatedProduit);
+
+                this.ajouteProduitForm.reset();
+                this.myControl.reset();
+                this.uniteControl.reset();
+                this.imageFile = null;
+                this.selectedFile = null;
+                this.newPhotoUrl = null;
+                this.isSending = false;
+
+                this.close.emit();
+              } else {
+                console.error('Aucun produit retourné par l\'API');
+                this.isSending = false;
+              }
             },
-            error: error => {
+            error: (error) => {
               let errorMessage = 'Erreur lors de la création du produit';
               if (error.error) {
-                if (typeof error.error === 'object' && error.error.error) {
-                  errorMessage = error.error.error;
-                } else if (typeof error.error === 'string') {
-                  errorMessage = error.error;
-                }
+                errorMessage = typeof error.error === 'string' ? error.error : error.error.message;
               }
               errorMessage = errorMessage.replace('Une erreur est survenue : ', '');
               this.showPopupMessage({
@@ -644,15 +656,16 @@ export class ProduitFormComponent {
                 image: 'assets/img/error.png',
                 type: 'error'
               });
-              this.isLoading = false;
+              this.isSending = false;
             }
           });
       } catch (error) {
         console.error('Erreur lors de la compression:', error);
         this.errorMessage = 'Erreur lors de la compression de l\'image';
-        this.isLoading = false;
+        this.isSending = false;
       }
     }
+
     // Options de configuration pour le code barre
     showBarcode = false;
     // Modifiez onCodeBarChange() :

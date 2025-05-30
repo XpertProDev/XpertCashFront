@@ -362,7 +362,10 @@
                 </div>
 
                 <div class="btn_ajouter">
-                  <button class="btn_save" (click)="onSubmit()">Sauvegarder</button>
+                  <button class="btn_save" (click)="onSubmit()" [disabled]="isSending">
+                      <span *ngIf="!isSending">Sauvegarder</span>
+                      <div *ngIf="isSending" class="mini-spinner"></div>
+                  </button>
                 </div>
                 
               </div>
