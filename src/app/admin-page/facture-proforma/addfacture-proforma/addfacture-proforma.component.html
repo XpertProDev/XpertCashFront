@@ -450,8 +450,10 @@
     <div class="overlay" (click)="closeClientFormPanel()"></div>
     <div class="content_cadre_right" (click)="$event.stopPropagation()">
       <div class="cadre_right">
-        <div class="add_client">
-         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Incidunt explicabo illum sint id iure aperiam ab commodi optio voluptate, velit minima architecto pariatur fuga, vitae similique? Aperiam repellendus quasi distinctio?
+        <div class="add_client" style="margin: 10% 0 0 5%;">
+          <app-client-form
+            (close)="closeClientFormPanel()">
+          </app-client-form>
         </div>
       </div>
     </div>
@@ -465,8 +467,10 @@
     <div class="overlay" (click)="closeEntrepriseFormPanel()"></div>
     <div class="content_cadre_right" (click)="$event.stopPropagation()">
       <div class="cadre_right">
-        <div class="add_entreprise">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel illo cum repudiandae voluptas eos architecto eaque a, laudantium dolores magni.
+        <div class="add_entreprise" style="margin: 10% 0 0 5%;">
+          <app-entreprise-form
+          (close)="closeEntrepriseFormPanel()">
+          </app-entreprise-form>
         </div>
       </div>
     </div>

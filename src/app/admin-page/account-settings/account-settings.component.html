@@ -40,7 +40,7 @@
                                         <div class="header_apercu">
                                             <!-- // logo entreprise -->
                                             <div class="logo_entreprise">
-                                                <img [src]="logo"  (error)="logo='http://localhost:8080/assets/img/logo.jpeg'"
+                                                <img [src]="logo" (error)="logo='http://localhost:8080/defaultLogo/Votre.png'" 
                                                 alt="Logo de l'entreprise">
                                             </div>
                                             <!-- entete entreprise  -->
@@ -63,7 +63,7 @@
                                         <!-- // date  -->
                                         <div class="date">
                                             <!-- <p>Bamako, le 12 Mai 2025</p> -->
-                                            <p>dd/MM/yyyy</p>
+                                            <p>{{ form.get('siege')?.value }} dd/MM/yyyy</p>
                                         </div>
 
                                         <!-- nom et object  -->
@@ -174,7 +174,7 @@
                                                     </div>
                                                     <div>
                                                         <em >
-                                                            Adresse : {{ form.get('adresse')?.value }} /{{ form.get('siege')?.value }}-{{ form.get('pays')?.value }}
+                                                            Adresse : {{ form.get('adresse')?.value }} / {{ form.get('pays')?.value }}
                                                         </em>
                                                     </div>
                                                 </div>
@@ -194,9 +194,9 @@
                             <!-- // Champs de la modification de facture dans setting  -->
                             <div class="champs_setting_facture">
                                 <div class="content_edit_facture" [formGroup]="form">
-                                    <!-- // Informations de l'entreprise  -->
+                                    <!-- // Informations de coordonées  -->
                                     <div class="titre_champ">
-                                        <h6>Informations de coordonées</h6>
+                                        <h6>Haut de page</h6>
                                     </div>
 
                                     <input type="file" 
@@ -237,10 +237,17 @@
                                     </div>
                                 
                                     <div class="champ_grid">
-                                        <!-- // Input de Nom Adresse  -->
-                                        <div class="champ_input ">
-                                            <input class="input_focus" type="text" formControlName="adresse" placeholder="Saisis l'adresse">
-                                            <label class="label">Adresse</label>
+
+                                        <!-- Input de Téléphone  -->
+                                        <div class="champ_input">
+                                            <input class="input_focus" type="telephone" formControlName="telephone" placeholder="00 00 00 00">
+                                            <label class="label">Téléphone</label>
+                                        </div>
+
+                                        <!-- // Input de siege   -->
+                                        <div class="champ_input">
+                                            <input class="input_focus" type="text" formControlName="siege" placeholder="ex: Bamako">
+                                            <label class="label">Siege</label>
                                         </div>
 
                                         <!-- Input de Pays  -->
@@ -254,17 +261,11 @@
                                              </select> -->
                                             <label class="label">Pays</label>
                                         </div>
-
-                                        <!-- Input de Téléphone  -->
-                                        <div class="champ_input">
-                                            <input class="input_focus" type="telephone" formControlName="telephone" placeholder="00 00 00 00">
-                                            <label class="label">Téléphone</label>
-                                        </div>
                                     </div>
 
                                     <!-- // Informations légales & bancaires  -->
                                     <div class="titre_champ" style="margin-top: 30px;">
-                                        <h6>Informations légales & bancaires</h6>
+                                        <h6>Bas de page</h6>
                                     </div>
                                 
                                     <div class="champ_grid">
@@ -300,16 +301,16 @@
                                             <label class="label">NIF</label>
                                         </div>
 
-                                        <!-- // Input de siege   -->
-                                        <div class="champ_input">
-                                            <input class="input_focus" type="text" formControlName="siege" placeholder="Saisis le siege">
-                                            <label class="label">Siege</label>
+                                        <!-- // Input de Nom Adresse  -->
+                                        <div class="champ_input ">
+                                            <input class="input_focus" type="text" formControlName="adresse" placeholder="Saisis l'adresse">
+                                            <label class="label">Adresse</label>
                                         </div>
                                     </div>
 
-                                    <!-- // Informations légales & bancaires  -->
+                                    <!-- // Signture  -->
                                     <div class="titre_champ" style="margin-top: 30px;">
-                                        <h6>Métadonnées facture</h6>
+                                        <h6>Signature</h6>
                                     </div>
                                 
                                     <div class="champ_grid">
@@ -524,7 +525,7 @@
                         </div>
                         <div>
                             <em class="em_footer">
-                                Adresse : {{ form.get('adresse')?.value }} /{{ form.get('siege')?.value }}-{{ form.get('pays')?.value }}
+                                Adresse : {{ form.get('adresse')?.value }} /{{ form.get('pays')?.value }}
                             </em>
                         </div>
                     </div>

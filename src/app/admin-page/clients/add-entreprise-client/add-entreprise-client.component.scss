@@ -1,5 +1,9 @@
+
+
 .container_global {
-    margin-right: 15%;
+  display: grid;
+  grid-template-columns: 72% 28%;
+  position: relative;
 }
 
 .title {

@@ -830,4 +830,8 @@ export class ProduitFormComponent {
     });
   }
 
+  gotToReturn() {
+    this.router.navigate(['/addfacture-proforma']);
+  }
+
 }

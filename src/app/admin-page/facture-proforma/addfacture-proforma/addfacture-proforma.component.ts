@@ -17,6 +17,8 @@ import { FormStateService } from '../../SERVICES/form-state.service';
 import { ProduitFormComponent } from '../../produits/produit-form/produit-form.component';
 import { MatIconModule } from '@angular/material/icon';
 import { NgxBarcode6Module } from 'ngx-barcode6';
+import { ClientFormComponent } from '../../clients/client-form/client-form.component';
+import { EntrepriseFormComponent } from '../../clients/entreprise-form/entreprise-form.component';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -26,9 +28,11 @@ import { NgxBarcode6Module } from 'ngx-barcode6';
     ReactiveFormsModule,
     MatAutocompleteModule,
     CustomNumberPipe,
-    ProduitFormComponent,
     MatIconModule,
-    NgxBarcode6Module
+    NgxBarcode6Module,
+    ProduitFormComponent,
+    ClientFormComponent,
+    EntrepriseFormComponent,
   ],
   templateUrl: './addfacture-proforma.component.html',
   styleUrls: ['./addfacture-proforma.component.scss']
