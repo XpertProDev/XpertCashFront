@@ -644,18 +644,25 @@ export class ProduitFormComponent {
                 this.isSending = false;
               }
             },
-            error: (error) => {
-              let errorMessage = 'Erreur lors de la création du produit';
-              if (error.error) {
-                errorMessage = typeof error.error === 'string' ? error.error : error.error.message;
+            error: (error: any) => {
+              let message: string;
+
+              if (error.status === 409) {
+                // Si le back-end renvoie un 409, c'est un doublon
+                message = 'Un produit portant ce nom existe déjà.';
+              } else if (error.error && typeof error.error === 'string') {
+                // Si le back-end renvoie un message d’erreur au format texte
+                message = error.error;
+              } else if (error.error && error.error.message) {
+                // Si le back-end renvoie un objet { message: string }
+                message = error.error.message;
+              } else {
+                // Cas général
+                message = 'Une erreur est survenue lors de la création du produit.';
               }
-              errorMessage = errorMessage.replace('Une erreur est survenue : ', '');
-              this.showPopupMessage({
-                title: 'Erreur',
-                message: errorMessage,
-                image: 'assets/img/error.png',
-                type: 'error'
-              });
+
+              // Affichage du popup d’erreur
+              this.errorMessage = "Un produit portant ce nom existe déjà.";
               this.isSending = false;
             }
           });
