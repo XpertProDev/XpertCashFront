@@ -30,7 +30,6 @@ import { MatIconModule } from '@angular/material/icon';
 export class AccountSettingsComponent implements OnInit {
   // panelOpenState = false;
   form!: FormGroup;
-  // logo: string = 'assets/img/logo.jpeg';
   logo: string | null = null; 
   selectedLogoFile: File | null = null;
   entrepriseId: number | null = null;
@@ -49,7 +48,12 @@ export class AccountSettingsComponent implements OnInit {
   ngOnInit() {
     this.getFormInit();
     this.getEntrepriseInfo();
+
+    this.getFormInit();
+    this.listenToPrefixSuffixChanges();
+  
   }
+
 
   getFormInit() {
     this.form = this.fb.group({
@@ -66,28 +70,12 @@ export class AccountSettingsComponent implements OnInit {
       rccm: ['xxxx'],
       nif: ['xxxx'],
       signataire: ['Monsieur X'],
-      signataireNom: ['Le Directeur Général']
+      signataireNom: ['Le Directeur Général'],
+      prefixe: ['xxxx'],
+      suffixe: ['xxxx']
     });
   }
 
-  // initializeForm() {
-  //   this.form = this.fb.group({
-  //     nom: [''],
-  //     secteur: [''],
-  //     email: [''],
-  //     adresse: [''],
-  //     pays: [''],
-  //     telephone: [''],
-  //     siteWeb: [''],
-  //     banque: [''],
-  //     siege: [''],
-  //     nina: [''],
-  //     rccm: [''],
-  //     nif: [''],
-  //     signataire: [''],
-  //     signataireNom: ['']
-  //   });
-  // }
 
   getEntrepriseInfo() {
     this.entrepriseService.getEntrepriseInfo().subscribe({
@@ -108,9 +96,13 @@ export class AccountSettingsComponent implements OnInit {
           nif: entreprise.nif,
           signataire: entreprise.signataire,
           signataireNom: entreprise.signataireNom,
-          logo: entreprise.logo
+          logo: entreprise.logo,
+          prefixe: entreprise.prefixe,
+          suffixe: entreprise.suffixe
         });
         // Construire l'URL complète du logo
+        console.log('Logo path from server:', entreprise);
+
         console.log('Logo path from server:', entreprise.logo);
         // this.logoUrl = entreprise.logo ? `http://localhost:8080/${entreprise.logo}` : 'assets/img/logo.jpeg';
         this.logo = 'http://localhost:8080' + entreprise.logo;
@@ -122,12 +114,10 @@ export class AccountSettingsComponent implements OnInit {
     });
   }
 
-  // Gestionnaire de clic pour le lien "ICI"
   onChangeLogoClick(): void {
     this.fileInput.nativeElement.click();
   }
 
-  // Ajoutez ces méthodes pour gérer le popup
   openPreview(): void {
     this.showPreview = true;
   }
@@ -174,7 +164,7 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true; // Active le loading
+    this.isLoading = true;
 
     const formData = new FormData();
     const entrepriseData = this.form.value;
@@ -183,22 +173,40 @@ export class AccountSettingsComponent implements OnInit {
       formData.append('logo', this.selectedLogoFile);
     }
 
-    // Crée un délai de 3 secondes avant l'envoi
     setTimeout(() => {
       this.entrepriseService.updateEntreprise(this.entrepriseId!, formData).subscribe({
         next: (response) => {
-          this.isLoading = false; // Désactive le loading
-          this.snackBar.open(response, 'Fermer', { duration: 3000 }); // Affiche le succès
+          this.isLoading = false;
+          this.snackBar.open(response, 'Fermer', { duration: 3000 });
           this.getEntrepriseInfo();
           this.selectedLogoFile = null;
         },
         error: (error) => {
-          this.isLoading = false; // Désactive le loading
+          this.isLoading = false;
           const errorMessage = error.error || 'Erreur lors de la mise à jour';
-          this.snackBar.open(errorMessage, 'Fermer', { duration: 3000 }); // Affiche l'erreur
+          this.snackBar.open(errorMessage, 'Fermer', { duration: 3000 });
         }
       });
-    }, 3000); // Délai de 3 secondes
+    }, 3000);
   }
+
+  shouldShowPrefixe(): boolean {
+    return !this.form.get('suffixe')?.value;
+  }
+
+  shouldShowSuffixe(): boolean {
+    return !this.form.get('prefixe')?.value;
+  }
+
+    private listenToPrefixSuffixChanges(): void {
+      this.form.get('prefixe')?.valueChanges.subscribe(() => {
+        this.cdRef.markForCheck();
+    });
+
+    this.form.get('suffixe')?.valueChanges.subscribe(() => {
+      this.cdRef.markForCheck();
+    });
+  }
+
 
 }

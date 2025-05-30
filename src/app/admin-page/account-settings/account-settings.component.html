@@ -58,12 +58,12 @@
                                         <!-- // titre  -->
                                         <div class="titre">
                                             <!-- <h2>Facture proforma n˚{{ facture.numeroFacture || '000-00-2025' }}</h2> -->
-                                            <h2>Facture proforma n˚<span style="color: #0000003e;">xxx-xx-xxxx</span></h2>
+                                            <h2>Facture proforma: <span style="color: #0000003e;">{{ form.get('prefixe')?.value  }}xxx-xx-xxxx -{{ form.get('suffixe')?.value  }}</span></h2>
                                         </div>
                                         <!-- // date  -->
                                         <div class="date">
                                             <!-- <p>Bamako, le 12 Mai 2025</p> -->
-                                            <p>dd/MM/yyyy</p>
+                                            <p>{{ form.get('siege')?.value  }}, le ....</p>
                                         </div>
 
                                         <!-- nom et object  -->
@@ -206,15 +206,17 @@
                                         style="display: none;"
                                         id="uniqueFileInputId">
 
-                                    <div class="champ_grid" style="margin: 10px 0 15px;">
-                                        <p style="margin: 0; font-size: 12px;">
-                                            Changer logo 
-                                            <a style="padding-left: 5px;" 
-                                                href="javascript:void(0)" 
-                                                (click)="fileInput.click()">
-                                                ICI
-                                            </a> </p>
-                                    </div>
+                                 <div class="champ_grid" style="margin: 10px 0 15px; display: flex; align-items: center;">
+                                    <p style="margin: 0; font-size: 12px; display: flex; align-items: center;">
+                                        Changer votre logo ici 👉
+                                        <a href="javascript:void(0)"
+                                        (click)="fileInput.click()"
+                                        title="Changer le logo"
+                                        style="padding-left: 8px; cursor: pointer; display: inline-flex; align-items: center;">
+                                            <img src="assets/img/appareil.png" alt="Changer logo" style="width: 25px; height: 25px;"/>
+                                        </a>
+                                    </p>
+                                </div>
                                 
                                     <div class="champ_grid">
                                         <!-- // Input de Nom entreprise  -->
@@ -264,7 +266,7 @@
 
                                     <!-- // Informations légales & bancaires  -->
                                     <div class="titre_champ" style="margin-top: 30px;">
-                                        <h6>Informations légales & bancaires</h6>
+                                        <h6>Informations pour pied de page </h6>
                                     </div>
                                 
                                     <div class="champ_grid">
@@ -325,6 +327,20 @@
                                             <label class="label">Poste</label>
                                         </div>
                                     </div>
+
+                                     <!-- Input Prefixe et Suffiche -->
+                                    <div class="champ_grid">
+                                        <div class="champ_input" *ngIf="shouldShowPrefixe()">
+                                            <input class="input_focus" type="text" formControlName="prefixe" placeholder="Saisis le prefixe de votre facture">
+                                            <label class="label">Préfixe de votre facture</label>
+                                        </div>
+
+                                        <div class="champ_input" *ngIf="shouldShowSuffixe()">
+                                            <input class="input_focus" type="text" formControlName="suffixe" placeholder="Saisis le suffixe de votre facture">
+                                            <label class="label">Suffixe de votre facture</label>
+                                        </div>
+                                    </div>
+
 
                                     <!-- // Btn confirm   -->
                                     <!-- Remplacez la ligne du bouton existant -->
@@ -408,12 +424,12 @@
             <!-- // titre  -->
             <div class="titre">
                 <!-- <h2>Facture proforma n˚{{ facture.numeroFacture || '000-00-2025' }}</h2> -->
-                <h2 style="font-size: 12px;">Facture proforma n˚<span style="color: #0000003e;">xxx-xx-xxxx</span></h2>
+                <h2 style="font-size: 12px;">Facture proforma: <span style="color: #0000003e;">{{ form.get('prefixe')?.value  }}-xxx-xx-xxxx {{ form.get('suffixe')?.value  }}</span></h2>
             </div>
             <!-- // date  -->
             <div class="date">
                 <!-- <p>Bamako, le 12 Mai 2025</p> -->
-                <p style="font-size: 10px;">dd/MM/yyyy</p>
+                <p style="font-size: 10px;">{{ form.get('siege')?.value }}, le ...</p>
             </div>
 
             <!-- nom et object  -->

@@ -344,6 +344,8 @@ export class AddClientsComponent implements OnInit {
       siteWeb: this.entrepriseForm.value.siteWeb,
       signataire: this.entrepriseForm.value.signataire,
       signataireNom: this.entrepriseForm.value.signataireNom,
+      prefixe: this.entrepriseForm.value.prefixe,
+      suffixe: this.entrepriseForm.value.suffixe
 
     };
   
