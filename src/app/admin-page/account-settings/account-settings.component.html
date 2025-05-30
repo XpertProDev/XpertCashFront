@@ -33,7 +33,7 @@
                         <div class="content_setting_facture">
                             <!-- // Facture de vue edit  -->
                             <div class="contenu_left_facture">
-                                <div class="facture_model" title="Cliquer pour voir l'aperçu" (click)="openPreview()">
+                                <div class="facture_model">
                                     <!-- // cadre de facture de model  -->
                                     <div class="content">
                                         <!-- // header apercu  -->
@@ -161,28 +161,24 @@
                                     <!-- // Footer  -->
                                     <div class="container_footer">
                                         <div class="footer">
-                                            <!-- // Ligne  -->
-                                            <div class="container_footer">
-                                                <div class="footer">
-                                                    <!-- // Ligne  -->
-                                                    <hr>
-                                                    <p><strong>{{form.get('siteWeb')?.value }}</strong></p>
-                                                    <div>
-                                                        <em>
-                                                            NINA : {{form.get('nina')?.value }} ; RCCM : {{form.get('rccm')?.value }} ; NIF : {{form.get('nif')?.value }} ; Banque : {{form.get('banque')?.value }}
-                                                        </em>
-                                                    </div>
-                                                    <div>
-                                                        <em >
-                                                            Adresse : {{ form.get('adresse')?.value }} / {{ form.get('pays')?.value }}
-                                                        </em>
-                                                    </div>
-                                                </div>
+                                            <hr>
+                                            <p *ngIf="form.get('siteWeb')?.value"><strong>{{form.get('siteWeb')?.value }}</strong></p>
+                                            
+                                            <div *ngIf="getLegalInfo()">
+                                            <em>{{ getLegalInfo() }}</em>
+                                            </div>
+                                            
+                                            <div *ngIf="getAddressInfo()">
+                                            <em>{{ getAddressInfo() }}</em>
                                             </div>
                                         </div>
                                     </div>
 
                                 </div>
+                                <div class="voir_apercu" title="Voir l'aperçu de la facture" (click)="openPreview()">
+                                    Agrandir <i class="ri-eye-2-line"></i>
+                                </div>
+
                                 <!-- // autre Paramètres de la facture  -->
                                 <!-- <div class="cadre_setting">
                                     <div class="titre_autre">
@@ -515,18 +511,17 @@
                 <!-- // Ligne  -->
                 <div class="container_footer">
                     <div class="footer" style="line-height: 12px;">
-                        <!-- // Ligne  -->
                         <hr>
-                        <p><strong style="font-size: 10px;">{{form.get('siteWeb')?.value }}</strong></p>
-                        <div>
-                            <em class="em_footer">
-                                NINA : {{form.get('nina')?.value }} ; RCCM : {{form.get('rccm')?.value }} ; NIF : {{form.get('nif')?.value }} ; Banque : {{form.get('banque')?.value }}
-                            </em>
+                        <p *ngIf="form.get('siteWeb')?.value">
+                        <strong style="font-size: 10px;">{{form.get('siteWeb')?.value }}</strong>
+                        </p>
+                        
+                        <div *ngIf="getLegalInfo()">
+                        <em class="em_footer">{{ getLegalInfo() }}</em>
                         </div>
-                        <div>
-                            <em class="em_footer">
-                                Adresse : {{ form.get('adresse')?.value }} /{{ form.get('pays')?.value }}
-                            </em>
+                        
+                        <div *ngIf="getAddressInfo()">
+                        <em class="em_footer">{{ getAddressInfo() }}</em>
                         </div>
                     </div>
                 </div>

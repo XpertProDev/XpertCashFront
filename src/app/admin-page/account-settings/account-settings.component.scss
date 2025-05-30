@@ -58,7 +58,7 @@
   // box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   border: 1px solid #b9b9b9;
   position: relative;
-  cursor: pointer;
+  // cursor: pointer;
 }
 
 .champs_setting_facture {
@@ -654,4 +654,10 @@ td.td_left {
 .preview-close:hover {
   color: #ff0000;
   transition: all .5s;
+}
+
+.voir_apercu {
+  font-size: 12px;
+  cursor: pointer;
+  margin: 5px 0px;
 }
