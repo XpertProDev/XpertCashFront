@@ -18,6 +18,10 @@ th {
   background-color: #f9f9f9;
 }
 
+.title_input {
+  margin-top: 15px;
+}
+
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -297,7 +301,7 @@ gap: 20px;
     grid-template-rows: 1fr;
     grid-column-gap: 0px;
     grid-row-gap: 0px;
-    gap: 20px;
+    // gap: 20px;
 }
 
 // .input_focus_type_quantite {

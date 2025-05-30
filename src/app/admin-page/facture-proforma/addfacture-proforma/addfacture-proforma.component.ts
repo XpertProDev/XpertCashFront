@@ -17,6 +17,8 @@ import { FormStateService } from '../../SERVICES/form-state.service';
 import { ProduitFormComponent } from '../../produits/produit-form/produit-form.component';
 import { MatIconModule } from '@angular/material/icon';
 import { NgxBarcode6Module } from 'ngx-barcode6';
+import { ClientFormComponent } from '../../clients/client-form/client-form.component';
+import { EntrepriseFormComponent } from '../../clients/entreprise-form/entreprise-form.component';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -26,9 +28,11 @@ import { NgxBarcode6Module } from 'ngx-barcode6';
     ReactiveFormsModule,
     MatAutocompleteModule,
     CustomNumberPipe,
-    ProduitFormComponent,
     MatIconModule,
-    NgxBarcode6Module
+    NgxBarcode6Module,
+    ProduitFormComponent,
+    ClientFormComponent,
+    EntrepriseFormComponent,
   ],
   templateUrl: './addfacture-proforma.component.html',
   styleUrls: ['./addfacture-proforma.component.scss']
@@ -84,6 +88,14 @@ export class AddfactureProformaComponent implements OnInit {
   showProductFormPanel: boolean = false;
   panelAnimationState: 'hidden' | 'visible' = 'hidden';
 
+  clientControl = new FormControl();
+  filteredClients: Observable<Clients[]>;
+  showClientFormPanel: boolean = false;
+
+  entrepriseControl = new FormControl();
+  filteredEntreprises: Observable<any[]>;
+  showEntrepriseFormPanel: boolean = false;
+
   constructor(
     private router: Router,
     private clientService: ClientService,
@@ -100,10 +112,77 @@ export class AddfactureProformaComponent implements OnInit {
       map(value => typeof value === 'string' ? value : value?.nom),
       map(name => name ? this._filterProduits(name) : this.produits.slice())
     );
+
+    this.filteredClients = this.clientControl.valueChanges.pipe(
+      startWith(''),
+      map(value => typeof value === 'string' ? value : value?.nomComplet),
+      map(name => name ? this._filterClients(name) : this.clients.slice())
+    );
+
+    // Ajoutez après les autres initialisations
+    this.filteredEntreprises = this.entrepriseControl.valueChanges.pipe(
+      startWith(''),
+      map(value => typeof value === 'string' ? value : value?.nom),
+      map(name => name ? this._filterEntreprises(name) : this.entreprises.slice())
+    );
+  }
+
+  private _filterClients(name: string): Clients[] {
+    const filterValue = name.toLowerCase();
+    return this.clients.filter(client => 
+      client.nomComplet.toLowerCase().includes(filterValue) ||
+      (client.entrepriseClient?.nom.toLowerCase().includes(filterValue))
+    );
+  }
+
+  displayClient(client: Clients): string {
+    if (!client) return '';
+    return client.entrepriseClient 
+      ? `${client.nomComplet} - ${client.entrepriseClient.nom}`
+      : client.nomComplet;
+  }
+
+  onClientSelected(event: MatAutocompleteSelectedEvent) {
+    if (event.option.value === null) {
+      this.openClientFormPanel();
+    } else {
+      this.selectedClientId = event.option.value.id;
+    }
+  }
+
+  onClientFocus() {
+    if (!this.clientControl.value) {
+      this.clientControl.setValue('');
+    }
+  }
+
+  private _filterEntreprises(name: string): any[] {
+    const filterValue = name.toLowerCase();
+    return this.entreprises.filter(entreprise => 
+      entreprise.nom.toLowerCase().includes(filterValue)
+    );
+  }
+
+  displayEntreprise(entreprise: any): string {
+    return entreprise && entreprise.nom ? entreprise.nom : '';
+  }
+
+  onEntrepriseSelected(event: MatAutocompleteSelectedEvent) {
+    if (event.option.value === null) {
+      this.openEntrepriseFormPanel();
+    } else {
+      this.selectedEntreprise = event.option.value;
+    }
+  }
+
+  onEntrepriseFocus() {
+    if (!this.entrepriseControl.value) {
+      this.entrepriseControl.setValue('');
+    }
   }
 
   async ngOnInit(): Promise<void> {
-    await this.getUserInfo();
+    this.getUserInfo();
     await Promise.all([
       this.getListClients(),
       this.getListEntreprise(),
@@ -121,6 +200,14 @@ export class AddfactureProformaComponent implements OnInit {
       this.activeRemise = savedState.activeRemise;
       this.remisePourcentage = savedState.remisePourcentage;
       this.activeTva = savedState.activeTva;
+
+      if (savedState.clientControl) {
+        this.clientControl.setValue(savedState.clientControl);
+      }
+
+      if (savedState.entrepriseControl) {
+        this.entrepriseControl.setValue(savedState.entrepriseControl);
+      }
     }
   }
 
@@ -147,6 +234,7 @@ export class AddfactureProformaComponent implements OnInit {
   getMontantRemise(): number {
     return (this.getTotalHT() * this.remisePourcentage) / 100;
   }
+  
 
   getTotalApresRemise(): number {
     return this.getTotalHT() - this.getMontantRemise();
@@ -231,6 +319,8 @@ export class AddfactureProformaComponent implements OnInit {
               ? { id: client.entrepriseClient.id, nom: client.entrepriseClient.nom }
               : null
           })).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+
+          this.clientControl.setValue(null);
           this.totalClients = this.clients.length;
           this.noClientsAvailable = this.clients.length === 0;
         },
@@ -247,6 +337,7 @@ export class AddfactureProformaComponent implements OnInit {
       this.clientService.getListEntreprises().subscribe({
         next: (data) => {
           this.entreprises = data.sort((a: any, b: any) => (b.id ?? 0) - (a.id ?? 0));
+          this.entrepriseControl.setValue(null);
         },
         error: (err) => console.error('Erreur récupération entreprises :', err)
       });
@@ -458,7 +549,9 @@ export class AddfactureProformaComponent implements OnInit {
       confirmedLignes: this.confirmedLignes,
       activeRemise: this.activeRemise,
       remisePourcentage: this.remisePourcentage,
-      activeTva: this.activeTva
+      activeTva: this.activeTva,
+      clientControl: this.clientControl.value,
+      entrepriseControl: this.entrepriseControl.value
     });
 
     const lignes = [
@@ -559,7 +652,6 @@ export class AddfactureProformaComponent implements OnInit {
     return produit && produit.nom ? produit.nom : '';
   }
 
-
   // Méthode pour ouvrir le panneau
   openProductFormPanel(): void {
     this.showProductFormPanel = true;
@@ -572,6 +664,30 @@ export class AddfactureProformaComponent implements OnInit {
     setTimeout(() => {
       this.showProductFormPanel = false;
     }, 300); // Correspond à la durée de l'animation
+  }
+
+  openClientFormPanel() {
+    this.showClientFormPanel = true;
+    this.panelAnimationState = 'visible';
+  }
+
+  closeClientFormPanel() {
+    this.panelAnimationState = 'hidden';
+    setTimeout(() => {
+      this.showClientFormPanel = false;
+    }, 300);
+  }
+
+  openEntrepriseFormPanel() {
+    this.showEntrepriseFormPanel = true;
+    this.panelAnimationState = 'visible';
+  }
+
+  closeEntrepriseFormPanel() {
+    this.panelAnimationState = 'hidden';
+    setTimeout(() => {
+      this.showEntrepriseFormPanel = false;
+    }, 300);
   }
 
   onProduitSelected(event: MatAutocompleteSelectedEvent) {

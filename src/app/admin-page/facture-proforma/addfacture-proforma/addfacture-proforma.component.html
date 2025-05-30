@@ -34,12 +34,60 @@
 
                       <div class="champ_grid">
                         <!-- Select Client -->
-                        <select *ngIf="typeDestinataire === 'client'" class="input_focus" [(ngModel)]="selectedClientId" name="client_id" required>
-                          <option [ngValue]="null">Sélectionner un client</option>
-                          <option *ngFor="let client of clients" [ngValue]="client.id">
-                            {{ client.nomComplet }} <span *ngIf="client.entrepriseClient"> - {{ client.entrepriseClient.nom }}</span>
-                          </option>
-                        </select>
+                        <!-- Remplacez le bloc select client par ceci -->
+                        <div *ngIf="typeDestinataire === 'client'">
+                          <div class="champ_input" style="margin-right: 15px;">
+                            <input
+                              matInput
+                              [formControl]="clientControl"
+                              [matAutocomplete]="autoClients"
+                              placeholder="Sélectionner un client"
+                              class="input_focus"
+                              (focus)="onClientFocus()"
+                            >
+                            <label for="description" class="label">Clients</label>
+                            <mat-autocomplete #autoClients="matAutocomplete" [displayWith]="displayClient" (optionSelected)="onClientSelected($event)">
+                              <mat-option [value]="null">
+                                <div style="display: flex; align-items: center; color: #0672E4;">
+                                  <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                                  <span style="margin-left: 8px;">Créer un client</span>
+                                </div>
+                              </mat-option>
+                              <mat-option *ngFor="let client of filteredClients | async" [value]="client">
+                                <div class="option-content">
+                                  {{ client.nomComplet }} <span *ngIf="client.entrepriseClient">- {{ client.entrepriseClient.nom }}</span>
+                                </div>
+                              </mat-option>
+                            </mat-autocomplete>
+                          </div>
+                        </div>
+
+                        <div *ngIf="typeDestinataire === 'entreprise'">
+                          <div class="champ_input" style="margin-right: 15px;">
+                            <input
+                              matInput
+                              [formControl]="entrepriseControl"
+                              [matAutocomplete]="autoEntreprises"
+                              placeholder="Sélectionner une entreprise"
+                              class="input_focus"
+                              (focus)="onEntrepriseFocus()"
+                            >
+                            <label for="description" class="label">Entreprise</label>
+                            <mat-autocomplete #autoEntreprises="matAutocomplete" [displayWith]="displayEntreprise" (optionSelected)="onEntrepriseSelected($event)">
+                              <mat-option [value]="null">
+                                <div style="display: flex; align-items: center; color: #0672E4;">
+                                  <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                                  <span style="margin-left: 8px;">Créer une entreprise</span>
+                                </div>
+                              </mat-option>
+                              <mat-option *ngFor="let entreprise of filteredEntreprises | async" [value]="entreprise">
+                                <div class="option-content">
+                                  {{ entreprise.nom }}
+                                </div>
+                              </mat-option>
+                            </mat-autocomplete>
+                          </div>
+                        </div>
 
                         <div class="champ_input">
                           <label for="dateFacture" style="font-size:12px; position:relative; top:0;">
@@ -66,18 +114,6 @@
                           {{ entreprise.nom }}
                         </option>
                       </select> -->
-                      <select *ngIf="typeDestinataire === 'entreprise'"
-                              [(ngModel)]="selectedEntreprise"
-                              name="entreprise"
-                              class="input_focus"
-                              [ngModelOptions]="{ standalone: true }"
-                              required>
-                        <option [ngValue]="null">Sélectionner une entreprise</option>
-                        <option *ngFor="let entreprise of entreprises"
-                                [ngValue]="entreprise">
-                          {{ entreprise.nom }}
-                        </option>
-                      </select>
 
                     </div>
 
@@ -171,7 +207,7 @@
                                       >
                                       <mat-autocomplete #autoProduits="matAutocomplete" [displayWith]="displayProduit" (optionSelected)="onProduitSelected($event)">
                                         <mat-option [value]="null">
-                                          <div style="display: flex; align-items: center; color: #0672E4;" (click)="openProductFormPanel()">
+                                          <div style="display: flex; align-items: center; color: #0672E4;">
                                             <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
                                             <span style="margin-left: 8px;">Créer un produit</span>
                                           </div>
@@ -401,6 +437,40 @@
             (produitAjoute)="onProduitAjoute($event)"
             (close)="closeProductFormPanel()">
           </app-produit-form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modifier le conteneur du panneau client -->
+  <div class="container_cadre_facture" 
+      [class.show]="showClientFormPanel"
+      [class.slide-in]="panelAnimationState === 'visible'"
+      [class.slide-out]="panelAnimationState === 'hidden'">
+    <div class="overlay" (click)="closeClientFormPanel()"></div>
+    <div class="content_cadre_right" (click)="$event.stopPropagation()">
+      <div class="cadre_right">
+        <div class="add_client" style="margin: 10% 0 0 5%;">
+          <app-client-form
+            (close)="closeClientFormPanel()">
+          </app-client-form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modifier le conteneur du panneau entreprise-->
+  <div class="container_cadre_facture" 
+      [class.show]="showEntrepriseFormPanel"
+      [class.slide-in]="panelAnimationState === 'visible'"
+      [class.slide-out]="panelAnimationState === 'hidden'">
+    <div class="overlay" (click)="closeEntrepriseFormPanel()"></div>
+    <div class="content_cadre_right" (click)="$event.stopPropagation()">
+      <div class="cadre_right">
+        <div class="add_entreprise" style="margin: 10% 0 0 5%;">
+          <app-entreprise-form
+          (close)="closeEntrepriseFormPanel()">
+          </app-entreprise-form>
         </div>
       </div>
     </div>

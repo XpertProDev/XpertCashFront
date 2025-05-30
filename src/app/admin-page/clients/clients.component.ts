@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnInit, ViewChild } from "@angular/core";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { Component, EventEmitter, OnInit, Output, ViewChild } from "@angular/core";
+import { FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatPaginator, MatPaginatorModule, PageEvent } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
 import { Router, RouterLink } from "@angular/router";
@@ -153,9 +153,9 @@ export class ClientsComponent implements OnInit  {
     this.router.navigate(['/detail-entreprise', clientId]);
   }
 
-   // Ouvre/ferme le popup choix d'ajoute client
-   openPopup() { this.showPopup = true; }
-   closePopup() { this.showPopup = false; }
+  // Ouvre/ferme le popup choix d'ajoute client
+  openPopup() { this.showPopup = true; }
+  closePopup() { this.showPopup = false; }
 
 
 }

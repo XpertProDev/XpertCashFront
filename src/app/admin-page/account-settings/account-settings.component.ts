@@ -209,4 +209,41 @@ export class AccountSettingsComponent implements OnInit {
   }
 
 
+  getLegalInfo(): string {
+    const parts = [];
+    
+    if (this.form.get('nina')?.value) {
+      parts.push(`NINA : ${this.form.get('nina')?.value}`);
+    }
+    
+    if (this.form.get('rccm')?.value) {
+      parts.push(`RCCM : ${this.form.get('rccm')?.value}`);
+    }
+    
+    if (this.form.get('nif')?.value) {
+      parts.push(`NIF : ${this.form.get('nif')?.value}`);
+    }
+    
+    if (this.form.get('banque')?.value) {
+      parts.push(`Banque : ${this.form.get('banque')?.value}`);
+    }
+    
+    return parts.join(' ; ');
+  }
+
+  getAddressInfo(): string {
+    const adresse = this.form.get('adresse')?.value;
+    const pays = this.form.get('pays')?.value;
+    
+    if (adresse && pays) {
+      return `Adresse : ${adresse} / ${pays}`;
+    } else if (adresse) {
+      return `Adresse : ${adresse}`;
+    } else if (pays) {
+      return `Adresse : ${pays}`;
+    }
+    
+    return '';
+  }
+
 }

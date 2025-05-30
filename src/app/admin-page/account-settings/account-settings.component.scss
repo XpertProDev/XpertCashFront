@@ -58,7 +58,7 @@
   // box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   border: 1px solid #b9b9b9;
   position: relative;
-  cursor: pointer;
+  // cursor: pointer;
 }
 
 .champs_setting_facture {
@@ -564,7 +564,7 @@ a:hover img {
   animation: scaleIn 0.3s ease-out;
   // width: 120mm;
   // min-height: 150mm;
-  margin-top: 0%;
+  margin-top: 5%;
   
   .preview-header {
     display: flex;
@@ -660,4 +660,10 @@ a:hover img {
 .preview-close:hover {
   color: #ff0000;
   transition: all .5s;
+}
+
+.voir_apercu {
+  font-size: 12px;
+  cursor: pointer;
+  margin: 5px 0px;
 }

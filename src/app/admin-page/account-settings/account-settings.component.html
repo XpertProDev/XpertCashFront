@@ -33,14 +33,14 @@
                         <div class="content_setting_facture">
                             <!-- // Facture de vue edit  -->
                             <div class="contenu_left_facture">
-                                <div class="facture_model" title="Cliquer pour voir l'aperçu" (click)="openPreview()">
+                                <div class="facture_model">
                                     <!-- // cadre de facture de model  -->
                                     <div class="content">
                                         <!-- // header apercu  -->
                                         <div class="header_apercu">
                                             <!-- // logo entreprise -->
                                             <div class="logo_entreprise">
-                                                <img [src]="logo"  (error)="logo='http://localhost:8080/assets/img/logo.jpeg'"
+                                                <img [src]="logo" (error)="logo='http://localhost:8080/defaultLogo/Votre.png'" 
                                                 alt="Logo de l'entreprise">
                                             </div>
                                             <!-- entete entreprise  -->
@@ -161,28 +161,24 @@
                                     <!-- // Footer  -->
                                     <div class="container_footer">
                                         <div class="footer">
-                                            <!-- // Ligne  -->
-                                            <div class="container_footer">
-                                                <div class="footer">
-                                                    <!-- // Ligne  -->
-                                                    <hr>
-                                                    <p><strong>{{form.get('siteWeb')?.value }}</strong></p>
-                                                    <div>
-                                                        <em>
-                                                            NINA : {{form.get('nina')?.value }} ; RCCM : {{form.get('rccm')?.value }} ; NIF : {{form.get('nif')?.value }} ; Banque : {{form.get('banque')?.value }}
-                                                        </em>
-                                                    </div>
-                                                    <div>
-                                                        <em >
-                                                            Adresse : {{ form.get('adresse')?.value }} /{{ form.get('siege')?.value }}-{{ form.get('pays')?.value }}
-                                                        </em>
-                                                    </div>
-                                                </div>
+                                            <hr>
+                                            <p *ngIf="form.get('siteWeb')?.value"><strong>{{form.get('siteWeb')?.value }}</strong></p>
+                                            
+                                            <div *ngIf="getLegalInfo()">
+                                            <em>{{ getLegalInfo() }}</em>
+                                            </div>
+                                            
+                                            <div *ngIf="getAddressInfo()">
+                                            <em>{{ getAddressInfo() }}</em>
                                             </div>
                                         </div>
                                     </div>
 
                                 </div>
+                                <div class="voir_apercu" title="Voir l'aperçu de la facture" (click)="openPreview()">
+                                    Agrandir <i class="ri-eye-2-line"></i>
+                                </div>
+
                                 <!-- // autre Paramètres de la facture  -->
                                 <!-- <div class="cadre_setting">
                                     <div class="titre_autre">
@@ -194,9 +190,9 @@
                             <!-- // Champs de la modification de facture dans setting  -->
                             <div class="champs_setting_facture">
                                 <div class="content_edit_facture" [formGroup]="form">
-                                    <!-- // Informations de l'entreprise  -->
+                                    <!-- // Informations de coordonées  -->
                                     <div class="titre_champ">
-                                        <h6>Informations de coordonées</h6>
+                                        <h6>Haut de page</h6>
                                     </div>
 
                                     <input type="file" 
@@ -239,10 +235,17 @@
                                     </div>
                                 
                                     <div class="champ_grid">
-                                        <!-- // Input de Nom Adresse  -->
-                                        <div class="champ_input ">
-                                            <input class="input_focus" type="text" formControlName="adresse" placeholder="Saisis l'adresse">
-                                            <label class="label">Adresse</label>
+
+                                        <!-- Input de Téléphone  -->
+                                        <div class="champ_input">
+                                            <input class="input_focus" type="telephone" formControlName="telephone" placeholder="00 00 00 00">
+                                            <label class="label">Téléphone</label>
+                                        </div>
+
+                                        <!-- // Input de siege   -->
+                                        <div class="champ_input">
+                                            <input class="input_focus" type="text" formControlName="siege" placeholder="ex: Bamako">
+                                            <label class="label">Siege</label>
                                         </div>
 
                                         <!-- Input de Pays  -->
@@ -256,17 +259,11 @@
                                              </select> -->
                                             <label class="label">Pays</label>
                                         </div>
-
-                                        <!-- Input de Téléphone  -->
-                                        <div class="champ_input">
-                                            <input class="input_focus" type="telephone" formControlName="telephone" placeholder="00 00 00 00">
-                                            <label class="label">Téléphone</label>
-                                        </div>
                                     </div>
 
                                     <!-- // Informations légales & bancaires  -->
                                     <div class="titre_champ" style="margin-top: 30px;">
-                                        <h6>Informations pour pied de page </h6>
+                                        <h6>Bas de page</h6>
                                     </div>
                                 
                                     <div class="champ_grid">
@@ -302,16 +299,16 @@
                                             <label class="label">NIF</label>
                                         </div>
 
-                                        <!-- // Input de siege   -->
-                                        <div class="champ_input">
-                                            <input class="input_focus" type="text" formControlName="siege" placeholder="Saisis le siege">
-                                            <label class="label">Siege</label>
+                                        <!-- // Input de Nom Adresse  -->
+                                        <div class="champ_input ">
+                                            <input class="input_focus" type="text" formControlName="adresse" placeholder="Saisis l'adresse">
+                                            <label class="label">Adresse</label>
                                         </div>
                                     </div>
 
-                                    <!-- // Informations légales & bancaires  -->
+                                    <!-- // Signture  -->
                                     <div class="titre_champ" style="margin-top: 30px;">
-                                        <h6>Métadonnées facture</h6>
+                                        <h6>Signature</h6>
                                     </div>
                                 
                                     <div class="champ_grid">
@@ -530,18 +527,17 @@
                 <!-- // Ligne  -->
                 <div class="container_footer">
                     <div class="footer" style="line-height: 12px;">
-                        <!-- // Ligne  -->
                         <hr>
-                        <p><strong style="font-size: 10px;">{{form.get('siteWeb')?.value }}</strong></p>
-                        <div>
-                            <em class="em_footer">
-                                NINA : {{form.get('nina')?.value }} ; RCCM : {{form.get('rccm')?.value }} ; NIF : {{form.get('nif')?.value }} ; Banque : {{form.get('banque')?.value }}
-                            </em>
+                        <p *ngIf="form.get('siteWeb')?.value">
+                        <strong style="font-size: 10px;">{{form.get('siteWeb')?.value }}</strong>
+                        </p>
+                        
+                        <div *ngIf="getLegalInfo()">
+                        <em class="em_footer">{{ getLegalInfo() }}</em>
                         </div>
-                        <div>
-                            <em class="em_footer">
-                                Adresse : {{ form.get('adresse')?.value }} /{{ form.get('siege')?.value }}-{{ form.get('pays')?.value }}
-                            </em>
+                        
+                        <div *ngIf="getAddressInfo()">
+                        <em class="em_footer">{{ getAddressInfo() }}</em>
                         </div>
                     </div>
                 </div>

@@ -25,6 +25,8 @@ import { DragDropModule }           from '@angular/cdk/drag-drop';
 import { MatSelectModule } from '@angular/material/select';
 import { ProduitFormComponent } from './admin-page/produits/produit-form/produit-form.component';
 import { AddfactureProformaComponent } from './admin-page/facture-proforma/addfacture-proforma/addfacture-proforma.component';
+import { ClientFormComponent } from './admin-page/clients/client-form/client-form.component';
+import { EntrepriseFormComponent } from './admin-page/clients/entreprise-form/entreprise-form.component';
 
 registerLocaleData(localeFr);
 
@@ -36,6 +38,8 @@ registerLocaleData(localeFr);
     UnlockDialogComponent,
     ProduitFormComponent,
     AddfactureProformaComponent,
+    ClientFormComponent,
+    EntrepriseFormComponent
   ],
   imports: [
     CommonModule,
