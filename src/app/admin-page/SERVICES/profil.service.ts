@@ -22,5 +22,4 @@ updatePassword(userId: number, request: UpdateUserRequest): Observable<any> {
   );
 }
 
-
 }
