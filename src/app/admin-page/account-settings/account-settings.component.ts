@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +9,9 @@ import { EntrepriseService } from '../SERVICES/entreprise-service';
 import { Entreprise } from '../MODELS/entreprise-model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
+import { ProfilService } from '../SERVICES/profil.service';
+import { UpdateUserRequest } from '../MODELS/profil.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-account-settings',
@@ -36,17 +39,46 @@ export class AccountSettingsComponent implements OnInit {
   entrepriseId: number | null = null;
   isLoading: boolean = false;
   showPreview: boolean = false;
+  userId!: number;
+  passwordForm!: FormGroup;
+  successMessage: string | null = null;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
+
+    // Methode de eye
+  showCurrentPassword: boolean = false;
+  showNewPassword: boolean = false;
+  showConfirmPassword: boolean = false;
+  errorMessage: string | null = null;
+  // Methode pour cadre From
+  isPasswordFormVisible = false;
+
+    toggleCurrentPasswordVisibility() {
+    this.showCurrentPassword = !this.showCurrentPassword;
+  }
+  
+  toggleNewPasswordVisibility() {
+    this.showNewPassword = !this.showNewPassword;
+  }
+  
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  togglePasswordForm() {
+    this.isPasswordFormVisible = !this.isPasswordFormVisible;
+  }
 
   constructor(
     private fb: FormBuilder,
     private entrepriseService: EntrepriseService,
     private cdRef: ChangeDetectorRef,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private profilService: ProfilService,
   ) {}
 
   ngOnInit() {
+    this.initForm();
     this.getFormInit();
     this.getEntrepriseInfo();
   }
@@ -68,6 +100,33 @@ export class AccountSettingsComponent implements OnInit {
       signataire: ['Monsieur X'],
       signataireNom: ['Le Directeur Général']
     });
+  }
+
+  private initForm(): void {
+      this.passwordForm = this.fb.group({
+        currentPassword: ['', [Validators.required]],
+        newPassword: ['', [Validators.required, Validators.minLength(8)]],
+        confirmPassword: ['', [Validators.required]]
+      }, { validators: this.passwordMatchValidator });
+      
+    }
+
+  get currentPassword() {
+    return this.passwordForm.get('currentPassword');
+  }
+  
+  get newPassword() {
+    return this.passwordForm.get('newPassword');
+  }
+  
+  get confirmPassword() {
+    return this.passwordForm.get('confirmPassword');
+  }
+
+  private passwordMatchValidator(form: FormGroup): ValidationErrors | null {
+    const newPassword = form.get('newPassword')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+    return newPassword === confirmPassword ? null : { mismatch: true };
   }
 
   // initializeForm() {
@@ -200,6 +259,56 @@ export class AccountSettingsComponent implements OnInit {
       });
     }, 3000); // Délai de 3 secondes
   }
+
+  updatePassword(): void {
+      // Réinitialise les messages
+      this.errorMessage = null;
+      this.successMessage = null;
+    
+      // Vérifie la validité du formulaire
+      if (this.passwordForm.invalid) {
+        this.errorMessage = "Veuillez remplir tous les champs correctement";
+        return;
+      }
+    
+      const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
+    
+      // Double vérification de la correspondance des mots de passe
+      if (newPassword !== confirmPassword) {
+        this.errorMessage = "Les nouveaux mots de passe ne correspondent pas";
+        return;
+      }
+    
+      // Active l'état de chargement
+      // this.isLoading = true;
+    
+      // Prépare la requête
+      const request: UpdateUserRequest = {
+        password: currentPassword,
+        newPassword: newPassword
+      };
+    
+      // Appel au service
+      this.profilService.updatePassword(this.userId, request).subscribe({
+        next: (response) => {
+          // Si le serveur retourne du texte, le traiter ici
+          this.successMessage = response.includes('succès') ? response : "Mot de passe modifié !";
+          this.isPasswordFormVisible = false;
+          this.passwordForm.reset();
+          setTimeout(() => this.successMessage = null, 10000);
+        },
+        error: (error) => {
+          // Gérer les erreurs de parsing ou autres
+          if (error instanceof HttpErrorResponse) {
+            this.errorMessage = error.error.message || error.error || "Erreur inconnue";
+          }
+          setTimeout(() => this.errorMessage = null, 10000);
+        },
+        // complete: () => {
+        //   this.isLoading = false;
+        // }
+      });
+    }
 
   getLegalInfo(): string {
     const parts = [];
