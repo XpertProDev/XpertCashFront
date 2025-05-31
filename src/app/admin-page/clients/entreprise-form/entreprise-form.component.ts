@@ -19,7 +19,7 @@ import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-servi
   styleUrl: './entreprise-form.component.scss'
 })
 export class EntrepriseFormComponent {
-  @Output() clientAjoute = new EventEmitter<any>();
+  @Output() entrepriseAjoute = new EventEmitter<any>();
   @Output() close = new EventEmitter<void>();
 
   entrepriseClientForm!: FormGroup;
@@ -111,22 +111,40 @@ export class EntrepriseFormComponent {
     ajouterEntrepriseClient(): void {
       this.errorMessageApi = '';
       this.successMessage = '';
-  
+
       if (this.entrepriseClientForm.invalid) {
         this.markAllAsTouched();
         return;
       }
-  
+
       this.isSubmitting = true;
       const entrepriseClient = this.entrepriseClientForm.value;
-  
+
       this.entrepriseClientService.addEntrepriseClient(entrepriseClient)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response) => {
             this.successMessage = 'Entreprise ajoutée avec succès!';
+            this.isSubmitting = false;
+
+            // Créer un objet Entreprise à partir des données du formulaire et de la réponse
+            const newEntreprise = {
+              id: response.id || response.id, // Ajustez selon la structure de la réponse
+              nom: entrepriseClient.nom,
+              adresse: entrepriseClient.adresse,
+              email: entrepriseClient.email,
+              telephone: entrepriseClient.telephone,
+              pays: entrepriseClient.pays,
+              siege: entrepriseClient.siege,
+              secteur: entrepriseClient.secteur,
+              // Ajoutez d'autres propriétés si nécessaire
+            };
+
+            // Émettre l'événement avec la nouvelle entreprise
+            this.entrepriseAjoute.emit(newEntreprise);
+
             this.entrepriseClientForm.reset();
-            setTimeout(() => this.closeForm(), 2000);
+            this.closeForm();
           },
           error: (err) => {
             this.errorMessageApi = err.error?.error || err.message || 'Erreur lors de l\'ajout de l\'entreprise';
@@ -135,11 +153,11 @@ export class EntrepriseFormComponent {
         });
     }
   
-    private markAllAsTouched(): void {
-      Object.values(this.entrepriseClientForm.controls).forEach(control => {
-        control.markAsTouched();
-      });
-    }
+  private markAllAsTouched(): void {
+    Object.values(this.entrepriseClientForm.controls).forEach(control => {
+      control.markAsTouched();
+    });
+  }
   
     // Annuler et revenir à la liste
 

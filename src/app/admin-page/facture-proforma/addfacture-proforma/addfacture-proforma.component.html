@@ -463,6 +463,7 @@
       <div class="cadre_right">
         <div class="add_client" style="margin: 10% 0 0 5%;">
           <app-client-form
+            (clientAjoute)="onClientAjoute($event)"
             (close)="closeClientFormPanel()">
           </app-client-form>
         </div>
@@ -480,7 +481,8 @@
       <div class="cadre_right">
         <div class="add_entreprise" style="margin: 10% 0 0 5%;">
           <app-entreprise-form
-          (close)="closeEntrepriseFormPanel()">
+          (entrepriseAjoute)="onEntrepriseAjoute($event)"
+            (close)="closeEntrepriseFormPanel()">
           </app-entreprise-form>
         </div>
       </div>

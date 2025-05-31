@@ -705,8 +705,26 @@ submitNote() {
 
     // Générer le PDF et l'ajouter aux pièces jointes
     const pdfFile = await this.generatePDFAttachment();
-    this.attachments = []; // Réinitialiser les pièces jointes existantes
+    this.attachments = []; 
     this.attachments.push({ name: pdfFile.name, file: pdfFile });
+
+    // Récupérer l'email du client s'il existe
+    this.emailDestinatairesList = [];
+    
+    if (this.factureProForma.client?.email) {
+      const clientEmail = this.factureProForma.client.email;
+      if (!this.emailDestinatairesList.includes(clientEmail)) {
+        this.emailDestinatairesList.push(clientEmail);
+      }
+    }
+    
+    // Récupérer l'email de l'entreprise si elle existe
+    if (this.factureProForma.entrepriseClient?.email) {
+      const entrepriseEmail = this.factureProForma.entrepriseClient.email;
+      if (!this.emailDestinatairesList.includes(entrepriseEmail)) {
+        this.emailDestinatairesList.push(entrepriseEmail);
+      }
+    }
   }
 
   // Modifier la configuration des transitions

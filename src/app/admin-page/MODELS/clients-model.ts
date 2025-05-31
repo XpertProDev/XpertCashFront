@@ -5,10 +5,10 @@ export interface Clients {
     nomComplet: string;
     adresse: string;
     email: string;
-    telephone: string;
+    telephone?: string;
     entrepriseClient: Entreprise;
     poste: string;
     pays: string;
     ville: string;
-    createdAt: Date;
+    createdAt?: Date;
 }
