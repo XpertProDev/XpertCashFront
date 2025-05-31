@@ -245,8 +245,6 @@ export class ProfilComponent  implements OnInit{
     });
   }
 
-  
-
   getUserInfo(): void {
     this.usersService.getUserInfo().subscribe({
       next: (user) => {
@@ -283,55 +281,55 @@ export class ProfilComponent  implements OnInit{
     }
   }
 
-  onSubmitNomBoutique(): void {
-    this.errorMessage = null;
-    this.successMessage = null;
+  // onSubmitNomBoutique(): void {
+  //   this.errorMessage = null;
+  //   this.successMessage = null;
     
-    if (this.nomBoutiqueForm.invalid) {
-      this.errorMessage = "Veuillez remplir tous les champs correctement";
-      return;
-    }
+  //   if (this.nomBoutiqueForm.invalid) {
+  //     this.errorMessage = "Veuillez remplir tous les champs correctement";
+  //     return;
+  //   }
   
-    const boutiqueId = this.nomBoutiqueForm.value.selectedBoutique;
-    const nomBoutique = this.nomBoutiqueForm.value.nomBoutique;
-    const adresse = this.nomBoutiqueForm.value.adresse;
+  //   const boutiqueId = this.nomBoutiqueForm.value.selectedBoutique;
+  //   const nomBoutique = this.nomBoutiqueForm.value.nomBoutique;
+  //   const adresse = this.nomBoutiqueForm.value.adresse;
   
-    this.usersService.updateBoutique(boutiqueId, { nomBoutique, adresse }).subscribe({
-      next: (response) => {
-        // Mettre à jour le tableau local
-        const index = this.boutiques.findIndex(b => b.id === boutiqueId);
-        if (index > -1) {
-          this.boutiques[index] = { 
-            ...this.boutiques[index], 
-            nomBoutique: nomBoutique,
-            adresse: adresse 
-          };
-        }
+  //   this.usersService.updateBoutique(boutiqueId, { nomBoutique, adresse }).subscribe({
+  //     next: (response) => {
+  //       // Mettre à jour le tableau local
+  //       const index = this.boutiques.findIndex(b => b.id === boutiqueId);
+  //       if (index > -1) {
+  //         this.boutiques[index] = { 
+  //           ...this.boutiques[index], 
+  //           nomBoutique: nomBoutique,
+  //           adresse: adresse 
+  //         };
+  //       }
   
-        this.successMessage = "Boutique mise à jour avec succès !";
-        this.isNomBoutiqueFormVisible = false;
-        this.nomBoutiqueForm.reset();
-        setTimeout(() => this.successMessage = null, 10000);
-      },
-      error: (error) => {
-        if (error instanceof HttpErrorResponse) {
-          this.errorMessage = error.error.message || error.error || "Erreur inconnue";
-        }
-        setTimeout(() => this.errorMessage = null, 10000);
-      },
-    });
-  }
+  //       this.successMessage = "Boutique mise à jour avec succès !";
+  //       this.isNomBoutiqueFormVisible = false;
+  //       this.nomBoutiqueForm.reset();
+  //       setTimeout(() => this.successMessage = null, 10000);
+  //     },
+  //     error: (error) => {
+  //       if (error instanceof HttpErrorResponse) {
+  //         this.errorMessage = error.error.message || error.error || "Erreur inconnue";
+  //       }
+  //       setTimeout(() => this.errorMessage = null, 10000);
+  //     },
+  //   });
+  // }
 
-  private refreshBoutiques(): void {
-    this.usersService.getUserInfo().subscribe({
-      next: (user) => {
-        this.boutiques = user.boutiques || [];
-      },
-      error: (err) => {
-        console.error("Erreur rafraîchissement boutiques:", err);
-      }
-    });
-  }
+  // private refreshBoutiques(): void {
+  //   this.usersService.getUserInfo().subscribe({
+  //     next: (user) => {
+  //       this.boutiques = user.boutiques || [];
+  //     },
+  //     error: (err) => {
+  //       console.error("Erreur rafraîchissement boutiques:", err);
+  //     }
+  //   });
+  // }
 
   updateBoutique(id: number, nomBoutique: string, adresse: string): void {
     const updates = { nomBoutique, adresse };
@@ -349,117 +347,112 @@ export class ProfilComponent  implements OnInit{
     );
   }
 
+  onSubmitUpdateUser(): void {
+    this.errorMessage = null;
+    this.successMessage = null;
 
-onSubmitUpdateUser(): void {
-  this.errorMessage = null;
-  this.successMessage = null;
-
-  if (this.nomCompletForm.invalid) {
-    this.errorMessage = "Veuillez remplir tous les champs correctement";
-    return;
-  }
-
-  const { nomComplet, phone, password } = this.nomCompletForm.value;
-
-  // Création de l'objet DTO à envoyer
-  const userData = {
-    nomComplet,
-    phone,
-    password
-  };
-
-  // Construction du FormData
-  const formData = new FormData();
-  formData.append('user', JSON.stringify(userData)); // 'user' correspond à @RequestPart("user") côté Spring
-
-  if (this.imageFile) {
-    formData.append('photo', this.imageFile); // 'photo' correspond à @RequestPart("photo") côté Spring
-  }
-
-  this.usersService.updateUser(this.userId, formData).subscribe({
-    next: (response) => {
-      console.log("✅ Réponse backend :", response);
-      this.successMessage = typeof response === 'string'
-        ? response
-        : response?.message || "Profil mis à jour avec succès !";
-
-      this.nomCompletForm.reset();
-      this.isUserFormVisible = false;
-      setTimeout(() => this.successMessage = null, 10000);
-    },
-    error: (error) => {
-      console.error("❌ Erreur update :", error);
-      if (error instanceof HttpErrorResponse) {
-        this.errorMessage = error.error.message || error.error || "Erreur inconnue";
-      }
-      setTimeout(() => this.errorMessage = null, 10000);
+    if (this.nomCompletForm.invalid) {
+      this.errorMessage = "Veuillez remplir tous les champs correctement";
+      return;
     }
-  });
-}
 
+    const { nomComplet, phone, password } = this.nomCompletForm.value;
 
-
-
-onFileSelected(event: Event): void {
-  const input = event.target as HTMLInputElement;
-
-  if (input.files && input.files[0]) {
-    const file = input.files[0];
-    this.imageFile = file;
-
-    const reader = new FileReader();
-
-    reader.onload = (e: any) => {
-      const base64 = e.target.result;
-
-      // Afficher l'image immédiatement 
-      this.photo = base64;
-
-      // Stocker en localStorage pour éviter chargement serveur
-      localStorage.setItem('photo', base64);
-
-      window.dispatchEvent(new Event('storage-photo-update'));
+    // Création de l'objet DTO à envoyer
+    const userData = {
+      nomComplet,
+      phone,
+      password
     };
 
-    reader.readAsDataURL(file);
-
-    //Envoi l’image au serveur
+    // Construction du FormData
     const formData = new FormData();
-    formData.append('photo', this.imageFile);
+    formData.append('user', JSON.stringify(userData)); // 'user' correspond à @RequestPart("user") côté Spring
+
+    if (this.imageFile) {
+      formData.append('photo', this.imageFile); // 'photo' correspond à @RequestPart("photo") côté Spring
+    }
 
     this.usersService.updateUser(this.userId, formData).subscribe({
       next: (response) => {
-        console.log("✅ Image mise à jour :", response);
+        console.log("✅ Réponse backend :", response);
+        this.successMessage = typeof response === 'string'
+          ? response
+          : response?.message || "Profil mis à jour avec succès !";
 
-        if (response.photo) {
-          this.photo = response.photo;
-        }
-
-        this.successMessage = "Photo de profil mise à jour avec succès !";
-        setTimeout(() => this.successMessage = null, 5000);
+        this.nomCompletForm.reset();
+        this.isUserFormVisible = false;
+        setTimeout(() => this.successMessage = null, 10000);
       },
       error: (error) => {
-        console.error("❌ Erreur mise à jour :", error);
-        this.errorMessage = "Échec de la mise à jour de la photo.";
-        setTimeout(() => this.errorMessage = null, 5000);
+        console.error("❌ Erreur update :", error);
+        if (error instanceof HttpErrorResponse) {
+          this.errorMessage = error.error.message || error.error || "Erreur inconnue";
+        }
+        setTimeout(() => this.errorMessage = null, 10000);
       }
     });
   }
-}
 
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
 
-changerPhoto(event: Event) {
-  event.stopPropagation();
-  const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-  fileInput.click();
-}
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.imageFile = file;
 
-visualiserPhoto(event: Event) {
-  const target = event.target as HTMLElement;
-  if (target.classList.contains('camera-icon')) return;
+      const reader = new FileReader();
 
-  this.isModalOpen = true;
-}
+      reader.onload = (e: any) => {
+        const base64 = e.target.result;
+
+        // Afficher l'image immédiatement 
+        this.photo = base64;
+
+        // Stocker en localStorage pour éviter chargement serveur
+        localStorage.setItem('photo', base64);
+
+        window.dispatchEvent(new Event('storage-photo-update'));
+      };
+
+      reader.readAsDataURL(file);
+
+      //Envoi l’image au serveur
+      const formData = new FormData();
+      formData.append('photo', this.imageFile);
+
+      this.usersService.updateUser(this.userId, formData).subscribe({
+        next: (response) => {
+          console.log("✅ Image mise à jour :", response);
+
+          if (response.photo) {
+            this.photo = response.photo;
+          }
+
+          this.successMessage = "Photo de profil mise à jour avec succès !";
+          setTimeout(() => this.successMessage = null, 5000);
+        },
+        error: (error) => {
+          console.error("❌ Erreur mise à jour :", error);
+          this.errorMessage = "Échec de la mise à jour de la photo.";
+          setTimeout(() => this.errorMessage = null, 5000);
+        }
+      });
+    }
+  }
+
+  changerPhoto(event: Event) {
+    event.stopPropagation();
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    fileInput.click();
+  }
+
+  visualiserPhoto(event: Event) {
+    const target = event.target as HTMLElement;
+    if (target.classList.contains('camera-icon')) return;
+
+    this.isModalOpen = true;
+  }
 
   fermerModal() {
     this.isModalOpen = false;

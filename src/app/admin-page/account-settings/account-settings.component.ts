@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ProfilService } from '../SERVICES/profil.service';
 import { UpdateUserRequest } from '../MODELS/profil.model';
 import { HttpErrorResponse } from '@angular/common/http';
+import { UsersService } from '../SERVICES/users.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -42,16 +43,37 @@ export class AccountSettingsComponent implements OnInit {
   passwordForm!: FormGroup;
   successMessage: string | null = null;
   password: string = '';
-
+  nomBoutiqueForm!: FormGroup;
+  nomCompletForm!: FormGroup;
+  photo: string = '';
+  imageFile: File | null = null;
+  // isUserFormVisible = false;
   @ViewChild('fileInput') fileInput!: ElementRef;
-
-  // Methode de eye
   showCurrentPassword: boolean = false;
   showNewPassword: boolean = false;
   showConfirmPassword: boolean = false;
   errorMessage: string | null = null;
   // Methode pour cadre From
   isPasswordFormVisible = false;
+  userName: string = '';
+  nomEntreprise: string = '';
+  email: string = '';
+  phone: string = '';
+  roleType: string = '';
+  pays: string = '';
+  nomBoutique: string = '';
+  boutiqueAdresse: string = '';
+  flagPays: string = '';
+  personalCode: string = '';
+  isNomBoutiqueFormVisible = false;
+  isSending: boolean = false;
+  isUserFormVisible = false;
+  boutiques: any[] = [];
+  paysFlags: { [key: string]: string } = {
+    'Mali': '🇲🇱',
+    'Sénégal': '🇸🇳',
+    'Côte d\'Ivoire': '🇨\u200D',
+  };
 
   get currentPassword() {
     return this.passwordForm.get('currentPassword');
@@ -63,6 +85,26 @@ export class AccountSettingsComponent implements OnInit {
   
   get confirmPassword() {
     return this.passwordForm.get('confirmPassword');
+  }
+
+  get nomBoutiqueControl() {
+    return this.nomBoutiqueForm.get('nomBoutique');
+  }
+
+  get adresseControl() {
+    return this.nomBoutiqueForm.get('adresse');
+  }
+
+  get nomCompletControl() {
+    return this.nomCompletForm.get('nomComplet');
+  }
+
+  get phoneControl() {
+    return this.nomCompletForm.get('phone');
+  }
+
+  get passwordControl() {
+    return this.nomCompletForm.get('password');
   }
 
   toggleCurrentPasswordVisibility() {
@@ -87,6 +129,7 @@ export class AccountSettingsComponent implements OnInit {
     private cdRef: ChangeDetectorRef,
     private snackBar: MatSnackBar,
     private profilService: ProfilService,
+    private usersService: UsersService,
   ) {}
 
   ngOnInit() {
@@ -94,6 +137,54 @@ export class AccountSettingsComponent implements OnInit {
     this.getFormInit();
     this.getEntrepriseInfo();
     this.listenToPrefixSuffixChanges();
+    this.getConnectedUserId();
+    this.getUserInfo();
+  }
+
+  // Récupère l'id de l'utilisateur connecté via UsersService ou le localStorage
+  private getConnectedUserId(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (userInfo) => {
+        if (userInfo && (userInfo as any).id) {
+          this.userId = (userInfo as any).id;
+        } else {
+          const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+          if (storedUser && storedUser.id) {
+            this.userId = storedUser.id;
+          } else {
+            this.errorMessage = "Utilisateur non authentifié.";
+          }
+        }
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des infos utilisateur:", err);
+        this.errorMessage = "Impossible de récupérer l'utilisateur connecté.";
+      }
+    });
+  }
+
+    getUserInfo(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        this.userName = user.nomComplet;
+        this.personalCode = user.personalCode;
+        this.nomEntreprise = user.nomEntreprise
+        this.email = user.email;
+        this.phone = user.phone;
+        this.photo = user.photo ? `http://localhost:8080${user.photo}` : '';
+        this.roleType = user.roleType;
+        this.pays = user.pays;
+        this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';
+        this.flagPays = this.paysFlags[this.pays] || '';
+        this.boutiques = user.boutiques || [];
+        console.log("Liste des boutiques:", this.boutiques);
+        console.log("Infos utilisateur récupérées :", user);
+        
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des infos utilisateur :", err);
+      }
+    });
   }
 
   private initForm(): void {
@@ -102,6 +193,12 @@ export class AccountSettingsComponent implements OnInit {
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
+
+    this.nomCompletForm = this.fb.group({
+      nomComplet: ['', [Validators.required]],
+      phone: ['', [Validators.pattern('^\\+?[0-9]{7,15}$')]], // Numéro valide
+      password: ['', [Validators.required, Validators.minLength(6)]] // Mot de passe avec min 6 caractères
+    });
   }
 
   // Validator pour vérifier que les deux nouveaux mots de passe correspondent
@@ -134,25 +231,6 @@ export class AccountSettingsComponent implements OnInit {
       signataireNom: ['Le Directeur Général']
     });
   }
-
-  // initializeForm() {
-  //   this.form = this.fb.group({
-  //     nom: [''],
-  //     secteur: [''],
-  //     email: [''],
-  //     adresse: [''],
-  //     pays: [''],
-  //     telephone: [''],
-  //     siteWeb: [''],
-  //     banque: [''],
-  //     siege: [''],
-  //     nina: [''],
-  //     rccm: [''],
-  //     nif: [''],
-  //     signataire: [''],
-  //     signataireNom: ['']
-  //   });
-  // }
 
   getEntrepriseInfo() {
     this.entrepriseService.getEntrepriseInfo().subscribe({
@@ -375,7 +453,60 @@ export class AccountSettingsComponent implements OnInit {
     });
   }
 
- 
+onSubmitUpdateUser(): void {
+  this.errorMessage = null;
+  this.successMessage = null;
+  this.isLoading = true;
+
+  if (this.nomCompletForm.invalid) {
+    this.errorMessage = "Veuillez remplir tous les champs correctement";
+    return;
+  }
+
+  const { nomComplet, phone, password } = this.nomCompletForm.value;
+
+  const userData = {
+    nomComplet,
+    phone,
+    password
+  };
+
+  const formData = new FormData();
+  formData.append('user', JSON.stringify(userData));
+
+  if (this.imageFile) {
+    formData.append('photo', this.imageFile);
+  }
+
+  // Correction 1 & 2 : Syntaxe correcte de subscribe + typage des paramètres
+  setTimeout(() => {
+    this.usersService.updateUser(this.userId, formData).subscribe({
+      next: (response: any) => {
+        console.log("✅ Réponse backend :", response);
+        this.successMessage = typeof response === 'string'
+          ? response
+          : response?.message || "Profil mis à jour avec succès !";
+
+        // Correction : Utiliser une chaîne par défaut si successMessage est null
+        const message = this.successMessage || "Profil mis à jour avec succès !";
+        this.snackBar.open(message, 'Fermer', { duration: 3000 });
+        
+        this.nomCompletForm.reset();
+      },
+      error: (error: any) => {
+        console.error("❌ Erreur update :", error);
+        if (error instanceof HttpErrorResponse) {
+          this.errorMessage = error.error.message || error.error || "Erreur inconnue";
+        }
+        this.isLoading = false;
+        
+        // Correction : Utiliser une chaîne par défaut ici aussi
+        const errorMsg = this.errorMessage || 'Erreur lors de la mise à jour';
+        this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+      }
+    });
+  }, 3000);
+}
 
  
 
