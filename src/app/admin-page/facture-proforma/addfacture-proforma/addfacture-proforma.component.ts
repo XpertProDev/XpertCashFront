@@ -115,8 +115,8 @@ export class AddfactureProformaComponent implements OnInit {
 
     this.filteredClients = this.clientControl.valueChanges.pipe(
       startWith(''),
-      map(value => typeof value === 'string' ? value : value?.nomComplet),
-      map(name => name ? this._filterClients(name) : this.clients.slice())
+      map(value => (typeof value === 'string' ? value : value?.nomComplet)),
+      map(name => (name ? this._filterClients(name) : this.clients.slice()))
     );
 
     // Ajoutez après les autres initialisations
@@ -129,7 +129,7 @@ export class AddfactureProformaComponent implements OnInit {
 
   private _filterClients(name: string): Clients[] {
     const filterValue = name.toLowerCase();
-    return this.clients.filter(client => 
+    return this.clients.filter(client =>
       client.nomComplet.toLowerCase().includes(filterValue) ||
       (client.entrepriseClient?.nom.toLowerCase().includes(filterValue))
     );
@@ -142,11 +142,12 @@ export class AddfactureProformaComponent implements OnInit {
       : client.nomComplet;
   }
 
-  onClientSelected(event: MatAutocompleteSelectedEvent) {
+  onClientSelected(event: MatAutocompleteSelectedEvent) { 
     if (event.option.value === null) {
-      this.openClientFormPanel();
+      this.openClientFormPanel(); // Ouvre le formulaire pour créer un client
     } else {
       this.selectedClientId = event.option.value.id;
+      // Optionnel : autres actions liées à la sélection
     }
   }
 
@@ -748,6 +749,31 @@ onProduitSelected(event: MatAutocompleteSelectedEvent) {
     this.cdr.detectChanges();
   }
 }
+
+// Méthode appelée lors de la réception de l’événement clientAjoute
+  onClientAjoute(nouveauClient: Clients) {
+    // Ajouter le nouveau client à la liste
+    this.clients.push(nouveauClient);
+
+    // Optionnel : trier par ID décroissant
+    this.clients.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+
+    // Pré-sélectionner le nouveau client dans l’autocomplete
+    this.clientControl.setValue(nouveauClient);
+
+    // Mettre à jour les options filtrées
+    this.filteredClients = this.clientControl.valueChanges.pipe(
+      startWith(nouveauClient),
+      map(value => (typeof value === 'string' ? value : value?.nomComplet)),
+      map(name => (name ? this._filterClients(name) : this.clients.slice()))
+    );
+
+    // Forcer la mise à jour de l’interface utilisateur
+    this.cdr.detectChanges();
+
+    // Fermer le panneau du formulaire client (si applicable)
+    this.closeClientFormPanel();
+  }
 
   
 }

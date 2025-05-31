@@ -366,48 +366,71 @@ export class ClientFormComponent {
     this.errorMessage = '';
     this.successMessage = '';
     this.entrepriseRequiredError = false;
-  
+
     // Vérification de la sélection d'entreprise
     if (this.isEntrepriseSelected) {
-      const entrepriseSelectionnee = this.control.value; 
+      const entrepriseSelectionnee = this.control.value;
       if (!entrepriseSelectionnee || !entrepriseSelectionnee.id) {
         this.entrepriseRequiredError = true;
         return;
       }
     }
-  
+
     if (this.clientForm.invalid) {
       this.errorMessage = 'Veuillez corriger les erreurs du formulaire.';
       return;
     }
-  
+
     this.isLoading = true; // Active le loading
-  
+
     const client: Clients = this.clientForm.value;
-    
+
     if (this.isEntrepriseSelected) {
       const selected = this.control.value as Entreprise;
       if (selected && selected.id) {
         client.entrepriseClient = { id: selected.id } as Entreprise;
       }
     }
-  
-    // Simuler un délai (optionnel)
-    setTimeout(() => {
-      this.clientService.addClient(client).subscribe({
-        next: res => {
-          this.isLoading = false; // Désactive le loading
-          this.successMessage = res.message;
-          this.clientForm.reset();
-          this.isEntrepriseSelected = false;
-          this.closeForm();
-        },
-        error: err => {
-          this.isLoading = false; // Désactive le loading en cas d'erreur
-          this.errorMessage = err.error?.error || 'Erreur lors de la création';
+
+    this.clientService.addClient(client).subscribe({
+      next: (response: { message: string; clientId: string; createdAt: string }) => {
+        this.isLoading = false;
+        this.clientForm.reset();
+        this.isEntrepriseSelected = false;
+
+        // Convertir clientId en nombre
+        const clientIdNum = parseInt(response.clientId, 10);
+
+        // Vérifier si la conversion a réussi
+        if (isNaN(clientIdNum)) {
+          console.error('ID client invalide reçu :', response.clientId);
+          this.errorMessage = 'Erreur : ID du client invalide';
+          return;
         }
-      });
-    }, 2000); // Retirez le setTimeout si non nécessaire
+
+        // Créer un objet Clients avec l'ID converti
+        const newClient: Clients = {
+          id: clientIdNum, // Maintenant un nombre
+          nomComplet: client.nomComplet,
+          adresse: client.adresse,
+          email: client.email,
+          telephone: client.telephone,
+          poste: client.poste,
+          pays: client.pays,
+          ville: client.ville,
+          entrepriseClient: client.entrepriseClient,
+        };
+
+        // Émettre l'événement avec le nouveau client
+        this.clientAjoute.emit(newClient);
+
+        this.closeForm();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.error?.error || 'Erreur lors de la création';
+      }
+    });
   }
 
   // Annuler et revenir à la liste
