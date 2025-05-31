@@ -19,6 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgxBarcode6Module } from 'ngx-barcode6';
 import { ClientFormComponent } from '../../clients/client-form/client-form.component';
 import { EntrepriseFormComponent } from '../../clients/entreprise-form/entreprise-form.component';
+import { Entreprise } from '../../MODELS/entreprise-model';
 
 @Component({
   selector: 'app-addfacture-proforma',
@@ -122,8 +123,8 @@ export class AddfactureProformaComponent implements OnInit {
     // Ajoutez après les autres initialisations
     this.filteredEntreprises = this.entrepriseControl.valueChanges.pipe(
       startWith(''),
-      map(value => typeof value === 'string' ? value : value?.nom),
-      map(name => name ? this._filterEntreprises(name) : this.entreprises.slice())
+      map(value => (typeof value === 'string' ? value : value?.nom)),
+      map(name => (name ? this._filterEntreprises(name) : this.entreprises.slice()))
     );
   }
 
@@ -774,6 +775,32 @@ onProduitSelected(event: MatAutocompleteSelectedEvent) {
     // Fermer le panneau du formulaire client (si applicable)
     this.closeClientFormPanel();
   }
+
+  // Méthode appelée lors de la réception de l’événement entrepriseAjoute
+  onEntrepriseAjoute(nouvelleEntreprise: Entreprise) {
+    // Ajouter la nouvelle entreprise à la liste
+    this.entreprises.push(nouvelleEntreprise);
+
+    // Optionnel : trier par ID décroissant
+    this.entreprises.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+
+    // Pré-sélectionner la nouvelle entreprise dans l’autocomplete
+    this.entrepriseControl.setValue(nouvelleEntreprise);
+
+    // Mettre à jour les options filtrées
+    this.filteredEntreprises = this.entrepriseControl.valueChanges.pipe(
+      startWith(nouvelleEntreprise),
+      map(value => (typeof value === 'string' ? value : value?.nom)),
+      map(name => (name ? this._filterEntreprises(name) : this.entreprises.slice()))
+    );
+
+    // Forcer la mise à jour de l’interface utilisateur
+    this.cdr.detectChanges();
+
+    // Fermer le panneau du formulaire
+    this.closeEntrepriseFormPanel();
+  }
+
 
   
 }
