@@ -126,7 +126,7 @@
                                             class="btn"
                                             [disabled]="passwordForm.invalid || isLoading">
                                             <span *ngIf="!isLoading">Confirmer</span>
-                                            <!-- <span *ngIf="isLoading">Chargement...</span> -->
+                                            <span *ngIf="isLoading">Chargement...</span>
                                             </button>
                                         </div>
                                     </form>
@@ -211,19 +211,16 @@
                                         </div>
                                     </div>
                                     </div>
-                                    
 
-                                    
-                                
                                     <div class="btn_double">
                                         <!-- Bouton de soumission -->
                                         <div class="btn_save">
-                                            
                                             <button 
                                                 type="submit" 
                                                 class="btn"
-                                                [disabled]="nomCompletForm.invalid || isLoading">
-                                                <span>Confirmer</span>
+                                                [disabled]="nomCompletForm.invalid">
+                                                <span *ngIf="!isLoading">Confirmer</span>
+                                                <span *ngIf="isLoading">Traitement...</span>
                                             </button>
                                         </div>
                                     </div>

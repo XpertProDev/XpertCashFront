@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -130,6 +130,7 @@ export class AccountSettingsComponent implements OnInit {
     private snackBar: MatSnackBar,
     private profilService: ProfilService,
     private usersService: UsersService,
+    private zone: NgZone,
   ) {}
 
   ngOnInit() {
@@ -403,111 +404,230 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   // Méthode appelée lors de la soumission du formulaire
+  // updatePassword(): void {
+  //   // Réinitialise les messages
+  //   this.errorMessage = null;
+  //   this.successMessage = null;
+  
+  //   // Vérifie la validité du formulaire
+  //   if (this.passwordForm.invalid) {
+  //     this.errorMessage = "Veuillez remplir tous les champs correctement";
+  //     return;
+  //   }
+  
+  //   const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
+  
+  //   // Double vérification de la correspondance des mots de passe
+  //   if (newPassword !== confirmPassword) {
+  //     this.errorMessage = "Les nouveaux mots de passe ne correspondent pas";
+  //     return;
+  //   }
+  
+  //   // Active l'état de chargement
+  //   // this.isLoading = true;
+  
+  //   // Prépare la requête
+  //   const request: UpdateUserRequest = {
+  //     password: currentPassword,
+  //     newPassword: newPassword
+  //   };
+  
+  //   // Appel au service
+  //   this.profilService.updatePassword(this.userId, request).subscribe({
+  //     next: (response) => {
+  //       // Si le serveur retourne du texte, le traiter ici
+  //       this.successMessage = response.includes('succès') ? response : "Mot de passe modifié !";
+  //       this.isPasswordFormVisible = false;
+  //       this.passwordForm.reset();
+  //       setTimeout(() => this.successMessage = null, 10000);
+  //     },
+  //     error: (error) => {
+  //       // Gérer les erreurs de parsing ou autres
+  //       if (error instanceof HttpErrorResponse) {
+  //         this.errorMessage = error.error.message || error.error || "Erreur inconnue";
+  //       }
+  //       setTimeout(() => this.errorMessage = null, 10000);
+  //     },
+  //     // complete: () => {
+  //     //   this.isLoading = false;
+  //     // }
+  //   });
+  // }
+
   updatePassword(): void {
-    // Réinitialise les messages
+      // Réinitialise les messages
+      this.errorMessage = null;
+      this.successMessage = null;
+    
+      // Vérifie la validité du formulaire
+      if (this.passwordForm.invalid) {
+          const errorMsg = "Veuillez remplir tous les champs correctement";
+          this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+          return;
+      }
+    
+      const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
+    
+      // Double vérification de la correspondance des mots de passe
+      if (newPassword !== confirmPassword) {
+          const errorMsg = "Les nouveaux mots de passe ne correspondent pas";
+          this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+          return;
+      }
+    
+      // Active l'état de chargement
+      this.isLoading = true;
+    
+      // Prépare la requête
+      const request: UpdateUserRequest = {
+          password: currentPassword,
+          newPassword: newPassword
+      };
+    
+      // Appel au service
+      this.profilService.updatePassword(this.userId, request).subscribe({
+          next: (response) => {
+              this.isLoading = false;
+              this.cdRef.detectChanges();
+              const successMsg = response.includes('succès') ? response : "Mot de passe modifié !";
+              this.snackBar.open(successMsg, 'Fermer', { duration: 3000 });
+              this.isPasswordFormVisible = false;
+              this.passwordForm.reset();
+          },
+          error: (error) => {
+              this.isLoading = false;
+              let errorMsg = "Erreur inconnue";
+              if (error instanceof HttpErrorResponse) {
+                  errorMsg = error.error.message || error.error || errorMsg;
+              }
+              this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+          }
+      });
+  }
+
+// onSubmitUpdateUser(): void {
+//   this.errorMessage = null;
+//   this.successMessage = null;
+//   this.isLoading = true;
+
+//   if (this.nomCompletForm.invalid) {
+//     this.errorMessage = "Veuillez remplir tous les champs correctement";
+//     this.isLoading = false; // Désactivation immédiate si formulaire invalide
+//     return;
+//   }
+
+//   const { nomComplet, phone, password } = this.nomCompletForm.value;
+
+//   const userData = {
+//     nomComplet,
+//     phone,
+//     password
+//   };
+
+//   const formData = new FormData();
+//   formData.append('user', JSON.stringify(userData));
+
+//   if (this.imageFile) {
+//     formData.append('photo', this.imageFile);
+//   }
+
+//   this.usersService.updateUser(this.userId, formData).subscribe({
+//     next: (response: any) => {
+//       console.log("✅ Réponse backend :", response);
+      
+//       // Désactiver le loading immédiatement
+//       this.isLoading = false;
+      
+//       // Préparer le message
+//       const message = typeof response === 'string'
+//         ? response
+//         : response?.message || "Profil mis à jour avec succès !";
+      
+//       // Afficher le snackbar après que l'UI ait eu le temps de se mettre à jour
+//       setTimeout(() => {
+//         this.snackBar.open(message, 'Fermer', { duration: 3000 });
+//       }, 0);
+      
+//       this.nomCompletForm.reset();
+//     },
+//     error: (error: any) => {
+//       console.error("❌ Erreur update :", error);
+      
+//       // Désactiver le loading immédiatement
+//       this.isLoading = false;
+      
+//       // Préparer le message d'erreur
+//       let errorMsg = 'Erreur lors de la mise à jour';
+//       if (error instanceof HttpErrorResponse) {
+//         errorMsg = error.error.message || error.error || errorMsg;
+//       }
+      
+//       // Afficher l'erreur après que l'UI ait eu le temps de se mettre à jour
+//       setTimeout(() => {
+//         this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+//       }, 0);
+//     }
+//   });
+// }
+
+  onSubmitUpdateUser(): void {
     this.errorMessage = null;
     this.successMessage = null;
-  
-    // Vérifie la validité du formulaire
-    if (this.passwordForm.invalid) {
+    this.isLoading = true;
+
+    if (this.nomCompletForm.invalid) {
       this.errorMessage = "Veuillez remplir tous les champs correctement";
+      this.isLoading = false; // Désactivation immédiate si formulaire invalide
       return;
     }
-  
-    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
-  
-    // Double vérification de la correspondance des mots de passe
-    if (newPassword !== confirmPassword) {
-      this.errorMessage = "Les nouveaux mots de passe ne correspondent pas";
-      return;
-    }
-  
-    // Active l'état de chargement
-    // this.isLoading = true;
-  
-    // Prépare la requête
-    const request: UpdateUserRequest = {
-      password: currentPassword,
-      newPassword: newPassword
+
+    const { nomComplet, phone, password } = this.nomCompletForm.value;
+
+    const userData = {
+      nomComplet,
+      phone,
+      password
     };
-  
-    // Appel au service
-    this.profilService.updatePassword(this.userId, request).subscribe({
-      next: (response) => {
-        // Si le serveur retourne du texte, le traiter ici
-        this.successMessage = response.includes('succès') ? response : "Mot de passe modifié !";
-        this.isPasswordFormVisible = false;
-        this.passwordForm.reset();
-        setTimeout(() => this.successMessage = null, 10000);
-      },
-      error: (error) => {
-        // Gérer les erreurs de parsing ou autres
-        if (error instanceof HttpErrorResponse) {
-          this.errorMessage = error.error.message || error.error || "Erreur inconnue";
-        }
-        setTimeout(() => this.errorMessage = null, 10000);
-      },
-      // complete: () => {
-      //   this.isLoading = false;
-      // }
-    });
-  }
 
-onSubmitUpdateUser(): void {
-  this.errorMessage = null;
-  this.successMessage = null;
-  this.isLoading = true;
+    const formData = new FormData();
+    formData.append('user', JSON.stringify(userData));
 
-  if (this.nomCompletForm.invalid) {
-    this.errorMessage = "Veuillez remplir tous les champs correctement";
-    return;
-  }
+    if (this.imageFile) {
+      formData.append('photo', this.imageFile);
+    }
 
-  const { nomComplet, phone, password } = this.nomCompletForm.value;
-
-  const userData = {
-    nomComplet,
-    phone,
-    password
-  };
-
-  const formData = new FormData();
-  formData.append('user', JSON.stringify(userData));
-
-  if (this.imageFile) {
-    formData.append('photo', this.imageFile);
-  }
-
-  // Correction 1 & 2 : Syntaxe correcte de subscribe + typage des paramètres
-  setTimeout(() => {
     this.usersService.updateUser(this.userId, formData).subscribe({
-      next: (response: any) => {
-        console.log("✅ Réponse backend :", response);
-        this.successMessage = typeof response === 'string'
+    next: (response: any) => {
+      this.isLoading = false;
+      this.cdRef.detectChanges();
+
+      const messages = typeof response === 'string'
           ? response
-          : response?.message || "Profil mis à jour avec succès !";
-
-        // Correction : Utiliser une chaîne par défaut si successMessage est null
-        const message = this.successMessage || "Profil mis à jour avec succès !";
+          : response?.message ;
+        
+      
+      this.zone.run(() => {
+        const message = messages;
         this.snackBar.open(message, 'Fermer', { duration: 3000 });
-        
         this.nomCompletForm.reset();
-      },
-      error: (error: any) => {
-        console.error("❌ Erreur update :", error);
-        if (error instanceof HttpErrorResponse) {
-          this.errorMessage = error.error.message || error.error || "Erreur inconnue";
-        }
-        this.isLoading = false;
-        
-        // Correction : Utiliser une chaîne par défaut ici aussi
-        const errorMsg = this.errorMessage || 'Erreur lors de la mise à jour';
-        this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
-      }
-    });
-  }, 3000);
-}
+      });
+    },
+    error: (error: any) => {
+      this.isLoading = false;
+      this.cdRef.detectChanges();
 
+      let errorMsgs = 'Erreur lors de la mise à jour';
+        if (error instanceof HttpErrorResponse) {
+          errorMsgs = error.error.message || error.error || errorMsgs;
+        }
+      
+      this.zone.run(() => {
+        const errorMsg =  errorMsgs;
+        this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+      });
+    }
+  });
+  }
  
 
 }
