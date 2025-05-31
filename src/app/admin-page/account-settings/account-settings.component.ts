@@ -33,7 +33,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class AccountSettingsComponent implements OnInit {
   // panelOpenState = false;
   form!: FormGroup;
-  // logo: string = 'assets/img/logo.jpeg';
   logo: string | null = null; 
   selectedLogoFile: File | null = null;
   entrepriseId: number | null = null;
@@ -42,10 +41,11 @@ export class AccountSettingsComponent implements OnInit {
   userId!: number;
   passwordForm!: FormGroup;
   successMessage: string | null = null;
+  password: string = '';
 
   @ViewChild('fileInput') fileInput!: ElementRef;
 
-    // Methode de eye
+  // Methode de eye
   showCurrentPassword: boolean = false;
   showNewPassword: boolean = false;
   showConfirmPassword: boolean = false;
@@ -53,7 +53,19 @@ export class AccountSettingsComponent implements OnInit {
   // Methode pour cadre From
   isPasswordFormVisible = false;
 
-    toggleCurrentPasswordVisibility() {
+  get currentPassword() {
+    return this.passwordForm.get('currentPassword');
+  }
+  
+  get newPassword() {
+    return this.passwordForm.get('newPassword');
+  }
+  
+  get confirmPassword() {
+    return this.passwordForm.get('confirmPassword');
+  }
+
+  toggleCurrentPasswordVisibility() {
     this.showCurrentPassword = !this.showCurrentPassword;
   }
   
@@ -81,6 +93,27 @@ export class AccountSettingsComponent implements OnInit {
     this.initForm();
     this.getFormInit();
     this.getEntrepriseInfo();
+    this.listenToPrefixSuffixChanges();
+  }
+
+  private initForm(): void {
+    this.passwordForm = this.fb.group({
+      currentPassword: ['', [Validators.required]],
+      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  // Validator pour vérifier que les deux nouveaux mots de passe correspondent
+  private passwordMatchValidator(form: FormGroup): ValidationErrors | null {
+    const newPassword = form.get('newPassword')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+    return newPassword === confirmPassword ? null : { mismatch: true };
+  }
+
+  get tauxTvaAffiche(): string {
+    const tva = this.form.get('tauxTva')?.value;
+    return tva !== null ? `${(tva * 100).toFixed(0)}%` : '';
   }
 
   getFormInit() {
@@ -100,33 +133,6 @@ export class AccountSettingsComponent implements OnInit {
       signataire: ['Monsieur X'],
       signataireNom: ['Le Directeur Général']
     });
-  }
-
-  private initForm(): void {
-      this.passwordForm = this.fb.group({
-        currentPassword: ['', [Validators.required]],
-        newPassword: ['', [Validators.required, Validators.minLength(8)]],
-        confirmPassword: ['', [Validators.required]]
-      }, { validators: this.passwordMatchValidator });
-      
-    }
-
-  get currentPassword() {
-    return this.passwordForm.get('currentPassword');
-  }
-  
-  get newPassword() {
-    return this.passwordForm.get('newPassword');
-  }
-  
-  get confirmPassword() {
-    return this.passwordForm.get('confirmPassword');
-  }
-
-  private passwordMatchValidator(form: FormGroup): ValidationErrors | null {
-    const newPassword = form.get('newPassword')?.value;
-    const confirmPassword = form.get('confirmPassword')?.value;
-    return newPassword === confirmPassword ? null : { mismatch: true };
   }
 
   // initializeForm() {
@@ -167,9 +173,14 @@ export class AccountSettingsComponent implements OnInit {
           nif: entreprise.nif,
           signataire: entreprise.signataire,
           signataireNom: entreprise.signataireNom,
-          logo: entreprise.logo
+          logo: entreprise.logo,
+          prefixe: entreprise.prefixe,
+          suffixe: entreprise.suffixe,
+          tauxTva: entreprise.tauxTva
         });
         // Construire l'URL complète du logo
+        console.log('Logo path from server:', entreprise);
+
         console.log('Logo path from server:', entreprise.logo);
         // this.logoUrl = entreprise.logo ? `http://localhost:8080/${entreprise.logo}` : 'assets/img/logo.jpeg';
         this.logo = 'http://localhost:8080' + entreprise.logo;
@@ -181,12 +192,10 @@ export class AccountSettingsComponent implements OnInit {
     });
   }
 
-  // Gestionnaire de clic pour le lien "ICI"
   onChangeLogoClick(): void {
     this.fileInput.nativeElement.click();
   }
 
-  // Ajoutez ces méthodes pour gérer le popup
   openPreview(): void {
     this.showPreview = true;
   }
@@ -233,7 +242,7 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true; // Active le loading
+    this.isLoading = true;
 
     const formData = new FormData();
     const entrepriseData = this.form.value;
@@ -242,73 +251,41 @@ export class AccountSettingsComponent implements OnInit {
       formData.append('logo', this.selectedLogoFile);
     }
 
-    // Crée un délai de 3 secondes avant l'envoi
     setTimeout(() => {
       this.entrepriseService.updateEntreprise(this.entrepriseId!, formData).subscribe({
         next: (response) => {
-          this.isLoading = false; // Désactive le loading
-          this.snackBar.open(response, 'Fermer', { duration: 3000 }); // Affiche le succès
+          this.isLoading = false;
+          this.snackBar.open(response, 'Fermer', { duration: 3000 });
           this.getEntrepriseInfo();
           this.selectedLogoFile = null;
         },
         error: (error) => {
-          this.isLoading = false; // Désactive le loading
+          this.isLoading = false;
           const errorMessage = error.error || 'Erreur lors de la mise à jour';
-          this.snackBar.open(errorMessage, 'Fermer', { duration: 3000 }); // Affiche l'erreur
+          this.snackBar.open(errorMessage, 'Fermer', { duration: 3000 });
         }
       });
-    }, 3000); // Délai de 3 secondes
+    }, 3000);
   }
 
-  updatePassword(): void {
-      // Réinitialise les messages
-      this.errorMessage = null;
-      this.successMessage = null;
-    
-      // Vérifie la validité du formulaire
-      if (this.passwordForm.invalid) {
-        this.errorMessage = "Veuillez remplir tous les champs correctement";
-        return;
-      }
-    
-      const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
-    
-      // Double vérification de la correspondance des mots de passe
-      if (newPassword !== confirmPassword) {
-        this.errorMessage = "Les nouveaux mots de passe ne correspondent pas";
-        return;
-      }
-    
-      // Active l'état de chargement
-      // this.isLoading = true;
-    
-      // Prépare la requête
-      const request: UpdateUserRequest = {
-        password: currentPassword,
-        newPassword: newPassword
-      };
-    
-      // Appel au service
-      this.profilService.updatePassword(this.userId, request).subscribe({
-        next: (response) => {
-          // Si le serveur retourne du texte, le traiter ici
-          this.successMessage = response.includes('succès') ? response : "Mot de passe modifié !";
-          this.isPasswordFormVisible = false;
-          this.passwordForm.reset();
-          setTimeout(() => this.successMessage = null, 10000);
-        },
-        error: (error) => {
-          // Gérer les erreurs de parsing ou autres
-          if (error instanceof HttpErrorResponse) {
-            this.errorMessage = error.error.message || error.error || "Erreur inconnue";
-          }
-          setTimeout(() => this.errorMessage = null, 10000);
-        },
-        // complete: () => {
-        //   this.isLoading = false;
-        // }
-      });
-    }
+  shouldShowPrefixe(): boolean {
+    return !this.form.get('suffixe')?.value;
+  }
+
+  shouldShowSuffixe(): boolean {
+    return !this.form.get('prefixe')?.value;
+  }
+
+    private listenToPrefixSuffixChanges(): void {
+      this.form.get('prefixe')?.valueChanges.subscribe(() => {
+        this.cdRef.markForCheck();
+    });
+
+    this.form.get('suffixe')?.valueChanges.subscribe(() => {
+      this.cdRef.markForCheck();
+    });
+  }
+
 
   getLegalInfo(): string {
     const parts = [];
@@ -346,5 +323,60 @@ export class AccountSettingsComponent implements OnInit {
     
     return '';
   }
+
+  // Méthode appelée lors de la soumission du formulaire
+  updatePassword(): void {
+    // Réinitialise les messages
+    this.errorMessage = null;
+    this.successMessage = null;
+  
+    // Vérifie la validité du formulaire
+    if (this.passwordForm.invalid) {
+      this.errorMessage = "Veuillez remplir tous les champs correctement";
+      return;
+    }
+  
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
+  
+    // Double vérification de la correspondance des mots de passe
+    if (newPassword !== confirmPassword) {
+      this.errorMessage = "Les nouveaux mots de passe ne correspondent pas";
+      return;
+    }
+  
+    // Active l'état de chargement
+    // this.isLoading = true;
+  
+    // Prépare la requête
+    const request: UpdateUserRequest = {
+      password: currentPassword,
+      newPassword: newPassword
+    };
+  
+    // Appel au service
+    this.profilService.updatePassword(this.userId, request).subscribe({
+      next: (response) => {
+        // Si le serveur retourne du texte, le traiter ici
+        this.successMessage = response.includes('succès') ? response : "Mot de passe modifié !";
+        this.isPasswordFormVisible = false;
+        this.passwordForm.reset();
+        setTimeout(() => this.successMessage = null, 10000);
+      },
+      error: (error) => {
+        // Gérer les erreurs de parsing ou autres
+        if (error instanceof HttpErrorResponse) {
+          this.errorMessage = error.error.message || error.error || "Erreur inconnue";
+        }
+        setTimeout(() => this.errorMessage = null, 10000);
+      },
+      // complete: () => {
+      //   this.isLoading = false;
+      // }
+    });
+  }
+
+ 
+
+ 
 
 }

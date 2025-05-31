@@ -278,6 +278,11 @@ td.td_left {
   top: 40px;
 }
 
+a:hover img {
+    color: #0056b3;
+    transform: scale(1.1);
+    transition: 0.2s ease;
+}
 
 .container_footer {
   display: flex;
@@ -604,12 +609,13 @@ td.td_left {
   }
 }
 
+
 .facture_model_preview {
   transform: scale(1.1);
   // padding: 30px;
   background-color: white;
-  width: 120mm;
-  min-height: 160mm;
+  width: 130mm;
+  min-height: 170mm;
   position: relative;
   
   .content {

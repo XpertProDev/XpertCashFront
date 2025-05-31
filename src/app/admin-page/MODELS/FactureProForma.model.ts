@@ -60,6 +60,8 @@ export interface FactureProForma {
   }[];
   entreprise?: {
       siege: string;
+      tauxTva?: number
+
   };
   description: string;
   totalHT: number;

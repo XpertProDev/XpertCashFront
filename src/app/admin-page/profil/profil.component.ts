@@ -10,9 +10,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-profil',
   imports: [
-      CommonModule,
-      ReactiveFormsModule,
-      FormsModule,
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
   ],
   templateUrl: './profil.component.html',
   styleUrl: './profil.component.scss'
@@ -30,8 +30,6 @@ export class ProfilComponent  implements OnInit{
   photo: string = '';
 
   imageFile: File | null = null;
-
-
 
   userName: string = '';
   nomEntreprise: string = '';
@@ -70,8 +68,6 @@ export class ProfilComponent  implements OnInit{
 
   // Methode pour cadre From
   isPasswordFormVisible = false;
-
-  
 
   toggleCurrentPasswordVisibility() {
     this.showCurrentPassword = !this.showCurrentPassword;
@@ -259,7 +255,7 @@ export class ProfilComponent  implements OnInit{
         this.nomEntreprise = user.nomEntreprise
         this.email = user.email;
         this.phone = user.phone;
-        this.photo = user.photo ? `http://localhost:8080${user.photo}` : 'assets/images/user.png';
+        this.photo = user.photo ? `http://localhost:8080${user.photo}` : '';
         this.roleType = user.roleType;
         this.pays = user.pays;
         this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';

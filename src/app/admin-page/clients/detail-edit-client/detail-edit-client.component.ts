@@ -369,6 +369,11 @@ export class DetailEditClientComponent {
       siteWeb: this.entrepriseForm.value.siteWeb,
       signataire: this.entrepriseForm.value.signataire,
       signataireNom: this.entrepriseForm.value.signataireNom,
+      prefixe: this.entrepriseForm.value.prefixe,
+      suffixe: this.entrepriseForm.value.suffixe,
+      tauxTva: this.entrepriseForm.value.tauxTva
+
+
 
     };
   

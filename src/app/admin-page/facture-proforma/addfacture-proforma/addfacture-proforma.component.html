@@ -361,18 +361,29 @@
                     </label>
                 </div>
         
-                <div class="double_input_grid" *ngIf="activeTva" style="margin-top: 15px;">
+              <div class="double_input_grid" *ngIf="activeTva" style="margin-top: 15px;">
                     <div class="champ_input">
-                      <input type="number" class="input_focus" readonly [value]="18" />
+                      <input
+                        type="text"
+                        class="input_focus"
+                        readonly
+                        [value]="(form.get('tauxTva')?.value * 100 | number:'1.0-2') + ' %'"
+                      />
                       <label class="label">TVA (%)</label>
                     </div>
-                    
+
                     <div class="champ_input">
-                      <input type="text" class="input_focus" readonly [value]="getMontantTVA() | customNumber" style="cursor: no-drop;"/>
+                      <input
+                        type="text"
+                        class="input_focus"
+                        readonly
+                        [value]="getMontantTVA() | customNumber"
+                        style="cursor: no-drop;"
+                      />
                       <label class="label">Montant (CFA)</label>
                     </div>
-        
-                </div>
+              </div>
+
         
                 </div>
             </div>

@@ -7,6 +7,7 @@ import { Router, RouterLink } from "@angular/router";
 import { ClientService } from "../SERVICES/client-service";
 import { Clients } from "../MODELS/clients-model";
 import { TruncateEmailPipe } from "../MODELS/truncate-email.pipe";
+import { EntrepriseClient } from "../MODELS/entreprise-clients-model";
 
 
 @Component({
@@ -36,7 +37,9 @@ export class ClientsComponent implements OnInit  {
   pageSize = 6;
   currentPage = 0;
   totalClients = 0;
+  totalEntrepriseClients = 0;
   clients: Clients[] = [];
+  entrepriseClient: EntrepriseClient[] = [];
   sortField = 'nomComplet';
   sortDirection: 'asc' | 'desc' = 'asc';
   noClientsAvailable = false;
@@ -132,6 +135,8 @@ export class ClientsComponent implements OnInit  {
     }
   }
 
+  //liste entreprise client
+  
   get paginatedClients(): Clients[] {
     const startIndex = this.currentPage * this.pageSize;
     return this.clients.slice(startIndex, startIndex + this.pageSize);

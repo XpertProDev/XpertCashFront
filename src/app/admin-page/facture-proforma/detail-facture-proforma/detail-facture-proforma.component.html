@@ -611,7 +611,9 @@
                         <div class="timeline-container">
                             <div *ngFor="let event of historicalEvents" class="timeline-event">
                                 <div class="event-avatar">
-                                    <img [src]="event.user.photo || 'assets/img/profil.png'" alt="Avatar" class="avatar">
+                                    <img [src]="event.user.photo || 'assets/img/profil.png'" alt="Avatar" class="avatar"
+                                     (error)="event.user.photo = 'assets/img/profil.png'">
+
                                 </div>
                                 
                                 <div class="event-content">

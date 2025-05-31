@@ -23,7 +23,7 @@ import { MatInputModule } from '@angular/material/input';
     MatPaginatorModule,
   ],
   templateUrl: './facture-proforma.component.html',
-  styleUrl: './facture-proforma.component.scss'
+  styleUrl: './facture-proforma.component.scss',
 })
 export class FactureProformaComponent implements OnInit {
 
@@ -189,7 +189,6 @@ export class FactureProformaComponent implements OnInit {
         return 'etat-gris';
     }
   }
-  
-  
+
   
 }
