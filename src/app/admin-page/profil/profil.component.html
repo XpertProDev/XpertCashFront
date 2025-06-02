@@ -60,7 +60,15 @@
                     <h5 style="color: #0672E4; letter-spacing: 0.60px;">{{ roleType }}</h5>
 
                     <div class="stats">
-                      <div>Code Personnel<br><span style="font-style: italic; color: red;">{{ personalCode }}</span>
+                      <div>Code Personnel<br>
+                        <span class="showCode" [ngClass]="{ 'blurred': !showCode }" >{{ personalCode }}</span>
+                          <button class="btnC"
+                          (click)="toggleCodeVisibility()" 
+                          style="background: none; border: none; cursor: pointer;"
+                          aria-label="Afficher/Masquer le code"
+                        >
+                          <i class="fa" [ngClass]="showCode ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        </button>
                       </div>
                     </div>
                 </div>

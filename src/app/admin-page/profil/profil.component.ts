@@ -458,4 +458,8 @@ export class ProfilComponent  implements OnInit{
     this.isModalOpen = false;
   }
   
+  showCode = false;
+   toggleCodeVisibility() {
+    this.showCode = !this.showCode;
+  }
 }
