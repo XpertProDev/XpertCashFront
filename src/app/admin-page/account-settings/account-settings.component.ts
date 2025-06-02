@@ -69,6 +69,7 @@ export class AccountSettingsComponent implements OnInit {
   isSending: boolean = false;
   isUserFormVisible = false;
   boutiques: any[] = [];
+  showPasswordInPersonalForm: boolean = false;
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
     'Sénégal': '🇸🇳',
@@ -180,12 +181,21 @@ export class AccountSettingsComponent implements OnInit {
         this.boutiques = user.boutiques || [];
         console.log("Liste des boutiques:", this.boutiques);
         console.log("Infos utilisateur récupérées :", user);
+        this.nomCompletForm.patchValue({
+        nomComplet: user.nomComplet,
+        phone: user.phone,
+        password: '' // On laisse le mot de passe vide
+      });
         
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
       }
     });
+  }
+
+  togglePasswordVisibilityInPersonalForm(): void {
+    this.showPasswordInPersonalForm = !this.showPasswordInPersonalForm;
   }
 
   private initForm(): void {
@@ -618,7 +628,7 @@ export class AccountSettingsComponent implements OnInit {
       this.zone.run(() => {
         const message = messages;
         this.snackBar.open(message, 'Fermer', { duration: 3000 });
-        this.nomCompletForm.reset();
+        // this.nomCompletForm.reset();
       });
     },
     error: (error: any) => {

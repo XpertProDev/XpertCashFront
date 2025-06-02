@@ -188,28 +188,22 @@
                                 
                                     <!-- Mot de passe -->
                                     <div class="champ_input">
-                                    <input 
-                                        [type]="showCurrentPassword ? 'text' : 'password'" 
-                                        formControlName="password" 
-                                        class="input_focus" 
-                                        placeholder="Saisissez votre mot de passe"
-                                    >
-                                    <label class="label labelColor">Votre mot de passe</label>
-                                    <div *ngIf="passwordControl?.touched && passwordControl?.invalid">
-                                        <small class="text-danger" *ngIf="passwordControl?.errors?.['required']">
-                                        Ce champ est obligatoire
-                                        </small>
-                                    </div>
-                                    
-                                    <!-- Icone œil pour basculer la visibilité -->
-                                    <div class="eye_container" (click)="toggleCurrentPasswordVisibility()">
-                                        <div class="eye_ferme" *ngIf="!showCurrentPassword">
-                                        <i class="ri-eye-close-line"></i>
+                                        <input 
+                                            [type]="showPasswordInPersonalForm ? 'text' : 'password'" 
+                                            formControlName="password" 
+                                            class="input_focus" 
+                                            placeholder="Saisissez votre mot de passe"
+                                        >
+                                        <label class="label labelColor">Votre mot de passe</label>
+                                        
+                                        <div class="eye_container" (click)="togglePasswordVisibilityInPersonalForm()">
+                                            <div class="eye_ferme" *ngIf="!showPasswordInPersonalForm">
+                                            <i class="ri-eye-close-line"></i>
+                                            </div>
+                                            <div class="eye_ouvre" *ngIf="showPasswordInPersonalForm">
+                                            <i class="ri-eye-line"></i>
+                                            </div>
                                         </div>
-                                        <div class="eye_ouvre" *ngIf="showCurrentPassword">
-                                        <i class="ri-eye-line"></i>
-                                        </div>
-                                    </div>
                                     </div>
 
                                     <div class="btn_double">
@@ -271,7 +265,7 @@
                                         <!-- // date  -->
                                         <div class="date">
                                             <!-- <p>Bamako, le 12 Mai 2025</p> -->
-                                            <p>{{ form.get('siege')?.value  }}, le ....</p>
+                                            <p>{{ form.get('siege')?.value  }}, le dd/MM.yyyy</p>
                                         </div>
 
                                         <!-- nom et object  -->
