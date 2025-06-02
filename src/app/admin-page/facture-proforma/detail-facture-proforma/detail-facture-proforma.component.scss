@@ -1518,6 +1518,7 @@ input.input_focus_type:focus {
     display: flex;
     margin-bottom: 14px;
     position: relative;
+    padding: 10px;
     
     &:not(:last-child):after {
         content: '';

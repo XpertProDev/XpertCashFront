@@ -518,6 +518,9 @@ a:hover img {
 .eye_ouvre i {
   font-size: 20px;
   cursor: pointer;
+  position: fixed;
+    top: -24px;
+    right: -9px;
 }
 
 .eye_container {
@@ -717,11 +720,16 @@ a:hover img {
 .champ_grid_double {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 1fr;
-  grid-column-gap: 0px;
-  grid-row-gap: 0px;
   gap: 15px;
 }
+
+@media (max-width: 768px) {
+  .champ_grid_double {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 
 // .cadre_photo {
 //   display: flex;
