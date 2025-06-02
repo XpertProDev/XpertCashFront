@@ -135,12 +135,7 @@ export class AccountSettingsComponent implements OnInit {
     private profilService: ProfilService,
     private usersService: UsersService,
     private zone: NgZone,
-  ) {
-    window.addEventListener('profilePhotoUpdated', (event: any) => {
-        const newPhoto = event.detail.photoUrl;
-        localStorage.setItem('userPhoto', newPhoto);
-    });
-  }
+  ) {}
 
   ngOnInit() {
     this.initForm();
@@ -179,9 +174,15 @@ export class AccountSettingsComponent implements OnInit {
     });
   }
 
-    getUserInfo(): void {
+  getUserInfo(): void {
     this.usersService.getUserInfo().subscribe({
       next: (user) => {
+         // AJOUT DU TIMESTAMP POUR CASSER LE CACHE
+        const timestamp = new Date().getTime();
+        this.photo = user.photo 
+          ? `http://localhost:8080${user.photo}?t=${timestamp}` 
+          : 'assets/img/profil.png';
+          
         this.userName = user.nomComplet;
         this.personalCode = user.personalCode;
         this.nomEntreprise = user.nomEntreprise
@@ -201,6 +202,7 @@ export class AccountSettingsComponent implements OnInit {
         phone: user.phone,
         password: '' // On laisse le mot de passe vide
       });
+      this.cdRef.detectChanges();
         
       },
       error: (err) => {
@@ -539,71 +541,6 @@ export class AccountSettingsComponent implements OnInit {
     });
   }
 
-// onSubmitUpdateUser(): void {
-//   this.errorMessage = null;
-//   this.successMessage = null;
-//   this.isLoading = true;
-
-//   if (this.nomCompletForm.invalid) {
-//     this.errorMessage = "Veuillez remplir tous les champs correctement";
-//     this.isLoading = false; // Désactivation immédiate si formulaire invalide
-//     return;
-//   }
-
-//   const { nomComplet, phone, password } = this.nomCompletForm.value;
-
-//   const userData = {
-//     nomComplet,
-//     phone,
-//     password
-//   };
-
-//   const formData = new FormData();
-//   formData.append('user', JSON.stringify(userData));
-
-//   if (this.imageFile) {
-//     formData.append('photo', this.imageFile);
-//   }
-
-//   this.usersService.updateUser(this.userId, formData).subscribe({
-//     next: (response: any) => {
-//       console.log("✅ Réponse backend :", response);
-      
-//       // Désactiver le loading immédiatement
-//       this.isLoading = false;
-      
-//       // Préparer le message
-//       const message = typeof response === 'string'
-//         ? response
-//         : response?.message || "Profil mis à jour avec succès !";
-      
-//       // Afficher le snackbar après que l'UI ait eu le temps de se mettre à jour
-//       setTimeout(() => {
-//         this.snackBar.open(message, 'Fermer', { duration: 3000 });
-//       }, 0);
-      
-//       this.nomCompletForm.reset();
-//     },
-//     error: (error: any) => {
-//       console.error("❌ Erreur update :", error);
-      
-//       // Désactiver le loading immédiatement
-//       this.isLoading = false;
-      
-//       // Préparer le message d'erreur
-//       let errorMsg = 'Erreur lors de la mise à jour';
-//       if (error instanceof HttpErrorResponse) {
-//         errorMsg = error.error.message || error.error || errorMsg;
-//       }
-      
-//       // Afficher l'erreur après que l'UI ait eu le temps de se mettre à jour
-//       setTimeout(() => {
-//         this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
-//       }, 0);
-//     }
-//   });
-// }
-
   onSubmitUpdateUser(): void {
     this.errorMessage = null;
     this.successMessage = null;
@@ -687,39 +624,60 @@ export class AccountSettingsComponent implements OnInit {
       this.isModalOpen = false;
   }
 
+  // 2. Modifiez votre méthode onProfilePhotoSelected
   onProfilePhotoSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      this.imageFile = file;
+      const input = event.target as HTMLInputElement;
+      
+      if (input.files && input.files[0]) {
+          const file = input.files[0];
+          this.imageFile = file;
 
-      // Prévisualisation locale immédiate
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-          this.photo = e.target.result;
-      };
-      reader.readAsDataURL(file);
+          // Prévisualisation locale IMMÉDIATE
+          const reader = new FileReader();
+          
+          reader.onload = (e: any) => {
+            const base64 = e.target.result;
 
-      // Envoi au serveur
-      const formData = new FormData();
-      formData.append('photo', file);
+            // Afficher l'image immédiatement 
+            this.photo = base64;
 
-      this.usersService.updateUser(this.userId, formData).subscribe({
-          next: (response) => {
-            console.log("Réponse serveur:", response);
-            this.snackBar.open("Photo mise à jour avec succès", 'Fermer', { duration: 3000 });
-            
-            // RECHARGEZ les données utilisateur après mise à jour
-            this.getUserInfo();
-            // this.refreshPhoto();
-          },
-          error: (error) => {
-              this.snackBar.open("Échec de la mise à jour", 'Fermer', { duration: 3000 });
-          }
-      });
-    }
+            // Stocker en localStorage pour éviter chargement serveur
+            localStorage.setItem('photo', base64);
+
+            window.dispatchEvent(new Event('storage-photo-update'));
+          };
+
+          reader.readAsDataURL(file);
+
+          // Envoi au serveur
+          const formData = new FormData();
+          formData.append('photo', file);
+
+          this.usersService.updateUser(this.userId, formData).subscribe({
+              next: (response: any) => {
+                  this.snackBar.open("Photo mise à jour avec succès", 'Fermer', { duration: 3000 });
+                  
+                  // Utilisez la nouvelle fonction de rafraîchissement
+                  this.refreshPhoto();
+              },
+              error: (error) => {
+                  this.snackBar.open("Échec de la mise à jour", 'Fermer', { duration: 3000 });
+                  this.refreshPhoto(); // Réinitialiser en cas d'erreur
+              }
+          });
+      }
   }
+
+  refreshPhoto() {
+    const timestamp = new Date().getTime();
+    this.usersService.getUserInfo().subscribe(user => {
+        this.photo = user.photo 
+            ? `http://localhost:8080${user.photo}?t=${timestamp}` 
+            : 'assets/img/profil.png';
+        this.cdRef.detectChanges();
+    });
+  }
+
 
   
 
