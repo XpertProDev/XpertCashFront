@@ -196,7 +196,7 @@ export class AccountSettingsComponent implements OnInit {
     }, { validators: this.passwordMatchValidator });
 
     this.nomCompletForm = this.fb.group({
-      nomComplet: ['', [Validators.required]],
+      nomComplet: [''],
       phone: ['', [Validators.pattern('^\\+?[0-9]{7,15}$')]], // Numéro valide
       password: ['', [Validators.required, Validators.minLength(6)]] // Mot de passe avec min 6 caractères
     });

@@ -491,8 +491,9 @@ a:hover img {
 // ICON EYE 
 .eye_container {
   position: absolute;
-  right: 20px;
-  top: 24px;
+  right: 7px;
+  top: 34px;
+  transform: translateY(-50%);
 }
 
 .eye_ferme i, 
@@ -501,13 +502,12 @@ a:hover img {
   cursor: pointer;
 }
 
-.eye_container {
-  cursor: pointer;
-  position: absolute;
-  right: 10px;
-  top: 65%;
-  transform: translateY(-50%);
-}
+// .eye_container {
+//   cursor: pointer;
+//   position: absolute;
+//   right: 10px;
+//   top: 55%;
+// }
 
 .eye_ferme, .eye_ouvre {
   font-size: 1.2rem;
