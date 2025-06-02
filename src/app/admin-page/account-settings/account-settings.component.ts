@@ -455,54 +455,63 @@ export class AccountSettingsComponent implements OnInit {
   // }
 
   updatePassword(): void {
-      // Réinitialise les messages
-      this.errorMessage = null;
-      this.successMessage = null;
-    
-      // Vérifie la validité du formulaire
-      if (this.passwordForm.invalid) {
-          const errorMsg = "Veuillez remplir tous les champs correctement";
-          this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
-          return;
-      }
-    
-      const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
-    
-      // Double vérification de la correspondance des mots de passe
-      if (newPassword !== confirmPassword) {
-          const errorMsg = "Les nouveaux mots de passe ne correspondent pas";
-          this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
-          return;
-      }
-    
-      // Active l'état de chargement
-      this.isLoading = true;
-    
-      // Prépare la requête
-      const request: UpdateUserRequest = {
-          password: currentPassword,
-          newPassword: newPassword
-      };
-    
-      // Appel au service
-      this.profilService.updatePassword(this.userId, request).subscribe({
-          next: (response) => {
-              this.isLoading = false;
-              this.cdRef.detectChanges();
-              const successMsg = response.includes('succès') ? response : "Mot de passe modifié !";
-              this.snackBar.open(successMsg, 'Fermer', { duration: 3000 });
-              this.isPasswordFormVisible = false;
-              this.passwordForm.reset();
-          },
-          error: (error) => {
-              this.isLoading = false;
-              let errorMsg = "Erreur inconnue";
-              if (error instanceof HttpErrorResponse) {
-                  errorMsg = error.error.message || error.error || errorMsg;
-              }
-              this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
-          }
+    // Réinitialise les messages
+    this.errorMessage = null;
+    this.successMessage = null;
+
+    // Vérifie la validité du formulaire
+    if (this.passwordForm.invalid) {
+      const errorMsg = "Veuillez remplir tous les champs correctement";
+      this.zone.run(() => {
+        this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
       });
+      return;
+    }
+
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
+
+    // Double vérification de la correspondance des mots de passe
+    if (newPassword !== confirmPassword) {
+      const errorMsg = "Les nouveaux mots de passe ne correspondent pas";
+      this.zone.run(() => {
+        this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+      });
+      return;
+    }
+
+    // Active l'état de chargement
+    this.isLoading = true;
+
+    // Prépare la requête
+    const request: UpdateUserRequest = {
+      password: currentPassword,
+      newPassword: newPassword
+    };
+
+    // Appel au service
+    this.profilService.updatePassword(this.userId, request).subscribe({
+      next: (response) => {
+        this.zone.run(() => {
+          this.isLoading = false;
+          const successMsg = response.includes('succès') ? response : "Mot de passe modifié !";
+          this.snackBar.open(successMsg, 'Fermer', { duration: 3000 });
+          this.isPasswordFormVisible = false;
+          this.passwordForm.reset();
+          this.cdRef.detectChanges(); // Forcer la détection de changements
+        });
+      },
+      error: (error) => {
+        this.zone.run(() => {
+          this.isLoading = false;
+          let errorMsg = "Erreur inconnue";
+          if (error instanceof HttpErrorResponse) {
+            errorMsg = error.error.message || error.error || errorMsg;
+          }
+          this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+          this.cdRef.detectChanges(); // Forcer la détection de changements
+        });
+      }
+    });
   }
 
 // onSubmitUpdateUser(): void {
