@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef,NgZone, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +9,10 @@ import { EntrepriseService } from '../SERVICES/entreprise-service';
 import { Entreprise } from '../MODELS/entreprise-model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
+import { ProfilService } from '../SERVICES/profil.service';
+import { UpdateUserRequest } from '../MODELS/profil.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { UsersService } from '../SERVICES/users.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -35,21 +39,175 @@ export class AccountSettingsComponent implements OnInit {
   entrepriseId: number | null = null;
   isLoading: boolean = false;
   showPreview: boolean = false;
-
+userId!: number;
+  passwordForm!: FormGroup;
+  successMessage: string | null = null;
+  password: string = '';
+  nomBoutiqueForm!: FormGroup;
+  nomCompletForm!: FormGroup;
+  photo: string = '';
+  imageFile: File | null = null;
+  // isUserFormVisible = false;
   @ViewChild('fileInput') fileInput!: ElementRef;
+  showCurrentPassword: boolean = false;
+  showNewPassword: boolean = false;
+  showConfirmPassword: boolean = false;
+  errorMessage: string | null = null;
+  // Methode pour cadre From
+  isPasswordFormVisible = false;
+  userName: string = '';
+  nomEntreprise: string = '';
+  email: string = '';
+  phone: string = '';
+  roleType: string = '';
+  pays: string = '';
+  nomBoutique: string = '';
+  boutiqueAdresse: string = '';
+  flagPays: string = '';
+  personalCode: string = '';
+  isNomBoutiqueFormVisible = false;
+  isSending: boolean = false;
+  isUserFormVisible = false;
+  boutiques: any[] = [];
+  paysFlags: { [key: string]: string } = {
+    'Mali': '🇲🇱',
+    'Sénégal': '🇸🇳',
+    'Côte d\'Ivoire': '🇨🇮',
+  };
+
+    get currentPassword() {
+    return this.passwordForm.get('currentPassword');
+  }
+  
+  get newPassword() {
+    return this.passwordForm.get('newPassword');
+  }
+  
+  get confirmPassword() {
+    return this.passwordForm.get('confirmPassword');
+  }
+
+  get nomBoutiqueControl() {
+    return this.nomBoutiqueForm.get('nomBoutique');
+  }
+
+  get adresseControl() {
+    return this.nomBoutiqueForm.get('adresse');
+  }
+
+  get nomCompletControl() {
+    return this.nomCompletForm.get('nomComplet');
+  }
+
+  get phoneControl() {
+    return this.nomCompletForm.get('phone');
+  }
+
+  get passwordControl() {
+    return this.nomCompletForm.get('password');
+  }
+
+  toggleCurrentPasswordVisibility() {
+    this.showCurrentPassword = !this.showCurrentPassword;
+  }
+  
+  toggleNewPasswordVisibility() {
+    this.showNewPassword = !this.showNewPassword;
+  }
+  
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  togglePasswordForm() {
+    this.isPasswordFormVisible = !this.isPasswordFormVisible;
+  }
 
   constructor(
     private fb: FormBuilder,
     private entrepriseService: EntrepriseService,
     private cdRef: ChangeDetectorRef,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private profilService: ProfilService,
+    private usersService: UsersService,
+    private zone: NgZone,
   ) {}
 
   ngOnInit() {
+    this.initForm();
     this.getFormInit();
     this.getEntrepriseInfo();
     this.listenToPrefixSuffixChanges();
+    this.getConnectedUserId();
+    this.getUserInfo();
   
+  }
+
+  // Récupère l'id de l'utilisateur connecté via UsersService ou le localStorage
+  private getConnectedUserId(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (userInfo) => {
+        if (userInfo && (userInfo as any).id) {
+          this.userId = (userInfo as any).id;
+        } else {
+          const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+          if (storedUser && storedUser.id) {
+            this.userId = storedUser.id;
+          } else {
+            this.errorMessage = "Utilisateur non authentifié.";
+          }
+        }
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des infos utilisateur:", err);
+        this.errorMessage = "Impossible de récupérer l'utilisateur connecté.";
+      }
+    });
+  }
+
+    getUserInfo(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        this.userName = user.nomComplet;
+        this.personalCode = user.personalCode;
+        this.nomEntreprise = user.nomEntreprise
+        this.email = user.email;
+        this.phone = user.phone;
+        this.photo = user.photo ? `http://localhost:8080${user.photo}` : '';
+        this.roleType = user.roleType;
+        this.pays = user.pays;
+        this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';
+        this.flagPays = this.paysFlags[this.pays] || '';
+        this.boutiques = user.boutiques || [];
+        console.log("Liste des boutiques:", this.boutiques);
+        console.log("Infos utilisateur récupérées :", user);
+        
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des infos utilisateur :", err);
+      }
+    });
+  }
+
+  private initForm(): void {
+    this.passwordForm = this.fb.group({
+      currentPassword: ['', [Validators.required]],
+      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
+
+    this.nomCompletForm = this.fb.group({
+      nomComplet: ['', [Validators.required]],
+      phone: ['', [Validators.pattern('^\\+?[0-9]{7,15}$')]], // Numéro valide
+      password: ['', [Validators.required, Validators.minLength(6)]] // Mot de passe avec min 6 caractères
+    });
+  }
+
+  // Validator pour vérifier que les deux nouveaux mots de passe correspondent
+  private passwordMatchValidator(form: FormGroup): ValidationErrors | null {
+    const newPassword = form.get('newPassword')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+    return newPassword === confirmPassword ? null : { mismatch: true };
   }
 
 get tauxTvaAffiche(): string {
@@ -254,7 +412,114 @@ get tauxTvaAffiche(): string {
   }
 
  
-
+  updatePassword(): void {
+      // Réinitialise les messages
+      this.errorMessage = null;
+      this.successMessage = null;
+    
+      // Vérifie la validité du formulaire
+      if (this.passwordForm.invalid) {
+          const errorMsg = "Veuillez remplir tous les champs correctement";
+          this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+          return;
+      }
+    
+      const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
+    
+      // Double vérification de la correspondance des mots de passe
+      if (newPassword !== confirmPassword) {
+          const errorMsg = "Les nouveaux mots de passe ne correspondent pas";
+          this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+          return;
+      }
+    
+      // Active l'état de chargement
+      this.isLoading = true;
+    
+      // Prépare la requête
+      const request: UpdateUserRequest = {
+          password: currentPassword,
+          newPassword: newPassword
+      };
+    
+      // Appel au service
+      this.profilService.updatePassword(this.userId, request).subscribe({
+          next: (response) => {
+              this.isLoading = false;
+              this.cdRef.detectChanges();
+              const successMsg = response.includes('succès') ? response : "Mot de passe modifié !";
+              this.snackBar.open(successMsg, 'Fermer', { duration: 3000 });
+              this.isPasswordFormVisible = false;
+              this.passwordForm.reset();
+          },
+          error: (error) => {
+              this.isLoading = false;
+              let errorMsg = "Erreur inconnue";
+              if (error instanceof HttpErrorResponse) {
+                  errorMsg = error.error.message || error.error || errorMsg;
+              }
+              this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+          }
+      });
+  }
  
+   onSubmitUpdateUser(): void {
+    this.errorMessage = null;
+    this.successMessage = null;
+    this.isLoading = true;
+
+    if (this.nomCompletForm.invalid) {
+      this.errorMessage = "Veuillez remplir tous les champs correctement";
+      this.isLoading = false; // Désactivation immédiate si formulaire invalide
+      return;
+    }
+
+    const { nomComplet, phone, password } = this.nomCompletForm.value;
+
+    const userData = {
+      nomComplet,
+      phone,
+      password
+    };
+
+    const formData = new FormData();
+    formData.append('user', JSON.stringify(userData));
+
+    if (this.imageFile) {
+      formData.append('photo', this.imageFile);
+    }
+
+    this.usersService.updateUser(this.userId, formData).subscribe({
+    next: (response: any) => {
+      this.isLoading = false;
+      this.cdRef.detectChanges();
+
+      const messages = typeof response === 'string'
+          ? response
+          : response?.message ;
+        
+      
+      this.zone.run(() => {
+        const message = messages;
+        this.snackBar.open(message, 'Fermer', { duration: 3000 });
+        this.nomCompletForm.reset();
+      });
+    },
+    error: (error: any) => {
+      this.isLoading = false;
+      this.cdRef.detectChanges();
+
+      let errorMsgs = 'Erreur lors de la mise à jour';
+        if (error instanceof HttpErrorResponse) {
+          errorMsgs = error.error.message || error.error || errorMsgs;
+        }
+      
+      this.zone.run(() => {
+        const errorMsg =  errorMsgs;
+        this.snackBar.open(errorMsg, 'Fermer', { duration: 3000 });
+      });
+    }
+  });
+  }
 
 }
