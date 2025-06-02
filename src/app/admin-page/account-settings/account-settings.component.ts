@@ -137,12 +137,7 @@ export class AccountSettingsComponent implements OnInit {
     private profilService: ProfilService,
     private usersService: UsersService,
     private zone: NgZone,
-  ) {
-    window.addEventListener('profilePhotoUpdated', (event: any) => {
-        const newPhoto = event.detail.photoUrl;
-        localStorage.setItem('userPhoto', newPhoto);
-    });
-  }
+  ) {}
 
   ngOnInit() {
     this.initForm();
@@ -182,9 +177,15 @@ export class AccountSettingsComponent implements OnInit {
     });
   }
 
-    getUserInfo(): void {
+  getUserInfo(): void {
     this.usersService.getUserInfo().subscribe({
       next: (user) => {
+         // AJOUT DU TIMESTAMP POUR CASSER LE CACHE
+        const timestamp = new Date().getTime();
+        this.photo = user.photo 
+          ? `http://localhost:8080${user.photo}?t=${timestamp}` 
+          : 'assets/img/profil.png';
+          
         this.userName = user.nomComplet;
         this.personalCode = user.personalCode;
         this.nomEntreprise = user.nomEntreprise
@@ -204,6 +205,7 @@ export class AccountSettingsComponent implements OnInit {
         phone: user.phone,
         password: '' // On laisse le mot de passe vide
       });
+      this.cdRef.detectChanges();
         
       },
       error: (err) => {
@@ -237,10 +239,10 @@ export class AccountSettingsComponent implements OnInit {
     return newPassword === confirmPassword ? null : { mismatch: true };
   }
 
-  get tauxTvaAffiche(): string {
-    const tva = this.form.get('tauxTva')?.value;
-    return tva !== null ? `${(tva * 100).toFixed(0)}%` : '';
-  }
+ get tauxTvaAffiche(): string {
+  const tva = this.form.get('tauxTva')?.value;
+  return tva !== null ? `${(tva * 100).toFixed(0)}%` : '';
+}
 
   getFormInit() {
     this.form = this.fb.group({
@@ -257,7 +259,10 @@ export class AccountSettingsComponent implements OnInit {
       rccm: ['xxxx'],
       nif: ['xxxx'],
       signataire: ['Monsieur X'],
-      signataireNom: ['Le Directeur Général']
+      signataireNom: ['Le Directeur Général'],
+       prefixe: ['xxxx'],
+      suffixe: ['xxxx'],
+     tauxTva: [null]
     });
   }
 
@@ -482,8 +487,8 @@ export class AccountSettingsComponent implements OnInit {
           }
       });
   }
- 
-   onSubmitUpdateUser(): void {
+
+  onSubmitUpdateUser(): void {
     this.errorMessage = null;
     this.successMessage = null;
     this.isLoading = true;
@@ -557,39 +562,62 @@ export class AccountSettingsComponent implements OnInit {
   fermerModal(): void {
       this.isModalOpen = false;
   }
+
+  // 2. Modifiez votre méthode onProfilePhotoSelected
   onProfilePhotoSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      this.imageFile = file;
+      const input = event.target as HTMLInputElement;
+      
+      if (input.files && input.files[0]) {
+          const file = input.files[0];
+          this.imageFile = file;
 
-      // Prévisualisation locale immédiate
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-          this.photo = e.target.result;
-      };
-      reader.readAsDataURL(file);
+          // Prévisualisation locale IMMÉDIATE
+          const reader = new FileReader();
+          
+          reader.onload = (e: any) => {
+            const base64 = e.target.result;
 
-      // Envoi au serveur
-      const formData = new FormData();
-      formData.append('photo', file);
+            // Afficher l'image immédiatement 
+            this.photo = base64;
 
-      this.usersService.updateUser(this.userId, formData).subscribe({
-          next: (response) => {
-            console.log("Réponse serveur:", response);
-            this.snackBar.open("Photo mise à jour avec succès", 'Fermer', { duration: 3000 });
-            
-            // RECHARGEZ les données utilisateur après mise à jour
-            this.getUserInfo();
-            // this.refreshPhoto();
-          },
-          error: (error) => {
-              this.snackBar.open("Échec de la mise à jour", 'Fermer', { duration: 3000 });
-          }
-      });
-    }
+            // Stocker en localStorage pour éviter chargement serveur
+            localStorage.setItem('photo', base64);
+
+            window.dispatchEvent(new Event('storage-photo-update'));
+          };
+
+          reader.readAsDataURL(file);
+
+          // Envoi au serveur
+          const formData = new FormData();
+          formData.append('photo', file);
+
+          this.usersService.updateUser(this.userId, formData).subscribe({
+              next: (response: any) => {
+                  this.snackBar.open("Photo mise à jour avec succès", 'Fermer', { duration: 3000 });
+                  
+                  // Utilisez la nouvelle fonction de rafraîchissement
+                  this.refreshPhoto();
+              },
+              error: (error) => {
+                  this.snackBar.open("Échec de la mise à jour", 'Fermer', { duration: 3000 });
+                  this.refreshPhoto(); // Réinitialiser en cas d'erreur
+              }
+          });
+      }
   }
 
+  refreshPhoto() {
+    const timestamp = new Date().getTime();
+    this.usersService.getUserInfo().subscribe(user => {
+        this.photo = user.photo 
+            ? `http://localhost:8080${user.photo}?t=${timestamp}` 
+            : 'assets/img/profil.png';
+        this.cdRef.detectChanges();
+    });
+  }
+
+
+  
 
 }
