@@ -45,7 +45,10 @@ export class AccountSettingsComponent implements OnInit {
   password: string = '';
   nomBoutiqueForm!: FormGroup;
   nomCompletForm!: FormGroup;
+  photoUrl: string | ArrayBuffer | null = 'assets/img/profil.png';
   photo: string = '';
+  isModalOpen = false;
+  private photoRefreshToken = new Date().getTime();
   imageFile: File | null = null;
   // isUserFormVisible = false;
   @ViewChild('fileInput') fileInput!: ElementRef;
@@ -132,7 +135,12 @@ export class AccountSettingsComponent implements OnInit {
     private profilService: ProfilService,
     private usersService: UsersService,
     private zone: NgZone,
-  ) {}
+  ) {
+    window.addEventListener('profilePhotoUpdated', (event: any) => {
+        const newPhoto = event.detail.photoUrl;
+        localStorage.setItem('userPhoto', newPhoto);
+    });
+  }
 
   ngOnInit() {
     this.initForm();
@@ -141,6 +149,12 @@ export class AccountSettingsComponent implements OnInit {
     this.listenToPrefixSuffixChanges();
     this.getConnectedUserId();
     this.getUserInfo();
+
+    const savedPhoto = localStorage.getItem('photo');
+    if (savedPhoto) {
+        this.photo = savedPhoto;
+    }
+
   }
 
   // Récupère l'id de l'utilisateur connecté via UsersService ou le localStorage
@@ -173,7 +187,8 @@ export class AccountSettingsComponent implements OnInit {
         this.nomEntreprise = user.nomEntreprise
         this.email = user.email;
         this.phone = user.phone;
-        this.photo = user.photo ? `http://localhost:8080${user.photo}` : '';
+        // this.photo = user.photo ? `http://localhost:8080${user.photo}` : '';
+        this.photo = user.photo ? `http://localhost:8080${user.photo}` : 'assets/img/profil.png';
         this.roleType = user.roleType;
         this.pays = user.pays;
         this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';
@@ -647,6 +662,65 @@ export class AccountSettingsComponent implements OnInit {
     }
   });
   }
- 
+
+
+  // Méthodes pour gérer la photo
+  // changerPhoto(event: Event): void {
+  //     event.stopPropagation();
+  //     const fileInput = document.getElementById('profilePhotoInput') as HTMLInputElement;
+  //     fileInput.click();
+  // }
+
+  changerPhoto(event: Event) {
+    event.stopPropagation();
+    const fileInput = document.getElementById('profilePhotoInput') as HTMLInputElement;
+    fileInput.click();
+  }
+
+  visualiserPhoto(event: Event): void {
+      const target = event.target as HTMLElement;
+      if (target.classList.contains('camera-icon')) return;
+      this.isModalOpen = true;
+  }
+
+  fermerModal(): void {
+      this.isModalOpen = false;
+  }
+
+  onProfilePhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.imageFile = file;
+
+      // Prévisualisation locale immédiate
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+          this.photo = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      // Envoi au serveur
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      this.usersService.updateUser(this.userId, formData).subscribe({
+          next: (response) => {
+            console.log("Réponse serveur:", response);
+            this.snackBar.open("Photo mise à jour avec succès", 'Fermer', { duration: 3000 });
+            
+            // RECHARGEZ les données utilisateur après mise à jour
+            this.getUserInfo();
+            // this.refreshPhoto();
+          },
+          error: (error) => {
+              this.snackBar.open("Échec de la mise à jour", 'Fermer', { duration: 3000 });
+          }
+      });
+    }
+  }
+
+  
 
 }

@@ -108,7 +108,7 @@ export class ProfilComponent  implements OnInit{
      const savedPhoto = localStorage.getItem('photo');
       if (savedPhoto) {
         this.photo = savedPhoto;
-  }
+      }
   }
 
   private initForm(): void {

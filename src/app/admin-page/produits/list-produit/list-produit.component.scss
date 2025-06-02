@@ -12,6 +12,12 @@
     // background-color: antiquewhite;
     margin-right: 30px;
   }
+
+  .container_global {
+    display: grid;
+    grid-template-columns: 72% 28%;
+    position: relative;
+  }
   
   /* formulaire */
   

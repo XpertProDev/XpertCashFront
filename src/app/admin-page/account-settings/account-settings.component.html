@@ -33,18 +33,43 @@
                                         </div>
 
                                         <!-- // Img de profil  -->
-                                        <div class="img_profil">
-                                            <img src="assets/img/profil.png" alt="image de profil">
+                                        <div class="profile-img-wrapper" (click)="visualiserPhoto($event)">
+                                            <img 
+                                                [src]="photo || 'assets/img/profil.png'"
+                                                (error)="photo = 'assets/img/profil.png'"
+                                                alt="Photo de profil"
+                                                class="profile-img" />
+                                            
+                                            <!-- <div class="overlay">
+                                                <img
+                                                    src="assets/img/appareil.jpg"
+                                                    alt="Modifier"
+                                                    class="camera-icon"
+                                                     />
+                                            </div> -->
+                                        </div>
+                                            <div class="btn_changer_profil">
+                                                <button class="btn camera-icon" (click)="changerPhoto($event)">
+                                                    Changer la photo
+                                                </button>
+                                            </div>
+
+                                        <input
+                                            type="file"
+                                            id="profilePhotoInput"
+                                            accept="image/*"
+                                            (change)="onProfilePhotoSelected($event)"
+                                            hidden />
+
+                                        <!-- Lightbox de visualisation -->
+                                        <div class="photo-modal" *ngIf="isModalOpen" (click)="fermerModal()">
+                                            <div class="photo-modal-content" (click)="$event.stopPropagation()">
+                                                <img [src]="photo || 'assets/img/profil.png'">
+                                                <button class="fermer-btn" (click)="fermerModal()">✕</button>
+                                            </div>
                                         </div>
 
-                                        <!-- // btn change profil  -->
-                                        <div class="btn_changer_profil">
-                                            <button class="btn">
-                                                Changer la photo
-                                            </button>
-                                        </div>
-
-                                        <!-- // information de photo parametre  -->
+                                        <!-- Garde le texte informatif -->
                                         <div class="info_capacity_profil">
                                             <p>Formats JPG, GIF ou PNG autorisés. Taille <br> maximale : 800 Ko.</p>
                                         </div>
