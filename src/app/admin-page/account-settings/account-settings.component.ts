@@ -10,9 +10,10 @@ import { Entreprise } from '../MODELS/entreprise-model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { ProfilService } from '../SERVICES/profil.service';
+import { UsersService } from '../SERVICES/users.service';
 import { UpdateUserRequest } from '../MODELS/profil.model';
 import { HttpErrorResponse } from '@angular/common/http';
-import { UsersService } from '../SERVICES/users.service';
+
 
 @Component({
   selector: 'app-account-settings',
@@ -39,13 +40,16 @@ export class AccountSettingsComponent implements OnInit {
   entrepriseId: number | null = null;
   isLoading: boolean = false;
   showPreview: boolean = false;
-userId!: number;
+  userId!: number;
   passwordForm!: FormGroup;
   successMessage: string | null = null;
   password: string = '';
   nomBoutiqueForm!: FormGroup;
   nomCompletForm!: FormGroup;
+  photoUrl: string | ArrayBuffer | null = 'assets/img/profil.png';
   photo: string = '';
+  isModalOpen = false;
+  private photoRefreshToken = new Date().getTime();
   imageFile: File | null = null;
   // isUserFormVisible = false;
   @ViewChild('fileInput') fileInput!: ElementRef;
@@ -69,6 +73,7 @@ userId!: number;
   isSending: boolean = false;
   isUserFormVisible = false;
   boutiques: any[] = [];
+  showPasswordInPersonalForm: boolean = false;
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
     'Sénégal': '🇸🇳',
@@ -122,6 +127,7 @@ userId!: number;
   togglePasswordForm() {
     this.isPasswordFormVisible = !this.isPasswordFormVisible;
   }
+  
 
   constructor(
     private fb: FormBuilder,
@@ -131,16 +137,27 @@ userId!: number;
     private profilService: ProfilService,
     private usersService: UsersService,
     private zone: NgZone,
-  ) {}
+  ) {
+    window.addEventListener('profilePhotoUpdated', (event: any) => {
+        const newPhoto = event.detail.photoUrl;
+        localStorage.setItem('userPhoto', newPhoto);
+    });
+  }
 
   ngOnInit() {
+    this.initForm();
     this.initForm();
     this.getFormInit();
     this.getEntrepriseInfo();
     this.listenToPrefixSuffixChanges();
     this.getConnectedUserId();
     this.getUserInfo();
-  
+
+    const savedPhoto = localStorage.getItem('photo');
+    if (savedPhoto) {
+        this.photo = savedPhoto;
+    }
+
   }
 
   // Récupère l'id de l'utilisateur connecté via UsersService ou le localStorage
@@ -173,7 +190,8 @@ userId!: number;
         this.nomEntreprise = user.nomEntreprise
         this.email = user.email;
         this.phone = user.phone;
-        this.photo = user.photo ? `http://localhost:8080${user.photo}` : '';
+        // this.photo = user.photo ? `http://localhost:8080${user.photo}` : '';
+        this.photo = user.photo ? `http://localhost:8080${user.photo}` : 'assets/img/profil.png';
         this.roleType = user.roleType;
         this.pays = user.pays;
         this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';
@@ -181,12 +199,21 @@ userId!: number;
         this.boutiques = user.boutiques || [];
         console.log("Liste des boutiques:", this.boutiques);
         console.log("Infos utilisateur récupérées :", user);
+        this.nomCompletForm.patchValue({
+        nomComplet: user.nomComplet,
+        phone: user.phone,
+        password: '' // On laisse le mot de passe vide
+      });
         
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
       }
     });
+  }
+
+  togglePasswordVisibilityInPersonalForm(): void {
+    this.showPasswordInPersonalForm = !this.showPasswordInPersonalForm;
   }
 
   private initForm(): void {
@@ -197,7 +224,7 @@ userId!: number;
     }, { validators: this.passwordMatchValidator });
 
     this.nomCompletForm = this.fb.group({
-      nomComplet: ['', [Validators.required]],
+      nomComplet: [''],
       phone: ['', [Validators.pattern('^\\+?[0-9]{7,15}$')]], // Numéro valide
       password: ['', [Validators.required, Validators.minLength(6)]] // Mot de passe avec min 6 caractères
     });
@@ -210,12 +237,10 @@ userId!: number;
     return newPassword === confirmPassword ? null : { mismatch: true };
   }
 
-get tauxTvaAffiche(): string {
-  const tva = this.form.get('tauxTva')?.value;
-  return tva !== null ? `${(tva * 100).toFixed(0)}%` : '';
-}
-
-
+  get tauxTvaAffiche(): string {
+    const tva = this.form.get('tauxTva')?.value;
+    return tva !== null ? `${(tva * 100).toFixed(0)}%` : '';
+  }
 
   getFormInit() {
     this.form = this.fb.group({
@@ -232,14 +257,9 @@ get tauxTvaAffiche(): string {
       rccm: ['xxxx'],
       nif: ['xxxx'],
       signataire: ['Monsieur X'],
-      signataireNom: ['Le Directeur Général'],
-      prefixe: ['xxxx'],
-      suffixe: ['xxxx'],
-     tauxTva: [null]
-
+      signataireNom: ['Le Directeur Général']
     });
   }
-
 
   getEntrepriseInfo() {
     this.entrepriseService.getEntrepriseInfo().subscribe({
@@ -521,5 +541,55 @@ get tauxTvaAffiche(): string {
     }
   });
   }
+
+  changerPhoto(event: Event) {
+    event.stopPropagation();
+    const fileInput = document.getElementById('profilePhotoInput') as HTMLInputElement;
+    fileInput.click();
+  }
+
+  visualiserPhoto(event: Event): void {
+      const target = event.target as HTMLElement;
+      if (target.classList.contains('camera-icon')) return;
+      this.isModalOpen = true;
+  }
+
+  fermerModal(): void {
+      this.isModalOpen = false;
+  }
+  onProfilePhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.imageFile = file;
+
+      // Prévisualisation locale immédiate
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+          this.photo = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      // Envoi au serveur
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      this.usersService.updateUser(this.userId, formData).subscribe({
+          next: (response) => {
+            console.log("Réponse serveur:", response);
+            this.snackBar.open("Photo mise à jour avec succès", 'Fermer', { duration: 3000 });
+            
+            // RECHARGEZ les données utilisateur après mise à jour
+            this.getUserInfo();
+            // this.refreshPhoto();
+          },
+          error: (error) => {
+              this.snackBar.open("Échec de la mise à jour", 'Fermer', { duration: 3000 });
+          }
+      });
+    }
+  }
+
 
 }
