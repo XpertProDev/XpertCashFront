@@ -11,6 +11,7 @@ import { Produit } from '../MODELS/produit.model';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatInputModule } from '@angular/material/input';
+import { EntrepriseService } from '../SERVICES/entreprise-service';
 
 @Component({
   selector: 'app-facture-proforma',
@@ -66,9 +67,9 @@ export class FactureProformaComponent implements OnInit {
     constructor(
       private router: Router,
       private clientService: ClientService,
-          private factureProFormaService: FactureProFormaService,
-          private produitService: ProduitService,
-          private usersService: UsersService
+      private factureProFormaService: FactureProFormaService,
+      private produitService: ProduitService,
+      private usersService: UsersService,
     ) {}
 
   ngOnInit(): void{

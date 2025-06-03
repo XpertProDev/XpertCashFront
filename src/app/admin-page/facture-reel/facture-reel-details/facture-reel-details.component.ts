@@ -9,11 +9,11 @@ import { EntrepriseService } from '../../SERVICES/entreprise-service';
   styleUrl: './facture-reel-details.component.scss'
 })
 export class FactureReelDetailsComponent implements OnInit {
-
+  
   nom: string | null = null;
   siege!: string;
   email!: string;
-  logo: string | null = null; 
+  logo: string | null = null;  
   secteur!: string;
   telephone!: string;
   adresse!: string;
@@ -23,8 +23,9 @@ export class FactureReelDetailsComponent implements OnInit {
   pays!: string;
   rccm!: string;
   siteWeb!: string;
-  signateur!: string;
-  signateurNom!: string;
+  signataire!: string;
+  signataireNom!: string;
+  tauxTva?: number | null;
 
   ngOnInit(): void {
     this.getUserEntrepriseInfo();
@@ -52,8 +53,9 @@ export class FactureReelDetailsComponent implements OnInit {
         this.pays = entreprise.pays;
         this.rccm = entreprise.rccm;
         this.siteWeb = entreprise.siteWeb;
-        this.signateur = entreprise.signataire;
-        this.signateurNom = entreprise.signataireNom;
+        this.signataire = entreprise.signataire;
+        this.signataireNom = entreprise.signataireNom;
+        this.tauxTva = entreprise.tauxTva;
 
   
         // Ajout du préfixe si nécessaire
@@ -65,11 +67,54 @@ export class FactureReelDetailsComponent implements OnInit {
     });
   }
 
-
   navigateBack() {
     this.router.navigate(['/facture-reel']);
   }
 
+  getLegalInfo(): string {
+    const parts = [];
+    
+    if (this.nina) {
+      parts.push(`NINA : ${this.nina}`);
+    }
+    
+    if (this.rccm) {
+      parts.push(`RCCM : ${this.rccm}`);
+    }
+    
+    if (this.nif) {
+      parts.push(`NIF : ${this.nif}`);
+    }
+    
+    if (this.banque) {
+      parts.push(`Banque : ${this.banque}`);
+    }
+    
+    return parts.join(' ; ');
+  }
 
+  getAddressInfo(): string {
+    const adresse = this.adresse;
+    const siege = this.siege;
+    const pays = this.pays;
+    
+    if (adresse && siege && pays) {
+      return `Adresse : ${adresse} / ${siege}-${pays}`;
+    } else if (adresse && siege) {
+      return `Adresse : ${adresse} / ${siege}`;
+    } else if (adresse && pays) {
+      return `Adresse : ${adresse} / ${pays}`;
+    } else if (siege && pays) {
+      return `Adresse : ${siege} / ${pays}`;
+    } else if (adresse) {
+      return `Adresse : ${adresse}`;
+    } else if (siege) {
+      return `Adresse : ${siege}`;
+    } else if (pays) {
+      return `Adresse : ${pays}`;
+    }
+    
+    return '';
+  }
 
 }

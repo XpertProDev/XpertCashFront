@@ -164,19 +164,14 @@
         <!-- // Footer  -->
         <div class="container_footer">
             <div class="footer">
-                <!-- // Ligne  -->
                 <hr style="margin-top: 40px;">
-                    <p><strong>{{siteWeb}}</strong></p>
-                    <div>
-                        <em>
-                            NINA : {{nina}} ; RCCM : {{rccm}} ;NIF :{{nif}} ; Banque : {{banque}}
-                        </em>
-                    </div>
-                   <div style="margin-top: -4px;">
-                        <em >
-                            Adresse : {{adresse}} /{{siege}}-{{pays}}
-                        </em>
-                   </div>
+                <p *ngIf="siteWeb"><strong>{{siteWeb}}</strong></p>
+                <div *ngIf="getLegalInfo()">
+                    <em>{{ getLegalInfo() }}</em>
+                </div>
+                <div *ngIf="getAddressInfo()" style="margin-top: -4px;">
+                    <em>{{ getAddressInfo() }}</em>
+                </div>
             </div>
         </div>
     </div>

@@ -91,4 +91,50 @@ export class DetailFactureProformaApercuComponent implements OnInit {
       }
     });
   }
+
+  getLegalInfo(): string {
+    const parts = [];
+    
+    if (this.nina) {
+      parts.push(`NINA : ${this.nina}`);
+    }
+    
+    if (this.rccm) {
+      parts.push(`RCCM : ${this.rccm}`);
+    }
+    
+    if (this.nif) {
+      parts.push(`NIF : ${this.nif}`);
+    }
+    
+    if (this.banque) {
+      parts.push(`Banque : ${this.banque}`);
+    }
+    
+    return parts.join(' ; ');
+  }
+
+  getAddressInfo(): string {
+    const adresse = this.adresse;
+    const siege = this.siege;
+    const pays = this.pays;
+    
+    if (adresse && siege && pays) {
+      return `Adresse : ${adresse} / ${siege}-${pays}`;
+    } else if (adresse && siege) {
+      return `Adresse : ${adresse} / ${siege}`;
+    } else if (adresse && pays) {
+      return `Adresse : ${adresse} / ${pays}`;
+    } else if (siege && pays) {
+      return `Adresse : ${siege} / ${pays}`;
+    } else if (adresse) {
+      return `Adresse : ${adresse}`;
+    } else if (siege) {
+      return `Adresse : ${siege}`;
+    } else if (pays) {
+      return `Adresse : ${pays}`;
+    }
+    
+    return '';
+  }
 }
