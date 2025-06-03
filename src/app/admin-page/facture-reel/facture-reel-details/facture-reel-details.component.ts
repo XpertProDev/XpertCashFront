@@ -1,19 +1,25 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
+import { FactureReelService } from '../../SERVICES/facturereel-service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
+import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 
 @Component({
   selector: 'app-facture-reel-details',
-  imports: [],
+  imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe],
   templateUrl: './facture-reel-details.component.html',
   styleUrl: './facture-reel-details.component.scss'
 })
 export class FactureReelDetailsComponent implements OnInit {
+  facture: any | null = null;
   
   nom: string | null = null;
   siege!: string;
   email!: string;
-  logo: string | null = null;  
+  logo: string | null = null;
   secteur!: string;
   telephone!: string;
   adresse!: string;
@@ -26,24 +32,54 @@ export class FactureReelDetailsComponent implements OnInit {
   signataire!: string;
   signataireNom!: string;
   tauxTva?: number | null;
-
-  ngOnInit(): void {
-    this.getUserEntrepriseInfo();
-  }
-
+  
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
+    private factureService: FactureReelService,
     private entrepriseService: EntrepriseService
   ){}
+
+  ngOnInit(): void {
+    // 1) Charger les infos de l’entreprise (en-tête)
+    this.getUserEntrepriseInfo();
+
+    // 2) Récupérer l’ID de la facture depuis l’URL et lancer la requête API
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      const factureId = +idParam;
+      this.loadFactureReelle(factureId);
+    } else {
+      // Si pas d’ID dans l’URL, rediriger ou afficher message d’erreur
+      console.error('Aucun ID de facture passé en paramètre');
+      this.router.navigate(['/facture-reel']);
+    }
+  }
+
+  loadFactureReelle(id: number): void {
+    this.factureService.getFactureReelleById(id).subscribe({
+      next: (data) => {
+        console.log('Facture reçue du backend :', data);
+        this.facture = data;
+        // Si vous souhaitez extraire le taux de TVA depuis l’entreprise
+        // (par exemple pour l’afficher dans le tableau), vous pouvez l’assigner ici :
+        // this.tauxTva = data.tva ? this.tauxTva : null;
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération de la facture :', err);
+        // Rediriger ou afficher un message à l’utilisateur
+        this.router.navigate(['/facture-reel']);
+      }
+    });
+  }
 
   getUserEntrepriseInfo(): void {
     this.entrepriseService.getEntrepriseInfo().subscribe({
       next: (entreprise) => {
-        console.log("Entreprise reçue :", entreprise);
-        this.nom = entreprise.nom; 
+        this.nom = entreprise.nom;
         this.siege = entreprise.siege;
         this.email = entreprise.email;
-        this.logo = entreprise.logo;
+        this.logo = entreprise.logo ? 'http://localhost:8080' + entreprise.logo : null;
         this.secteur = entreprise.secteur;
         this.telephone = entreprise.telephone;
         this.adresse = entreprise.adresse;
@@ -56,13 +92,9 @@ export class FactureReelDetailsComponent implements OnInit {
         this.signataire = entreprise.signataire;
         this.signataireNom = entreprise.signataireNom;
         this.tauxTva = entreprise.tauxTva;
-
-  
-        // Ajout du préfixe si nécessaire
-        this.logo = 'http://localhost:8080' + entreprise.logo;
       },
       error: (err) => {
-        console.error("Erreur lors de la récupération des infos utilisateur :", err);
+        console.error('Erreur lors de la récupération des infos entreprise :', err);
       }
     });
   }
@@ -72,24 +104,11 @@ export class FactureReelDetailsComponent implements OnInit {
   }
 
   getLegalInfo(): string {
-    const parts = [];
-    
-    if (this.nina) {
-      parts.push(`NINA : ${this.nina}`);
-    }
-    
-    if (this.rccm) {
-      parts.push(`RCCM : ${this.rccm}`);
-    }
-    
-    if (this.nif) {
-      parts.push(`NIF : ${this.nif}`);
-    }
-    
-    if (this.banque) {
-      parts.push(`Banque : ${this.banque}`);
-    }
-    
+    const parts: string[] = [];
+    if (this.nina) { parts.push(`NINA : ${this.nina}`); }
+    if (this.rccm) { parts.push(`RCCM : ${this.rccm}`); }
+    if (this.nif) { parts.push(`NIF : ${this.nif}`); }
+    if (this.banque) { parts.push(`Banque : ${this.banque}`); }
     return parts.join(' ; ');
   }
 
@@ -97,23 +116,15 @@ export class FactureReelDetailsComponent implements OnInit {
     const adresse = this.adresse;
     const siege = this.siege;
     const pays = this.pays;
-    
-    if (adresse && siege && pays) {
-      return `Adresse : ${adresse} / ${siege}-${pays}`;
-    } else if (adresse && siege) {
-      return `Adresse : ${adresse} / ${siege}`;
-    } else if (adresse && pays) {
-      return `Adresse : ${adresse} / ${pays}`;
-    } else if (siege && pays) {
-      return `Adresse : ${siege} / ${pays}`;
-    } else if (adresse) {
-      return `Adresse : ${adresse}`;
-    } else if (siege) {
-      return `Adresse : ${siege}`;
-    } else if (pays) {
-      return `Adresse : ${pays}`;
-    }
-    
+
+    if (adresse && siege && pays) { return `Adresse : ${adresse} / ${siege}-${pays}`; }
+    if (adresse && siege) { return `Adresse : ${adresse} / ${siege}`; }
+    if (adresse && pays) { return `Adresse : ${adresse} / ${pays}`; }
+    if (siege && pays)  { return `Adresse : ${siege} / ${pays}`; }
+    if (adresse)        { return `Adresse : ${adresse}`; }
+    if (siege)          { return `Adresse : ${siege}`; }
+    if (pays)           { return `Adresse : ${pays}`; }
+
     return '';
   }
 
