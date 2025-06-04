@@ -72,9 +72,11 @@ export interface FactureProForma {
   client?: {
     id: number;
     nomComplet: string;
-    email?: string;
-    adresse?: string;
     telephone?: string;
+    email?: string;
+    pays?: string
+    ville?: string
+    adresse?: string;
   };
   entrepriseClient?: {
     id: number;
@@ -82,6 +84,9 @@ export interface FactureProForma {
     email?: string;
     adresse?: string;
     telephone?: string;
+    ville?: string;
+    siege?: string
+    pays?: string
   };
   lignesFacture: LigneFactureProforma[];
   // Ajout de utilisateurCreateur

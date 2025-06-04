@@ -1,6 +1,16 @@
 // .account-settings {
 // }
 
+.blurred{
+  font-style: italic;
+  color: red;
+  filter: blur(6px);
+}
+.showCode{
+  font-style: italic;
+  color: red;
+}
+
 .section {
   padding: 10px;
 }
