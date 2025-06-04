@@ -1295,7 +1295,7 @@ submitNote() {
       labelY
     );
 
-    const objectLabel = 'OBJECT :';
+    const objectLabel = 'Object :';
     const objectLabelX = 15;
     const objectLabelY = 72;
 

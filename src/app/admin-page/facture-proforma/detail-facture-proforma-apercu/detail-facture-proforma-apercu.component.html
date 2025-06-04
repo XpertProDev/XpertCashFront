@@ -38,7 +38,7 @@
                     <p>{{ f.entrepriseClient.nom }}</p>
                 </div>
                 <div class="object">
-                    <h4>OBJECT :</h4>
+                    <h4>Object :</h4>
                     <p>{{ f.description }}</p>
                 </div>
                 <table class="table">
@@ -74,7 +74,7 @@
                             <td>{{ (f.totalHT - (f.totalHT * f.remise / 100)) | customNumber }}</td>
                         </tr>
                         <tr *ngIf="f.tva">
-                            <td colspan="4">TVA (18%)</td>
+                            <td colspan="4">TVA ({{ (tauxTva ?? 0) * 100 | number:'1.0-2' }} %)</td>
                             <td>{{ ((f.totalHT - (f.totalHT * (f.remise ?? 0) / 100)) * 0.18) | customNumber }}</td>
                         </tr>
                         <tr *ngIf="f.tva">

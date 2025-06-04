@@ -35,6 +35,7 @@ export class DetailFactureProformaApercuComponent implements OnInit {
   siteWeb!: string;
   signataire!: string;
   signataireNom!: string;
+  tauxTva!: number;
 
   constructor(
     private previewService: FacturePreviewService,
@@ -85,6 +86,7 @@ export class DetailFactureProformaApercuComponent implements OnInit {
         this.siteWeb = entreprise.siteWeb;
         this.signataire = entreprise.signataire;
         this.signataireNom = entreprise.signataireNom;
+        this.tauxTva = entreprise.tauxTva;
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);

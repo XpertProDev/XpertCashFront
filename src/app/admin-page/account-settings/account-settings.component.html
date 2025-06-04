@@ -302,7 +302,7 @@
 
                                         <!-- nom et object  -->
                                         <div class="object">
-                                            <h4>OBJECT :</h4>
+                                            <h4>Object :</h4>
                                             <p>Une petite description de l'object</p>
                                         </div>
 
@@ -677,7 +677,7 @@
 
             <!-- nom et object  -->
             <div class="object droit_preview">
-                <h4>OBJECT :</h4>
+                <h4>Object :</h4>
                 <p>Une petite description de l'object</p>
             </div>
 
@@ -727,7 +727,9 @@
                     </tr>
                     <!-- TVA à 18% sur le montant commercial -->
                     <tr>
-                        <td class="td" colspan="4">TVA (18%)</td>
+                        <!-- <td class="td" colspan="4">TVA (18%)</td> -->
+                        <!-- Dans la partie Factures, aperçu de la facture -->
+                        <td class="td" colspan="4">{{ form.get('tauxTva')?.value * 100 | number:'1.0-0' }}%</td>
                         <td class="td">
                         <!-- {{
                             ((facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) * 0.18) | customNumber
