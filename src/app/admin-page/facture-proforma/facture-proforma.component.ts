@@ -57,12 +57,22 @@ export class FactureProformaComponent implements OnInit {
     isListView = true;
     showDropdown = false;
     searchTerm: string = '';
+    filteredFactures: any[] = [];
 
     // Pagination
     pageSize = 6;
     currentPage = 0;
     sortField: string = 'numeroFacture'; // Au lieu de 'any'
     sortDirection: 'asc' | 'desc' = 'asc';
+    // Ajouter dans la classe
+    selectedStatut: string | null = null;
+    statuts = [
+      { value: 'BROUILLON', label: 'Brouillon' },
+      { value: 'APPROUVE', label: 'Approuvé' },
+      { value: 'ENVOYE', label: 'Envoyé' },
+      { value: 'VALIDE', label: 'Validé' }
+    ];
+
 
     constructor(
       private router: Router,
@@ -112,9 +122,23 @@ export class FactureProformaComponent implements OnInit {
     this.pageSize = event.pageSize;
   }
 
+  // Méthode pour filtrer par statut
+  selectStatut(statut: string | null): void {
+    this.selectedStatut = statut;
+    this.currentPage = 0;
+    
+    // Filtrer les factures ici plutôt que dans le template
+    if (statut) {
+      this.filteredFactures = this.facturesproforma.filter(f => f.statut === statut);
+    } else {
+      this.filteredFactures = [...this.facturesproforma];
+    }
+  }
+
+  // Modifier le getter paginatedFactures
   get paginatedFactures(): any[] {
-      const start = this.currentPage * this.pageSize;
-      return this.facturesproforma.slice(start, start + this.pageSize);
+    const start = this.currentPage * this.pageSize;
+    return this.filteredFactures.slice(start, start + this.pageSize);
   }
 
   getTotalFacture(facture: any): number {
@@ -127,6 +151,8 @@ export class FactureProformaComponent implements OnInit {
         this.nomEntreprise = user.nomEntreprise;
         this.userEntrepriseId = user.entrepriseId;
         this.loadFactproformaOfEntreprise(this.userEntrepriseId);
+        // Initialiser avec toutes les factures
+        this.filteredFactures = [...this.facturesproforma];
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
@@ -142,6 +168,7 @@ export class FactureProformaComponent implements OnInit {
         this.facturesproforma = data.map(facturesproforma => ({
           ...facturesproforma,
         }));
+        this.filteredFactures = [...this.facturesproforma];
         this.isLoading = false;
         console.log('Facture proforma récupérés:', this.facturesproforma);
       },

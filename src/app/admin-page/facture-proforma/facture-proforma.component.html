@@ -35,6 +35,32 @@
       </div>
   </div>
 
+  <!-- Ajouter après la barre de recherche -->
+  <div class="container_list_boutique">
+    <div class="content_list_boutique">
+      <div class="name_boutique">
+        <!-- Option "Tous les états" -->
+        <div class="all_boutique" 
+            [class.name_boutique_active]="selectedStatut === null"
+            (click)="selectStatut(null)">
+          <p class="all_boutique">Toutes les états</p>
+        </div>
+        
+        <!-- Options d'état -->
+        <ng-container *ngFor="let statut of statuts; let i = index">
+          <div class="statut-option" 
+              [class.name_boutique_active]="selectedStatut === statut.value"
+              (click)="selectStatut(statut.value)">
+            <p>
+              {{ statut.label }}
+            </p>
+          </div>
+          <div *ngIf="i !== statuts.length - 1" class="barre"></div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
   <!-- Vue Tableau -->
   <table *ngIf="isListView">
       <thead>
@@ -167,13 +193,13 @@
   </div>
 
   <!-- Message vide -->
-  <div *ngIf="facturesproforma.length === 0" class="no-client-message">
+  <div *ngIf="filteredFactures.length === 0" class="no-client-message">
     Aucun facture pro forma trouvé
   </div>
 
   <!-- Pagination -->
   <div class="pagination">
-    <mat-paginator [length]="facturesproforma.length" [pageSize]="pageSize" [pageSizeOptions]="[6, 10, 25, 100]"
+    <mat-paginator [length]="filteredFactures.length" [pageSize]="pageSize" [pageSizeOptions]="[6, 10, 25, 100]"
         (page)="onPageChange($event)">
     </mat-paginator>
   </div>
