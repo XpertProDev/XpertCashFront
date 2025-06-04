@@ -1057,29 +1057,7 @@ th {
   top: -6px;
 }
 
-.editable-content {
-  // border: 1px solid #ccc;
-  border: none;
-  padding: 12px;
-  min-height: 200px;
-  white-space: pre-wrap;
-  text-align: left;
-  line-height: 1.5;
-  font-size: 12px;
-}
 
-.editable-content[contenteditable="true"]:empty::before {
-  content: attr(data-placeholder);
-  color: #999;
-  text-align: left; /* Placeholder aussi à gauche */
-}
-
-.editable-content strong {
-  background: #fff3d6;
-  padding: 2px 4px;
-  border-radius: 3px;
-  display: inline-block; /* Empêche le débordement */
-}
 
 // .footer_btn {
 //   position: absolute;
@@ -1197,6 +1175,8 @@ th {
 
 .text-truncate {
   color: #0672E4;
+  font-size: 10px;
+  font-weight: bold;
 }
 
 .icon_attach {
@@ -1622,7 +1602,6 @@ input.input_focus_type:focus {
     }
 }
 
-
 .event-action {
     padding: 12px;
     border-radius: 8px;
@@ -2015,3 +1994,4 @@ input.input_focus_type:focus {
     font-size: 10px;
     font-weight: bolder;
 }
+

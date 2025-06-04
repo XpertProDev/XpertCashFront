@@ -1191,7 +1191,7 @@ get labelNom(): string {
     }
   }
 
-  // Ajouter cette méthode
+  /*
   onMethodeEnvoiChange() {
     if (this.methodeEnvoi === 'physique') {
       // Réinitialiser les champs email si besoin
@@ -1199,6 +1199,7 @@ get labelNom(): string {
       this.currentEmail = '';
     }
   }
+    */
 
   async generatePDFAttachment(): Promise<File> {
     try {

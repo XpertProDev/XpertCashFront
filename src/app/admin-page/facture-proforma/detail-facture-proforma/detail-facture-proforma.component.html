@@ -736,7 +736,6 @@
                             name="methodeEnvoi"
                             value="physique"
                             [(ngModel)]="methodeEnvoi"
-                            (change)="onMethodeEnvoiChange()"
                             />
                             <span class="radio-mark"></span>
                             Physique
@@ -748,7 +747,6 @@
                             name="methodeEnvoi"
                             value="email"
                             [(ngModel)]="methodeEnvoi"
-                            (change)="onMethodeEnvoiChange()"
                             />
                             <span class="radio-mark"></span>
                             Email
@@ -850,21 +848,21 @@
             </div>
 
             <!-- Contenu existant de l'email -->
-            <div class="email-body">
-                <div class="editable-content" contenteditable="true" #editableContent>
-                    Bonjour {{ destinataire.nom }} ,<br><br>
-                    Votre facture <strong>{{ factureProForma.numeroFacture }}</strong>
-                    d'un montant de : <strong>{{ getTotalTTC() | customNumber }} CFA</strong>
-                    a été confirmée.<br>
+            <div style="font-family: Arial, sans-serif; font-size: 12px; color: #333333; line-height: 1.2; text-align: justify; padding: 20px;">
+                Bonjour {{ destinataire.nom }},<br><br>
 
-                    Merci pour votre confiance !<br><br>
-                    N'hésitez pas à nous contacter pour toute question.<br><br>
+                Suite à notre échange, veuillez trouver ci-joint la facture proforma correspondant à votre demande.<br><br>
 
-                    ---<br>
+                N’hésitez pas à revenir vers nous si vous avez besoin d’informations complémentaires ou si des ajustements sont nécessaires.<br><br>
 
-                    {{ nomEntreprise }}
-                </div>
+                Nous restons à votre disposition pour finaliser la commande dès validation de votre part.<br><br>
+
+                Bien cordialement,<br><br>
+
+                ---<br>
+                {{ nomEntreprise }}
             </div>
+
 
             <!-- Remplacer la section pdf -->
             <div class="section_img_pdf">
@@ -957,8 +955,8 @@
                                 <div *ngIf="isSending" class="mini-spinner"></div>
                             </button>
                         </div>
-                   
 
+                   
                         <div class="icon_attach" 
                             (click)="triggerFileInput()" 
                             *ngIf="methodeEnvoi === 'email'"
