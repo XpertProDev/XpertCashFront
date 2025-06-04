@@ -91,9 +91,9 @@
                   <div *ngIf="facture.ligneFactureProforma?.length > 2">...</div>
               </td>
               <td class="td">
-                  <span [ngClass]="getStatutClass(facture.statut)">
-                      {{ facture.statut }}
-                  </span>
+                <span [ngClass]="getStatutClass(facture.statut)">
+                  {{ facture.statut }}
+                </span>
               </td>
               <td class="td">
                   <!-- {{ getTotalFacture(facture) | customNumber }} -->

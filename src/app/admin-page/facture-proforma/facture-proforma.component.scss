@@ -416,6 +416,19 @@ tr:hover {
   }
 }
 
+/* Ajouter ces nouvelles classes */
+.etat-gris { color: #808080; }        /* Noir pour brouillon */
+.etat-bleu { color: #0671e4; }     /* Bleu pour approuvé */
+.etat-orange { color: #ff9900; }   /* Orange pour envoyé */
+.etat-vert { color: #008000; }     /* Vert pour validé */
+
+/* Optionnel : rendre le texte plus visible */
+.td span {
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
 /* Grid view styles */
 // .grid-view {
 //     display: grid;
