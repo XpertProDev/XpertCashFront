@@ -10,16 +10,19 @@ export class FactureReelService {
 
   constructor(private http: HttpClient) {}
 
-  // getFactureReelleById(id: number): Observable<FactureReelleDTO> {
-  //   const token = localStorage.getItem('authToken'); 
-  //   const headers = new HttpHeaders({
-  //     Authorization: `Bearer ${token}`
-  //   });
-  //   return this.http.get<FactureReelleDTO>(
-  //     `${this.apiUrl}/factures-reelles/${id}`,
-  //     { headers }
-  //   );
-  // }
+ getFactureReelleById(id: number): Observable<any> {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.error('Aucun token retrouvé en localStorage');
+      return throwError(() => new Error('Aucun token trouvé'));
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    return this.http.get<any>(`${this.apiUrl}/factures-reelles/${id}`, { headers });
+  }
 
   getAlFactproreelOfEntreprise(entrepriseId: number): Observable<any[]> {
     const token = localStorage.getItem('authToken');

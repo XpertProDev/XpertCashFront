@@ -852,7 +852,7 @@
             <!-- Contenu existant de l'email -->
             <div class="email-body">
                 <div class="editable-content" contenteditable="true" #editableContent>
-                    Bonjour,<br><br>
+                    Bonjour {{ destinataire.nom }} ,<br><br>
                     Votre facture <strong>{{ factureProForma.numeroFacture }}</strong>
                     d'un montant de : <strong>{{ getTotalTTC() | customNumber }} CFA</strong>
                     a été confirmée.<br>
@@ -885,12 +885,56 @@
             </div>
         </div>
 
-        <div class="contenue_form_envoyer contenue_form_image_physique" *ngIf="methodeEnvoi === 'physique'">
+      <div class="contenue_form_envoyer contenue_form_image_physique conteneur_horizontal" *ngIf="methodeEnvoi === 'physique'">
             <div class="image_delivery">
-                <img src="assets/img/physique.png">
+                <img src="assets/img/physique.png" alt="Physique">
                 <p class="tchia">TCHAK3DA</p>
             </div>
-        </div>
+            <div class="infos-physique">
+            <p class="instruction">📍 Veuillez déposer la facture à l'adresse suivante :</p>
+            <table class="infos-table">
+                <tr>
+                    <td class="label">{{ labelNom }} :</td>
+                    <td class="value">{{ destinataire.nom }}</td>
+                </tr>
+
+                 <tr *ngIf="destinataire.siege">
+                    <td class="label">Siège :</td>
+                    <td class="value">{{ destinataire.siege }}</td>
+                </tr>
+
+                <tr>
+                    <td class="label">Adresse :</td>
+                    <td class="value">{{ destinataire.adresse }}</td>
+                </tr>
+               
+                <tr *ngIf="destinataire.ville">
+                    <td class="label">Ville :</td>
+                    <td class="value">{{ destinataire.ville }}</td>
+                </tr>
+
+                <tr>
+                    <td class="label">Pays :</td>
+                    <td class="value">{{ destinataire.pays }}</td>
+                </tr>
+
+                <tr>
+                    <td class="label">Téléphone :</td>
+                    <td class="value">{{ destinataire.telephone }}</td>
+                </tr>
+
+                <tr>
+                    <td class="label">Email :</td>
+                    <td class="value">{{ destinataire.email }}</td>
+                </tr>
+            </table>
+            </div>
+
+
+
+             </div>
+
+
 
             <div class="footer_btn">
                 <div class="content_footer">

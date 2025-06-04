@@ -1,180 +1,158 @@
-<div class="container_global">
-    <!-- <div *ngIf="isLoading" class="loading-overlay">
-        <div class="spinner"></div>
-    </div> -->
-
-    <div class="information_cadre" style="position: relative;">
-        <div class="cadre_retour">
-            <!-- // icon  -->
-            <div class="retour_icon" (click)="navigateBack()">
-                <i class="ri-arrow-left-long-fill"></i>
-            </div>
-            <!-- // enregistrer  -->
-            <div class="icon_printer">
-                <i class="ri-printer-cloud-line"></i>                
-            </div>
-        </div> 
-        <div class="info_titre_input">
-            <div class="content">
-                <!-- // header apercu  -->
-                <div class="header_apercu">
-                    <!-- // logo entreprise -->
-                    <div class="logo_entreprise">
-                        <img [src]="logo" (error)="logo='http://localhost:8080/defaultLogo/Votre.png'" 
-                        alt="Logo de l'entreprise">
-                    </div>
-                    <!-- entete entreprise  -->
-                    <div class="entete_entreprise">
-                        <div class="content_entete">
-                            <p class="para1">{{nom}}</p>
-                            <p class="para2">Secterur: {{secteur}}</p>
-                            <div class="para3">Email : <a href="mail">{{email }}</a> Téléphone : {{telephone}}</div>
-                        </div>
-                    </div>
-                </div>
-                <!-- // Ligne  -->
-                <hr>
-                <hr>
-                <!-- // titre  -->
-                <div class="titre">
-                    <!-- <h2>Facture proforma n˚{{ facture.numeroFacture || '000-00-2025' }}</h2> -->
-                    <h2>Facture proforma n˚<span style="color: #0000003e;">xxx-xx-xxxx</span></h2>
-                </div>
-                <!-- // date  -->
-                <div class="date">
-                    <!-- <p>Bamako, le 12 Mai 2025</p> -->
-                    <p>{{siege}}, le 09 mai 2025</p>
-                </div>
-
-                <!-- nom et object  -->
-                <div class="droit">
-                    <h4>Client : </h4> 
-                    <p>Nom de client individuel</p>
-                </div>
-
-                <!-- nom et object  -->
-                <div class="droit">
-                    <h4>Entreprise :</h4>
-                    <p>Nom de client entreprise</p>
-                </div>
-
-                <!-- <div>
-                    {{facture|json}}
-                </div> -->
-
-                <div class="object">
-                    <h4>OBJECT :</h4>
-                    <p>Une petite description de l'object</p>
-                </div>
-
-                <!-- // Table  -->
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Désignation</th>
-                            <th style="width: 260px!important;">Description</th>
-                            <th>Prix Unitaire (FCFA)</th>
-                            <th>Quantité</th>
-                            <!-- <th>Durée</th> -->
-                            <th>Montant (FCFA)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="td_left">Produit nom</td>
-                            <td class="td_left">Produit description</td>
-                            <td>00000</td>
-                            <td>00</td>
-                            <!-- <td>15 000</td> -->
-                            <td> prixUnitaire * ligne.quantite</td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                          <td colspan="4">Total HT</td>
-                          <td>00000</td>
-                        </tr>
-                        <tr>
-                          <td colspan="4">Remise 0 %</td>
-                          <td>
-                            <!-- {{ ((facture.totalHT * facture.remise/100) | customNumber) }} -->
-                              000000
-                        </td>
-                        </tr>
-                        <!-- Montant Commercial  -->
-                        <tr>
-                            <td colspan="4">Montant commercial</td>
-                            <td>
-                              <!-- {{
-                                (facture.totalHT - (facture.totalHT * facture.remise / 100)) | customNumber
-                              }} -->
-                                0000
-                            </td>
-                        </tr>
-                        <!-- TVA à 18% sur le montant commercial -->
-                        <tr>
-                            <td colspan="4">TVA (18%)</td>
-                            <td>
-                              <!-- {{
-                                ((facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) * 0.18) | customNumber
-                              }} -->
-                                0000
-                            </td>
-                        </tr>
-                        <tr>
-                          <td colspan="4">Montant TTC</td>
-                          <td>
-                            <!-- {{ facture.totalFacture | customNumber }} -->
-                              0000
-                        </td>
-                        </tr>
-                      </tfoot>
-                </table>
-
-                <!-- // contenu_bottom  -->
-                <div class="contenu_bottom">
-                    <p><span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>
-                    <!-- {{ facture.totalFacture | enLettres }}. -->
-                      Mille neuf cent .....
-                </p>
-                </div>
-
-                <!-- // sachet  -->
-                <div class="cachet_container">
-                    <div></div>
-                    <div class="cachet">
-                        <h6>Le Directeur Général</h6>
-                        <h6 class="name_directeur">Moussa H. OUOLOGUEM</h6>
-                    </div>
-                </div>
-                
-                
-
-            </div>
-        </div>
-
-        <!-- // Footer  -->
-        <div class="container_footer">
-            <div class="footer">
-                <!-- // Ligne  -->
-                <div class="container_footer">
-                    <div class="footer">
-                        <!-- // Ligne  -->
-                        <hr style="margin-top: 40px;">
-                        <p><strong>{{siteWeb}}</strong></p>
-                        <div>
-                            <em>
-                                NINA : {{nina}} ; RCCM : {{rccm}} ;NIF :{{nif}} ; Banque : {{banque}}
-                            </em>
-                        </div>
-                        <div style="margin-top: -4px;">
-                            <em >
-                                Adresse : {{adresse}} /{{siege}}-{{pays}}
-                            </em>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div>
+    {{facture | json}}
 </div>
+<div class="container_global" *ngIf="facture as f; else noData">
+  <div class="information_cadre" style="position: relative;">
+    <div class="cadre_retour">
+      <div class="retour_icon" (click)="navigateBack()">
+        <i class="ri-arrow-left-long-fill"></i>
+      </div>
+    </div>
+
+    <div class="info_titre_input">
+      <div class="content">
+        <!-- En-tête avec logo et infos entreprise -->
+        <div class="header_apercu">
+          <div class="logo_entreprise">
+            <img [src]="logo" 
+                 (error)="logo = 'http://localhost:8080/defaultLogo/Votre.png'" 
+                 alt="Logo de l'entreprise">
+          </div>
+          <div class="entete_entreprise">
+            <div class="content_entete">
+              <p class="para1">{{ nom }}</p>
+              <p class="para2">Secteur : {{ secteur }}</p>
+              <div class="para3">
+                Email : <a href="mailto:{{ email }}">{{ email }}</a>  
+                Téléphone : {{ telephone }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+        <hr>
+
+        <!-- Titre facture -->
+        <div class="titre">
+          <h2>Facture réelle n˚{{ f.numeroFacture }}</h2>
+        </div>
+
+        <!-- Date de création -->
+        <div class="date">
+          <p>{{ siege }}, le {{ f.dateCreation | date:'dd MMMM yyyy' }}</p>
+        </div>
+
+        <!-- Client -->
+        <div class="droit" *ngIf="f.client">
+          <h4>Client :</h4>
+          <p>{{ f.client.nom }}</p>
+        </div>
+
+        <!-- Entreprise cliente éventuelle -->
+        <div class="droit" *ngIf="f.entrepriseClient">
+          <h4>Entreprise :</h4>
+          <p>{{ f.entrepriseClient.nom }}</p>
+        </div>
+
+        <!-- Description / Objet -->
+        <div class="object">
+          <h4>Objet :</h4>
+          <p>{{ facture.description }}</p>
+        </div>
+
+        <!-- Tableau des lignes de facture -->
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Désignation</th>
+              <th style="width: 260px!important;">Description</th>
+              <th>Prix Unitaire (FCFA)</th>
+              <th>Quantité</th>
+              <th>Montant (FCFA)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ligne of f.lignesFacture">
+              <td class="td_left">{{ ligne.produitNom || ligne.produit?.nom }}</td>
+              <td class="td_left">{{ ligne.ligneDescription }}</td>
+              <td>{{ ligne.prixUnitaire | customNumber }}</td>
+              <td>{{ ligne.quantite }}</td>
+              <td>{{ (ligne.prixUnitaire * ligne.quantite) | customNumber }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4">Total HT</td>
+              <td>{{ f.totalHT | customNumber }}</td>
+            </tr>
+            <tr *ngIf="f.remise && f.remise > 0">
+              <td colspan="4">
+                Remise {{facture.tauxRemise}}%
+            </td>
+              <td>
+                <!-- {{ ((f.totalHT * f.remise / 100) | customNumber) }} -->
+              {{ facture.remise }}
+            </td>
+            </tr>
+            <tr *ngIf="f.remise && f.remise > 0">
+              <td colspan="4">Montant commercial</td>
+              <td>
+                {{ ((f.totalHT - (f.totalHT * f.remise / 100)) | customNumber) }}
+              </td>
+            </tr>
+            <tr *ngIf="f.tva">
+              <td colspan="4">TVA ({{ (tauxTva ?? 0) * 100 | number:'1.0-2' }} %)</td>
+              <td>
+                {{
+                  ((f.totalHT - (f.totalHT * (f.remise ?? 0) / 100)) * (tauxTva ?? 0))
+                  | number:'1.0-2'
+                }}
+              </td>
+            </tr>
+            <tr *ngIf="f.tva">
+              <td colspan="4">Montant TTC</td>
+              <td>{{ f.totalFacture | customNumber }}</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <!-- Montant en lettres -->
+        <div class="contenu_bottom">
+          <p>
+            <span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>
+            {{ f.totalFacture | enLettres }}.
+          </p>
+        </div>
+
+        <!-- Cachet / signature -->
+        <div class="cachet_container">
+          <div></div>
+          <div class="cachet">
+            <h6>{{ signataire }}</h6>
+            <h4 class="name_directeur">{{ signataireNom }}</h4>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="container_footer">
+      <div class="footer">
+        <hr style="margin-top: 40px;">
+        <p *ngIf="siteWeb"><strong>{{ siteWeb }}</strong></p>
+        <div *ngIf="getLegalInfo()">
+          <em>{{ getLegalInfo() }}</em>
+        </div>
+        <div *ngIf="getAddressInfo()" style="margin-top: -4px;">
+          <em>{{ getAddressInfo() }}</em>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #noData>
+  <p>Aucune donnée d’aperçu… <a (click)="navigateBack()">Retour</a></p>
+</ng-template>

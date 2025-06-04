@@ -492,6 +492,25 @@
                                         </div>
                                     </div>
 
+                                     <!-- Input Prefixe et Suffiche -->
+                                    <div class="champ_grid">
+                                        <div class="champ_input" *ngIf="shouldShowPrefixe()">
+                                            <input class="input_focus" type="text" formControlName="prefixe" placeholder="Saisis le prefixe de votre facture">
+                                            <label class="label">Préfixe de votre facture</label>
+                                        </div>
+
+                                        <div class="champ_input" *ngIf="shouldShowSuffixe()">
+                                            <input class="input_focus" type="text" formControlName="suffixe" placeholder="Saisis le suffixe de votre facture">
+                                            <label class="label">Suffixe de votre facture</label>
+                                        </div>
+
+                                        <!-- // Tva  -->
+                                        <div class="champ_input">
+                                            <input class="input_focus" type="number" formControlName="tauxTva" placeholder="Ex: 0.18">
+                                            <label class="label">TVA (ex: 0.18 = 18%)</label>
+                                        </div>
+                                    </div>
+
                                     <!-- // Informations légales & bancaires  -->
                                     <div class="titre_champ" style="margin-top: 30px;">
                                         <h6>Bas de page</h6>
@@ -555,25 +574,8 @@
                                             <label class="label">Poste</label>
                                         </div>
 
-                                        <!-- // Input de Signature   -->
-                                        <div class="champ_input">
-                                            <input class="input_focus" type="number" formControlName="tauxTva" placeholder="Ex: 0.18">
-                                            <label class="label">TVA (ex: 0.18 = 18%)</label>
-                                        </div>
+                                        
 
-                                    </div>
-
-                                     <!-- Input Prefixe et Suffiche -->
-                                       <div class="champ_grid">
-                                        <div class="champ_input" *ngIf="shouldShowPrefixe()">
-                                            <input class="input_focus" type="text" formControlName="prefixe" placeholder="Saisis le prefixe de votre facture">
-                                            <label class="label">Préfixe de votre facture</label>
-                                        </div>
-
-                                        <div class="champ_input" *ngIf="shouldShowSuffixe()">
-                                            <input class="input_focus" type="text" formControlName="suffixe" placeholder="Saisis le suffixe de votre facture">
-                                            <label class="label">Suffixe de votre facture</label>
-                                        </div>
                                     </div>
 
 
@@ -725,7 +727,7 @@
                     </tr>
                     <!-- TVA à 18% sur le montant commercial -->
                     <tr>
-                        <td class="td" colspan="4">TVA (18%)</td>
+                        <td class="td" colspan="4">TVA {{ tauxTvaAffiche }}</td>
                         <td class="td">
                         <!-- {{
                             ((facture.totalHT - (facture.totalHT * (facture.remise ?? 0) / 100)) * 0.18) | customNumber

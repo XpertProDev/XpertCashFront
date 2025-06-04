@@ -630,10 +630,6 @@ submitNote() {
 }
 
 
-
-
-
-
   // Ajouter ces méthodes
   canApprove(): boolean {
     return this.factureProForma.statut === StatutFactureProForma.BROUILLON;
@@ -710,6 +706,7 @@ submitNote() {
 
     // Récupérer l'email du client s'il existe
     this.emailDestinatairesList = [];
+
     
     if (this.factureProForma.client?.email) {
       const clientEmail = this.factureProForma.client.email;
@@ -726,6 +723,29 @@ submitNote() {
       }
     }
   }
+get destinataire() {
+  const entreprise = this.factureProForma.entrepriseClient;
+  const client = this.factureProForma.client;
+
+  return {
+    nom: entreprise?.nom ?? client?.nomComplet ?? '',
+    adresse: entreprise?.adresse ?? client?.adresse ?? '',
+    siege: entreprise?.siege ?? '', 
+    ville: entreprise ? '' : client?.ville ?? '',
+    pays: entreprise?.pays ?? client?.pays ?? '',
+    telephone: entreprise?.telephone ?? client?.telephone ?? '',
+    email: entreprise?.email ?? client?.email ?? '',
+  };
+}
+get labelNom(): string {
+  return this.factureProForma.entrepriseClient ? 'Entreprise' : 'Nom';
+}
+
+
+
+
+
+
 
   // Modifier la configuration des transitions
   private isStatusTransitionAllowed(newStatut: StatutFactureProForma): boolean {
@@ -948,7 +968,6 @@ submitNote() {
     const payload: Partial<FactureProForma> = {
       statut: StatutFactureProForma.ENVOYE,
       methodeEnvoi: this.methodeEnvoi.toUpperCase() as 'EMAIL' | 'PHYSIQUE',
-      // Corriger la conversion de date
       dateRelance: this.dateRelance ? new Date(this.dateRelance).toISOString() : undefined
     };
 
@@ -1675,11 +1694,6 @@ loadNotes() {
   });
 }
 
-
-
-
-
- 
 
 
 toggleNotebook() {

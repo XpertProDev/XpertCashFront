@@ -97,9 +97,34 @@
             <div class="information_cadre">
               <div class="info_titre_input"> 
                 <h4>Information des produits</h4>
+                  <div class="triple">
+                    <div class="radio-group">
+                      <div class="radio-option">
+                        <input type="radio" 
+                              id="typePhysique" 
+                              formControlName="typeProduit" 
+                              value="PHYSIQUE"
+                              class="radio-input">
+                        <label for="typePhysique" class="radio-label">
+                          <span class="radio-custom"></span>
+                          Produit
+                        </label>
+                      </div>
+                      
+                      <div class="radio-option">
+                        <input type="radio" 
+                              id="typeService" 
+                              formControlName="typeProduit" 
+                              value="SERVICE"
+                              class="radio-input">
+                        <label for="typeService" class="radio-label">
+                          <span class="radio-custom"></span>
+                          Service
+                        </label>
+                      </div>
+                    </div>
+                  </div>
 
-                <div class="double_input_grid">
-                 
                   
                   <!-- Input de nom produits  -->
                   <div class="champ_input">
@@ -111,15 +136,10 @@
                     </div>
                   </div>
 
+                <div class="double_input_grid">
+
                   <!-- Type  -->
-                     <div class="triple" >
-                      <div class="champ_input" class="form-group">
-                        <select class="input_focus " id="typeProduit" formControlName="typeProduit">
-                          <option value="PHYSIQUE">Produit physique</option>
-                          <option value="SERVICE">Service</option>
-                        </select>
-                      </div>
-                  </div>
+                  <!-- Remplacement du select par des boutons radio -->
 
                   <div class="double_input2">
                     <div class="champ_input">
