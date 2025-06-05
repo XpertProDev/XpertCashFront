@@ -236,8 +236,16 @@ const routes: Routes = [
 
       // Routing detail et edit entreprise client
       {
-        path: 'detail-entreprise/:id',
+        path: 'detail-entreprise-client/:id',
         loadComponent: () => import('./admin-page/clients/detail-edit-entreprise-client/detail-edit-entreprise-client.component').then(m => m.DetailEditEntrepriseClientComponent),
+        canActivate: [authGuard]
+
+      },
+
+      // Routing detail et edit entreprise 
+      {
+        path: 'detail-entreprise/:id',
+        loadComponent: () => import('./admin-page/clients/detail-edit-entreprise/detail-edit-entreprise.component').then(m => m.DetailEditEntrepriseComponent),
         canActivate: [authGuard]
 
       },

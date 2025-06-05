@@ -61,15 +61,13 @@ export class ClientsComponent implements OnInit  {
   ngOnInit() {
     // Récupérer les préférences depuis localStorage
     const savedView = localStorage.getItem('viewPreference');
-    this.isListView = savedView !== 'grid'; 
+  this.isListView = savedView !== 'grid'; 
     
-    // Récupérer le type de liste
     const savedListType = localStorage.getItem('listTypePreference');
     if (savedListType === 'clients' || savedListType === 'entreprises') {
       this.currentListType = savedListType;
     }
 
-    // Charger les données en fonction du type actuel
     if (this.currentListType === 'clients') {
       this.getListClients();
     } else {
@@ -107,18 +105,17 @@ export class ClientsComponent implements OnInit  {
   getListEntreprises() {
     const token = localStorage.getItem('authToken');
     if (token) {
-      // Utiliser le service des entreprises
-      this.clientService.getListEntreprises().subscribe({
+      // Utiliser le service EntrepriseService au lieu de ClientService
+      this.entrepriseService.getListEntreprises().subscribe({
         next: (data: EntrepriseClient[]) => {
           console.log('Entreprises récupérées:', data);
           this.entreprises = data;
           
-          // Trier par id décroissant
           this.entreprises = this.entreprises.sort((a: EntrepriseClient, b: EntrepriseClient) => 
             (b.id ?? 0) - (a.id ?? 0)
           );
         },
-        error: (err: any) => {
+        error: (err) => {
           console.error('Erreur lors de la récupération des entreprises :', err);
         }
       });
@@ -226,11 +223,15 @@ export class ClientsComponent implements OnInit  {
   // entreprise client id routing
   openEntrepriseClientDetail(clientId: number, event: MouseEvent): void {
     event.stopPropagation(); 
-    this.router.navigate(['/detail-entreprise', clientId]);
+    this.router.navigate(['/detail-entreprise-client', clientId]);
   }
 
   // Ajoutez cette méthode pour ouvrir les détails d'une entreprise
-  openEntrepriseDetail(entrepriseId: number): void {
+  openEntrepriseDetail(entrepriseId: number | undefined): void {
+    if (entrepriseId === undefined) {
+      console.error("ID d'entreprise non défini");
+      return;
+    }
     this.router.navigate(['/detail-entreprise', entrepriseId]);
   }
 

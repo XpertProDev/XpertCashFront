@@ -15,19 +15,26 @@ export class EntrepriseService {
   constructor(private http: HttpClient) { }
 
   // Dans client.service.ts
-  // getListEntreprises(): Observable<EntrepriseClient[]> {
-  //   const token = localStorage.getItem('authToken');
-  //   if (!token) {
-  //     return throwError('Aucun token trouvé');
-  //   }
+// Dans entreprise.service.ts
+  getListEntreprises(): Observable<EntrepriseClient[]> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
 
-  //   const headers = new HttpHeaders({
-  //     Authorization: `Bearer ${token}`
-  //   });
-
-  //   // Correction du endpoint
-  //   return this.http.get<EntrepriseClient[]>(`${this.apiUrl}/entreprise-clients`, { headers });
-  // }
+    return this.http.get<EntrepriseClient[]>(`${this.apiUrl}/entreprises`, { headers }).pipe(
+      catchError(error => {
+        let errorMsg = 'Erreur inconnue';
+        if (error.error instanceof ErrorEvent) {
+          errorMsg = `Erreur: ${error.error.message}`;
+        } else if (error.status === 404) {
+          errorMsg = 'Aucune entreprise trouvée';
+        }
+        return throwError(() => new Error(errorMsg));
+      })
+    );
+  }
 
   // Ajouter une entreprise
   addEntreprise(entreprise: Entreprise): Observable<Entreprise> {

@@ -218,7 +218,7 @@
       </thead>
 
       <tbody>
-          <tr *ngFor="let entreprise of paginatedEntreprises" >
+          <tr *ngFor="let entreprise of paginatedEntreprises" (click)="openEntrepriseDetail(entreprise.id)">
               <td>
                 <div class="imgClient">
                   <img src="assets/img/office_building.png" alt="Logo entreprise">
@@ -263,7 +263,7 @@
     <!-- Vue cadre pour les entreprises -->
     <div class="container_cadre" *ngIf="!isListView && currentListType === 'entreprises'">
       <div class="grid-view">
-        <div class="client-card" *ngFor="let entreprise of paginatedEntreprises">
+        <div class="client-card" *ngFor="let entreprise of paginatedEntreprises" (click)="openEntrepriseDetail(entreprise.id)">
           <div class="name_icon">
             <div class="tete">
               <h3>

@@ -145,7 +145,7 @@ export class DetailEditEntrepriseClientComponent {
   // entreprise client id routing
   openEntrepriseClientDetail(clientId: number, event: MouseEvent): void {
     event.stopPropagation(); 
-    this.router.navigate(['/detail-entreprise', clientId]);
+    this.router.navigate(['/detail-entreprise-client', clientId]);
   }
 
    // Ouvre/ferme le popup choix d'ajoute client
