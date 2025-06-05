@@ -7,4 +7,5 @@ export interface EntrepriseClient {
     pays: string;
     siege: string;
     secteur: string;
+    createdAt?: string;
 }

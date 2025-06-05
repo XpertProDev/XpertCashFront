@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, catchError, Observable, switchMap, tap, throwError } from "rxjs";
 import { Entreprise } from "../MODELS/entreprise-model";
+import { EntrepriseClient } from "../MODELS/entreprise-clients-model";
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,21 @@ export class EntrepriseService {
   private entrepriseSubject = new BehaviorSubject<Entreprise[]>([]);
   public entreprise$ = this.entrepriseSubject.asObservable(); 
   constructor(private http: HttpClient) { }
+
+  // Dans client.service.ts
+  // getListEntreprises(): Observable<EntrepriseClient[]> {
+  //   const token = localStorage.getItem('authToken');
+  //   if (!token) {
+  //     return throwError('Aucun token trouvé');
+  //   }
+
+  //   const headers = new HttpHeaders({
+  //     Authorization: `Bearer ${token}`
+  //   });
+
+  //   // Correction du endpoint
+  //   return this.http.get<EntrepriseClient[]>(`${this.apiUrl}/entreprise-clients`, { headers });
+  // }
 
   // Ajouter une entreprise
   addEntreprise(entreprise: Entreprise): Observable<Entreprise> {

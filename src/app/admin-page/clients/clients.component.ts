@@ -8,6 +8,7 @@ import { ClientService } from "../SERVICES/client-service";
 import { Clients } from "../MODELS/clients-model";
 import { TruncateEmailPipe } from "../MODELS/truncate-email.pipe";
 import { EntrepriseClient } from "../MODELS/entreprise-clients-model";
+import { EntrepriseService } from "../SERVICES/entreprise-service";
 
 
 @Component({
@@ -18,7 +19,7 @@ import { EntrepriseClient } from "../MODELS/entreprise-clients-model";
     FormsModule,
     MatPaginatorModule,
     RouterLink,
-    TruncateEmailPipe
+    TruncateEmailPipe,
   ],
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.scss'],
@@ -44,10 +45,15 @@ export class ClientsComponent implements OnInit  {
   sortDirection: 'asc' | 'desc' = 'asc';
   noClientsAvailable = false;
   messageNoClient = 'Aucun client disponible.';
+  showTypeDropdown = false;
+  currentListType: 'clients' | 'entreprises' = 'clients';
+  entreprises: EntrepriseClient[] = [];
+  messageNoEntreprise = 'Aucune entreprise disponible.';
 
   constructor(
     private clientService: ClientService,
     private router: Router,
+    private entrepriseService: EntrepriseService,
   ) {}
 
   ngOnInit() {
@@ -71,23 +77,74 @@ export class ClientsComponent implements OnInit  {
     localStorage.setItem('viewPreference', viewType);
   }
 
+  setListType(type: 'clients' | 'entreprises') {
+    this.currentListType = type;
+    this.showTypeDropdown = false;
+    
+    if (type === 'entreprises' && this.entreprises.length === 0) {
+      this.getListEntreprises();
+    }
+  }
+
+  getListEntreprises() {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      this.clientService.getListEntreprises().subscribe({
+        next: (data: EntrepriseClient[]) => {
+          console.log('Entreprises récupérées:', data);
+          this.entreprises = data;
+          
+          // Trier par id décroissant
+          this.entreprises = this.entreprises.sort((a: EntrepriseClient, b: EntrepriseClient) => 
+            (b.id ?? 0) - (a.id ?? 0)
+          );
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération des entreprises :', err);
+        }
+      });
+    } else {
+      console.error('Aucun token trouvé !');
+    }
+  }
+
+  // Ajoutez ce getter pour la pagination des entreprises
+  get paginatedEntreprises(): EntrepriseClient[] {
+    const startIndex = this.currentPage * this.pageSize;
+    return this.entreprises.slice(startIndex, startIndex + this.pageSize);
+  }
 
   // Modifie la fonction sort
-  sort(field: keyof Clients) {
+  sort(field: string) {
+    // Déterminer si le champ existe dans le type actuel
+    const isValidField = 
+      (this.currentListType === 'clients' && this.clients.length > 0 && field in this.clients[0]) ||
+      (this.currentListType === 'entreprises' && this.entreprises.length > 0 && field in this.entreprises[0]);
+
+    if (!isValidField) return;
+
     if (this.sortField === field) {
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
-        this.sortField = field;
-        this.sortDirection = 'asc';
+      this.sortField = field;
+      this.sortDirection = 'asc';
     }
 
-    this.clients.sort((a, b) => {
+    if (this.currentListType === 'clients') {
+      this.clients.sort((a: any, b: any) => {
         const modifier = this.sortDirection === 'asc' ? 1 : -1;
-        // Gestion des valeurs undefined/null
         const valueA = a[field]?.toString().toLowerCase() ?? '';
         const valueB = b[field]?.toString().toLowerCase() ?? '';
         return valueA.localeCompare(valueB) * modifier;
-    });
+      });
+    } else {
+      this.entreprises.sort((a: any, b: any) => {
+        const modifier = this.sortDirection === 'asc' ? 1 : -1;
+        const valueA = a[field]?.toString().toLowerCase() ?? '';
+        const valueB = b[field]?.toString().toLowerCase() ?? '';
+        return valueA.localeCompare(valueB) * modifier;
+      });
+    }
   }
 
   // list clients 
@@ -151,6 +208,11 @@ export class ClientsComponent implements OnInit  {
   openEntrepriseClientDetail(clientId: number, event: MouseEvent): void {
     event.stopPropagation(); 
     this.router.navigate(['/detail-entreprise', clientId]);
+  }
+
+  // Ajoutez cette méthode pour ouvrir les détails d'une entreprise
+  openEntrepriseDetail(entrepriseId: number): void {
+    this.router.navigate(['/detail-entreprise', entrepriseId]);
   }
 
   // Ouvre/ferme le popup choix d'ajoute client

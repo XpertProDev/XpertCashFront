@@ -1,7 +1,9 @@
 <div class="containerTable">
     <!-- En-tête : titre, actions et barre de recherche -->
     <div class="tasks-header">
-      <h1 class="title">Mes Clients</h1>
+      <h1 class="title">
+        {{ currentListType === 'clients' ? 'Mes Clients' : 'Mes Entreprises' }}
+      </h1>
       <div class="actions">
         <button class="add-task" (click)="openPopup()">Créer un client</button>
   
@@ -22,6 +24,23 @@
         </div>
   
         <div class="barre"></div>
+
+        <div class="contentIcon" 
+            (click)="showTypeDropdown = !showTypeDropdown" 
+            clickOutside (clickOutside)="showTypeDropdown = false">
+          <i class="ri-arrow-left-right-line"></i>
+          <!-- Dropdown pour choisir le type -->
+          <div class="view-dropdown" *ngIf="showTypeDropdown">
+            <div class="dropdown-item" (click)="setListType('clients')">
+                Clients {{ currentListType === 'clients' ? '✓' : '' }}
+            </div>
+            <div class="dropdown-item" (click)="setListType('entreprises')">
+                Entreprises {{ currentListType === 'entreprises' ? '✓' : '' }}
+            </div>
+          </div>
+        </div>
+  
+        <div class="barre"></div>
         
         <div class="inputSearch">
           <i class="ri-search-2-line"></i>
@@ -34,7 +53,7 @@
     </div>
     
       <!-- Tableau (visible par défaut) -->
-    <table *ngIf="isListView">
+    <table *ngIf="isListView && currentListType === 'clients'">
       
       <thead>
         <th>Photo</th>
@@ -101,7 +120,7 @@
     </table>
     
     <!-- Vue cadre (quand on active) -->
-    <div class="container_cadre" *ngIf="!isListView">
+    <div class="container_cadre" *ngIf="!isListView && currentListType === 'clients'">
       <div class="grid-view">
         <div class="client-card" *ngFor="let client of paginatedClients" (click)="openClientDetail(client.id)">
           <div class="name_icon">
@@ -180,13 +199,150 @@
       </div>
     </div>
 
+    <!-- ////////////////////////////////////////// ENTREPRISE ////////////////////////////////////////// -->
+
+    <!-- Ajoutez ce code pour l'affichage des entreprises -->
+    <!-- Vue tableau pour les entreprises -->
+    <table *ngIf="isListView && currentListType === 'entreprises'">
+      <thead>
+        <th>Logo</th>
+        <th (click)="sort('nom')">
+          Nom 
+          <i [class]="sortField === 'nom' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
+        </th>
+        <th> Email </th>
+        <th> Adresse </th>
+        <th> Téléphone </th>
+        <th> Pays </th>
+        <th> Siège </th>
+        <th> Secteur </th>
+        <th> Date de Creation </th>
+      </thead>
+
+      <tbody>
+          <tr *ngFor="let entreprise of paginatedEntreprises" >
+              <td>
+                <div class="imgClient">
+                  <img src="assets/img/office_building.png" alt="Logo entreprise">
+                </div>
+              </td>
+              <td>
+                <span *ngIf="entreprise.nom; else noNom">{{ entreprise.nom }}</span>
+                <ng-template #noNom>
+                  <span class="no-phone-text">Nom vide</span>
+                </ng-template>
+              </td>
+              <td>
+                <span *ngIf="entreprise.email; else noEmail">{{ entreprise.email }}</span>
+                <ng-template #noEmail>
+                  <span class="no-phone-text">Non email</span>
+                </ng-template>
+              </td>
+              <td>
+                <span *ngIf="entreprise.adresse; else noAdresse">{{ entreprise.adresse }}</span>
+                <ng-template #noAdresse>
+                  <span class="no-phone-text">Non adresse</span>
+                </ng-template>
+              </td>
+              <td>
+                <span *ngIf="entreprise.telephone; else noPhone">{{ entreprise.telephone }}</span>
+                <ng-template #noPhone>
+                  <span class="no-phone-text">Non téléphone</span>
+                </ng-template>
+              </td>
+              <td>{{ entreprise.pays || '--' }}</td>
+              <td>{{ entreprise.siege || '--' }}</td>
+              <td>{{ entreprise.secteur || '--' }}</td>
+              <td>
+                <span *ngIf="entreprise.createdAt; else noDate">{{ entreprise.createdAt | date: 'dd/MM/yyyy' }}</span>
+                <ng-template #noDate>
+                  <span class="no-phone-text">Non date</span>
+                </ng-template>
+          </tr>
+      </tbody>
+    </table>
+
+    <!-- Vue cadre pour les entreprises -->
+    <div class="container_cadre" *ngIf="!isListView && currentListType === 'entreprises'">
+      <div class="grid-view">
+        <div class="client-card" *ngFor="let entreprise of paginatedEntreprises">
+          <div class="name_icon">
+            <div class="tete">
+              <h3>
+                <span *ngIf="entreprise.nom; else noNom">{{ entreprise.nom }}</span>
+                <ng-template #noNom>
+                  <span class="no-phone-text">Nom est vide</span>
+                </ng-template>
+              </h3>
+            </div>
+            <span *ngIf="entreprise.createdAt" class="dateCreat">{{ entreprise.createdAt | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="content_cadre_double">
+            <div class="info_cadre">
+              <p>
+                <i class="ri-mail-line"></i>
+                <span *ngIf="entreprise.email; else noEmail">{{ entreprise.email | truncateEmail }}</span>
+                <ng-template #noEmail>
+                  <span class="no-phone-text">Non email</span>
+                </ng-template>
+              </p>
+              <p>
+                <i class="ri-map-pin-line"></i>
+                <span *ngIf="entreprise.adresse; else noAdresse">{{ entreprise.adresse }}</span>
+                <ng-template #noAdresse>
+                  <span class="no-phone-text">Non adresse</span>
+                </ng-template>
+              </p>
+              <p>
+                <i class="ri-phone-line"></i>
+                <span *ngIf="entreprise.telephone; else noPhone">{{ entreprise.telephone }}</span>
+                <ng-template #noPhone>
+                  <span class="no-phone-text">Non téléphone</span>
+                </ng-template>
+              </p>
+              <p>
+                <i class="ri-flag-line"></i>
+                {{ entreprise.pays || '--' }}
+              </p>
+              <p>
+                <i class="ri-building-line"></i>
+                {{ entreprise.siege || '--' }}
+              </p>
+              <p>
+                <i class="ri-briefcase-line"></i>
+                {{ entreprise.secteur || '--' }}
+              </p>
+            </div>
+            <div class="imgClient_grid">
+              <img src="assets/img/office_building.png" alt="Logo entreprise">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message quand il n'y a pas d'entreprise -->
+    <div *ngIf="entreprises.length === 0 && currentListType === 'entreprises'" class="no-client-message">
+      {{ messageNoEntreprise }}
+    </div>
+
+    <!-- Pagination pour les entreprises -->
+    <div class="pagination" *ngIf="currentListType === 'entreprises'">
+      <mat-paginator
+        [length]="entreprises.length"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[6, 10, 25, 100]"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+
     <!-- Message quand il n'y a pas de client -->
-    <div *ngIf="clients.length === 0" class="no-client-message">
+    <div *ngIf="clients.length === 0 && currentListType === 'clients'" class="no-client-message">
       {{ messageNoClient }}
     </div>
 
     <!-- Pagination -->
-    <div class="pagination">
+    <div class="pagination" *ngIf="currentListType === 'clients'">
       <mat-paginator
         [length]="clients.length"
         [pageSize]="pageSize"
