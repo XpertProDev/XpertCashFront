@@ -25,9 +25,7 @@
   
         <div class="barre"></div>
 
-        <div class="contentIcon" 
-            (click)="showTypeDropdown = !showTypeDropdown" 
-            clickOutside (clickOutside)="showTypeDropdown = false">
+        <div class="contentIcon" (click)="showTypeDropdown = !showTypeDropdown" clickOutside (clickOutside)="showTypeDropdown = false">
           <i class="ri-arrow-left-right-line"></i>
           <!-- Dropdown pour choisir le type -->
           <div class="view-dropdown" *ngIf="showTypeDropdown">
@@ -300,7 +298,7 @@
                   <span class="no-phone-text">Non téléphone</span>
                 </ng-template>
               </p>
-              <p>
+              <!-- <p>
                 <i class="ri-flag-line"></i>
                 {{ entreprise.pays || '--' }}
               </p>
@@ -311,7 +309,7 @@
               <p>
                 <i class="ri-briefcase-line"></i>
                 {{ entreprise.secteur || '--' }}
-              </p>
+              </p> -->
             </div>
             <div class="imgClient_grid">
               <img src="assets/img/office_building.png" alt="Logo entreprise">

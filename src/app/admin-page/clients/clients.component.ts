@@ -9,6 +9,7 @@ import { Clients } from "../MODELS/clients-model";
 import { TruncateEmailPipe } from "../MODELS/truncate-email.pipe";
 import { EntrepriseClient } from "../MODELS/entreprise-clients-model";
 import { EntrepriseService } from "../SERVICES/entreprise-service";
+import { ClickOutsideDirective } from "../MODELS/click-outside.directive";
 
 
 @Component({
@@ -20,6 +21,7 @@ import { EntrepriseService } from "../SERVICES/entreprise-service";
     MatPaginatorModule,
     RouterLink,
     TruncateEmailPipe,
+    ClickOutsideDirective
   ],
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.scss'],
@@ -57,10 +59,22 @@ export class ClientsComponent implements OnInit  {
   ) {}
 
   ngOnInit() {
-    // Récupérer la préférence depuis le localStorage
+    // Récupérer les préférences depuis localStorage
     const savedView = localStorage.getItem('viewPreference');
     this.isListView = savedView !== 'grid'; 
-    this.getListClients();
+    
+    // Récupérer le type de liste
+    const savedListType = localStorage.getItem('listTypePreference');
+    if (savedListType === 'clients' || savedListType === 'entreprises') {
+      this.currentListType = savedListType;
+    }
+
+    // Charger les données en fonction du type actuel
+    if (this.currentListType === 'clients') {
+      this.getListClients();
+    } else {
+      this.getListEntreprises(); // Charger les entreprises si c'est le type sélectionné
+    }
   }
 
   // Gestion de la pagination
@@ -80,15 +94,20 @@ export class ClientsComponent implements OnInit  {
   setListType(type: 'clients' | 'entreprises') {
     this.currentListType = type;
     this.showTypeDropdown = false;
+    localStorage.setItem('listTypePreference', type);
     
+    // Charger les données si nécessaire
     if (type === 'entreprises' && this.entreprises.length === 0) {
       this.getListEntreprises();
+    } else if (type === 'clients' && this.clients.length === 0) {
+      this.getListClients();
     }
   }
 
   getListEntreprises() {
     const token = localStorage.getItem('authToken');
     if (token) {
+      // Utiliser le service des entreprises
       this.clientService.getListEntreprises().subscribe({
         next: (data: EntrepriseClient[]) => {
           console.log('Entreprises récupérées:', data);
@@ -99,7 +118,7 @@ export class ClientsComponent implements OnInit  {
             (b.id ?? 0) - (a.id ?? 0)
           );
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Erreur lors de la récupération des entreprises :', err);
         }
       });
