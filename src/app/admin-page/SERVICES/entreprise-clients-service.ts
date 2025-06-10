@@ -58,4 +58,21 @@ export class EntrepriseClientService {
     );
   }
 
+  getEntrepriseById(id: number): Observable<EntrepriseClient> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    
+    return this.http.get<EntrepriseClient>(`${this.apiUrl}/entreprises/${id}`, { headers }).pipe(
+      catchError(error => {
+        let errorMsg = 'Erreur lors de la récupération';
+        if (error.status === 404) {
+          errorMsg = 'Entreprise non trouvée';
+        }
+        return throwError(() => new Error(errorMsg));
+      })
+    );
+  }
+
 }
