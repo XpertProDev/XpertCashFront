@@ -1,5 +1,8 @@
 .container_global {
-    margin-right: 15%;
+  display: grid;
+  grid-template-columns: 72% 28%;
+  position: relative;
+  gap: 15px;
 }
 
 .title {
@@ -552,4 +555,8 @@ input:checked + .slider:before {
   color: #ff0000;
   font-weight: bold;
   position: relative;
+}
+
+.cadre_client {
+  background: #000;
 }

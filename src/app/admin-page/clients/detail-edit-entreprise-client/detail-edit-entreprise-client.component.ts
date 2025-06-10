@@ -20,8 +20,6 @@ import { Entreprise } from '../../MODELS/entreprise-model';
 })
 export class DetailEditEntrepriseClientComponent {
   entrepriseClientForm!: FormGroup;
-
-
   errorMessage: string = '';
   errorMessageApi: string = '';
   successMessage = '';
