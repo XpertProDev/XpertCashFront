@@ -22,6 +22,15 @@ export class DetailEditEntrepriseComponent {
   successMessage: string = '';
   entrepriseId!: number;
   entrepriseData!: EntrepriseClient;
+  indicatif: string = '';
+  maxPhoneLength: number = 0;
+
+  // Définition des indicatifs par pays
+  paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
+    'Mali': { indicatif: '+223', longueur: 8 },
+    'Sénégal': { indicatif: '+221', longueur: 9 },
+    'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 }
+  };
 
   constructor(
     private router: Router,
@@ -42,15 +51,29 @@ export class DetailEditEntrepriseComponent {
     this.entrepriseService.getEntrepriseById(this.entrepriseId).subscribe({
       next: (data) => {
         this.entrepriseData = data;
+        
+        // Nettoyer le numéro de téléphone existant
+        let cleanPhone = data.telephone;
+        if (data.telephone && data.telephone.includes(' ')) {
+          cleanPhone = data.telephone.replace(/\s/g, '');
+        }
+
         this.entrepriseForm.patchValue({
           nom: data.nom,
           email: data.email,
-          telephone: data.telephone,
+          telephone: cleanPhone, // Utiliser le numéro nettoyé
           pays: data.pays,
           adresse: data.adresse,
           siege: data.siege,
           secteur: data.secteur
         });
+
+        // Initialiser l'indicatif si pays existant
+        if (data.pays && this.paysIndicatifs[data.pays]) {
+          this.indicatif = this.paysIndicatifs[data.pays].indicatif;
+          this.maxPhoneLength = this.indicatif.length + this.paysIndicatifs[data.pays].longueur;
+          this.updatePhoneValidator(this.paysIndicatifs[data.pays].longueur);
+        }
       },
       error: (err) => {
         this.errorMessage = err.message || 'Erreur lors du chargement';
@@ -59,12 +82,59 @@ export class DetailEditEntrepriseComponent {
     });
   }
 
+  onPaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+  
+    if (paysInfo) {
+      this.indicatif = `${paysInfo.indicatif} `;
+      this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
+  
+      // Mise à jour de la valeur du téléphone
+      if (!this.entrepriseForm.get('telephone')?.value.startsWith(this.indicatif)) {
+        this.entrepriseForm.get('telephone')?.setValue(this.indicatif);
+      }
+  
+      this.updatePhoneValidator(paysInfo.longueur);
+    }
+  }
+
+  updatePhoneValidator(longueur?: number): void {
+    const validators = [];
+    
+    if (this.indicatif) {
+      // Permettre des espaces optionnels après l'indicatif
+      const regex = new RegExp(`^\\${this.indicatif}\\s*\\d{${longueur}}$`);
+      validators.push(Validators.pattern(regex));
+    }
+    
+    this.entrepriseForm.get('telephone')?.setValidators(validators);
+    this.entrepriseForm.get('telephone')?.updateValueAndValidity();
+  }
+
+  formatPhoneNumber(): void {
+    let valeur = this.entrepriseForm.get('telephone')?.value;
+    
+    if (!valeur.startsWith(this.indicatif)) {
+      this.entrepriseForm.get('telephone')?.setValue(this.indicatif);
+      return;
+    }
+
+    // Supprimer TOUS les caractères non numériques après l'indicatif
+    const chiffres = valeur.replace(this.indicatif, '').replace(/\D/g, '');
+    const numeroFormate = this.indicatif + chiffres;
+    
+    this.entrepriseForm.get('telephone')?.setValue(
+      numeroFormate.slice(0, this.maxPhoneLength)
+    );
+  }
+
   initializeForm() {
     this.entrepriseForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.email]],
-      telephone: ['', [Validators.pattern(/^\d+$/)]],
-      pays: [''],
+      telephone: [''], // Validation dynamique
+      pays: [''], // Devenu obligatoire
       adresse: [''],
       siege: [''],
       secteur: ['']

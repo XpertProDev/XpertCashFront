@@ -47,33 +47,53 @@
                     </div>
 
                   </div>
-                  <div class="champ_grid_double">
-                      <!-- Pays -->
-                      <div class="champ_input">
-                        <input class="input_focus"
-                                  autocomplete="off"
-                                  id="pays" formControlName="pays"
-                                  name="pays"
-                                  placeholder="Saisis le pays">
-                        <label for="pays" class="label">Pays</label>
-                      </div>
-
-                    <!-- Telephone -->
+                  <!-- Remplacer le bloc Pays et Téléphone existant par : -->
+                <div class="champ_grid_double">
+                    <!-- Pays -->
                     <div class="champ_input">
-                      <input type="tel" class="input_focus"
-                                id="telephone" formControlName="telephone"
-                                name="telephone"
-                                placeholder="Saisis le numéro de téléphone">
-                      <label for="telephone" class="label">Téléphone</label>
-                      <div *ngIf="entrepriseForm.get('telephone')?.invalid && entrepriseForm.get('telephone')?.touched" 
-                            class="error">
-                          <small *ngIf="entrepriseForm.get('telephone')?.errors?.['pattern']">
-                            Uniquement des chiffres
-                          </small>
-                      </div>
+                        <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
+                            <option value="" disabled selected>Pays</option>
+                            <option value="Mali">Mali</option>
+                            <option value="Sénégal">Sénégal</option>
+                            <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                        </select>
+                        <label for="pays" class="label">Pays</label>
+                        <!-- <div *ngIf="entrepriseForm.get('pays')?.invalid && entrepriseForm.get('pays')?.touched" class="error">
+                            <small>Ce champ est requis</small>
+                        </div> -->
                     </div>
-                  
-                  </div>
+
+                    <!-- Téléphone -->
+                    <div class="champ_input">
+                        <input type="tel" class="input_focus"
+                            id="telephone" formControlName="telephone"
+                            name="telephone"
+                            placeholder="Saisis le numéro de téléphone"
+                            (input)="formatPhoneNumber()">
+                        <label for="telephone" class="label">Téléphone</label>
+                    
+                        <!-- Message d'erreur spécifique au pattern -->
+                        <div *ngIf="
+                                entrepriseForm.get('telephone')?.touched &&
+                                entrepriseForm.get('telephone')?.errors?.['pattern'] &&
+                                entrepriseForm.get('pays')?.value
+                                " class="error">
+                            <small>
+                                Le numéro doit contenir
+                                {{ paysIndicatifs[entrepriseForm.get('pays')?.value].longueur }}
+                                chiffres après l’indicatif {{ paysIndicatifs[entrepriseForm.get('pays')?.value].indicatif.trim() }}.
+                            </small>
+                        </div>
+                    
+                        <!-- Message d'erreur pour champ requis -->
+                        <div *ngIf="
+                            entrepriseForm.get('telephone')?.touched &&
+                            entrepriseForm.get('telephone')?.errors?.['required']
+                            " class="error">
+                            <small>Le téléphone est requis.</small>
+                        </div>
+                    </div>
+                </div>
 
                   <div class="champ_grid">
                     <!-- Siege -->
@@ -126,7 +146,6 @@
                   <div class="btn_ajouter">
                     <button class="btn_save" (click)="onSubmit()"
                           [disabled]="entrepriseForm.invalid"
-                          [disabled]="entrepriseForm.invalid" 
                           [style.backgroundColor]="entrepriseForm.valid ? '#0672E4' : '#0671e434'"
                           [style.color]="entrepriseForm.valid ? '#ffffff' : '#00000073'"
                           [style.cursor]="entrepriseForm.valid ? 'pointer' : 'no-drop'">
