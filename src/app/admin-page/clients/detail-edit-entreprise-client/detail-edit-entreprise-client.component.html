@@ -47,33 +47,41 @@
                   </div>
 
                 </div>
+                <!-- Remplacez le bloc actuel du pays et téléphone par ceci -->
                 <div class="double_input">
-                    <!-- Pays -->
-                    <div class="champ_input champ_input2">
-                      <input class="input_focus"
-                                autocomplete="off"
-                                id="pays" formControlName="pays"
-                                name="pays"
-                                placeholder="Saisis le pays">
-                      <label for="pays" class="label">Pays</label>
-                    </div>
-
-                  <!-- Telephone -->
+                  <!-- Pays (transformé en select) -->
                   <div class="champ_input champ_input2">
-                    <input type="tel" class="input_focus"
-                              id="telephone" formControlName="telephone"
-                              name="telephone"
-                              placeholder="Saisis le numéro de téléphone">
+                    <select class="input_focus" 
+                            id="pays" 
+                            formControlName="pays"
+                            (change)="onPaysChange($event)">
+                      <option value="" disabled selected>Sélectionne un pays</option>
+                      <option value="Mali">Mali</option>
+                      <option value="Sénégal">Sénégal</option>
+                      <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                    </select>
+                    <label for="pays" class="label">Pays</label>
+                  </div>
+
+                  <!-- Telephone (avec gestion d'indicatif) -->
+                  <div class="champ_input champ_input2">
+                    <input type="tel" 
+                          class="input_focus"
+                          id="telephone" 
+                          formControlName="telephone"
+                          placeholder="Saisis le numéro de téléphone"
+                          (input)="formatPhoneNumber()">
                     <label for="telephone" class="label">Téléphone</label>
-                    <div *ngIf="entrepriseClientForm.get('telephone')?.invalid && entrepriseClientForm.get('telephone')?.touched" 
-                          class="error">
-                        <small *ngIf="entrepriseClientForm.get('telephone')?.errors?.['pattern']">
-                          Uniquement des chiffres
-                        </small>
+                    
+                    <!-- Messages d'erreur améliorés -->
+                    <div *ngIf="entrepriseClientForm.get('telephone')?.touched && entrepriseClientForm.get('telephone')?.errors?.['pattern']" 
+                        class="error">
+                      <small *ngIf="entrepriseClientForm.get('pays')?.value">
+                        Format invalide pour {{ entrepriseClientForm.get('pays')?.value }}.
+                        Exemple: {{ paysIndicatifs[entrepriseClientForm.get('pays')?.value].exemple }}
+                      </small>
                     </div>
                   </div>
-                
-
                 </div>
 
                 <div class="double_input">
