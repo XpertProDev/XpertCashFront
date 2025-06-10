@@ -325,9 +325,10 @@
     </div>
 
     <!-- Pagination pour les entreprises -->
-    <div class="pagination" *ngIf="currentListType === 'entreprises'">
+    <div class="pagination" *ngIf="currentListType === 'clients'">
       <mat-paginator
-        [length]="entreprises.length"
+        [length]="clients.length"
+        [pageIndex]="currentPageClients"
         [pageSize]="pageSize"
         [pageSizeOptions]="[6, 10, 25, 100]"
         (page)="onPageChange($event)">
@@ -340,9 +341,10 @@
     </div>
 
     <!-- Pagination -->
-    <div class="pagination" *ngIf="currentListType === 'clients'">
+    <div class="pagination" *ngIf="currentListType === 'entreprises'">
       <mat-paginator
-        [length]="clients.length"
+        [length]="entreprises.length"
+        [pageIndex]="currentPageEntreprises"
         [pageSize]="pageSize"
         [pageSizeOptions]="[6, 10, 25, 100]"
         (page)="onPageChange($event)">

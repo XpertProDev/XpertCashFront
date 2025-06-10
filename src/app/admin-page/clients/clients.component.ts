@@ -39,6 +39,8 @@ export class ClientsComponent implements OnInit  {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   pageSize = 6;
   currentPage = 0;
+  currentPageClients = 0;
+  currentPageEntreprises = 0;
   totalClients = 0;
   totalEntrepriseClients = 0;
   clients: Clients[] = [];
@@ -77,6 +79,12 @@ export class ClientsComponent implements OnInit  {
 
   // Gestion de la pagination
   onPageChange(event: PageEvent): void {
+    if (this.currentListType === 'clients') {
+      this.currentPageClients = event.pageIndex;
+    } else {
+      this.currentPageEntreprises = event.pageIndex;
+    }
+    
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
   }
@@ -90,11 +98,13 @@ export class ClientsComponent implements OnInit  {
   }
 
   setListType(type: 'clients' | 'entreprises') {
+    // Réinitialisez la page courante selon le type
+    this.currentPage = type === 'clients' ? this.currentPageClients : this.currentPageEntreprises;
+    
     this.currentListType = type;
     this.showTypeDropdown = false;
     localStorage.setItem('listTypePreference', type);
     
-    // Charger les données si nécessaire
     if (type === 'entreprises' && this.entreprises.length === 0) {
       this.getListEntreprises();
     } else if (type === 'clients' && this.clients.length === 0) {
@@ -126,7 +136,7 @@ export class ClientsComponent implements OnInit  {
 
   // Ajoutez ce getter pour la pagination des entreprises
   get paginatedEntreprises(): EntrepriseClient[] {
-    const startIndex = this.currentPage * this.pageSize;
+    const startIndex = this.currentPageEntreprises * this.pageSize;
     return this.entreprises.slice(startIndex, startIndex + this.pageSize);
   }
 
@@ -209,9 +219,8 @@ export class ClientsComponent implements OnInit  {
   }
 
   //liste entreprise client
-  
   get paginatedClients(): Clients[] {
-    const startIndex = this.currentPage * this.pageSize;
+    const startIndex = this.currentPageClients * this.pageSize;
     return this.clients.slice(startIndex, startIndex + this.pageSize);
   }
 
