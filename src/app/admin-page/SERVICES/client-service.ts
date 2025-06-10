@@ -61,6 +61,10 @@ export class ClientService {
     );
   }
 
+  getClientsByEntreprise(entrepriseId: number): Observable<Clients[]> {
+    return this.http.get<Clients[]>(`${this.apiUrl}/clients/entreprise/${entrepriseId}`);
+  }
+
   getClientById(id: number): Observable<Clients> {
     const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({

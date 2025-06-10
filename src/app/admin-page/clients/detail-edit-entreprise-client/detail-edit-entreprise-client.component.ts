@@ -7,6 +7,7 @@ import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-servi
 import { CommonModule } from '@angular/common';
 import { Clients } from '../../MODELS/clients-model';
 import { Entreprise } from '../../MODELS/entreprise-model';
+import { TruncateEmailPipe } from '../../MODELS/truncate-email.pipe';
 
 @Component({
   selector: 'app-detail-edit-entreprise-client',
@@ -14,6 +15,7 @@ import { Entreprise } from '../../MODELS/entreprise-model';
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
+    TruncateEmailPipe,
   ],
   templateUrl: './detail-edit-entreprise-client.component.html',
   styleUrl: './detail-edit-entreprise-client.component.scss'
@@ -34,6 +36,7 @@ export class DetailEditEntrepriseClientComponent {
   client: Clients = {
     entrepriseClient: {} // Initialisation par défaut
   } as Clients;
+  clientsAffilies: Clients[] = [];
 
   constructor(
     private clientService: ClientService,
@@ -65,13 +68,33 @@ export class DetailEditEntrepriseClientComponent {
     });
   }
 
+  // Modifier getClient() pour récupérer les clients affiliés
   getClient(id: number) {
     this.clientService.getClientById(id).subscribe({
       next: (client) => {
         this.client = client;
-        this.initializeForm(); // Initialiser le formulaire après récupération
+        this.initializeForm();
+        
+        // Filtrer les clients affiliés
+        this.getClientsAffilies();
       },
       error: (err) => console.error('Erreur lors de la récupération:', err)
+    });
+  }
+
+  // Nouvelle méthode pour récupérer les clients affiliés
+  getClientsAffilies() {
+    if (!this.client?.entrepriseClient?.id) return;
+    
+    const entrepriseId = this.client.entrepriseClient.id;
+    
+    this.clientService.getClientsByEntreprise(entrepriseId).subscribe({
+      next: (clients) => {
+        this.clientsAffilies = clients;
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération des clients affiliés:', err);
+      }
     });
   }
 

@@ -162,16 +162,36 @@
     </div>
   </div>
 
-  <div class="information_cadre" style="margin-top: 16%;">
-    <div class="name_client">
-      <!-- <div class="cadre_client">Name client</div> -->
-       <ul>
-        <li>client 1</li>
-        <li>client 2</li>
-        <li>client 3</li>
-        <li>client 4</li>
-        <li>client 5</li>
-       </ul>
+  <div class="information_cadre cadre_affilie">
+    <div class="header_affilie">
+      <h4>Clients affiliés à cette <br>entreprise</h4>
+      <div class="count">{{ clientsAffilies.length }}</div>
     </div>
+
+    <div class="content_affilie" *ngIf="clientsAffilies.length > 0; else noAffilie">
+      <div class="client_card" *ngFor="let client of clientsAffilies" (click)="openClientDetail(client.id)">
+        <div class="avatar">
+          <img src="assets/img/profil.png" alt="Photo client">
+        </div>
+        <div class="info">
+          <div class="name">{{ client.nomComplet || 'Nom non disponible' }}</div>
+          <div class="contact">
+            <span *ngIf="client.email">
+              <i class="ri-mail-line"></i> {{ client.email  | truncateEmail}}
+            </span>
+            <span *ngIf="client.telephone">
+              <i class="ri-phone-line"></i> {{ client.telephone }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noAffilie>
+      <div class="no-affiliation">
+        <i class="ri-group-line"></i>
+        <p>Aucun client affilié à cette entreprise</p>
+      </div>
+    </ng-template>
   </div>
 </div>
