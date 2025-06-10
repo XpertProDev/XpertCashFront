@@ -171,8 +171,16 @@
   </div>
 
   <div class="information_cadre cadre_affilie">
+    <!-- <div class="header_affilie">
+      <h4>Clients affiliés à cette <br>entreprise <strong></strong> </h4>
+      <div class="count">{{ clientsAffilies.length }}</div>
+    </div> -->
+
     <div class="header_affilie">
-      <h4>Clients affiliés à cette <br>entreprise</h4>
+      <h4 style="font-weight: 400;">
+        Clients affiliés à l'entreprise<br>
+        <strong style="color: #0672E4; letter-spacing: 0.60px;">{{ client.entrepriseClient.nom || 'cette entreprise' }}</strong>
+      </h4>
       <div class="count">{{ clientsAffilies.length }}</div>
     </div>
 
