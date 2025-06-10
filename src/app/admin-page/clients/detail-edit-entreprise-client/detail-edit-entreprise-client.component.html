@@ -169,7 +169,7 @@
     </div>
 
     <div class="content_affilie" *ngIf="clientsAffilies.length > 0; else noAffilie">
-      <div class="client_card" *ngFor="let client of clientsAffilies" (click)="openClientDetail(client.id)">
+      <div class="client_card" *ngFor="let client of clientsAffilies" (click)="openClientDetail(client.id)" [class.selected]="client.id === currentClientId">
         <div class="avatar">
           <img src="assets/img/profil.png" alt="Photo client">
         </div>
@@ -177,7 +177,7 @@
           <div class="name">{{ client.nomComplet || 'Nom non disponible' }}</div>
           <div class="contact">
             <span *ngIf="client.email">
-              <i class="ri-mail-line"></i> {{ client.email  | truncateEmail}}
+              <i class="ri-mail-line"></i> {{ client.email | truncateEmail }}
             </span>
             <span *ngIf="client.telephone">
               <i class="ri-phone-line"></i> {{ client.telephone }}

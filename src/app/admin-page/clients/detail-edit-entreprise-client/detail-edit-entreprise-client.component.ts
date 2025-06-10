@@ -21,6 +21,7 @@ import { TruncateEmailPipe } from '../../MODELS/truncate-email.pipe';
   styleUrl: './detail-edit-entreprise-client.component.scss'
 })
 export class DetailEditEntrepriseClientComponent {
+  currentClientId: number | null = null;
   entrepriseClientForm!: FormGroup;
   errorMessage: string = '';
   errorMessageApi: string = '';
@@ -52,6 +53,7 @@ export class DetailEditEntrepriseClientComponent {
     this.isListView = savedView !== 'grid'; 
     this.getListClients();
     const id = +this.route.snapshot.params['id'];
+    this.currentClientId = id;
     this.getClient(id);
     this.getFormEntreprise();
   }
