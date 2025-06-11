@@ -13,28 +13,27 @@ export interface EntrepriseClientDTO {
 
 export interface ClientDTO {
   id: number;
-  nomComplet: string;
-  // … autres champs (adresse, tél, …) si vous les renvoyez
+  nom: string;
 }
 
 export interface LigneFactureDTO {
   id: number;
-  produitNom: string; // Changé (était 'produit')
+  produitNom: string;
   ligneDescription: string;
   prixUnitaire: number;
   quantite: number;
-  montantTotal: number; // Ajouté
+  montantTotal: number;
 }
 
 export interface FactureReelle {
   id: number;
   numeroFacture: string;
   dateCreation: string;
-  description: string; // Ajouté
-  totalHT: number; // Ajouté
+  description: string;
+  totalHT: number;
   totalFacture: number;
   remise: number;
-  tauxRemise?: number; // Ajouté
+  tauxRemise?: number;
   tva: boolean;
   statutPaiement: string;
   utilisateur: UserRequest | null;
