@@ -127,6 +127,8 @@ export class DetailFactureProformaComponent implements OnInit {
   attachments: EmailAttachment[] = [];
   currentAttachment: File | null = null;
   successMessage: string | null = null;
+  tauxTva?: number | null;
+
 
 
 
@@ -210,7 +212,7 @@ export class DetailFactureProformaComponent implements OnInit {
   getMontantTVA(): number {
     if (!this.activeTva) return 0;
     const base = this.getTotalApresRemise();
-    return base * 0.18; // 18% de TVA
+    return base * (this.tauxTva ?? 0);
   }
 
   getTotalCommercial() : number {
@@ -1206,7 +1208,8 @@ get labelNom(): string {
       this.nomEntreprise = entreprise.nom ?? '—';
       this.siege = entreprise.siege ?? '—';
       this.email = entreprise.email ?? '—';
-      this.logo = 'http://localhost:8080' + (entreprise.logo?.startsWith('/') ? entreprise.logo : '/' + entreprise.logo);
+      // Ensure logo path is correct for http access
+      this.logo = entreprise.logo ? (entreprise.logo.startsWith('http') || entreprise.logo.startsWith('data:image/') ? entreprise.logo : 'http://localhost:8080' + (entreprise.logo.startsWith('/') ? entreprise.logo : '/' + entreprise.logo)) : null;
       this.secteur = entreprise.secteur ?? '—';
       this.telephone = entreprise.telephone ?? '—';
       this.adresse = entreprise.adresse ?? '—';
@@ -1218,19 +1221,28 @@ get labelNom(): string {
       this.siteWeb  = entreprise.siteWeb  ?? '—';
       this.signataire  = entreprise.signataire  ?? '—';
       this.signataireNom  = entreprise.signataireNom  ?? '—';
+      // Assuming signataireSignature is a URL or base64 for the graphic signature
+      // this.signataireSignature = entreprise.signataireSignature ?? null;
+
+      // Assuming you have these properties for calculations and display:
+      // this.activeRemise = entreprise.activeRemise ?? false;
+      // this.remisePourcentage = entreprise.remisePourcentage ?? 0; // Or get from factureProForma if discount is per invoice
+      // this.activeTva = entreprise.activeTva ?? false; // Or get from factureProForma/products
+      // this.tvaRate = entreprise.tvaRate ?? 0.18; // Or get from config/factureProForma
+      // this.tvaLabel = entreprise.tvaLabel ?? 'TVA (18 %)'; // Optional: For customizable TVA label
     } catch (error) {
       console.error('Erreur de récupération des infos entreprise :', error);
     }
 
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
     /*************** ——— 1. HEADER ——— ****************/
     try {
       if (this.logo) {
-          const imgData = await this.getBase64ImageFromURL(this.logo);
-          const formatMatch = imgData.match(/^data:image\/(png|jpeg);/);
+          const imgData = this.logo.startsWith('data:image/') ? this.logo : await this.getBase64ImageFromURL(this.logo);
+          const formatMatch = imgData.match(/^data:image\/(png|jpeg|gif);/);
           const format = formatMatch ? formatMatch[1].toUpperCase() : 'PNG';
           doc.addImage(imgData, format, 15, 10, 47, 17);
-
       }
     } catch (imgErr) {
       console.error('Erreur lors du chargement ou de l’ajout du logo :', imgErr);
@@ -1238,38 +1250,36 @@ get labelNom(): string {
 
     /*************** ——— 1. INFOS SOCIÉTÉ ——— ****************/
     const infoX = 70;
-    const infoY_EmailTel = 22;
+    const infoY_Start = 12;
     doc.setFontSize(10);
 
     doc.setFont('helvetica', 'bold');
-    doc.text(this.nomEntreprise || 'Nom Entreprise', infoX, 12);
+    doc.text(this.nomEntreprise || 'Nom Entreprise', infoX, infoY_Start);
 
     doc.setFont('helvetica', 'normal');
-    doc.text(`Secteur : ${this.secteur || 'default'}`,  infoX, 17);
-    doc.text(`Email : ${this.email || 'default'}`, infoX, infoY_EmailTel);
+    doc.text(`Secteur : ${this.secteur || 'default'}`,  infoX, infoY_Start + 5);
 
-    // Calcul d’un X décalé pour le téléphone, selon la largeur de l’email
     const emailText = `Email : ${this.email || 'default'}`;
+    doc.text(emailText, infoX, infoY_Start + 10);
+
     const emailWidth = doc.getTextWidth(emailText);
     const spacing = 5;
-
-    doc.text(
+     doc.text(
       `Téléphone : ${this.telephone || 'default'}`,
       infoX + emailWidth + spacing,
-      infoY_EmailTel
-    );
-    // ► 1) Calcul de la position Y immédiatement après la dernière info
-    const lastInfoY = 27;
-    const gapBelowInfo = 5;
+      infoY_Start + 10
+     );
+
+    const lastInfoY = infoY_Start + 10;
+    const gapBelowInfo = 7;
     const sepY = lastInfoY + gapBelowInfo;
 
-    // ► 2) Double séparateur (<hr>)
     doc.setDrawColor(200);
     doc.line(15, sepY,     195, sepY);
-    doc.line(15, sepY + 2, 195, sepY + 2);
+    doc.line(15, sepY + 1.5, 195, sepY + 1.5);
 
     /*************** ——— 2. TITRE PRINCIPAL ——— ****************/
-    const gapBelowSep = 10;
+    const gapBelowSep = 8;
     const titleY = sepY + gapBelowSep;
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -1277,7 +1287,10 @@ get labelNom(): string {
     doc.text(`FACTURE PROFORMA ${numeroFacture}`, 105, titleY, { align: 'center' });
 
     doc.setDrawColor(0);
-    doc.line(60, titleY + 2, 150, titleY + 2);
+    const titleLineWidth = 90;
+    const titleLineX = 105 - titleLineWidth / 2;
+    doc.line(titleLineX, titleY + 1.5, titleLineX + titleLineWidth, titleY + 1.5);
+
 
     /*************** ——— 3. DATE & LIEU ——— ****************/
     doc.setFontSize(10);
@@ -1286,7 +1299,7 @@ get labelNom(): string {
     doc.text(
       `${this.siege || 'default'}, le ${
         this.factureProForma.dateCreation
-          ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR')
+          ? new Date(this.factureProForma.dateCreation).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
           : ''
       }`,
       195,
@@ -1295,42 +1308,49 @@ get labelNom(): string {
     );
 
     /*************** ——— 3. INFOS CLIENT & OBJET ——— ****************/
+    const clientObjectBlockY = titleY + 20;
+
     const label = 'Client :';
     const labelX = 15;
-    const labelY = 65;
+    let currentY = clientObjectBlockY;
 
     doc.setFont('helvetica', 'bold');
-    doc.text(label, labelX, labelY);
+    doc.text(label, labelX, currentY);
 
-    const labelWidth = doc.getTextWidth(label);
-    doc.line(labelX, labelY + 0.8, labelX + labelWidth, labelY + 0.8);
+
 
     doc.setFont('helvetica', 'normal');
     doc.text(
       this.factureProForma.client?.nomComplet ||
         this.factureProForma.entrepriseClient?.nom ||
         'Non spécifié',
-      35,
-      labelY
+      labelX + doc.getTextWidth(label) + 2,
+      currentY
     );
 
+    currentY += 7;
+
     const objectLabel = 'Object :';
-    const objectLabelX = 15;
-    const objectLabelY = 72;
 
     doc.setFont('helvetica', 'bold');
-    doc.text(objectLabel, objectLabelX, objectLabelY);
+    doc.text(objectLabel, labelX, currentY);
 
-    const objectLabelWidth = doc.getTextWidth(objectLabel);
-    doc.line(objectLabelX, objectLabelY + 0.8, objectLabelX + objectLabelWidth, objectLabelY + 0.8);
-
+  
     doc.setFont('helvetica', 'normal');
-    doc.text(this.factureProForma.description || 'Objet', 35, objectLabelY);
+    doc.text(
+      this.factureProForma.description || 'Objet',
+      labelX + doc.getTextWidth(objectLabel) + 2,
+      currentY
+    );
 
-    /*************** ——— 4. TABLE PRODUITS ——— ****************/
+    /*************** ——— 4. TABLE PRODUITS & TOTAUX ——— ****************/
+    const tableStartY = currentY + 10;
+
     const headers = [
       ['Désignation', 'Description', 'Prix Unitaire (FCFA)', 'Quantité', 'Montant (FCFA)'],
     ];
+
+    // Data rows for products
     const data = this.confirmedLignes.map((ligne) => [
       this.getProduitNom(ligne.produitId) || 'N/A',
       ligne.ligneDescription || '',
@@ -1339,203 +1359,216 @@ get labelNom(): string {
       this.getMontantTotal(ligne).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
     ]);
 
+    // --- Calculate Totals including conditional Remise and TVA ---
+    const totalHT = this.getTotalHT();
+    const montantRemise = this.getMontantRemise(); // Calculate remise amount
+    const isRemiseActive = this.activeRemise && montantRemise > 0;
+
+    const totalCommercial = isRemiseActive ? totalHT - montantRemise : totalHT;
+    const safeTotalCommercial = Math.max(0, totalCommercial);
+
+    const montantTVA = this.getMontantTVA();
+    const isTvaActive = this.activeTva && montantTVA > 0;
+
+    const totalTTC = safeTotalCommercial + montantTVA;
+
+
+    // --- Add Total Rows to the table data ---
+
+    // Add Total HT row (always display)
+    data.push([
+        { content: 'Total HT', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } }, // Label right-aligned
+        { content: totalHT.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '), styles: { halign: 'right' } } // Value right-aligned
+    ] as any);
+
+    // Conditionally add Remise row
+    if (isRemiseActive) {
+        const remiseLabel = `Remise (${this.remisePourcentage ? this.remisePourcentage + ' %' : 'Montant'})`;
+        data.push([
+           { content: remiseLabel, colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } }, // Label right-aligned
+           { content: montantRemise.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '), styles: { halign: 'right' } } // Value right-aligned
+        ] as any);
+
+        // Add Montant Commercial row (typically shown if remise applies)
+         data.push([
+            { content: 'Montant Commercial', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } }, // Label right-aligned
+            { content: safeTotalCommercial.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '), styles: { halign: 'right' } } // Value right-aligned
+         ] as any);
+    }
+
+
+    // Conditionally add TVA row
+    if (isTvaActive) {
+      const tauxPourcent = Math.round((this.tauxTva ?? 0) * 100); 
+
+        data.push([
+            {
+                content: `TVA (${tauxPourcent} %)`,
+                colSpan: 4,
+                styles: { fontStyle: 'normal', halign: 'center' }
+            },
+            {
+                content: montantTVA.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '), styles: { halign: 'right' }
+              
+            }
+        ] as any);
+    }
+
+    // Add Montant TTC row (always display)
+     data.push([
+        { content: 'Montant TTC', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
+        { content: totalTTC.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '), styles: { fontStyle: 'normal', halign: 'right' } } 
+    ] as any);
+
+
     (doc as any).autoTable({
       head: headers,
       body: data,
-      startY: 80,
+      startY: tableStartY,
       theme: 'grid',
-      styles: { fontSize: 9, cellPadding: 2, halign: 'center',},
-      headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 10, halign: 'center',},
-      alternateRowStyles: { fillColor: [249, 249, 249] },
+      styles: { fontSize: 9, cellPadding: 2, lineWidth: 0.1, lineColor: [221, 221, 221]},
+      headStyles: { fillColor: [242, 242, 242], textColor: [0, 0, 0], fontSize: 8, halign: 'center', fontStyle: 'bold'},
+      bodyStyles: { textColor: [0,0,0], fillColor: null },
+
       margin: { left: 15, right: 15 },
       columnStyles: {
-        0: { halign: 'left' },
-        1: { halign: 'left' }, 
+        // Define column widths and alignment
+        0: { halign: 'left', cellWidth: 30 },
+        1: { halign: 'left', cellWidth: 60 },
+        2: { halign: 'center', cellWidth: 33 },
+        3: { halign: 'center', cellWidth: 20 },
+        4: { halign: 'right', cellWidth: 35 },
       },
+      tableStyle: { borderColor: [200, 200, 200], borderWidth: 0.1 }
     });
 
-    /*************** ——— 5. TOTAUX ——— ****************/
-      
-    let y = (doc as any).lastAutoTable.finalY + 11;
-    doc.setFontSize(10);
 
-    const labelXCenter = (100 + 150) / 2;
-    const valueXCenter = (150 + 195) / 2;
+    /*************** ——— 5. MONTANT EN LETTRES ——— ****************/
 
-    const addTotalLine = (label: string, value: string, isBold = false) => {
-      if (isBold) {
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(10);
-      }
-      doc.text(label, labelXCenter, y, { align: 'center' });
-      doc.text(value, valueXCenter, y, { align: 'center' });
-      if (isBold) {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
-      }
-      y += 6;
-    };
+    let y_after_table = (doc as any).lastAutoTable.finalY;
+    let y_amount_in_words = y_after_table + 18; // Add space below table
 
-    addTotalLine(
-      'Total HT',
-      `${this.getTotalHT().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-    );
-
-    if (this.activeRemise) {
-      addTotalLine(
-        `Remise (${this.remisePourcentage || 10}%)`,
-        `${this.getMontantRemise().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-      );
-    }
-
-    addTotalLine(
-      'Montant commercial',
-      `${this.getTotalCommercial().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-    );
-
-    if (this.activeTva) {
-      addTotalLine(
-        'TVA (18%)',
-        `${this.getMontantTVA().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`
-      );
-    }
-
-    addTotalLine(
-      'Montant TTC',
-      `${this.getTotalTTC().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} CFA`,
-      true
-    );
-
-    /*************** ——— 6. MONTANT EN LETTRES ——— ****************/
-
-    y += 18;
     const libelle = 'Arrêté la présente facture à la somme de : ';
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text(libelle, 15, y);
+    doc.setFontSize(7.4);
+    doc.text(libelle, 15, y_amount_in_words);
 
-    // largeur du libellé pour connaître le point de départ du texte en lettres
     const libelleWidth = doc.getTextWidth(libelle);
     const startX = 15 + libelleWidth;
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    const montantLettreRaw =
-    this.enLettresPipe.transform(this.getTotalTTC());
+    doc.setFontSize(8.4);
 
-    const maxWidth = 195 - startX; 
+    // Amount in words is always the final TTC amount
+    const amountForWords = totalTTC;
+    const montantLettreRaw = this.enLettresPipe.transform(amountForWords);
+
+    const maxWidth = 195 - startX;
 
     const lines = doc.splitTextToSize(montantLettreRaw, maxWidth);
 
-    doc.text(lines[0], startX, y);
+    doc.text(lines[0], startX, y_amount_in_words);
+    let currentAmountInWordsY = y_amount_in_words;
 
     for (let i = 1; i < lines.length; i++) {
-      y += 6;
-      doc.text(lines[i], 15, y);
+      currentAmountInWordsY += 6;
+      doc.text(lines[i], 15, currentAmountInWordsY);
     }
 
-    /*************** ——— 7. SIGNATURE / CACHET ——— ****************/
-    // 1. Texte du nom (en bas)
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    const nom = this.signataireNom || 'Nom du signataire';
-    const nomWidth = doc.getTextWidth(nom);
 
-    // ➤ On déplace le bloc vers la droite (ex : centré autour de x = 160mm)
+    /*************** ——— 6. SIGNATURE / CACHET ——— ****************/
+
+    let y_signature_block = currentAmountInWordsY + 30;
+    const min_y_signature = doc.internal.pageSize.height - 70;
+    y_signature_block = Math.max(y_signature_block, min_y_signature);
+
+
     const blocCenterX = 180;
-    const nomX = blocCenterX - nomWidth / 2;
 
-    // Texte du rôle (juste au-dessus)
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     const signataire = this.signataire || 'Directeur';
     const signataireWidth = doc.getTextWidth(signataire);
     const signataireX = blocCenterX - signataireWidth / 2;
+    doc.text(signataire, signataireX, y_signature_block);
 
-    // Dessiner (moins d’espace entre les 2 lignes : 10 au lieu de 15)
-    y += 50;
-    doc.text(signataire, signataireX, y);
-    y += 10;  // réduit l’espace vertical
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(nom, nomX, y);
-    y += 10; // espace sous le nom classique
+    const nom = this.signataireNom || 'Nom du signataire';
+    const nomWidth = doc.getTextWidth(nom);
+    const nomX = blocCenterX - nomWidth / 2;
+    doc.text(nom, nomX, y_signature_block + 8);
 
-    doc.setFontSize(9);
-    doc.setFont('times', 'italic');
 
-    const nomSignatureWidth = doc.getTextWidth(nom);
-    const nomSignatureX = blocCenterX - nomSignatureWidth / 2;
+    // if (this.signataireSignature) { ... add signature image logic here ... }
 
-    // Ombre légère (gris, décalé)
-    doc.setTextColor(150, 150, 150);
-    doc.text(nom, nomSignatureX + 0.5, y + 0.5);
 
-    // Texte principal en noir, italique
-    doc.setTextColor(0, 0, 0);
-    doc.text(nom, nomSignatureX, y);
+    /*************** ——— 7. FOOTER  ——— ****************/
 
-    // Ligne ondulée sous le texte (signature stylisée)
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.5);
+    const margin = 15;
+const pageWidth = doc.internal.pageSize.width;
+const x1 = margin;
+const x2 = pageWidth - margin;
+const pageHeight = doc.internal.pageSize.height;
+const footerYStart = pageHeight - 20;
+const separatorY = footerYStart - 5;
 
-    const waveStartX = nomSignatureX;
-    const waveEndX = nomSignatureX + nomSignatureWidth;
-    const waveY = y + 3; // un peu sous le texte
-    const waveLength = 5;  // longueur d’une vague complète
-    const amplitude = 1;   // hauteur de la vague
+doc.setLineWidth(0.2);
+doc.setDrawColor(150);
+doc.line(x1, separatorY, x2, separatorY);
 
-    let previousX = waveStartX;
-    let previousY = waveY;
+doc.setFontSize(8);
+doc.setFont('helvetica', 'normal');
+doc.setTextColor(100);
 
-    for (let x = waveStartX + 0.5; x <= waveEndX; x += 0.5) {
-      // Calculer y avec une sinusoïde pour l’effet ondulé
-      const yOffset = amplitude * Math.sin(((x - waveStartX) / waveLength) * 2 * Math.PI);
-      const currentY = waveY + yOffset;
-      doc.line(previousX, previousY, x, currentY);
-      previousX = x;
-      previousY = currentY;
-    }
+let currentFooterY = footerYStart;
 
-    // Séparateur presque pleine largeur
-    const margin = 10;
-    const pageWidth = doc.internal.pageSize.width;
-    const x1 = margin;
-    const x2 = pageWidth - margin;
-    const pageHeight = doc.internal.pageSize.height;
-    const footerYStart = pageHeight - 20;
-    const separatorY = footerYStart - 5;
-    doc.setLineWidth(0.2);
-    doc.setDrawColor(150);
-    doc.line(x1, separatorY, x2, separatorY);
+// — Site Web —
+if (this.siteWeb) {
+  doc.text(this.siteWeb, 105, currentFooterY, { align: 'center' });
+  currentFooterY += 4;
+}
 
-    /*************** ——— 8. FOOTER  ——— ****************/
+// — Identifiants divers (NINA, RCCM, etc.) —
+const parts = [];
+if (this.nina) parts.push(`NINA : ${this.nina}`);
+if (this.rccm) parts.push(`RCCM : ${this.rccm}`);
+if (this.nif) parts.push(`NIF : ${this.nif}`);
+if (this.banque) parts.push(`Banque : ${this.banque}`);
 
-    doc.setFontSize(9);
-    doc.setFont('Roboto', 'normal');  
-    doc.setTextColor(100);
+if (parts.length > 0) {
+  doc.text(parts.join(' ; '), 105, currentFooterY, { align: 'center' });
+  currentFooterY += 4;
+}
 
-    doc.text(this.siteWeb || 'www.votre-entreprise.com', 105, footerYStart, { align: 'center' });
+// — Adresse —
+const adresse = this.adresse;
+const siege = this.siege;
+const pays = this.pays;
 
-    doc.text(
-      `NINA : ${this.nina || 'default'} ; RCCM : ${this.rccm || 'default'} ; NIF : ${
-        this.nif || 'default'
-      } ; Banque : ${this.banque || 'default'}`,
-      105,
-      footerYStart + 5,
-      { align: 'center' }
-    );
+let adresseLine = '';
+if (adresse && siege && pays) {
+  adresseLine = `Adresse : ${adresse} / ${siege}-${pays}`;
+} else if (adresse && siege) {
+  adresseLine = `Adresse : ${adresse} / ${siege}`;
+} else if (adresse && pays) {
+  adresseLine = `Adresse : ${adresse} / ${pays}`;
+} else if (siege && pays) {
+  adresseLine = `Adresse : ${siege} / ${pays}`;
+} else if (adresse) {
+  adresseLine = `Adresse : ${adresse}`;
+} else if (siege) {
+  adresseLine = `Adresse : ${siege}`;
+} else if (pays) {
+  adresseLine = `Adresse : ${pays}`;
+}
 
-    doc.text(
-      `Adresse : ${this.adresse || 'default'} / ${this.siege || 'default'} - ${
-        this.pays || 'default'
-      }`,
-      105,
-      footerYStart + 10,
-      { align: 'center' }
-    );
+if (adresseLine) {
+  doc.text(adresseLine, 105, currentFooterY, { align: 'center' });
+  currentFooterY += 4;
+}
 
-    doc.setTextColor(0);
+doc.setTextColor(0);
 
 
     const pdfBlob = doc.output('blob');
@@ -1568,10 +1601,11 @@ get labelNom(): string {
         this.siteWeb = entreprise.siteWeb;
         this.signataire = entreprise.signataire;
         this.signataireNom = entreprise.signataireNom;
+        this.tauxTva = entreprise.tauxTva;
+
 
         this.logo = 'http://localhost:8080' + entreprise.logo;
 
-          // ✅ Appelle ici loadUsersOfEntreprise une fois qu'on a l'ID
       if (this.userEntrepriseId) {
         this.loadUsersOfEntreprise(this.userEntrepriseId);
       } else {

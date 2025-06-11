@@ -75,7 +75,7 @@
                         </tr>
                         <tr *ngIf="f.tva">
                             <td colspan="4">TVA ({{ tauxTva * 100 | number:'1.0-2' }} %)</td>
-                            <td>{{ ((f.totalHT - (f.totalHT * (f.remise ?? 0) / 100)) * 0.18) | customNumber }}</td>
+                            <td>{{ ((f.totalHT - (f.totalHT * (f.remise ?? 0) / 100)) * tauxTva) | customNumber }}</td>
                         </tr>
                         <tr *ngIf="f.tva">
                             <td colspan="4">Montant TTC</td>
