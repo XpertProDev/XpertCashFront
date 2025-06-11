@@ -1,6 +1,6 @@
-<div>
+<!-- <div>
     {{facture | json}}
-</div>
+</div> -->
 <div class="container_global" *ngIf="facture as f; else noData">
   <div class="information_cadre" style="position: relative;">
     <div class="cadre_retour">
@@ -40,7 +40,8 @@
 
         <!-- Date de création -->
         <div class="date">
-          <p>{{ siege }}, le {{ f.dateCreation | date:'dd MMMM yyyy' }}</p>
+          <!-- <p>{{ siege }}, le {{ f.dateCreation | date:'dd MMMM yyyy' }}</p> -->
+          <p>{{ siege }}, le {{ f.dateCreation | date:'dd-MM-yyyy':'fr_FR' }}</p>
         </div>
 
         <!-- Client -->

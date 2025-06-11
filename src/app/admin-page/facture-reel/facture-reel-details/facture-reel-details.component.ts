@@ -64,6 +64,7 @@ export class FactureReelDetailsComponent implements OnInit {
   loadFactureReelle(id: number): void {
   this.factureService.getFactureReelleById(id).subscribe({
     next: (data: FactureReelle) => {
+      console.log('Type de dateCreation :', typeof data.dateCreation, data.dateCreation);
       // sum est un nombre, ligne est une LigneFacture
       data.totalHT = data.lignesFacture
         .reduce((sum: number, ligne: LigneFactureDTO) => sum + ligne.montantTotal, 0);
