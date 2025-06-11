@@ -46,7 +46,7 @@
         <!-- Client -->
         <div class="droit" *ngIf="f.client">
           <h4>Client :</h4>
-          <p>{{ f.client.nom }}</p>
+          <p>{{ f.client.nomComplet }}</p>
         </div>
 
         <!-- Entreprise cliente éventuelle -->
@@ -58,7 +58,7 @@
         <!-- Description / Objet -->
         <div class="object">
           <h4>Objet :</h4>
-          <p>{{ facture.description }}</p>
+          <p>{{ f.description }}</p>
         </div>
 
         <!-- Tableau des lignes de facture -->
@@ -74,11 +74,11 @@
           </thead>
           <tbody>
             <tr *ngFor="let ligne of f.lignesFacture">
-              <td class="td_left">{{ ligne.produitNom || ligne.produit?.nom }}</td>
+              <td class="td_left">{{ ligne.produitNom }}</td>
               <td class="td_left">{{ ligne.ligneDescription }}</td>
               <td>{{ ligne.prixUnitaire | customNumber }}</td>
               <td>{{ ligne.quantite }}</td>
-              <td>{{ (ligne.prixUnitaire * ligne.quantite) | customNumber }}</td>
+              <td>{{ ligne.montantTotal | customNumber }}</td>
             </tr>
           </tbody>
           <tfoot>
@@ -88,26 +88,23 @@
             </tr>
             <tr *ngIf="f.remise && f.remise > 0">
               <td colspan="4">
-                Remise {{facture.tauxRemise}}%
+                Remise {{ f.tauxRemise | number:'1.0-2' }}%
             </td>
               <td>
                 <!-- {{ ((f.totalHT * f.remise / 100) | customNumber) }} -->
-              {{ facture.remise }}
+              -{{ f.remise | customNumber }}
             </td>
             </tr>
             <tr *ngIf="f.remise && f.remise > 0">
               <td colspan="4">Montant commercial</td>
               <td>
-                {{ ((f.totalHT - (f.totalHT * f.remise / 100)) | customNumber) }}
+                {{ (f.totalHT - f.remise) | customNumber }}
               </td>
             </tr>
             <tr *ngIf="f.tva">
               <td colspan="4">TVA ({{ (tauxTva ?? 0) * 100 | number:'1.0-2' }} %)</td>
               <td>
-                {{
-                  ((f.totalHT - (f.totalHT * (f.remise ?? 0) / 100)) * (tauxTva ?? 0))
-                  | number:'1.0-2'
-                }}
+                {{ totalTVA | customNumber }}
               </td>
             </tr>
             <tr *ngIf="f.tva">

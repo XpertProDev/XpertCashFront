@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
+import { FactureReelle, LigneFactureDTO } from '../../MODELS/FactureReelle.model';
 
 @Component({
   selector: 'app-facture-reel-details',
@@ -14,7 +15,7 @@ import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
   styleUrl: './facture-reel-details.component.scss'
 })
 export class FactureReelDetailsComponent implements OnInit {
-  facture: any | null = null;
+  // facture: any | null = null;
   
   nom: string | null = null;
   siege!: string;
@@ -32,6 +33,10 @@ export class FactureReelDetailsComponent implements OnInit {
   signataire!: string;
   signataireNom!: string;
   tauxTva?: number | null;
+
+  facture: FactureReelle | null = null;
+  totalTVA: number = 0;
+  montantCommercial: number = 0;
   
   constructor(
     private router: Router,
@@ -57,21 +62,30 @@ export class FactureReelDetailsComponent implements OnInit {
   }
 
   loadFactureReelle(id: number): void {
-    this.factureService.getFactureReelleById(id).subscribe({
-      next: (data) => {
-        console.log('Facture reçue du backend :', data);
-        this.facture = data;
-        // Si vous souhaitez extraire le taux de TVA depuis l’entreprise
-        // (par exemple pour l’afficher dans le tableau), vous pouvez l’assigner ici :
-        // this.tauxTva = data.tva ? this.tauxTva : null;
-      },
-      error: (err) => {
-        console.error('Erreur lors de la récupération de la facture :', err);
-        // Rediriger ou afficher un message à l’utilisateur
-        this.router.navigate(['/facture-reel']);
+  this.factureService.getFactureReelleById(id).subscribe({
+    next: (data: FactureReelle) => {
+      // sum est un nombre, ligne est une LigneFacture
+      data.totalHT = data.lignesFacture
+        .reduce((sum: number, ligne: LigneFactureDTO) => sum + ligne.montantTotal, 0);
+
+      data.tauxRemise = data.remise > 0
+        ? (data.remise / data.totalHT!) * 100
+        : 0;
+
+      if (data.tva) {
+        this.totalTVA = (data.totalHT! - data.remise) * (this.tauxTva ?? 0);
+        this.montantCommercial = data.totalHT! - data.remise;
       }
-    });
-  }
+
+      this.facture = data;
+    },
+    error: (err) => {
+      console.error('Erreur', err);
+      this.router.navigate(['/facture-reel']);
+    }
+  });
+}
+
 
   getUserEntrepriseInfo(): void {
     this.entrepriseService.getEntrepriseInfo().subscribe({

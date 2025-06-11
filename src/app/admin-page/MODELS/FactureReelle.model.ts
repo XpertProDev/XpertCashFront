@@ -8,7 +8,7 @@ export interface UserRequest {
 export interface EntrepriseClientDTO {
   id: number;
   nom: string;
-  // … autres champs (email, tél, …) si vous les renvoyez
+  
 }
 
 export interface ClientDTO {
@@ -19,28 +19,26 @@ export interface ClientDTO {
 
 export interface LigneFactureDTO {
   id: number;
-  produit: {
-    id: number;
-    nom: string;
-  };
+  produitNom: string; // Changé (était 'produit')
   ligneDescription: string;
   prixUnitaire: number;
   quantite: number;
-  // => vous pouvez ajouter d’autres champs si vous en renvoyez d’autres
+  montantTotal: number; // Ajouté
 }
 
 export interface FactureReelle {
   id: number;
   numeroFacture: string;
-  dateCreation: string;      // JSON envoie la date sous forme de string ISO
-  totalHT: number;           // total hors taxe
-  remise: number;
-  tva: boolean;
+  dateCreation: string;
+  description: string; // Ajouté
+  totalHT: number; // Ajouté
   totalFacture: number;
-  statutPaiement: string;    // Enum StatutPaiementFacture (en string)
+  remise: number;
+  tauxRemise?: number; // Ajouté
+  tva: boolean;
+  statutPaiement: string;
   utilisateur: UserRequest | null;
   entrepriseClient: EntrepriseClientDTO | null;
   client: ClientDTO | null;
   lignesFacture: LigneFactureDTO[];
-  // … vous pouvez l’enrichir si le DTO a plus de champs
 }
