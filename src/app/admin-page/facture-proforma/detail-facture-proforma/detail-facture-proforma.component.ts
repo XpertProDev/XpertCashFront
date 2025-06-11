@@ -1310,23 +1310,31 @@ get labelNom(): string {
     /*************** ——— 3. INFOS CLIENT & OBJET ——— ****************/
     const clientObjectBlockY = titleY + 20;
 
-    const label = 'Client :';
-    const labelX = 15;
-    let currentY = clientObjectBlockY;
+  const labelX = 15;
+  let currentY = clientObjectBlockY;
+
+  if (this.factureProForma) {
+    const isClient = !!this.factureProForma.client;
+    const isEntreprise = !!this.factureProForma.entrepriseClient;
+
+    const label = isClient ? 'Client :' : isEntreprise ? 'Entreprise :' : 'Client :';
+    const nom = isClient
+      ? this.factureProForma.client?.nomComplet ?? 'Non spécifié'
+      : isEntreprise
+        ? this.factureProForma.entrepriseClient?.nom ?? 'Non spécifié'
+        : 'Non spécifié';
 
     doc.setFont('helvetica', 'bold');
     doc.text(label, labelX, currentY);
 
-
-
     doc.setFont('helvetica', 'normal');
     doc.text(
-      this.factureProForma.client?.nomComplet ||
-        this.factureProForma.entrepriseClient?.nom ||
-        'Non spécifié',
+      nom,
       labelX + doc.getTextWidth(label) + 2,
       currentY
     );
+  }
+
 
     currentY += 7;
 
@@ -1450,14 +1458,14 @@ get labelNom(): string {
 
     const libelle = 'Arrêté la présente facture à la somme de : ';
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.4);
+    doc.setFontSize(8);
     doc.text(libelle, 15, y_amount_in_words);
 
     const libelleWidth = doc.getTextWidth(libelle);
     const startX = 15 + libelleWidth;
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.4);
+    doc.setFontSize(9);
 
     // Amount in words is always the final TTC amount
     const amountForWords = totalTTC;
