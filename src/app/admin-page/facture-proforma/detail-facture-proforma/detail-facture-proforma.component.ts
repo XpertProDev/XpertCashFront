@@ -107,6 +107,9 @@ export class DetailFactureProformaComponent implements OnInit {
   emailUtilisateur: string = '';
   facture: FactureProForma | null = null;
   nom: string | null = null;
+  role: string | null = null;
+  entrprisePhone: string | null = null;
+
   siege!: string;
   email: string = '';
   logo: string | null = null; 
@@ -370,10 +373,9 @@ export class DetailFactureProformaComponent implements OnInit {
         this.userEntrepriseId = user.entrepriseId;
         this.siege = user.siege;
         this.email = user.email;
+        this.nom = user.nomComplet;
+        this.role = user.roleType
        
-
-
-
         if (this.email && !this.emailCcList.includes(this.email)) {
             this.emailCcList.push(this.email);
           }
@@ -1197,8 +1199,8 @@ get labelNom(): string {
   onMethodeEnvoiChange() {
     if (this.methodeEnvoi === 'physique') {
       // Réinitialiser les champs email si besoin
-      this.emailDestinatairesList = [];
-      this.currentEmail = '';
+      // this.emailDestinatairesList = [];
+      // this.currentEmail = '';
     }
   }
 
@@ -1283,6 +1285,7 @@ get labelNom(): string {
     const titleY = sepY + gapBelowSep;
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
+    doc.setTextColor(85, 85, 85);
     const numeroFacture = this.factureProForma.numeroFacture || 'XXX‑XX‑XXXX';
     doc.text(`FACTURE PROFORMA ${numeroFacture}`, 105, titleY, { align: 'center' });
 
@@ -1454,7 +1457,7 @@ get labelNom(): string {
     /*************** ——— 5. MONTANT EN LETTRES ——— ****************/
 
     let y_after_table = (doc as any).lastAutoTable.finalY;
-    let y_amount_in_words = y_after_table + 18; // Add space below table
+    let y_amount_in_words = y_after_table + 18; 
 
     const libelle = 'Arrêté la présente facture à la somme de : ';
     doc.setFont('helvetica', 'bold');

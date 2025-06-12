@@ -98,7 +98,9 @@ export class StocksComponent implements OnInit {
     });
     const filtered = sortedProducts.filter(product =>
       (product.nom && product.nom.toLowerCase().includes(this.searchText.toLowerCase())) ||
-      (product.codeGenerique && product.codeGenerique.toLowerCase().includes(this.searchText.toLowerCase()))
+      (product.codeGenerique && product.codeGenerique.toLowerCase().includes(this.searchText.toLowerCase())) ||
+      (product.codeBare && product.codeBare.toLowerCase().includes(this.searchText.toLowerCase())) 
+
     );
     const startIndex = this.currentPage * this.pageSize;
     return filtered.slice(startIndex, startIndex + this.pageSize);
