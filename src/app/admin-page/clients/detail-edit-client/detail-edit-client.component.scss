@@ -1,16 +1,65 @@
 .container_global {
-    margin-right: 15%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  gap: 15px;
 }
 
-.title {
-    font-size: 18px;
+.container_formulaire {
+  display: grid;
+  grid-template-rows: auto 1fr;  /* rangée 1 = hauteur automatique (le titre), rangée 2 = reste de la hauteur */
+  height: 100%;                   /* occupe toute la hauteur disponible */
+}
+
+.content_formulaire {
+  width: 100%;
+  // height: 50vh;
+  max-height: 57vh;
+  overflow-y: auto;
+  white-space: nowrap;
+  // background-color: red;
+  border: 1px solid #ebebeb;
+  box-shadow: 4px 4px 30px rgba(0, 0, 0, .2);
+  padding: 0px;
+  // overflow: scroll;
+
+  &::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
   }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    // background: transparent;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.Title {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  font-size: 14px;
+  padding: 6px 0 0 10px;
+  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+}
+
+.form_left_right {
+  overflow-y: auto;
+  /* facultatif : si vous voulez un petit padding pour le scroll */
+  padding-right: 8px;
+}
 
   /* formulaire */
   
   .champ_input {
     position: relative;
-    margin-bottom: 30px;
+    margin-bottom: 5px;
   }
   
   .champ_input_list_stock {
@@ -32,13 +81,14 @@
   }
   
   .Title h3 {
-    font-size: 18px;
+    font-size: 14px;
   }
+
   
   .input_focus {
     width: 100%;
     //min-width: 250px;
-    height: 49px;
+    height: 40px;
     outline: none;
     border-bottom: 1px solid rgb(53, 50, 50);
     border-top: none;
@@ -46,7 +96,7 @@
     border-right: none;
     margin: 10px 0 0;
     transition: all 0.3s;
-    font-size: 14px;
+    font-size: 10px;
     //padding-left: 10px;
     background: none;
     color: #000000;
@@ -75,7 +125,7 @@
     left: 0;
     transition: all 0.3s ease-in-out;
     background: none;
-    font-size: 11px;
+    font-size: 10px;
     padding: 0;
   }
   
@@ -156,12 +206,12 @@
   }
   
   .info_titre_input {
-    padding: 20px; 
+    padding: 0 12px; 
     // padding-bottom: 10px;
   }
 
   .info_titre_input h4 {
-    font-size: 16px;
+    font-size: 14px;
     margin-bottom: 10px;
     letter-spacing: 0.60px;
   }
@@ -198,6 +248,7 @@
   
   .champ_input_inventaire p {
     margin: 0;
+    font-size: 10px;
   }
 
    // <!-- Les information des magasin  -->
@@ -207,15 +258,16 @@
     background-color: #fff;
     box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.108);
     border-radius: 5px;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    padding: 10px 0;
   }
 
   .double_input {
     display: flex; 
     align-items: center;
     gap: 20px;
-    margin-top: 30px;
+    margin-top: -20px;
   }
 
 /* From Uiverse.io by Yaya12085 */ 
@@ -320,12 +372,14 @@
     display: flex;
     align-items: center;
     justify-content: end;
-    gap: 20px;
+    gap: 8px;
   }
 
   // button annuler
-.btn_annuler .btn_cancel {
-    padding: 8px 30px;
+  .btn_annuler .btn_cancel {
+    padding: 6px 20px;
+    font-size: 10px;
+    letter-spacing: 0.6px;
     border: none;
     border-radius: 5px;
     background-color: #ff0000;
@@ -340,7 +394,9 @@
 
 // button ajouter 
 .btn_ajouter .btn_save {
-    padding: 8px 30px;
+    padding: 6px 20px;
+    font-size: 10px;
+    letter-spacing: 0.6px;
     border: none;
     border-radius: 5px;
     background-color: #0672E4;
@@ -370,8 +426,8 @@
 .switch {
   position: relative;
   display: inline-block;
-  width: 50px;
-  height: 24px;
+  width: 30px;
+  height: 15px;
 }
 
 /* Masquer l'input checkbox original */
@@ -385,21 +441,34 @@
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0; 
+  left: 2px; 
+  right: 0; 
+  bottom: 0;
   background-color: #ccc;
   transition: .4s;
   border-radius: 24px;
 }
 
 .slider:before {
+  // position: absolute;
+  // content: "";
+  // height: 18px; 
+  // width: 18px;
+  // left: 3px; 
+  // bottom: 3px;
+  // background-color: white;
+  // transition: .4s;
+  // border-radius: 50%;
+
   position: absolute;
   content: "";
-  height: 18px; 
-  width: 18px;
-  left: 3px; 
-  bottom: 3px;
+  height: 11px;
+  width: 11px;
+  left: 2px;
+  bottom: 2px;
   background-color: white;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 50%;
 }
 
@@ -409,7 +478,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-  transform: translateX(26px);
+  transform: translateX(13px);
 }
 
 .input_cursor {

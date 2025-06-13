@@ -13,9 +13,9 @@
               <div class="information_cadre">
                 <div class="info_titre_input">
                   
-                  <div class="double_input">
+                  <div class="champ_grid">
                     <!-- Nom et prenom -->
-                    <div class="champ_input champ_input2">
+                    <div class="champ_input">
                       <input type="text" class="input_focus"
                                 id="nomComplet" formControlName="nomComplet"
                                 name="nomComplet"
@@ -27,7 +27,7 @@
                       </div>
                     </div>
                     <!-- Email -->
-                    <div class="champ_input champ_input2">
+                    <div class="champ_input">
                       <input type="email" class="input_focus"
                                 id="email" formControlName="email"
                                 name="email"
@@ -40,10 +40,10 @@
 
                   </div>
 
-                  <div class="double_input">
+                  <div class="champ_grid">
                    
                     <!-- Adress -->
-                    <div class="champ_input champ_input2">
+                    <div class="champ_input">
                       <input class="input_focus"
                                 id="adresse" formControlName="adresse"
                                 name="adresse"
@@ -52,7 +52,7 @@
                     </div>
  
                    <!-- Poste -->
-                   <div class="champ_input champ_input2">
+                   <div class="champ_input">
                      <input class="input_focus"
                                id="poste" formControlName="poste"
                                name="poste"
@@ -201,6 +201,30 @@
               </div>
   
             </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- // Cleint and facture  -->
+    <div class="content_formulaire">
+      <div class="modal-body">
+        <form [formGroup]="modifierClientForm" class="container_formulaire">
+          <!-- Titre d'ajout de produits -->
+          <div class="Title">
+            <h3>Clients lier au facture</h3>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- // Cleint and facture  -->
+    <div class="content_formulaire">
+      <div class="modal-body">
+        <form [formGroup]="modifierClientForm" class="container_formulaire">
+          <!-- Titre d'ajout de produits -->
+          <div class="Title">
+            <h3>Autres</h3>
           </div>
         </form>
       </div>
