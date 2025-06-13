@@ -229,6 +229,30 @@ export class FactureProFormaService {
   );
 }
 
+  getFacturesByClient(clientId?: number, entrepriseClientId?: number): Observable<any[]> {
+    const token = localStorage.getItem('authToken');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    let params = new HttpParams();
+    
+    if (clientId) {
+      params = params.set('clientId', clientId.toString());
+    }
+    
+    if (entrepriseClientId) {
+      params = params.set('entrepriseClientId', entrepriseClientId.toString());
+    }
+
+    return this.http.get<any[]>(`${this.apiUrl}/factures/client`, { headers, params }).pipe(
+      catchError(error => {
+        console.error('Erreur dans getFacturesByClient:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
  
 }
 

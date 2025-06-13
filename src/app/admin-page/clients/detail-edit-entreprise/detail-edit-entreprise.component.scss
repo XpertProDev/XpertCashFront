@@ -1,18 +1,65 @@
 .container_global {
   display: grid;
-  grid-template-columns: 72% 28%;
-  position: relative;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  gap: 15px;
 }
 
-.title {
-    font-size: 18px;
+.container_formulaire {
+  display: grid;
+  grid-template-rows: auto 1fr;  /* rangée 1 = hauteur automatique (le titre), rangée 2 = reste de la hauteur */
+  height: 100%;                   /* occupe toute la hauteur disponible */
+}
+
+.content_formulaire {
+  width: 100%;
+  // height: 50vh;
+  max-height: 57vh;
+  overflow-y: auto;
+  white-space: nowrap;
+  // background-color: red;
+  border: 1px solid #ebebeb;
+  box-shadow: 4px 4px 30px rgba(0, 0, 0, .2);
+  padding: 0px;
+  // overflow: scroll;
+
+  &::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    // background: transparent;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.Title {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  font-size: 14px;
+  padding: 6px 0 0 10px;
+  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+}
+
+.form_left_right {
+  overflow-y: auto;
+  /* facultatif : si vous voulez un petit padding pour le scroll */
+  padding-right: 8px;
 }
 
   /* formulaire */
   
   .champ_input {
     position: relative;
-    margin-bottom: 30px;
+    margin-bottom: 5px;
   }
   
   .champ_input_list_stock {
@@ -34,13 +81,14 @@
   }
   
   .Title h3 {
-    font-size: 18px;
+    font-size: 14px;
   }
+
   
   .input_focus {
     width: 100%;
-    // min-width: 250px;
-    height: 49px;
+    //min-width: 250px;
+    height: 40px;
     outline: none;
     border-bottom: 1px solid rgb(53, 50, 50);
     border-top: none;
@@ -48,10 +96,10 @@
     border-right: none;
     margin: 10px 0 0;
     transition: all 0.3s;
-    font-size: 14px;
+    font-size: 10px;
     //padding-left: 10px;
     background: none;
-    color: #000;
+    color: #000000;
   }
   
   .champ_input .label {
@@ -60,7 +108,6 @@
     left: 4px;
     pointer-events: none;
     color: #999;
-    // font-style: italic;
   }
   
   .input_focus:hover {
@@ -78,7 +125,7 @@
     left: 0;
     transition: all 0.3s ease-in-out;
     background: none;
-    font-size: 11px;
+    font-size: 10px;
     padding: 0;
   }
   
@@ -95,7 +142,7 @@
   
   .input_focus2 {
     width: 100%;
-    // min-width: 250px;
+    min-width: 250px;
     height: 57px;
     outline: none;
     border-top: none;
@@ -106,7 +153,7 @@
     font-size: 14px;
     padding-left: 10px;
     background: none;
-    color: #777474;
+    color: #000000;
     border-radius: 5px;
     padding-top: 10px;
     border-bottom: 1px solid rgb(53, 50, 50);
@@ -120,13 +167,13 @@
     border-right: none;
   }
   
-  // .champ_input2 .label {
-  //   position: absolute;
-  //   top: 22px;
-  //   left: 0px;
-  //   pointer-events: none;
-  //   color: rgb(66, 56, 56);
-  // }
+  .champ_input2 .label {
+    position: absolute;
+    top: 22px;
+    left: 0px;
+    pointer-events: none;
+    color: #999;
+  }
   
   
   .champ_input .labelCategory {
@@ -159,12 +206,12 @@
   }
   
   .info_titre_input {
-    padding: 20px; 
+    padding: 0 12px; 
     // padding-bottom: 10px;
   }
 
   .info_titre_input h4 {
-    font-size: 16px;
+    font-size: 14px;
     margin-bottom: 10px;
     letter-spacing: 0.60px;
   }
@@ -201,6 +248,7 @@
   
   .champ_input_inventaire p {
     margin: 0;
+    font-size: 10px;
   }
 
    // <!-- Les information des magasin  -->
@@ -210,33 +258,16 @@
     background-color: #fff;
     box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.108);
     border-radius: 5px;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    padding: 10px 0;
   }
 
   .double_input {
     display: flex; 
     align-items: center;
     gap: 20px;
-    margin-top: 30px;
-  }
-
-  .champ_grid_double {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: 1fr;
-    grid-column-gap: 0px;
-    grid-row-gap: 0px;
-    gap: 15px;
-  }
-
-  .champ_grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: 1fr;
-    grid-column-gap: 0px;
-    grid-row-gap: 0px;
-    gap: 15px;
+    margin-top: -20px;
   }
 
 /* From Uiverse.io by Yaya12085 */ 
@@ -341,12 +372,14 @@
     display: flex;
     align-items: center;
     justify-content: end;
-    gap: 20px;
+    gap: 8px;
   }
 
   // button annuler
-.btn_annuler .btn_cancel {
-    padding: 8px 30px;
+  .btn_annuler .btn_cancel {
+    padding: 6px 20px;
+    font-size: 10px;
+    letter-spacing: 0.6px;
     border: none;
     border-radius: 5px;
     background-color: #ff0000;
@@ -361,7 +394,9 @@
 
 // button ajouter 
 .btn_ajouter .btn_save {
-    padding: 8px 30px;
+    padding: 6px 20px;
+    font-size: 10px;
+    letter-spacing: 0.6px;
     border: none;
     border-radius: 5px;
     background-color: #0672E4;
@@ -391,8 +426,8 @@
 .switch {
   position: relative;
   display: inline-block;
-  width: 50px;
-  height: 24px;
+  width: 30px;
+  height: 15px;
 }
 
 /* Masquer l'input checkbox original */
@@ -406,21 +441,34 @@
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0; 
+  left: 2px; 
+  right: 0; 
+  bottom: 0;
   background-color: #ccc;
   transition: .4s;
   border-radius: 24px;
 }
 
 .slider:before {
+  // position: absolute;
+  // content: "";
+  // height: 18px; 
+  // width: 18px;
+  // left: 3px; 
+  // bottom: 3px;
+  // background-color: white;
+  // transition: .4s;
+  // border-radius: 50%;
+
   position: absolute;
   content: "";
-  height: 18px; 
-  width: 18px;
-  left: 3px; 
-  bottom: 3px;
+  height: 11px;
+  width: 11px;
+  left: 2px;
+  bottom: 2px;
   background-color: white;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 50%;
 }
 
@@ -430,7 +478,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-  transform: translateX(26px);
+  transform: translateX(13px);
 }
 
 .input_cursor {
@@ -572,4 +620,151 @@ input:checked + .slider:before {
   color: #ff0000;
   font-weight: bold;
   position: relative;
+}
+
+.grid_colonne {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  gap: 20px;
+}
+  
+.div1 { grid-area: 1 / 1 / 2 / 2; }
+.div2 { grid-area: 1 / 2 / 2 / 3; }
+.div3 { grid-area: 1 / 3 / 2 / 4; }
+
+/* Styles communs pour les deux composants */
+.table-container {
+  margin: 0px;
+  border: 1px solid #e0e0e0;
+  // border-radius: 8px;
+  overflow: auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+
+  &::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    // background: transparent;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  tbody tr {
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: #f8f9fa;
+    }
+  }
+  
+  tfoot {
+    background-color: #f1f3f5;
+    
+    td {
+      font-weight: 600;
+      color: #212529;
+    }
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-bold {
+  font-weight: 600;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 9px;
+  font-weight: 500;
+  
+  &.draft {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+  
+  &.sent {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  &.approved {
+    background-color: #c5c5e2;
+    color: #0000ff;
+  }
+  
+  &.valid {
+    background-color: #d5e6d5;
+    color: #008000;
+  }
+}
+
+.loading-indicator {
+  padding: 20px;
+  text-align: center;
+  color: #6c757d;
+  
+  .spin {
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+  }
+}
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6c757d;
+  
+  i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #ced4da;
+  }
+  
+  p {
+    margin: 0;
+  }
+}
+
+.error-message {
+  padding: 20px;
+  text-align: center;
+  color: #dc3545;
+  background-color: #fff8f8;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
