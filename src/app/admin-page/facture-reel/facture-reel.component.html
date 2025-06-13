@@ -67,7 +67,7 @@
           <img [src]="getImageSrc(facture.statutPaiement)" alt="Étiquette">
           <div class="etat" [ngClass]="getStatutClass(facture.statutPaiement)">
             <p class="tilte_etat">- État -</p>
-            <span>{{ facture.statutPaiement }}</span>
+            <span>{{ getLibelleStatut(facture.statutPaiement) }}</span>
           </div>
         </div>
       </div>

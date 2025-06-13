@@ -111,8 +111,8 @@
                     <div class="info_titre_input">
                         <div class="champ_input">
                             <!-- <input [value]="factureProForma.description" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object"> -->
-                            <textarea [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus2" required placeholder="Saisis l'object"></textarea>
-                            <label for="object" class="label"> Object </label>
+                            <textarea [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus2" required placeholder="Saisis l'objet"></textarea>
+                            <label for="object" class="label"> Objet </label>
                         </div>
                     </div>
                 </div>
@@ -121,7 +121,7 @@
                 <div class="information_cadre">
                     <div class="info_titre_input">
                         <div *ngIf="factureProForma.client">
-                            <h5>Client</h5>
+                            <h5>Doit</h5>
                             <!-- // Nom complet et email  -->
                             <!-- <div>
                                 {{factureProForma | json}}
