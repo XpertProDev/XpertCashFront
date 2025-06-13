@@ -107,6 +107,9 @@ export class DetailFactureProformaComponent implements OnInit {
   emailUtilisateur: string = '';
   facture: FactureProForma | null = null;
   nom: string | null = null;
+  role: string | null = null;
+  entrprisePhone: string | null = null;
+
   siege!: string;
   email: string = '';
   logo: string | null = null; 
@@ -164,6 +167,7 @@ export class DetailFactureProformaComponent implements OnInit {
     this.getUserEntrepriseInfo(); 
     this.getProduits();
     this.getUserInfo();
+    this.setDefaultDateRelance();
     
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
@@ -370,10 +374,9 @@ export class DetailFactureProformaComponent implements OnInit {
         this.userEntrepriseId = user.entrepriseId;
         this.siege = user.siege;
         this.email = user.email;
+        this.nom = user.nomComplet;
+        this.role = user.roleType
        
-
-
-
         if (this.email && !this.emailCcList.includes(this.email)) {
             this.emailCcList.push(this.email);
           }
@@ -1197,8 +1200,8 @@ get labelNom(): string {
   onMethodeEnvoiChange() {
     if (this.methodeEnvoi === 'physique') {
       // Réinitialiser les champs email si besoin
-      this.emailDestinatairesList = [];
-      this.currentEmail = '';
+      // this.emailDestinatairesList = [];
+      // this.currentEmail = '';
     }
   }
 
@@ -1283,13 +1286,14 @@ get labelNom(): string {
     const titleY = sepY + gapBelowSep;
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
+    doc.setTextColor(85, 85, 85);
     const numeroFacture = this.factureProForma.numeroFacture || 'XXX‑XX‑XXXX';
     doc.text(`FACTURE PROFORMA ${numeroFacture}`, 105, titleY, { align: 'center' });
 
     doc.setDrawColor(0);
     const titleLineWidth = 90;
     const titleLineX = 105 - titleLineWidth / 2;
-    doc.line(titleLineX, titleY + 1.5, titleLineX + titleLineWidth, titleY + 1.5);
+    // doc.line(titleLineX, titleY + 1.5, titleLineX + titleLineWidth, titleY + 1.5);
 
 
     /*************** ——— 3. DATE & LIEU ——— ****************/
@@ -1310,27 +1314,35 @@ get labelNom(): string {
     /*************** ——— 3. INFOS CLIENT & OBJET ——— ****************/
     const clientObjectBlockY = titleY + 20;
 
-    const label = 'Client :';
-    const labelX = 15;
-    let currentY = clientObjectBlockY;
+  const labelX = 15;
+  let currentY = clientObjectBlockY;
+
+  if (this.factureProForma) {
+    const isClient = !!this.factureProForma.client;
+    const isEntreprise = !!this.factureProForma.entrepriseClient;
+
+    const label = isClient ? 'Doit :' : isEntreprise ? 'Doit :' : 'Doit :';
+    const nom = isClient
+      ? this.factureProForma.client?.nomComplet ?? 'Non spécifié'
+      : isEntreprise
+        ? this.factureProForma.entrepriseClient?.nom ?? 'Non spécifié'
+        : 'Non spécifié';
 
     doc.setFont('helvetica', 'bold');
     doc.text(label, labelX, currentY);
 
-
-
     doc.setFont('helvetica', 'normal');
     doc.text(
-      this.factureProForma.client?.nomComplet ||
-        this.factureProForma.entrepriseClient?.nom ||
-        'Non spécifié',
+      nom,
       labelX + doc.getTextWidth(label) + 2,
       currentY
     );
+  }
+
 
     currentY += 7;
 
-    const objectLabel = 'Object :';
+    const objectLabel = 'Objet :';
 
     doc.setFont('helvetica', 'bold');
     doc.text(objectLabel, labelX, currentY);
@@ -1446,18 +1458,18 @@ get labelNom(): string {
     /*************** ——— 5. MONTANT EN LETTRES ——— ****************/
 
     let y_after_table = (doc as any).lastAutoTable.finalY;
-    let y_amount_in_words = y_after_table + 18; // Add space below table
+    let y_amount_in_words = y_after_table + 18; 
 
     const libelle = 'Arrêté la présente facture à la somme de : ';
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.4);
+    doc.setFontSize(8);
     doc.text(libelle, 15, y_amount_in_words);
 
     const libelleWidth = doc.getTextWidth(libelle);
     const startX = 15 + libelleWidth;
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.4);
+    doc.setFontSize(9);
 
     // Amount in words is always the final TTC amount
     const amountForWords = totalTTC;
@@ -1819,6 +1831,17 @@ confirmDelete(index: number) {
 cancelDelete() {
   this.confirmDeleteIndex = null;
   this.activeMenuIndex = null;
+}
+
+private setDefaultDateRelance(): void {
+  const now = new Date();
+  const in72h = new Date(now.getTime() + 72 * 60 * 60 * 1000);
+  this.dateRelance = this.formatDateForInput(in72h);
+}
+
+private formatDateForInput(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 
