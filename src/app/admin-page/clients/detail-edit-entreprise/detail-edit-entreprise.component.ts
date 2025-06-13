@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { Router, ActivatedRoute } from '@angular/router';
 import { EntrepriseClient } from '../../MODELS/entreprise-clients-model';
 import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-service';
+import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
+import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 
 @Component({
   selector: 'app-detail-edit-entreprise',
@@ -12,6 +14,7 @@ import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-servi
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
+    CustomNumberPipe
   ],
   templateUrl: './detail-edit-entreprise.component.html',
   styleUrl: './detail-edit-entreprise.component.scss'
@@ -24,6 +27,9 @@ export class DetailEditEntrepriseComponent {
   entrepriseData!: EntrepriseClient;
   indicatif: string = '';
   maxPhoneLength: number = 0;
+  facturesEntreprise: any[] = [];
+  loadingFactures = false;
+  errorFactures = '';
 
   // Définition des indicatifs par pays
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
@@ -36,7 +42,8 @@ export class DetailEditEntrepriseComponent {
     private router: Router,
     private route: ActivatedRoute,
     private fb: FormBuilder,
-    private entrepriseService: EntrepriseClientService
+    private entrepriseService: EntrepriseClientService,
+    private factureService: FactureProFormaService,
   ) {}
 
  ngOnInit() {
@@ -44,6 +51,21 @@ export class DetailEditEntrepriseComponent {
     this.route.params.subscribe(params => {
       this.entrepriseId = +params['id'];
       this.loadEntrepriseData();
+    });
+  }
+
+  private loadFacturesEntreprise() {
+    this.loadingFactures = true;
+    this.factureService.getFacturesByClient(undefined, this.entrepriseId).subscribe({
+      next: (factures) => {
+        this.facturesEntreprise = factures;
+        this.loadingFactures = false;
+      },
+      error: (err) => {
+        this.errorFactures = 'Erreur lors du chargement des factures';
+        this.loadingFactures = false;
+        console.error(err);
+      }
     });
   }
 
@@ -68,6 +90,8 @@ export class DetailEditEntrepriseComponent {
           secteur: data.secteur
         });
 
+        this.loadFacturesEntreprise();
+
         // Initialiser l'indicatif si pays existant
         if (data.pays && this.paysIndicatifs[data.pays]) {
           this.indicatif = this.paysIndicatifs[data.pays].indicatif;
@@ -80,6 +104,22 @@ export class DetailEditEntrepriseComponent {
         setTimeout(() => this.router.navigate(['/clients']), 3000);
       }
     });
+  }
+
+  // Calcul du total des factures
+  // getTotalFactures(): number {
+  //   return this.facturesEntreprise.reduce((sum: number, facture: any) => 
+  //     sum + facture.totalFacture, 0
+  //   );
+  // }
+
+  getTotalFactures(): number {
+    const total = this.facturesEntreprise.reduce((sum: number, facture: any) => 
+      sum + facture.totalFacture, 0
+    );
+    
+    // Arrondir à l'entier le plus proche
+    return Math.round(total);
   }
 
   onPaysChange(event: any): void {

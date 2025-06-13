@@ -161,15 +161,68 @@
       </div>
     </div>
 
-    <!-- // Cleint and facture  -->
+    <!-- Remplacer la section "Entreprise lier au facture" par -->
     <div class="content_formulaire">
       <div class="modal-body">
-        <form class="container_formulaire">
-          <!-- Titre d'ajout de produits -->
+        <div class="container_formulaire">
           <div class="Title">
-            <h3>Entreprise lier au facture</h3>
+            <h3>Factures liées à l'entreprise</h3>
           </div>
-        </form>
+          
+          <div class="table-container">
+            <!-- Chargement -->
+            <div *ngIf="loadingFactures" class="loading-indicator">
+              <i class="ri-loader-4-line spin"></i> Chargement des factures...
+            </div>
+            
+            <!-- Erreur -->
+            <div *ngIf="!loadingFactures && errorFactures" class="error-message">
+              {{ errorFactures }}
+            </div>
+            
+            <!-- Liste vide -->
+            <div *ngIf="!loadingFactures && !errorFactures && facturesEntreprise.length === 0" class="empty-state">
+              <i class="ri-building-line"></i>
+              <p>Aucune facture trouvée pour cette entreprise</p>
+            </div>
+            
+            <!-- Tableau des factures -->
+            <table *ngIf="!loadingFactures && !errorFactures && facturesEntreprise.length > 0">
+              <thead>
+                <tr>
+                  <th>Numéro</th>
+                  <th>Date</th>
+                  <th>Statut</th>
+                  <th class="text-right">Montant</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let facture of facturesEntreprise">
+                  <td>{{ facture.numeroFacture }}</td>
+                  <td>{{ facture.dateFacture | date:'dd/MM/yyyy' }}</td>
+                  <td>
+                    <span class="status-badge" [ngClass]="{
+                      'draft': facture.statut === 'BROUILLON',
+                      'sent': facture.statut === 'ENVOYE',
+                      'approved': facture.statut === 'APPROUVE'
+                    }">
+                      {{ facture.statut }}
+                    </span>
+                  </td>
+                  <td class="text-right">{{ facture.totalFacture | customNumber }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-bold">Total</td>
+                  <td class="text-right text-bold">
+                    {{ getTotalFactures() | customNumber }}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 

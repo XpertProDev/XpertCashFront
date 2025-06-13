@@ -9,6 +9,8 @@ import { ClientService } from '../../SERVICES/client-service';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { CommonModule } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
+import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 
 @Component({
   selector: 'app-detail-edit-client',
@@ -17,7 +19,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
-    MatAutocompleteModule, 
+    MatAutocompleteModule,
+    CustomNumberPipe
   ],
   templateUrl: './detail-edit-client.component.html',
   styleUrl: './detail-edit-client.component.scss'
@@ -43,6 +46,10 @@ export class DetailEditClientComponent {
   indicatif: string = '';
   maxPhoneLength: number = 0;
 
+  facturesClient: any[] = [];
+  loadingFactures = false;
+  errorFactures = '';
+
 
   // Ajoutez ces propriétés dans la classe
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
@@ -57,6 +64,7 @@ export class DetailEditClientComponent {
     private entrepriseService: EntrepriseService,
     private clientService: ClientService,
     private route: ActivatedRoute,
+    private factureService: FactureProFormaService,
   ) {}
 
   async testImageCompression(file: File) {
@@ -95,6 +103,22 @@ export class DetailEditClientComponent {
       } catch (error) {
         console.error('Erreur lors de la compression:', error);
       }
+  }
+
+  // Calcul du total des factures
+  // getTotalFactures(): number {
+  //   return this.facturesClient.reduce((sum: number, facture: any) => 
+  //     sum + facture.totalFacture, 0
+  //   );
+  // }
+
+  getTotalFactures(): number {
+    const total = this.facturesClient.reduce((sum: number, facture: any) => 
+      sum + facture.totalFacture, 0
+    );
+    
+    // Arrondir à l'entier le plus proche
+    return Math.round(total);
   }
 
   onFileSelected(event: Event): void {
@@ -193,10 +217,26 @@ export class DetailEditClientComponent {
       next: (client) => {
         this.populateForm(client);
         this.handleEntreprise(client.entrepriseClient);
+        this.loadFacturesClient();
       },
       error: (error) => {
         this.errorMessage = 'Erreur lors du chargement du client';
         console.error('Erreur:', error);
+      }
+    });
+  }
+
+  private loadFacturesClient() {
+    this.loadingFactures = true;
+    this.factureService.getFacturesByClient(this.clientId).subscribe({
+      next: (factures) => {
+        this.facturesClient = factures;
+        this.loadingFactures = false;
+      },
+      error: (err) => {
+        this.errorFactures = 'Erreur lors du chargement des factures';
+        this.loadingFactures = false;
+        console.error(err);
       }
     });
   }
@@ -454,7 +494,6 @@ export class DetailEditClientComponent {
   goToClients() {
     this.router.navigate(['/clients']);
   }
-  
-  
+
   
 }
