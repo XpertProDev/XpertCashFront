@@ -160,9 +160,6 @@ export class DetailFactureProformaApercuComponent implements OnInit {
   }
 
   async download() {
-    // 1. Récupération des infos entreprise (si besoin)
-    // (optionnel si déjà fait dans ngOnInit)
-    // await this.getUserEntrepriseInfo();
 
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
@@ -209,7 +206,7 @@ export class DetailFactureProformaApercuComponent implements OnInit {
     doc.setDrawColor(0);
     const titleLineWidth = 90;
     const titleLineX = 105 - titleLineWidth / 2;
-    doc.line(titleLineX, titleY + 1.5, titleLineX + titleLineWidth, titleY + 1.5);
+    // doc.line(titleLineX, titleY + 1.5, titleLineX + titleLineWidth, titleY + 1.5);
 
     // 6. Date à droite
     doc.setFontSize(10);
@@ -232,7 +229,7 @@ export class DetailFactureProformaApercuComponent implements OnInit {
     if (this.facture) {
       const isClient = !!this.facture.client;
       const isEntreprise = !!this.facture.entrepriseClient;
-      const label = isClient ? 'Client :' : isEntreprise ? 'Entreprise :' : 'Client :';
+      const label = isClient ? 'Doit :' : isEntreprise ? 'Doit :' : 'Doit :';
       const nom = isClient
         ? this.facture.client?.nomComplet ?? 'Non spécifié'
         : isEntreprise
@@ -245,7 +242,7 @@ export class DetailFactureProformaApercuComponent implements OnInit {
     }
     currentY += 7;
     doc.setFont('helvetica', 'bold');
-    doc.text('Object :', labelX, currentY);
+    doc.text('Objet :', labelX, currentY);
     doc.setFont('helvetica', 'normal');
     doc.text(this.facture?.description || '', labelX + doc.getTextWidth('Object :') + 2, currentY);
 
@@ -336,13 +333,13 @@ export class DetailFactureProformaApercuComponent implements OnInit {
     const min_y_signature = doc.internal.pageSize.height - 70;
     y_signature_block = Math.max(y_signature_block, min_y_signature);
     const blocCenterX = 180;
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setFont('helvetica');
     const signataire = this.signataire || 'Directeur';
     const signataireWidth = doc.getTextWidth(signataire);
     const signataireX = blocCenterX - signataireWidth / 2;
     doc.text(signataire, signataireX, y_signature_block);
-    doc.setFontSize(12);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     const nom = this.signataireNom || 'Nom du signataire';
     const nomWidth = doc.getTextWidth(nom);

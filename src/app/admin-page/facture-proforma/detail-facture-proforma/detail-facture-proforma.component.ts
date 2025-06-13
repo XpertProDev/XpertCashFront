@@ -167,6 +167,7 @@ export class DetailFactureProformaComponent implements OnInit {
     this.getUserEntrepriseInfo(); 
     this.getProduits();
     this.getUserInfo();
+    this.setDefaultDateRelance();
     
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
@@ -1292,7 +1293,7 @@ get labelNom(): string {
     doc.setDrawColor(0);
     const titleLineWidth = 90;
     const titleLineX = 105 - titleLineWidth / 2;
-    doc.line(titleLineX, titleY + 1.5, titleLineX + titleLineWidth, titleY + 1.5);
+    // doc.line(titleLineX, titleY + 1.5, titleLineX + titleLineWidth, titleY + 1.5);
 
 
     /*************** ——— 3. DATE & LIEU ——— ****************/
@@ -1320,7 +1321,7 @@ get labelNom(): string {
     const isClient = !!this.factureProForma.client;
     const isEntreprise = !!this.factureProForma.entrepriseClient;
 
-    const label = isClient ? 'Client :' : isEntreprise ? 'Entreprise :' : 'Client :';
+    const label = isClient ? 'Doit :' : isEntreprise ? 'Doit :' : 'Doit :';
     const nom = isClient
       ? this.factureProForma.client?.nomComplet ?? 'Non spécifié'
       : isEntreprise
@@ -1341,7 +1342,7 @@ get labelNom(): string {
 
     currentY += 7;
 
-    const objectLabel = 'Object :';
+    const objectLabel = 'Objet :';
 
     doc.setFont('helvetica', 'bold');
     doc.text(objectLabel, labelX, currentY);
@@ -1830,6 +1831,17 @@ confirmDelete(index: number) {
 cancelDelete() {
   this.confirmDeleteIndex = null;
   this.activeMenuIndex = null;
+}
+
+private setDefaultDateRelance(): void {
+  const now = new Date();
+  const in72h = new Date(now.getTime() + 72 * 60 * 60 * 1000);
+  this.dateRelance = this.formatDateForInput(in72h);
+}
+
+private formatDateForInput(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 
