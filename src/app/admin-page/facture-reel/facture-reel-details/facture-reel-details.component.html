@@ -35,7 +35,7 @@
 
         <!-- Titre facture -->
         <div class="titre">
-          <h2>Facture réelle n˚{{ f.numeroFacture }}</h2>
+          <h2>Facture réelle {{ f.numeroFacture }}</h2>
         </div>
 
         <!-- Date de création -->
@@ -46,13 +46,13 @@
 
         <!-- Client -->
         <div class="droit" *ngIf="f.client">
-          <h4>Client :</h4>
+          <h4>Doit :</h4>
           <p>{{ f.client.nom }}</p>
         </div>
 
         <!-- Entreprise cliente éventuelle -->
         <div class="droit" *ngIf="f.entrepriseClient">
-          <h4>Entreprise :</h4>
+          <h4>Doit :</h4>
           <p>{{ f.entrepriseClient.nom }}</p>
         </div>
 
@@ -123,18 +123,20 @@
           </p>
         </div>
 
-        <div class="acquis">
-          <h6 style="font-size: 17px;">Pour acquit</h6>
-        </div>
+          <div class="footer_container">
+          <div class="acquis">
+            <h6 style="font-size: 12px;">Pour acquit</h6>
+          </div>
 
-        <!-- Cachet / signature -->
-        <div class="cachet_container">
-          <div></div>
-          <div class="cachet">
-            <h6>{{ signataire }}</h6>
-            <h4 class="name_directeur">{{ signataireNom }}</h4>
+          <div class="cachet_container">
+            <div></div>
+            <div class="cachet">
+              <h6>{{ signataire }}</h6>
+              <h4 class="name_directeur">{{ signataireNom }}</h4>
+            </div>
           </div>
         </div>
+
 
       </div>
     </div>

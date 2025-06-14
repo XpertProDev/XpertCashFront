@@ -71,22 +71,43 @@ export class FactureReelComponent implements OnInit {
     return this.factureReel.slice(start, start + this.pageSize);
   }
 
-  getImageSrc(statut: string): string {
-    switch (statut) {
-      case 'EN_ATTENTE':
-        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-orange.png';
-      case 'PAYE':
-        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Vert.png';
-      default:
-        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Gris.png';
-    }
+getLibelleStatut(statut: string): string {
+  switch (statut) {
+    case 'EN_ATTENTE':
+      return 'En attente';
+    case 'PARTIELLEMENT_PAYEE':
+      return 'Part. payée';
+    case 'PAYEE':
+    case 'PAYE':
+      return 'Payée';
+    default:
+      return 'Inconnu';
   }
+}
+
+
+
+ getImageSrc(statut: string): string {
+  switch (statut) {
+    case 'EN_ATTENTE':
+      return 'assets/etiquette/Etiquette-Sy-XPERTPRO-orange.png';
+    case 'PARTIELLEMENT_PAYEE':
+      return 'assets/etiquette/Etiquette-Sy-XPERTPRO-bleu-.png';
+    case 'PAYEE':
+      return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Vert.png';
+    default:
+      return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Gris.png';
+  }
+}
+
 
   getStatutClass(statut: string): string {
     switch (statut) {
       case 'EN_ATTENTE':
         return 'etat-orange';
-      case 'PAYE':
+      case 'PARTIELLEMENT_PAYEE':
+        return 'etat-bleu';
+      case 'PAYEE':
         return 'etat-vert';
       default:
         return 'etat-gris';

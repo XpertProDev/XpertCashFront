@@ -35,15 +35,15 @@
                     <p>{{siege}}, le {{ f.dateCreation | date:'dd MMMM yyyy' }}</p>
                 </div>
                 <div class="droit" *ngIf="f.client">
-                    <h4>Client :</h4> 
+                    <h4>Doit :</h4> 
                     <p>{{ f.client.nomComplet}}</p>
                 </div>
                 <div class="droit" *ngIf="f.entrepriseClient">
-                    <h4>Entreprise :</h4>
+                    <h4>Doit :</h4>
                     <p>{{ f.entrepriseClient.nom }}</p>
                 </div>
                 <div class="object">
-                    <h4>Object :</h4>
+                    <h4>Objet :</h4>
                     <p>{{ f.description }}</p>
                 </div>
                 <table class="table">

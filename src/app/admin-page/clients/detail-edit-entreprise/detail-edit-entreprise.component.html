@@ -13,7 +13,7 @@
               <div class="information_cadre">
                 <div class="info_titre_input">
                   
-                  <div class="champ_grid_double">
+                  <div class="champ_grid">
                     <!-- Nom et prenom -->
                     <div class="champ_input">
                       <input type="text" class="input_focus"
@@ -48,7 +48,7 @@
 
                   </div>
                   <!-- Remplacer le bloc Pays et Téléphone existant par : -->
-                <div class="champ_grid_double">
+                <div class="champ_grid">
                     <!-- Pays -->
                     <div class="champ_input">
                         <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
@@ -95,19 +95,19 @@
                     </div>
                 </div>
 
-                  <div class="champ_grid">
+                  <div class="grid_colonne">
                     <!-- Siege -->
-                    <div class="champ_input">
+                    <div class="champ_input div1">
                       <input class="input_focus"
                                 autocomplete="off"
                                 id="siege" formControlName="siege"
                                 name="siege"
                                 placeholder="Saisis le siege">
-                      <label for="siege" class="label">Siege</label>
+                      <label for="siege" class="label">Ville</label>
                     </div>
 
                   <!-- Secteur -->
-                  <div class="champ_input">
+                  <div class="champ_input div2">
                     <input class="input_focus"
                               autocomplete="off"
                               id="secteur" formControlName="secteur"
@@ -116,7 +116,7 @@
                     <label for="secteur" class="label">Secteur</label>
                   </div>
 
-                  <div class="champ_input">
+                  <div class="champ_input div3">
                     <input class="input_focus"
                             autocomplete="off"
                             id="adresse" 
