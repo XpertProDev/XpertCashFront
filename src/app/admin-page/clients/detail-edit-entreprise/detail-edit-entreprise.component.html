@@ -204,7 +204,8 @@
                     <span class="status-badge" [ngClass]="{
                       'draft': facture.statut === 'BROUILLON',
                       'sent': facture.statut === 'ENVOYE',
-                      'approved': facture.statut === 'APPROUVE'
+                      'approved': facture.statut === 'APPROUVE',
+                      'valid': facture.statut === 'VALIDE'
                     }">
                       {{ facture.statut }}
                     </span>
