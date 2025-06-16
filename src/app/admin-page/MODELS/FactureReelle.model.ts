@@ -41,3 +41,11 @@ export interface FactureReelle {
   client: ClientDTO | null;
   lignesFacture: LigneFactureDTO[];
 }
+
+export interface PaiementDTO {
+  id: number;
+  montant: number;
+  datePaiement: string;
+  modePaiement: string;
+  encaissePar: string;
+}

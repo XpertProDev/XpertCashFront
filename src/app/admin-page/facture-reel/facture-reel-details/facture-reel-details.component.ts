@@ -3,10 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { FactureReelService } from '../../SERVICES/facturereel-service';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
-import { FactureReelle, LigneFactureDTO } from '../../MODELS/FactureReelle.model';
+import { FactureReelle, LigneFactureDTO, PaiementDTO } from '../../MODELS/FactureReelle.model';
 
 @Component({
   selector: 'app-facture-reel-details',
@@ -37,13 +37,26 @@ export class FactureReelDetailsComponent implements OnInit {
   facture: FactureReelle | null = null;
   totalTVA: number = 0;
   montantCommercial: number = 0;
+
+  paiementForm: FormGroup;
+  montantRestant: number = 0;
+  historiquePaiements: PaiementDTO[] = [];
+  isLoading: boolean = false;
+  errorMessage: string | null = null;
+  successMessage: string | null = null;
   
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private factureService: FactureReelService,
-    private entrepriseService: EntrepriseService
-  ){}
+    private entrepriseService: EntrepriseService,
+    private fb: FormBuilder
+  ){
+    this.paiementForm = this.fb.group({
+      montant: ['', [Validators.required, Validators.min(0.01)]],
+      modePaiement: ['', Validators.required]
+    });
+  }
 
   ngOnInit(): void {
     // 1) Charger les infos de l’entreprise (en-tête)
@@ -59,34 +72,105 @@ export class FactureReelDetailsComponent implements OnInit {
       console.error('Aucun ID de facture passé en paramètre');
       this.router.navigate(['/facture-reel']);
     }
+
+    this.paiementForm = this.fb.group({
+      montant: ['', [Validators.required, Validators.min(0.01)]],
+      modePaiement: ['', Validators.required]
+    });
   }
 
   loadFactureReelle(id: number): void {
-  this.factureService.getFactureReelleById(id).subscribe({
-    next: (data: FactureReelle) => {
-      console.log('Type de dateCreation :', typeof data.dateCreation, data.dateCreation);
-      // sum est un nombre, ligne est une LigneFacture
-      data.totalHT = data.lignesFacture
-        .reduce((sum: number, ligne: LigneFactureDTO) => sum + ligne.montantTotal, 0);
+    this.factureService.getFactureReelleById(id).subscribe({
+      next: (data: FactureReelle) => {
+        console.log('Type de dateCreation :', typeof data.dateCreation, data.dateCreation);
+        // sum est un nombre, ligne est une LigneFacture
+        data.totalHT = data.lignesFacture
+          .reduce((sum: number, ligne: LigneFactureDTO) => sum + ligne.montantTotal, 0);
 
-      data.tauxRemise = data.remise > 0
-        ? (data.remise / data.totalHT!) * 100
-        : 0;
+        data.tauxRemise = data.remise > 0
+          ? (data.remise / data.totalHT!) * 100
+          : 0;
 
-      if (data.tva) {
-        this.totalTVA = (data.totalHT! - data.remise) * (this.tauxTva ?? 0);
-        this.montantCommercial = data.totalHT! - data.remise;
+        if (data.tva) {
+          this.totalTVA = (data.totalHT! - data.remise) * (this.tauxTva ?? 0);
+          this.montantCommercial = data.totalHT! - data.remise;
+        }
+
+        this.facture = data;
+
+        this.loadMontantRestant();
+        this.loadHistoriquePaiements();
+      },
+      error: (err) => {
+        console.error('Erreur', err);
+        this.router.navigate(['/facture-reel']);
       }
+    });
+  }
 
-      this.facture = data;
-    },
-    error: (err) => {
-      console.error('Erreur', err);
-      this.router.navigate(['/facture-reel']);
+  loadMontantRestant() {
+    if (!this.facture) return;
+    
+    this.factureService.getMontantRestant(this.facture.id).subscribe({
+      next: (montant) => this.montantRestant = montant,
+      error: (err) => console.error(err)
+    });
+  }
+
+  getStatutText(statut: string | undefined): string {
+    if (!statut) return 'Inconnu';
+    
+    switch(statut) {
+      case 'PAYEE': return 'Payée';
+      case 'PARTIELLEMENT_PAYEE': return 'Partiellement payée';
+      case 'EN_ATTENTE': return 'En attente';
+      default: return statut;
     }
-  });
-}
+  }
 
+  getModeText(mode: string): string {
+    switch(mode) {
+      case 'CASH': return 'Espèce';
+      case 'CHEQUE': return 'Chèque';
+      case 'CARD': return 'Carte bancaire';
+      case 'TRANSFER': return 'Virement';
+      case 'MOBILE': return 'Mobile Money';
+      default: return mode;
+    }
+  }
+
+  loadHistoriquePaiements() {
+    if (!this.facture) return;
+    
+    this.factureService.getHistoriquePaiements(this.facture.id).subscribe({
+      next: (paiements) => this.historiquePaiements = paiements.reverse(),
+      error: (err) => console.error(err)
+    });
+  }
+
+  enregistrerPaiement() {
+    if (this.paiementForm.invalid || !this.facture) return;
+    
+    this.isLoading = true;
+    const { montant, modePaiement } = this.paiementForm.value;
+    
+    this.factureService.enregistrerPaiement(
+      this.facture.id, 
+      montant, 
+      modePaiement
+    ).subscribe({
+      next: () => {
+        this.paiementForm.reset();
+        this.loadMontantRestant();
+        this.loadHistoriquePaiements();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.isLoading = false;
+      }
+    });
+  }
 
   getUserEntrepriseInfo(): void {
     this.entrepriseService.getEntrepriseInfo().subscribe({
