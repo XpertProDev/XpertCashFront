@@ -76,7 +76,7 @@ h4 {margin: 0;}
 // cadre information
 .information_cadre {
     width: 100%;
-    // height: 100vh;
+    height: 1000px;
     background-color: #fff;
     box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.108);
     // border-radius: 5px;
@@ -631,7 +631,7 @@ select.input_focus {
 .statut-badge {
   padding: 4px 12px;
   border-radius: 20px;
-  font-size: 0.85rem;
+  font-size: 10px;
   font-weight: 500;
   
   &.payee {
