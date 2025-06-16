@@ -1,10 +1,18 @@
 p {margin: 0;}
 h4 {margin: 0;}
 
+// .container_global {
+//     // margin-right: 20%;
+//     display: flex;
+//     justify-content: center;
+// }
+
+
+
 .container_global {
-    // margin-right: 20%;
-    display: flex;
-    justify-content: center;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  position: relative;
 }
 
 .cadre_retour {
@@ -43,7 +51,7 @@ h4 {margin: 0;}
 
 // cadre information
 .information_cadre {
-    width: 800px;
+    width: 740px;
     height: 1223px;
     background-color: #fff;
     box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.108);
