@@ -155,6 +155,7 @@
       </div>
     </div>
   </div>
+  
 
   <div class="column">
     <!-- Formulaire de paiement -->
@@ -165,27 +166,30 @@
         </div>
         <div class="content">
           <form [formGroup]="paiementForm">
-            <div class="grid_colonne">
-              <!-- Client (lecture seule) -->
+            <!-- <div class="grid_colonne">
               <div class="champ_input">
                 <input type="text" class="input_focus" readonly style="cursor: no-drop;"
                     [value]="(facture.client?.nom || facture.entrepriseClient?.nom) || ''">
                 <label class="label">Client</label>
               </div>
               
-              <!-- Montant total (lecture seule) -->
               <div class="champ_input">
                 <input type="text" class="input_focus" readonly style="cursor: no-drop;"
                     [value]="(facture.totalFacture || 0) | customNumber">
                 <label class="label">Montant total</label>
               </div>
-            </div>
+            </div> -->
             
             <div class="grid_colonne">
               <!-- Montant paiement -->
               <div class="champ_input">
-                <input type="number" class="input_focus" formControlName="montant"
-                      placeholder="Saisis le montant">
+                <input type="text"
+                  class="input_focus"
+                  formControlName="montant"
+                  (input)="onInputChange($event)"
+                  placeholder="Saisis le montant">
+
+
                 <label class="label">Montant paiement</label>
                 <small class="restant" *ngIf="montantRestant > 0">
                   Restant: {{ montantRestant | customNumber }} FCFA
@@ -198,8 +202,8 @@
                   <option value="">Sélectionnez...</option>
                   <option value="CASH">Espèce</option>
                   <option value="CHEQUE">Chèque</option>
-                  <option value="CARD">Carte bancaire</option>
-                  <option value="TRANSFER">Virement</option>
+                  <option value="CARD">Carte de crédit</option>
+                  <option value="TRANSFER">Virement bancaires</option>
                   <option value="MOBILE">Mobile Money</option>
                 </select>
                 <label class="label">Mode de paiement</label>

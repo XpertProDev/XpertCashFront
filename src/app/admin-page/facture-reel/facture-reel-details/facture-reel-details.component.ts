@@ -47,7 +47,7 @@ export class FactureReelDetailsComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
-
+montant: number = 0;
   private messageSubscription: Subscription | null = null;
   
   
@@ -63,6 +63,31 @@ export class FactureReelDetailsComponent implements OnInit {
       modePaiement: ['', Validators.required]
     });
   }
+
+onInputChange(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  if (!input) return;
+
+  const cleaned = input.value.replace(/\s/g, '');
+  const parsed = parseInt(cleaned, 10);
+
+  if (!isNaN(parsed)) {
+    // Met à jour le champ FormControl
+    this.paiementForm.get('montant')?.setValue(parsed, { emitEvent: false });
+
+    // Met à jour visuellement le champ avec format
+    input.value = this.customNumberTransform(parsed);
+  } else {
+    this.paiementForm.get('montant')?.setValue(null, { emitEvent: false });
+  }
+}
+
+// Fonction utilitaire de formatage (tu peux réutiliser ta pipe ici si tu veux)
+customNumberTransform(value: number): string {
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+
 
   ngOnInit(): void {
     // 1) Charger les infos de l’entreprise (en-tête)
@@ -198,7 +223,7 @@ getModeIconClass(mode: string): string {
     
     // Validation supplémentaire du montant
     if (montantPaiement > this.montantRestant) {
-      this.errorMessage = "Le montant saisi dépasse le montant restant";
+      this.errorMessage = "Le montant saisi est supérieur au montant restant à payer.";
       this.startMessageTimer(3000);
       this.isLoading = false;
       return;
