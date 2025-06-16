@@ -505,10 +505,15 @@
                                         </div>
 
                                         <!-- // Tva  -->
-                                        <div class="champ_input">
-                                            <input class="input_focus" type="number" formControlName="tauxTva" placeholder="Ex: 0.18">
-                                            <label class="label">TVA (ex: 0.18 = 18%)</label>
+                                       <div class="champ_input">
+                                            <input 
+                                                class="input_focus" 
+                                                type="number" 
+                                                [value]="tauxTvaAffiche" 
+                                                (input)="onTauxTvaInput($event)">
+                                            <label class="label">TVA (en %)</label>
                                         </div>
+
                                     </div>
 
                                     <!-- // Informations légales & bancaires  -->
