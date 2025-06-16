@@ -687,7 +687,13 @@ select.input_focus {
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   padding: 15px;
   margin-bottom: 12px;
-  border-left: 4px solid #0672E4;
+  border-left: 3px solid #0672E4;
+   transition: all 0.3s ease;
+
+    &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  }
   
   .paiement-header {
     display: flex;
@@ -788,3 +794,4 @@ select.input_focus {
 .text-navy { color: #001f3f; }
 .text-orange { color: #fd7e14; }
 .text-gray { color: #6c757d; }
+
