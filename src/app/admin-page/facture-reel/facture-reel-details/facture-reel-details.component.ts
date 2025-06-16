@@ -7,9 +7,12 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 import { FactureReelle, LigneFactureDTO, PaiementDTO } from '../../MODELS/FactureReelle.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Subscription, timer } from 'rxjs';
 
 @Component({
   selector: 'app-facture-reel-details',
+  standalone: true,
   imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe, ReactiveFormsModule],
   templateUrl: './facture-reel-details.component.html',
   styleUrl: './facture-reel-details.component.scss'
@@ -44,13 +47,16 @@ export class FactureReelDetailsComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
+
+  private messageSubscription: Subscription | null = null;
+  
   
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private factureService: FactureReelService,
     private entrepriseService: EntrepriseService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
   ){
     this.paiementForm = this.fb.group({
       montant: ['', [Validators.required, Validators.min(0.01)]],
@@ -150,26 +156,79 @@ export class FactureReelDetailsComponent implements OnInit {
 
   enregistrerPaiement() {
     if (this.paiementForm.invalid || !this.facture) return;
+
+    // Réinitialiser les messages avant chaque tentative
+    this.errorMessage = null;
+    this.successMessage = null;
+    this.clearMessageTimer(); // Annuler tout timer existant
     
     this.isLoading = true;
-    const { montant, modePaiement } = this.paiementForm.value;
+    const montantPaiement = this.paiementForm.get('montant')?.value;
     
+    // Validation supplémentaire du montant
+    if (montantPaiement > this.montantRestant) {
+      this.errorMessage = "Le montant saisi dépasse le montant restant";
+      this.startMessageTimer(3000); // Démarrer le timer pour fermer le message
+      this.isLoading = false;
+      return;
+    }
+
     this.factureService.enregistrerPaiement(
       this.facture.id, 
-      montant, 
-      modePaiement
+      montantPaiement, 
+      this.paiementForm.get('modePaiement')?.value
     ).subscribe({
       next: () => {
+        // Cas standard (si l'API renvoie du JSON)
+        this.successMessage = "Paiement enregistré avec succès.";
         this.paiementForm.reset();
         this.loadMontantRestant();
         this.loadHistoriquePaiements();
         this.isLoading = false;
+        this.startMessageTimer(3000); // Démarrer le timer pour fermer le message
       },
-      error: (err) => {
-        console.error(err);
+      error: (err: HttpErrorResponse) => {
+        // Gestion spécifique du succès avec réponse texte
+        if (err.status === 200 && err.error?.text) {
+          this.successMessage = err.error.text; // Message original de l'API
+          this.paiementForm.reset();
+          this.loadMontantRestant();
+          this.loadHistoriquePaiements();
+        } 
+        // Gestion des erreurs standards
+        else if (err.error?.message) {
+          this.errorMessage = err.error.message;
+        } else {
+          this.errorMessage = "Une erreur inconnue est survenue";
+        }
+        
         this.isLoading = false;
+        this.startMessageTimer(3000); // Démarrer le timer pour fermer le message
       }
     });
+  }
+
+ // Méthode pour démarrer le timer de fermeture automatique
+  private startMessageTimer(duration: number) {
+    this.clearMessageTimer(); // Nettoyer tout timer existant
+    
+    this.messageSubscription = timer(duration).subscribe(() => {
+      this.successMessage = null;
+      this.errorMessage = null;
+      this.messageSubscription = null;
+    });
+  }
+
+  // Méthode pour annuler le timer
+  private clearMessageTimer() {
+    if (this.messageSubscription) {
+      this.messageSubscription.unsubscribe();
+      this.messageSubscription = null;
+    }
+  }
+
+  ngOnDestroy() {
+    this.clearMessageTimer();
   }
 
   getUserEntrepriseInfo(): void {

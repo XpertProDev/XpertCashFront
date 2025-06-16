@@ -49,25 +49,25 @@ h4 {margin: 0;}
   padding: 10px 10px 10px 15px;
 }
 
-.btn_ajouter p {
-  margin-right: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px; 
-  letter-spacing: 0.60px;
-}
+// .btn_ajouter p {
+//   margin-right: 10px;
+//   cursor: pointer;
+//   font-weight: 600;
+//   font-size: 14px; 
+//   letter-spacing: 0.60px;
+// }
 
-.retour_icon i {
-  font-size: 20px;
-  cursor: pointer;
-}
+// .retour_icon i {
+//   font-size: 20px;
+//   cursor: pointer;
+// }
 
-.btn_ajouter .btn_save {
-  border: none;
-  background-color: transparent;
-  color: #0672E4;
-  font-size: 15px;
-}
+// .btn_ajouter .btn_save {
+//   border: none;
+//   background-color: transparent;
+//   color: #0672E4;
+//   font-size: 15px;
+// }
 
 .content {
     margin-top: 5px;
@@ -729,17 +729,18 @@ select.input_focus {
   }
 }
 
-.message-container {
-  margin-bottom: 20px;
-}
+// .message-container {
+//   margin-bottom: 20px;
+// }
 
 .success-message, .error-message {
-  padding: 12px 15px;
+  padding: 5px 10px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 15px;
+  // margin-bottom: 0px;
+  // margin-top: 20px;
   animation: fadeIn 0.3s ease;
   
   i:first-child {
