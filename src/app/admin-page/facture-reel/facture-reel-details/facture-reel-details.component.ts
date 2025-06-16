@@ -164,16 +164,17 @@ export class FactureReelDetailsComponent implements OnInit {
     }
   }
 
-  getModeIcon(mode: string): string {
+getModeIconClass(mode: string): string {
   switch (mode) {
-    case 'CASH': return 'ri-cash-line';
-    case 'CHEQUE': return 'ri-bill-line';
-    case 'CARD': return 'ri-bank-card-line';
-    case 'VIREMENT': return 'ri-bank-fill';
-    case 'MOBILE': return 'ri-smartphone-line';
-    default: return 'ri-question-line';
+    case 'CASH': return 'ri-cash-line text-green';
+    case 'CHEQUE': return 'ri-bill-line text-blue';
+    case 'CARD': return 'ri-bank-card-line text-purple';
+    case 'VIREMENT': return 'ri-bank-fill text-navy';
+    case 'MOBILE': return 'ri-smartphone-line text-orange';
+    default: return 'ri-question-line text-gray';
   }
 }
+
 
 
   loadHistoriquePaiements() {
