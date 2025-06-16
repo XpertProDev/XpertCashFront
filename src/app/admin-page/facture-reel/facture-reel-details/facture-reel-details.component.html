@@ -2,7 +2,7 @@
     {{facture | json}}
 </div> -->
 <div class="container_global" *ngIf="facture as f; else noData">
-  <div class="information_cadre" style="position: relative;">
+  <div class="information_cadre div1" style="position: relative;">
     <div class="cadre_retour">
       <div class="retour_icon" (click)="navigateBack()">
         <i class="ri-arrow-left-long-fill"></i>
@@ -155,6 +155,131 @@
       </div>
     </div>
   </div>
+
+  <div class="column">
+    <!-- Formulaire de paiement -->
+    <div class="information_cadre_row" *ngIf="facture?.statutPaiement !== 'PAYEE'">
+      <div class="info_titre_input">
+        <div class="paiement_title">
+          <h5>Paiement de facture</h5>
+        </div>
+        <div class="content">
+          <form [formGroup]="paiementForm">
+            <div class="grid_colonne">
+              <!-- Client (lecture seule) -->
+              <div class="champ_input">
+                <input type="text" class="input_focus" readonly style="cursor: no-drop;"
+                    [value]="(facture.client?.nom || facture.entrepriseClient?.nom) || ''">
+                <label class="label">Client</label>
+              </div>
+              
+              <!-- Montant total (lecture seule) -->
+              <div class="champ_input">
+                <input type="text" class="input_focus" readonly style="cursor: no-drop;"
+                    [value]="(facture.totalFacture || 0) | customNumber">
+                <label class="label">Montant total</label>
+              </div>
+            </div>
+            
+            <div class="grid_colonne">
+              <!-- Montant paiement -->
+              <div class="champ_input">
+                <input type="number" class="input_focus" formControlName="montant"
+                      placeholder="Saisis le montant">
+                <label class="label">Montant paiement</label>
+                <small class="restant" *ngIf="montantRestant > 0">
+                  Restant: {{ montantRestant | customNumber }} FCFA
+                </small>
+              </div>
+              
+              <!-- Mode paiement -->
+              <div class="champ_input">
+                <select class="input_focus" formControlName="modePaiement">
+                  <option value="">Sélectionnez...</option>
+                  <option value="CASH">Espèce</option>
+                  <option value="CHEQUE">Chèque</option>
+                  <option value="CARD">Carte bancaire</option>
+                  <option value="TRANSFER">Virement</option>
+                  <option value="MOBILE">Mobile Money</option>
+                </select>
+                <label class="label">Mode de paiement</label>
+              </div>
+            </div>
+
+            <div class="content_btn">
+              <div class="message-container">
+                <div *ngIf="successMessage" class="success-message">
+                  <i class="ri-checkbox-circle-fill"></i>
+                  {{ successMessage }}
+                  <i class="ri-close-line" (click)="successMessage = null"></i>
+                </div>
+                
+                <div *ngIf="errorMessage" class="error-message">
+                  <i class="ri-error-warning-fill"></i>
+                  {{ errorMessage }}
+                  <i class="ri-close-line" (click)="errorMessage = null"></i>
+                </div>
+              </div>
+
+            <!-- Dans le formulaire de paiement -->
+            <div class="btn_ajouter">
+              <button type="button" class="btn_save" 
+                      (click)="enregistrerPaiement()"
+                      [disabled]="paiementForm.invalid || isLoading">
+                <span *ngIf="!isLoading">Payer la facture</span>
+                <span *ngIf="isLoading">Traitement...</span>
+              </button>
+            </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historique des paiements -->
+    <div class="information_cadre_row_list">
+      <div class="info_titre_input">
+        <div class="paiement_title">
+          <h5>Historique des paiements</h5>
+          <div class="statut-badge" [ngClass]="{
+            'payee': facture.statutPaiement === 'PAYEE',
+            'partiel': facture.statutPaiement === 'PARTIELLEMENT_PAYEE',
+            'attente': facture.statutPaiement === 'EN_ATTENTE'
+          }">
+            {{ getStatutText(facture.statutPaiement || '') }}
+          </div>
+        </div>
+        
+        <div class="content">
+          <div class="historique-container">
+            <div *ngIf="historiquePaiements.length === 0" class="empty-state">
+              <i class="ri-history-line"></i>
+              <p>Aucun paiement enregistré</p>
+            </div>
+            
+            <div *ngFor="let p of historiquePaiements" class="paiement-card">
+              <div class="paiement-header">
+                <span class="montant">{{ p.montant | customNumber }} FCFA</span>
+                <span class="date">{{ p.datePaiement | date: 'dd/MM/yyyy' }}</span>
+              </div>
+              
+              <div class="paiement-details">
+                <div class="mode">
+                  <i class="ri-bank-card-line"></i>
+                  {{ getModeText(p.modePaiement) }}
+                </div>
+                <div class="encaisse">
+                  <i class="ri-user-line"></i>
+                  Par {{ p.encaissePar }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <ng-template #noData>

@@ -3,14 +3,17 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { FactureReelService } from '../../SERVICES/facturereel-service';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
-import { FactureReelle, LigneFactureDTO } from '../../MODELS/FactureReelle.model';
+import { FactureReelle, LigneFactureDTO, PaiementDTO } from '../../MODELS/FactureReelle.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Subscription, timer } from 'rxjs';
 
 @Component({
   selector: 'app-facture-reel-details',
-  imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe],
+  standalone: true,
+  imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe, ReactiveFormsModule],
   templateUrl: './facture-reel-details.component.html',
   styleUrl: './facture-reel-details.component.scss'
 })
@@ -37,13 +40,29 @@ export class FactureReelDetailsComponent implements OnInit {
   facture: FactureReelle | null = null;
   totalTVA: number = 0;
   montantCommercial: number = 0;
+
+  paiementForm: FormGroup;
+  montantRestant: number = 0;
+  historiquePaiements: PaiementDTO[] = [];
+  isLoading: boolean = false;
+  errorMessage: string | null = null;
+  successMessage: string | null = null;
+
+  private messageSubscription: Subscription | null = null;
+  
   
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private factureService: FactureReelService,
-    private entrepriseService: EntrepriseService
-  ){}
+    private entrepriseService: EntrepriseService,
+    private fb: FormBuilder,
+  ){
+    this.paiementForm = this.fb.group({
+      montant: ['', [Validators.required, Validators.min(0.01)]],
+      modePaiement: ['', Validators.required]
+    });
+  }
 
   ngOnInit(): void {
     // 1) Charger les infos de l’entreprise (en-tête)
@@ -59,34 +78,177 @@ export class FactureReelDetailsComponent implements OnInit {
       console.error('Aucun ID de facture passé en paramètre');
       this.router.navigate(['/facture-reel']);
     }
+
+    this.paiementForm = this.fb.group({
+      montant: ['', [Validators.required, Validators.min(0.01)]],
+      modePaiement: ['', Validators.required]
+    });
   }
 
   loadFactureReelle(id: number): void {
-  this.factureService.getFactureReelleById(id).subscribe({
-    next: (data: FactureReelle) => {
-      console.log('Type de dateCreation :', typeof data.dateCreation, data.dateCreation);
-      // sum est un nombre, ligne est une LigneFacture
-      data.totalHT = data.lignesFacture
-        .reduce((sum: number, ligne: LigneFactureDTO) => sum + ligne.montantTotal, 0);
+    this.factureService.getFactureReelleById(id).subscribe({
+      next: (data: FactureReelle) => {
+        console.log('Type de dateCreation :', typeof data.dateCreation, data.dateCreation);
+        // sum est un nombre, ligne est une LigneFacture
+        data.totalHT = data.lignesFacture
+          .reduce((sum: number, ligne: LigneFactureDTO) => sum + ligne.montantTotal, 0);
 
-      data.tauxRemise = data.remise > 0
-        ? (data.remise / data.totalHT!) * 100
-        : 0;
+        data.tauxRemise = data.remise > 0
+          ? (data.remise / data.totalHT!) * 100
+          : 0;
 
-      if (data.tva) {
-        this.totalTVA = (data.totalHT! - data.remise) * (this.tauxTva ?? 0);
-        this.montantCommercial = data.totalHT! - data.remise;
+        if (data.tva) {
+          this.totalTVA = (data.totalHT! - data.remise) * (this.tauxTva ?? 0);
+          this.montantCommercial = data.totalHT! - data.remise;
+        }
+
+        this.facture = data;
+
+        this.loadMontantRestant();
+        this.loadHistoriquePaiements();
+      
+        // Ajouter le calcul du statut
+        this.updatePaymentStatus();
+      },
+      error: (err) => {
+        console.error('Erreur', err);
+        this.router.navigate(['/facture-reel']);
       }
+    });
+  }
 
-      this.facture = data;
-    },
-    error: (err) => {
-      console.error('Erreur', err);
-      this.router.navigate(['/facture-reel']);
+  // Nouvelle méthode pour mettre à jour le statut
+  private updatePaymentStatus() {
+    if (!this.facture) return;
+    
+    if (this.montantRestant <= 0) {
+      this.facture.statutPaiement = 'PAYEE';
+    } else if (this.montantRestant < this.facture.totalFacture) {
+      this.facture.statutPaiement = 'PARTIELLEMENT_PAYEE';
+    } else {
+      this.facture.statutPaiement = 'EN_ATTENTE';
     }
-  });
-}
+  }
 
+  loadMontantRestant() {
+    if (!this.facture) return;
+    
+    this.factureService.getMontantRestant(this.facture.id).subscribe({
+      next: (montant) => {
+        this.montantRestant = montant;
+        this.updatePaymentStatus(); // Mettre à jour le statut après avoir reçu le montant restant
+      },
+      error: (err) => console.error(err)
+    });
+  }
+
+  getStatutText(statut: string | undefined): string {
+    if (!statut) return 'Inconnu';
+    
+    switch(statut) {
+      case 'PAYEE': return 'Payée';
+      case 'PARTIELLEMENT_PAYEE': return 'Partiellement payée';
+      case 'EN_ATTENTE': return 'En attente';
+      default: return statut;
+    }
+  }
+
+  getModeText(mode: string): string {
+    switch(mode) {
+      case 'CASH': return 'Espèce';
+      case 'CHEQUE': return 'Chèque';
+      case 'CARD': return 'Carte bancaire';
+      case 'TRANSFER': return 'Virement';
+      case 'MOBILE': return 'Mobile Money';
+      default: return mode;
+    }
+  }
+
+  loadHistoriquePaiements() {
+    if (!this.facture) return;
+    
+    this.factureService.getHistoriquePaiements(this.facture.id).subscribe({
+      next: (paiements) => this.historiquePaiements = paiements.reverse(),
+      error: (err) => console.error(err)
+    });
+  }
+  enregistrerPaiement() {
+    if (this.paiementForm.invalid || !this.facture) return;
+
+    // Réinitialiser les messages avant chaque tentative
+    this.errorMessage = null;
+    this.successMessage = null;
+    this.clearMessageTimer(); // Annuler tout timer existant
+    
+    this.isLoading = true;
+    const montantPaiement = this.paiementForm.get('montant')?.value;
+    
+    // Validation supplémentaire du montant
+    if (montantPaiement > this.montantRestant) {
+      this.errorMessage = "Le montant saisi dépasse le montant restant";
+      this.startMessageTimer(3000);
+      this.isLoading = false;
+      return;
+    }
+
+    this.factureService.enregistrerPaiement(
+      this.facture.id, 
+      montantPaiement, 
+      this.paiementForm.get('modePaiement')?.value
+    ).subscribe({
+      next: () => {
+        this.successMessage = "Paiement enregistré avec succès.";
+        this.paiementForm.reset();
+        
+        // Recharger les données de la facture pour mettre à jour le statut
+        this.loadFactureReelle(this.facture!.id);
+        
+        this.startMessageTimer(3000);
+      },
+      error: (err: HttpErrorResponse) => {
+        // Gestion spécifique du succès avec réponse texte
+        if (err.status === 200 && err.error?.text) {
+          this.successMessage = err.error.text;
+          this.paiementForm.reset();
+          
+          // Recharger les données de la facture pour mettre à jour le statut
+          this.loadFactureReelle(this.facture!.id);
+        } 
+        // Gestion des erreurs standards
+        else if (err.error?.message) {
+          this.errorMessage = err.error.message;
+        } else {
+          this.errorMessage = "Une erreur inconnue est survenue";
+        }
+        
+        this.isLoading = false;
+        this.startMessageTimer(3000);
+      }
+    });
+  }
+
+ // Méthode pour démarrer le timer de fermeture automatique
+  private startMessageTimer(duration: number) {
+    this.clearMessageTimer(); // Nettoyer tout timer existant
+    
+    this.messageSubscription = timer(duration).subscribe(() => {
+      this.successMessage = null;
+      this.errorMessage = null;
+      this.messageSubscription = null;
+    });
+  }
+
+  // Méthode pour annuler le timer
+  private clearMessageTimer() {
+    if (this.messageSubscription) {
+      this.messageSubscription.unsubscribe();
+      this.messageSubscription = null;
+    }
+  }
+
+  ngOnDestroy() {
+    this.clearMessageTimer();
+  }
 
   getUserEntrepriseInfo(): void {
     this.entrepriseService.getEntrepriseInfo().subscribe({

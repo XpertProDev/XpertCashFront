@@ -59,7 +59,7 @@
   
   .champ_input {
     position: relative;
-    margin-bottom: 5px;
+    margin-bottom: 20px;
   }
   
   .champ_input_list_stock {
@@ -586,7 +586,7 @@ input:checked + .slider:before {
 }
 
 .error-messageApi {
-  font-size: 14px;
+  font-size: 9px;
   color: red;
   font-weight: bold;
   position: relative;
@@ -595,7 +595,7 @@ input:checked + .slider:before {
 }
 
 .success-messageApi {
-  font-size: 14px;
+  font-size: 9px;
   color: #0672E4;
   font-weight: bold;
   position: relative;
@@ -604,19 +604,19 @@ input:checked + .slider:before {
 }
 
 .error-messageApi2 {
-  font-size: 14px;
+  font-size: 9px;
   color: red;
   font-weight: bold;
 }
 
 .success-messageApi2 {
-  font-size: 14px;
+  font-size: 9px;
   color: #0672E4;
   font-weight: bold;
 }
 
 .error {
-  font-size: 14px;
+  font-size: 9px;
   color: #ff0000;
   font-weight: bold;
   position: relative;
