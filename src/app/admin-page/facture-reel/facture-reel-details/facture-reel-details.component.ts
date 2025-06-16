@@ -3,14 +3,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { FactureReelService } from '../../SERVICES/facturereel-service';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 import { FactureReelle, LigneFactureDTO } from '../../MODELS/FactureReelle.model';
 
 @Component({
   selector: 'app-facture-reel-details',
-  imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe],
+  imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe, ReactiveFormsModule],
   templateUrl: './facture-reel-details.component.html',
   styleUrl: './facture-reel-details.component.scss'
 })

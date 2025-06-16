@@ -2,7 +2,7 @@
     {{facture | json}}
 </div> -->
 <div class="container_global" *ngIf="facture as f; else noData">
-  <div class="information_cadre" style="position: relative;">
+  <div class="information_cadre div1" style="position: relative;">
     <div class="cadre_retour">
       <div class="retour_icon" (click)="navigateBack()">
         <i class="ri-arrow-left-long-fill"></i>
@@ -155,6 +155,74 @@
       </div>
     </div>
   </div>
+
+  <div class="column">
+    <div class="information_cadre_row">
+      <div class="info_titre_input">
+          <div class="paiement_title">
+            <h5>Paiement de facture</h5>
+          </div>
+        <div class="content">
+          <form>
+            <div class="grid_colonne">
+              <!-- client -->
+              <div class="champ_input">
+                <input type="text" class="input_focus"
+                          id="client" formControlName="client"
+                          name="client"
+                          placeholder="Nom de client">
+                <label for="client" class="label">Client</label>
+              </div>
+              <!-- Mode de paiement -->
+              <div class="champ_input">
+                <input type="text" class="input_focus"
+                          id="modePaiement" formControlName="MontantTotal"
+                          name="MontantTotal"
+                          placeholder="Saisis le montant total">
+                <label for="MontantTotal" class="label">Montant total</label>
+              </div>
+            </div>
+            <div class="grid_colonne">
+              <!-- Montant Paiement -->
+              <div class="champ_input">
+                <input type="text" class="input_focus"
+                          id="montant" formControlName="montant"
+                          name="montant"
+                          placeholder="Saisis le montant">
+                <label for="montant" class="label">Montant paiement</label>
+              </div>
+              <!-- Mode de paiement -->
+              <div class="champ_input">
+                <input type="text" class="input_focus"
+                          id="modePaiement" formControlName="modePaiement"
+                          name="modePaiement"
+                          placeholder="Saisis le mode paiement">
+                <label for="modePaiement" class="label">Mode de paiement</label>
+              </div>
+            </div>
+
+            <div class="btn_ajouter">
+              <button type="button" class="btn_save">
+                Payer la facture
+              </button>                  
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="information_cadre_row_list">
+      <div class="info_titre_input">
+          <div class="paiement_title">
+            <h5>Statut de paiement</h5>
+          </div>
+        <div class="content">
+         
+        </div>
+      </div>
+    </div>
+
+  </div>
+
 </div>
 
 <ng-template #noData>
