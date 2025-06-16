@@ -265,14 +265,15 @@
               
               <div class="paiement-details">
                 <div class="mode">
-                  <i class="ri-bank-card-line"></i>
+                  <i [ngClass]="getModeIcon(p.modePaiement)"></i>
                   {{ getModeText(p.modePaiement) }}
                 </div>
                 <div class="encaisse">
                   <i class="ri-user-line"></i>
                   Par {{ p.encaissePar }}
                 </div>
-              </div>
+            </div>
+
             </div>
           </div>
         </div>

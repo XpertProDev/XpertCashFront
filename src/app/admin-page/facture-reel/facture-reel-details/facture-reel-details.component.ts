@@ -158,11 +158,23 @@ export class FactureReelDetailsComponent implements OnInit {
       case 'CASH': return 'Espèce';
       case 'CHEQUE': return 'Chèque';
       case 'CARD': return 'Carte bancaire';
-      case 'TRANSFER': return 'Virement';
+      case 'VIREMENT': return 'Virement';
       case 'MOBILE': return 'Mobile Money';
       default: return mode;
     }
   }
+
+  getModeIcon(mode: string): string {
+  switch (mode) {
+    case 'CASH': return 'ri-cash-line';
+    case 'CHEQUE': return 'ri-bill-line';
+    case 'CARD': return 'ri-bank-card-line';
+    case 'VIREMENT': return 'ri-bank-fill';
+    case 'MOBILE': return 'ri-smartphone-line';
+    default: return 'ri-question-line';
+  }
+}
+
 
   loadHistoriquePaiements() {
     if (!this.facture) return;
