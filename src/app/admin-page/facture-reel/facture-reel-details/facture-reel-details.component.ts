@@ -106,6 +106,9 @@ export class FactureReelDetailsComponent implements OnInit {
 
         this.loadMontantRestant();
         this.loadHistoriquePaiements();
+      
+        // Ajouter le calcul du statut
+        this.updatePaymentStatus();
       },
       error: (err) => {
         console.error('Erreur', err);
@@ -114,11 +117,27 @@ export class FactureReelDetailsComponent implements OnInit {
     });
   }
 
+  // Nouvelle méthode pour mettre à jour le statut
+  private updatePaymentStatus() {
+    if (!this.facture) return;
+    
+    if (this.montantRestant <= 0) {
+      this.facture.statutPaiement = 'PAYEE';
+    } else if (this.montantRestant < this.facture.totalFacture) {
+      this.facture.statutPaiement = 'PARTIELLEMENT_PAYEE';
+    } else {
+      this.facture.statutPaiement = 'EN_ATTENTE';
+    }
+  }
+
   loadMontantRestant() {
     if (!this.facture) return;
     
     this.factureService.getMontantRestant(this.facture.id).subscribe({
-      next: (montant) => this.montantRestant = montant,
+      next: (montant) => {
+        this.montantRestant = montant;
+        this.updatePaymentStatus(); // Mettre à jour le statut après avoir reçu le montant restant
+      },
       error: (err) => console.error(err)
     });
   }
@@ -153,7 +172,6 @@ export class FactureReelDetailsComponent implements OnInit {
       error: (err) => console.error(err)
     });
   }
-
   enregistrerPaiement() {
     if (this.paiementForm.invalid || !this.facture) return;
 
@@ -168,7 +186,7 @@ export class FactureReelDetailsComponent implements OnInit {
     // Validation supplémentaire du montant
     if (montantPaiement > this.montantRestant) {
       this.errorMessage = "Le montant saisi dépasse le montant restant";
-      this.startMessageTimer(3000); // Démarrer le timer pour fermer le message
+      this.startMessageTimer(3000);
       this.isLoading = false;
       return;
     }
@@ -179,21 +197,22 @@ export class FactureReelDetailsComponent implements OnInit {
       this.paiementForm.get('modePaiement')?.value
     ).subscribe({
       next: () => {
-        // Cas standard (si l'API renvoie du JSON)
         this.successMessage = "Paiement enregistré avec succès.";
         this.paiementForm.reset();
-        this.loadMontantRestant();
-        this.loadHistoriquePaiements();
-        this.isLoading = false;
-        this.startMessageTimer(3000); // Démarrer le timer pour fermer le message
+        
+        // Recharger les données de la facture pour mettre à jour le statut
+        this.loadFactureReelle(this.facture!.id);
+        
+        this.startMessageTimer(3000);
       },
       error: (err: HttpErrorResponse) => {
         // Gestion spécifique du succès avec réponse texte
         if (err.status === 200 && err.error?.text) {
-          this.successMessage = err.error.text; // Message original de l'API
+          this.successMessage = err.error.text;
           this.paiementForm.reset();
-          this.loadMontantRestant();
-          this.loadHistoriquePaiements();
+          
+          // Recharger les données de la facture pour mettre à jour le statut
+          this.loadFactureReelle(this.facture!.id);
         } 
         // Gestion des erreurs standards
         else if (err.error?.message) {
@@ -203,7 +222,7 @@ export class FactureReelDetailsComponent implements OnInit {
         }
         
         this.isLoading = false;
-        this.startMessageTimer(3000); // Démarrer le timer pour fermer le message
+        this.startMessageTimer(3000);
       }
     });
   }

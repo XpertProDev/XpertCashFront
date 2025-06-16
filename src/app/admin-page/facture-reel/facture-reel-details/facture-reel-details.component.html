@@ -158,7 +158,7 @@
 
   <div class="column">
     <!-- Formulaire de paiement -->
-    <div class="information_cadre_row">
+    <div class="information_cadre_row" *ngIf="facture?.statutPaiement !== 'PAYEE'">
       <div class="info_titre_input">
         <div class="paiement_title">
           <h5>Paiement de facture</h5>
