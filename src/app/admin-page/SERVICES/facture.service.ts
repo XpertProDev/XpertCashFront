@@ -2,12 +2,13 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Facture } from "../MODELS/facture.model";
 import { catchError, map, Observable, of, throwError } from "rxjs";
+import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class FactureService {
-  private apiUrl = 'http://localhost:8080/api/auth';
+ private apiUrl = environment.apiBaseUrl;
   private boutiques: any[] = []; // Ajouter la propriété boutiques
 
   constructor(private http: HttpClient) { }

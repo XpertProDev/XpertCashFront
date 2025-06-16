@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Transfert } from "../MODELS/tranfert-model";
 import { Observable } from "rxjs/internal/Observable";
+import { environment } from "src/environments/environment";
 
 @Injectable({
     providedIn: 'root'
@@ -9,7 +10,8 @@ import { Observable } from "rxjs/internal/Observable";
 
   export class TransfertService {
 
-  private apiUrl = 'http://localhost:8080/api/auth';
+    private apiUrl = environment.apiBaseUrl;
+  
 
   constructor(private http: HttpClient) { }
 
