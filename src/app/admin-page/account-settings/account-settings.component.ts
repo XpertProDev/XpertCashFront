@@ -239,10 +239,22 @@ export class AccountSettingsComponent implements OnInit {
     return newPassword === confirmPassword ? null : { mismatch: true };
   }
 
- get tauxTvaAffiche(): string {
+get tauxTvaAffiche(): number {
   const tva = this.form.get('tauxTva')?.value;
-  return tva !== null ? `${(tva * 100).toFixed(0)}%` : '';
+  return tva !== null ? Math.round(tva * 100) : 0;
 }
+
+onTauxTvaInput(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const value = parseFloat(input.value);
+
+  if (!isNaN(value)) {
+    this.form.get('tauxTva')?.setValue(value / 100);
+  } else {
+    this.form.get('tauxTva')?.setValue(null);
+  }
+}
+
 
   getFormInit() {
     this.form = this.fb.group({

@@ -4,13 +4,14 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, switchMap, tap, throwError } from 'rxjs';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
 import { UserRequest } from '../MODELS/user-request';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class UsersService {
-  private apiUrl: string = "http://localhost:8080/api/auth";
+  private apiUrl = environment.apiBaseUrl;
   public isLocked: boolean = false;
   
 

@@ -2,13 +2,14 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { catchError, Observable, throwError } from "rxjs";
 import { UpdateUserRequest } from "../MODELS/profil.model";
+import { environment } from "src/environments/environment";
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfilService {
-  private apiUrl = 'http://localhost:8080/api/auth';
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) { }
   

@@ -2,13 +2,15 @@ import { Injectable } from "@angular/core";
 import { UniteMesure } from "../MODELS/unite.model";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { BehaviorSubject, Observable, tap } from "rxjs";
+import { environment } from "src/environments/environment";
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class UniteMesureService {
-  private apiUrl: string = "http://localhost:8080/api/auth";
+    private apiUrl = environment.apiBaseUrl;
+  
   
   private uniteMesuresSubject = new BehaviorSubject<UniteMesure[]>([]);
   public uniteMesures$ = this.uniteMesuresSubject.asObservable();
