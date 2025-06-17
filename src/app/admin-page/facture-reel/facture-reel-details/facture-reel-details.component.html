@@ -243,14 +243,20 @@
     <!-- Historique des paiements -->
     <div class="information_cadre_row_list">
       <div class="info_titre_input">
-        <div class="paiement_title">
-          <h5>Historique des paiements</h5>
-          <div class="statut-badge" [ngClass]="{
-            'payee': facture.statutPaiement === 'PAYEE',
-            'partiel': facture.statutPaiement === 'PARTIELLEMENT_PAYEE',
-            'attente': facture.statutPaiement === 'EN_ATTENTE'
-          }">
-            {{ getStatutText(facture.statutPaiement || '') }}
+        <div class="content_header">
+          <div class="paiement_title">
+            <h5>Historique des paiements</h5>
+            <div class="statut-badge" [ngClass]="{
+              'payee': facture.statutPaiement === 'PAYEE',
+              'partiel': facture.statutPaiement === 'PARTIELLEMENT_PAYEE',
+              'attente': facture.statutPaiement === 'EN_ATTENTE'
+            }">
+              {{ getStatutText(facture.statutPaiement || '') }}
+            </div>
+          </div>
+
+          <div class="total_montant">
+            Montant dû : {{ (facture.totalFacture || 0) | customNumber }} FCFA
           </div>
         </div>
         
@@ -281,6 +287,14 @@
             </div>
           </div>
         </div>
+        
+        <div class="content_footer">
+          <div class="total_montant">
+            Montant restant : {{ montantRestant | customNumber }} FCFA 
+          </div>
+        </div>
+
+
       </div>
     </div>
   </div>

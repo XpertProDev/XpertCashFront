@@ -629,11 +629,12 @@ select.input_focus {
 }
 
 .statut-badge {
-  padding: 4px 12px;
+  padding: 5px 12px;
+  margin-bottom: 8px;
   border-radius: 20px;
   font-size: 10px;
   font-weight: 500;
-  transform: translateX(-8px);
+  transform: translateX(-1px);
   &.payee {
     background-color: #e3fcef;
     color: #0e9f6e;
@@ -796,3 +797,24 @@ select.input_focus {
 .text-orange { color: #fd7e14; }
 .text-gray { color: #6c757d; }
 
+.content_header {
+  // background-color: red;
+  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  width: 100%;
+  // padding: 5px 10px;
+  margin-bottom: 10px;
+  position: sticky;
+  top: 0;
+}
+
+.total_montant {
+  padding-bottom: 5px;
+}
+
+.content_footer {
+  padding-bottom: 0px;
+  background-color: #fff;
+  padding-top: 10px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px -2px 2px 0px
+  
+}
