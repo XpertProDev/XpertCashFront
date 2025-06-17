@@ -123,7 +123,7 @@
                     <div class="info_titre_input">
                         <div class="champ_input">
                             <!-- <input [value]="factureProForma.description" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object"> -->
-                            <textarea [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus2" required placeholder="Saisis l'objet"></textarea>
+                            <textarea [disabled]="isAnnule" [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus2" required placeholder="Saisis l'objet"></textarea>
                             <label for="object" class="label"> Objet </label>
                         </div>
                     </div>
@@ -229,7 +229,7 @@
                                 <tbody>
                                     <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of confirmedLignes; let i = index">
                                         <!-- // Produit  -->
-                                        <td>
+                                        <td class="input_focus_type_select">
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <input [value]="getProduitNom(ligne.produitId)" class="input_focus_type" type="text" readonly class="input_table" placeholder="Nom produit">
                                             </div>
@@ -237,7 +237,7 @@
                                         <!-- // Description -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                            <textarea style="margin-bottom: -7px; min-width: 120px; resize: none;"
+                                            <textarea [disabled]="isAnnule" style="margin-bottom: -7px; min-width: 120px; resize: none;"
                                                 type="text" [(ngModel)]="ligne.ligneDescription" 
                                                 [ngModelOptions]="{standalone: true}"  
                                                 class="input_focus_type"
@@ -248,7 +248,7 @@
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <!-- <input  [value]="ligne.quantite" type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité"> -->
-                                                <input [(ngModel)]="ligne.quantite" [ngModelOptions]="{standalone: true}" type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité">
+                                                <input [disabled]="isAnnule" [(ngModel)]="ligne.quantite" [ngModelOptions]="{standalone: true}" type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité">
                                             </div>
                                         </td>
                                         <!-- // Prix Unitaire  -->
@@ -283,7 +283,7 @@
                                     </tr>
                                 </tbody>
                                 <!-- Ajouter produit quantite  -->
-                                <tbody>
+                                <tbody *ngIf="factureProForma.statut !== statusOptions.ANNULE">
                                     <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;"  *ngFor="let ligne of inputLignes; let i = index; trackBy: trackByFn">
                                         <!-- // Produit  -->
                                         <div class="champ_input" style="margin-right: 15px;">
@@ -297,7 +297,7 @@
                                                     {{ produit.nom }}
                                                 </option>
                                                 </select> -->
-                                                <select 
+                                                <select  [disabled]="isAnnule"
                                                     name="produit{{i}}"
                                                     class="input_focus_type input_focus_type_select" 
                                                     [(ngModel)]="ligne.produitId"
@@ -316,7 +316,7 @@
                                         <!-- // Description -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                                <textarea style="margin-bottom: -7px; min-width: 120px; resize: none;"
+                                                <textarea [disabled]="isAnnule" style="margin-bottom: -7px; min-width: 120px; resize: none;"
                                                 type="text"
                                                 [(ngModel)]="ligne.ligneDescription"
                                                 [ngModelOptions]="{ standalone: true }"
@@ -327,7 +327,7 @@
                                         <!-- // Quantité  -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                                <input type="number" [(ngModel)]="ligne.quantite" 
+                                                <input [disabled]="isAnnule" type="number" [(ngModel)]="ligne.quantite" 
                                                 (ngModelChange)="updateCalculs()" [ngModelOptions]="{standalone: true}"
                                                 class="input_focus_type" 
                                                 placeholder="Quantité">
@@ -402,7 +402,7 @@
                     <div class="champ_input_inventaire">
                         <p>Application de REMISE</p>
                         <label class="switch">
-                            <input type="checkbox" [(ngModel)]="activeRemise" (change)="onToggleRemise()" [ngModelOptions]="{standalone: true}"/>
+                            <input [disabled]="isAnnule" type="checkbox" [(ngModel)]="activeRemise" (change)="onToggleRemise()" [ngModelOptions]="{standalone: true}"/>
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -452,7 +452,7 @@
                     <div class="champ_input_inventaire">
                         <p>Application de TVA</p>
                         <label class="switch">
-                            <input type="checkbox" [(ngModel)]="activeTva" (change)="onToggleTVA()" [ngModelOptions]="{standalone: true}"/>
+                            <input [disabled]="isAnnule" type="checkbox" [(ngModel)]="activeTva" (change)="onToggleTVA()" [ngModelOptions]="{standalone: true}"/>
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -487,14 +487,20 @@
               </fieldset>
 
                 <!-- Buttom ajouter et annuler  -->
-                <div class="info_titre_input info_titre_input_btn" *ngIf="factureProForma.statut !== statusOptions.ANNULE">
-                    <!-- Input de produits  -->
-                    <div class="btn_annuler">
-                        <button class="btn_cancel" (click)="getAnnulerDetail()">Annuler</button>
+                <div class="information_cadre" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 10px; ">
+                    <div style="cursor: pointer; text-align: left; margin-left: 20px;">
+                        <button class="btn_apercu" title="Voir l'aperçu de facture proforma" (click)="apercuFactureProformaDansDetail()">Aperçu  <i class="ri-eye-2-line"></i></button>
                     </div>
-
-                    <div class="btn_ajouter">
-                        <button *ngIf="!isValidated" class="btn_save" type="submit" (click)="submitUpdateForm()">Modifier</button>
+                    <!-- /////////  -->
+                    <div class="info_titre_input info_titre_input_btn" *ngIf="factureProForma.statut !== statusOptions.ANNULE" style="padding: 0;">
+                        <!-- Input de produits  -->
+                        <div class="btn_annuler">
+                            <button class="btn_cancel" (click)="getAnnulerDetail()">Annuler</button>
+                        </div>
+        
+                        <div class="btn_ajouter">
+                            <button *ngIf="!isValidated" class="btn_save" type="submit" (click)="submitUpdateForm()">Modifier</button>
+                        </div>
                     </div>
                 </div>
                 <!-- Message d'erreur global -->

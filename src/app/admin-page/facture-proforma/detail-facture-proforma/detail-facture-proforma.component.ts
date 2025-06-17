@@ -571,6 +571,10 @@ export class DetailFactureProformaComponent implements OnInit {
     this.updateFactureStatut(payload);
   }
 
+  get isAnnule(): boolean {
+    return this.factureProForma?.statut === this.statusOptions.ANNULE;
+  }
+
   // Méthode générique pour mettre à jour le statut
   private updateFactureStatut(payload: Partial<FactureProForma>): void {
     this.factureProFormaService.updateFactureProforma(
