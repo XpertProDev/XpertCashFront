@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { catchError, Observable, tap, throwError } from "rxjs";
-import { FactureProForma, UpdateFactureProFormaDTO } from "../MODELS/FactureProForma.model";
+import { FactureProForma, StatutFactureProForma, UpdateFactureProFormaDTO } from "../MODELS/FactureProForma.model";
 import { Note } from "../MODELS/Note.model";
 
 
@@ -104,6 +104,11 @@ export class FactureProFormaService {
       idsApprobateurs.forEach(id => {
         params = params.append('idsApprobateurs', id.toString());
       });
+    }
+
+    // Ajouter le traitement spécifique pour l'annulation
+    if (modifications.statut === StatutFactureProForma.ANNULE) {
+      params = params.set('isAnnulation', 'true');
     }
 
 
