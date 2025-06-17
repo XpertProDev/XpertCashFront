@@ -72,6 +72,11 @@
         </div>
       </div>
     </div>
+
+      <!-- Message vide -->
+  <div *ngIf="factureReel.length === 0" class="no-client-message">
+    Aucun facture réelle trouvé
+  </div>
   
     <!-- Pagination -->
     <div class="pagination">
