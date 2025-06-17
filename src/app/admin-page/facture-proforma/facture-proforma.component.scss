@@ -421,6 +421,7 @@ tr:hover {
 .etat-bleu { color: #0671e4; }     /* Bleu pour approuvé */
 .etat-orange { color: #ff9900; }   /* Orange pour envoyé */
 .etat-vert { color: #008000; }     /* Vert pour validé */
+.etat-rouge { color: #ff0000; } 
 
 /* Optionnel : rendre le texte plus visible */
 .td span {
@@ -810,7 +811,13 @@ tr.tr:hover {
   .etat-vert span {
     color: #fff;
   }
+
+  .etat-rouge p,
+  .etat-rouge span {
+    color: #fff;
+  }
   
+
 
   .pagination {
     display: flex;

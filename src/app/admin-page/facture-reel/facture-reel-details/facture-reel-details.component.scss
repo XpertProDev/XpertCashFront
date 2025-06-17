@@ -633,7 +633,7 @@ select.input_focus {
   border-radius: 20px;
   font-size: 10px;
   font-weight: 500;
-  
+  transform: translateX(-8px);
   &.payee {
     background-color: #e3fcef;
     color: #0e9f6e;

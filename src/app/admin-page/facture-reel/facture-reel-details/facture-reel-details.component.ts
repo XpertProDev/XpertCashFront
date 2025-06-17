@@ -182,8 +182,8 @@ customNumberTransform(value: number): string {
     switch(mode) {
       case 'CASH': return 'Espèce';
       case 'CHEQUE': return 'Chèque';
-      case 'CARD': return 'Carte bancaire';
-      case 'VIREMENT': return 'Virement';
+      case 'CARD': return 'Carte de crédit';
+      case 'VIREMENT': return 'Virement bancaires';
       case 'MOBILE': return 'Mobile Money';
       default: return mode;
     }
