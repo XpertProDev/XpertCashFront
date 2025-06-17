@@ -3,8 +3,8 @@ export enum StatutFactureProForma {
   APPROBATION = 'APPROBATION',
   APPROUVE = 'APPROUVE',
   ENVOYE = 'ENVOYE',
-  VALIDE   = 'VALIDE',
-  
+  VALIDE = 'VALIDE',
+  ANNULE = 'ANNULE'
 }
 
 // Dans ton modèle FactureProForma
@@ -41,6 +41,7 @@ export interface FactureProForma {
   dateRelance?: string;
   dateCreation: string;
   dateApprobation?: string;
+  noteModification?: string;
   // dateAnnulation?: string;
   methodeEnvoi?: 'EMAIL' | 'PHYSIQUE';
 

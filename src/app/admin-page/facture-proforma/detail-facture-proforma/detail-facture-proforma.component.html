@@ -18,7 +18,7 @@
         <div class="modal-body">
             <form class="container_formulaire">
 
-              <fieldset [disabled]="isValidated">
+              <fieldset>
                 <!-- // Titre -->
                 <div class="Title">
                     <h3>Détails de la facture pro forma</h3>
@@ -26,75 +26,87 @@
                 <!-- Les informations de l'etat  -->
                 <div class="information_cadre">
                     <div class="info_titre_etat">
-                    <h4>État</h4>
-                    <div class="etat_container" [class.has-active]="factureProForma.statut">
-                        <!-- Section des états -->
-                        <div class="etat_content">
+                        <h4>État</h4>
+                        <div class="etat_container" [class.has-active]="factureProForma.statut">
+                            <!-- Section des états -->
+                            <div class="etat_content" *ngIf="factureProForma.statut !== statusOptions.ANNULE">
+                                <!-- Bouton Brouillon -->
+                                <div class="etat_brouillon" *ngIf="factureProForma.statut !== statusOptions.VALIDE">
+                                    <button class="btn_etat" 
+                                            [class.active]="factureProForma.statut === statusOptions.BROUILLON"
+                                            [disabled]="!canTransitionTo(statusOptions.BROUILLON)"
+                                            (click)="openStatusConfirmation(statusOptions.BROUILLON)">
+                                    Brouillon
+                                    </button>
+                                </div>
+                                
+                                <!-- Bouton Approbation -->
+                                <div class="etat_approbation" *ngIf="!factureProForma.dateApprobation && factureProForma.statut !== statusOptions.VALIDE">
+                                    <button class="btn_etat" 
+                                            [class.active]="factureProForma.statut === statusOptions.APPROBATION"
+                                            [disabled]="!canTransitionTo(statusOptions.APPROBATION)"
+                                            (click)="openStatusConfirmation(statusOptions.APPROBATION)">
+                                    Approbation
+                                    </button>
+                                </div>
+                                
+                                <!-- Bouton Approuver -->
+                                <div class="etat_approuver" *ngIf="factureProForma.statut !== statusOptions.VALIDE">
+                                    <button class="btn_etat" 
+                                            [class.active]="factureProForma.statut === statusOptions.APPROUVE"
+                                            [disabled]="!canTransitionTo(statusOptions.APPROUVE)"
+                                            (click)="openStatusConfirmation(statusOptions.APPROUVE)">
+                                    Approuver
+                                    </button>
+                                </div>
+                                
+                                <!-- Bouton Envoyer -->
+                                <div class="etat_envoyer" *ngIf="factureProForma.statut !== statusOptions.VALIDE">
+                                    <button class="btn_etat" 
+                                            [class.active]="factureProForma.statut === statusOptions.ENVOYE"
+                                            [disabled]="!canTransitionTo(statusOptions.ENVOYE)"
+                                            (click)="openStatusConfirmation(statusOptions.ENVOYE)">
+                                    Envoyer
+                                    </button>
+                                </div>
+                                
+                                <!-- Bouton Annuler -->
+                                <div class="etat_envoyer" *ngIf="factureProForma.statut === statusOptions.VALIDE">
+                                    <button class="btn_etat btn_etat_annuler"
+                                            (click)="openAnnulationConfirmation()">
+                                        Annuler
+                                    </button>
+                                </div>
+                                
+                                <!-- Bouton Valider -->
+                                <div class="etat_valider">
+                                    <button class="btn_etat" 
+                                            [class.active]="factureProForma.statut === statusOptions.VALIDE"
+                                            [disabled]="!canTransitionTo(statusOptions.VALIDE)"
+                                            (click)="openStatusConfirmation(statusOptions.VALIDE)">
+                                    Valider
+                                    </button>
+                                </div>
+                            </div>
 
-                            <!-- Bouton Brouillon -->
-                            <div class="etat_brouillon">
-                                <button class="btn_etat" 
-                                        [class.active]="factureProForma.statut === statusOptions.BROUILLON"
-                                        [disabled]="!canTransitionTo(statusOptions.BROUILLON)"
-                                        (click)="openStatusConfirmation(statusOptions.BROUILLON)">
-                                Brouillon
-                                </button>
+                            <!-- Message d'annulation -->
+                            <div *ngIf="factureProForma.statut === statusOptions.ANNULE" class="annule-message">
+                                <i class="ri-information-line"></i>
+                                Cette facture a été annulée
                             </div>
-                            
 
-                            <!-- Bouton Approbation -->
-                            <div class="etat_approbation" *ngIf="!factureProForma.dateApprobation">
-                                <button class="btn_etat" 
-                                        [class.active]="factureProForma.statut === statusOptions.APPROBATION"
-                                        [disabled]="!canTransitionTo(statusOptions.APPROBATION)"
-                                        (click)="openStatusConfirmation(statusOptions.APPROBATION)">
-                                Approbation
-                                </button>
-                            </div>
-                            
-                            <!-- Bouton Approuver -->
-                            <div class="etat_approuver">
-                                <button class="btn_etat" 
-                                        [class.active]="factureProForma.statut === statusOptions.APPROUVE"
-                                        [disabled]="!canTransitionTo(statusOptions.APPROUVE)"
-                                        (click)="openStatusConfirmation(statusOptions.APPROUVE)">
-                                Approuver
-                                </button>
-                            </div>
-                            
-                            <!-- Bouton Envoyer -->
-                            <div class="etat_envoyer">
-                                <button class="btn_etat" 
-                                        [class.active]="factureProForma.statut === statusOptions.ENVOYE"
-                                        [disabled]="!canTransitionTo(statusOptions.ENVOYE)"
-                                        (click)="openStatusConfirmation(statusOptions.ENVOYE)">
-                                Envoyer
-                                </button>
-                            </div>
-                            
-                            <!-- Bouton Valider -->
-                            <div class="etat_valider">
-                                <button class="btn_etat" 
-                                        [class.active]="factureProForma.statut === statusOptions.VALIDE"
-                                        [disabled]="!canTransitionTo(statusOptions.VALIDE)"
-                                        (click)="openStatusConfirmation(statusOptions.VALIDE)">
-                                Valider
-                                </button>
+                            <!-- Popup de confirmation -->
+                            <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
+                                <div class="popup-content">
+                                    <h4>Confirmer le changement de statut</h4>
+                                    <p>Voulez-vous vraiment passer la facture au statut "{{ selectedStatutLabel }}" ?</p>
+                                    <div class="popup-actions">
+                                        <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
+                                        <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Popup de confirmation -->
-                        <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
-                            <div class="popup-content">
-                            <h4>Confirmer le changement de statut</h4>
-                            <p>Voulez-vous vraiment passer la facture au statut "{{ selectedStatutLabel }}" ?</p>
-                            <div class="popup-actions">
-                                <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
-                                <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
-                            </div>
-                            </div>
-                        </div>
-                    </div>
                     </div>
                 </div>
 
@@ -111,7 +123,7 @@
                     <div class="info_titre_input">
                         <div class="champ_input">
                             <!-- <input [value]="factureProForma.description" autocomplete="off" type="text" class="input_focus" required placeholder="Saisis l'object"> -->
-                            <textarea [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus2" required placeholder="Saisis l'objet"></textarea>
+                            <textarea [disabled]="isAnnule" [(ngModel)]="factureProForma.description" [ngModelOptions]="{standalone: true}" autocomplete="off" type="text" class="input_focus2" required placeholder="Saisis l'objet"></textarea>
                             <label for="object" class="label"> Objet </label>
                         </div>
                     </div>
@@ -217,7 +229,7 @@
                                 <tbody>
                                     <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;" *ngFor="let ligne of confirmedLignes; let i = index">
                                         <!-- // Produit  -->
-                                        <td>
+                                        <td class="input_focus_type_select">
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <input [value]="getProduitNom(ligne.produitId)" class="input_focus_type" type="text" readonly class="input_table" placeholder="Nom produit">
                                             </div>
@@ -225,7 +237,7 @@
                                         <!-- // Description -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                            <textarea style="margin-bottom: -7px; min-width: 120px; resize: none;"
+                                            <textarea [disabled]="isAnnule" style="margin-bottom: -7px; min-width: 120px; resize: none;"
                                                 type="text" [(ngModel)]="ligne.ligneDescription" 
                                                 [ngModelOptions]="{standalone: true}"  
                                                 class="input_focus_type"
@@ -236,7 +248,7 @@
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
                                                 <!-- <input  [value]="ligne.quantite" type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité"> -->
-                                                <input [(ngModel)]="ligne.quantite" [ngModelOptions]="{standalone: true}" type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité">
+                                                <input [disabled]="isAnnule" [(ngModel)]="ligne.quantite" [ngModelOptions]="{standalone: true}" type="number" class="input_focus_type" id="addQuantite" name="addQuantite" placeholder="Quantité">
                                             </div>
                                         </td>
                                         <!-- // Prix Unitaire  -->
@@ -271,7 +283,7 @@
                                     </tr>
                                 </tbody>
                                 <!-- Ajouter produit quantite  -->
-                                <tbody>
+                                <tbody *ngIf="factureProForma.statut !== statusOptions.ANNULE">
                                     <tr class="tr_stock" style="border-top: 1px solid #f0f2f5;"  *ngFor="let ligne of inputLignes; let i = index; trackBy: trackByFn">
                                         <!-- // Produit  -->
                                         <div class="champ_input" style="margin-right: 15px;">
@@ -285,7 +297,7 @@
                                                     {{ produit.nom }}
                                                 </option>
                                                 </select> -->
-                                                <select 
+                                                <select  [disabled]="isAnnule"
                                                     name="produit{{i}}"
                                                     class="input_focus_type input_focus_type_select" 
                                                     [(ngModel)]="ligne.produitId"
@@ -304,7 +316,7 @@
                                         <!-- // Description -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                                <textarea style="margin-bottom: -7px; min-width: 120px; resize: none;"
+                                                <textarea [disabled]="isAnnule" style="margin-bottom: -7px; min-width: 120px; resize: none;"
                                                 type="text"
                                                 [(ngModel)]="ligne.ligneDescription"
                                                 [ngModelOptions]="{ standalone: true }"
@@ -315,7 +327,7 @@
                                         <!-- // Quantité  -->
                                         <td>
                                             <div class="champ_input" style="margin-right: 15px;">
-                                                <input type="number" [(ngModel)]="ligne.quantite" 
+                                                <input [disabled]="isAnnule" type="number" [(ngModel)]="ligne.quantite" 
                                                 (ngModelChange)="updateCalculs()" [ngModelOptions]="{standalone: true}"
                                                 class="input_focus_type" 
                                                 placeholder="Quantité">
@@ -390,7 +402,7 @@
                     <div class="champ_input_inventaire">
                         <p>Application de REMISE</p>
                         <label class="switch">
-                            <input type="checkbox" [(ngModel)]="activeRemise" (change)="onToggleRemise()" [ngModelOptions]="{standalone: true}"/>
+                            <input [disabled]="isAnnule" type="checkbox" [(ngModel)]="activeRemise" (change)="onToggleRemise()" [ngModelOptions]="{standalone: true}"/>
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -440,7 +452,7 @@
                     <div class="champ_input_inventaire">
                         <p>Application de TVA</p>
                         <label class="switch">
-                            <input type="checkbox" [(ngModel)]="activeTva" (change)="onToggleTVA()" [ngModelOptions]="{standalone: true}"/>
+                            <input [disabled]="isAnnule" type="checkbox" [(ngModel)]="activeTva" (change)="onToggleTVA()" [ngModelOptions]="{standalone: true}"/>
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -475,12 +487,12 @@
               </fieldset>
 
                 <!-- Buttom ajouter et annuler  -->
-                <div class="information_cadre" style="display: flex; align-items: center; justify-content: space-between;">
+                <div class="information_cadre" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 10px; ">
                     <div style="cursor: pointer; text-align: left; margin-left: 20px;">
                         <button class="btn_apercu" title="Voir l'aperçu de facture proforma" (click)="apercuFactureProformaDansDetail()">Aperçu  <i class="ri-eye-2-line"></i></button>
                     </div>
                     <!-- /////////  -->
-                    <div class="info_titre_input info_titre_input_btn">
+                    <div class="info_titre_input info_titre_input_btn" *ngIf="factureProForma.statut !== statusOptions.ANNULE" style="padding: 0;">
                         <!-- Input de produits  -->
                         <div class="btn_annuler">
                             <button class="btn_cancel" (click)="getAnnulerDetail()">Annuler</button>
@@ -984,4 +996,33 @@
                 </div>
             </div>
     </div>
+</div>
+
+<!-- Popup de confirmation pour l'annulation -->
+<div *ngIf="showAnnulationConfirmation" class="status-confirmation-popup">
+  <div class="popup-content">
+    <h4>Confirmer l'annulation</h4>
+    
+    <!-- <div class="form-group">
+      <label for="annulationReason">Raison de l'annulation (requise):</label>
+      <textarea id="annulationReason" 
+                [(ngModel)]="annulationReason" 
+                class="form-control" 
+                rows="3"
+                placeholder="Expliquez pourquoi vous annulez cette facture..."></textarea>
+    </div> -->
+    
+    <p>
+      Êtes-vous sûr de vouloir annuler cette facture ? Cette action est irréversible.
+    </p>
+    
+    <div class="popup-actions">
+      <button class="btn btn-secondary" (click)="cancelAnnulation()">Retour</button>
+      <button class="btn btn-danger" 
+              (click)="confirmAnnulation()">
+          Confirmer l'annulation
+      </button>
+      <!-- [disabled]="canAddNote && !annulationReason.trim()" -->
+    </div>
+  </div>
 </div>

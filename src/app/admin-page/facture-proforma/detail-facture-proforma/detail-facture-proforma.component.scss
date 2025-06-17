@@ -123,6 +123,16 @@ th {
   color: #000;
 }
 
+.btn_etat_annuler {
+  background-color: #ff0000!important;
+  color: #fff;
+}
+
+.btn_etat_annuler:hover {
+  background-color: #cb0505!important;
+  color: #fff;
+}
+
 .has-active .btn_etat:not(.active):hover {
   background-color: #00000030;
   color: #fff;
@@ -134,6 +144,9 @@ th {
 .btn_etat.active {
   background-color: #E9D421;
   color: #000;
+}
+.btn_etat_annuler.active {
+  color: #fff;
 }
 
 
@@ -2014,4 +2027,20 @@ input.input_focus_type:focus {
     color: #4099ff;
     font-size: 10px;
     font-weight: bolder;
+}
+
+.annule-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #d32f2f;
+    font-weight: 500;
+    padding: 8px 12px;
+    background-color: #ffebee;
+    border-radius: 4px;
+    font-size: 14px;
+    
+    i {
+        font-size: 18px;
+    }
 }

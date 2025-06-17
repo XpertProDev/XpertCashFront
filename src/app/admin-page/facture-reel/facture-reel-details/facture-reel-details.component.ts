@@ -339,7 +339,6 @@ getModeIconClass(mode: string): string {
     if (adresse)        { return `Adresse : ${adresse}`; }
     if (siege)          { return `Adresse : ${siege}`; }
     if (pays)           { return `Adresse : ${pays}`; }
-
     return '';
   }
 

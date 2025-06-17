@@ -23,7 +23,7 @@ interface EmailAttachment {
   file: File;
 }
 
-type EventType = 'creation' | 'modification' | 'approbation' | 'envoi' | 'validation';
+type EventType = 'creation' | 'modification' | 'approbation' | 'envoi' | 'validation' | 'annulation'; // Ajouté 'annulation'
 
 interface Note {
   id: number;
@@ -109,6 +109,7 @@ export class DetailFactureProformaComponent implements OnInit {
   nom: string | null = null;
   role: string | null = null;
   entrprisePhone: string | null = null;
+  noteEditingIndex: number | null = null;
 
   siege!: string;
   email: string = '';
@@ -132,17 +133,18 @@ export class DetailFactureProformaComponent implements OnInit {
   successMessage: string | null = null;
   tauxTva?: number | null;
 
-
-
+  showAnnulationConfirmation = false;
+  annulationReason = '';
+  // canAddNote = true; 
 
   isNotebookOpen = false;
   isAddNotePopupOpen = false;
   newNote = '';
   notes: Note[] = [];
   noteModification: string = '';
- isAddNoteInputVisible: boolean = false;
-   infoMessage: string | null = null;
-   confirmDeleteIndex: number | null = null;
+  isAddNoteInputVisible: boolean = false;
+  infoMessage: string | null = null;
+  confirmDeleteIndex: number | null = null;
 
 
 
@@ -536,104 +538,160 @@ export class DetailFactureProformaComponent implements OnInit {
       }
     });
   }
-noteEditingIndex: number | null = null;
 
-  
-submitNote() {
-  this.errorMessage = null;
-  this.successMessage = null;
+  // Ouvrir la confirmation d'annulation
+  openAnnulationConfirmation(): void {
+    // Vérifier si on peut ajouter une note
+    // this.canAddNote = this.factureProForma.statut !== this.statusOptions.VALIDE;
+    this.annulationReason = '';
+    this.showAnnulationConfirmation = true;
+  }
 
-  if (this.noteEditingIndex !== null && this.notes[this.noteEditingIndex]) {
-    // Cas modification d'une note existante
-    const noteToUpdate = this.notes[this.noteEditingIndex];
-    console.log('Note à modifier dans submitNote:', noteToUpdate);
-    const noteId = Number(noteToUpdate.id);
-    if (!noteId) {
-      this.errorMessage = 'ID invalide pour la note sélectionnée';
-      return;
-    }
+  closeAnnulationPopup(): void {
+    this.showAnnulationConfirmation = false;
+  }
 
+  // Annuler la procédure d'annulation
+  cancelAnnulation(): void {
+    this.showAnnulationConfirmation = false;
+  }
 
-    this.factureProFormaService.updateNote(
-      this.factureId,
-      noteId,
-      this.noteModification || ''
-    ).subscribe({
-      next: (res) => {
-        console.log('Note mise à jour avec succès !', res);
-        this.successMessage = 'Note modifiée avec succès.';
-         this.loadNotes();
+  // Confirmer l'annulation
+  confirmAnnulation(): void {
+    // if (this.canAddNote && !this.annulationReason.trim()) {
+    //   this.errorMessage = 'Veuillez saisir une raison pour l\'annulation';
+    //   return;
+    // }
 
-            const derniereNoteId = res?.noteId || res?.id || null;
-            if (derniereNoteId) {
-              this.factureProFormaService.getNoteById(this.factureId, derniereNoteId).subscribe({
-                next: (note) => {
-                  this.notes.unshift(note);
-                },
-                error: (err) => {
-                  console.error('Erreur lors de la récupération de la note ajoutée', err);
-                }
-              });
-            } else {
-              console.warn('ID de la note non retourné dans la réponse.');
-            }
-
-        // Mise à jour locale de la note
-        this.notes[this.noteEditingIndex!].content = this.noteModification;
-        this.notes[this.noteEditingIndex!].dateModification = new Date();
-
-        // Réinitialisation
-        this.noteModification = '';
-        this.isAddNoteInputVisible = false;
-        this.noteEditingIndex = null;
-      },
-      error: (err) => {
-        console.error('Échec de la mise à jour de la note', err);
-        const fullError = err.error?.error || 'Erreur lors de la modification de la note';
-        const splitMessage = fullError.split(':');
-        this.errorMessage = splitMessage.length > 1 ? splitMessage[1].trim() : fullError;
-      }
-    });
-  } else {
-    // Cas ajout d'une nouvelle note
-    const payload = {
-      noteModification: this.noteModification || null,
-      //numeroIdentifiant
-      
+    const payload: Partial<FactureProForma> = {
+      statut: StatutFactureProForma.ANNULE,
+      noteModification: this.annulationReason
     };
 
-    const nouvelleNote: Note = {
-      id: Date.now(), // ou un ID généré par le backend
-      content: this.noteModification,
-      dateCreation: new Date(),
-      auteur: this.getCurrentUser().nomComplet || 'Utilisateur inconnu',
-      numeroIdentifiant: this.noteModification || '', // Ajout du champ requis
-    };
+    this.updateFactureStatut(payload);
+  }
 
+  get isAnnule(): boolean {
+    return this.factureProForma?.statut === this.statusOptions.ANNULE;
+  }
+
+  // Méthode générique pour mettre à jour le statut
+  private updateFactureStatut(payload: Partial<FactureProForma>): void {
     this.factureProFormaService.updateFactureProforma(
       this.factureId,
       undefined,
       undefined,
-      payload as Partial<FactureProForma>
+      payload
     ).subscribe({
-      next: (res) => {
-        console.log('Note ajoutée avec succès !', res);
-        this.successMessage = 'Note enregistrée avec succès.';
-        this.loadNotes();
-        this.notes.unshift(nouvelleNote);
-        this.noteModification = '';
-        this.isAddNoteInputVisible = false;
+      next: (updatedFacture) => {
+        this.factureProForma = updatedFacture;
+        this.showAnnulationConfirmation = false;
+        this.loadHistoricalEvents();
+        this.successMessage = 'Facture annulée avec succès';
+        setTimeout(() => this.successMessage = null, 3000);
       },
       error: (err) => {
-        console.error('Échec de l\'ajout de la note', err);
-        const fullError = err.error?.error || 'Erreur lors de l\'ajout de la note';
-        const splitMessage = fullError.split(':');
-        this.errorMessage = splitMessage.length > 1 ? splitMessage[1].trim() : fullError;
+        console.error('Erreur lors de l\'annulation', err);
+        this.errorMessage = err.error?.message || 'Échec de l\'annulation';
+        this.showAnnulationConfirmation = false;
       }
     });
   }
-}
+    
+  submitNote() {
+    this.errorMessage = null;
+    this.successMessage = null;
 
+    if (this.noteEditingIndex !== null && this.notes[this.noteEditingIndex]) {
+      // Cas modification d'une note existante
+      const noteToUpdate = this.notes[this.noteEditingIndex];
+      console.log('Note à modifier dans submitNote:', noteToUpdate);
+      const noteId = Number(noteToUpdate.id);
+      if (!noteId) {
+        this.errorMessage = 'ID invalide pour la note sélectionnée';
+        return;
+      }
+
+
+      this.factureProFormaService.updateNote(
+        this.factureId,
+        noteId,
+        this.noteModification || ''
+      ).subscribe({
+        next: (res) => {
+          console.log('Note mise à jour avec succès !', res);
+          this.successMessage = 'Note modifiée avec succès.';
+          this.loadNotes();
+
+              const derniereNoteId = res?.noteId || res?.id || null;
+              if (derniereNoteId) {
+                this.factureProFormaService.getNoteById(this.factureId, derniereNoteId).subscribe({
+                  next: (note) => {
+                    this.notes.unshift(note);
+                  },
+                  error: (err) => {
+                    console.error('Erreur lors de la récupération de la note ajoutée', err);
+                  }
+                });
+              } else {
+                console.warn('ID de la note non retourné dans la réponse.');
+              }
+
+          // Mise à jour locale de la note
+          this.notes[this.noteEditingIndex!].content = this.noteModification;
+          this.notes[this.noteEditingIndex!].dateModification = new Date();
+
+          // Réinitialisation
+          this.noteModification = '';
+          this.isAddNoteInputVisible = false;
+          this.noteEditingIndex = null;
+        },
+        error: (err) => {
+          console.error('Échec de la mise à jour de la note', err);
+          const fullError = err.error?.error || 'Erreur lors de la modification de la note';
+          const splitMessage = fullError.split(':');
+          this.errorMessage = splitMessage.length > 1 ? splitMessage[1].trim() : fullError;
+        }
+      });
+    } else {
+      // Cas ajout d'une nouvelle note
+      const payload = {
+        noteModification: this.noteModification || null,
+        //numeroIdentifiant
+        
+      };
+
+      const nouvelleNote: Note = {
+        id: Date.now(), // ou un ID généré par le backend
+        content: this.noteModification,
+        dateCreation: new Date(),
+        auteur: this.getCurrentUser().nomComplet || 'Utilisateur inconnu',
+        numeroIdentifiant: this.noteModification || '', // Ajout du champ requis
+      };
+
+      this.factureProFormaService.updateFactureProforma(
+        this.factureId,
+        undefined,
+        undefined,
+        payload as Partial<FactureProForma>
+      ).subscribe({
+        next: (res) => {
+          console.log('Note ajoutée avec succès !', res);
+          this.successMessage = 'Note enregistrée avec succès.';
+          this.loadNotes();
+          this.notes.unshift(nouvelleNote);
+          this.noteModification = '';
+          this.isAddNoteInputVisible = false;
+        },
+        error: (err) => {
+          console.error('Échec de l\'ajout de la note', err);
+          const fullError = err.error?.error || 'Erreur lors de l\'ajout de la note';
+          const splitMessage = fullError.split(':');
+          this.errorMessage = splitMessage.length > 1 ? splitMessage[1].trim() : fullError;
+        }
+      });
+    }
+  }
 
   // Ajouter ces méthodes
   canApprove(): boolean {
@@ -756,28 +814,36 @@ get labelNom(): string {
   private isStatusTransitionAllowed(newStatut: StatutFactureProForma): boolean {
     if (!this.factureProForma?.statut) return false;
 
+    // Correction pour allowedTransitions
     const allowedTransitions: Record<StatutFactureProForma, StatutFactureProForma[]> = {
       [StatutFactureProForma.BROUILLON]: [
         StatutFactureProForma.APPROUVE,
         StatutFactureProForma.APPROBATION,
         StatutFactureProForma.ENVOYE,
-        StatutFactureProForma.VALIDE // Si vous voulez autoriser la validation directe
+        StatutFactureProForma.VALIDE,
+        StatutFactureProForma.ANNULE // Ajouté
       ],
       [StatutFactureProForma.APPROBATION]: [
         StatutFactureProForma.APPROUVE,
-        StatutFactureProForma.BROUILLON
+        StatutFactureProForma.BROUILLON,
+        StatutFactureProForma.ANNULE // Ajouté
       ],
       [StatutFactureProForma.APPROUVE]: [
         StatutFactureProForma.ENVOYE,
         StatutFactureProForma.BROUILLON,
-        StatutFactureProForma.VALIDE // Optionnel
+        StatutFactureProForma.VALIDE,
+        StatutFactureProForma.ANNULE // Ajouté
       ],
       [StatutFactureProForma.ENVOYE]: [
         StatutFactureProForma.VALIDE,
         StatutFactureProForma.APPROUVE,
-        StatutFactureProForma.BROUILLON // Optionnel
+        StatutFactureProForma.BROUILLON,
+        StatutFactureProForma.ANNULE // Ajouté
       ],
-      [StatutFactureProForma.VALIDE]: []
+      [StatutFactureProForma.VALIDE]: [
+        StatutFactureProForma.ANNULE // Ajouté (si applicable)
+      ],
+      [StatutFactureProForma.ANNULE]: [] // Nouvelle entrée
     };
 
     const currentStatut = this.factureProForma.statut as StatutFactureProForma;
@@ -856,11 +922,12 @@ get labelNom(): string {
 
   private getStatusDescription(status: StatutFactureProForma): string {
     const descriptions = {
-        [StatutFactureProForma.BROUILLON]: 'Retour au brouillon',
-        [StatutFactureProForma.APPROBATION]: 'Demande d\'approbation envoyée',
-        [StatutFactureProForma.APPROUVE]: 'Facture approuvée',
-        [StatutFactureProForma.ENVOYE]: 'Facture envoyée au client',
-        [StatutFactureProForma.VALIDE]: 'Facture validée définitivement'
+      [StatutFactureProForma.BROUILLON]: 'Retour au brouillon',
+      [StatutFactureProForma.APPROBATION]: 'Demande d\'approbation envoyée',
+      [StatutFactureProForma.APPROUVE]: 'Facture approuvée',
+      [StatutFactureProForma.ENVOYE]: 'Facture envoyée au client',
+      [StatutFactureProForma.VALIDE]: 'Facture validée définitivement',
+      [StatutFactureProForma.ANNULE]: 'Facture annulée' // Ajouté
     };
     return descriptions[status];
   }
@@ -877,9 +944,9 @@ get labelNom(): string {
       [StatutFactureProForma.APPROBATION]: 'approbation',
       [StatutFactureProForma.APPROUVE]: 'approbation',
       [StatutFactureProForma.ENVOYE]: 'envoi',
-      [StatutFactureProForma.VALIDE]: 'validation'
+      [StatutFactureProForma.VALIDE]: 'validation',
+      [StatutFactureProForma.ANNULE]: 'annulation' // Ajouté
     };
-
     return statusMap[status] || 'modification';
   }
 
@@ -894,7 +961,8 @@ get labelNom(): string {
       [StatutFactureProForma.APPROBATION]: 'Approbation',
       [StatutFactureProForma.APPROUVE]: 'Approuvé',
       [StatutFactureProForma.ENVOYE]: 'Envoyé',
-      [StatutFactureProForma.VALIDE]: 'Validé'
+      [StatutFactureProForma.VALIDE]: 'Validé',
+      [StatutFactureProForma.ANNULE]: 'Annulé' // Ajouté
     };
     return labels[statut];
   }
