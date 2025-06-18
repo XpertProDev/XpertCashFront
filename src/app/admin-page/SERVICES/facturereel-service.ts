@@ -1,13 +1,14 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable, throwError } from "rxjs";
+import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class FactureReelService {
-  private apiUrl: string = "http://localhost:8080/api/auth";
-
+    private apiUrl = environment.apiBaseUrl;
+  
   constructor(private http: HttpClient) {}
 
   getFactureReelleById(id: number): Observable<any> {

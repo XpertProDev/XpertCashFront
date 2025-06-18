@@ -41,7 +41,7 @@ import { SuspendedBoutiqueDialogComponent } from '../produits/suspended-boutique
 })
 export class StocksComponent implements OnInit {
   boutiqueId!: number;
-  backendUrl: string = 'http://localhost:8080';
+  backendUrl: string = 'http://31.207.34.194:8080';
   searchText: string = '';
   tasks: Produit[] = [];
   imagePopup: string | null = null;
@@ -310,7 +310,7 @@ export class StocksComponent implements OnInit {
             // const fullImageUrl = prod.photo && prod.photo !== "null" && prod.photo !== "undefined" ? `http://localhost:8080${prod.photo}` : "";
           // Vérifier si la photo est valide
           const hasPhoto = prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined';
-          const fullImageUrl = hasPhoto ? `http://localhost:8080${prod.photo}` : '';
+          const fullImageUrl = hasPhoto ? `http://31.207.34.194:8080${prod.photo}` : '';
 
             return {
               id: prod.id,

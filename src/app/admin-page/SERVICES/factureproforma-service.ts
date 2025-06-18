@@ -3,13 +3,15 @@ import { Injectable } from "@angular/core";
 import { catchError, Observable, tap, throwError } from "rxjs";
 import { FactureProForma, StatutFactureProForma, UpdateFactureProFormaDTO } from "../MODELS/FactureProForma.model";
 import { Note } from "../MODELS/Note.model";
+import { environment } from "src/environments/environment";
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class FactureProFormaService {
-  private apiUrl: string = "http://localhost:8080/api/auth";
+    private apiUrl = environment.apiBaseUrl;
+  
 
   constructor(private http: HttpClient) { }
 

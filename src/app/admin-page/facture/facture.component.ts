@@ -352,7 +352,7 @@ blobToBase64(blob: Blob): Promise<string> {
     const logoPath = this.userInfo?.logoEntreprise;
 
     if (logoPath) {
-      const fullLogoUrl = `http://localhost:8080${logoPath}`;
+      const fullLogoUrl = `http://31.207.34.194:8080${logoPath}`;
 
       const logoWidth = 20; 
        const logoHeight = 15;

@@ -64,7 +64,7 @@ export class ListProduitComponent {
   // Gestion de l'image
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
-  backendUrl: string = 'http://localhost:8080';
+  backendUrl: string = 'http://31.207.34.194:8080';
   selectedFile: File | null | undefined = null;
   selectedBoutiqueId: number | null = null;
   showPopupMessage(data: PopupData): void { this.popupData = data; this.showPopup = true; }

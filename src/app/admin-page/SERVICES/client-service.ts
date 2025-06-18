@@ -3,12 +3,14 @@ import { Injectable } from "@angular/core";
 import { BehaviorSubject, catchError, Observable, tap, throwError } from "rxjs";
 import { Entreprise } from "../MODELS/entreprise-model";
 import { Clients } from "../MODELS/clients-model";
+import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClientService {
-  private apiUrl: string = "http://localhost:8080/api/auth";
+    private apiUrl = environment.apiBaseUrl;
+  
 
   constructor(private http: HttpClient) { }
 

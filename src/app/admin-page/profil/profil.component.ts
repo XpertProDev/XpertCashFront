@@ -253,7 +253,7 @@ export class ProfilComponent  implements OnInit{
         this.nomEntreprise = user.nomEntreprise
         this.email = user.email;
         this.phone = user.phone;
-        this.photo = user.photo ? `http://localhost:8080${user.photo}` : '';
+        this.photo = user.photo ? `http://31.207.34.194:8080${user.photo}` : '';
         this.roleType = user.roleType;
         this.pays = user.pays;
         this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';

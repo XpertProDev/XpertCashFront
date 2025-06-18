@@ -126,7 +126,7 @@ export class FactureProformaApercuComponent implements OnInit {
 
   
         // Ajout du préfixe si nécessaire
-        this.logo = 'http://localhost:8080' + entreprise.logo;
+        this.logo = 'http://31.207.34.194:8080' + entreprise.logo;
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);

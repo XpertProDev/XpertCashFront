@@ -41,7 +41,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-
 })
 export class ProduitsComponent implements OnInit {
   boutiqueId!: number;
-  backendUrl: string = 'http://localhost:8080';
+  backendUrl: string = 'http://31.207.34.194:8080';
   searchText: string = '';
   tasks: Produit[] = [];
   imagePopup: string | null = null;

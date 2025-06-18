@@ -294,7 +294,7 @@ getModeIconClass(mode: string): string {
         this.nom = entreprise.nom;
         this.siege = entreprise.siege;
         this.email = entreprise.email;
-        this.logo = entreprise.logo ? 'http://localhost:8080' + entreprise.logo : null;
+        this.logo = entreprise.logo ? 'http://31.207.34.194:8080' + entreprise.logo : null;
         this.secteur = entreprise.secteur;
         this.telephone = entreprise.telephone;
         this.adresse = entreprise.adresse;

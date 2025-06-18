@@ -183,7 +183,7 @@ export class AccountSettingsComponent implements OnInit {
          // AJOUT DU TIMESTAMP POUR CASSER LE CACHE
         const timestamp = new Date().getTime();
         this.photo = user.photo 
-          ? `http://localhost:8080${user.photo}?t=${timestamp}` 
+          ? `http://31.207.34.194:8080${user.photo}?t=${timestamp}` 
           : 'assets/img/profil.png';
           
         this.userName = user.nomComplet;
@@ -192,7 +192,7 @@ export class AccountSettingsComponent implements OnInit {
         this.email = user.email;
         this.phone = user.phone;
         // this.photo = user.photo ? `http://localhost:8080${user.photo}` : '';
-        this.photo = user.photo ? `http://localhost:8080${user.photo}` : 'assets/img/profil.png';
+        this.photo = user.photo ? `http://31.207.34.194:8080${user.photo}` : 'assets/img/profil.png';
         this.roleType = user.roleType;
         this.pays = user.pays;
         this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';
@@ -307,7 +307,7 @@ onTauxTvaInput(event: Event): void {
 
         console.log('Logo path from server:', entreprise.logo);
         // this.logoUrl = entreprise.logo ? `http://localhost:8080/${entreprise.logo}` : 'assets/img/logo.jpeg';
-        this.logo = 'http://localhost:8080' + entreprise.logo;
+        this.logo = 'http://31.207.34.194:8080' + entreprise.logo;
         this.cdRef.markForCheck();
       },
       error: (error) => {
@@ -623,7 +623,7 @@ onTauxTvaInput(event: Event): void {
     const timestamp = new Date().getTime();
     this.usersService.getUserInfo().subscribe(user => {
         this.photo = user.photo 
-            ? `http://localhost:8080${user.photo}?t=${timestamp}` 
+            ? `http://31.207.34.194:8080${user.photo}?t=${timestamp}` 
             : 'assets/img/profil.png';
         this.cdRef.detectChanges();
     });

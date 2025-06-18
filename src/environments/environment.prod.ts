@@ -4,6 +4,6 @@ export const environment = {
   appVersion: packageInfo.version,
   production: true,
   apiUrl: 'http://localhost:4200',
-  apiBaseUrl: "http://localhost:8080/api/auth"
+  apiBaseUrl: "http://31.207.34.194:8080/api/auth"
   
 };

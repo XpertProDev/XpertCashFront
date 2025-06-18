@@ -237,7 +237,7 @@ export class DetailFactureProformaComponent implements OnInit {
         date: new Date(action.date),
            user: {
               nomComplet: action.utilisateur || 'Utilisateur inconnu',
-              photo: action.photo ? `http://localhost:8080${action.photo}` : null 
+              photo: action.photo ? `http://31.207.34.194:8080${action.photo}` : null 
             },
         type: this.mapActionType(action.action),
         description: action.details,
@@ -1280,7 +1280,7 @@ get labelNom(): string {
       this.siege = entreprise.siege ?? '—';
       this.email = entreprise.email ?? '—';
       // Ensure logo path is correct for http access
-      this.logo = entreprise.logo ? (entreprise.logo.startsWith('http') || entreprise.logo.startsWith('data:image/') ? entreprise.logo : 'http://localhost:8080' + (entreprise.logo.startsWith('/') ? entreprise.logo : '/' + entreprise.logo)) : null;
+      this.logo = entreprise.logo ? (entreprise.logo.startsWith('http') || entreprise.logo.startsWith('data:image/') ? entreprise.logo : 'http://31.207.34.194:8080' + (entreprise.logo.startsWith('/') ? entreprise.logo : '/' + entreprise.logo)) : null;
       this.secteur = entreprise.secteur ?? '—';
       this.telephone = entreprise.telephone ?? '—';
       this.adresse = entreprise.adresse ?? '—';
@@ -1684,7 +1684,7 @@ doc.setTextColor(0);
         this.tauxTva = entreprise.tauxTva;
 
 
-        this.logo = 'http://localhost:8080' + entreprise.logo;
+        this.logo = 'http://31.207.34.194:8080' + entreprise.logo;
 
       if (this.userEntrepriseId) {
         this.loadUsersOfEntreprise(this.userEntrepriseId);
