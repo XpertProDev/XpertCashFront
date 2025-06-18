@@ -423,6 +423,7 @@ export class ClientFormComponent {
           pays: client.pays,
           ville: client.ville,
           entrepriseClient: client.entrepriseClient,
+          photoUrl: client.photoUrl || this.urllink, // Utiliser l'URL par défaut si photo est vide
         };
 
         // Émettre l'événement avec le nouveau client
