@@ -19,6 +19,7 @@ import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 import { MatDialog } from '@angular/material/dialog';
 import { SuspendedBoutiqueDialogComponent } from './suspended-boutique-dialog.component';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-produits',
@@ -41,7 +42,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-
 })
 export class ProduitsComponent implements OnInit {
   boutiqueId!: number;
-  backendUrl: string = 'http://31.207.34.194:8080';
+   private backendUrl = environment.apiBaseUrl;
   searchText: string = '';
   tasks: Produit[] = [];
   imagePopup: string | null = null;
@@ -56,6 +57,7 @@ export class ProduitsComponent implements OnInit {
   previousSelectedBoutique: any | null = null;
   boutiqueActuelle: string = "Toutes les boutiques";
   boutiques: any[] = []; 
+  private apiUrl = environment.imgUrl;
 
   isLoading = false;
 
@@ -165,8 +167,8 @@ export class ProduitsComponent implements OnInit {
     }
     const doc = new jsPDF();
     const logoUrl = this.logoEntreprise
-      ? `http://31.207.34.194:8080${this.logoEntreprise}`
-      : `http://31.207.34.194:8080/logoUpload/651.jpg`;
+      ? `${this.apiUrl}${this.logoEntreprise}`
+      : `${this.apiUrl}/logoUpload/651.jpg`;
     const entreprise = this.nomEntreprise || "Nom non disponible";
     
     
@@ -397,7 +399,7 @@ export class ProduitsComponent implements OnInit {
         this.tasks = produits.map(prod => {
           // Conversion de la photo
           const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
-            ? `${this.backendUrl}${prod.photo}`
+            ? `${this.apiUrl}${prod.photo}`
             : '';
 
           // Conversion de la date

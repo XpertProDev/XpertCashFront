@@ -30,7 +30,8 @@ import { environment } from "src/environments/environment";
 })
 export class ClientsComponent implements OnInit  {
   // API URL de limage est http://31.207.34.194:8080
-  apiUrl = 'http://31.207.34.194:8080';
+    private apiUrl = environment.imgUrl;
+
 
   
 
@@ -190,7 +191,7 @@ export class ClientsComponent implements OnInit  {
           return {
             ...client,
             photoUrl: client.photo 
-            ? `http://31.207.34.194:8080${client.photo}` 
+            ? `${this.apiUrl}${client.photo}` 
             : `/assets/images/default-avatar.png`,
             
             entrepriseClient: client.entrepriseClient ? { 

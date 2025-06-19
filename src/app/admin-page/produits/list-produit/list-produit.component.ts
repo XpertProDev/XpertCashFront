@@ -14,6 +14,7 @@ import { UniteMesureService } from '../../SERVICES/unite.service';
 import { UsersService } from '../../SERVICES/users.service';
 import { PopupData } from '../../MODELS/PopUp/popup-data';
 import { NgxBarcode6Module } from 'ngx-barcode6';
+import { environment } from 'src/environments/environment';
 
 export interface CategorySelect {
   nom: string;
@@ -64,7 +65,8 @@ export class ListProduitComponent {
   // Gestion de l'image
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
-  backendUrl: string = 'http://31.207.34.194:8080';
+  private backendUrl =environment.apiBaseUrl;
+
   selectedFile: File | null | undefined = null;
   selectedBoutiqueId: number | null = null;
   showPopupMessage(data: PopupData): void { this.popupData = data; this.showPopup = true; }
