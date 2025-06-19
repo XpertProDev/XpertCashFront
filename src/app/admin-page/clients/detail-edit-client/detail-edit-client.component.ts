@@ -64,6 +64,9 @@ export class DetailEditClientComponent {
   loadingFactures = false;
   errorFactures = '';
 
+  // Ajoutez cette propriété dans la classe
+  isEditing = false;
+
   displayedColumns1 = ['numero', 'date', 'statut', 'montant'];
 
   // Ajoutez ces propriétés dans la classe
@@ -161,6 +164,11 @@ export class DetailEditClientComponent {
     }
   }
 
+  startEditing(): void {
+    this.isEditing = true;
+    this.modifierClientForm.enable(); // Active tous les champs du formulaire
+  }
+
   // Ajoutez ces méthodes
   onPaysChange(event: any): void {
     const paysSelectionne = event.target.value;
@@ -218,6 +226,7 @@ export class DetailEditClientComponent {
     this.getEntrepriseForm();
     this.loadEntreprises();
     this.getRouteClient();
+    this.modifierClientForm.disable();
   }
 
   getRouteClient() {
@@ -227,10 +236,17 @@ export class DetailEditClientComponent {
     });
   }
 
+  cancelEditing(): void {
+    this.isEditing = false;
+    this.modifierClientForm.disable();
+    this.loadClientData(); // Recharge les données originales
+  }
+
   private loadClientData() {
     this.clientService.getClientById(this.clientId).subscribe({
       next: (client) => {
         this.populateForm(client);
+        this.modifierClientForm.disable();
         this.handleEntreprise(client.entrepriseClient);
         this.loadFacturesClient();
       },
@@ -390,7 +406,10 @@ export class DetailEditClientComponent {
   }
 
   // Ouvre/ferme le popup d’entreprise
-  openPopup() { this.showPopup = true; }
+  openPopup() {
+    if (!this.isEditing) return; // Bloquer si pas en mode édition
+    this.showPopup = true;
+  }
   closePopup() { this.showPopup = false; }
   
   initEntreprise() {
@@ -505,9 +524,24 @@ export class DetailEditClientComponent {
     });
   }
 
+  toggleEditing(): void {
+    this.isEditing = !this.isEditing;
+    
+    if (this.isEditing) {
+      this.modifierClientForm.enable(); // Active le formulaire
+    } else {
+      this.modifierClientForm.disable(); // Désactive le formulaire
+      this.loadClientData(); // Recharge les données originales
+    }
+  }
+
   // Annuler et revenir à la liste
   goToClients() {
-    this.router.navigate(['/clients']);
+    if (this.isEditing) {
+      this.cancelEditing();
+    } else {
+      this.router.navigate(['/clients']);
+    }
   }
 
   

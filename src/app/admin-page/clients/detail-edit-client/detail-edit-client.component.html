@@ -4,7 +4,7 @@
     <div class="info_personnel">
       <div class="information_grid_two">
         <!-- Section Profil -->
-        <div class="profil_section">
+        <div class="profil_section" style="max-height: 65%;">
             <div class="section_title">
                 <div class="title">
                     <h6>Photo de profil</h6>
@@ -29,7 +29,15 @@
               <div class="title title_display">
                   <h6>Informations Personnelles</h6>
                   <div class="icon_edit">
-                    <i class="ri-edit-box-line" title="Cliquer ici pour modifier"></i>
+                    <i *ngIf="!isEditing" 
+                      class="ri-edit-box-line" 
+                      title="Cliquer ici pour modifier"
+                      (click)="toggleEditing()"></i>
+                    
+                    <i *ngIf="isEditing" style="color: #ff0000;"
+                      class="ri-close-line" 
+                      title="Fermer l'édition"
+                      (click)="toggleEditing()"></i>
                   </div>
               </div>
           </div>
@@ -38,7 +46,7 @@
             <div class="champ_grid_true">
               <!-- Nom et prenom -->
               <div class="champ_input">
-                <input type="text" class="input_focus"
+                <input type="text" class="input_focus" [disabled]="!isEditing"
                           id="nomComplet" formControlName="nomComplet"
                           name="nomComplet"
                           placeholder="Saisis le nom et prénom">
@@ -50,9 +58,9 @@
               </div>
               <!-- Email -->
               <div class="champ_input">
-                <input type="email" class="input_focus"
+                <input type="email" class="input_focus" [disabled]="!isEditing"
                           id="email" formControlName="email"
-                          name="email"
+                          name="email" [disabled]="!isEditing"
                           placeholder="Saisis l'email">
                 <label for="email" class="label">Email</label>
                 <div *ngIf="modifierClientForm.get('email')?.touched && modifierClientForm.get('email')?.invalid" class="error">
@@ -61,7 +69,7 @@
               </div>
               <!-- Adress -->
               <div class="champ_input">
-                <input class="input_focus"
+                <input class="input_focus" [disabled]="!isEditing"
                           id="adresse" formControlName="adresse"
                           name="adresse"
                           placeholder="Saisissez votre adresse ">
@@ -131,7 +139,7 @@
               <p>J'appartient à une entreprise</p>
         
               <label class="switch">
-                <input type="checkbox" [(ngModel)]="isEntrepriseSelected" [ngModelOptions]="{standalone: true}"/>
+                <input type="checkbox" [disabled]="!isEditing" [(ngModel)]="isEntrepriseSelected" [ngModelOptions]="{standalone: true}"/>
                 <span class="slider round"></span>
               </label>
             </div>
@@ -140,7 +148,7 @@
           <!-- // Cadre entreprise  -->
           <div class="cadre_entreprise" *ngIf="isEntrepriseSelected">
             <div class="champ_input">
-              <input type="text"
+              <input type="text" [disabled]="!isEditing"
                     placeholder="Selectionner un entreprise"
                     [formControl]="control" matInput
                     [matAutocomplete]="auto"
@@ -171,7 +179,7 @@
           </div>
 
           <!-- Boutons Ajouter et Sauvegarder -->
-          <div class=" information_cadre_save">
+          <div class=" information_cadre_save" *ngIf="isEditing">
               <!-- Message d'erreur global -->
             <div class="container_error_message">
                 <!-- Messages API -->
@@ -185,7 +193,7 @@
 
             <div class="info_titre_input info_titre_input_btn">
               <div class="btn_annuler">
-                <button class="btn_cancel" (click)="goToClients()">Annuler</button>
+                <button class="btn_cancel" (click)="goToClients()">{{ isEditing ? 'Annuler' : 'Retour' }}</button>
               </div>
               <div class="btn_ajouter">
                 <button class="btn_save" (click)="modifierClient()"
@@ -338,7 +346,7 @@
                   </div>
                 </div>
                 
-                <!-- Section Informations Personnelles -->
+                <!-- Section Informations Factures -->
                 <div class="info_section" style="padding: 0;">
                   <div class="contact_info__">
                     <div class="section_title section_title2" style="padding: 20px 20px 6px;">

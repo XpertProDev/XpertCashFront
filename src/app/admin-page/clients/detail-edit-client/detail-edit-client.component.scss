@@ -185,8 +185,8 @@
 .profile-img-wrapper {
   position: relative;
   display: inline-block;
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   overflow: hidden;
   cursor: pointer;
@@ -802,6 +802,7 @@ hr {
   align-items: center;
   justify-content: end;
   gap: 8px;
+  margin-top: 12px;
 }
 
 
