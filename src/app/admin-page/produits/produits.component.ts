@@ -56,6 +56,10 @@ export class ProduitsComponent implements OnInit {
   previousSelectedBoutique: any | null = null;
   boutiqueActuelle: string = "Toutes les boutiques";
   boutiques: any[] = []; 
+
+  isLoading = false;
+
+  
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -161,12 +165,15 @@ export class ProduitsComponent implements OnInit {
     }
     const doc = new jsPDF();
     const logoUrl = this.logoEntreprise
-      ? `${this.backendUrl}/logoUpload/${this.logoEntreprise}`
-      : `${this.backendUrl}/logoUpload/651.jpg`;
+      ? `http://31.207.34.194:8080${this.logoEntreprise}`
+      : `http://31.207.34.194:8080/logoUpload/651.jpg`;
     const entreprise = this.nomEntreprise || "Nom non disponible";
     
+    
     this.getImageBase64(logoUrl).then((logoBase64) => {
-      doc.addImage(logoBase64, 'PNG', 14, 5, 30, 30);
+      const imageType = logoBase64.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+      doc.addImage(logoBase64, imageType, 14, 5, 30, 30);
+
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
       doc.text(`Nom de l'entreprise: ${entreprise}`, 60, 20);
@@ -437,8 +444,10 @@ export class ProduitsComponent implements OnInit {
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;
         }
+        this.isLoading = false;
       },
       error: (err) => {
+        this.isLoading = false;
         if (err.message === 'BOUTIQUE_DESACTIVEE') {
           this.showSuspendedBoutiqueDialog();
           // Réinitialiser la sélection à la précédente
@@ -449,6 +458,81 @@ export class ProduitsComponent implements OnInit {
       }
     });
   }
+
+rafraichirProduits(): void {
+  if (!this.selectedBoutique?.id) return;
+
+  this.isLoading = true;
+  const start = Date.now();
+
+  this.produitService.getProduitsEntreprise(this.selectedBoutique.id).subscribe({
+    next: (produits: Produit[]) => {
+      const elapsed = Date.now() - start;
+      const delay = Math.max(500 - elapsed, 0); // minimum 500 ms
+
+      setTimeout(() => {
+        // Traitement des produits (ton code actuel)
+        this.tasks = produits.map(prod => {
+          const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
+            ? `${this.backendUrl}${prod.photo}`
+            : '';
+          let createdAt = '';
+          if (prod.createdAt) {
+            if (prod.createdAt.includes('à')) {
+              const [datePart, timePart] = prod.createdAt.split(' à ');
+              // format personnalisé si besoin
+            } else {
+              createdAt = new Date(prod.createdAt).toISOString();
+            }
+          }
+
+          return {
+            id: prod.id,
+            codeGenerique: prod.codeGenerique || '',
+            codeBare: prod.codeBare || '',
+            nom: prod.nom || 'Nom inconnu',
+            description: prod.description || '',
+            prixVente: prod.prixVente || 0,
+            prixAchat: prod.prixAchat || 0,
+            quantite: prod.quantite || 0,
+            seuilAlert: prod.seuilAlert || 0,
+            enStock: prod.enStock || false,
+            photo: fullImageUrl,
+            nomCategorie: prod.nomCategorie || '',
+            nomUnite: prod.nomUnite || '',
+            createdAt: createdAt,
+            categorieId: prod.categorieId || 0,
+            uniteId: prod.uniteId || 0,
+            typeProduit: prod.typeProduit || 'Non défini',
+            boutiques: prod.boutiques || []
+          } as Produit;
+        }).sort((a, b) => {
+          const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
+          const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
+          return dateB - dateA;
+        });
+
+        this.dataSource.data = this.tasks;
+        if (this.paginator) {
+          this.dataSource.paginator = this.paginator;
+        }
+
+        this.isLoading = false;
+      }, delay);
+    },
+    error: (err) => {
+      this.isLoading = false;
+      if (err.message === 'BOUTIQUE_DESACTIVEE') {
+        this.showSuspendedBoutiqueDialog();
+        this.selectedBoutique = this.previousSelectedBoutique;
+      } else {
+        console.error("Erreur :", err);
+      }
+    }
+  });
+}
+
+
   
   public showSuspendedBoutiqueDialog(): void {
     this.dialog.open(SuspendedBoutiqueDialogComponent, {

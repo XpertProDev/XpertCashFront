@@ -6,7 +6,8 @@
     <div class="actions">
       <button class="add-task" (click)="goToAddProduit()">Ajouter un produit</button>
       <div class="contentIcon">
-        <i class="ri-refresh-line"></i>
+        <i class="ri-refresh-line" (click)="rafraichirProduits()" *ngIf="!isLoading"></i>
+        <i *ngIf="isLoading" class="ri-loader-line ri-spin"></i>
         <div class="bare"></div>
         <div class="export-container">
           <div class="iconDrop">
