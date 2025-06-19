@@ -9,6 +9,7 @@ import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 import { FactureReelle, LigneFactureDTO, PaiementDTO } from '../../MODELS/FactureReelle.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription, timer } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-facture-reel-details',
@@ -49,6 +50,9 @@ export class FactureReelDetailsComponent implements OnInit {
   successMessage: string | null = null;
 montant: number = 0;
   private messageSubscription: Subscription | null = null;
+  private apiUrl = environment.imgUrl;
+fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
+
   
   
   constructor(
@@ -294,7 +298,7 @@ getModeIconClass(mode: string): string {
         this.nom = entreprise.nom;
         this.siege = entreprise.siege;
         this.email = entreprise.email;
-        this.logo = entreprise.logo ? 'http://localhost:8080' + entreprise.logo : null;
+        this.logo = entreprise.logo ? `${this.apiUrl}${entreprise.logo}` : null;
         this.secteur = entreprise.secteur;
         this.telephone = entreprise.telephone;
         this.adresse = entreprise.adresse;

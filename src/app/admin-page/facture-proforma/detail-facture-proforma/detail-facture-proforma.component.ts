@@ -16,6 +16,8 @@ import { firstValueFrom } from 'rxjs';
 import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { MatDialog } from '@angular/material/dialog';
+import { environment } from 'src/environments/environment';
+import { T } from '@angular/cdk/portal-directives.d-BoG39gYN';
 
 // Ajouter cette interface pour les pièces jointes
 interface EmailAttachment {
@@ -145,6 +147,8 @@ export class DetailFactureProformaComponent implements OnInit {
   isAddNoteInputVisible: boolean = false;
   infoMessage: string | null = null;
   confirmDeleteIndex: number | null = null;
+  private apiUrl = environment.imgUrl;
+  
 
 
 
@@ -237,7 +241,8 @@ export class DetailFactureProformaComponent implements OnInit {
         date: new Date(action.date),
            user: {
               nomComplet: action.utilisateur || 'Utilisateur inconnu',
-              photo: action.photo ? `http://localhost:8080${action.photo}` : null 
+             photo: action.photo ? `${this.apiUrl}${action.photo}` : null
+
             },
         type: this.mapActionType(action.action),
         description: action.details,
@@ -1280,7 +1285,14 @@ get labelNom(): string {
       this.siege = entreprise.siege ?? '—';
       this.email = entreprise.email ?? '—';
       // Ensure logo path is correct for http access
-      this.logo = entreprise.logo ? (entreprise.logo.startsWith('http') || entreprise.logo.startsWith('data:image/') ? entreprise.logo : 'http://localhost:8080' + (entreprise.logo.startsWith('/') ? entreprise.logo : '/' + entreprise.logo)) : null;
+      this.logo = entreprise.logo
+  ? (
+      entreprise.logo.startsWith('http') || entreprise.logo.startsWith('data:image/')
+        ? entreprise.logo
+        : `${this.apiUrl.replace(/\/$/, '')}/${entreprise.logo.replace(/^\//, '')}`
+    )
+  : null;
+
       this.secteur = entreprise.secteur ?? '—';
       this.telephone = entreprise.telephone ?? '—';
       this.adresse = entreprise.adresse ?? '—';
@@ -1684,7 +1696,8 @@ doc.setTextColor(0);
         this.tauxTva = entreprise.tauxTva;
 
 
-        this.logo = 'http://localhost:8080' + entreprise.logo;
+        this.logo = `${this.apiUrl}${entreprise.logo}`;
+
 
       if (this.userEntrepriseId) {
         this.loadUsersOfEntreprise(this.userEntrepriseId);

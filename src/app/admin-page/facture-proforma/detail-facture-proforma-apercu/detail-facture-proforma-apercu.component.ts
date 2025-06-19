@@ -11,6 +11,7 @@ import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-detail-facture-proforma-apercu',
@@ -38,6 +39,10 @@ export class DetailFactureProformaApercuComponent implements OnInit {
   signataire!: string;
   signataireNom!: string;
   tauxTva!: number;
+
+  private apiUrl = environment.imgUrl;
+fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
+
 
   constructor(
     private previewService: FacturePreviewService,
@@ -76,7 +81,7 @@ export class DetailFactureProformaApercuComponent implements OnInit {
         this.nom = entreprise.nom;
         this.siege = entreprise.siege;
         this.email = entreprise.email;
-        this.logo = 'http://localhost:8080' + entreprise.logo;
+        this.logo = `${this.apiUrl}${entreprise.logo}`;
         this.secteur = entreprise.secteur;
         this.telephone = entreprise.telephone;
         this.adresse = entreprise.adresse;

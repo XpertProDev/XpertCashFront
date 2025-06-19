@@ -12,7 +12,7 @@
             </div>
 
             <div class="profile-img-wrapper" (click)="triggerFileInput()">
-              <img [src]="newPhotoUrl || clientPhotoUrl || 'assets/img/profil.png'" 
+              <img [src]="newPhotoUrl || clientPhotoUrl || 'assets/img/profil.png'"
                   alt="Photo de profil" 
                   class="profile-img" />
               
@@ -149,7 +149,7 @@
           <!-- // Cadre entreprise  -->
           <div class="cadre_entreprise" *ngIf="isEntrepriseSelected">
             <div class="champ_input">
-              <input type="text" 
+              <input type="text"
                     placeholder="Selectionner un entreprise"
                     [formControl]="control" matInput
                     [matAutocomplete]="auto"
@@ -500,13 +500,48 @@
               <label class="label">Adresse</label>
             </div>
       
-            <!-- Téléphone -->
+            <!-- Siege -->
             <div class="champ_input">
               <input class="input_focus" 
-                     type="tel" 
+                     type="text" 
+                     formControlName="siege"
+                     placeholder="Saisis le siège">
+              <label class="label">Ville</label>
+            </div>
+
+          </div>
+
+          <!-- Modifiez le sélecteur de pays et le champ téléphone -->
+          <div class="grid_colonne">
+            <!-- Pays -->
+            <div class="champ_input div1">
+              <select class="input_focus" 
+                      formControlName="pays" 
+                      (change)="onEntreprisePaysChange($event)">
+                <option value="" disabled selected>Pays</option>
+                <option value="Mali">Mali</option>
+                <option value="Sénégal">Sénégal</option>
+                <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+              </select>
+              <!-- <label class="label">Pays</label> Label corrigé -->
+            </div>
+
+            <!-- Téléphone -->
+            <div class="champ_input div2">
+              <input type="tel" 
+                     class="input_focus"
                      formControlName="telephone"
-                     placeholder="00 00 00 00">
-              <label class="label">Téléphone</label>
+                     placeholder="Saisis le numéro de téléphone"
+                     (input)="formatEntreprisePhoneNumber()">
+              <label for="telephone" class="label">Téléphone</label>
+            </div>
+
+            <!-- Secteur -->
+            <div class="champ_input div3">
+              <input class="input_focus"
+                    formControlName="secteur"
+                    placeholder="Saisis le secteur">
+              <label class="label">Secteur</label>
             </div>
           </div>
         </div>

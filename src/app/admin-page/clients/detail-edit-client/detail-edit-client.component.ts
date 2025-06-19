@@ -19,6 +19,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
+import { environment } from 'src/environments/environment';
 
 
 @Component({
@@ -40,6 +41,7 @@ import { MatDividerModule } from '@angular/material/divider';
   styleUrl: './detail-edit-client.component.scss'
 })
 export class DetailEditClientComponent {
+  private apiUrl = environment.imgUrl
   clientId!: number;
   errorMessage: string = '';
   errorMessageApi: string = '';
@@ -59,6 +61,8 @@ export class DetailEditClientComponent {
   entrepriseRequiredError = false;
   indicatif: string = '';
   maxPhoneLength: number = 0;
+  entrepriseIndicatif: string = '';
+  entrepriseMaxPhoneLength: number = 0;
 
   facturesClient: any[] = [];
   loadingFactures = false;
@@ -245,6 +249,7 @@ export class DetailEditClientComponent {
     this.loadEntreprises();
     this.getRouteClient();
     this.modifierClientForm.disable();
+    this.control.disable();
     
   }
 
@@ -264,13 +269,18 @@ export class DetailEditClientComponent {
   private loadClientData() {
     this.clientService.getClientById(this.clientId).subscribe({
       next: (client) => {
+        // Transformez l'URL de la photo
+        this.clientPhotoUrl = client.photo 
+        ? this.clientService.getFullImageUrl(client.photo)
+        : 'assets/img/profil.png';
+        
         this.populateForm(client);
         this.modifierClientForm.disable();
         this.handleEntreprise(client.entrepriseClient);
         this.loadFacturesClient();
 
         if (client.photo) {
-          this.clientPhotoUrl = client.photo;
+          this.clientPhotoUrl = this.clientService.getFullImageUrl(client.photo);
         }
       },
       error: (error) => {
@@ -349,6 +359,7 @@ export class DetailEditClientComponent {
       adresse: [''],
       siege: [''],
       secteur: [''],
+      pays: ['']
     });
   }
 
@@ -430,8 +441,20 @@ export class DetailEditClientComponent {
 
   // Ouvre/ferme le popup d’entreprise
   openPopup() {
-    if (!this.isEditing) return; // Bloquer si pas en mode édition
+    if (!this.isEditing) return;
+    
+    this.getEntrepriseForm(); // Réinitialiser le formulaire
+    this.entrepriseForm.reset();
+    
+    // Réinitialiser les indicateurs téléphoniques
+    this.entrepriseIndicatif = '';
+    this.entrepriseMaxPhoneLength = 0;
+    
     this.showPopup = true;
+
+    this.entrepriseForm.patchValue({
+      pays: ''
+    });
   }
   closePopup() { this.showPopup = false; }
   
@@ -447,7 +470,7 @@ export class DetailEditClientComponent {
     });
   }
   
-  ajouterEntreprise() {
+ajouterEntreprise() {
     if (this.entrepriseForm.invalid) return;
   
     const newEntreprise: Entreprise = {
@@ -458,7 +481,7 @@ export class DetailEditClientComponent {
       adresse: this.entrepriseForm.value.adresse,
       siege: this.entrepriseForm.value.siege,
       secteur: this.entrepriseForm.value.secteur,
-      logo: this.newPhotoUrl || '',
+      logo : this.entrepriseForm.value.logo,
       nif: this.entrepriseForm.value.nif,
       nina: this.entrepriseForm.value.nina,
       banque: this.entrepriseForm.value.banque,
@@ -469,7 +492,6 @@ export class DetailEditClientComponent {
       prefixe: this.entrepriseForm.value.prefixe,
       suffixe: this.entrepriseForm.value.suffixe,
       tauxTva: this.entrepriseForm.value.tauxTva
-
 
 
     };
@@ -537,7 +559,7 @@ export class DetailEditClientComponent {
         this.errorMessage = '';
         setTimeout(() => this.router.navigate(['/clients']), 2000);
         if (updatedClient.photo) {
-          this.clientPhotoUrl = updatedClient.photo;
+          this.clientPhotoUrl = this.clientService.getFullImageUrl(updatedClient.photo);
         }
         this.newPhotoUrl = null;
         this.selectedImageFile = null;
@@ -565,10 +587,12 @@ export class DetailEditClientComponent {
     this.isEditing = !this.isEditing;
     
     if (this.isEditing) {
-      this.modifierClientForm.enable(); // Active tous les champs
+      this.control.enable(); // Activer le contrôle
+      this.modifierClientForm.enable();
     } else {
-      this.modifierClientForm.disable(); // Désactive tous les champs
-      this.loadClientData(); // Recharge les données originales
+      this.control.disable(); // Désactiver le contrôle
+      this.modifierClientForm.disable();
+      this.loadClientData();
     }
   }
 
@@ -579,6 +603,42 @@ export class DetailEditClientComponent {
     } else {
       this.router.navigate(['/clients']);
     }
+  }
+
+  formatEntreprisePhoneNumber(): void {
+    let valeur = this.entrepriseForm.get('telephone')?.value;
+    
+    if (!valeur.startsWith(this.entrepriseIndicatif)) {
+      this.entrepriseForm.get('telephone')?.setValue(this.entrepriseIndicatif);
+      return;
+    }
+  
+    const chiffres = valeur.replace(this.entrepriseIndicatif, '').replace(/\D/g, '');
+    const numeroFormate = this.entrepriseIndicatif + chiffres;
+    this.entrepriseForm.get('telephone')?.setValue(numeroFormate.slice(0, this.entrepriseIndicatif.length + this.entrepriseMaxPhoneLength));
+  }
+
+  onEntreprisePaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+  
+    if (paysInfo) {
+      this.entrepriseIndicatif = `${paysInfo.indicatif} `;
+      this.entrepriseMaxPhoneLength = this.entrepriseIndicatif.length + paysInfo.longueur;
+  
+      if (!this.entrepriseForm.get('telephone')?.value.startsWith(this.entrepriseIndicatif)) {
+        this.entrepriseForm.get('telephone')?.setValue(this.entrepriseIndicatif);
+      }
+  
+      this.updateEntreprisePhoneValidator(paysInfo.longueur);
+    }
+  }
+
+  updateEntreprisePhoneValidator(longueur: number): void {
+    this.entrepriseForm.controls['telephone'].setValidators([
+      Validators.pattern(`^\\${this.entrepriseIndicatif}\\d{${longueur}}$`)
+    ]);
+    this.entrepriseForm.controls['telephone'].updateValueAndValidity();
   }
 
   

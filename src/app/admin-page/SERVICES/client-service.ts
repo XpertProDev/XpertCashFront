@@ -3,12 +3,14 @@ import { Injectable } from "@angular/core";
 import { BehaviorSubject, catchError, Observable, tap, throwError } from "rxjs";
 import { Entreprise } from "../MODELS/entreprise-model";
 import { Clients } from "../MODELS/clients-model";
+import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClientService {
-  private apiUrl: string = "http://localhost:8080/api/auth";
+    private apiUrl = environment.apiBaseUrl;
+  
 
   constructor(private http: HttpClient) { }
 
@@ -81,27 +83,52 @@ export class ClientService {
   }
 
   // Ajoutez cette méthode dans votre ClientService
-  updateClient(id: number, client: Clients, imageFile?: File): Observable<Clients> {
-    const token = localStorage.getItem('authToken') || '';
-    const formData = new FormData();
-    formData.append('client', JSON.stringify(client));
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
+updateClient(id: number, client: Clients, imageFile?: File): Observable<Clients> {
+  const token = localStorage.getItem('authToken') || '';
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+    // ❌ Ne pas fixer Content-Type ici — Angular le fait automatiquement avec FormData
+  });
 
-    if (imageFile) {
-      formData.append('imageClientFile', imageFile);
-    }
-    
-    return this.http.put<Clients>(`${this.apiUrl}/clientupdate/${id}`, formData, { headers }).pipe(
-      tap(response => console.log('Client mis à jour:', response)),
-      catchError(error => {
-        console.error('Erreur lors de la mise à jour du client', error);
-        return throwError(() => error);
-      })
-    );
+  // Préparer les données en multipart/form-data
+  const formData = new FormData();
+
+  // Convertir l'objet client en JSON string
+  formData.append('client', new Blob(
+    [JSON.stringify(client)],
+    { type: 'application/json' }
+  ));
+
+  // Ajouter l'image si elle est fournie
+  if (imageFile) {
+    formData.append('imageClientFile', imageFile);
   }
+
+  return this.http.put<Clients>(`${this.apiUrl}/clientupdate/${id}`, formData, { headers }).pipe(
+    tap(response => console.log('Client mis à jour:', response)),
+    catchError(error => {
+      console.error('Erreur lors de la mise à jour du client', error);
+      return throwError(() => error);
+    })
+  );
+}
+
+// getFullImageUrl(relativePath: string): string {
+//   return relativePath 
+//     ? `${environment.imgUrl}${relativePath}`
+//     : 'assets/img/profil.png';
+// }
+
+getFullImageUrl(relativePath: string): string {
+  // Si déjà une URL complète, retournez directement
+  if (relativePath.startsWith('http')) return relativePath;
+  
+  return relativePath 
+    ? `${environment.imgUrl}${relativePath}`
+    : 'assets/img/profil.png';
+}
+  
+
 
 
 }

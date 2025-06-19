@@ -6,6 +6,7 @@ import { ProfilService } from '../SERVICES/profil.service';
 import { CommonModule } from '@angular/common';
 import { UsersService } from '../SERVICES/users.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-profil',
@@ -44,6 +45,8 @@ export class ProfilComponent  implements OnInit{
   isNomBoutiqueFormVisible = false;
   isUserFormVisible = false;
   boutiques: any[] = [];
+
+  private apiUrl = environment.apiBaseUrl;
 
   isModalOpen = false;
 
@@ -253,7 +256,7 @@ export class ProfilComponent  implements OnInit{
         this.nomEntreprise = user.nomEntreprise
         this.email = user.email;
         this.phone = user.phone;
-        this.photo = user.photo ? `http://localhost:8080${user.photo}` : '';
+        this.photo = user.photo ? `${this.apiUrl}${user.photo}` : '';
         this.roleType = user.roleType;
         this.pays = user.pays;
         this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';

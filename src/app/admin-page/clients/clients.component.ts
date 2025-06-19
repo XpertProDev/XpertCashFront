@@ -10,6 +10,7 @@ import { TruncateEmailPipe } from "../MODELS/truncate-email.pipe";
 import { EntrepriseClient } from "../MODELS/entreprise-clients-model";
 import { EntrepriseService } from "../SERVICES/entreprise-service";
 import { ClickOutsideDirective } from "../MODELS/click-outside.directive";
+import { environment } from "src/environments/environment";
 
 
 @Component({
@@ -28,6 +29,11 @@ import { ClickOutsideDirective } from "../MODELS/click-outside.directive";
   
 })
 export class ClientsComponent implements OnInit  {
+  // API URL de limage est http://31.207.34.194:8080
+    private apiUrl = environment.imgUrl;
+
+
+  
 
   isListView = true;
   showDropdown = false;
@@ -174,49 +180,52 @@ export class ClientsComponent implements OnInit  {
   }
 
   // list clients 
-  getListClients() {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      this.clientService.getListClients().subscribe({
-        next: (data) => {
-          console.log('Données brutes:', data);
-          this.clients = data.map(client => ({
-            ...client,
-            entrepriseClient: client.entrepriseClient ? { 
-              id: client.entrepriseClient.id,
-              nom: client.entrepriseClient.nom
-            } : null
-          }));
-          
-          // 1. Trier par id décroissant pour que les plus récents (id élevés) soient en tête
-          this.clients = data.sort((a, b) => {
-            // si vous avez un champ createdAt : return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            return (b.id ?? 0) - (a.id ?? 0);
-          });
-  
-          this.totalClients = this.clients.length;
-          this.noClientsAvailable = this.clients.length === 0;
-  
-          // 2. Mettre à jour la source de données du tableau/paginator
-          this.dataSource.data = this.clients;
-          this.dataSource.paginator = this.paginator;
+ getListClients() {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    this.clientService.getListClients().subscribe({
+      next: (data) => {
+        console.log('📥 Données brutes:', data);
 
-          // Vérifiez un client spécifique
-          if (this.clients.length > 0) {
-            console.log('Exemple de client:', this.clients[0]);
-            console.log('Entreprise associée:', this.clients[0].entrepriseClient);
-          }
-  
-          console.log('Clients récupérées (triées) :', this.clients);
-        },
-        error: (err) => {
-          console.error('Erreur lors de la récupération des clients :', err);
+        this.clients = data.map(client => {
+          return {
+            ...client,
+            photo: client.photo 
+            ? `${this.apiUrl}${client.photo}` 
+            : `/assets/img/profil.png`,
+            
+            entrepriseClient: client.entrepriseClient ? { 
+              id: client.entrepriseClient.id
+            } : null
+          };
+        });
+
+        console.log('🖼️ URLs des photos clients :', this.clients.map(c => c.photo));
+
+        // Tri décroissant par ID
+        this.clients = this.clients.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+
+        this.totalClients = this.clients.length;
+        this.noClientsAvailable = this.clients.length === 0;
+
+        this.dataSource.data = this.clients;
+        this.dataSource.paginator = this.paginator;
+
+        if (this.clients.length > 0) {
+          console.log('👤 Exemple client :', this.clients[0]);
         }
-      });
-    } else {
-      console.error('Aucun token trouvé !');
-    }
+
+      },
+      error: (err) => {
+        console.error('❌ Erreur récupération clients :', err);
+      }
+    });
+  } else {
+    console.error('🔐 Aucun token trouvé !');
   }
+}
+
+
 
   //liste entreprise client
   get paginatedClients(): Clients[] {

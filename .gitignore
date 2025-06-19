@@ -4,4 +4,7 @@ node_modules
 yarn.lock
 package-lock.json
 
+echo "dist/" >> .gitignore
 
+# Ignore le fichier Request.sql
+echo "Request.sql" >> .gitignore

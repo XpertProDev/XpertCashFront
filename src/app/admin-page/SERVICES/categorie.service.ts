@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Categorie } from '../MODELS/categorie.model';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CategorieService {
-  private apiUrl: string = "http://localhost:8080/api/auth";
+    private apiUrl = environment.apiBaseUrl;
+  
   
   private categoriesSubject = new BehaviorSubject<Categorie[]>([]);
   public categories$ = this.categoriesSubject.asObservable();

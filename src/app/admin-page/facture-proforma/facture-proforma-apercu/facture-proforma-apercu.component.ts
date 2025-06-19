@@ -10,6 +10,7 @@ import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 import { FormStateService } from '../../SERVICES/form-state.service';
 import { UsersService } from '../../SERVICES/users.service';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
+import { environment } from 'src/environments/environment';
 
 
 @Component({
@@ -38,7 +39,8 @@ export class FactureProformaApercuComponent implements OnInit {
   signataire!: string;
   signataireNom!: string;
   tauxTva?: number | null;
-
+    private apiUrl = environment.imgUrl;
+    fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
 
 
   constructor(
@@ -126,14 +128,14 @@ export class FactureProformaApercuComponent implements OnInit {
 
   
         // Ajout du préfixe si nécessaire
-        this.logo = 'http://localhost:8080' + entreprise.logo;
+        this.logo = `${this.apiUrl}${entreprise.logo}`;
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
       }
     });
   }
-
+ 
   getLegalInfo(): string {
     const parts = [];
     

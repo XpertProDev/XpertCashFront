@@ -3,12 +3,14 @@ import { Injectable } from "@angular/core";
 import { BehaviorSubject, catchError, Observable, switchMap, tap, throwError } from "rxjs";
 import { Entreprise } from "../MODELS/entreprise-model";
 import { EntrepriseClient } from "../MODELS/entreprise-clients-model";
+import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class EntrepriseService {
-  private apiUrl: string = "http://localhost:8080/api/auth";
+    private apiUrl = environment.apiBaseUrl;
+  
 
   private entrepriseSubject = new BehaviorSubject<Entreprise[]>([]);
   public entreprise$ = this.entrepriseSubject.asObservable(); 

@@ -28,6 +28,7 @@ import { FactureWithDataSource } from '../MODELS/facture-with-data-source';
 import { SuspendedBoutiqueDialogComponent } from '../produits/suspended-boutique-dialog.component';
 import { forkJoin } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
+import { environment } from 'src/environments/environment';
 
 //FactureWithDataSource
 
@@ -105,6 +106,9 @@ export class FactureComponent  implements AfterViewInit {
   entrepriseId!: number;
 
   userInfo: any;
+
+    private apiUrl = environment.imgUrl;
+  
 
    constructor(
          private userService: UsersService,
@@ -352,7 +356,7 @@ blobToBase64(blob: Blob): Promise<string> {
     const logoPath = this.userInfo?.logoEntreprise;
 
     if (logoPath) {
-      const fullLogoUrl = `http://localhost:8080${logoPath}`;
+      const fullLogoUrl = `${this.apiUrl}${logoPath}`;
 
       const logoWidth = 20; 
        const logoHeight = 15;
