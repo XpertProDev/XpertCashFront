@@ -11,6 +11,15 @@ import { CommonModule } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
+
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
+import { MatDividerModule } from '@angular/material/divider';
+
 
 @Component({
   selector: 'app-detail-edit-client',
@@ -20,7 +29,12 @@ import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
-    CustomNumberPipe
+    CustomNumberPipe,
+    MatTabsModule,
+    MatExpansionModule, 
+    MatFormFieldModule,
+    MatIconModule,
+    MatCardModule, MatTableModule, MatDividerModule
   ],
   templateUrl: './detail-edit-client.component.html',
   styleUrl: './detail-edit-client.component.scss'
@@ -50,6 +64,7 @@ export class DetailEditClientComponent {
   loadingFactures = false;
   errorFactures = '';
 
+  displayedColumns1 = ['numero', 'date', 'statut', 'montant'];
 
   // Ajoutez ces propriétés dans la classe
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
