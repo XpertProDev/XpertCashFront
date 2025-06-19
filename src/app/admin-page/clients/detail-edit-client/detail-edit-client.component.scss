@@ -763,7 +763,46 @@ hr {
   }
 }
 
+// button annuler
+.btn_annuler .btn_cancel {
+  padding: 6px 20px;
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff0000;
+  color: #fff;
+}
 
+// button annuler hover
+.btn_annuler .btn_cancel:hover {
+  background-color: #d80101;
+  transition: all ease-in .5s;
+}
+
+// button ajouter 
+.btn_ajouter .btn_save {
+  padding: 6px 20px;
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  border: none;
+  border-radius: 5px;
+  background-color: #0672E4;
+  color: #fff;
+}
+
+// button ajouter hover
+.btn_ajouter .btn_save:hover {
+  background-color: #0863c5;
+  transition: all .5s;
+}
+
+.info_titre_input_btn {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 8px;
+}
 
 
 
@@ -1096,46 +1135,9 @@ hr {
 //     justify-content: space-between;
 //   }
 
-//   .info_titre_input_btn {
-//     display: flex;
-//     align-items: center;
-//     justify-content: end;
-//     gap: 8px;
-//   }
 
-//   // button annuler
-//   .btn_annuler .btn_cancel {
-//     padding: 6px 20px;
-//     font-size: 10px;
-//     letter-spacing: 0.6px;
-//     border: none;
-//     border-radius: 5px;
-//     background-color: #ff0000;
-//     color: #fff;
-//   }
-  
-//   // button annuler hover
-//   .btn_annuler .btn_cancel:hover {
-//     background-color: #d80101;
-//     transition: all ease-in .5s;
-//   }
 
-// // button ajouter 
-// .btn_ajouter .btn_save {
-//     padding: 6px 20px;
-//     font-size: 10px;
-//     letter-spacing: 0.6px;
-//     border: none;
-//     border-radius: 5px;
-//     background-color: #0672E4;
-//     color: #fff;
-//   }
-  
-//   // button ajouter hover
-//   .btn_ajouter .btn_save:hover {
-//     background-color: #0863c5;
-//     transition: all .5s;
-//   }
+
 
 
 

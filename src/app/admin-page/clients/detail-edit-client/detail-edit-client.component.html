@@ -122,11 +122,11 @@
             </div>
           </form>
 
-          <!-- Les information des produit Inventaire  -->
+          <!-- Les information des Entreprises  -->
           <div class="info_titre_input" style="margin-top: 20px;">
             <h6>Entreprise</h6>
         
-            <!-- Input de produits inventaire -->
+            <!-- J'appartient à une entrepris -->
             <div class="champ_input_inventaire">
               <p>J'appartient à une entreprise</p>
         
@@ -168,7 +168,37 @@
                 <i class="ri-arrow-down-s-line"></i>
               </div>
             </div>
-          </div> 
+          </div>
+
+          <!-- Boutons Ajouter et Sauvegarder -->
+          <div class=" information_cadre_save">
+              <!-- Message d'erreur global -->
+            <div class="container_error_message">
+                <!-- Messages API -->
+                <div *ngIf="errorMessage" class="error-messageApi2">{{ errorMessage }}</div>
+                <div *ngIf="successMessage" class="success-messageApi2">{{ successMessage }}</div>
+                <!-- Ajouter ce bloc d'erreur -->
+                <div *ngIf="entrepriseRequiredError" class="error-message">
+                  Veuillez sélectionner ou créer une entreprise
+                </div>
+            </div>
+
+            <div class="info_titre_input info_titre_input_btn">
+              <div class="btn_annuler">
+                <button class="btn_cancel" (click)="goToClients()">Annuler</button>
+              </div>
+              <div class="btn_ajouter">
+                <button class="btn_save" (click)="modifierClient()"
+                      [disabled]="modifierClientForm.invalid"
+                      [disabled]="modifierClientForm.invalid" 
+                      [style.backgroundColor]="modifierClientForm.valid ? '#0672E4' : '#0671e434'"
+                      [style.color]="modifierClientForm.valid ? '#ffffff' : '#00000073'"
+                      [style.cursor]="modifierClientForm.valid ? 'pointer' : 'no-drop'">
+                  Modifier
+              </button>
+              </div>
+            </div>
+          </div>
         
         </div>
       </div>
