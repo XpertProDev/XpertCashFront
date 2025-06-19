@@ -476,7 +476,8 @@ rafraichirProduits(): void {
         // Traitement des produits (ton code actuel)
         this.tasks = produits.map(prod => {
           const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
-            ? `${this.backendUrl}${prod.photo}`
+            ? `${this.apiUrl}${prod.photo}`
+            
             : '';
           let createdAt = '';
           if (prod.createdAt) {
