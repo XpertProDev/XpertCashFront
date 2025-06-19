@@ -78,7 +78,7 @@ export class DetailEditClientComponent {
 
   displayedColumns1 = ['numero', 'date', 'statut', 'montant'];
 
-  // Ajoutez ces propriétés dans la classe
+  // Définir les indicatifs par pays
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
     'Mali': { indicatif: '+223', longueur: 8 },
     'Sénégal': { indicatif: '+221', longueur: 9 },
@@ -443,18 +443,22 @@ export class DetailEditClientComponent {
   openPopup() {
     if (!this.isEditing) return;
     
-    this.getEntrepriseForm(); // Réinitialiser le formulaire
+    this.getEntrepriseForm();
     this.entrepriseForm.reset();
     
-    // Réinitialiser les indicateurs téléphoniques
-    this.entrepriseIndicatif = '';
-    this.entrepriseMaxPhoneLength = 0;
+    // Initialiser avec le Mali par défaut
+    this.entrepriseForm.patchValue({
+      pays: 'Mali'
+    });
+    
+    // Forcer l'initialisation de l'indicatif
+    this.onEntreprisePaysChange({
+      target: { 
+        value: this.entrepriseForm.get('pays')?.value 
+      }
+    });
     
     this.showPopup = true;
-
-    this.entrepriseForm.patchValue({
-      pays: ''
-    });
   }
   closePopup() { this.showPopup = false; }
   
@@ -608,28 +612,37 @@ ajouterEntreprise() {
   formatEntreprisePhoneNumber(): void {
     let valeur = this.entrepriseForm.get('telephone')?.value;
     
+    // Garantir que l'indicatif est présent
     if (!valeur.startsWith(this.entrepriseIndicatif)) {
       this.entrepriseForm.get('telephone')?.setValue(this.entrepriseIndicatif);
       return;
     }
-  
+    
+    // Nettoyer et formater les chiffres
     const chiffres = valeur.replace(this.entrepriseIndicatif, '').replace(/\D/g, '');
     const numeroFormate = this.entrepriseIndicatif + chiffres;
-    this.entrepriseForm.get('telephone')?.setValue(numeroFormate.slice(0, this.entrepriseIndicatif.length + this.entrepriseMaxPhoneLength));
+    
+    // Limiter la longueur
+    const maxLength = this.entrepriseIndicatif.length + this.entrepriseMaxPhoneLength;
+    this.entrepriseForm.get('telephone')?.setValue(numeroFormate.slice(0, maxLength));
   }
 
   onEntreprisePaysChange(event: any): void {
     const paysSelectionne = event.target.value;
     const paysInfo = this.paysIndicatifs[paysSelectionne];
-  
+    
     if (paysInfo) {
+      // Mettre à jour l'indicatif et la longueur max
       this.entrepriseIndicatif = `${paysInfo.indicatif} `;
-      this.entrepriseMaxPhoneLength = this.entrepriseIndicatif.length + paysInfo.longueur;
-  
-      if (!this.entrepriseForm.get('telephone')?.value.startsWith(this.entrepriseIndicatif)) {
+      this.entrepriseMaxPhoneLength = paysInfo.longueur;
+      
+      // Mettre à jour la valeur du téléphone
+      const currentPhone = this.entrepriseForm.get('telephone')?.value || '';
+      if (!currentPhone.startsWith(this.entrepriseIndicatif)) {
         this.entrepriseForm.get('telephone')?.setValue(this.entrepriseIndicatif);
       }
-  
+      
+      // Mettre à jour les validateurs
       this.updateEntreprisePhoneValidator(paysInfo.longueur);
     }
   }

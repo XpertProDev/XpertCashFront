@@ -529,11 +529,12 @@
             <!-- Téléphone -->
             <div class="champ_input div2">
               <input type="tel" 
-                     class="input_focus"
-                     formControlName="telephone"
-                     placeholder="Saisis le numéro de téléphone"
-                     (input)="formatEntreprisePhoneNumber()">
-              <label for="telephone" class="label">Téléphone</label>
+                    class="input_focus"
+                    formControlName="telephone"
+                    placeholder="Saisis le numéro de téléphone"
+                    (focus)="onEntreprisePaysChange({target: {value: entrepriseForm.get('pays')?.value}})"
+                    (input)="formatEntreprisePhoneNumber()">
+              <label class="label">Téléphone</label>
             </div>
 
             <!-- Secteur -->

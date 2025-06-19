@@ -47,6 +47,8 @@ export class ProfilComponent  implements OnInit{
   boutiques: any[] = [];
 
   private apiUrl = environment.apiBaseUrl;
+  private imgUrl = environment.imgUrl;
+
 
   isModalOpen = false;
 
@@ -256,7 +258,7 @@ export class ProfilComponent  implements OnInit{
         this.nomEntreprise = user.nomEntreprise
         this.email = user.email;
         this.phone = user.phone;
-        this.photo = user.photo ? `${this.apiUrl}${user.photo}` : '';
+        this.photo = user.photo ? `${this.imgUrl}${user.photo}` : '';
         this.roleType = user.roleType;
         this.pays = user.pays;
         this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';
