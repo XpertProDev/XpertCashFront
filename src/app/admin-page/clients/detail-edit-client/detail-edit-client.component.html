@@ -185,26 +185,127 @@
               <div class="information_grid_two">
                 <!-- Section Profil -->
                 <div class="profil_section profil_section_facture">
-                    <div class="section_title">
-                        <div class="title">
-                            <h6>Profil Professionnel</h6>
+                  <div class="facture_model">
+                    <div class="header_apercu" style="display: flex; align-items: center; gap: 5px; margin: 10px;">
+                        <!-- // logo entreprise -->
+                        <div class="logo_entreprise">
+                            <img src="assets/img/logo.jpeg" alt="Logo de l'entreprise">
+                        </div>
+                        <!-- entete entreprise  -->
+                        <div class="entete_entreprise">
+                            <div class="content_entete">
+                                <p class="para1">Entreprise SyTechSy</p>
+                                <p class="para1">Secterur: Informatique</p>
+                                <div class="para1">Email : contact&#64;xyz.com Téléphone : +223 70 00 00 00</div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="section_title" style="margin-top: 25px;">
-                        <div class="title">
-                            <h6>Compétences</h6>
-                        </div>
+                    <!-- // Ligne  -->
+                    <hr>
+                    <hr>
+                    <!-- // titre  -->
+                    <div class="titre" style="text-align: center; margin-top: 8px;">
+                        <h6>Facture proforma: <span style="color: #0000003e; font-size: 10px;">FAC-xxx-xx-xxxx</span></h6>
                     </div>
-                    
-                    <div class="tags">
-                        <div class="tag">Stratégie Marketing</div>
-                        <div class="tag">Brand Management</div>
-                        <div class="tag">Analyse de données</div>
-                        <div class="tag">Marketing Digital</div>
-                        <div class="tag">Gestion d'équipe</div>
-                        <div class="tag">CRM</div>
+
+                    <div class="date_right">
+                      <p style="margin: 0 10px; font-size: 8px; text-align: right;">Bamako, dd,MM,yyyy</p>
                     </div>
+
+                    <div class="name_client" style="margin-left: 10px;">
+                      <div class="doit" style="display: flex; align-items: center; gap: 3px;">
+                        <h6 style="margin: 0; font-size: 8px;">Doit : </h6>
+                        <p style="margin: 0; font-size: 8px;">Nom de client</p>
+                      </div>
+                      <div class="objets" style="display: flex; align-items: center; gap: 3px;">
+                        <h6 style="margin: 0; font-size: 8px;">Objets : </h6>
+                        <p style="margin: 0; font-size: 8px;">Une petite description de l'objet</p>
+                      </div>
+                    </div>
+
+                    <div class="container_table" style="display: flex; justify-content: center;">
+                      <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="th">Désignation</th>
+                                <th class="th" style="width: 70px!important;">Description</th>
+                                <th class="th">PU</th>
+                                <th class="th">Quantité</th>
+                                <th class="th">Montant (FCFA)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="td">Site E-commerce</td>
+                                <td class="td">Site vitrine</td>
+                                <td class="td">500,000</td>
+                                <td class="td">1</td>
+                                <td class="td">500,000</td>
+                            </tr>
+                            <tr>
+                                <td class="td td_left">Maintenance</td>
+                                <td class="td td_left">Support technique</td>
+                                <td class="td">100,000</td>
+                                <td class="td">3</td>
+                                <td class="td">300,000</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="tfoot">
+                            <tr>
+                                <td class="td" colspan="4">Total HT</td>
+                                <td class="td">800,000</td>
+                            </tr>
+                            <tr>
+                                <td class="td" colspan="4">Remise 10 %</td>
+                                <td class="td">80,000</td>
+                            </tr>
+                            <!-- Montant Commercial  -->
+                            <tr>
+                                <td class="td" colspan="4">Montant commercial</td>
+                                <td class="td">720,000</td>
+                            </tr>
+                            <!-- TVA à 18% sur le montant commercial -->
+                            <tr>
+                                <td class="td" colspan="4">18 %</td>
+                                <td class="td">129,600</td>
+                            </tr>
+                            <tr>
+                                <td class="td" colspan="4">Montant TTC</td>
+                                <td class="td">849,600</td>
+                            </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+
+                    <div class="arret_somme">
+                      <p style="margin: 0 0 0 10px; font-size: 6px;">Arrêté la présente facture à la somme de : Zero .....</p>
+                    </div>
+
+                    <div class="signature" style="text-align: right; margin: 20px 10px 26px 0;">
+                      <div class="post_signateure">
+                        <p style="font-size: 8px;">Directeur</p>
+                      </div>
+                      <div class="nom_signateure">
+                        <p style="font-size: 8px;">Diakaridia SY</p>
+                      </div>
+                    </div>
+
+                    <!-- <hr> -->
+
+                    <div class="container_footer">
+                      <div class="footer">
+                          <hr style="margin-top: 40px;">
+                          <p style="text-align: center; font-size: 8px; margin: 0 0 3px 0;"><strong>www.groupexpertpro.com</strong></p>
+                          <div style="font-size: 7px; text-align: center;">
+                              <em>NINA : xxxx, RCCM : xxxx, NIF : xxxx, Banque : xxxx</em>
+                          </div>
+                          <div style="margin-top: 0px; font-size: 7px; text-align: center;">
+                              <em>Adresse : Faladjié Sema, Rue du gouverneur /Bamako-Mali</em>
+                          </div>
+                      </div>
+                  </div>
+
+                  </div>
                 </div>
                 
                 <!-- Section Informations Personnelles -->
@@ -273,7 +374,7 @@
                     <!-- Footer collé en bas du conteneur -->
                     <div class="sticky-footer" *ngIf="!loadingFactures && !errorFactures && facturesClient.length > 0">
                       <table style="width: 100%;">
-                        <tfoot>
+                        <tfoot style="background-color: #ffffff;">
                           <tr>
                             <td colspan="3" class="text-bold">Total</td>
                             <td class="text-right text-bold">
