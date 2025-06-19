@@ -23,6 +23,10 @@
 
             <input #fileInput type="file" accept="image/*" hidden 
                   (change)="onFileSelected($event)">
+
+            <div class="taille_photo">
+              <p style="margin: 0; font-size: 8px; text-align: center;">Formats JPG, GIF ou PNG autorisés. Taille maximale : 800 Ko.</p>
+            </div>
         </div>
         
         <!-- Section Informations Personnelles -->
@@ -320,7 +324,7 @@
                       <p style="margin: 0 0 0 10px; font-size: 6px;">Arrêté la présente facture à la somme de : Zero .....</p>
                     </div>
 
-                    <div class="signature" style="text-align: right; margin: 20px 10px 26px 0;">
+                    <div class="signature" style="text-align: right; margin: 20px 10px 16px 0;">
                       <div class="post_signateure">
                         <p style="font-size: 8px;">Directeur</p>
                       </div>
@@ -333,12 +337,12 @@
 
                     <div class="container_footer">
                       <div class="footer">
-                          <hr style="margin-top: 40px;">
+                          <hr>
                           <p style="text-align: center; font-size: 8px; margin: 0 0 3px 0;"><strong>www.groupexpertpro.com</strong></p>
-                          <div style="font-size: 7px; text-align: center;">
+                          <div style="font-size: 5px; text-align: center;">
                               <em>NINA : xxxx, RCCM : xxxx, NIF : xxxx, Banque : xxxx</em>
                           </div>
-                          <div style="margin-top: 0px; font-size: 7px; text-align: center;">
+                          <div style="margin-top: 0px; font-size: 5px; text-align: center;">
                               <em>Adresse : Faladjié Sema, Rue du gouverneur /Bamako-Mali</em>
                           </div>
                       </div>
