@@ -11,16 +11,18 @@
                 </div>
             </div>
 
-            <div class="profile-img-wrapper">
-              <img src="assets/img/profil.png" alt="Photo de profil" class="profile-img" />
-
-                <div class="overlay">
-                  <img
-                    src="assets/img/appareil.jpg"
-                    alt="Modifier"
-                    class="camera-icon" />
-                </div>
+            <div class="profile-img-wrapper" (click)="triggerFileInput()">
+              <img [src]="newPhotoUrl || clientPhotoUrl || 'assets/img/profil.png'" 
+                  alt="Photo de profil" 
+                  class="profile-img" />
+              
+              <div class="overlay">
+                <img src="assets/img/appareil.jpg" alt="Modifier" class="camera-icon" />
+              </div>
             </div>
+
+            <input #fileInput type="file" accept="image/*" hidden 
+                  (change)="onFileSelected($event)">
         </div>
         
         <!-- Section Informations Personnelles -->
@@ -46,7 +48,7 @@
             <div class="champ_grid_true">
               <!-- Nom et prenom -->
               <div class="champ_input">
-                <input type="text" class="input_focus" [disabled]="!isEditing"
+                <input type="text" class="input_focus" 
                           id="nomComplet" formControlName="nomComplet"
                           name="nomComplet"
                           placeholder="Saisis le nom et prénom">
@@ -58,9 +60,8 @@
               </div>
               <!-- Email -->
               <div class="champ_input">
-                <input type="email" class="input_focus" [disabled]="!isEditing"
+                <input type="email" class="input_focus" 
                           id="email" formControlName="email"
-                          name="email" [disabled]="!isEditing"
                           placeholder="Saisis l'email">
                 <label for="email" class="label">Email</label>
                 <div *ngIf="modifierClientForm.get('email')?.touched && modifierClientForm.get('email')?.invalid" class="error">
@@ -69,7 +70,7 @@
               </div>
               <!-- Adress -->
               <div class="champ_input">
-                <input class="input_focus" [disabled]="!isEditing"
+                <input class="input_focus" 
                           id="adresse" formControlName="adresse"
                           name="adresse"
                           placeholder="Saisissez votre adresse ">
@@ -148,7 +149,7 @@
           <!-- // Cadre entreprise  -->
           <div class="cadre_entreprise" *ngIf="isEntrepriseSelected">
             <div class="champ_input">
-              <input type="text" [disabled]="!isEditing"
+              <input type="text" 
                     placeholder="Selectionner un entreprise"
                     [formControl]="control" matInput
                     [matAutocomplete]="auto"

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BehaviorSubject, combineLatest, map, Observable, of, startWith } from 'rxjs';
 import { Entreprise } from '../../MODELS/entreprise-model';
@@ -63,6 +63,11 @@ export class DetailEditClientComponent {
   facturesClient: any[] = [];
   loadingFactures = false;
   errorFactures = '';
+
+  // @ViewChild('fileInput') fileInput!: ElementRef;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  clientPhotoUrl: string | null = null;
+  selectedImageFile: File | null = null;
 
   // Ajoutez cette propriété dans la classe
   isEditing = false;
@@ -139,28 +144,38 @@ export class DetailEditClientComponent {
     return Math.round(total);
   }
 
+  // Méthode pour déclencher l'input file
+  triggerFileInput(): void {
+    if (!this.isEditing) return;
+    this.fileInput.nativeElement.click();
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-  
-      // Vérification du format du fichier
+      
+      // Vérification du format
       const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
       if (!allowedFormats.includes(file.type)) {
-        this.errorMessage = 'Le fichier doit être une image (JPG, PNG)';
+        this.errorMessage = 'Seuls les formats JPG, PNG sont acceptés';
         return;
       }
-      this.selectedFile = file;
-      this.imageFile = file;
-  
-      // Tester la compression
-      this.testImageCompression(file);
-
+      
+      // Vérification de la taille (max 2MB)
+      // if (file.size > 2 * 1024 * 1024) {
+      //   this.errorMessage = 'La taille maximale est de 2MB';
+      //   return;
+      // }
+      
+      this.selectedImageFile = file;
+      
+      // Aperçu de l'image
       const reader = new FileReader();
       reader.onload = (e) => {
         this.newPhotoUrl = e.target?.result as string;
       };
-      reader.readAsDataURL(this.selectedFile);
+      reader.readAsDataURL(file);
     }
   }
 
@@ -177,6 +192,7 @@ export class DetailEditClientComponent {
     if (paysInfo) {
       this.indicatif = `${paysInfo.indicatif} `; // Ajout d'un espace après l'indicatif
       this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
+      this.modifierClientForm.get('telephone')?.enable();
   
       // Met à jour la valeur avec l'indicatif + espace
       const currentPhone = this.modifierClientForm.get('telephone')?.value || '';
@@ -185,6 +201,8 @@ export class DetailEditClientComponent {
       }
   
       this.updatePhoneValidator(paysInfo.longueur);
+    } else {
+      this.modifierClientForm.get('telephone')?.disable();
     }
   }
 
@@ -227,6 +245,7 @@ export class DetailEditClientComponent {
     this.loadEntreprises();
     this.getRouteClient();
     this.modifierClientForm.disable();
+    
   }
 
   getRouteClient() {
@@ -249,6 +268,10 @@ export class DetailEditClientComponent {
         this.modifierClientForm.disable();
         this.handleEntreprise(client.entrepriseClient);
         this.loadFacturesClient();
+
+        if (client.photo) {
+          this.clientPhotoUrl = client.photo;
+        }
       },
       error: (error) => {
         this.errorMessage = 'Erreur lors du chargement du client';
@@ -487,9 +510,16 @@ export class DetailEditClientComponent {
     }
   
     // Construction de l'objet client
+    // const clientData: any = {
+    //   ...this.modifierClientForm.value,
+    //   id: this.clientId
+    // };
+
+     // Construction de l'objet client avec photo optionnelle
     const clientData: any = {
       ...this.modifierClientForm.value,
-      id: this.clientId
+      id: this.clientId,
+      photo: this.clientPhotoUrl // Ajout de la propriété photo
     };
 
     if (this.isEntrepriseSelected && this.control.value?.id) {
@@ -497,13 +527,20 @@ export class DetailEditClientComponent {
     } else {
       clientData.entrepriseClient = null;
     }
+
+    const imageFile = this.selectedImageFile ?? undefined;
   
     // Appel au service
-    this.clientService.updateClient(this.clientId, clientData).subscribe({
+    this.clientService.updateClient(this.clientId, clientData, imageFile).subscribe({
       next: (updatedClient) => {
         this.successMessage = 'Client modifié avec succès !';
         this.errorMessage = '';
         setTimeout(() => this.router.navigate(['/clients']), 2000);
+        if (updatedClient.photo) {
+          this.clientPhotoUrl = updatedClient.photo;
+        }
+        this.newPhotoUrl = null;
+        this.selectedImageFile = null;
       },
       error: (error) => {
         console.error('Erreur:', error);
@@ -528,9 +565,9 @@ export class DetailEditClientComponent {
     this.isEditing = !this.isEditing;
     
     if (this.isEditing) {
-      this.modifierClientForm.enable(); // Active le formulaire
+      this.modifierClientForm.enable(); // Active tous les champs
     } else {
-      this.modifierClientForm.disable(); // Désactive le formulaire
+      this.modifierClientForm.disable(); // Désactive tous les champs
       this.loadClientData(); // Recharge les données originales
     }
   }
