@@ -228,127 +228,136 @@
               <div class="information_grid_two">
                 <!-- Section Profil -->
                 <div class="profil_section profil_section_facture">
-                  <div class="facture_model">
-                    <div class="header_apercu" style="display: flex; align-items: center; gap: 5px; margin: 10px;">
-                        <!-- // logo entreprise -->
-                        <div class="logo_entreprise">
-                            <img src="assets/img/logo.jpeg" alt="Logo de l'entreprise">
-                        </div>
-                        <!-- entete entreprise  -->
-                        <div class="entete_entreprise">
-                            <div class="content_entete">
-                                <p class="para1">Entreprise SyTechSy</p>
-                                <p class="para1">Secterur: Informatique</p>
-                                <div class="para1">Email : contact&#64;xyz.com Téléphone : +223 70 00 00 00</div>
-                            </div>
-                        </div>
+                <div class="facture_model" *ngIf="factureDetails; else noFactureSelected">
+                  <!-- En-tête dynamique -->
+                  <div class="header_apercu" style="display: flex; align-items: center; gap: 5px; margin: 10px;">
+                    <div class="logo_entreprise">
+                      <img [src]="entrepriseLogo"><!--  alt="Logo entreprise" -->
                     </div>
-                    <!-- // Ligne  -->
-                    <hr>
-                    <hr>
-                    <!-- // titre  -->
-                    <div class="titre" style="text-align: center; margin-top: 8px;">
-                        <h6>Facture proforma: <span style="color: #0000003e; font-size: 10px;">FAC-xxx-xx-xxxx</span></h6>
-                    </div>
-
-                    <div class="date_right">
-                      <p style="margin: 0 10px; font-size: 8px; text-align: right;">Bamako, dd,MM,yyyy</p>
-                    </div>
-
-                    <div class="name_client" style="margin-left: 10px;">
-                      <div class="doit" style="display: flex; align-items: center; gap: 3px;">
-                        <h6 style="margin: 0; font-size: 8px;">Doit : </h6>
-                        <p style="margin: 0; font-size: 8px;">Nom de client</p>
-                      </div>
-                      <div class="objets" style="display: flex; align-items: center; gap: 3px;">
-                        <h6 style="margin: 0; font-size: 8px;">Objets : </h6>
-                        <p style="margin: 0; font-size: 8px;">Une petite description de l'objet</p>
+                    <div class="entete_entreprise">
+                      <p class="para1">{{ entrepriseNom }}</p>
+                      <p class="para1">Secteur: {{ entrepriseSecteur }}</p>
+                      <div class="para1">
+                        Email: {{ entrepriseEmail }} 
+                        Téléphone: {{ entrepriseTelephone }}
                       </div>
                     </div>
+                  </div>
 
-                    <div class="container_table" style="display: flex; justify-content: center;">
-                      <table class="table">
-                        <thead>
-                            <tr>
-                                <th class="th">Désignation</th>
-                                <th class="th" style="width: 70px!important;">Description</th>
-                                <th class="th">PU</th>
-                                <th class="th">Quantité</th>
-                                <th class="th">Montant (FCFA)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="td">Site E-commerce</td>
-                                <td class="td">Site vitrine</td>
-                                <td class="td">500,000</td>
-                                <td class="td">1</td>
-                                <td class="td">500,000</td>
-                            </tr>
-                            <tr>
-                                <td class="td td_left">Maintenance</td>
-                                <td class="td td_left">Support technique</td>
-                                <td class="td">100,000</td>
-                                <td class="td">3</td>
-                                <td class="td">300,000</td>
-                            </tr>
-                        </tbody>
-                        <tfoot class="tfoot">
-                            <tr>
-                                <td class="td" colspan="4">Total HT</td>
-                                <td class="td">800,000</td>
-                            </tr>
-                            <tr>
-                                <td class="td" colspan="4">Remise 10 %</td>
-                                <td class="td">80,000</td>
-                            </tr>
-                            <!-- Montant Commercial  -->
-                            <tr>
-                                <td class="td" colspan="4">Montant commercial</td>
-                                <td class="td">720,000</td>
-                            </tr>
-                            <!-- TVA à 18% sur le montant commercial -->
-                            <tr>
-                                <td class="td" colspan="4">18 %</td>
-                                <td class="td">129,600</td>
-                            </tr>
-                            <tr>
-                                <td class="td" colspan="4">Montant TTC</td>
-                                <td class="td">849,600</td>
-                            </tr>
-                        </tfoot>
-                      </table>
+                  <hr><hr>
+
+                  <!-- Numéro de facture -->
+                  <div class="titre" style="text-align: center; font-size: 8px;">
+                    <h6>Facture proforma: 
+                      <span style="color: #0000003e;">
+                        {{ factureDetails.numeroFacture }}
+                      </span>
+                    </h6>
+                  </div>
+
+                  <!-- Date et lieu -->
+                  <div class="date_right">
+                    <p style="margin: 0 10px; font-size: 8px; text-align: right;">
+                      {{ entrepriseSiege }}, {{ factureDetails.dateCreation | date:'dd/MM/yyyy' }}
+                    </p>
+                  </div>
+
+                  <!-- Destinataire -->
+                  <div class="name_client" style="margin-left: 10px;">
+                    <div class="doit" style="display: flex; align-items: center; gap: 3px;">
+                      <h6 style="margin: 0; font-size: 8px;">Doit : </h6>
+                      <p style="margin: 0; font-size: 8px;">
+                        {{ factureDetails.client?.nomComplet || factureDetails.entrepriseClient?.nom }}
+                      </p>
                     </div>
+                    <div class="objets" style="display: flex; align-items: center; gap: 3px;">
+                      <h6 style="margin: 0; font-size: 8px;">Objet : </h6>
+                      <p style="margin: 0; font-size: 8px;">
+                        {{ factureDetails.description }}
+                      </p>
+                    </div>
+                  </div>
 
-                    <div class="arret_somme">
+                  <!-- Lignes de produits -->
+                  <div class="container_table" style="display: flex; justify-content: center;">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th class="th">Désignation</th>
+                          <th class="th">Description</th>
+                          <th class="th">PU</th>
+                          <th class="th">Quantité</th>
+                          <th class="th">Montant (FCFA)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let ligne of factureDetails.lignesFacture">
+                          <td class="td">{{ ligne.nomProduit }}</td>
+                          <td class="td">{{ ligne.ligneDescription }}</td>
+                          <td class="td">{{ ligne.prixUnitaire | customNumber }}</td>
+                          <td class="td">{{ ligne.quantite }}</td>
+                          <td class="td">{{ ligne.montantTotal | customNumber }}</td>
+                        </tr>
+                      </tbody>
+                      <tfoot class="tfoot">
+                        <!-- Totaux dynamiques -->
+                        <tr>
+                          <td class="td" colspan="4">Total HT</td>
+                          <td class="td">{{ factureDetails.totalHT | customNumber }}</td>
+                        </tr>
+                        <tr *ngIf="factureDetails.remise > 0">
+                          <td class="td" colspan="4">Remise {{ factureDetails.remise }}%</td>
+                          <td class="td">{{ (factureDetails.totalHT * factureDetails.remise / 100) | customNumber }}</td>
+                        </tr>
+                        <tr *ngIf="factureDetails.tva">
+                          <td class="td" colspan="4">TVA</td>
+                          <td class="td">{{ factureDetails.montantTVA | customNumber }}</td>
+                        </tr>
+                        <tr>
+                          <td class="td" colspan="4">Montant TTC</td>
+                          <td class="td">{{ factureDetails.totalFacture | customNumber }}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+
+                  <div class="arret_somme">
                       <p style="margin: 0 0 0 10px; font-size: 6px;">Arrêté la présente facture à la somme de : Zero .....</p>
-                    </div>
+                  </div>
 
-                    <div class="signature" style="text-align: right; margin: 20px 10px 16px 0;">
+                  <div class="signature" style="text-align: right; margin: 20px 10px 16px 0;">
                       <div class="post_signateure">
-                        <p style="font-size: 8px;">Directeur</p>
+                        <p style="font-size: 8px;">{{ entrepriseSignataire }}</p>
                       </div>
                       <div class="nom_signateure">
-                        <p style="font-size: 8px;">Diakaridia SY</p>
+                        <p style="font-size: 8px;">{{ entrepriseSignataireNom }}</p>
                       </div>
+                  </div>
+
+                  <!-- Pied de page dynamique -->
+                  <div class="container_footer">
+                    <div class="footer">
+                      <hr>
+                      <p style="text-align: center; font-size: 8px; margin: 0 0 3px 0;">
+                        <strong>{{ entrepriseSiteWeb }}</strong>
+                      </p>
+                      <div style="font-size: 5px; text-align: center;">
+                        <em>
+                          NINA: {{ entrepriseNina }}
+                          RCCM: {{ entrepriseRccm }}
+                          NIF: {{ entrepriseNif }}
+                          Banque: {{ entrepriseBanque }}
+                        </em>
+                      </div>
+                       <div style="margin-top: 0px; font-size: 5px; text-align: center;">
+                          <em>Adresse : {{ entrepriseAdresse }} /{{ entreprisePays }}</em>
+                        </div>
                     </div>
-
-                    <!-- <hr> -->
-
-                    <div class="container_footer">
-                      <div class="footer">
-                          <hr>
-                          <p style="text-align: center; font-size: 8px; margin: 0 0 3px 0;"><strong>www.groupexpertpro.com</strong></p>
-                          <div style="font-size: 5px; text-align: center;">
-                              <em>NINA : xxxx, RCCM : xxxx, NIF : xxxx, Banque : xxxx</em>
-                          </div>
-                          <div style="margin-top: 0px; font-size: 5px; text-align: center;">
-                              <em>Adresse : Faladjié Sema, Rue du gouverneur /Bamako-Mali</em>
-                          </div>
-                      </div>
                   </div>
-
-                  </div>
+                </div>
+                  <ng-template #noFactureSelected>
+                    <!-- Aperçu par défaut (existant) -->
+                  </ng-template>
                 </div>
                 
                 <!-- Section Informations Factures -->
@@ -387,7 +396,9 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr *ngFor="let facture of facturesClient">
+                          <tr *ngFor="let facture of facturesClient" 
+                              (click)="onSelectFacture(facture)"
+                              [class.selected-row]="selectedFactureId === facture.id">
                             <td>{{ facture.numeroFacture }}</td>
                             <td>{{ facture.dateFacture | date:'dd/MM/yyyy' }}</td>
                             <td>
