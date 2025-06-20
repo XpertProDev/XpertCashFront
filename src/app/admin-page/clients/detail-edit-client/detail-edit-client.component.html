@@ -306,12 +306,16 @@
                           <td class="td">{{ factureDetails.totalHT | customNumber }}</td>
                         </tr>
                         <tr *ngIf="factureDetails.remise > 0">
-                          <td class="td" colspan="4">Remise {{ factureDetails.remise }}%</td>
-                          <td class="td">{{ (factureDetails.totalHT * factureDetails.remise / 100) | customNumber }}</td>
+                          <!-- <td class="td" colspan="4">Remise {{ factureDetails.remise | number:'1.0-0' }}%</td> -->
+                          <td class="td" colspan="4">Remise 0%</td>
+                          <!-- <td class="td">{{ (factureDetails.totalHT * factureDetails.remise / 100) | customNumber }}</td> -->
+                          <td class="td">0000</td>
                         </tr>
                         <tr *ngIf="factureDetails.tva">
-                          <td class="td" colspan="4">TVA</td>
-                          <td class="td">{{ factureDetails.montantTVA | customNumber }}</td>
+                          <!-- <td class="td" colspan="4">TVA {{ (factureDetails.tauxTva * 100) | number:'1.0-0' }}%</td> -->
+                          <td class="td" colspan="4">TVA 0%</td>
+                          <!-- <td class="td">{{ factureDetails.montantTVA | customNumber }}</td> -->
+                          <td class="td">000</td>
                         </tr>
                         <tr>
                           <td class="td" colspan="4">Montant TTC</td>

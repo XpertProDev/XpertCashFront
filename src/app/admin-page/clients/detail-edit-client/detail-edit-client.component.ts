@@ -169,8 +169,39 @@ export class DetailEditClientComponent {
   // Ajouter cette méthode pour charger les détails d'une facture
 loadFactureDetails(factureId: number): void {
   this.factureService.getFactureProformaById(factureId).subscribe({
-    next: (details) => {
-      this.factureDetails = details;
+    next: (details: any) => {
+      // Calculer le montant après remise
+      const remiseValue = details.remise || 0;
+      const totalApresRemise = details.totalHT - (details.totalHT * remiseValue / 100);
+      
+      // Calculer la TVA si nécessaire
+      let montantTVA = 0;
+      let tauxTva = 0;
+      
+      if (details.tva) {
+        // Calcul: TTC = (HT - Remise) + TVA
+        // => TVA = TTC - (HT - Remise)
+        montantTVA = details.totalFacture - totalApresRemise;
+        
+        // Calculer le taux de TVA réel
+        if (totalApresRemise > 0) {
+          tauxTva = montantTVA / totalApresRemise;
+        }
+      }
+      
+      // Valider et corriger la remise
+      let remiseCorrigee = remiseValue;
+      if (remiseCorrigee > 100) {
+        console.warn(`Remise invalide corrigée: ${remiseCorrigee}% -> 100%`);
+        remiseCorrigee = 100;
+      }
+      
+      this.factureDetails = {
+        ...details,
+        montantTVA,
+        tauxTva,
+        remise: remiseCorrigee
+      };
     },
     error: (err) => {
       console.error('Erreur chargement détails facture', err);
