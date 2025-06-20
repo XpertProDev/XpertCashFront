@@ -75,6 +75,8 @@ export class ListProduitComponent {
   // Variable regroupant toutes les informations du popup
   popupData: PopupData = { title: '', message: '', image: '', type: 'success' };
   showBarcode = false;
+  showPopupCategory: boolean = false;
+  showPopupUnit: boolean = false;
     
   // Produit 
   produit: Produit = {
@@ -208,6 +210,31 @@ export class ListProduitComponent {
   //     this.boutiqueName = name;
   //   });
   // }
+
+  // Méthodes pour ouvrir/fermer le popup
+  openPopupCategory(): void {
+    this.showPopupCategory = true;
+    this.ajouteCategoryForm.reset();
+    this.errorMessageCategory = '';
+    this.messageAPI = '';
+  }
+
+  closePopupCategory(): void { 
+    this.showPopupCategory = false; 
+  }
+
+  // Méthodes pour ouvrir/fermer le popup
+  openPopupUnit(): void {
+    this.showPopupUnit = true;
+    this.ajouteUniteForm.reset();
+    this.errorMessageUnity = '';
+    this.messageAPI = '';
+  }
+
+  closePopupUnit(): void { 
+    this.showPopupUnit = false; 
+  }
+  
 
   getFiltrageCategoriesUnites() {
     // 🟢 Filtrage des catégories (OK)
@@ -426,6 +453,7 @@ export class ListProduitComponent {
   onCreateCategoryClick() {
     this.showCategoryCreation = true;
     this.showUniteCreation = false; 
+    this.openPopupCategory();
     // this.ajouteUniteForm.get('unityName')!.setValue('');
     this.ajouteCategoryForm.get('categoryName')!.setValue('');
   }
@@ -434,6 +462,7 @@ export class ListProduitComponent {
   onCreateUniteClick() {
     this.showUniteCreation = true;
     this.showCategoryCreation = false;
+    this.openPopupUnit();
     this.ajouteUniteForm.get('unityName')!.setValue('');
     // this.ajouteCategoryForm.get('categoryName')!.setValue('');
   }
@@ -465,6 +494,8 @@ export class ListProduitComponent {
 
           // Ajouter à la liste des options
           this.options.push(newCategory);
+
+          this.showPopupCategory = false; 
 
           // 1. Mettre à jour l'input d'autocomplete
           this.myControl.setValue(newCategory);
@@ -533,6 +564,8 @@ export class ListProduitComponent {
 
           // Ajouter à la liste
           this.optionsUnite.push(newUnity);
+
+          this.showPopupUnit = false; 
 
           // Mettre à jour le contrôle après l'ajout
           this.uniteControl.setValue(newUnity);
