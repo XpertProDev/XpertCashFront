@@ -113,5 +113,22 @@ updateClient(id: number, client: Clients, imageFile?: File): Observable<Clients>
   );
 }
 
+// getFullImageUrl(relativePath: string): string {
+//   return relativePath 
+//     ? `${environment.imgUrl}${relativePath}`
+//     : 'assets/img/profil.png';
+// }
+
+getFullImageUrl(relativePath: string): string {
+  // Si déjà une URL complète, retournez directement
+  if (relativePath.startsWith('http')) return relativePath;
+  
+  return relativePath 
+    ? `${environment.imgUrl}${relativePath}`
+    : 'assets/img/profil.png';
+}
+  
+
+
 
 }

@@ -11,5 +11,5 @@ export interface Clients {
     pays: string;
     ville: string;
     createdAt?: Date;
-    photoUrl: string;
+    photo?: string;
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BehaviorSubject, combineLatest, map, Observable, of, startWith } from 'rxjs';
 import { Entreprise } from '../../MODELS/entreprise-model';
@@ -11,6 +11,16 @@ import { CommonModule } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
+
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
+import { MatDividerModule } from '@angular/material/divider';
+import { environment } from 'src/environments/environment';
+
 
 @Component({
   selector: 'app-detail-edit-client',
@@ -20,12 +30,18 @@ import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
     CommonModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
-    CustomNumberPipe
+    CustomNumberPipe,
+    MatTabsModule,
+    MatExpansionModule, 
+    MatFormFieldModule,
+    MatIconModule,
+    MatCardModule, MatTableModule, MatDividerModule
   ],
   templateUrl: './detail-edit-client.component.html',
   styleUrl: './detail-edit-client.component.scss'
 })
 export class DetailEditClientComponent {
+  private apiUrl = environment.imgUrl
   clientId!: number;
   errorMessage: string = '';
   errorMessageApi: string = '';
@@ -45,13 +61,24 @@ export class DetailEditClientComponent {
   entrepriseRequiredError = false;
   indicatif: string = '';
   maxPhoneLength: number = 0;
+  entrepriseIndicatif: string = '';
+  entrepriseMaxPhoneLength: number = 0;
 
   facturesClient: any[] = [];
   loadingFactures = false;
   errorFactures = '';
 
+  // @ViewChild('fileInput') fileInput!: ElementRef;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  clientPhotoUrl: string | null = null;
+  selectedImageFile: File | null = null;
 
-  // Ajoutez ces propriétés dans la classe
+  // Ajoutez cette propriété dans la classe
+  isEditing = false;
+
+  displayedColumns1 = ['numero', 'date', 'statut', 'montant'];
+
+  // Définir les indicatifs par pays
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
     'Mali': { indicatif: '+223', longueur: 8 },
     'Sénégal': { indicatif: '+221', longueur: 9 },
@@ -121,29 +148,44 @@ export class DetailEditClientComponent {
     return Math.round(total);
   }
 
+  // Méthode pour déclencher l'input file
+  triggerFileInput(): void {
+    if (!this.isEditing) return;
+    this.fileInput.nativeElement.click();
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-  
-      // Vérification du format du fichier
+      
+      // Vérification du format
       const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
       if (!allowedFormats.includes(file.type)) {
-        this.errorMessage = 'Le fichier doit être une image (JPG, PNG)';
+        this.errorMessage = 'Seuls les formats JPG, PNG sont acceptés';
         return;
       }
-      this.selectedFile = file;
-      this.imageFile = file;
-  
-      // Tester la compression
-      this.testImageCompression(file);
-
+      
+      // Vérification de la taille (max 2MB)
+      // if (file.size > 2 * 1024 * 1024) {
+      //   this.errorMessage = 'La taille maximale est de 2MB';
+      //   return;
+      // }
+      
+      this.selectedImageFile = file;
+      
+      // Aperçu de l'image
       const reader = new FileReader();
       reader.onload = (e) => {
         this.newPhotoUrl = e.target?.result as string;
       };
-      reader.readAsDataURL(this.selectedFile);
+      reader.readAsDataURL(file);
     }
+  }
+
+  startEditing(): void {
+    this.isEditing = true;
+    this.modifierClientForm.enable(); // Active tous les champs du formulaire
   }
 
   // Ajoutez ces méthodes
@@ -154,6 +196,7 @@ export class DetailEditClientComponent {
     if (paysInfo) {
       this.indicatif = `${paysInfo.indicatif} `; // Ajout d'un espace après l'indicatif
       this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
+      this.modifierClientForm.get('telephone')?.enable();
   
       // Met à jour la valeur avec l'indicatif + espace
       const currentPhone = this.modifierClientForm.get('telephone')?.value || '';
@@ -162,6 +205,8 @@ export class DetailEditClientComponent {
       }
   
       this.updatePhoneValidator(paysInfo.longueur);
+    } else {
+      this.modifierClientForm.get('telephone')?.disable();
     }
   }
 
@@ -203,6 +248,9 @@ export class DetailEditClientComponent {
     this.getEntrepriseForm();
     this.loadEntreprises();
     this.getRouteClient();
+    this.modifierClientForm.disable();
+    this.control.disable();
+    
   }
 
   getRouteClient() {
@@ -212,12 +260,28 @@ export class DetailEditClientComponent {
     });
   }
 
+  cancelEditing(): void {
+    this.isEditing = false;
+    this.modifierClientForm.disable();
+    this.loadClientData(); // Recharge les données originales
+  }
+
   private loadClientData() {
     this.clientService.getClientById(this.clientId).subscribe({
       next: (client) => {
+        // Transformez l'URL de la photo
+        this.clientPhotoUrl = client.photo 
+        ? this.clientService.getFullImageUrl(client.photo)
+        : 'assets/img/profil.png';
+        
         this.populateForm(client);
+        this.modifierClientForm.disable();
         this.handleEntreprise(client.entrepriseClient);
         this.loadFacturesClient();
+
+        if (client.photo) {
+          this.clientPhotoUrl = this.clientService.getFullImageUrl(client.photo);
+        }
       },
       error: (error) => {
         this.errorMessage = 'Erreur lors du chargement du client';
@@ -295,6 +359,7 @@ export class DetailEditClientComponent {
       adresse: [''],
       siege: [''],
       secteur: [''],
+      pays: ['']
     });
   }
 
@@ -375,7 +440,26 @@ export class DetailEditClientComponent {
   }
 
   // Ouvre/ferme le popup d’entreprise
-  openPopup() { this.showPopup = true; }
+  openPopup() {
+    if (!this.isEditing) return;
+    
+    this.getEntrepriseForm();
+    this.entrepriseForm.reset();
+    
+    // Initialiser avec le Mali par défaut
+    this.entrepriseForm.patchValue({
+      pays: 'Mali'
+    });
+    
+    // Forcer l'initialisation de l'indicatif
+    this.onEntreprisePaysChange({
+      target: { 
+        value: this.entrepriseForm.get('pays')?.value 
+      }
+    });
+    
+    this.showPopup = true;
+  }
   closePopup() { this.showPopup = false; }
   
   initEntreprise() {
@@ -390,7 +474,7 @@ export class DetailEditClientComponent {
     });
   }
   
-  ajouterEntreprise() {
+ajouterEntreprise() {
     if (this.entrepriseForm.invalid) return;
   
     const newEntreprise: Entreprise = {
@@ -401,7 +485,7 @@ export class DetailEditClientComponent {
       adresse: this.entrepriseForm.value.adresse,
       siege: this.entrepriseForm.value.siege,
       secteur: this.entrepriseForm.value.secteur,
-      logo: this.newPhotoUrl || '',
+      logo : this.entrepriseForm.value.logo,
       nif: this.entrepriseForm.value.nif,
       nina: this.entrepriseForm.value.nina,
       banque: this.entrepriseForm.value.banque,
@@ -412,7 +496,6 @@ export class DetailEditClientComponent {
       prefixe: this.entrepriseForm.value.prefixe,
       suffixe: this.entrepriseForm.value.suffixe,
       tauxTva: this.entrepriseForm.value.tauxTva
-
 
 
     };
@@ -453,9 +536,16 @@ export class DetailEditClientComponent {
     }
   
     // Construction de l'objet client
+    // const clientData: any = {
+    //   ...this.modifierClientForm.value,
+    //   id: this.clientId
+    // };
+
+     // Construction de l'objet client avec photo optionnelle
     const clientData: any = {
       ...this.modifierClientForm.value,
-      id: this.clientId
+      id: this.clientId,
+      photo: this.clientPhotoUrl // Ajout de la propriété photo
     };
 
     if (this.isEntrepriseSelected && this.control.value?.id) {
@@ -463,13 +553,20 @@ export class DetailEditClientComponent {
     } else {
       clientData.entrepriseClient = null;
     }
+
+    const imageFile = this.selectedImageFile ?? undefined;
   
     // Appel au service
-    this.clientService.updateClient(this.clientId, clientData).subscribe({
+    this.clientService.updateClient(this.clientId, clientData, imageFile).subscribe({
       next: (updatedClient) => {
         this.successMessage = 'Client modifié avec succès !';
         this.errorMessage = '';
         setTimeout(() => this.router.navigate(['/clients']), 2000);
+        if (updatedClient.photo) {
+          this.clientPhotoUrl = this.clientService.getFullImageUrl(updatedClient.photo);
+        }
+        this.newPhotoUrl = null;
+        this.selectedImageFile = null;
       },
       error: (error) => {
         console.error('Erreur:', error);
@@ -490,9 +587,71 @@ export class DetailEditClientComponent {
     });
   }
 
+  toggleEditing(): void {
+    this.isEditing = !this.isEditing;
+    
+    if (this.isEditing) {
+      this.control.enable(); // Activer le contrôle
+      this.modifierClientForm.enable();
+    } else {
+      this.control.disable(); // Désactiver le contrôle
+      this.modifierClientForm.disable();
+      this.loadClientData();
+    }
+  }
+
   // Annuler et revenir à la liste
   goToClients() {
-    this.router.navigate(['/clients']);
+    if (this.isEditing) {
+      this.cancelEditing();
+    } else {
+      this.router.navigate(['/clients']);
+    }
+  }
+
+  formatEntreprisePhoneNumber(): void {
+    let valeur = this.entrepriseForm.get('telephone')?.value;
+    
+    // Garantir que l'indicatif est présent
+    if (!valeur.startsWith(this.entrepriseIndicatif)) {
+      this.entrepriseForm.get('telephone')?.setValue(this.entrepriseIndicatif);
+      return;
+    }
+    
+    // Nettoyer et formater les chiffres
+    const chiffres = valeur.replace(this.entrepriseIndicatif, '').replace(/\D/g, '');
+    const numeroFormate = this.entrepriseIndicatif + chiffres;
+    
+    // Limiter la longueur
+    const maxLength = this.entrepriseIndicatif.length + this.entrepriseMaxPhoneLength;
+    this.entrepriseForm.get('telephone')?.setValue(numeroFormate.slice(0, maxLength));
+  }
+
+  onEntreprisePaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+    
+    if (paysInfo) {
+      // Mettre à jour l'indicatif et la longueur max
+      this.entrepriseIndicatif = `${paysInfo.indicatif} `;
+      this.entrepriseMaxPhoneLength = paysInfo.longueur;
+      
+      // Mettre à jour la valeur du téléphone
+      const currentPhone = this.entrepriseForm.get('telephone')?.value || '';
+      if (!currentPhone.startsWith(this.entrepriseIndicatif)) {
+        this.entrepriseForm.get('telephone')?.setValue(this.entrepriseIndicatif);
+      }
+      
+      // Mettre à jour les validateurs
+      this.updateEntreprisePhoneValidator(paysInfo.longueur);
+    }
+  }
+
+  updateEntreprisePhoneValidator(longueur: number): void {
+    this.entrepriseForm.controls['telephone'].setValidators([
+      Validators.pattern(`^\\${this.entrepriseIndicatif}\\d{${longueur}}$`)
+    ]);
+    this.entrepriseForm.controls['telephone'].updateValueAndValidity();
   }
 
   

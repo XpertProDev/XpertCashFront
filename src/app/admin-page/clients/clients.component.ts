@@ -190,9 +190,9 @@ export class ClientsComponent implements OnInit  {
         this.clients = data.map(client => {
           return {
             ...client,
-            photoUrl: client.photo 
+            photo: client.photo 
             ? `${this.apiUrl}${client.photo}` 
-            : `/assets/images/default-avatar.png`,
+            : `/assets/img/profil.png`,
             
             entrepriseClient: client.entrepriseClient ? { 
               id: client.entrepriseClient.id
@@ -200,7 +200,7 @@ export class ClientsComponent implements OnInit  {
           };
         });
 
-        console.log('🖼️ URLs des photos clients :', this.clients.map(c => c.photoUrl));
+        console.log('🖼️ URLs des photos clients :', this.clients.map(c => c.photo));
 
         // Tri décroissant par ID
         this.clients = this.clients.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
