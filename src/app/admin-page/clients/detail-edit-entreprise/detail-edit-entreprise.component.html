@@ -161,7 +161,7 @@
                     <!-- En-tête dynamique -->
                     <div class="header_apercu" style="display: flex; align-items: center; gap: 5px; margin: 10px;">
                       <div class="logo_entreprise">
-                        <img [src]="entrepriseLogo">
+                        <img [src]="entrepriseEmitter.logo ? (imgUrl + entrepriseEmitter.logo) : 'assets/img/entreprise-icon.png'">
                       </div>
                       <div class="entete_entreprise">
                         <p class="para1">{{ entrepriseNom }}</p>

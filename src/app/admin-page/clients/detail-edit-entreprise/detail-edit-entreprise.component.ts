@@ -8,6 +8,7 @@ import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { MatTabsModule } from '@angular/material/tabs';
 import { environment } from 'src/environments/environment';
+import { EntrepriseService } from '../../SERVICES/entreprise-service';
 
 @Component({
   selector: 'app-detail-edit-entreprise',
@@ -23,7 +24,7 @@ import { environment } from 'src/environments/environment';
   styleUrl: './detail-edit-entreprise.component.scss'
 })
 export class DetailEditEntrepriseComponent {
-  private imgUrl = environment.imgUrl;
+  public imgUrl = environment.imgUrl;
   entrepriseForm!: FormGroup;
   errorMessage: string = '';
   successMessage: string = '';
@@ -37,6 +38,7 @@ export class DetailEditEntrepriseComponent {
   isEditing = false;
   selectedFactureId: number | null = null;
   factureDetails: any = null;
+  entrepriseEmitter: any = {};
 
   // Propriétés pour l'aperçu de facture
   entrepriseNom: string = 'Nom entreprise';
@@ -54,6 +56,11 @@ export class DetailEditEntrepriseComponent {
   entreprisePays: string = 'Pays';
   entrepriseSignataireNom: string = 'Nom signataire';
   entrepriseSignataire: string = 'Fonction signataire';
+
+  newPhotoUrl: string | null = null;
+  selectedFile: File | null = null;
+  clientPhotoUrl: string | null = null;
+
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   // Définition des indicatifs par pays
@@ -69,6 +76,7 @@ export class DetailEditEntrepriseComponent {
     private fb: FormBuilder,
     private entrepriseService: EntrepriseClientService,
     private factureService: FactureProFormaService,
+    private entrepriseService2: EntrepriseService 
   ) {}
 
   ngOnInit() {
@@ -77,6 +85,18 @@ export class DetailEditEntrepriseComponent {
       this.entrepriseId = +params['id'];
       this.loadEntrepriseData();
       this.loadFacturesEntreprise();
+    });
+    this.loadEntrepriseEmitter();
+  }
+
+  loadEntrepriseEmitter(): void {
+    this.entrepriseService2.getEntrepriseInfo().subscribe({
+      next: (entreprise) => {
+        this.entrepriseEmitter = entreprise;
+      },
+      error: (err) => {
+        console.error('Erreur chargement infos entreprise émettrice', err);
+      }
     });
   }
 
