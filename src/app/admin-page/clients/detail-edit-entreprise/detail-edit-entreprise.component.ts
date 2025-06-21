@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { EntrepriseClient } from '../../MODELS/entreprise-clients-model';
 import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-service';
 import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
+import { MatTabsModule } from '@angular/material/tabs';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-detail-edit-entreprise',
@@ -14,12 +16,14 @@ import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
-    CustomNumberPipe
+    CustomNumberPipe,
+    MatTabsModule
   ],
   templateUrl: './detail-edit-entreprise.component.html',
   styleUrl: './detail-edit-entreprise.component.scss'
 })
 export class DetailEditEntrepriseComponent {
+  private imgUrl = environment.imgUrl;
   entrepriseForm!: FormGroup;
   errorMessage: string = '';
   successMessage: string = '';
@@ -30,6 +34,27 @@ export class DetailEditEntrepriseComponent {
   facturesEntreprise: any[] = [];
   loadingFactures = false;
   errorFactures = '';
+  isEditing = false;
+  selectedFactureId: number | null = null;
+  factureDetails: any = null;
+
+  // Propriétés pour l'aperçu de facture
+  entrepriseNom: string = 'Nom entreprise';
+  entrepriseSecteur: string = 'Secteur';
+  entrepriseEmail: string = 'email@entreprise.com';
+  entrepriseTelephone: string = '+223 00 00 00 00';
+  entrepriseSiege: string = 'Siège social';
+  entrepriseLogo: string = 'assets/img/entreprise-icon.png';
+  entrepriseSiteWeb: string = 'www.entreprise.com';
+  entrepriseNina: string = 'NINA';
+  entrepriseRccm: string = 'RCCM';
+  entrepriseNif: string = 'NIF';
+  entrepriseBanque: string = 'Banque';
+  entrepriseAdresse: string = 'Adresse';
+  entreprisePays: string = 'Pays';
+  entrepriseSignataireNom: string = 'Nom signataire';
+  entrepriseSignataire: string = 'Fonction signataire';
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   // Définition des indicatifs par pays
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
@@ -46,20 +71,26 @@ export class DetailEditEntrepriseComponent {
     private factureService: FactureProFormaService,
   ) {}
 
- ngOnInit() {
+  ngOnInit() {
     this.initializeForm();
     this.route.params.subscribe(params => {
       this.entrepriseId = +params['id'];
       this.loadEntrepriseData();
+      this.loadFacturesEntreprise();
     });
   }
 
-  private loadFacturesEntreprise() {
+  loadFacturesEntreprise() {
     this.loadingFactures = true;
     this.factureService.getFacturesByClient(undefined, this.entrepriseId).subscribe({
       next: (factures) => {
         this.facturesEntreprise = factures;
         this.loadingFactures = false;
+        
+        // Sélectionner la première facture par défaut
+        if (this.facturesEntreprise.length > 0) {
+          this.onSelectFacture(this.facturesEntreprise[0]);
+        }
       },
       error: (err) => {
         this.errorFactures = 'Erreur lors du chargement des factures';
@@ -69,56 +100,26 @@ export class DetailEditEntrepriseComponent {
     });
   }
 
-  loadEntrepriseData() {
-    this.entrepriseService.getEntrepriseById(this.entrepriseId).subscribe({
-      next: (data) => {
-        this.entrepriseData = data;
-        
-        // Nettoyer le numéro de téléphone existant
-        let cleanPhone = data.telephone;
-        if (data.telephone && data.telephone.includes(' ')) {
-          cleanPhone = data.telephone.replace(/\s/g, '');
-        }
+  onSelectFacture(facture: any): void {
+    this.selectedFactureId = facture.id;
+    this.loadFactureDetails(facture.id);
+  }
 
-        this.entrepriseForm.patchValue({
-          nom: data.nom,
-          email: data.email,
-          telephone: cleanPhone, // Utiliser le numéro nettoyé
-          pays: data.pays,
-          adresse: data.adresse,
-          siege: data.siege,
-          secteur: data.secteur
-        });
-
-        this.loadFacturesEntreprise();
-
-        // Initialiser l'indicatif si pays existant
-        if (data.pays && this.paysIndicatifs[data.pays]) {
-          this.indicatif = this.paysIndicatifs[data.pays].indicatif;
-          this.maxPhoneLength = this.indicatif.length + this.paysIndicatifs[data.pays].longueur;
-          this.updatePhoneValidator(this.paysIndicatifs[data.pays].longueur);
-        }
+  loadFactureDetails(factureId: number): void {
+    this.factureService.getFactureProformaById(factureId).subscribe({
+      next: (details: any) => {
+        this.factureDetails = details;
       },
       error: (err) => {
-        this.errorMessage = err.message || 'Erreur lors du chargement';
-        setTimeout(() => this.router.navigate(['/clients']), 3000);
+        console.error('Erreur chargement détails facture', err);
       }
     });
   }
-
-  // Calcul du total des factures
-  // getTotalFactures(): number {
-  //   return this.facturesEntreprise.reduce((sum: number, facture: any) => 
-  //     sum + facture.totalFacture, 0
-  //   );
-  // }
 
   getTotalFactures(): number {
     const total = this.facturesEntreprise.reduce((sum: number, facture: any) => 
       sum + facture.totalFacture, 0
     );
-    
-    // Arrondir à l'entier le plus proche
     return Math.round(total);
   }
 
@@ -130,7 +131,6 @@ export class DetailEditEntrepriseComponent {
       this.indicatif = `${paysInfo.indicatif} `;
       this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
   
-      // Mise à jour de la valeur du téléphone
       if (!this.entrepriseForm.get('telephone')?.value.startsWith(this.indicatif)) {
         this.entrepriseForm.get('telephone')?.setValue(this.indicatif);
       }
@@ -139,11 +139,10 @@ export class DetailEditEntrepriseComponent {
     }
   }
 
-  updatePhoneValidator(longueur?: number): void {
+  updatePhoneValidator(longueur: number): void {
     const validators = [];
     
     if (this.indicatif) {
-      // Permettre des espaces optionnels après l'indicatif
       const regex = new RegExp(`^\\${this.indicatif}\\s*\\d{${longueur}}$`);
       validators.push(Validators.pattern(regex));
     }
@@ -160,7 +159,6 @@ export class DetailEditEntrepriseComponent {
       return;
     }
 
-    // Supprimer TOUS les caractères non numériques après l'indicatif
     const chiffres = valeur.replace(this.indicatif, '').replace(/\D/g, '');
     const numeroFormate = this.indicatif + chiffres;
     
@@ -173,16 +171,78 @@ export class DetailEditEntrepriseComponent {
     this.entrepriseForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.email]],
-      telephone: [''], // Validation dynamique
-      pays: [''], // Devenu obligatoire
+      telephone: [''],
+      pays: [''],
       adresse: [''],
       siege: [''],
       secteur: ['']
     });
   }
 
+  loadEntrepriseData() {
+    this.entrepriseService.getEntrepriseById(this.entrepriseId).subscribe({
+      next: (data) => {
+        this.entrepriseData = data;
+        
+        // Mettre à jour les propriétés d'aperçu
+        this.entrepriseNom = data.nom;
+        this.entrepriseSecteur = data.secteur || '';
+        this.entrepriseEmail = data.email || '';
+        this.entrepriseTelephone = data.telephone || '';
+        this.entrepriseSiege = data.siege || '';
+        this.entrepriseAdresse = data.adresse || '';
+        this.entreprisePays = data.pays || '';
+
+        let cleanPhone = data.telephone;
+        if (data.telephone && data.telephone.includes(' ')) {
+          cleanPhone = data.telephone.replace(/\s/g, '');
+        }
+
+        this.entrepriseForm.patchValue({
+          nom: data.nom,
+          email: data.email,
+          telephone: cleanPhone,
+          pays: data.pays,
+          adresse: data.adresse,
+          siege: data.siege,
+          secteur: data.secteur
+        });
+
+        if (data.pays && this.paysIndicatifs[data.pays]) {
+          this.indicatif = this.paysIndicatifs[data.pays].indicatif;
+          this.maxPhoneLength = this.indicatif.length + this.paysIndicatifs[data.pays].longueur;
+          this.updatePhoneValidator(this.paysIndicatifs[data.pays].longueur);
+        }
+      },
+      error: (err) => {
+        this.errorMessage = err.message || 'Erreur lors du chargement';
+      }
+    });
+  }
+
+  toggleEditing(): void {
+    this.isEditing = !this.isEditing;
+    
+    if (this.isEditing) {
+      this.entrepriseForm.enable();
+    } else {
+      this.entrepriseForm.disable();
+      this.loadEntrepriseData();
+    }
+  }
+
   goToClients() {
-    this.router.navigate(['/clients']);
+    if (this.isEditing) {
+      this.toggleEditing();
+    } else {
+      this.router.navigate(['/clients']);
+    }
+  }
+
+  // Méthode pour déclencher l'input file
+  triggerFileInput(): void {
+    if (!this.isEditing) return;
+    this.fileInput.nativeElement.click();
   }
 
   onSubmit() {
@@ -205,5 +265,4 @@ export class DetailEditEntrepriseComponent {
       }
     });
   }
-
 }
