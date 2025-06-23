@@ -546,3 +546,9 @@
     </form>
   </div>
 </div>
+
+<div class="popup-footer" *ngIf="showPopup && popupData.type === 'success'">
+  <button (click)="closePopup()">Fermer</button>
+  <!-- Nouveau bouton -->
+  <button (click)="resetForm(); closePopup()">Ajouter un autre</button>
+</div>

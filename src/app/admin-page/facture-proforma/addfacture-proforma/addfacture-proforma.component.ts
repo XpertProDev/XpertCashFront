@@ -141,19 +141,47 @@ export class AddfactureProformaComponent implements OnInit {
     );
   }
 
-  displayClient(client: Clients): string {
+  // displayClient(client: Clients): string {
+  //   if (!client) return '';
+  //   return client.entrepriseClient 
+  //     ? `${client.nomComplet} - ${client.entrepriseClient.nom}`
+  //     : client.nomComplet;
+  // }
+
+  displayClient(client: Clients | null): string {
     if (!client) return '';
     return client.entrepriseClient 
       ? `${client.nomComplet} - ${client.entrepriseClient.nom}`
       : client.nomComplet;
   }
 
+  // onClientSelected(event: MatAutocompleteSelectedEvent) { 
+  //   if (event.option.value === null) {
+  //     this.openClientFormPanel(); // Ouvre le formulaire pour créer un client
+  //   } else {
+  //     this.selectedClientId = event.option.value.id;
+  //     // Optionnel : autres actions liées à la sélection
+  //   }
+  // }
+
+  onClientBlur() {
+    const selectedClient = this.clientControl.value;
+    if (selectedClient && typeof selectedClient === 'object' && 'id' in selectedClient) {
+      this.selectedClientId = selectedClient.id;
+    } else {
+      // Réinitialiser si la valeur n'est pas un objet client valide
+      this.selectedClientId = null;
+      this.clientControl.setValue(null);
+    }
+  }
+
   onClientSelected(event: MatAutocompleteSelectedEvent) { 
     if (event.option.value === null) {
-      this.openClientFormPanel(); // Ouvre le formulaire pour créer un client
+      this.openClientFormPanel();
     } else {
       this.selectedClientId = event.option.value.id;
-      // Optionnel : autres actions liées à la sélection
+      // Mettre à jour le contrôle pour afficher correctement le client
+      this.clientControl.setValue(event.option.value);
     }
   }
 
@@ -624,42 +652,45 @@ export class AddfactureProformaComponent implements OnInit {
     return e ? e.nom : '';
   }
 
-onProduitAjoute(nouveauProduit: Produit) {
-  // Ajouter le nouveau produit à la liste des produits
-  this.produits.push(nouveauProduit);
+  onProduitAjoute(nouveauProduit: Produit) {
+    // Ajouter le nouveau produit à la liste des produits
+    this.produits.push(nouveauProduit);
 
-  // Mettre à jour la ligne de facture actuelle
-  if (this.inputLignes.length > 0) {
-    this.inputLignes[0].produitId = nouveauProduit.id;
-    this.inputLignes[0].ligneDescription = nouveauProduit.description || null;
-    this.inputLignes[0].quantite = 1; // Quantité par défaut
-    this.inputLignes[0].isDuplicate = false;
+    // Mettre à jour la ligne de facture actuelle
+    if (this.inputLignes.length > 0) {
+      this.inputLignes[0].produitId = nouveauProduit.id;
+      this.inputLignes[0].ligneDescription = nouveauProduit.description || null;
+      this.inputLignes[0].quantite = 1; // Quantité par défaut
+      this.inputLignes[0].isDuplicate = false;
 
-    // Mettre à jour l'autocomplete pour afficher le nom du nouveau produit
-    this.productControl.setValue(nouveauProduit);
+      // Mettre à jour l'autocomplete pour afficher le nom du nouveau produit
+      this.productControl.setValue(nouveauProduit);
 
-    // Forcer la mise à jour des options filtrées
-    this.filteredProduits = this.productControl.valueChanges.pipe(
-      startWith(nouveauProduit),
-      map(value => (typeof value === 'string' ? value : value?.nom)),
-      map(name => (name ? this._filterProduits(name) : this.produits.slice()))
-    );
+      // FORCER LA MISE À JOUR DE L'AUTOCOMPLÉTION
+      // this.productControl.setValue('');
 
-    // Déclencher une mise à jour de l'interface utilisateur
-    this.updateCalculs();
-    this.cdr.detectChanges();
+      // Forcer la mise à jour des options filtrées
+      this.filteredProduits = this.productControl.valueChanges.pipe(
+        startWith(''),
+        map(value => typeof value === 'string' ? value : value?.nom),
+        map(name => name ? this._filterProduits(name) : this.produits.slice())
+      );
+
+      // Déclencher une mise à jour de l'interface utilisateur
+      this.updateCalculs();
+      this.cdr.detectChanges();
+    }
+
+    // Fermer le panneau du formulaire
+    this.closeProductFormPanel();
   }
-
-  // Fermer le panneau du formulaire
-  this.closeProductFormPanel();
-}
 
   // Méthode appelée au focus
   onFocus() {
-  if (!this.productControl.value) {
-    this.productControl.setValue('');
+    if (!this.productControl.value) {
+      this.productControl.setValue('');
+    }
   }
-}
 
 
   // Méthodes pour mat-autocomplete
@@ -772,11 +803,18 @@ onProduitSelected(event: MatAutocompleteSelectedEvent) {
     this.clients.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
 
     // Pré-sélectionner le nouveau client dans l’autocomplete
+    this.selectedClientId = nouveauClient.id;
     this.clientControl.setValue(nouveauClient);
 
     // Mettre à jour les options filtrées
     this.filteredClients = this.clientControl.valueChanges.pipe(
       startWith(nouveauClient),
+      map(value => (typeof value === 'string' ? value : value?.nomComplet)),
+      map(name => (name ? this._filterClients(name) : this.clients.slice()))
+    );
+
+    this.filteredClients = this.clientControl.valueChanges.pipe(
+      startWith(''),
       map(value => (typeof value === 'string' ? value : value?.nomComplet)),
       map(name => (name ? this._filterClients(name) : this.clients.slice()))
     );
@@ -789,30 +827,67 @@ onProduitSelected(event: MatAutocompleteSelectedEvent) {
   }
 
   // Méthode appelée lors de la réception de l’événement entrepriseAjoute
-  onEntrepriseAjoute(nouvelleEntreprise: Entreprise) {
-    // Ajouter la nouvelle entreprise à la liste
+  // onEntrepriseAjoute(nouvelleEntreprise: Entreprise) {
+  //   // Ajouter la nouvelle entreprise à la liste
+  //   this.entreprises.push(nouvelleEntreprise);
+
+  //   // Optionnel : trier par ID décroissant
+  //   this.entreprises.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+
+  //   // Pré-sélectionner la nouvelle entreprise dans l’autocomplete
+  //   this.entrepriseControl.setValue(nouvelleEntreprise);
+
+  //   // Mettre à jour les options filtrées
+  //   this.filteredEntreprises = this.entrepriseControl.valueChanges.pipe(
+  //     startWith(nouvelleEntreprise),
+  //     map(value => (typeof value === 'string' ? value : value?.nom)),
+  //     map(name => (name ? this._filterEntreprises(name) : this.entreprises.slice()))
+  //   );
+
+  //   // Forcer la mise à jour de l’interface utilisateur
+  //   this.cdr.detectChanges();
+
+  //   // Fermer le panneau du formulaire
+  //   this.closeEntrepriseFormPanel();
+  // }
+
+  onEntrepriseAjoute(nouvelleEntreprise: any) {
     this.entreprises.push(nouvelleEntreprise);
-
-    // Optionnel : trier par ID décroissant
     this.entreprises.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
-
-    // Pré-sélectionner la nouvelle entreprise dans l’autocomplete
+    
+    // Mettre à jour la sélection immédiatement
+    this.selectedEntreprise = nouvelleEntreprise;
     this.entrepriseControl.setValue(nouvelleEntreprise);
-
-    // Mettre à jour les options filtrées
+    
+    // FORCER LA MISE À JOUR DE L'AUTOCOMPLÉTION
     this.filteredEntreprises = this.entrepriseControl.valueChanges.pipe(
-      startWith(nouvelleEntreprise),
+      startWith(''),
       map(value => (typeof value === 'string' ? value : value?.nom)),
       map(name => (name ? this._filterEntreprises(name) : this.entreprises.slice()))
     );
-
-    // Forcer la mise à jour de l’interface utilisateur
+    
     this.cdr.detectChanges();
-
-    // Fermer le panneau du formulaire
-    this.closeEntrepriseFormPanel();
   }
 
+  // onEntrepriseBlur() {
+  //   const selectedEntreprise = this.entrepriseControl.value;
+  //   if (selectedEntreprise && typeof selectedEntreprise === 'object' && 'id' in selectedEntreprise) {
+  //     this.selectedEntreprise = selectedEntreprise;
+  //   } else {
+  //     this.selectedEntreprise = null;
+  //     this.entrepriseControl.setValue(null);
+  //   }
+  // }
+
+  onEntrepriseBlur() {
+    const selectedEntreprise = this.entrepriseControl.value;
+    if (selectedEntreprise && typeof selectedEntreprise === 'object' && 'id' in selectedEntreprise) {
+      this.selectedEntreprise = selectedEntreprise;
+    } else {
+      this.selectedEntreprise = null;
+      this.entrepriseControl.setValue(null);
+    }
+  }
 
   getFormInit() {
     this.form = this.fb.group({

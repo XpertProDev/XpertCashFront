@@ -44,6 +44,7 @@
                               placeholder="Sélectionner un client"
                               class="input_focus"
                               (focus)="onClientFocus()"
+                              (blur)="onClientBlur()"
                             >
                             <label for="description" class="label">Clients</label>
                             <mat-autocomplete #autoClients="matAutocomplete" [displayWith]="displayClient" (optionSelected)="onClientSelected($event)">
@@ -71,6 +72,7 @@
                               placeholder="Sélectionner une entreprise"
                               class="input_focus"
                               (focus)="onEntrepriseFocus()"
+                              (blur)="onEntrepriseBlur()"
                             >
                             <label for="description" class="label">Entreprise</label>
                             <mat-autocomplete #autoEntreprises="matAutocomplete" [displayWith]="displayEntreprise" (optionSelected)="onEntrepriseSelected($event)">
@@ -445,8 +447,9 @@
       <div class="cadre_right">
         <div class="add_produit">
           <app-produit-form 
-            (produitAjoute)="onProduitAjoute($event)"
-            (close)="closeProductFormPanel()">
+              *ngIf="showProductFormPanel"
+              (produitAjoute)="onProduitAjoute($event)"
+              (close)="closeProductFormPanel()">
           </app-produit-form>
         </div>
       </div>
@@ -462,9 +465,10 @@
     <div class="content_cadre_right" (click)="$event.stopPropagation()">
       <div class="cadre_right">
         <div class="add_client" style="margin: 10% 0 0 5%;">
-          <app-client-form
-            (clientAjoute)="onClientAjoute($event)"
-            (close)="closeClientFormPanel()">
+          <app-client-form 
+              *ngIf="showClientFormPanel"
+              (clientAjoute)="onClientAjoute($event)"
+              (close)="closeClientFormPanel()">
           </app-client-form>
         </div>
       </div>

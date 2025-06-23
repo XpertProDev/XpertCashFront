@@ -309,6 +309,18 @@ export class ClientFormComponent {
     // }
   }
 
+  // Ajoutez cette méthode
+  resetForm(): void {
+    this.clientForm.reset({
+      pays: '' // Réinitialisez le champ pays si nécessaire
+    });
+    this.control.reset();
+    this.isEntrepriseSelected = false;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.entrepriseRequiredError = false;
+  }
+
   // Ouvre/ferme le popup d’entreprise
   openPopup() { this.showPopup = true; }
   closePopup() { this.showPopup = false; }
@@ -426,8 +438,13 @@ export class ClientFormComponent {
           photo: client.photo || this.urllink, // Utiliser l'URL par défaut si photo est vide
         };
 
+        this.resetForm();
+
         // Émettre l'événement avec le nouveau client
         this.clientAjoute.emit(newClient);
+
+        // Afficher un message de succès
+        this.successMessage = 'Client créé avec succès !';
 
         this.closeForm();
       },

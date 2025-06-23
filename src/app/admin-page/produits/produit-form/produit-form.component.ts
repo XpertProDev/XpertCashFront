@@ -628,7 +628,7 @@ export class ProduitFormComponent {
                   boutiqueId: this.boutiqueIdSelected?.length > 0 ? this.boutiqueIdSelected[0] : null // Ajout de boutiqueId
                 };
 
-                this.produitAjoute.emit(updatedProduit);
+                this.resetForm();
 
                 this.ajouteProduitForm.reset();
                 this.myControl.reset();
@@ -638,6 +638,8 @@ export class ProduitFormComponent {
                 this.newPhotoUrl = null;
                 this.isSending = false;
 
+
+                this.produitAjoute.emit(updatedProduit);
                 this.close.emit();
               } else {
                 console.error('Aucun produit retourné par l\'API');
@@ -731,16 +733,37 @@ export class ProduitFormComponent {
   
     closePopupBoutique() { this.showPopupBoutique = false; this.resetForm(); }
   
-    private resetForm() {
-      this.boutiqueForm.patchValue({
-        nomBoutique: '',
-        emailBoutique: '',
-        adresseBoutique: '',
-        telephoneBoutique: ''
+    // private resetForm() {
+    //   this.boutiqueForm.patchValue({
+    //     nomBoutique: '',
+    //     emailBoutique: '',
+    //     adresseBoutique: '',
+    //     telephoneBoutique: ''
+    //   });
+    //   this.boutiqueForm.markAsPristine();
+    //   this.boutiqueForm.markAsUntouched();
+    //   this.boutiqueForm.updateValueAndValidity();
+    // }
+
+    // Ajoutez cette méthode
+    resetForm(): void {
+      this.ajouteProduitForm.reset({
+        typeProduit: 'PHYSIQUE' // Réinitialisez à la valeur par défaut
       });
-      this.boutiqueForm.markAsPristine();
-      this.boutiqueForm.markAsUntouched();
-      this.boutiqueForm.updateValueAndValidity();
+      
+      this.myControl.reset();
+      this.uniteControl.reset();
+      this.imageFile = null;
+      this.selectedFile = null;
+      this.newPhotoUrl = this.urllink; // Réinitialise à l'image par défaut
+      this.isChecked = false;
+      this.boutiqueIdSelected = [];
+      this.quantitesMap = {};
+      this.seuilsMap = {};
+      this.controlBoutique.reset();
+      this.showBoutiqueSelectionPanel = false;
+      this.selectedBoutiques = [];
+      this.errorMessage = '';
     }
   
     onBoutiqueSelected(event: any): void {
