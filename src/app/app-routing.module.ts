@@ -15,11 +15,11 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: '/accueil',
+        redirectTo: '/',
         pathMatch: 'full'
       },
       {
-        path: 'accueil',
+        path: '',
         loadComponent: () => import('./demo/pages/authentication/login/login-page/login-page.component').then(m => m.LoginPageComponent)
       },
       {
