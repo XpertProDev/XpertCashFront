@@ -7,6 +7,12 @@
       <div class="retour_icon" (click)="navigateBack()">
         <i class="ri-arrow-left-long-fill"></i>
       </div>
+
+      <div class="etat_envoyer">
+          <button class="btn_etat btn_etat_annuler">
+              Annuler la facture
+          </button>
+      </div>
     </div>
 
     <div class="info_titre_input">
@@ -255,7 +261,8 @@
           </div>
 
           <div class="total_montant">
-            Montant dû : {{ (facture.totalFacture || 0) | customNumber }} FCFA
+            <p>Montant dû : {{ (facture.totalFacture || 0) | customNumber }} FCFA</p>
+            <p>Montant restant : {{ montantRestant | customNumber }} FCFA </p>
           </div>
         </div>
         
