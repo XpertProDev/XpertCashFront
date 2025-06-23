@@ -831,7 +831,8 @@ select.input_focus {
 }
 
 .total_montant {
-  padding-bottom: 5px;
+  margin-top: 10px;
+  padding-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -847,5 +848,8 @@ select.input_focus {
   background-color: #fff;
   padding-top: 10px;
   box-shadow: rgba(0, 0, 0, 0.05) 0px -2px 2px 0px
-  
+}
+
+.total_montant_logo p {
+  font-size: 10px;
 }
