@@ -39,6 +39,7 @@ export class DetailEditEntrepriseComponent {
   selectedFactureId: number | null = null;
   factureDetails: any = null;
   entrepriseEmitter: any = {};
+  factureCount: number = 0;
 
   // Propriétés pour l'aperçu de facture
   entrepriseNom: string = 'Nom entreprise';
@@ -105,6 +106,7 @@ export class DetailEditEntrepriseComponent {
     this.factureService.getFacturesByClient(undefined, this.entrepriseId).subscribe({
       next: (factures) => {
         this.facturesEntreprise = factures;
+        this.factureCount = factures.length;
         this.loadingFactures = false;
         
         // Sélectionner la première facture par défaut

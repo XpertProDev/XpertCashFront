@@ -92,6 +92,8 @@ export class DetailEditClientComponent {
   entrepriseSignataireNom: string = '';
   entrepriseSignataire: string = '';
 
+  factureCount: number = 0;
+
   // Ajoutez cette propriété dans la classe
   isEditing = false;
 
@@ -392,6 +394,7 @@ loadFacturesClient() {
   this.factureService.getFacturesByClient(this.clientId).subscribe({
     next: (factures) => {
       this.facturesClient = factures;
+      this.factureCount = factures.length;
       this.loadingFactures = false;
       
       // Sélectionner la première facture par défaut

@@ -151,7 +151,13 @@
     <div class="section_navbar">
       <mat-tab-group [selectedIndex]="0" class="custom-tabs">
         <!-- Factures -->
-        <mat-tab label="Factures entreprise">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="tab-label">
+              <span>Factures entreprise</span>
+              <span class="facture-count">{{factureCount}}</span>
+            </div>
+          </ng-template>
           <div class="tab-content">
             <div class="content_client">
               <div class="information_grid_two">

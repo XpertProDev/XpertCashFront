@@ -823,7 +823,24 @@ hr {
   background-color: #f0f8ff;
 }
 
+.tab-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
+.facture-count {
+  background-color: #0672E4;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  min-width: 22px;
+  height: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+}
 
 
 
