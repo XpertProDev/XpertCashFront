@@ -26,4 +26,9 @@ export class AuthService {
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
+
+  // Ajoutez cette méthode pour corriger l'erreur
+  isLoggedIn(): boolean {
+    return this.isAuthenticated();
+  }
 }
