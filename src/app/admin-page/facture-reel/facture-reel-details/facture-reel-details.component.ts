@@ -37,6 +37,7 @@ export class FactureReelDetailsComponent implements OnInit {
   signataire!: string;
   signataireNom!: string;
   tauxTva?: number | null;
+  totauxParMode: { [key: string]: number } = {};
 
   facture: FactureReelle | null = null;
   totalTVA: number = 0;
@@ -48,12 +49,13 @@ export class FactureReelDetailsComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
-montant: number = 0;
+  montant: number = 0;
   private messageSubscription: Subscription | null = null;
   private apiUrl = environment.imgUrl;
-fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
+  fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
 
-  
+  modesPaiementVisibles: { mode: string, montant: number }[] = [];
+
   
   constructor(
     private router: Router,
@@ -206,14 +208,55 @@ getModeIconClass(mode: string): string {
 
 
 
+  // loadHistoriquePaiements() {
+  //   if (!this.facture) return;
+    
+  //   this.factureService.getHistoriquePaiements(this.facture.id).subscribe({
+  //     next: (paiements) => this.historiquePaiements = paiements.reverse(),
+  //     error: (err) => console.error(err)
+  //   });
+  // }
+
   loadHistoriquePaiements() {
     if (!this.facture) return;
     
     this.factureService.getHistoriquePaiements(this.facture.id).subscribe({
-      next: (paiements) => this.historiquePaiements = paiements.reverse(),
+      next: (paiements) => {
+        this.historiquePaiements = paiements.reverse();
+        this.calculerTotauxParMode(); // Nouvelle fonction
+      },
       error: (err) => console.error(err)
     });
   }
+
+  calculerTotauxParMode(): void {
+    const totaux: { [key: string]: number } = {};
+    
+    // Calcul des totaux
+    this.historiquePaiements.forEach(paiement => {
+      totaux[paiement.modePaiement] = (totaux[paiement.modePaiement] || 0) + paiement.montant;
+    });
+    
+    // Création du tableau des modes visibles
+    this.modesPaiementVisibles = Object.entries(totaux)
+      .filter(([_, montant]) => montant > 0)
+      .map(([mode, montant]) => ({ mode, montant }));
+    
+    // Tri pour un affichage cohérent
+    this.modesPaiementVisibles.sort((a, b) => b.montant - a.montant);
+  }
+
+  getIconClass(mode: string): string {
+    switch (mode) {
+      case 'CASH': return 'ri-cash-line text-green';
+      case 'CHEQUE': return 'ri-bill-line text-blue';
+      case 'CARD': return 'ri-bank-card-line text-purple';
+      case 'VIREMENT': return 'ri-bank-fill text-navy';
+      case 'MOBILE': return 'ri-smartphone-line text-orange';
+      default: return 'ri-question-line text-gray';
+    }
+  }
+
   enregistrerPaiement() {
     if (this.paiementForm.invalid || !this.facture) return;
 

@@ -294,43 +294,22 @@
           </div>
         </div>
         
-        <div class="content_footer" style="display: flex; align-items: center; gap: 10px;">
-          <div class="total_montant">
-            <!-- Montant restant : {{ montantRestant | customNumber }} FCFA  -->
-            <p>Montant total :</p>
-          </div>
-
-          <div class="total_logo_virement" style="display: flex; align-items: center; gap: 10px;">
-
-            <div class="total_montant_logo" style="display: flex; align-items: center; gap: 5px;">
-              <i class="ri-cash-line text-green"></i>
-              <p>: 0000</p>
-            </div>
-
-            <div class="total_montant_logo" style="display: flex; align-items: center; gap: 5px;">
-              <i class="ri-bill-line text-blue"></i>
-              <p>: 0000</p>
-            </div>
-
-            <div class="total_montant_logo" style="display: flex; align-items: center; gap: 5px;">
-              <i class="ri-bank-card-line text-purple"></i>
-              <p>: 0000</p>
-            </div>
-
-            <div class="total_montant_logo" style="display: flex; align-items: center; gap: 5px;">
-              <i class="ri-bank-fill text-navy"></i>
-              <p>: 0000</p>
-            </div>
-
-            <div class="total_montant_logo" style="display: flex; align-items: center; gap: 5px;">
-              <i class="ri-smartphone-line text-orange"></i>
-              <p>: 0000</p>
-            </div>
-
-          </div>
+      <div class="content_footer">
+        <div class="total_montant">
+          <p>Montant total :</p>
         </div>
 
-
+        <div class="total_logo_virement">
+          <!-- Boucle sur les modes de paiement avec montant > 0 -->
+          <ng-container *ngFor="let item of modesPaiementVisibles">
+            <div class="total_montant_logo">
+              <i [class]="getIconClass(item.mode)"></i>
+              <p>: {{ item.montant | customNumber }}</p>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+      
       </div>
     </div>
   </div>
