@@ -40,6 +40,7 @@ export interface FactureReelle {
   entrepriseClient: EntrepriseClientDTO | null;
   client: ClientDTO | null;
   lignesFacture: LigneFactureDTO[];
+  statut: 'VALIDE' | 'ANNULEE';
 }
 
 export interface PaiementDTO {

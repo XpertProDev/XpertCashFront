@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { UsersService } from '../SERVICES/users.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import imageCompression from 'browser-image-compression';
 
 @Component({
   selector: 'app-profil',
@@ -48,6 +49,8 @@ export class ProfilComponent  implements OnInit{
 
   private apiUrl = environment.apiBaseUrl;
   private imgUrl = environment.imgUrl;
+
+  newPhotoUrl: string | null = null;
 
 
   isModalOpen = false;
@@ -399,41 +402,80 @@ export class ProfilComponent  implements OnInit{
     });
   }
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
+   async testImageCompression(file: File): Promise<File | null> {
+  if (!file) {
+    console.log('Aucun fichier sélectionné.');
+    return null;
+  }
 
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      this.imageFile = file;
+  console.log('Taille originale:', file.size / 1024, 'Ko');
+
+  const options = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1000,
+    useWebWorker: true,
+  };
+
+  try {
+    const compressedFile = await imageCompression(file, options);
+    console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
+
+    if (!compressedFile.type.startsWith('image/')) {
+      console.error('Le fichier compressé n\'est pas un format d\'image valide.');
+      this.errorMessage = 'Erreur de compression : Le fichier n\'est pas une image.';
+      return null;
+    }
+
+
+    return compressedFile;
+
+  } catch (error) {
+    console.error('Erreur lors de la compression:', error);
+    return null;
+  }
+}
+
+
+async onFileSelected(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement;
+
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+
+    try {
+      const compressedFile = await this.testImageCompression(file);
+
+      if (!compressedFile) {
+        console.error("Compression échouée ou image invalide.");
+        return;
+      }
+
+      this.imageFile = compressedFile;
 
       const reader = new FileReader();
-
       reader.onload = (e: any) => {
         const base64 = e.target.result;
-
-        // Afficher l'image immédiatement 
         this.photo = base64;
-
-        // Stocker en localStorage pour éviter chargement serveur
         localStorage.setItem('photo', base64);
-
         window.dispatchEvent(new Event('storage-photo-update'));
       };
+      reader.readAsDataURL(compressedFile);
 
-      reader.readAsDataURL(file);
-
-      //Envoi l’image au serveur
       const formData = new FormData();
-      formData.append('photo', this.imageFile);
+
+      // Récupérer l'extension du fichier d'origine
+      const extension = file.name.split('.').pop();
+      const nomFichierFinal = `photo_profil_${Date.now()}.${extension}`;
+
+      // Ajouter le fichier avec un nom explicite
+      formData.append('photo', this.imageFile, nomFichierFinal);
 
       this.usersService.updateUser(this.userId, formData).subscribe({
         next: (response) => {
           console.log("✅ Image mise à jour :", response);
-
           if (response.photo) {
             this.photo = response.photo;
           }
-
           this.successMessage = "Photo de profil mise à jour avec succès !";
           setTimeout(() => this.successMessage = null, 5000);
         },
@@ -443,8 +485,15 @@ export class ProfilComponent  implements OnInit{
           setTimeout(() => this.errorMessage = null, 5000);
         }
       });
+
+    } catch (error) {
+      console.error("Erreur lors de la compression ou de l'envoi :", error);
+      this.errorMessage = "Erreur lors de la compression ou de l'envoi.";
+      setTimeout(() => this.errorMessage = null, 5000);
     }
   }
+}
+
 
   changerPhoto(event: Event) {
     event.stopPropagation();

@@ -396,8 +396,6 @@ export class ProduitsComponent implements OnInit {
 
     this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
       next: (produits: Produit[]) => {
-       console.log("Produits reçus :", produits);
-
         this.tasks = produits.map(prod => {
           // Conversion de la photo
           const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
@@ -470,12 +468,9 @@ rafraichirProduits(): void {
   const start = Date.now();
 
   this.produitService.getProduitsEntreprise(this.selectedBoutique.id).subscribe({
-
     next: (produits: Produit[]) => {
       const elapsed = Date.now() - start;
       const delay = Math.max(500 - elapsed, 0); // minimum 500 ms
-
-     
 
       setTimeout(() => {
         // Traitement des produits (ton code actuel)
@@ -492,8 +487,6 @@ rafraichirProduits(): void {
             } else {
               createdAt = new Date(prod.createdAt).toISOString();
             }
-
-            
           }
 
           return {

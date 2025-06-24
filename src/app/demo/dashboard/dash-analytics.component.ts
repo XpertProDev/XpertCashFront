@@ -537,16 +537,10 @@ getBoutiqueName() {
   ];
 
 
-  showBlockedPopup = true;
-isFadingOut = false;
+  showBlockedPopup: boolean = false;
 
  onLogout(): void {
-  this.isFadingOut = true;
-  setTimeout(() => {
-    this.showBlockedPopup = false;
-       this.isFadingOut = false;
     this.userService.logoutUser();
-  }, 500);
   }
  
   

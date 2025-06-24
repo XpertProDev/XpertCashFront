@@ -42,7 +42,7 @@ export const NavigationItems: NavigationItem[] = [
     icon: 'icon-group',
     children: [
       {
-        id: 'produit',
+        id: 'vente',
         title: 'Ventes',
         type: 'item',
         url: '/vente',
@@ -56,6 +56,14 @@ export const NavigationItems: NavigationItem[] = [
         url: '/produit',
         icon: 'feather icon-tag'
         //classes: 'nav-item',
+      },
+      {
+        id: 'boutique',
+        title: 'Boutique',
+        type: 'item',
+        url: '/boutique',
+        classes: 'nav-item',
+        icon: 'feather icon-list'
       },
       {
         id: 'stock',
@@ -90,22 +98,6 @@ export const NavigationItems: NavigationItem[] = [
         icon: 'feather icon-briefcase'
       },
       {
-        id: 'comptabilite',
-        title: 'Comptabilite',
-        type: 'item',
-        url: '/comptabilite',
-        classes: 'nav-item',
-        icon: 'feather icon-clipboard'
-      },
-      {
-        id: 'boutique',
-        title: 'Boutique',
-        type: 'item',
-        url: '/boutique',
-        classes: 'nav-item',
-        icon: 'feather icon-list'
-      },
-      {
         id: 'factures',
         title: '',
         type: 'group',
@@ -134,6 +126,14 @@ export const NavigationItems: NavigationItem[] = [
             ]
           }
         ]
+      },
+      {
+        id: 'comptabilite',
+        title: 'Comptabilite',
+        type: 'item',
+        url: '/comptabilite',
+        classes: 'nav-item',
+        icon: 'feather icon-clipboard'
       },
 
       // Pour les compte

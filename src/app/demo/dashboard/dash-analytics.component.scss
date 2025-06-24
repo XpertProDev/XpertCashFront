@@ -1,5 +1,6 @@
+
 .top-banner {
-  position: fixed;
+   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -19,21 +20,6 @@
   to {
     transform: translateY(0);
     opacity: 1;
-  }
-}
-
-.fade-out {
-  animation: slideUpFade 0.5s ease forwards;
-}
-
-@keyframes slideUpFade {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-100%);
-    opacity: 0;
   }
 }
 

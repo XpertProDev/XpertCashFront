@@ -8,9 +8,12 @@
         <i class="ri-arrow-left-long-fill"></i>
       </div>
 
-      <div class="etat_envoyer">
-          <button class="btn_etat btn_etat_annuler">
-              Annuler la facture
+      <div class="etat_envoyer" *ngIf="facture?.statutPaiement === 'EN_ATTENTE'">
+          <button class="btn_etat btn_etat_annuler" 
+                  (click)="annulerFacture()"
+                  [disabled]="isLoadingFacture">
+              <span *ngIf="!isLoadingFacture">Annuler la facture</span>
+              <span *ngIf="isLoadingFacture">Traitement...</span>
           </button>
       </div>
     </div>
@@ -163,8 +166,23 @@
   
 
   <div class="column">
+    
+        <div class="message-container">
+          <div *ngIf="successMessageFactureAnuller" class="success-message" style="margin-bottom: 10px;">
+            <i class="ri-checkbox-circle-fill"></i>
+            {{ successMessageFactureAnuller }}
+            <i class="ri-close-line" (click)="successMessageFactureAnuller = null"></i>
+          </div>
+          
+          <div *ngIf="errorMessageFactureAnuller" class="error-message" style="margin-bottom: 10px;">
+            <i class="ri-error-warning-fill"></i>
+            {{ errorMessageFactureAnuller }}
+            <i class="ri-close-line" (click)="errorMessageFactureAnuller = null"></i>
+          </div>
+        </div>
+
     <!-- Formulaire de paiement -->
-    <div class="information_cadre_row" *ngIf="facture?.statutPaiement !== 'PAYEE'">
+    <div class="information_cadre_row" *ngIf="facture?.statutPaiement !== 'PAYEE' && facture?.statutPaiement !== 'ANNULEE'">
       <div class="info_titre_input">
         <div class="paiement_title">
           <h5>Paiement de facture</h5>
@@ -231,14 +249,14 @@
               </div>
 
             <!-- Dans le formulaire de paiement -->
-            <div class="btn_ajouter">
-              <button type="button" class="btn_save" 
-                      (click)="enregistrerPaiement()"
-                      [disabled]="paiementForm.invalid || isLoading">
-                <span *ngIf="!isLoading">Payer la facture</span>
-                <span *ngIf="isLoading">Traitement...</span>
-              </button>
-            </div>
+              <div class="btn_ajouter">
+                <button type="button" class="btn_save" 
+                        (click)="enregistrerPaiement()"
+                        [disabled]="paiementForm.invalid || isLoading">
+                  <span *ngIf="!isLoading">Payer la facture</span>
+                  <span *ngIf="isLoading">Traitement...</span>
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -294,28 +312,57 @@
           </div>
         </div>
         
-      <div class="content_footer">
-        <div class="total_montant">
-          <p>Montant total :</p>
-        </div>
+        <div class="content_footer">
+          <div class="total_montant">
+            <p>Montant total :</p>
+          </div>
 
-        <div class="total_logo_virement">
-          <!-- Boucle sur les modes de paiement avec montant > 0 -->
-          <ng-container *ngFor="let item of modesPaiementVisibles">
-            <div class="total_montant_logo">
-              <i [class]="getIconClass(item.mode)"></i>
-              <p>: {{ item.montant | customNumber }}</p>
-            </div>
-          </ng-container>
+          <!-- <div class="total_logo_virement">
+            <ng-container *ngFor="let item of modesPaiementVisibles">
+              <div class="total_montant_logo">
+                <i [class]="getIconClass(item.mode)"></i>
+                <p>: {{ item.montant | customNumber }}</p>
+              </div>
+            </ng-container>
+          </div> -->
+          <div class="total_logo_virement">
+            <!-- Boucle sur les modes de paiement avec montant > 0 -->
+            <ng-container *ngFor="let item of modesPaiementVisibles">
+              <div class="total_montant_logo">
+                <i [class]="getIconClass(item.mode)" 
+                  [title]="getModeText(item.mode)"></i>
+                <p [title]="getModeText(item.mode)">: {{ item.montant | customNumber }}</p>
+              </div>
+            </ng-container>
+          </div>
+
         </div>
-      </div>
       
       </div>
     </div>
   </div>
-
 </div>
 
 <ng-template #noData>
   <p>Aucune donnée d’aperçu… <a (click)="navigateBack()">Retour</a></p>
 </ng-template>
+
+<!-- Popup de confirmation pour l'annulation -->
+<div *ngIf="showAnnulationConfirmation" class="status-confirmation-popup">
+  <div class="popup-content">
+    <h4>Confirmer l'annulation</h4>
+    
+    <p>
+      Êtes-vous sûr de vouloir annuler cette facture ? Cette action est irréversible.
+    </p>
+    
+    <div class="popup-actions">
+      <button class="btn btn-secondary" (click)="cancelAnnulation()">Retour</button>
+      <button class="btn btn-danger" 
+              (click)="confirmAnnulation()">
+          Confirmer
+      </button>
+      <!-- [disabled]="canAddNote && !annulationReason.trim()" -->
+    </div>
+  </div>
+</div>

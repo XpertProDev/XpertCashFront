@@ -39,7 +39,7 @@ registerLocaleData(localeFr);
     ProduitFormComponent,
     AddfactureProformaComponent,
     ClientFormComponent,
-    EntrepriseFormComponent
+    EntrepriseFormComponent,
   ],
   imports: [
     CommonModule,
@@ -56,7 +56,7 @@ registerLocaleData(localeFr);
     MatButtonModule,
     CodeInputModule,
     DragDropModule,
-    MatSelectModule
+    MatSelectModule,
   ],
   providers: [
     provideHttpClient(),
