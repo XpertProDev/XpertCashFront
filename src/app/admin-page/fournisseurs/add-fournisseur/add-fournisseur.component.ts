@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FactureService } from '../../SERVICES/facture.service';
@@ -24,6 +24,10 @@ export class AddFournisseurComponent {
   errorMessageApi = '';
   indicatif: string = '';
   maxPhoneLength: number = 0;
+  image: string | null = null; 
+  selectedLogoFile: File | null = null;
+
+  @ViewChild('fileInput') fileInput!: ElementRef;
 
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
     'Mali': { indicatif: '+223 ', longueur: 8 },
@@ -35,6 +39,7 @@ export class AddFournisseurComponent {
     private fb: FormBuilder,
     private fournisseurService: FournisseurService,
     private router: Router,
+     private cdRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -135,4 +140,39 @@ export class AddFournisseurComponent {
     this.router.navigate(['/fournisseurs']);
   }
 
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedLogoFile = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const img = new Image();
+        img.src = e.target.result;
+
+        img.onload = () => {
+          const MAX_SIZE = 800;
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          if (img.width > MAX_SIZE || img.height > MAX_SIZE) {
+            const ratio = Math.min(MAX_SIZE / img.width, MAX_SIZE / img.height);
+            canvas.width = img.width * ratio;
+            canvas.height = img.height * ratio;
+            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+            this.image = canvas.toDataURL('image/jpeg', 0.8);
+          } else {
+            this.image = e.target.result;
+          }
+          this.cdRef.markForCheck();
+          this.fileInput.nativeElement.value = '';
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
 }
+function ViewChild(arg0: string): (target: AddFournisseurComponent, propertyKey: "fileInput") => void {
+  throw new Error('Function not implemented.');
+}
+

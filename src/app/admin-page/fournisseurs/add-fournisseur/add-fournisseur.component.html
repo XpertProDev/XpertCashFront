@@ -19,11 +19,11 @@
                 <!-- Cadre contenant le select et la description -->
                 <div class="information_cadre">
                   <div class="info_titre_input">
-                    
-                    <div class="grid_colonne">
+
+                    <div class="grid_colonne_double">
 
                       <!-- Nom et prenom -->
-                      <div class="champ_input div1">
+                      <div class="champ_input">
                         <input type="text" class="input_focus"
                                   id="nomComplet" formControlName="nomComplet"
                                   name="nomComplet"
@@ -35,8 +35,26 @@
                         </div>
                       </div>
 
+                      <!-- Entreprise -->
+                      <div class="champ_input">
+                        <input type="text" class="input_focus"
+                                  id="entreprise" formControlName="entreprise"
+                                  name="entreprise"
+                                  placeholder="Saisis l'entreprise">
+                        <label for="nomComplet" class="label">L'entreprise</label>
+                      </div>
+
+                    </div>
+
+                    <!-- // Description  -->
+                    <div class="champ_input">
+                      <textarea type="text" class="input_focus2" id="description" name="description" placeholder="Saisis le description"></textarea>
+                      <label for="description" class="label">Description</label>
+                    </div>
+                    
+                    <div class="grid_colonne">
                       <!-- Pays -->
-                      <div class="champ_input div2">
+                      <div class="champ_input">
                         <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
                           <option value="" disabled selected>Pays</option>
                           <option value="Mali">Mali</option>
@@ -50,7 +68,7 @@
                       </div>
   
                       <!-- Téléphone -->
-                      <div class="champ_input div3">
+                      <div class="champ_input">
                         <input type="tel" class="input_focus"
                                id="telephone" formControlName="telephone"
                                name="telephone"
@@ -82,15 +100,9 @@
                           <small>Le téléphone est requis.</small>
                         </div>
                       </div>
-                                           
-  
-                    </div>
-  
-                    <!-- Modifiez le sélecteur de pays et le champ téléphone -->
-                    <div class="grid_colonne">
 
                       <!-- Email -->
-                      <div class="champ_input div1">
+                      <div class="champ_input">
                           <input type="email" class="input_focus"
                                   id="email" formControlName="email"
                                   name="email"
@@ -100,24 +112,46 @@
                           <small *ngIf="fournisseurForm.get('email')?.errors?.['email']">Format invalide.</small>
                           </div>
                       </div>
-
-                      <!-- Adresse -->
-                      <div class="champ_input div2">
-                          <input class="input_focus"
-                                      id="adresse" formControlName="adresse"
-                                      name="adresse"
-                                      placeholder="Saisis l'adresse">
-                          <label for="adresse" class="label">Adresse</label>
-                      </div>
-
+                    </div>
+  
+                    <!-- Modifiez le sélecteur de pays et le champ téléphone -->
+                    <div class="grid_colonne_double">
                       <!-- Ville -->
-                      <div class="champ_input div3">
+                      <div class="champ_input">
                         <input class="input_focus"
                                   id="ville" formControlName="ville"
                                   name="ville"
                                   placeholder="Saisis la ville">
                         <label for="ville" class="label">Ville</label>
                       </div>
+
+                      <!-- Adresse -->
+                      <div class="champ_input">
+                          <input class="input_focus"
+                                      id="adresse" formControlName="adresse"
+                                      name="adresse"
+                                      placeholder="Saisis l'adresse">
+                          <label for="adresse" class="label">Adresse</label>
+                      </div>
+                    </div>
+
+                    <input type="file" 
+                            accept="image/*" 
+                            #fileInput 
+                            (change)="onFileSelected($event)"
+                            style="display: none;"
+                            id="uniqueFileInputId">
+
+                      <div class="champ_grid" style="margin: 10px 0 15px; display: flex; align-items: center;">
+                        <p style="margin: 0; font-size: 12px; display: flex; align-items: center;">
+                            Changer votre logo ici 👉
+                            <a href="javascript:void(0)"
+                            (click)="fileInput.click()"
+                            title="Changer le logo"
+                            style="padding-left: 8px; cursor: pointer; display: inline-flex; align-items: center;">
+                                <img src="assets/img/appareil.png" alt="Changer logo" style="width: 25px; height: 25px;"/>
+                            </a>
+                        </p>
                     </div>
                                       
                   </div>

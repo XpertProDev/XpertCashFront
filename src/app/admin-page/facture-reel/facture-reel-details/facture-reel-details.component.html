@@ -302,15 +302,25 @@
           <p>Montant total :</p>
         </div>
 
-        <div class="total_logo_virement">
-          <!-- Boucle sur les modes de paiement avec montant > 0 -->
+        <!-- <div class="total_logo_virement">
           <ng-container *ngFor="let item of modesPaiementVisibles">
             <div class="total_montant_logo">
               <i [class]="getIconClass(item.mode)"></i>
               <p>: {{ item.montant | customNumber }}</p>
             </div>
           </ng-container>
+        </div> -->
+        <div class="total_logo_virement">
+          <!-- Boucle sur les modes de paiement avec montant > 0 -->
+          <ng-container *ngFor="let item of modesPaiementVisibles">
+            <div class="total_montant_logo">
+              <i [class]="getIconClass(item.mode)" 
+                [title]="getModeText(item.mode)"></i>
+              <p>: {{ item.montant | customNumber }}</p>
+            </div>
+          </ng-container>
         </div>
+
       </div>
       
       </div>
