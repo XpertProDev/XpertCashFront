@@ -50,6 +50,7 @@ export class FactureReelDetailsComponent implements OnInit {
   montantRestant: number = 0;
   historiquePaiements: PaiementDTO[] = [];
   isLoading: boolean = false;
+  isLoadingFacture: boolean = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
   errorMessageFactureAnuller: string | null = null;
@@ -194,7 +195,7 @@ export class FactureReelDetailsComponent implements OnInit {
       case 'CASH': return 'Espèce';
       case 'CHEQUE': return 'Chèque';
       case 'CARD': return 'Carte de crédit';
-      case 'VIREMENT': return 'Virement bancaires';
+      case 'VIREMENT': return 'Virement bancaire';
       case 'MOBILE': return 'Mobile Money';
       default: return mode;
     }
@@ -406,16 +407,16 @@ export class FactureReelDetailsComponent implements OnInit {
     // Cacher la popup
     this.showAnnulationConfirmation = false;
     
-    this.isLoading = true;
+    this.isLoadingFacture = true;
     
     if (!this.facture) {
-      this.isLoading = false;
+      this.isLoadingFacture = false;
       return;
     }
 
     this.factureService.annulerFactureReelle(this.facture.id).subscribe({
       next: () => {
-        this.successMessage = 'Facture annulée avec succès';
+        this.successMessageFactureAnuller = 'Facture annulée avec succès';
         // Rediriger après 2 secondes
         setTimeout(() => {
           this.router.navigate(['/facture-reel']);
@@ -423,8 +424,8 @@ export class FactureReelDetailsComponent implements OnInit {
       },
       error: (err) => {
         // this.errorMessage = err.error?.message || 'Erreur lors de l\'annulation de facture le paiement est déjà commencer';
-        this.errorMessage = err.error?.message || 'Vous pouvez pas annuler cette facture le paiement est déjà commencer';
-        this.isLoading = false;
+        this.errorMessageFactureAnuller = err.error?.message || 'Vous pouvez pas annuler cette facture le paiement est déjà commencer';
+        this.isLoadingFacture = false;
       }
     });
   }
