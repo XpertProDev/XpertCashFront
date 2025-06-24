@@ -1,3 +1,16 @@
+<div *ngIf="showBlockedPopup" [ngClass]="{'top-banner': true, 'fade-out': isFadingOut}">
+  <div class="banner-content">
+    <span class="icon">⚠️</span>
+    <span class="message">
+      Votre période d'accès temporaire a expiré. Veuillez vérifier votre boîte mail et activer votre compte.
+    </span>
+    <button class="logout-btn" (click)="onLogout()">Se déconnecter</button>
+  </div>
+</div>
+
+<div *ngIf="showBlockedPopup" class="click-blocker"></div>
+
+
 <div class="row">
   <!-- order-card start -->
   @for (card of cards; track card) {
@@ -300,11 +313,3 @@
   </div>
 </div>
 
-
-<div *ngIf="showBlockedPopup" class="popup-overlay">
-  <div class="popup-content">
-    <h2>Compte inactif</h2>
-    <p>Votre compte n'est pas activé depuis plus de 24 heures. Veuillez contacter l'administrateur.</p>
-    <!-- Pas de bouton de fermeture si tu veux que ce soit figé -->
-  </div>
-</div>

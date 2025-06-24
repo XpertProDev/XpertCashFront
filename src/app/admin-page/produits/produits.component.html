@@ -82,14 +82,12 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Boucle sur la liste filtrée et paginée -->
+      <!--  -->
       <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;" (click)="openProduitDetail(product.id)">
         <td [innerHTML]="highlightMatch(product.codeGenerique || '')"></td>
         <td>
           <div class="imgProduit">
-            <!-- <img [src]="product.photo"> -->
             <img [src]="product.photo" alt="Produit">
-            <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/image_product.png' : product.photo"> -->
           </div>
           <div class="modal" *ngIf="imagePopup">
             <div class="modal-content" (click)="$event.stopPropagation()">

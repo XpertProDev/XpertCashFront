@@ -27,6 +27,7 @@ export default class DashAnalyticsComponent {
   chartOptions_2!: Partial<ApexOptions>;
   chartOptions_3!: Partial<ApexOptions>;
   boutiqueName: string = '';
+  userEmail: string = '';
 
   // constructor
   constructor(private userService: UsersService,private http: HttpClient, private produitService: ProduitService, 
@@ -226,11 +227,13 @@ export default class DashAnalyticsComponent {
     this.getBoutiqueInfo();
     this.getBoutiqueName();
 
-      this.userService.getUserInfo().subscribe(user => {
+    this.userService.getUserInfo().subscribe(user => {
     const createdAt = new Date(user.createdAt);
     const now = new Date();
     const diffInMs = now.getTime() - createdAt.getTime();
     const diffInHours = diffInMs / (1000 * 60 * 60);
+    //email de l'utilisateur
+    this.userEmail = user.email;
 
     if (diffInHours > 24 && user.userActivated === false) {
       this.showBlockedPopup = true;
@@ -534,10 +537,17 @@ getBoutiqueName() {
   ];
 
 
-  showBlockedPopup: boolean = false;
+  showBlockedPopup = true;
+isFadingOut = false;
 
-
-  
+ onLogout(): void {
+  this.isFadingOut = true;
+  setTimeout(() => {
+    this.showBlockedPopup = false;
+       this.isFadingOut = false;
+    this.userService.logoutUser();
+  }, 500);
+  }
  
   
 }
