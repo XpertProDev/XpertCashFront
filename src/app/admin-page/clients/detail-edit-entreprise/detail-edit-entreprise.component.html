@@ -1,241 +1,379 @@
-<div class="container_global">
-    <div class="content_formulaire">
-      <div class="modal-body">
-        <form [formGroup]="entrepriseForm" class="container_formulaire">
-          <!-- Titre d'ajout de produits -->
-          <div class="Title">
-            <h3>Modifier un entreprise</h3>
-          </div>
-  
-          <div class="form_left_right">
-            <div class="formulaire">
-              <!-- Cadre contenant le select et la description -->
-              <div class="information_cadre">
-                <div class="info_titre_input">
-                  
-                  <div class="champ_grid">
-                    <!-- Nom et prenom -->
-                    <div class="champ_input">
-                      <input type="text" class="input_focus"
-                             id="nom" 
-                             formControlName="nom"
-                             placeholder="Saisis le nom d'entreprise">
-                      <label for="nom" class="label">Nom d'entreprise</label>
-                      <div *ngIf="entrepriseForm.get('nom')?.invalid && entrepriseForm.get('nom')?.touched" 
-                           class="error">
-                        <small *ngIf="entrepriseForm.get('nom')?.errors?.['required']">
-                          Ce champ est obligatoire
-                        </small>
-                        <small *ngIf="entrepriseForm.get('nom')?.errors?.['minlength']">
-                          Minimum 2 caractères
-                        </small>
-                      </div>
-                    </div>
-                    <!-- Email -->
-                    <div class="champ_input">
-                      <input type="email" class="input_focus"
-                                id="email" formControlName="email"
-                                name="email"
-                                placeholder="Saisis l'email">
-                      <label for="email" class="label">Email</label>
-                        <div *ngIf="entrepriseForm.get('email')?.invalid && entrepriseForm.get('email')?.touched" 
-                           class="error">
-                          <small *ngIf="entrepriseForm.get('email')?.errors?.['email']">
-                              Format d'email invalide
-                          </small>
-                      </div>
-                    </div>
-
-                  </div>
-                  <!-- Remplacer le bloc Pays et Téléphone existant par : -->
-                <div class="champ_grid">
-                    <!-- Pays -->
-                    <div class="champ_input">
-                        <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
-                            <option value="" disabled selected>Pays</option>
-                            <option value="Mali">Mali</option>
-                            <option value="Sénégal">Sénégal</option>
-                            <option value="Côte d'Ivoire">Côte d'Ivoire</option>
-                        </select>
-                        <label for="pays" class="label">Pays</label>
-                        <!-- <div *ngIf="entrepriseForm.get('pays')?.invalid && entrepriseForm.get('pays')?.touched" class="error">
-                            <small>Ce champ est requis</small>
-                        </div> -->
-                    </div>
-
-                    <!-- Téléphone -->
-                    <div class="champ_input">
-                        <input type="tel" class="input_focus"
-                            id="telephone" formControlName="telephone"
-                            name="telephone"
-                            placeholder="Saisis le numéro de téléphone"
-                            (input)="formatPhoneNumber()">
-                        <label for="telephone" class="label">Téléphone</label>
-                    
-                        <!-- Message d'erreur spécifique au pattern -->
-                        <div *ngIf="
-                                entrepriseForm.get('telephone')?.touched &&
-                                entrepriseForm.get('telephone')?.errors?.['pattern'] &&
-                                entrepriseForm.get('pays')?.value
-                                " class="error">
-                            <small>
-                                Le numéro doit contenir
-                                {{ paysIndicatifs[entrepriseForm.get('pays')?.value].longueur }}
-                                chiffres après l’indicatif {{ paysIndicatifs[entrepriseForm.get('pays')?.value].indicatif.trim() }}.
-                            </small>
-                        </div>
-                    
-                        <!-- Message d'erreur pour champ requis -->
-                        <div *ngIf="
-                            entrepriseForm.get('telephone')?.touched &&
-                            entrepriseForm.get('telephone')?.errors?.['required']
-                            " class="error">
-                            <small>Le téléphone est requis.</small>
-                        </div>
-                    </div>
-                </div>
-
-                  <div class="grid_colonne">
-                    <!-- Siege -->
-                    <div class="champ_input div1">
-                      <input class="input_focus"
-                                autocomplete="off"
-                                id="siege" formControlName="siege"
-                                name="siege"
-                                placeholder="Saisis le siege">
-                      <label for="siege" class="label">Ville</label>
-                    </div>
-
-                  <!-- Secteur -->
-                  <div class="champ_input div2">
-                    <input class="input_focus"
-                              autocomplete="off"
-                              id="secteur" formControlName="secteur"
-                              name="secteur"
-                              placeholder="Saisis le secteur">
-                    <label for="secteur" class="label">Secteur</label>
-                  </div>
-
-                  <div class="champ_input div3">
-                    <input class="input_focus"
-                            autocomplete="off"
-                            id="adresse" 
-                            formControlName="adresse"
-                            placeholder="Saisis l'adresse">
-                    <label for="adresse" class="label">Adresse</label>
-                  </div>
-                
-                </div>
-                  
-                </div>
-              </div>
-  
-              <!-- Boutons Ajouter et Sauvegarder -->
-              <div class="information_cadre information_cadre_save">
-
-                <!-- Message d'erreur global -->
-               <div class="container_error_message">
-                    <div *ngIf="errorMessage" class="error-messageApi2">{{ errorMessage }}</div>
-                    <div *ngIf="successMessage" class="success-messageApi2">{{ successMessage }}</div>
-                </div>
-
-                <div class="info_titre_input info_titre_input_btn">
-                  <div class="btn_annuler">
-                    <button class="btn_cancel" (click)="goToClients()">Annuler</button>
-                  </div>
-                  <div class="btn_ajouter">
-                    <button class="btn_save" (click)="onSubmit()"
-                          [disabled]="entrepriseForm.invalid"
-                          [style.backgroundColor]="entrepriseForm.valid ? '#0672E4' : '#0671e434'"
-                          [style.color]="entrepriseForm.valid ? '#ffffff' : '#00000073'"
-                          [style.cursor]="entrepriseForm.valid ? 'pointer' : 'no-drop'">
-                      Modifier
-                    </button>
-                  </div>
-                </div>
-              </div>
-  
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Remplacer la section "Entreprise lier au facture" par -->
-    <div class="content_formulaire">
-      <div class="modal-body">
-        <div class="container_formulaire">
-          <div class="Title">
-            <h3>Factures liées à l'entreprise</h3>
-          </div>
-          
-          <div class="table-container">
-            <!-- Chargement -->
-            <div *ngIf="loadingFactures" class="loading-indicator">
-              <i class="ri-loader-4-line spin"></i> Chargement des factures...
-            </div>
-            
-            <!-- Erreur -->
-            <div *ngIf="!loadingFactures && errorFactures" class="error-message">
-              {{ errorFactures }}
-            </div>
-            
-            <!-- Liste vide -->
-            <div *ngIf="!loadingFactures && !errorFactures && facturesEntreprise.length === 0" class="empty-state">
-              <i class="ri-building-line"></i>
-              <p>Aucune facture trouvée pour cette entreprise</p>
-            </div>
-            
-            <!-- Tableau des factures -->
-            <table *ngIf="!loadingFactures && !errorFactures && facturesEntreprise.length > 0">
-              <thead>
-                <tr>
-                  <th>Numéro</th>
-                  <th>Date</th>
-                  <th>Statut</th>
-                  <th class="text-right">Montant</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let facture of facturesEntreprise">
-                  <td>{{ facture.numeroFacture }}</td>
-                  <td>{{ facture.dateFacture | date:'dd/MM/yyyy' }}</td>
-                  <td>
-                    <span class="status-badge" [ngClass]="{
-                      'draft': facture.statut === 'BROUILLON',
-                      'sent': facture.statut === 'ENVOYE',
-                      'approved': facture.statut === 'APPROUVE',
-                      'valid': facture.statut === 'VALIDE'
-                    }">
-                      {{ facture.statut }}
-                    </span>
-                  </td>
-                  <td class="text-right">{{ facture.totalFacture | customNumber }}</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="3" class="text-bold">Total</td>
-                  <td class="text-right text-bold">
-                    {{ getTotalFactures() | customNumber }}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
+<div class="container_client">
+  <div class="information_cadre" style="margin-bottom: 20px; padding: 20px;">
+    <div class="information_grid_two">
+      <!-- Section Logo Entreprise -->
+      <div class="profil_section">
+        <div class="section_title">
+          <div class="title">
+            <h6>Logo</h6>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- // Cleint and facture  -->
-    <div class="content_formulaire">
-      <div class="modal-body">
-        <form class="container_formulaire">
-          <!-- Titre d'ajout de produits -->
-          <div class="Title">
-            <h3>Autres</h3>
+        <!-- <div class="profile-img-wrapper">
+          <img src="assets/img/office_building.png" alt="Logo entreprise" class="profile-img" />
+        </div> -->
+
+        <div class="profile-img-wrapper" (click)="triggerFileInput()">
+              <img src="assets/img/office_building.png"
+                  alt="Photo de profil" 
+                  class="profile-img" />
+              
+              <div class="overlay">
+                <img src="assets/img/appareil.jpg" alt="Modifier" class="camera-icon" />
+              </div>
+            </div>
+      </div>
+      
+      <!-- Section Informations Entreprise -->
+      <div class="info_section">
+        <div class="section_title">
+          <div class="title title_display">
+            <h6>Informations Entreprise</h6>
+            <div class="icon_edit">
+              <i *ngIf="!isEditing" 
+                class="ri-edit-box-line" 
+                title="Cliquer ici pour modifier"
+                (click)="toggleEditing()"></i>
+              
+              <i *ngIf="isEditing" style="color: #ff0000;"
+                class="ri-close-line" 
+                title="Fermer l'édition"
+                (click)="toggleEditing()"></i>
+            </div>
+          </div>
+        </div>
+        
+        <form [formGroup]="entrepriseForm" class="container_formulaire">
+          <div class="champ_grid_true">
+            <!-- Nom entreprise -->
+            <div class="champ_input">
+              <input type="text" class="input_focus" 
+                     id="nom" formControlName="nom"
+                     placeholder="Saisis le nom de l'entreprise">
+              <label for="nom" class="label">Nom entreprise</label>
+              <div *ngIf="entrepriseForm.get('nom')?.touched && entrepriseForm.get('nom')?.invalid" class="error">
+                <small *ngIf="entrepriseForm.get('nom')?.errors?.['required']">Champ requis.</small>
+                <small *ngIf="entrepriseForm.get('nom')?.errors?.['minlength']">Au moins 2 caractères.</small>
+              </div>
+            </div>
+            <!-- Email -->
+            <div class="champ_input">
+              <input type="email" class="input_focus" 
+                     id="email" formControlName="email"
+                     placeholder="Saisis l'email">
+              <label for="email" class="label">Email</label>
+              <div *ngIf="entrepriseForm.get('email')?.touched && entrepriseForm.get('email')?.invalid" class="error">
+                <small *ngIf="entrepriseForm.get('email')?.errors?.['email']">Format invalide.</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="champ_grid_true">
+            <!-- Sélecteur de pays -->
+            <div class="champ_input div1">
+              <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
+                <option value="" disabled>Pays</option>
+                <option value="Mali">Mali</option>
+                <option value="Sénégal">Sénégal</option>
+                <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+              </select>
+              <label for="pays" class="label">Pays</label>
+            </div>
+
+            <!-- Téléphone -->
+            <div class="champ_input div2">
+              <input type="tel" class="input_focus"
+                     id="telephone" formControlName="telephone"
+                     placeholder="Saisis le numéro de téléphone"
+                     (input)="formatPhoneNumber()">
+              <label for="telephone" class="label">Téléphone</label>
+              <div *ngIf="entrepriseForm.get('telephone')?.touched && entrepriseForm.get('telephone')?.invalid" class="error">
+                <small>Format invalide</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="champ_grid_true">
+            <!-- Adresse -->
+            <div class="champ_input">
+              <input class="input_focus"
+                     id="adresse" formControlName="adresse"
+                     placeholder="Saisis l'adresse">
+              <label for="adresse" class="label">Adresse</label>
+            </div>
+            
+            <!-- Ville -->
+            <div class="champ_input">
+              <input class="input_focus"
+                     id="siege" formControlName="siege"
+                     placeholder="Saisis la ville">
+              <label for="siege" class="label">Ville</label>
+            </div>
+            
+            <!-- Secteur -->
+            <div class="champ_input">
+              <input class="input_focus"
+                     id="secteur" formControlName="secteur"
+                     placeholder="Saisis le secteur">
+              <label for="secteur" class="label">Secteur</label>
+            </div>
+          </div>
+
+          <!-- Boutons Ajouter et Sauvegarder -->
+          <div class="information_cadre_save" *ngIf="isEditing">
+            <!-- Message d'erreur global -->
+            <div class="container_error_message">
+              <div *ngIf="errorMessage" class="error-messageApi2">{{ errorMessage }}</div>
+              <div *ngIf="successMessage" class="success-messageApi2">{{ successMessage }}</div>
+            </div>
+
+            <div class="info_titre_input info_titre_input_btn">
+              <div class="btn_annuler">
+                <button class="btn_cancel" (click)="goToClients()">{{ isEditing ? 'Annuler' : 'Retour' }}</button>
+              </div>
+              <div class="btn_ajouter">
+                <button class="btn_save" (click)="onSubmit()"
+                      [disabled]="entrepriseForm.invalid"
+                      [style.backgroundColor]="entrepriseForm.valid ? '#0672E4' : '#0671e434'"
+                      [style.color]="entrepriseForm.valid ? '#ffffff' : '#00000073'"
+                      [style.cursor]="entrepriseForm.valid ? 'pointer' : 'no-drop'">
+                  Modifier
+                </button>
+              </div>
+            </div>
           </div>
         </form>
       </div>
     </div>
+  </div>
+
+  <div class="information_cadre">
+    <div class="section_navbar">
+      <mat-tab-group [selectedIndex]="0" class="custom-tabs">
+        <!-- Factures -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="tab-label">
+              <span>Factures entreprise</span>
+              <span class="facture-count">{{factureCount}}</span>
+            </div>
+          </ng-template>
+          <div class="tab-content">
+            <div class="content_client">
+              <div class="information_grid_two">
+                <!-- Aperçu Facture -->
+                <div class="profil_section profil_section_facture">
+                  <div class="facture_model" *ngIf="factureDetails; else noFactureSelected">
+                    <!-- En-tête dynamique -->
+                    <div class="header_apercu" style="display: flex; align-items: center; gap: 5px; margin: 10px;">
+                      <div class="logo_entreprise">
+                        <img [src]="entrepriseEmitter.logo ? (imgUrl + entrepriseEmitter.logo) : 'assets/img/entreprise-icon.png'">
+                      </div>
+                      <div class="entete_entreprise">
+                        <p class="para1">{{ entrepriseNom }}</p>
+                        <p class="para1">Secteur: {{ entrepriseSecteur }}</p>
+                        <div class="para1">
+                          Email: {{ entrepriseEmail }} 
+                          Téléphone: {{ entrepriseTelephone }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <hr><hr>
+
+                    <!-- Numéro de facture -->
+                    <div class="titre" style="text-align: center; font-size: 8px;">
+                      <h6>Facture proforma: 
+                        <span style="color: #0000003e;">
+                          {{ factureDetails.numeroFacture }}
+                        </span>
+                      </h6>
+                    </div>
+
+                    <!-- Date et lieu -->
+                    <div class="date_right">
+                      <p style="margin: 0 10px; font-size: 8px; text-align: right;">
+                        {{ entrepriseSiege }}, {{ factureDetails.dateCreation | date:'dd/MM/yyyy' }}
+                      </p>
+                    </div>
+
+                    <!-- Destinataire -->
+                    <div class="name_client" style="margin-left: 10px;">
+                      <div class="doit" style="display: flex; align-items: center; gap: 3px;">
+                        <h6 style="margin: 0; font-size: 8px;">Doit : </h6>
+                        <p style="margin: 0; font-size: 8px;">
+                          {{ factureDetails.client?.nomComplet || factureDetails.entrepriseClient?.nom }}
+                        </p>
+                      </div>
+                      <div class="objets" style="display: flex; align-items: center; gap: 3px;">
+                        <h6 style="margin: 0; font-size: 8px;">Objet : </h6>
+                        <p style="margin: 0; font-size: 8px;">
+                          {{ factureDetails.description }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Lignes de produits -->
+                    <div class="container_table" style="display: flex; justify-content: center;">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th class="th">Désignation</th>
+                            <th class="th">Description</th>
+                            <th class="th">PU</th>
+                            <th class="th">Quantité</th>
+                            <th class="th">Montant (FCFA)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let ligne of factureDetails.lignesFacture">
+                            <td class="td">{{ ligne.nomProduit }}</td>
+                            <td class="td">{{ ligne.ligneDescription }}</td>
+                            <td class="td">{{ ligne.prixUnitaire | customNumber }}</td>
+                            <td class="td">{{ ligne.quantite }}</td>
+                            <td class="td">{{ ligne.montantTotal | customNumber }}</td>
+                          </tr>
+                        </tbody>
+                        <tfoot class="tfoot">
+                          <tr>
+                            <td class="td" colspan="4">Total HT</td>
+                            <td class="td">{{ factureDetails.totalHT | customNumber }}</td>
+                          </tr>
+                          <tr *ngIf="factureDetails.remise > 0">
+                            <td class="td" colspan="4">Remise 0%</td>
+                            <td class="td">0000</td>
+                          </tr>
+                          <tr *ngIf="factureDetails.tva">
+                            <td class="td" colspan="4">TVA 0%</td>
+                            <td class="td">000</td>
+                          </tr>
+                          <tr>
+                            <td class="td" colspan="4">Montant TTC</td>
+                            <td class="td">{{ factureDetails.totalFacture | customNumber }}</td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+
+                    <div class="arret_somme">
+                      <p style="margin: 0 0 0 10px; font-size: 6px;">Arrêté la présente facture à la somme de : Zero .....</p>
+                    </div>
+
+                    <div class="signature" style="text-align: right; margin: 20px 10px 16px 0;">
+                      <div class="post_signateure">
+                        <p style="font-size: 8px;">{{ entrepriseSignataire }}</p>
+                      </div>
+                      <div class="nom_signateure">
+                        <p style="font-size: 8px;">{{ entrepriseSignataireNom }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Pied de page dynamique -->
+                    <div class="container_footer">
+                      <div class="footer">
+                        <hr>
+                        <p style="text-align: center; font-size: 8px; margin: 0 0 3px 0;">
+                          <strong>{{ entrepriseSiteWeb }}</strong>
+                        </p>
+                        <div style="font-size: 5px; text-align: center;">
+                          <em>
+                            NINA: {{ entrepriseNina }}
+                            RCCM: {{ entrepriseRccm }}
+                            NIF: {{ entrepriseNif }}
+                            Banque: {{ entrepriseBanque }}
+                          </em>
+                        </div>
+                        <div style="margin-top: 0px; font-size: 5px; text-align: center;">
+                          <em>Adresse : {{ entrepriseAdresse }} /{{ entreprisePays }}</em>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <ng-template #noFactureSelected>
+                    <div class="empty-preview">
+                      <i class="ri-file-text-line"></i>
+                      <p>Sélectionnez une facture pour l'aperçu</p>
+                    </div>
+                  </ng-template>
+                </div>
+                
+                <!-- Liste des Factures -->
+                <div class="info_section" style="padding: 0;">
+                  <div class="contact_info__">
+                    <div class="section_title section_title2" style="padding: 20px 20px 6px;">
+                      <div class="title">
+                        <h6>Toutes les factures</h6>
+                      </div>
+                    </div>
+
+                    <!-- Tableau des factures -->
+                    <div class="table-container" style="max-height: 41vh; border-radius: 10px; display: flex; flex-direction: column; position: relative;">
+                      <!-- États de chargement/erreur -->
+                      <div *ngIf="loadingFactures" class="loading-indicator">
+                        <i class="ri-loader-4-line spin"></i> Chargement des factures...
+                      </div>
+                      
+                      <div *ngIf="!loadingFactures && errorFactures" class="error-message">
+                        {{ errorFactures }}
+                      </div>
+                      
+                      <div *ngIf="!loadingFactures && !errorFactures && facturesEntreprise.length === 0" class="empty-state">
+                        <i class="ri-file-list-2-line"></i>
+                        <p>Aucune facture trouvée pour cette entreprise</p>
+                      </div>
+                      
+                      <!-- Tableau réel -->
+                      <table *ngIf="!loadingFactures && !errorFactures && facturesEntreprise.length > 0">
+                        <thead>
+                          <tr style="position: sticky; top: 0; background: white; z-index: 10; box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);">
+                            <th>Numéro</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                            <th class="text-right">Montant</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let facture of facturesEntreprise" 
+                              (click)="onSelectFacture(facture)"
+                              [class.selected-row]="selectedFactureId === facture.id">
+                            <td>{{ facture.numeroFacture }}</td>
+                            <td>{{ facture.dateFacture | date:'dd/MM/yyyy' }}</td>
+                            <td>
+                              <span class="status-badge" [ngClass]="{
+                                'draft': facture.statut === 'BROUILLON',
+                                'sent': facture.statut === 'ENVOYE',
+                                'approved': facture.statut === 'APPROUVE',
+                                'valid': facture.statut === 'VALIDE'
+                              }">
+                                {{ facture.statut }}
+                              </span>
+                            </td>
+                            <td class="text-right">{{ facture.totalFacture | customNumber }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+  
+                    <!-- Footer collé en bas -->
+                    <div class="sticky-footer" *ngIf="!loadingFactures && !errorFactures && facturesEntreprise.length > 0">
+                      <table style="width: 100%;">
+                        <tfoot style="background-color: #ffffff;">
+                          <tr>
+                            <td colspan="3" class="text-bold">Total</td>
+                            <td class="text-right text-bold">
+                              {{ getTotalFactures() | customNumber }}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div> 
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </div>
 </div>

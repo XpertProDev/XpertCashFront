@@ -350,3 +350,9 @@
       </form>
   </div>
 </div>
+
+<!-- Dans le message de succès -->
+<div *ngIf="successMessage" class="success-messageApi2">
+  {{ successMessage }}
+  <button (click)="resetForm()">Ajouter un autre</button>
+</div>

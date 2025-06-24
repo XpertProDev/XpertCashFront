@@ -51,6 +51,17 @@ export class EntrepriseFormComponent {
       this.destroy$.next();
       this.destroy$.complete();
     }
+
+    // Ajoutez cette méthode
+    resetForm(): void {
+      this.entrepriseClientForm.reset({
+        pays: '' // Réinitialisez le champ pays
+      });
+      this.errorMessageApi = '';
+      this.successMessage = '';
+      this.entrepriseIndicatif = '';
+      this.entrepriseMaxPhoneLength = 0;
+    }
   
     // Ajouter ces méthodes
     onEntreprisePaysChange(event: any): void {
@@ -142,6 +153,7 @@ export class EntrepriseFormComponent {
 
             // Émettre l'événement avec la nouvelle entreprise
             this.entrepriseAjoute.emit(newEntreprise);
+            this.resetForm();
 
             this.entrepriseClientForm.reset();
             this.closeForm();

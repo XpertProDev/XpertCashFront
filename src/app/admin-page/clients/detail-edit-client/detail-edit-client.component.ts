@@ -41,7 +41,7 @@ import { environment } from 'src/environments/environment';
   styleUrl: './detail-edit-client.component.scss'
 })
 export class DetailEditClientComponent {
-  private apiUrl = environment.imgUrl
+  private imgUrl = environment.imgUrl
   clientId!: number;
   errorMessage: string = '';
   errorMessageApi: string = '';
@@ -67,11 +67,32 @@ export class DetailEditClientComponent {
   facturesClient: any[] = [];
   loadingFactures = false;
   errorFactures = '';
+  selectedFactureId: number | null = null;
+  factureDetails: any = null;
 
   // @ViewChild('fileInput') fileInput!: ElementRef;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   clientPhotoUrl: string | null = null;
   selectedImageFile: File | null = null;
+
+  // Ajoutez ces propriétés dans la classe
+  entrepriseNom: string = '';
+  entrepriseSecteur: string = '';
+  entrepriseEmail: string = '';
+  entrepriseTelephone: string = '';
+  entrepriseSiege: string = '';
+  entrepriseLogo: string = '';
+  entrepriseSiteWeb: string = '';
+  entrepriseNina: string = '';
+  entrepriseRccm: string = '';
+  entrepriseNif: string = '';
+  entrepriseBanque: string = '';
+  entrepriseAdresse: string = '';
+  entreprisePays: string = '';
+  entrepriseSignataireNom: string = '';
+  entrepriseSignataire: string = '';
+
+  factureCount: number = 0;
 
   // Ajoutez cette propriété dans la classe
   isEditing = false;
@@ -84,6 +105,21 @@ export class DetailEditClientComponent {
     'Sénégal': { indicatif: '+221', longueur: 9 },
     'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 }
   };
+
+
+
+  ngOnInit() {
+    this.getListEntreprise();
+    this.initEntreprise();
+    this.getClientForm();
+    this.getEntrepriseForm();
+    this.loadEntreprises();
+    this.getRouteClient();
+    this.modifierClientForm.disable();
+    this.control.disable();
+    this.loadEntrepriseInfo();
+    
+  }
   
   constructor(
     private router: Router,
@@ -131,6 +167,80 @@ export class DetailEditClientComponent {
         console.error('Erreur lors de la compression:', error);
       }
   }
+
+  // Ajouter cette méthode pour charger les détails d'une facture
+loadFactureDetails(factureId: number): void {
+  this.factureService.getFactureProformaById(factureId).subscribe({
+    next: (details: any) => {
+      // Calculer le montant après remise
+      const remiseValue = details.remise || 0;
+      const totalApresRemise = details.totalHT - (details.totalHT * remiseValue / 100);
+      
+      // Calculer la TVA si nécessaire
+      let montantTVA = 0;
+      let tauxTva = 0;
+      
+      if (details.tva) {
+        // Calcul: TTC = (HT - Remise) + TVA
+        // => TVA = TTC - (HT - Remise)
+        montantTVA = details.totalFacture - totalApresRemise;
+        
+        // Calculer le taux de TVA réel
+        if (totalApresRemise > 0) {
+          tauxTva = montantTVA / totalApresRemise;
+        }
+      }
+      
+      // Valider et corriger la remise
+      let remiseCorrigee = remiseValue;
+      if (remiseCorrigee > 100) {
+        console.warn(`Remise invalide corrigée: ${remiseCorrigee}% -> 100%`);
+        remiseCorrigee = 100;
+      }
+      
+      this.factureDetails = {
+        ...details,
+        montantTVA,
+        tauxTva,
+        remise: remiseCorrigee
+      };
+    },
+    error: (err) => {
+      console.error('Erreur chargement détails facture', err);
+    }
+  });
+}
+
+onSelectFacture(facture: any): void {
+  this.selectedFactureId = facture.id;
+  this.loadFactureDetails(facture.id);
+}
+
+// Méthode pour charger les infos entreprise
+loadEntrepriseInfo(): void {
+  this.entrepriseService.getEntrepriseInfo().subscribe({
+    next: (entreprise) => {
+      this.entrepriseNom = entreprise.nom;
+      this.entrepriseSecteur = entreprise.secteur;
+      this.entrepriseEmail = entreprise.email;
+      this.entrepriseTelephone = entreprise.telephone;
+      this.entrepriseSiege = entreprise.siege;
+      this.entrepriseLogo = entreprise.logo ? `${this.imgUrl}${entreprise.logo}` : '';
+      this.entrepriseSiteWeb = entreprise.siteWeb;
+      this.entrepriseNina = entreprise.nina;
+      this.entrepriseRccm = entreprise.rccm;
+      this.entrepriseNif = entreprise.nif;
+      this.entrepriseBanque = entreprise.banque;
+      this.entrepriseAdresse = entreprise.adresse;
+      this.entreprisePays = entreprise.pays;
+      this.entrepriseSignataireNom = entreprise.signataireNom;
+      this.entrepriseSignataire = entreprise.signataire;
+    },
+    error: (err) => {
+      console.error('Erreur chargement infos entreprise', err);
+    }
+  });
+}
 
   // Calcul du total des factures
   // getTotalFactures(): number {
@@ -241,18 +351,6 @@ export class DetailEditClientComponent {
     this.router.navigate(['/clients']);
   }
 
-  ngOnInit() {
-    this.getListEntreprise();
-    this.initEntreprise();
-    this.getClientForm();
-    this.getEntrepriseForm();
-    this.loadEntreprises();
-    this.getRouteClient();
-    this.modifierClientForm.disable();
-    this.control.disable();
-    
-  }
-
   getRouteClient() {
     this.route.params.subscribe(params => {
       this.clientId = +params['id'];
@@ -290,20 +388,27 @@ export class DetailEditClientComponent {
     });
   }
 
-  private loadFacturesClient() {
-    this.loadingFactures = true;
-    this.factureService.getFacturesByClient(this.clientId).subscribe({
-      next: (factures) => {
-        this.facturesClient = factures;
-        this.loadingFactures = false;
-      },
-      error: (err) => {
-        this.errorFactures = 'Erreur lors du chargement des factures';
-        this.loadingFactures = false;
-        console.error(err);
+// Dans loadFacturesClient, sélectionner la première facture par défaut
+loadFacturesClient() {
+  this.loadingFactures = true;
+  this.factureService.getFacturesByClient(this.clientId).subscribe({
+    next: (factures) => {
+      this.facturesClient = factures;
+      this.factureCount = factures.length;
+      this.loadingFactures = false;
+      
+      // Sélectionner la première facture par défaut
+      if (this.facturesClient.length > 0) {
+        this.onSelectFacture(this.facturesClient[0]);
       }
-    });
-  }
+    },
+    error: (err) => {
+      this.errorFactures = 'Erreur lors du chargement des factures';
+      this.loadingFactures = false;
+      console.error(err);
+    }
+  });
+}
 
   // Modifiez la méthode populateForm pour initialiser l'indicatif
   private populateForm(client: Clients) {

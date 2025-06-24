@@ -7,6 +7,12 @@
       <div class="retour_icon" (click)="navigateBack()">
         <i class="ri-arrow-left-long-fill"></i>
       </div>
+
+      <div class="etat_envoyer">
+          <button class="btn_etat btn_etat_annuler">
+              Annuler la facture
+          </button>
+      </div>
     </div>
 
     <div class="info_titre_input">
@@ -202,7 +208,7 @@
                   <option value="CASH">Espèce</option>
                   <option value="CHEQUE">Chèque</option>
                   <option value="CARD">Carte de crédit</option>
-                  <option value="VIREMENT">Virement bancaires</option>
+                  <option value="VIREMENT">Virement bancaire</option>
                   <option value="MOBILE">Mobile Money</option>
                 </select>
                 <label class="label">Mode de paiement</label>
@@ -255,7 +261,8 @@
           </div>
 
           <div class="total_montant">
-            Montant dû : {{ (facture.totalFacture || 0) | customNumber }} FCFA
+            <p>Montant dû : {{ (facture.totalFacture || 0) | customNumber }} FCFA</p>
+            <p>Montant restant : {{ montantRestant | customNumber }} FCFA </p>
           </div>
         </div>
         
@@ -287,13 +294,22 @@
           </div>
         </div>
         
-        <div class="content_footer">
-          <div class="total_montant">
-            Montant restant : {{ montantRestant | customNumber }} FCFA 
-          </div>
+      <div class="content_footer">
+        <div class="total_montant">
+          <p>Montant total :</p>
         </div>
 
-
+        <div class="total_logo_virement">
+          <!-- Boucle sur les modes de paiement avec montant > 0 -->
+          <ng-container *ngFor="let item of modesPaiementVisibles">
+            <div class="total_montant_logo">
+              <i [class]="getIconClass(item.mode)"></i>
+              <p>: {{ item.montant | customNumber }}</p>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+      
       </div>
     </div>
   </div>

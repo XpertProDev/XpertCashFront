@@ -225,6 +225,17 @@ export default class DashAnalyticsComponent {
     this.updateTotalProduits();
     this.getBoutiqueInfo();
     this.getBoutiqueName();
+
+      this.userService.getUserInfo().subscribe(user => {
+    const createdAt = new Date(user.createdAt);
+    const now = new Date();
+    const diffInMs = now.getTime() - createdAt.getTime();
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+
+    if (diffInHours > 24 && user.userActivated === false) {
+      this.showBlockedPopup = true;
+    }
+  });
     
   }
 
@@ -523,6 +534,10 @@ getBoutiqueName() {
   ];
 
 
+  showBlockedPopup: boolean = false;
+
+
+  
  
   
 }

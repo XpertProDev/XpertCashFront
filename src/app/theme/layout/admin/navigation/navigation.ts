@@ -21,7 +21,7 @@ export interface NavigationItem {
 export const NavigationItems: NavigationItem[] = [
   {
     id: 'navigation',
-    title: 'Navigation',
+    title: '',
     type: 'group',
     icon: 'icon-group',
     children: [
@@ -37,7 +37,7 @@ export const NavigationItems: NavigationItem[] = [
 
   {
     id: 'page',
-    title: 'Page',
+    title: '',
     type: 'group',
     icon: 'icon-group',
     children: [
@@ -107,7 +107,7 @@ export const NavigationItems: NavigationItem[] = [
       },
       {
         id: 'factures',
-        title: 'Factures',
+        title: '',
         type: 'group',
         icon: 'icon-group',
         children: [
@@ -194,7 +194,7 @@ export const NavigationItems: NavigationItem[] = [
   // COMPTE 
   {
     id: 'Comptes',
-    title: 'Comptes',
+    title: '',
     type: 'group',
     icon: 'icon-group',
     children: [
