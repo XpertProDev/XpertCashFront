@@ -66,4 +66,21 @@ export class FactureReelService {
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
     return this.http.get<number>(`${this.apiUrl}/factures/${factureId}/montant-restant`, { headers });
   }
+
+  // Ajouter cette méthode dans FactureReelService
+  annulerFactureReelle(factureId: number): Observable<any> {
+    const token = localStorage.getItem('authToken');
+    if (!token) return throwError(() => new Error('Aucun token trouvé'));
+
+    const headers = new HttpHeaders({ 
+      Authorization: `Bearer ${token}` 
+    });
+
+    // Ajouter un objet vide comme body
+    return this.http.put(
+      `${this.apiUrl}/cancelFacture/${factureId}`, 
+      {}, // Body vide
+      { headers }
+    );
+  }
 }

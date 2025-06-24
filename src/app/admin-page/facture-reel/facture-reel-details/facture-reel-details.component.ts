@@ -10,11 +10,13 @@ import { FactureReelle, LigneFactureDTO, PaiementDTO } from '../../MODELS/Factur
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription, timer } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { MatDialog } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-facture-reel-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, CustomNumberPipe, EnLettresPipe, ReactiveFormsModule, MatButtonModule],
   templateUrl: './facture-reel-details.component.html',
   styleUrl: './facture-reel-details.component.scss'
 })
@@ -49,12 +51,15 @@ export class FactureReelDetailsComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
+  errorMessageFactureAnuller: string | null = null;
+  successMessageFactureAnuller: string | null = null;
   montant: number = 0;
   private messageSubscription: Subscription | null = null;
   private apiUrl = environment.imgUrl;
   fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
 
   modesPaiementVisibles: { mode: string, montant: number }[] = [];
+  showAnnulationConfirmation: boolean = false;
 
   
   constructor(
@@ -63,6 +68,7 @@ export class FactureReelDetailsComponent implements OnInit {
     private factureService: FactureReelService,
     private entrepriseService: EntrepriseService,
     private fb: FormBuilder,
+    private dialog: MatDialog,
   ){
     this.paiementForm = this.fb.group({
       montant: ['', [Validators.required, Validators.min(0.01)]],
@@ -70,30 +76,28 @@ export class FactureReelDetailsComponent implements OnInit {
     });
   }
 
-onInputChange(event: Event): void {
-  const input = event.target as HTMLInputElement;
-  if (!input) return;
+  onInputChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input) return;
 
-  const cleaned = input.value.replace(/\s/g, '');
-  const parsed = parseInt(cleaned, 10);
+    const cleaned = input.value.replace(/\s/g, '');
+    const parsed = parseInt(cleaned, 10);
 
-  if (!isNaN(parsed)) {
-    // Met à jour le champ FormControl
-    this.paiementForm.get('montant')?.setValue(parsed, { emitEvent: false });
+    if (!isNaN(parsed)) {
+      // Met à jour le champ FormControl
+      this.paiementForm.get('montant')?.setValue(parsed, { emitEvent: false });
 
-    // Met à jour visuellement le champ avec format
-    input.value = this.customNumberTransform(parsed);
-  } else {
-    this.paiementForm.get('montant')?.setValue(null, { emitEvent: false });
+      // Met à jour visuellement le champ avec format
+      input.value = this.customNumberTransform(parsed);
+    } else {
+      this.paiementForm.get('montant')?.setValue(null, { emitEvent: false });
+    }
   }
-}
 
-// Fonction utilitaire de formatage (tu peux réutiliser ta pipe ici si tu veux)
-customNumberTransform(value: number): string {
-  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-}
-
-
+  // Fonction utilitaire de formatage (tu peux réutiliser ta pipe ici si tu veux)
+  customNumberTransform(value: number): string {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
 
   ngOnInit(): void {
     // 1) Charger les infos de l’entreprise (en-tête)
@@ -195,18 +199,16 @@ customNumberTransform(value: number): string {
     }
   }
 
-getModeIconClass(mode: string): string {
-  switch (mode) {
-    case 'CASH': return 'ri-cash-line text-green';
-    case 'CHEQUE': return 'ri-bill-line text-blue';
-    case 'CARD': return 'ri-bank-card-line text-purple';
-    case 'VIREMENT': return 'ri-bank-fill text-navy';
-    case 'MOBILE': return 'ri-smartphone-line text-orange';
-    default: return 'ri-question-line text-gray';
+  getModeIconClass(mode: string): string {
+    switch (mode) {
+      case 'CASH': return 'ri-cash-line text-green';
+      case 'CHEQUE': return 'ri-bill-line text-blue';
+      case 'CARD': return 'ri-bank-card-line text-purple';
+      case 'VIREMENT': return 'ri-bank-fill text-navy';
+      case 'MOBILE': return 'ri-smartphone-line text-orange';
+      default: return 'ri-question-line text-gray';
+    }
   }
-}
-
-
 
   // loadHistoriquePaiements() {
   //   if (!this.facture) return;
@@ -387,6 +389,43 @@ getModeIconClass(mode: string): string {
     if (siege)          { return `Adresse : ${siege}`; }
     if (pays)           { return `Adresse : ${pays}`; }
     return '';
+  }
+
+  annulerFacture() {
+    // Afficher la popup de confirmation
+    this.showAnnulationConfirmation = true;
+  }
+
+  cancelAnnulation() {
+    // Cacher la popup
+    this.showAnnulationConfirmation = false;
+  }
+
+  confirmAnnulation() {
+    // Cacher la popup
+    this.showAnnulationConfirmation = false;
+    
+    this.isLoading = true;
+    
+    if (!this.facture) {
+      this.isLoading = false;
+      return;
+    }
+
+    this.factureService.annulerFactureReelle(this.facture.id).subscribe({
+      next: () => {
+        this.successMessage = 'Facture annulée avec succès';
+        // Rediriger après 2 secondes
+        setTimeout(() => {
+          this.router.navigate(['/facture-reel']);
+        }, 2000);
+      },
+      error: (err) => {
+        // this.errorMessage = err.error?.message || 'Erreur lors de l\'annulation de facture le paiement est déjà commencer';
+        this.errorMessage = err.error?.message || 'Vous pouvez pas annuler cette facture le paiement est déjà commencer';
+        this.isLoading = false;
+      }
+    });
   }
 
 }
