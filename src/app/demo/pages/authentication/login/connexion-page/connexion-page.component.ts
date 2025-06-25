@@ -80,13 +80,15 @@ export class ConnexionPageComponent {
 
   initOptForm() {
     this.otpForm = this.fb.group({
-    digit1: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
-    digit2: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
-    digit3: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
-    digit4: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
-    digit5: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
-    digit6: ['', [Validators.required, Validators.pattern(/[0-9]/)]]
-  });
+      digit1: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
+      digit2: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
+      digit3: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
+      digit4: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
+      digit5: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
+      digit6: ['', [Validators.required, Validators.pattern(/[0-9]/)]]
+    });
+    this.otpErrorMessage = ''; // <-- Ajout ici
+    this.otpSuccessMessage = '';
   }
 
   // Getter pour accéder facilement aux contrôles
@@ -180,6 +182,7 @@ export class ConnexionPageComponent {
         this.resetSuccessMessage = `Votre code de vérification a été envoyé par e-mail.`;
         this.resetEmailForOtp = email; 
         this.resetForm.reset();
+        this.resetOtpForm();
 
         setTimeout(() => {
           this.isResetPassword = false; // Masquer la vue réinitialisation
@@ -252,11 +255,24 @@ export class ConnexionPageComponent {
 
   // Ajouter pour la navigation entre les vues
   goBackToReset() {
+    this.resetOtpForm();
+
+    this.resetForm.patchValue({
+      resetEmail: this.resetEmailForOtp
+    });
+
     this.showOtpVerification = false;
     this.isResetPassword = true;
     this.otpErrorMessage = '';
     this.otpSuccessMessage = '';
     this.resetSuccessMessage = null;
+  }
+
+  // Ajoutez cette méthode pour réinitialiser les champs OTP
+  resetOtpForm(): void {
+    this.otpForm.reset();
+    this.otpErrorMessage = '';
+    this.otpSuccessMessage = '';
   }
 
   goToLogin(): void {

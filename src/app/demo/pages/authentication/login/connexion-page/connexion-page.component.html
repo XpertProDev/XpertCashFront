@@ -148,7 +148,7 @@
                 </div>
 
                 <div class="btn_contact">
-                  <button type="submit" [disabled]="isLoading || resetForm.invalid" (click)="submitResetForm()">
+                  <button type="submit" [disabled]="isLoading || resetForm.invalid" (click)="submitResetForm(); resetOtpForm()">
                     <span *ngIf="!isLoading">Envoyer le lien pour réinitialiser le mot de passe</span>
                     <span *ngIf="isLoading">Envoi en cours...</span>
                   </button>
