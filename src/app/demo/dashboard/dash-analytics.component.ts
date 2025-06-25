@@ -11,6 +11,7 @@ import { ApexOptions, ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ProduitService } from 'src/app/admin-page/SERVICES/produit.service';
+import { UserRequest } from 'src/app/admin-page/MODELS/user-request';
 @Component({
   selector: 'app-dash-analytics',
   standalone: true,
@@ -226,19 +227,9 @@ export default class DashAnalyticsComponent {
     this.updateTotalProduits();
     this.getBoutiqueInfo();
     this.getBoutiqueName();
+    this.checkAccountStatus();
 
-    this.userService.getUserInfo().subscribe(user => {
-    const createdAt = new Date(user.createdAt);
-    const now = new Date();
-    const diffInMs = now.getTime() - createdAt.getTime();
-    const diffInHours = diffInMs / (1000 * 60 * 60);
-    //email de l'utilisateur
-    this.userEmail = user.email;
 
-    if (diffInHours > 24 && user.userActivated === false) {
-      this.showBlockedPopup = true;
-    }
-  });
     
   }
 
@@ -544,4 +535,34 @@ getBoutiqueName() {
   }
  
   
+private checkAccountStatus(): void {
+  this.userService.getUserInfo().subscribe((user: UserRequest) => {
+    this.userEmail = user.email;
+    this.isAdmin = user.roleType === 'ADMIN';
+    const now = new Date();
+
+    if (this.isAdmin) {
+      const createdAt = user.createdAt ? new Date(user.createdAt) : null;
+      const diffInHours = createdAt ? (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60) : 0;
+
+      this.showBlockedPopup = !user.userActivated && diffInHours > 24;
+    } else {
+      if (user.adminActivated) {
+        this.showBlockedPopup = false;
+        return;
+      }
+
+      const adminCreatedAt = user.adminCreatedAt ? new Date(user.adminCreatedAt) : null;
+      const diffAdminInHours = adminCreatedAt ? (now.getTime() - adminCreatedAt.getTime()) / (1000 * 60 * 60) : 0;
+
+      this.showBlockedPopup = diffAdminInHours > 24;
+    }
+  });
+}
+
+
+isAdmin: boolean = false;
+
+
+
 }

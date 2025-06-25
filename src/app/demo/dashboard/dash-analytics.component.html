@@ -1,13 +1,23 @@
-<div *ngIf="showBlockedPopup" class="top-banner">
+<!-- Bandeau commun avec message conditionnel -->
+<div *ngIf="showBlockedPopup" class="top-banner" role="alert" aria-live="assertive">
   <div class="banner-content">
     <span class="icon">⚠️</span>
-    <span class="message">
+    
+    <!-- Si ADMIN, message spécifique -->
+    <span *ngIf="isAdmin" class="message">
       Votre période d'accès temporaire a expiré. Veuillez vérifier votre boîte mail et activer votre compte.
     </span>
+    
+    <!-- Si EMPLOYÉ, autre message -->
+    <span *ngIf="!isAdmin" class="message">
+      Votre administrateur n'a pas activé son compte dans les délais. Veuillez patienter ou le contacter.
+    </span>
+    
     <button class="logout-btn" (click)="onLogout()">Se déconnecter</button>
   </div>
 </div>
 
+<!-- Blocage global des interactions -->
 <div *ngIf="showBlockedPopup" class="click-blocker"></div>
 
 

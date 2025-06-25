@@ -15,6 +15,7 @@ export interface UserRequest {
   userActivated: boolean;
   adminActivated: boolean;
   createdAt: string;
+  adminCreatedAt: string;
   boutiques: {
     id: number;
     nomBoutique: string;
