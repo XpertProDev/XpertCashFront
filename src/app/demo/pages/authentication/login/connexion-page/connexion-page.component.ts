@@ -40,6 +40,10 @@ export class ConnexionPageComponent {
   otpErrorMessage: string = '';
   otpSuccessMessage: string = '';
 
+  showPasswordResetForm: boolean = false;
+  resetToken: string = '';
+  newPasswordForm!: FormGroup;
+
   constructor(
     private fb: FormBuilder,
     private usersService: UsersService,
@@ -58,7 +62,20 @@ export class ConnexionPageComponent {
     });
 
     this.initOptForm();
+    this.initNewPassword();
     
+  }
+
+  initNewPassword() {
+    this.newPasswordForm = this.fb.group({
+      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', Validators.required]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  passwordMatchValidator(form: FormGroup) {
+    return form.get('newPassword')?.value === form.get('confirmPassword')?.value 
+      ? null : { mismatch: true };
   }
 
   initOptForm() {
@@ -168,7 +185,7 @@ export class ConnexionPageComponent {
           this.isResetPassword = false; // Masquer la vue réinitialisation
           this.showOtpVerification = true; // Afficher la vue OTP
           this.resetSuccessMessage = null; // Effacer le message
-        }, 3000);
+        }, 2000);
       },
       error: (error) => {
         this.isLoading = false;
@@ -184,31 +201,53 @@ export class ConnexionPageComponent {
   }
 
   submitOtpForm(): void {
-    if (this.otpForm.invalid) {
-      this.otpErrorMessage = "Veuillez saisir un code complet à 6 chiffres";
-      return;
-    }
+      if (this.otpForm.invalid) {
+          this.otpErrorMessage = "Veuillez saisir un code complet à 6 chiffres";
+          return;
+      }
 
-    this.isLoading = true;
-    this.otpErrorMessage = '';
-    
-    // Concaténer les chiffres
-    const code = Object.values(this.otpForm.value).join('');
-    
-    // Ici vous appelleriez normalement votre service de vérification OTP
-    // this.usersService.verifyOtp(this.resetEmailForOtp, code).subscribe(...)
-    
-    // Simulation de succès
-    setTimeout(() => {
-      this.isLoading = false;
-      this.otpSuccessMessage = "Votre email a été vérifié avec succès!";
-      this.otpForm.reset();
+      this.isLoading = true;
+      this.otpErrorMessage = '';
       
-      // Redirection après 3 secondes
-      setTimeout(() => {
-        this.router.navigate(['/connexion']);
-      }, 3000);
-    }, 1500);
+      // Concaténer les chiffres
+      const code = Object.values(this.otpForm.value).join('');
+      
+      // Appel au backend pour validation
+      this.usersService.validateOtp(this.resetEmailForOtp, code).subscribe({
+          next: (response) => {
+              this.isLoading = false;
+              this.otpSuccessMessage = "Votre email a été vérifié avec succès!";
+              this.resetToken = response.token; // Stocker le token reçu du backend
+              this.otpForm.reset();
+              
+              setTimeout(() => {
+                  this.otpSuccessMessage = '';
+                  this.showOtpVerification = false;
+                  this.showPasswordResetForm = true;
+              }, 2000);
+          },
+          error: (error) => {
+              this.isLoading = false;
+              this.otpErrorMessage = error.error?.error || "Code invalide ou expiré";
+          }
+      });
+  }
+
+  resetComponentState(): void {
+    this.isResetPassword = false;
+    this.showOtpVerification = false;
+    this.showPasswordResetForm = false;
+    this.otpSuccessMessage = '';
+    this.otpErrorMessage = '';
+    this.resetSuccessMessage = null;
+    this.resetErrorMessage = null;
+    this.errorMessage = '';
+    
+    // Réinitialiser les formulaires
+    this.loginForm.reset();
+    this.resetForm.reset();
+    this.otpForm.reset();
+    this.newPasswordForm.reset();
   }
 
   // Ajouter pour la navigation entre les vues
@@ -239,5 +278,47 @@ export class ConnexionPageComponent {
       }
     }
   }
+
+  goBackToOtpVerification() {
+    this.showPasswordResetForm = false;
+    this.showOtpVerification = true;
+  }
   
+  submitNewPasswordForm(): void {
+      if (this.newPasswordForm.invalid) {
+          return;
+      }
+
+      const newPassword = this.newPasswordForm.get('newPassword')?.value;
+      this.isLoading = true;
+
+      this.usersService.resetPassword(this.resetToken, newPassword).subscribe({
+          next: () => {
+              this.isLoading = false;
+              this.otpSuccessMessage = "Votre mot de passe a été réinitialisé avec succès!";
+              
+              setTimeout(() => {
+                  // Réinitialiser tous les états avant la navigation
+                  this.isResetPassword = false;
+                  this.showOtpVerification = false;
+                  this.showPasswordResetForm = false;
+                  this.otpSuccessMessage = '';
+                  this.otpErrorMessage = '';
+                  this.resetSuccessMessage = null;
+                  this.resetErrorMessage = null;
+                  
+                  // Naviguer vers la page de connexion
+                  this.resetComponentState();
+                  this.router.navigate(['/connexion']);
+              }, 2000);
+          },
+          error: (error) => {
+              this.isLoading = false;
+              this.otpErrorMessage = error.error?.error || "Erreur lors de la réinitialisation du mot de passe.";
+          }
+      });
+  }
+
+
+
 }

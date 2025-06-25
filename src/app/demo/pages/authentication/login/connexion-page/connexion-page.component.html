@@ -18,65 +18,113 @@
   
       <section class="formulaire_img">
         <div class="info_form_left">
+          <div *ngIf="showPasswordResetForm">
+            <form [formGroup]="newPasswordForm">
+              <div class="formulaire">
+                <h2>Réinitialiser votre mot de passe</h2>
+                
+                <div class="champ_input">
+                  <input type="password" formControlName="newPassword" class="input_focus" placeholder="Nouveau mot de passe">
+                  <label class="label">Nouveau mot de passe</label>
+                  <div *ngIf="newPasswordForm.get('newPassword')?.touched && newPasswordForm.get('newPassword')?.invalid" class="error-message">
+                    <span *ngIf="newPasswordForm.get('newPassword')?.errors?.['required']">Le mot de passe est requis</span>
+                    <span *ngIf="newPasswordForm.get('newPassword')?.errors?.['minlength']">Au moins 8 caractères</span>
+                  </div>
+                </div>
 
-        <div *ngIf="showOtpVerification">
-          <form [formGroup]="otpForm" (ngSubmit)="submitOtpForm()">
-            <div class="formulaire">
-              <h2>Vérifiez votre adresse e-mail</h2>
-              <p class="reset-instructions">Nous avons envoyé un code à 6 chiffres à votre adresse e-mail</p>
-              <p class="reset-instructions">{{ resetEmailForOtp }}</p>
-              
-              <div class="otp-inputs">
-                <input type="text" formControlName="digit1" maxlength="1" class="otp-input" 
-                      (input)="onOtpInput(1, $event)">
-                <input type="text" formControlName="digit2" maxlength="1" class="otp-input" 
-                      (input)="onOtpInput(2, $event)">
-                <input type="text" formControlName="digit3" maxlength="1" class="otp-input" 
-                      (input)="onOtpInput(3, $event)">
-                <input type="text" formControlName="digit4" maxlength="1" class="otp-input" 
-                      (input)="onOtpInput(4, $event)">
-                <input type="text" formControlName="digit5" maxlength="1" class="otp-input" 
-                      (input)="onOtpInput(5, $event)">
-                <input type="text" formControlName="digit6" maxlength="1" class="otp-input" 
-                      (input)="onOtpInput(6, $event)">
-              </div>
+                <div class="champ_input">
+                  <input type="password" formControlName="confirmPassword" class="input_focus" placeholder="Confirmer le mot de passe">
+                  <label class="label">Confirmation</label>
+                  <div *ngIf="newPasswordForm.get('confirmPassword')?.touched && newPasswordForm.get('confirmPassword')?.invalid" class="error-message">
+                    <span *ngIf="newPasswordForm.get('confirmPassword')?.errors?.['required']">La confirmation est requise</span>
+                  </div>
+                  <div *ngIf="newPasswordForm.errors?.['mismatch'] && newPasswordForm.touched" class="error-message">
+                    Les mots de passe ne correspondent pas
+                  </div>
+                </div>
 
-              <div *ngIf="otpForm.invalid && otpForm.touched" class="error-message">
-                Veuillez saisir un code complet à 6 chiffres
-              </div>
-              
-              <div *ngIf="otpErrorMessage" class="error-message">
-                {{ otpErrorMessage }}
-              </div>
-              
-              <div *ngIf="otpSuccessMessage" class="success-message">
-                {{ otpSuccessMessage }}
-              </div>
+                <div *ngIf="otpErrorMessage" class="error-message">
+                  {{ otpErrorMessage }}
+                </div>
+                
+                <div *ngIf="otpSuccessMessage" class="success-message">
+                  {{ otpSuccessMessage }}
+                </div>
 
-              <p class="reset-instructions" style="font-size: 12px; text-align: center;">
-                Vous souhaitez modifier votre adresse e-mail? 
-                <a (click)="goBackToReset()" style="cursor: pointer; color: #0672E4; text-decoration: underline;">
-                  Cliquez ici.
-                </a>
-              </p>
+                <div class="btn_contact">
+                  <button type="submit" [disabled]="isLoading || newPasswordForm.invalid" (click)="submitNewPasswordForm()">
+                    <span *ngIf="!isLoading">Réinitialiser le mot de passe</span>
+                    <span *ngIf="isLoading">Traitement en cours...</span>
+                  </button>
+                </div>
 
-              <div class="btn_contact">
-                <button type="submit" [disabled]="isLoading">
-                  <span *ngIf="!isLoading">Verify Email</span>
-                  <span *ngIf="isLoading">Vérification en cours...</span>
-                </button>
+                <p class="reset-instructions" style="text-align: center; margin-top: 20px;">
+                  <a (click)="goBackToOtpVerification()" style="cursor: pointer; color: #0672E4; text-decoration: underline;">
+                    ← Retour à la vérification
+                  </a>
+                </p>
               </div>
+            </form>
+          </div>
 
-              <div class="registerPage">
-                <p><a class="logout" (click)="goToLogin()">Connexion</a></p>
+          <div *ngIf="showOtpVerification">
+            <form [formGroup]="otpForm">
+              <div class="formulaire">
+                <h2>Vérifiez votre adresse e-mail</h2>
+                <p class="reset-instructions">Nous avons envoyé un code à 6 chiffres à votre adresse e-mail</p>
+                <p class="reset-instructions">{{ resetEmailForOtp }}</p>
+                
+                <div class="otp-inputs">
+                  <input type="text" formControlName="digit1" maxlength="1" class="otp-input" 
+                        (input)="onOtpInput(1, $event)">
+                  <input type="text" formControlName="digit2" maxlength="1" class="otp-input" 
+                        (input)="onOtpInput(2, $event)">
+                  <input type="text" formControlName="digit3" maxlength="1" class="otp-input" 
+                        (input)="onOtpInput(3, $event)">
+                  <input type="text" formControlName="digit4" maxlength="1" class="otp-input" 
+                        (input)="onOtpInput(4, $event)">
+                  <input type="text" formControlName="digit5" maxlength="1" class="otp-input" 
+                        (input)="onOtpInput(5, $event)">
+                  <input type="text" formControlName="digit6" maxlength="1" class="otp-input" 
+                        (input)="onOtpInput(6, $event)">
+                </div>
+
+                <div *ngIf="otpForm.invalid && otpForm.touched" class="error-message">
+                  Veuillez saisir un code complet à 6 chiffres
+                </div>
+                
+                <div *ngIf="otpErrorMessage" class="error-message">
+                  {{ otpErrorMessage }}
+                </div>
+                
+                <div *ngIf="otpSuccessMessage" class="success-message">
+                  {{ otpSuccessMessage }}
+                </div>
+
+                <p class="reset-instructions" style="font-size: 12px; text-align: center;">
+                  Vous souhaitez modifier votre adresse e-mail? 
+                  <a (click)="goBackToReset()" style="cursor: pointer; color: #0672E4; text-decoration: underline;">
+                    Cliquez ici.
+                  </a>
+                </p>
+
+                <div class="btn_contact">
+                  <button type="submit" [disabled]="isLoading" (click)="submitOtpForm()">
+                    <span *ngIf="!isLoading">Verify Email</span>
+                    <span *ngIf="isLoading">Vérification en cours...</span>
+                  </button>
+                </div>
+
+                <div class="registerPage">
+                  <p><a class="logout" (click)="goToLogin()">Connexion</a></p>
+                </div>
               </div>
-            </div>
-          </form>
-        </div>
+            </form>
+          </div>
 
           <!-- Vue Réinitialisation de mot de passe -->
           <div *ngIf="isResetPassword && !showOtpVerification">
-            <form [formGroup]="resetForm" (ngSubmit)="submitResetForm()">
+            <form [formGroup]="resetForm">
               <div class="formulaire">
                 <h2>Mot de passe oublié ?</h2>
                 <p class="reset-instructions">Indiquez votre adresse e-mail ci-dessous</p>
@@ -100,7 +148,7 @@
                 </div>
 
                 <div class="btn_contact">
-                  <button type="submit" [disabled]="isLoading || resetForm.invalid">
+                  <button type="submit" [disabled]="isLoading || resetForm.invalid" (click)="submitResetForm()">
                     <span *ngIf="!isLoading">Envoyer le lien pour réinitialiser le mot de passe</span>
                     <span *ngIf="isLoading">Envoi en cours...</span>
                   </button>
@@ -118,7 +166,7 @@
             </form>
           </div>
 
-          <form *ngIf="!isResetPassword && !showOtpVerification" [formGroup]="loginForm" (ngSubmit)="submitForm()">
+          <form *ngIf="!isResetPassword && !showOtpVerification && !showPasswordResetForm" [formGroup]="loginForm">
             <div class="formulaire">
               <!-- Champ email -->
               <div class="champ_input">
@@ -151,7 +199,7 @@
           
               <!-- Bouton de soumission -->
               <div class="btn_contact">
-                <button type="submit" (click)="submitForm()" [disabled]="isLoading">
+                <button type="submit" (click)="submitForm()" [disabled]="isLoading" (click)="submitForm()">
                   <span></span> 
                   <span>Se connecter</span>
                 </button>
@@ -175,7 +223,7 @@
                 <button (click)="closePopup()">OK</button>
               </div>
             </div>
-          </form>                
+          </form>
         </div>
   
         <div class="info_form_right">
