@@ -327,7 +327,7 @@ export class StocksComponent implements OnInit {
               enStock: prod.enStock || false,
               // photo: fullImageUrl,
               photo: fullImageUrl ? fullImageUrl : this.generateLetterAvatar(prod.nom),
-              nomCategorie: prod.nomCategorie || "Non catégorie",
+              nomCategorie: prod.nomCategorie || "Aucune categorie",
               nomUnite: prod.nomUnite || "Non unité",
               createdAt: prod.createdAt || new Date().toISOString(), // Assurer une valeur par défaut
               categorieId: prod.categorieId,

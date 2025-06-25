@@ -6,7 +6,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { AdminComponent } from './theme/layout/admin/admin.component';
 import { GuestComponent } from './theme/layout/guest/guest.component';
 import { authGuard } from './admin-page/guards/auth.guard';
-import { GuestGuard } from './guest.guard';
+import { guestGuard } from './admin-page/guards/guestGuard';
 
 
 const routes: Routes = [
@@ -14,7 +14,7 @@ const routes: Routes = [
   {
     path: '',
     component: GuestComponent,
-    canActivate: [GuestGuard], // Empêche l'accès si déjà connecté
+    canActivate: [guestGuard], // Empêche l'accès si déjà connecté
     children: [
       {
         path: '',

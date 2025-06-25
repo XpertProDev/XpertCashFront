@@ -168,6 +168,30 @@ export class DetailEditClientComponent {
       }
   }
 
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      
+      // Vérification du format
+      const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedFormats.includes(file.type)) {
+        this.errorMessage = 'Seuls les formats JPG, PNG sont acceptés';
+        return;
+      }
+
+      this.testImageCompression(file);
+      
+      
+      // Aperçu de l'image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newPhotoUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   // Ajouter cette méthode pour charger les détails d'une facture
 loadFactureDetails(factureId: number): void {
   this.factureService.getFactureProformaById(factureId).subscribe({
@@ -264,34 +288,9 @@ loadEntrepriseInfo(): void {
     this.fileInput.nativeElement.click();
   }
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      
-      // Vérification du format
-      const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
-      if (!allowedFormats.includes(file.type)) {
-        this.errorMessage = 'Seuls les formats JPG, PNG sont acceptés';
-        return;
-      }
-      
-      // Vérification de la taille (max 2MB)
-      // if (file.size > 2 * 1024 * 1024) {
-      //   this.errorMessage = 'La taille maximale est de 2MB';
-      //   return;
-      // }
-      
-      this.selectedImageFile = file;
-      
-      // Aperçu de l'image
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.newPhotoUrl = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    }
-  }
+  
+
+  
 
   startEditing(): void {
     this.isEditing = true;

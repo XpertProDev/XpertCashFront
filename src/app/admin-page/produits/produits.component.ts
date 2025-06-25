@@ -86,8 +86,12 @@ export class ProduitsComponent implements OnInit {
   ngOnInit(): void {
     // this.getUserBoutiqueId();
     this.getUserInfo();
+    this.selectBoutique(null);
+
     // this.loadProduits();
   }
+
+  
 
   goToAddProduit() {
     this.router.navigate(['/addProduit']);
@@ -196,7 +200,7 @@ export class ProduitsComponent implements OnInit {
         task.codeGenerique || '',
         task.nom || '',
         task.description || '',
-        task.nomCategorie ? `${task.nomCategorie}` : 'Non catégorie',
+        task.nomCategorie ? `${task.nomCategorie}` : 'Aucune categorie',
         task.prixVente ?? 0,
         task.prixAchat ?? 0,
         task.quantite ?? 0,
