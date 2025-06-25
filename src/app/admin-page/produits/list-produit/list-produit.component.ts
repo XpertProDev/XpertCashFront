@@ -77,6 +77,7 @@ export class ListProduitComponent {
   showBarcode = false;
   showPopupCategory: boolean = false;
   showPopupUnit: boolean = false;
+  isEditing: boolean = false;
     
   // Produit 
   produit: Produit = {
@@ -123,6 +124,9 @@ export class ListProduitComponent {
     this.getAjouteCategoryFormCategoryName();
     this.getAjouteCategoryFormUnityName();
     this.getModifierProduitFormCodeBare();
+    this.modifierProduitForm.disable();
+    this.myControl.disable();
+    this.uniteControl.disable();
 
     this.route.queryParams.subscribe(params => {
       this.selectedBoutiqueId = params['boutiqueId'] ? +params['boutiqueId'] : null;
@@ -369,6 +373,10 @@ export class ListProduitComponent {
         this.produit = data;
         this.modifierProduitForm.patchValue(this.produit);
         this.loadInitialValues();
+
+        // Réinitialiser les contrôles après chargement
+        this.myControl.disable();
+        this.uniteControl.disable();
   
         // Mise à jour des noms de boutiques
         if (this.produit.boutiques && this.produit.boutiques.length > 0) {
@@ -401,6 +409,37 @@ export class ListProduitComponent {
     }
     console.error('Aucune boutique trouvée pour ce produit');
     return ['Aucune boutique'];
+  }
+
+  // toggleEditing(): void {
+  //   this.isEditing = !this.isEditing;
+    
+  //   if (this.isEditing) {
+  //     this.modifierProduitForm.enable();
+  //   } else {
+  //     // Annuler les modifications et recharger les données originales
+  //     this.modifierProduitForm.disable();
+  //     this.getProduit();
+  //   }
+  // }
+
+  toggleEditing(): void {
+    this.isEditing = !this.isEditing;
+    
+    if (this.isEditing) {
+      // Activer tous les contrôles
+      this.modifierProduitForm.enable();
+      this.myControl.enable();
+      this.uniteControl.enable();
+    } else {
+      // Désactiver et réinitialiser
+      this.modifierProduitForm.disable();
+      this.myControl.disable();
+      this.uniteControl.disable();
+      
+      // Réinitialiser les valeurs aux données originales
+      this.getProduit();
+    }
   }
 
   // Méthode pour la sélection d'une catégorie
@@ -605,54 +644,135 @@ export class ListProduitComponent {
     });
   }
 
+  // submitUpdateForm(): void {
+  //   // Vérifier que le formulaire est valide
+  //   if (this.modifierProduitForm.invalid) {
+  //     this.errorMessage = "Veuillez remplir les champs obligatoires.";
+  //     return;
+  //   }
+  
+  //   // Fusionner les valeurs du formulaire avec le produit existant
+  //   const updatedProduct: Produit = {
+  //     ...this.produit,
+  //     ...this.modifierProduitForm.value 
+  //   };
+  
+  //   // Ajout de logs pour le debug
+  //   console.log("Produit mis à jour (avant envoi) :", updatedProduct);
+  //   console.log("Fichier sélectionné :", this.selectedFile);
+  
+  //   // Appel du service qui se charge de créer le FormData et d'envoyer la requête PATCH
+  //   this.produitService.modifierProduit(updatedProduct, this.selectedFile ?? undefined)
+  //     .subscribe({
+  //       next: (response: Produit) => {
+  //         console.log("Produit modifié avec succès", response);
+  //         this.produit = response;
+  //         this.showPopupMessage({
+  //           title: 'Succès',
+  //           message: 'Le produit a été modifié avec succès.',
+  //           image: 'assets/img/succcccc.png',
+  //           type: 'success'
+  //         });
+  //       },
+  //       error: (error) => {
+  //         console.error("Erreur lors de la modification du produit", error);
+  //         let errorMessage = "Une erreur est survenue lors de la modification du produit.";
+  //         if (error.error) {
+  //           if (typeof error.error === "object" && error.error.error) {
+  //             errorMessage = error.error.error;
+  //           } else if (typeof error.error === "string") {
+  //             errorMessage = error.error;
+  //           }
+  //         }
+  //         this.showPopupMessage({
+  //           title: 'Erreur',
+  //           message: errorMessage,
+  //           image: 'assets/img/error.png',
+  //           type: 'error'
+  //         });
+  //       }
+  //     });
+  // }
+
   submitUpdateForm(): void {
-    // Vérifier que le formulaire est valide
-    if (this.modifierProduitForm.invalid) {
-      this.errorMessage = "Veuillez remplir les champs obligatoires.";
-      return;
-    }
-  
-    // Fusionner les valeurs du formulaire avec le produit existant
-    const updatedProduct: Produit = {
-      ...this.produit,
-      ...this.modifierProduitForm.value 
-    };
-  
-    // Ajout de logs pour le debug
-    console.log("Produit mis à jour (avant envoi) :", updatedProduct);
-    console.log("Fichier sélectionné :", this.selectedFile);
-  
-    // Appel du service qui se charge de créer le FormData et d'envoyer la requête PATCH
-    this.produitService.modifierProduit(updatedProduct, this.selectedFile ?? undefined)
-      .subscribe({
-        next: (response: Produit) => {
-          console.log("Produit modifié avec succès", response);
-          this.produit = response;
-          this.showPopupMessage({
-            title: 'Succès',
-            message: 'Le produit a été modifié avec succès.',
-            image: 'assets/img/succcccc.png',
-            type: 'success'
-          });
-        },
-        error: (error) => {
-          console.error("Erreur lors de la modification du produit", error);
-          let errorMessage = "Une erreur est survenue lors de la modification du produit.";
-          if (error.error) {
-            if (typeof error.error === "object" && error.error.error) {
-              errorMessage = error.error.error;
-            } else if (typeof error.error === "string") {
-              errorMessage = error.error;
-            }
-          }
-          this.showPopupMessage({
-            title: 'Erreur',
-            message: errorMessage,
-            image: 'assets/img/error.png',
-            type: 'error'
-          });
-        }
+  // 1. Vérifier si on est en mode édition
+  if (!this.isEditing) return;
+
+  // 2. Vérifier la validité du formulaire
+  if (this.modifierProduitForm.invalid) {
+    this.errorMessage = "Veuillez corriger les erreurs dans le formulaire.";
+    
+    // Marquer tous les champs comme "touched" pour afficher les erreurs
+    this.markFormGroupTouched(this.modifierProduitForm);
+    return;
+  }
+
+  // 3. Préparer les données à envoyer
+  const updatedProduct: Produit = {
+    ...this.produit,
+    ...this.modifierProduitForm.value
+  };
+
+  // 4. Appel au service de mise à jour
+  this.isLoading = true;
+  this.produitService.modifierProduit(
+    updatedProduct, 
+    this.selectedFile ?? undefined
+  ).subscribe({
+    next: (response: Produit) => {
+      this.isLoading = false;
+      
+      // Mettre à jour les données locales
+      this.produit = response;
+      
+      // Réinitialiser l'état d'édition
+      this.isEditing = false;
+      this.modifierProduitForm.disable();
+      
+      // Réinitialiser la sélection de fichier
+      this.selectedFile = null;
+      this.newPhotoUrl = null;
+      
+      // Afficher message de succès
+      this.showPopupMessage({
+        title: 'Succès',
+        message: 'Produit modifié avec succès',
+        image: 'assets/img/succes.png',
+        type: 'success'
       });
+    },
+    error: (error) => {
+      this.isLoading = false;
+      
+      // Gestion des erreurs
+      let errorMessage = "Erreur lors de la modification du produit";
+      
+      if (error.error?.message) {
+        errorMessage += `: ${error.error.message}`;
+      } else if (error.statusText) {
+        errorMessage += `: ${error.statusText}`;
+      }
+      
+      // Afficher message d'erreur
+      this.showPopupMessage({
+        title: 'Erreur',
+        message: errorMessage,
+        image: 'assets/img/error.png',
+        type: 'error'
+      });
+    }
+  });
+}
+
+  // Méthode utilitaire pour marquer tous les champs comme "touched"
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
   }
 
   // Modifiez onCodeBarChange() :
@@ -666,6 +786,10 @@ export class ListProduitComponent {
     if (charCode < 48 || charCode > 57) {
       event.preventDefault();
     }
+  }
+
+  navigateBack() {
+    this.router.navigate(['/produit']);
   }
   
 }

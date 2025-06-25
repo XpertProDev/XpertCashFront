@@ -18,6 +18,16 @@
           <h3>Détails du produits</h3>
         </div>
 
+
+        <!-- Button return  -->
+        <div class="information_cadre">
+          <div class="cadre_retour">
+            <div class="retour_icon" (click)="navigateBack()" style="cursor: pointer;" title="Retour sur la page produit">
+                <i class="ri-arrow-left-long-fill"></i>
+            </div>
+          </div>
+        </div>
+
         <div class="form_left_right">
 
           <!-- Formular ajouter produit  -->
@@ -44,12 +54,25 @@
             <!-- Les information des produit  -->
             <div class="information_cadre">
               <div class="info_titre_input">
-                <h4>Information des produits</h4>
+                <div class="content_return" style="display: flex; align-items: center; justify-content: space-between;">
+                  <h4>Information des produits</h4>
+                  <div class="icon_edit" style="cursor: pointer;">
+                    <i *ngIf="!isEditing" style="font-size: 16px;"
+                        class="ri-edit-box-line" 
+                        title="Cliquer ici pour modifier"
+                        (click)="toggleEditing()"></i>
+
+                    <i *ngIf="isEditing" style="color: #ff0000; font-size: 16px;"
+                        class="ri-close-line" 
+                        title="Fermer l'édition"
+                        (click)="toggleEditing()"></i>
+                  </div>
+                </div>
 
                 <div class="champ_grid">
                   <!-- Input de nom produits  -->
                   <div class="champ_input">
-                    <input formControlName="nom" type="text" class="input_focus " id="nom" name="nom" 
+                    <input [attr.disabled]="!isEditing ? '' : null"  formControlName="nom" type="text" class="input_focus " id="nom" name="nom" 
                     placeholder="Saisis le nom de magasin">
                     <label for="nom" class="label labelColor">Nom produit</label>
                     <div *ngIf="f['nom'].touched && f['nom'].invalid" class="error-message">
@@ -62,7 +85,8 @@
                     <div class="champ_input">
                       <input type="text" placeholder="Saisis le nom de catégorie"
                           class="input_focus" matInput [formControl]="myControl" 
-                          [matAutocomplete]="auto" style="cursor: pointer;" [value]="produit.nomCategorie  || 'non categorie'">
+                          [matAutocomplete]="auto" style="cursor: pointer;" [value]="produit.nomCategorie  || 'non categorie'"
+                          [attr.disabled]="!isEditing ? '' : null">
                       <label for="categorieId" class="label labelCategory">Catégorie</label>
                       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
 
@@ -126,7 +150,8 @@
                     <div class="champ_input">
                       <input type="text" placeholder="Saisis l'unité de mesure" 
                           matInput [formControl]="uniteControl" class="input_focus"
-                          [matAutocomplete]="autoUnite" style="cursor: pointer;" [value]="produit.nomUnite || 'non unite'">
+                          [matAutocomplete]="autoUnite" style="cursor: pointer;" [value]="produit.nomUnite || 'non unite'"
+                          [attr.disabled]="!isEditing ? '' : null">
                       <label for="uniteId" class="label labelCategory">Unité de mesure</label>
                       <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">
 
@@ -328,7 +353,7 @@
                   <button *ngIf="newPhotoUrl && newPhotoUrl !== urllink" (click)="clearImage()" class="clear-image-btn">
                     <i class="ri-delete-bin-5-line"></i>
                   </button>
-                  <div>
+                  <div *ngIf="isEditing">
                     <label for="file" class="footer_file"> 
                       <i class="ri-file-3-fill"></i>
                       <p>Choisir un fichier</p>
@@ -356,7 +381,7 @@
                   <button class="btn_cancel" routerLink="/produit" >Annuler</button>
                 </div>
 
-                <div class="btn_ajouter">
+                <div class="btn_ajouter" *ngIf="isEditing">
                   <button class="btn_save" type="submit" (click)="submitUpdateForm()">Modifier</button>
                 </div>
                 
