@@ -510,6 +510,57 @@
   margin: 15px 0;
   text-align: center;
 }
+
+/* Styles pour les inputs OTP */
+.otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.otp-input {
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  border: 2px solid #0672E4;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  transition: all 0.3s;
+}
+
+.otp-input:focus {
+  border-color: #034b9e;
+  box-shadow: 0 0 0 3px rgba(6, 114, 228, 0.2);
+  outline: none;
+}
+
+/* Bouton toggle OTP */
+.otp-toggle-btn {
+  background: none;
+  border: none;
+  color: #0672E4;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-top: 15px;
+  font-size: 14px;
+  padding: 5px;
+}
+
+.otp-toggle-btn:hover {
+  color: #034b9e;
+}
+
+/* Responsive pour petits écrans */
+@media (max-width: 768px) {
+  .otp-input {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+}
   
   
   

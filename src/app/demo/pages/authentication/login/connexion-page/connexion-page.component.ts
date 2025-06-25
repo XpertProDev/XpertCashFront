@@ -34,6 +34,12 @@ export class ConnexionPageComponent {
   resetSuccessMessage: string | null = null;
   resetErrorMessage: string | null = null;
 
+  showOtpVerification: boolean = false;
+  otpForm!: FormGroup;
+  resetEmailForOtp: string = '';
+  otpErrorMessage: string = '';
+  otpSuccessMessage: string = '';
+
   constructor(
     private fb: FormBuilder,
     private usersService: UsersService,
@@ -50,7 +56,20 @@ export class ConnexionPageComponent {
     this.resetForm = this.fb.group({
       resetEmail: ['', [Validators.required, Validators.email]]
     });
+
+    this.initOptForm();
     
+  }
+
+  initOptForm() {
+    this.otpForm = this.fb.group({
+    digit1: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
+    digit2: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
+    digit3: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
+    digit4: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
+    digit5: ['', [Validators.required, Validators.pattern(/[0-9]/)]],
+    digit6: ['', [Validators.required, Validators.pattern(/[0-9]/)]]
+  });
   }
 
   // Getter pour accéder facilement aux contrôles
@@ -140,8 +159,16 @@ export class ConnexionPageComponent {
     this.usersService.forgotPassword(email).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.resetSuccessMessage = `Un lien de réinitialisation a été envoyé à ${email}. Vérifiez votre boîte de réception.`;
+        // this.resetSuccessMessage = `Un lien de réinitialisation a été envoyé à ${email}. Vérifiez votre boîte de réception.`;
+        this.resetSuccessMessage = `Votre code de vérification a été envoyé par e-mail.`;
+        this.resetEmailForOtp = email; 
         this.resetForm.reset();
+
+        setTimeout(() => {
+          this.isResetPassword = false; // Masquer la vue réinitialisation
+          this.showOtpVerification = true; // Afficher la vue OTP
+          this.resetSuccessMessage = null; // Effacer le message
+        }, 3000);
       },
       error: (error) => {
         this.isLoading = false;
@@ -156,5 +183,61 @@ export class ConnexionPageComponent {
     });
   }
 
+  submitOtpForm(): void {
+    if (this.otpForm.invalid) {
+      this.otpErrorMessage = "Veuillez saisir un code complet à 6 chiffres";
+      return;
+    }
+
+    this.isLoading = true;
+    this.otpErrorMessage = '';
+    
+    // Concaténer les chiffres
+    const code = Object.values(this.otpForm.value).join('');
+    
+    // Ici vous appelleriez normalement votre service de vérification OTP
+    // this.usersService.verifyOtp(this.resetEmailForOtp, code).subscribe(...)
+    
+    // Simulation de succès
+    setTimeout(() => {
+      this.isLoading = false;
+      this.otpSuccessMessage = "Votre email a été vérifié avec succès!";
+      this.otpForm.reset();
+      
+      // Redirection après 3 secondes
+      setTimeout(() => {
+        this.router.navigate(['/connexion']);
+      }, 3000);
+    }, 1500);
+  }
+
+  // Ajouter pour la navigation entre les vues
+  goBackToReset() {
+    this.showOtpVerification = false;
+    this.isResetPassword = true;
+    this.otpErrorMessage = '';
+    this.otpSuccessMessage = '';
+    this.resetSuccessMessage = null;
+  }
+
+  goToLogin(): void {
+    this.isResetPassword = false;
+    this.showOtpVerification = false;
+    this.resetSuccessMessage = null;
+    this.resetErrorMessage = null;
+    this.otpErrorMessage = '';
+    this.otpSuccessMessage = '';
+  }
+
+  // Gestion du focus automatique
+  onOtpInput(index: number, event: any) {
+    const value = event.target.value;
+    if (value && index < 6) {
+      const nextInput = document.querySelector(`[formControlName="digit${index + 1}"]`) as HTMLInputElement;
+      if (nextInput) {
+        nextInput.focus();
+      }
+    }
+  }
   
 }

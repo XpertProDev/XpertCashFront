@@ -19,8 +19,63 @@
       <section class="formulaire_img">
         <div class="info_form_left">
 
+        <div *ngIf="showOtpVerification">
+          <form [formGroup]="otpForm" (ngSubmit)="submitOtpForm()">
+            <div class="formulaire">
+              <h2>Vérifiez votre adresse e-mail</h2>
+              <p class="reset-instructions">Nous avons envoyé un code à 6 chiffres à votre adresse e-mail</p>
+              <p class="reset-instructions">{{ resetEmailForOtp }}</p>
+              
+              <div class="otp-inputs">
+                <input type="text" formControlName="digit1" maxlength="1" class="otp-input" 
+                      (input)="onOtpInput(1, $event)">
+                <input type="text" formControlName="digit2" maxlength="1" class="otp-input" 
+                      (input)="onOtpInput(2, $event)">
+                <input type="text" formControlName="digit3" maxlength="1" class="otp-input" 
+                      (input)="onOtpInput(3, $event)">
+                <input type="text" formControlName="digit4" maxlength="1" class="otp-input" 
+                      (input)="onOtpInput(4, $event)">
+                <input type="text" formControlName="digit5" maxlength="1" class="otp-input" 
+                      (input)="onOtpInput(5, $event)">
+                <input type="text" formControlName="digit6" maxlength="1" class="otp-input" 
+                      (input)="onOtpInput(6, $event)">
+              </div>
+
+              <div *ngIf="otpForm.invalid && otpForm.touched" class="error-message">
+                Veuillez saisir un code complet à 6 chiffres
+              </div>
+              
+              <div *ngIf="otpErrorMessage" class="error-message">
+                {{ otpErrorMessage }}
+              </div>
+              
+              <div *ngIf="otpSuccessMessage" class="success-message">
+                {{ otpSuccessMessage }}
+              </div>
+
+              <p class="reset-instructions" style="font-size: 12px; text-align: center;">
+                Vous souhaitez modifier votre adresse e-mail? 
+                <a (click)="goBackToReset()" style="cursor: pointer; color: #0672E4; text-decoration: underline;">
+                  Cliquez ici.
+                </a>
+              </p>
+
+              <div class="btn_contact">
+                <button type="submit" [disabled]="isLoading">
+                  <span *ngIf="!isLoading">Verify Email</span>
+                  <span *ngIf="isLoading">Vérification en cours...</span>
+                </button>
+              </div>
+
+              <div class="registerPage">
+                <p><a class="logout" (click)="goToLogin()">Connexion</a></p>
+              </div>
+            </div>
+          </form>
+        </div>
+
           <!-- Vue Réinitialisation de mot de passe -->
-          <div *ngIf="isResetPassword">
+          <div *ngIf="isResetPassword && !showOtpVerification">
             <form [formGroup]="resetForm" (ngSubmit)="submitResetForm()">
               <div class="formulaire">
                 <h2>Mot de passe oublié ?</h2>
@@ -63,7 +118,7 @@
             </form>
           </div>
 
-          <form *ngIf="!isResetPassword" [formGroup]="loginForm" (ngSubmit)="submitForm()">
+          <form *ngIf="!isResetPassword && !showOtpVerification" [formGroup]="loginForm" (ngSubmit)="submitForm()">
             <div class="formulaire">
               <!-- Champ email -->
               <div class="champ_input">
