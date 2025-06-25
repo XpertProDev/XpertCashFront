@@ -415,7 +415,9 @@ export class FactureReelDetailsComponent implements OnInit {
     }
 
     this.factureService.annulerFactureReelle(this.facture.id).subscribe({
-      next: () => {
+      next: (factureAnnulee) => {
+        // Mettre à jour la facture locale avec le nouveau statut
+        this.facture = factureAnnulee;
         this.successMessageFactureAnuller = 'Facture annulée avec succès';
         // Rediriger après 2 secondes
         setTimeout(() => {

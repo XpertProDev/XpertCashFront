@@ -8,13 +8,13 @@
         <i class="ri-arrow-left-long-fill"></i>
       </div>
 
-      <div class="etat_envoyer">
-        <button class="btn_etat btn_etat_annuler" 
-                (click)="annulerFacture()"
-                [disabled]="isLoadingFacture">
-          <span *ngIf="!isLoadingFacture">Annuler la facture</span>
-          <span *ngIf="isLoadingFacture">Traitement...</span>
-        </button>
+      <div class="etat_envoyer" *ngIf="facture?.statutPaiement === 'EN_ATTENTE'">
+          <button class="btn_etat btn_etat_annuler" 
+                  (click)="annulerFacture()"
+                  [disabled]="isLoadingFacture">
+              <span *ngIf="!isLoadingFacture">Annuler la facture</span>
+              <span *ngIf="isLoadingFacture">Traitement...</span>
+          </button>
       </div>
     </div>
 
@@ -182,7 +182,7 @@
         </div>
 
     <!-- Formulaire de paiement -->
-    <div class="information_cadre_row" *ngIf="facture?.statutPaiement !== 'PAYEE'">
+    <div class="information_cadre_row" *ngIf="facture?.statutPaiement !== 'PAYEE' && facture?.statutPaiement !== 'ANNULEE'">
       <div class="info_titre_input">
         <div class="paiement_title">
           <h5>Paiement de facture</h5>
@@ -331,7 +331,7 @@
               <div class="total_montant_logo">
                 <i [class]="getIconClass(item.mode)" 
                   [title]="getModeText(item.mode)"></i>
-                <p>: {{ item.montant | customNumber }}</p>
+                <p [title]="getModeText(item.mode)">: {{ item.montant | customNumber }}</p>
               </div>
             </ng-container>
           </div>
