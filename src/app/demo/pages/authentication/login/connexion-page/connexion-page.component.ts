@@ -91,6 +91,18 @@ export class ConnexionPageComponent {
     this.otpSuccessMessage = '';
   }
 
+  onOtpBackspace(index: number, event: KeyboardEvent) {
+    const input = event.target as HTMLInputElement;
+    
+    if (event.key === 'Backspace' && !input.value && index > 1) {
+      const prevInput = document.querySelector(`[formControlName="digit${index - 1}"]`) as HTMLInputElement;
+      if (prevInput) {
+        prevInput.focus();
+        prevInput.select(); // Sélectionne le contenu pour faciliter la suppression
+      }
+    }
+  }
+
   // Getter pour accéder facilement aux contrôles
   get rf() { return this.resetForm.controls; }
 

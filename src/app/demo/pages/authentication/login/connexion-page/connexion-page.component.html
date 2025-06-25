@@ -76,17 +76,23 @@
                 
                 <div class="otp-inputs">
                   <input type="text" formControlName="digit1" maxlength="1" class="otp-input" 
-                        (input)="onOtpInput(1, $event)">
+                        (input)="onOtpInput(1, $event)" 
+                        (keydown)="onOtpBackspace(1, $event)">
                   <input type="text" formControlName="digit2" maxlength="1" class="otp-input" 
-                        (input)="onOtpInput(2, $event)">
+                        (input)="onOtpInput(2, $event)" 
+                        (keydown)="onOtpBackspace(2, $event)">
                   <input type="text" formControlName="digit3" maxlength="1" class="otp-input" 
-                        (input)="onOtpInput(3, $event)">
+                        (input)="onOtpInput(3, $event)" 
+                        (keydown)="onOtpBackspace(3, $event)">
                   <input type="text" formControlName="digit4" maxlength="1" class="otp-input" 
-                        (input)="onOtpInput(4, $event)">
+                        (input)="onOtpInput(4, $event)" 
+                        (keydown)="onOtpBackspace(4, $event)">
                   <input type="text" formControlName="digit5" maxlength="1" class="otp-input" 
-                        (input)="onOtpInput(5, $event)">
+                        (input)="onOtpInput(5, $event)" 
+                        (keydown)="onOtpBackspace(5, $event)">
                   <input type="text" formControlName="digit6" maxlength="1" class="otp-input" 
-                        (input)="onOtpInput(6, $event)">
+                        (input)="onOtpInput(6, $event)" 
+                        (keydown)="onOtpBackspace(6, $event)">
                 </div>
 
                 <div *ngIf="otpForm.invalid && otpForm.touched" class="error-message">
