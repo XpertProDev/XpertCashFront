@@ -38,7 +38,7 @@ const routes: Routes = [
       }
     ]
   },
-  
+
   // Routes privées (authentifiées)
   {
     path: '',
