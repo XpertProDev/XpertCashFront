@@ -6,6 +6,10 @@ import { AuthService } from 'src/app/admin-page/SERVICES/auth.service';
 import { HeaderNavComponent } from 'src/app/admin-page/Navigation/header-nav/header-nav.component';
 import { CommonModule } from '@angular/common';
 
+export interface ForgotPasswordResponse {
+  message: string;
+}
+
 @Component({
   selector: 'app-connexion-page',
   standalone: true,
@@ -16,6 +20,8 @@ import { CommonModule } from '@angular/common';
 export class ConnexionPageComponent {
   loginForm!: FormGroup;
   errorMessage: string = '';
+  isResetPassword: boolean = false;
+  resetForm!: FormGroup;
 
   // Propriétés pour la popup (utilisées uniquement en cas d'erreur)
   showPopup: boolean = false;
@@ -25,6 +31,8 @@ export class ConnexionPageComponent {
   popupType: 'success' | 'error' = 'success';
 
   isLoading: boolean = false;
+  resetSuccessMessage: string | null = null;
+  resetErrorMessage: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -38,10 +46,23 @@ export class ConnexionPageComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]]
     });
+
+    this.resetForm = this.fb.group({
+      resetEmail: ['', [Validators.required, Validators.email]]
+    });
+    
   }
+
+  // Getter pour accéder facilement aux contrôles
+  get rf() { return this.resetForm.controls; }
 
   goToInscription() {
     this.router.navigate(['/inscription']);
+  }
+
+  // Méthode pour basculer entre les vues
+  toggleResetPassword() {
+    this.isResetPassword = !this.isResetPassword;
   }
 
   openPopup(title: string, message: string, type: 'success' | 'error'): void {
@@ -101,4 +122,39 @@ export class ConnexionPageComponent {
   }
   
   get f() { return this.loginForm.controls; }
+
+  // Méthode de soumission du formulaire de réinitialisation
+
+  submitResetForm(): void {
+    this.resetSuccessMessage = null;
+    this.resetErrorMessage = null;
+
+    if (this.resetForm.invalid) {
+      this.resetErrorMessage = 'Veuillez saisir une adresse email valide.';
+      return;
+    }
+
+    const email = this.resetForm.get('resetEmail')?.value;
+    this.isLoading = true;
+
+    this.usersService.forgotPassword(email).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.resetSuccessMessage = `Un lien de réinitialisation a été envoyé à ${email}. Vérifiez votre boîte de réception.`;
+        this.resetForm.reset();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        
+        if (error.status === 404) {
+          this.resetErrorMessage = "Une erreur s'est produite. Veuillez réessayer plus tard.";
+        } else {
+          this.resetErrorMessage = "Aucun compte n'est associé à cet email.";
+          // this.resetErrorMessage = "Une erreur s'est produite. Veuillez réessayer plus tard.";
+        }
+      }
+    });
+  }
+
+  
 }

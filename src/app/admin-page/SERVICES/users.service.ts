@@ -166,7 +166,7 @@ export class UsersService {
     return this.http.put<{ message?: string; error?: string }>(`${this.apiUrl}/updatedBoutique/${id}`, updates, { headers });
   }
 
-updateUser(id: number, formData: FormData): Observable<any> {
+  updateUser(id: number, formData: FormData): Observable<any> {
     const token = localStorage.getItem('authToken');
     
     if (!token) {
@@ -260,6 +260,11 @@ updateUser(id: number, formData: FormData): Observable<any> {
             responseType: 'text' // <-- Ajoutez ceci
         }
     );
+  }
+
+    // Ajouter cette méthode dans UsersService
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/forgot-password`, { email });
   }
   
 }

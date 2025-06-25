@@ -18,7 +18,52 @@
   
       <section class="formulaire_img">
         <div class="info_form_left">
-          <form [formGroup]="loginForm" (ngSubmit)="submitForm()">
+
+          <!-- Vue Réinitialisation de mot de passe -->
+          <div *ngIf="isResetPassword">
+            <form [formGroup]="resetForm" (ngSubmit)="submitResetForm()">
+              <div class="formulaire">
+                <h2>Mot de passe oublié ?</h2>
+                <p class="reset-instructions">Indiquez votre adresse e-mail ci-dessous</p>
+                <p class="reset-instructions">Nous vous enverrons un lien qui vous permettra de réinitialiser votre <br>mot de passe.</p>
+                
+                <div class="champ_input">
+                  <input type="email" formControlName="resetEmail" class="input_focus" style="min-width: 200px;" placeholder="Saisis votre email">
+                  <label class="label">Adresse e-mail</label>
+                  <div *ngIf="rf['resetEmail'].touched && rf['resetEmail'].invalid" class="error-message">
+                    <span *ngIf="rf['resetEmail'].errors?.['required']">Email est vide.</span>
+                    <span *ngIf="rf['resetEmail'].errors?.['email']">Email n'est pas valide.</span>
+                  </div>
+                </div>
+
+                <div *ngIf="resetSuccessMessage" class="success-message">
+                  {{ resetSuccessMessage }}
+                </div>
+                
+                <div *ngIf="resetErrorMessage" class="error-message">
+                  {{ resetErrorMessage }}
+                </div>
+
+                <div class="btn_contact">
+                  <button type="submit" [disabled]="isLoading || resetForm.invalid">
+                    <span *ngIf="!isLoading">Envoyer le lien pour réinitialiser le mot de passe</span>
+                    <span *ngIf="isLoading">Envoi en cours...</span>
+                  </button>
+                </div>
+
+                <!-- Ajouter ce bloc après le bouton de réinitialisation -->
+                <!-- <div *ngIf="resetFormSubmitted && !showPopup" class="success-message">
+                  <p>✓ Un email de réinitialisation a été envoyé !</p>
+                </div> -->
+
+                <div class="registerPage">
+                  <p><a class="logout" (click)="toggleResetPassword()">Connexion</a></p>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <form *ngIf="!isResetPassword" [formGroup]="loginForm" (ngSubmit)="submitForm()">
             <div class="formulaire">
               <!-- Champ email -->
               <div class="champ_input">
@@ -41,7 +86,7 @@
               </div>
   
               <div class="resetPassword">
-                <p>Mot de passe oublié</p>
+                <p (click)="toggleResetPassword()">Mot de passe oublié</p>
               </div>
           
               <!-- Message d'erreur global -->
