@@ -238,7 +238,7 @@ export class AddProduitComponent implements OnInit {
       reader.readAsDataURL(this.selectedFile);
     }
   }
- 
+
   setupFormSubscriptions() {
     const token = localStorage.getItem('authToken'); // ou via un service d'authentification
     if (token) {

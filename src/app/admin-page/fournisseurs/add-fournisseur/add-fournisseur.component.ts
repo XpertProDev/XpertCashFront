@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FactureService } from '../../SERVICES/facture.service';
@@ -26,7 +26,7 @@ export class AddFournisseurComponent {
   indicatif: string = '';
   maxPhoneLength: number = 0;
   image: string | null = null; 
- selectedLogoFile?: File;
+  selectedLogoFile?: File;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
 
@@ -54,6 +54,7 @@ export class AddFournisseurComponent {
       adresse: [''],
       pays: [''],
       telephone: [''],
+      description: [''],
       ville: [''],
       nomSociete: [''],
       photo: [null],
@@ -210,7 +211,5 @@ export class AddFournisseurComponent {
   }
 
 }
-function ViewChild(arg0: string): (target: AddFournisseurComponent, propertyKey: "fileInput") => void {
-  throw new Error('Function not implemented.');
-}
+
 

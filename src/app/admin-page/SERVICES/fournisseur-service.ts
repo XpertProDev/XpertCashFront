@@ -42,8 +42,9 @@ addFournisseur(fournisseur: Fournisseurs, imageFournisseurFile?: File): Observab
       'Content-Type': 'application/json'
     });
   
-    return this.http.get<Fournisseurs>(`${this.apiUrl}/get-fournisseur/${id}`, { headers });
+    return this.http.get<Fournisseurs>(`${this.apiUrl}/getFournisseur/${id}`, { headers });
   }
+
   //Get all fournisseurs
   getAllFournisseurs(): Observable<Fournisseurs[]> {
     const token = localStorage.getItem('authToken');

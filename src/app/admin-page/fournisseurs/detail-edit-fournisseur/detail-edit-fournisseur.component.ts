@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FournisseurService } from '../../SERVICES/fournisseur-service';
 import { Fournisseurs } from '../../MODELS/fournisseurs-model';
 import { ActivatedRoute } from '@angular/router';
+import imageCompression from 'browser-image-compression';
 
 @Component({
   selector: 'app-detail-edit-fournisseur',
@@ -23,6 +24,13 @@ export class DetailEditFournisseurComponent {
   errorMessage = '';
   successMessage = '';
   errorMessageApi = '';
+  isEditing = false;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  fournisseurPhotoUrl: string | null = null;
+  newPhotoUrl: string | null = null;
+  fournisseur!: Fournisseurs;
+  control = new FormControl();
+  
   countryDialCodes = {
     'Mali': '+223',
     'Sénégal': '+221',
@@ -39,6 +47,13 @@ export class DetailEditFournisseurComponent {
   ngOnInit() {
     this.getInitForm();
     this.loadFournisseur();
+    this.fournisseurEditForm.disable();
+    this.control.disable();
+  }
+
+  startEditing(): void {
+    this.isEditing = true;
+    this.fournisseurEditForm.enable(); // Active tous les champs du formulaire
   }
 
   getInitForm() {
@@ -48,7 +63,10 @@ export class DetailEditFournisseurComponent {
       adresse: [''],
       pays: [''],
       telephone: [''],
-      ville: ['']
+      description: [''],
+      ville: [''],
+      nomSociete: [''],
+      photo: [null]
     });
   }
   
@@ -65,17 +83,67 @@ export class DetailEditFournisseurComponent {
     }
   }
   
-  // formatPhoneNumber() {
-  //   let phone = this.fournisseurEditForm.get('telephone')?.value;
-  //   const pays = this.fournisseurEditForm.get('pays')?.value;
-  //   const dialCode = this.countryDialCodes[pays as keyof typeof this.countryDialCodes];
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      
+      // Vérification du format
+      const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedFormats.includes(file.type)) {
+        this.errorMessage = 'Seuls les formats JPG, PNG sont acceptés';
+        return;
+      }
 
-  //   if (dialCode && phone.startsWith(dialCode)) {
-  //     phone = phone.substring(dialCode.length).replace(/\D/g, '');
-  //     const formatted = phone.replace(/(\d{2})(?=\d)/g, '$1 ');
-  //     this.fournisseurEditForm.get('telephone')?.setValue(dialCode + ' ' + formatted, { emitEvent: false });
-  //   }
-  // }
+      this.testImageCompression(file);
+      
+      
+      // Aperçu de l'image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newPhotoUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  async testImageCompression(file: File) {
+      if (!file) {
+        console.log('Aucun fichier sélectionné.');
+        return;
+      }
+    
+      console.log('Taille originale:', file.size / 1024, 'Ko');
+    
+      // Options de compression
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1000,
+        useWebWorker: true,
+      };
+    
+      try {
+        const compressedFile = await imageCompression(file, options);
+        console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
+    
+        // Vérifier si le fichier est bien en PNG/JPEG après compression
+        if (compressedFile.type !== 'image/png' && compressedFile.type !== 'image/jpeg') {
+          console.error('Le fichier compressé n\'est pas un format supporté (PNG ou JPEG).');
+          this.errorMessage = 'Erreur de compression : Le format de l\'image n\'est pas valide.';
+          return;
+        }
+    
+        // Lire l'image compressée et afficher l'aperçu
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.newPhotoUrl = e.target?.result as string;
+          console.log('Image compressée prête à être affichée !');
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error('Erreur lors de la compression:', error);
+      }
+  }
 
   formatPhoneNumber() {
     const ctrl = this.fournisseurEditForm.get('telephone')!;
@@ -99,27 +167,45 @@ export class DetailEditFournisseurComponent {
     ctrl.setValue(formatted, { emitEvent: false });
   }
 
-  modifierFournisseur() {}
-
   goToFournisseur() {
     this.router.navigate(['/fournisseurs']);
   }
 
-  fournisseur!: Fournisseurs;
+  private loadFournisseur(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!id) {
+      console.error('ID du fournisseur non valide');
+      return;
+    }
+
+    this.fournisseurService.getFournisseurById(id).subscribe({
+      next: (data) => this.fournisseur = data,
+      error: (err) => console.error('Erreur de chargement du fournisseur', err)
+    });
+  }
+
+  // Méthode pour déclencher l'input file
+  triggerFileInput(): void {
+    if (!this.isEditing) return;
+    this.fileInput.nativeElement.click();
+  }
+
+  toggleEditing(): void {
+    this.isEditing = !this.isEditing;
+    
+    if (this.isEditing) {
+      this.control.enable(); // Activer le contrôle
+      this.fournisseurEditForm.enable();
+    } else {
+      this.control.disable(); // Désactiver le contrôle
+      this.fournisseurEditForm.disable();
+      this.loadFournisseur();
+    }
+  }
+
+  modifierFournisseur() {}
 
   
-    private loadFournisseur(): void {
-      const id = Number(this.route.snapshot.paramMap.get('id'));
-      if (!id) {
-        console.error('ID du fournisseur non valide');
-        return;
-      }
-  
-      this.fournisseurService.getFournisseurById(id).subscribe({
-        next: (data) => this.fournisseur = data,
-        error: (err) => console.error('Erreur de chargement du fournisseur', err)
-      });
-    }
 
 }
  
