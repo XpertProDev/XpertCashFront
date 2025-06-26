@@ -60,6 +60,28 @@ addFournisseur(fournisseur: Fournisseurs, imageFournisseurFile?: File): Observab
     return this.http.get<Fournisseurs[]>(`${this.apiUrl}/get-fournisseurs`, { headers });
   }
 
-  updateFournisseur(){}
+// fournisseur.service.ts
+updateFournisseur(id: number, updatedData: Fournisseurs, imageFile?: File): Observable<any> {
+  const token = localStorage.getItem('authToken') || '';
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+    // NE PAS ajouter 'Content-Type' ici!
+  });
+
+  const formData = new FormData();
+  
+  // Spécifier explicitement le type pour la partie JSON
+  const jsonBlob = new Blob([JSON.stringify(updatedData)], { 
+    type: 'application/json' 
+  });
+  formData.append('updatedFournisseur', jsonBlob);
+  
+  if (imageFile) {
+    // Spécifier le type MIME pour le fichier image
+    formData.append('imageFournisseurFile', imageFile, imageFile.name);
+  }
+
+  return this.http.put(`${this.apiUrl}/updateFournisseur/${id}`, formData, { headers });
+}
 
 }
