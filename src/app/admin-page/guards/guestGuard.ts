@@ -7,7 +7,6 @@ export const guestGuard: CanActivateFn = (route, state) => {
   const token = localStorage.getItem('authToken');
 
   if (token) {
-    // Si déjà connecté, redirige vers le tableau de bord par exemple
     router.navigate(['/analytics']);
     return false;
   }

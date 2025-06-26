@@ -286,10 +286,20 @@ async modifierFournisseur() {
     };
     
     // Préparer les données pour l'API
-    const updatedFournisseur: Fournisseurs = {
-      ...this.fournisseur,
-      ...formValue
-    };
+   const updatedFournisseur: Fournisseurs = {
+    id: this.fournisseur.id,
+    nomComplet: formValue.nomComplet,
+    email: formValue.email,
+    adresse: formValue.adresse,
+    pays: formValue.pays,
+    telephone: formValue.telephone,
+    description: formValue.description,
+    ville: formValue.ville,
+    nomSociete: formValue.nomSociete,
+    photo: this.fournisseur.photo,
+    createdAt: this.fournisseur.createdAt
+  };
+
 
     // Appeler le service
     await this.fournisseurService.updateFournisseur(

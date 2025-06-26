@@ -23,6 +23,7 @@ import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 export class FactureReelComponent implements OnInit {
   factureReel: any[] = [];
   userEntrepriseId: number | null = null;
+  errorMessage: string = '';
   
   // Pagination
   pageSize = 6;
@@ -50,16 +51,36 @@ export class FactureReelComponent implements OnInit {
     });
   }
 
-  getAllFactureReelOfEntreprise(entrepriseId: number): void {
-    this.factureReelService.getAlFactproreelOfEntreprise(entrepriseId).subscribe(
-      (response: any[]) => {
-        this.factureReel = response;
-      },
-      (error: any) => {
-        console.error('Erreur lors de la récupération des factures réelles:', error);
+getAllFactureReelOfEntreprise(entrepriseId: number): void {
+  this.factureReelService.getAlFactproreelOfEntreprise(entrepriseId).subscribe(
+    (response: any[]) => {
+      this.factureReel = response;
+      this.errorMessage = "";
+    },
+    (error: any) => {
+      console.error('Erreur lors de la récupération des factures réelles:', error);
+
+      if (error.error && error.error.error && typeof error.error.error === 'string') {
+        let msg = error.error.error;
+
+        // Supprime le début standardisé "Une erreur est survenue : " s'il est présent
+        if (msg.startsWith("Une erreur est survenue :")) {
+          msg = msg.replace("Une erreur est survenue :", "").trim();
+        }
+
+        this.errorMessage = msg;
+      } else {
+        this.errorMessage = "Une erreur est survenue.";
       }
-    );
-  }
+
+      this.factureReel = [];
+    }
+  );
+}
+
+
+
+
 
   onPageChange(event: PageEvent) {
     this.currentPage = event.pageIndex;
