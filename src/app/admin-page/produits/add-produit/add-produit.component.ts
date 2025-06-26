@@ -93,6 +93,8 @@ export class AddProduitComponent implements OnInit {
   get c() { return this.ajouteCategoryForm.controls; }
   get u() { return this.ajouteUniteForm.controls; }
   get f() { return this.ajouteProduitForm.controls; }
+  formSubmitted = false;
+  showBoutiqueError: boolean = false;
 
   clearImage() {
     this.newPhotoUrl = null;
@@ -198,6 +200,7 @@ export class AddProduitComponent implements OnInit {
 
     if (newValue && this.boutiqueIdSelected.length === 0) {
       this.errorMessage = "Veuillez sélectionner au moins une boutique avant d'ajouter des stocks.";
+       this.showBoutiqueError = true;
       // Annule l'activation du switch
       setTimeout(() => {
         this.isChecked = false;
@@ -292,6 +295,7 @@ export class AddProduitComponent implements OnInit {
       uniteId: [''],
       typeProduit: ['PHYSIQUE', Validators.required]
     });
+    this.formSubmitted = false;
 
     this.ajouteCategoryForm = this.fb.group({
       categoryName: ['', [/*Validators.required,*/ Validators.minLength(3), Validators.maxLength(20)]]
@@ -562,13 +566,24 @@ export class AddProduitComponent implements OnInit {
   }
 
   async onSubmit() {
+
+    this.formSubmitted = true; // Active le mode "soumis"
+    this.showBoutiqueError = false; 
+
+    // Vérifiez d'abord les boutiques avant le formulaire
+    if (this.boutiqueIdSelected.length === 0) {
+      this.showBoutiqueError = true;
+      this.errorMessage = "Veuillez sélectionner au moins une boutique.";
+      return;
+    }
+
     if (this.ajouteProduitForm.invalid) {
       this.errorMessage = "Veuillez vérifier les informations saisies.";
       return;
     }
     this.isLoading = true;
     const produit = this.ajouteProduitForm.value;
-    
+
     // Si le prix d'achat n'est pas fourni, mettez-le à null ou 0
     if (produit.prixAchat === '' || produit.prixAchat === null) {
       produit.prixAchat = null; // ou 0 selon vos besoins
@@ -619,13 +634,6 @@ export class AddProduitComponent implements OnInit {
         const productName = produit.nom.trim()[0]; // Récupérer la première lettre du nom du produit
         finalImage = this.dataURLtoFile(this.generateImageFromLetter(productName), 'default.svg');
         console.log('Image par défaut utilisée:', finalImage);
-      }
-      // const boutiqueId = this.boutiqueIdSelected;
-      // const boutiqueId = this.boutiqueIdSelected || this.boutiquesList[0]?.id;
-      if (this.boutiqueIdSelected.length === 0) {
-        this.errorMessage = "Veuillez sélectionner au moins une boutique.";
-        this.isLoading = false;
-        return;
       }
       const quantitesSelected = this.boutiqueIdSelected.map(id => Number(this.quantitesMap[id]) || 0);
       const seuilsSelected = this.boutiqueIdSelected.map(id => Number(this.seuilsMap[id]) || 0);
@@ -827,10 +835,12 @@ export class AddProduitComponent implements OnInit {
     this.controlBoutique.setValue(selectedNames.join(', '));
     this.toggleBoutiqueSelectionPanel();
     
-    // Efface le message d'erreur si des boutiques sont sélectionnées
-    if (this.boutiqueIdSelected.length > 0 && 
-        this.errorMessage === "Veuillez sélectionner au moins une boutique avant d'ajouter des stocks.") {
-      this.errorMessage = '';
+    // Réinitialisez l'erreur boutique
+    if (this.boutiqueIdSelected.length > 0) {
+      this.showBoutiqueError = false;
+      if (this.errorMessage === "Veuillez sélectionner au moins une boutique.") {
+        this.errorMessage = '';
+      }
     }
   }
 

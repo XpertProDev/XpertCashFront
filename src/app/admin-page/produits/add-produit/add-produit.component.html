@@ -33,7 +33,7 @@
                   <label for="nomMagasin" class="label labelColor">Nom magasin</label>
                 </div> -->
                 <div class="double_input2">
-                  <div class="champ_input">
+                  <div class="champ_input" [class.invalid-field]="showBoutiqueError">
                     <input autocomplete="off" 
                            type="text" 
                            placeholder="Sélectionner vos boutiques"
@@ -157,7 +157,7 @@
 
                   
                   <!-- Input de nom produits  -->
-                  <div class="champ_input">
+                  <div  class="champ_input" [class.invalid-field]="f['nom'].invalid && (f['nom'].touched || formSubmitted)">
                     <input autocomplete="off" formControlName="nom" type="text" class="input_focus " required id="nom" name="nom" placeholder="Saisis le nom de produit">
                     <label for="nom" class="label">Nom produit</label>
                     <div *ngIf="f['nom'].touched && f['nom'].invalid" class="error-message">
@@ -240,7 +240,7 @@
 
                 <div class="double_input_grid">
                   <!-- Input de nom produits  -->
-                  <div class="champ_input">
+                  <div class="champ_input" [class.invalid-field]="f['prixVente'].invalid && (f['prixVente'].touched || formSubmitted)">
                     <input autocomplete="off" formControlName="prixVente" type="number" class="input_focus " required id="prixVente" name="prixVente" placeholder="Saisis le nom de magasin" (input)="formatPrixVente()">
                     <label for="prixVente" class="label">Prix de vente</label>
                     <div class="nombreDevise" *ngIf="formattedPrixVente">
