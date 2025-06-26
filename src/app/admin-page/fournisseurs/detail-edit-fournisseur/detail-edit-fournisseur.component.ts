@@ -241,34 +241,7 @@ export class DetailEditFournisseurComponent {
     }
   }
 
-  modifierFournisseur() {
-    if (this.fournisseurEditForm.invalid) return;
-
-    this.isLoading = true;
-    const formValue = this.fournisseurEditForm.value;
-    
-    const updatedFournisseur: Fournisseurs = {
-      ...this.fournisseur,
-      ...formValue
-    };
-
-    const imageFile = this.fileInput.nativeElement.files?.[0];
-
-    this.fournisseurService.updateFournisseur(updatedFournisseur, imageFile).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.successMessage = 'Modification réussie!';
-        setTimeout(() => {
-          this.isEditing = false;
-          this.fournisseurEditForm.disable();
-        }, 2000);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Erreur lors de la modification';
-      }
-    });
-  }
+  modifierFournisseur() {}
 
   
 
