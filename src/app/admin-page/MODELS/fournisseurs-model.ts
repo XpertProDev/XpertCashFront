@@ -5,6 +5,7 @@ export interface Fournisseurs {
     email: string;
     telephone: string;
     pays: string;
+    description: String;
     ville: string;
     createdAt: Date;
     photo: string;

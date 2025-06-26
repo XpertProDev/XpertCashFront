@@ -6,6 +6,7 @@ import { FournisseurService } from '../../SERVICES/fournisseur-service';
 import { Fournisseurs } from '../../MODELS/fournisseurs-model';
 import { ActivatedRoute } from '@angular/router';
 import imageCompression from 'browser-image-compression';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-detail-edit-fournisseur',
@@ -171,18 +172,55 @@ export class DetailEditFournisseurComponent {
     this.router.navigate(['/fournisseurs']);
   }
 
+  // private loadFournisseur(): void {
+  //   const id = Number(this.route.snapshot.paramMap.get('id'));
+  //   this.fournisseurService.getFournisseurById(id).subscribe({
+  //     next: (data) => {
+  //       this.fournisseur = data;
+  //       // Mettre à jour les valeurs du formulaire
+  //       this.fournisseurEditForm.patchValue({
+  //         nomComplet: data.nomComplet,
+  //         email: data.email,
+  //         adresse: data.adresse,
+  //         pays: data.pays,
+  //         telephone: data.telephone,
+  //         description: data.description,
+  //         ville: data.ville,
+  //         nomSociete: data.nomSociete
+  //       });
+  //       // Mettre à jour la photo
+  //       this.fournisseurPhotoUrl = data.photo 
+  //         ? `${environment.apiBaseUrl}/${data.photo}` 
+  //         : null;
+  //     },
+  //     error: (err) => console.error('Erreur de chargement', err)
+  //   });
+  // }
+
+  // detail-edit-fournisseur.component.ts
   private loadFournisseur(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) {
-      console.error('ID du fournisseur non valide');
-      return;
-    }
-
     this.fournisseurService.getFournisseurById(id).subscribe({
-      next: (data) => this.fournisseur = data,
-      error: (err) => console.error('Erreur de chargement du fournisseur', err)
+      next: (resp) => {
+        // resp = { fournisseur: {...} }
+        const data = resp.fournisseur;
+        this.fournisseur = data;
+        this.fournisseurEditForm.patchValue({
+          nomComplet: data.nomComplet,
+          email: data.email,
+          adresse: data.adresse,
+          pays: data.pays,
+          telephone: data.telephone,
+          description: data.description,
+          ville: data.ville,
+          nomSociete: data.nomSociete
+        });
+        this.fournisseurPhotoUrl = data.photo;
+      },
+      error: (err) => console.error('Erreur de chargement', err)
     });
   }
+
 
   // Méthode pour déclencher l'input file
   triggerFileInput(): void {
@@ -203,7 +241,34 @@ export class DetailEditFournisseurComponent {
     }
   }
 
-  modifierFournisseur() {}
+  modifierFournisseur() {
+    if (this.fournisseurEditForm.invalid) return;
+
+    this.isLoading = true;
+    const formValue = this.fournisseurEditForm.value;
+    
+    const updatedFournisseur: Fournisseurs = {
+      ...this.fournisseur,
+      ...formValue
+    };
+
+    const imageFile = this.fileInput.nativeElement.files?.[0];
+
+    this.fournisseurService.updateFournisseur(updatedFournisseur, imageFile).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.successMessage = 'Modification réussie!';
+        setTimeout(() => {
+          this.isEditing = false;
+          this.fournisseurEditForm.disable();
+        }, 2000);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.error?.message || 'Erreur lors de la modification';
+      }
+    });
+  }
 
   
 

@@ -145,7 +145,6 @@
                   <div class="btn_ajouter">
                     <button class="btn_save" (click)="modifierFournisseur()"
                           [disabled]="fournisseurEditForm.invalid"
-                          [disabled]="fournisseurEditForm.invalid" 
                           [style.backgroundColor]="fournisseurEditForm.valid ? '#0672E4' : '#0671e434'"
                           [style.color]="fournisseurEditForm.valid ? '#ffffff' : '#00000073'"
                           [style.cursor]="fournisseurEditForm.valid ? 'pointer' : 'no-drop'">
@@ -189,4 +188,4 @@
     </div>
   </div>
 <div>
-{{fournisseur | json}}
+<!-- {{fournisseur | json}} -->
