@@ -86,7 +86,7 @@ export class ProduitsComponent implements OnInit {
   ngOnInit(): void {
     // this.getUserBoutiqueId();
     this.getUserInfo();
-    this.selectBoutique(null);
+    // this.selectBoutique(null);
 
     // this.loadProduits();
   }
@@ -302,8 +302,10 @@ export class ProduitsComponent implements OnInit {
         // this.boutiques = user.boutiques;
         this.boutiques = user.boutiques ?? []; 
   
-        // Récupération de l'ID entreprise depuis la réponse
+        // Récupération de l'ID entreprise
         this.entrepriseId = user.entrepriseId;
+
+        this.selectBoutique(null);
   
         if (!this.entrepriseId) {
           console.error('Aucun ID entreprise trouvé !');
@@ -315,10 +317,10 @@ export class ProduitsComponent implements OnInit {
           
         }
   
-        if (this.boutiques.length > 0) {
-          this.selectedBoutique = this.boutiques[0];
-          this.loadProduits(this.selectedBoutique.id);
-        }
+        // if (this.boutiques.length > 0) {
+        //   this.selectedBoutique = this.boutiques[0];
+        //   this.loadProduits(this.selectedBoutique.id);
+        // }
   
         this.addressBoutique = this.selectedBoutique?.adresse || 'Adresse non trouvée';
       },
