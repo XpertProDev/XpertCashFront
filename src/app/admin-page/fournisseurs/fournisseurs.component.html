@@ -94,7 +94,7 @@
           <div class="content_img_info">
             <!-- // image  -->
             <div class="imgFourni_grid">
-              <img src="assets/img/profil.png" alt="Icon fournisseur">
+              <img [src]="fournisseur.photo" alt="Icon fournisseur">
             </div>
             <!-- '// info' -->
             <div class="info_fourni">
@@ -140,3 +140,5 @@
       </mat-paginator>
     </div>
 </div>
+
+<!-- {{fournisseurs | json}} -->

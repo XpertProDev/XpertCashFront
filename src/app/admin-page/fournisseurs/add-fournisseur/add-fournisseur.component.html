@@ -171,13 +171,12 @@
                     </div>
                     <div class="btn_ajouter">
                       <button class="btn_save" (click)="ajouterFournisseur()"
-                            [disabled]="fournisseurForm.invalid"
-                            [disabled]="fournisseurForm.invalid" 
-                            [style.backgroundColor]="fournisseurForm.valid ? '#0672E4' : '#0671e434'"
-                            [style.color]="fournisseurForm.valid ? '#ffffff' : '#00000073'"
-                            [style.cursor]="fournisseurForm.valid ? 'pointer' : 'no-drop'">
+                            [disabled]="fournisseurForm.invalid || isLoading"
+                            [style.backgroundColor]="(fournisseurForm.valid && !isLoading) ? '#0672E4' : '#0671e434'"
+                            [style.color]="(fournisseurForm.valid && !isLoading) ? '#ffffff' : '#00000073'"
+                            [style.cursor]="(fournisseurForm.valid && !isLoading) ? 'pointer' : 'no-drop'">
                         Ajouter
-                    </button>
+                      </button>
                     </div>
                   </div>
                 </div>

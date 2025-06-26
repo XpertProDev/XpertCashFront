@@ -112,70 +112,99 @@ export class AddFournisseurComponent {
     ctrl.setValue(formatted, { emitEvent: false });
   }
   
+  // ajouterFournisseur() {
+  //   if (this.fournisseurForm.invalid) {
+  //     this.fournisseurForm.markAllAsTouched();
+  //     return;
+  //   }
+
+  //   this.isLoading = true;
+  //   this.errorMessage = '';
+  //   this.successMessage = '';
+
+  //   const fournisseurData = {
+  //     ...this.fournisseurForm.value,
+  //     telephone: this.fournisseurForm.value.telephone.replace(/\s/g, '')
+  //   };
+
+  //   // Passe aussi this.selectedLogoFile au service
+  //   this.fournisseurService.addFournisseur(fournisseurData, this.selectedLogoFile).subscribe({
+  //     next: (response) => {
+  //       this.isLoading = false;
+  //       this.successMessage = 'Fournisseur ajouté avec succès!';
+  //       setTimeout(() => this.router.navigate(['/fournisseurs']), 2000);
+  //     },
+  //     error: (error) => {
+  //       this.isLoading = false;
+  //       this.errorMessage = error.error?.error || 'Une erreur est survenue';
+  //     }
+  //   });
+  // }
+
   ajouterFournisseur() {
-  if (this.fournisseurForm.invalid) {
-    this.fournisseurForm.markAllAsTouched();
-    return;
-  }
-
-  this.isLoading = true;
-  this.errorMessage = '';
-  this.successMessage = '';
-
-  const fournisseurData = {
-    ...this.fournisseurForm.value,
-    telephone: this.fournisseurForm.value.telephone.replace(/\s/g, '')
-  };
-
-  // Passe aussi this.selectedLogoFile au service
-  this.fournisseurService.addFournisseur(fournisseurData, this.selectedLogoFile).subscribe({
-    next: (response) => {
-      this.isLoading = false;
-      this.successMessage = 'Fournisseur ajouté avec succès!';
-      setTimeout(() => this.router.navigate(['/fournisseurs']), 2000);
-    },
-    error: (error) => {
-      this.isLoading = false;
-      this.errorMessage = error.error?.error || 'Une erreur est survenue';
+    if (this.fournisseurForm.invalid) {
+      this.fournisseurForm.markAllAsTouched();
+      return;
     }
-  });
-}
 
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    // Délai de 3 secondes avant la création
+    setTimeout(() => {
+      const fournisseurData = {
+        ...this.fournisseurForm.value,
+        telephone: this.fournisseurForm.value.telephone.replace(/\s/g, '')
+      };
+
+      this.fournisseurService.addFournisseur(fournisseurData, this.selectedLogoFile).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.successMessage = 'Fournisseur ajouté avec succès!';
+          setTimeout(() => this.router.navigate(['/fournisseurs']), 2000);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.errorMessage = error.error?.error || 'Une erreur est survenue';
+        }
+      });
+    }, 3000); // 3000 ms = 3 secondes
+  }
 
   goToFournisseur() {
     this.router.navigate(['/fournisseurs']);
   }
 
   async onFileSelected(event: Event): Promise<void> {
-  const input = event.target as HTMLInputElement;
+    const input = event.target as HTMLInputElement;
 
-  if (input.files && input.files[0]) {
-    const file = input.files[0];
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
 
-    try {
-      const compressedFile = await this.testImageCompression(file);
+      try {
+        const compressedFile = await this.testImageCompression(file);
 
-      if (!compressedFile) {
-        console.error("Compression échouée ou image invalide.");
-        return;
-      }
+        if (!compressedFile) {
+          console.error("Compression échouée ou image invalide.");
+          return;
+        }
 
-      this.selectedLogoFile = compressedFile;
+      this.selectedLogoFile = compressedFile; // Stocke le fichier compressé à envoyer
 
       // Affichage preview en base64
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.image = e.target.result; 
+        this.image = e.target.result; // Base64 pour afficher l'image dans l'interface
         this.cdRef.markForCheck();
       };
       reader.readAsDataURL(compressedFile);
 
-    } catch (error) {
-      console.error("Erreur lors de la compression ou du traitement :", error);
+      } catch (error) {
+        console.error("Erreur lors de la compression ou du traitement :", error);
+      }
     }
   }
-}
-
 
   async testImageCompression(file: File): Promise<File | null> {
   if (!file) {
@@ -203,6 +232,8 @@ export class AddFournisseurComponent {
 
     // Extraire le nom de base sans extension
     const originalName = file.name.split('.').slice(0, -1).join('.') || 'image';
+
+    // Déterminer la bonne extension selon le type MIME
     let extension = 'png';
     if (compressedBlob.type === 'image/jpeg') extension = 'jpg';
     else if (compressedBlob.type === 'image/png') extension = 'png';
@@ -210,6 +241,7 @@ export class AddFournisseurComponent {
 
     const finalFileName = `${originalName}.${extension}`;
 
+    // Recréer un fichier avec le bon nom et la bonne extension
     const compressedFile = new File([compressedBlob], finalFileName, {
       type: compressedBlob.type,
       lastModified: Date.now(),
@@ -222,6 +254,7 @@ export class AddFournisseurComponent {
     return null;
   }
 }
+
 
 
 }
