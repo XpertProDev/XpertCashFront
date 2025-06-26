@@ -63,7 +63,7 @@
                     -->
                   
                     <!-- Panel de sélection des boutiques -->
-                    <div class="boutique-selection-panel" *ngIf="showBoutiqueSelectionPanel">
+                    <!-- <div class="boutique-selection-panel" *ngIf="showBoutiqueSelectionPanel">
                       <div class="panel-header">
                         <h4>Sélectionner des boutiques</h4>
                         <button class="close-btn" (click)="toggleBoutiqueSelectionPanel()">&times;</button>
@@ -75,6 +75,36 @@
                                    [(ngModel)]="boutique.selected"
                                    (change)="updateSelectedBoutiques()"
                                    [ngModelOptions]="{standalone: true}">
+                            {{ boutique.nomBoutique }}
+                          </label>
+                        </div>
+                      </div>
+                      <div class="panel-footer">
+                        <button class="btn-confirm" (click)="confirmBoutiqueSelection()">Confirmer</button>
+                      </div>
+                    </div> -->
+                    <div class="boutique-selection-panel" *ngIf="showBoutiqueSelectionPanel">
+                      <div class="panel-header">
+                        <h4>Sélectionner des boutiques</h4>
+                        <button class="close-btn" (click)="toggleBoutiqueSelectionPanel()">&times;</button>
+                      </div>
+                      <div class="panel-body">
+                        <!-- Ajout de la case "Tout sélectionner" -->
+                        <div class="boutique-item select-all">
+                          <label>
+                            <input type="checkbox" 
+                                  [checked]="areAllBoutiquesSelected()"
+                                  (change)="toggleSelectAllBoutiques($event)">
+                            Sélectionner toutes les boutiques
+                          </label>
+                        </div>
+                        
+                        <div *ngFor="let boutique of boutiquesList" class="boutique-item">
+                          <label>
+                            <input type="checkbox" 
+                                  [(ngModel)]="boutique.selected"
+                                  (change)="updateSelectedBoutiques()"
+                                  [ngModelOptions]="{standalone: true}">
                             {{ boutique.nomBoutique }}
                           </label>
                         </div>
@@ -221,17 +251,25 @@
                     </div>
                   </div>
                   
-                  <!-- Input de prixAchat  -->
-                  <div class="champ_input">
-                    <input autocomplete="off" formControlName="prixAchat" type="number" class="input_focus " required id="prixAchat" name="prixAchat" placeholder="Saisis le prix d'achat" (input)="formatCoutProduit()">
-                    <label for="prixAchat" class="label">Coût du produit</label>
-                    <div class="nombreDevise" *ngIf="formattedCoutProduit">
-                      <p>{{ formattedCoutProduit }}</p>
-                    </div>
-                    <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
-                      Ce champ est obligatoire.
-                    </div>
+                                  <!-- Input de prixAchat  -->
+                <div class="champ_input">
+                  <input autocomplete="off" 
+                        formControlName="prixAchat" 
+                        type="number" 
+                        class="input_focus" 
+                        id="prixAchat" 
+                        name="prixAchat" 
+                        placeholder="Saisis le prix d'achat" 
+                        (input)="formatCoutProduit()">
+                  <label for="prixAchat" class="label">Coût du produit (Facultatif)</label>
+                  <div class="nombreDevise" *ngIf="formattedCoutProduit">
+                    <p>{{ formattedCoutProduit }}</p>
                   </div>
+                  <!-- Modifier le message d'erreur pour refléter que ce n'est plus obligatoire -->
+                  <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
+                    <span *ngIf="f['prixAchat'].errors?.['min']">Le coût ne peut pas être négatif.</span>
+                  </div>
+                </div>
 
                 </div>
 

@@ -283,7 +283,7 @@ export class AddProduitComponent implements OnInit {
     this.ajouteProduitForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prixVente: ['', Validators.required],
-      prixAchat: ['', Validators.required],
+      prixAchat: ['', [Validators.min(0)]],
       quantite: ['0'],
       seuilAlert: ['0'],
       description: [''],
@@ -568,6 +568,12 @@ export class AddProduitComponent implements OnInit {
     }
     this.isLoading = true;
     const produit = this.ajouteProduitForm.value;
+    
+    // Si le prix d'achat n'est pas fourni, mettez-le à null ou 0
+    if (produit.prixAchat === '' || produit.prixAchat === null) {
+      produit.prixAchat = null; // ou 0 selon vos besoins
+    }
+
     console.log('Produit soumis:', produit);
     const tokenStored = localStorage.getItem('authToken');
     if (!tokenStored) {
@@ -826,6 +832,19 @@ export class AddProduitComponent implements OnInit {
         this.errorMessage === "Veuillez sélectionner au moins une boutique avant d'ajouter des stocks.") {
       this.errorMessage = '';
     }
+  }
+
+  // Vérifie si toutes les boutiques sont sélectionnées
+  areAllBoutiquesSelected(): boolean {
+    return this.boutiquesList.length > 0 && 
+          this.boutiquesList.every(b => b.selected);
+  }
+
+  // Sélectionne ou désélectionne toutes les boutiques
+  toggleSelectAllBoutiques(event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.boutiquesList.forEach(b => b.selected = isChecked);
+    this.updateSelectedBoutiques();
   }
 
   // Ajouter cette méthode

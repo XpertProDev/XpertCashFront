@@ -1002,3 +1002,15 @@ input:checked + .slider:before {
 .triple {
   margin-top: 20px;
 }
+
+.select-all {
+  font-weight: bold;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.select-all input[type="checkbox"] {
+  margin-right: 8px;
+  transform: scale(1.2);
+}
