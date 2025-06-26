@@ -3,12 +3,10 @@
   <div class="banner-content">
     <span class="icon">⚠️</span>
     
-    <!-- Si ADMIN, message spécifique -->
     <span *ngIf="isAdmin" class="message">
       Votre période d'accès temporaire a expiré. Veuillez vérifier votre boîte mail et activer votre compte.
     </span>
     
-    <!-- Si EMPLOYÉ, autre message -->
     <span *ngIf="!isAdmin" class="message">
       Votre administrateur n'a pas activé son compte dans les délais. Veuillez patienter ou le contacter.
     </span>
@@ -17,7 +15,6 @@
   </div>
 </div>
 
-<!-- Blocage global des interactions -->
 <div *ngIf="showBlockedPopup" class="click-blocker"></div>
 
 

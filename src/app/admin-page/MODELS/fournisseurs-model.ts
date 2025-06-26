@@ -7,4 +7,6 @@ export interface Fournisseurs {
     pays: string;
     ville: string;
     createdAt: Date;
+    photo: string;
+    nomSociete: string;
 }

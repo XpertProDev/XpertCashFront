@@ -368,7 +368,7 @@ export class ProduitsComponent implements OnInit {
         this.tasks = produits.map(prod => {
           // Reprenez ici la même logique de mapping que dans loadProduits()
           const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
-            ? `${this.backendUrl}${prod.photo}`
+            ? `${this.apiUrl}${prod.photo}`
             : '';
 
           return {

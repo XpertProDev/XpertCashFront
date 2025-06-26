@@ -47,7 +47,6 @@ export class ProfilComponent  implements OnInit{
   isUserFormVisible = false;
   boutiques: any[] = [];
 
-  private apiUrl = environment.apiBaseUrl;
   private imgUrl = environment.imgUrl;
 
   newPhotoUrl: string | null = null;
@@ -433,7 +432,7 @@ export class ProfilComponent  implements OnInit{
     console.error('Erreur lors de la compression:', error);
     return null;
   }
-}
+  }
 
 
 async onFileSelected(event: Event): Promise<void> {

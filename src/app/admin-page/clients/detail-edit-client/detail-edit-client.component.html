@@ -136,22 +136,26 @@
           </form>
 
           <!-- Les information des Entreprises  -->
-          <div class="info_titre_input" style="margin-top: 20px;">
-            <h6>Entreprise</h6>
-        
-            <!-- J'appartient à une entrepris -->
-            <div class="champ_input_inventaire">
-              <p>J'appartient à une entreprise</p>
-        
-              <label class="switch">
-                <input type="checkbox" [disabled]="!isEditing" [(ngModel)]="isEntrepriseSelected" [ngModelOptions]="{standalone: true}"/>
-                <span class="slider round"></span>
-              </label>
-            </div>
-          </div>  
+          <div *ngIf="isEditing || isEntrepriseSelected" class="info_titre_input" style="margin-top: 20px;">
+              <h6>Entreprise</h6>
+
+              <!-- J'appartient à une entreprise -->
+              <div class="champ_input_inventaire">
+                  <p>J'appartient à une entreprise</p>
+
+                  <label class="switch">
+                      <!-- Activer/désactiver le toggle uniquement en mode édition -->
+                      <input type="checkbox" 
+                            [disabled]="!isEditing" 
+                            [(ngModel)]="isEntrepriseSelected" 
+                            [ngModelOptions]="{standalone: true}"/>
+                      <span class="slider round"></span>
+                  </label>
+              </div>
+          </div>
 
           <!-- // Cadre entreprise  -->
-          <div class="cadre_entreprise" *ngIf="isEntrepriseSelected">
+          <div class="cadre_entreprise" *ngIf="isEntrepriseSelected && (isEditing || isEntrepriseSelected)">
             <div class="champ_input">
               <input type="text"
                     placeholder="Selectionner un entreprise"

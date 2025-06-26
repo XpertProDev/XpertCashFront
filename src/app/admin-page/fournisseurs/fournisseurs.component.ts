@@ -10,10 +10,12 @@ import { TransfertService } from '../SERVICES/transfert-service';
 import { Fournisseurs } from '../MODELS/fournisseurs-model';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { TruncateEmailPipe } from '../MODELS/truncate-email.pipe';
+import { environment } from 'src/environments/environment';
+import { FournisseurService } from '../SERVICES/fournisseur-service';
 
 @Component({
   selector: 'app-fournisseurs',
-  standalone: true,
+  standalone: true, 
   imports: [
     FormsModule,
     CommonModule,
@@ -35,10 +37,13 @@ export class FournisseursComponent {
   sortField = 'nom';
   sortDirection: 'asc' | 'desc' = 'asc';
   fournisseurs: Fournisseurs[] = [];
+    private imgUrl = environment.imgUrl;
+  
 
 
     constructor(
         private produitService: ProduitService,
+        private fournisseurService: FournisseurService,
         private fb: FormBuilder,
         private router: Router,
         private usersService: UsersService,
@@ -55,10 +60,21 @@ export class FournisseursComponent {
     this.loadFournisseurs();
   }
 
+
+
+
   loadFournisseurs(): void {
-    this.produitService.getFournisseurs().subscribe({
+    this.fournisseurService.getAllFournisseurs().subscribe({
       next: (fournisseurs: Fournisseurs[]) => {
         this.fournisseurs = fournisseurs.reverse();
+        //photo de fournisseur specifique pour chaque fournisseur
+        this.fournisseurs.forEach(fournisseur => {
+          if (fournisseur.photo) {
+            fournisseur.photo = `${this.imgUrl}${fournisseur.photo}`;
+          } else {
+            fournisseur.photo = 'assets/images/default-fournisseur.png'; // Chemin par défaut si pas de photo
+          }
+        });
         console.log('Fournisseurs:', this.fournisseurs);
       },
       error: (err) => {
