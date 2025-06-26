@@ -160,12 +160,12 @@ export class AddFournisseurComponent {
         return;
       }
 
-      this.selectedLogoFile = compressedFile; // Stocke le fichier compressé à envoyer
+      this.selectedLogoFile = compressedFile;
 
       // Affichage preview en base64
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.image = e.target.result; // Base64 pour afficher l'image dans l'interface
+        this.image = e.target.result; 
         this.cdRef.markForCheck();
       };
       reader.readAsDataURL(compressedFile);
@@ -177,38 +177,52 @@ export class AddFournisseurComponent {
 }
 
 
-     async testImageCompression(file: File): Promise<File | null> {
-    if (!file) {
-      console.log('Aucun fichier sélectionné.');
-      return null;
-    }
-  
-    console.log('Taille originale:', file.size / 1024, 'Ko');
-  
-    const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 1000,
-      useWebWorker: true,
-    };
-  
-    try {
-      const compressedFile = await imageCompression(file, options);
-      console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
-  
-      if (!compressedFile.type.startsWith('image/')) {
-        console.error('Le fichier compressé n\'est pas un format d\'image valide.');
-        this.errorMessage = 'Erreur de compression : Le fichier n\'est pas une image.';
-        return null;
-      }
-  
-  
-      return compressedFile;
-  
-    } catch (error) {
-      console.error('Erreur lors de la compression:', error);
-      return null;
-    }
+  async testImageCompression(file: File): Promise<File | null> {
+  if (!file) {
+    console.log('Aucun fichier sélectionné.');
+    return null;
   }
+
+  console.log('Taille originale:', file.size / 1024, 'Ko');
+
+  const options = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1000,
+    useWebWorker: true,
+  };
+
+  try {
+    const compressedBlob = await imageCompression(file, options);
+    console.log('Taille après compression:', compressedBlob.size / 1024, 'Ko');
+
+    if (!compressedBlob.type.startsWith('image/')) {
+      console.error('Le fichier compressé n\'est pas un format d\'image valide.');
+      this.errorMessage = 'Erreur de compression : Le fichier n\'est pas une image.';
+      return null;
+    }
+
+    // Extraire le nom de base sans extension
+    const originalName = file.name.split('.').slice(0, -1).join('.') || 'image';
+    let extension = 'png';
+    if (compressedBlob.type === 'image/jpeg') extension = 'jpg';
+    else if (compressedBlob.type === 'image/png') extension = 'png';
+    else if (compressedBlob.type === 'image/webp') extension = 'webp';
+
+    const finalFileName = `${originalName}.${extension}`;
+
+    const compressedFile = new File([compressedBlob], finalFileName, {
+      type: compressedBlob.type,
+      lastModified: Date.now(),
+    });
+
+    return compressedFile;
+
+  } catch (error) {
+    console.error('Erreur lors de la compression:', error);
+    return null;
+  }
+}
+
 
 }
 
