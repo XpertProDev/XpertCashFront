@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FournisseurService } from '../../SERVICES/fournisseur-service';
 import { Fournisseurs } from '../../MODELS/fournisseurs-model';
 import { ActivatedRoute } from '@angular/router';
+import imageCompression from 'browser-image-compression';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-detail-edit-fournisseur',
@@ -18,11 +20,21 @@ import { ActivatedRoute } from '@angular/router';
   styleUrl: './detail-edit-fournisseur.component.scss'
 })
 export class DetailEditFournisseurComponent {
+  private imgUrl = environment.imgUrl
   fournisseurEditForm!: FormGroup;
   isLoading = false;
   errorMessage = '';
   successMessage = '';
   errorMessageApi = '';
+  isEditing = false;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  fournisseurPhotoUrl: string | null = null;
+  newPhotoUrl: string | null = null;
+  fournisseur!: Fournisseurs;
+  control = new FormControl();
+  selectedFile: File | null = null;
+  selectedCompressedFile: File | null = null;
+  
   countryDialCodes = {
     'Mali': '+223',
     'Sénégal': '+221',
@@ -39,6 +51,17 @@ export class DetailEditFournisseurComponent {
   ngOnInit() {
     this.getInitForm();
     this.loadFournisseur();
+    this.fournisseurEditForm.disable();
+    this.control.disable();
+
+    this.fournisseurEditForm.get('pays')?.valueChanges.subscribe(pays => {
+      this.formatPhoneNumber();
+    });
+  }
+
+  startEditing(): void {
+    this.isEditing = true;
+    this.fournisseurEditForm.enable(); // Active tous les champs du formulaire
   }
 
   getInitForm() {
@@ -48,7 +71,10 @@ export class DetailEditFournisseurComponent {
       adresse: [''],
       pays: [''],
       telephone: [''],
-      ville: ['']
+      description: [''],
+      ville: [''],
+      nomSociete: [''],
+      photo: [null]
     });
   }
   
@@ -65,61 +91,246 @@ export class DetailEditFournisseurComponent {
     }
   }
   
-  // formatPhoneNumber() {
-  //   let phone = this.fournisseurEditForm.get('telephone')?.value;
-  //   const pays = this.fournisseurEditForm.get('pays')?.value;
-  //   const dialCode = this.countryDialCodes[pays as keyof typeof this.countryDialCodes];
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.selectedFile = file;
+      
+      // Vérification du format
+      const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedFormats.includes(file.type)) {
+        this.errorMessage = 'Seuls les formats JPG, PNG sont acceptés';
+        return;
+      }
 
-  //   if (dialCode && phone.startsWith(dialCode)) {
-  //     phone = phone.substring(dialCode.length).replace(/\D/g, '');
-  //     const formatted = phone.replace(/(\d{2})(?=\d)/g, '$1 ');
-  //     this.fournisseurEditForm.get('telephone')?.setValue(dialCode + ' ' + formatted, { emitEvent: false });
-  //   }
-  // }
+      this.testImageCompression(file);
+      
+      
+      // Aperçu de l'image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newPhotoUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  async testImageCompression(file: File) {
+      if (!file) {
+        console.log('Aucun fichier sélectionné.');
+        return;
+      }
+    
+      console.log('Taille originale:', file.size / 1024, 'Ko');
+    
+      // Options de compression
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1000,
+        useWebWorker: true,
+      };
+    
+      try {
+        const compressedFile = await imageCompression(file, options);
+
+        // Convertir en File avec le bon type MIME
+        this.selectedCompressedFile = new File(
+          [compressedFile], 
+          file.name, 
+          { type: compressedFile.type }
+        );
+        // this.selectedCompressedFile = compressedFile;
+        this.selectedFile = compressedFile;
+        console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
+    
+        // Vérifier si le fichier est bien en PNG/JPEG après compression
+        if (compressedFile.type !== 'image/png' && compressedFile.type !== 'image/jpeg') {
+          console.error('Le fichier compressé n\'est pas un format supporté (PNG ou JPEG).');
+          this.errorMessage = 'Erreur de compression : Le format de l\'image n\'est pas valide.';
+          return;
+        }
+        
+    
+        // Lire l'image compressée et afficher l'aperçu
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.newPhotoUrl = e.target?.result as string;
+          console.log('Image compressée prête à être affichée !');
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error('Erreur lors de la compression:', error);
+      }
+  }
 
   formatPhoneNumber() {
     const ctrl = this.fournisseurEditForm.get('telephone')!;
     let raw = ctrl.value as string;
     const pays = this.fournisseurEditForm.get('pays')?.value;
     const dialCode = this.countryDialCodes[pays as keyof typeof this.countryDialCodes] || '';
-  
-    // 1) On retire le dialCode existant pour ne pas le dupliquer
-    if (dialCode && raw.startsWith(dialCode)) {
-      raw = raw.substring(dialCode.length);
-    }
-    // 2) On ne conserve que les chiffres
+
+    // Nettoyer le numéro
     const cleaned = raw.replace(/\D/g, '');
-  
-    // 3) On remet le dialCode + un espace + le bloc de chiffres
-    const formatted = dialCode 
-      ? `${dialCode} ${cleaned}` 
-      : cleaned;
-  
-    // 4) On remet la valeur sans retrigger d'événement
+
+    // Formater selon le pays
+    let formatted = cleaned;
+    if (dialCode && cleaned.startsWith(dialCode.replace('+', ''))) {
+      formatted = dialCode + ' ' + cleaned.substring(dialCode.length);
+    } else if (dialCode) {
+      formatted = dialCode + ' ' + cleaned;
+    }
+
     ctrl.setValue(formatted, { emitEvent: false });
   }
-
-  modifierFournisseur() {}
 
   goToFournisseur() {
     this.router.navigate(['/fournisseurs']);
   }
 
-  fournisseur!: Fournisseurs;
+  // private loadFournisseur(): void {
+  //   const id = Number(this.route.snapshot.paramMap.get('id'));
+  //   this.fournisseurService.getFournisseurById(id).subscribe({
+  //     next: (data) => {
+  //       this.fournisseur = data;
+  //       // Mettre à jour les valeurs du formulaire
+  //       this.fournisseurEditForm.patchValue({
+  //         nomComplet: data.nomComplet,
+  //         email: data.email,
+  //         adresse: data.adresse,
+  //         pays: data.pays,
+  //         telephone: data.telephone,
+  //         description: data.description,
+  //         ville: data.ville,
+  //         nomSociete: data.nomSociete
+  //       });
+  //       // Mettre à jour la photo
+  //       this.fournisseurPhotoUrl = data.photo 
+  //         ? `${environment.apiBaseUrl}/${data.photo}` 
+  //         : null;
+  //     },
+  //     error: (err) => console.error('Erreur de chargement', err)
+  //   });
+  // }
+
+  // detail-edit-fournisseur.component.ts
+  private loadFournisseur(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.fournisseurService.getFournisseurById(id).subscribe({
+      next: (resp) => {
+        // resp = { fournisseur: {...} }
+        const data = resp.fournisseur;
+        this.fournisseur = data;
+        this.fournisseurEditForm.patchValue({
+          nomComplet: data.nomComplet,
+          email: data.email,
+          adresse: data.adresse,
+          pays: data.pays,
+          telephone: data.telephone,
+          description: data.description,
+          ville: data.ville,
+          nomSociete: data.nomSociete,
+        });
+        // this.fournisseurPhotoUrl = data.photo;
+        this.fournisseurPhotoUrl = data.photo ? `${this.imgUrl}${data.photo}` : '';
+        // Correction ici : utiliser l'URL complète
+        // this.fournisseurPhotoUrl = data.photo 
+        //   ? `${environment.apiBaseUrl}${data.photo}` 
+        //   : null;
+      },
+      error: (err) => console.error('Erreur de chargement', err)
+    });
+  }
+
+  // Méthode pour déclencher l'input file
+  triggerFileInput(): void {
+    if (!this.isEditing) return;
+    this.fileInput.nativeElement.click();
+  }
+
+  toggleEditing(): void {
+  this.isEditing = !this.isEditing;
+  
+  if (this.isEditing) {
+    this.fournisseurEditForm.enable();
+  } else {
+    // Réinitialiser les modifications
+    this.selectedCompressedFile = null;
+    this.newPhotoUrl = null;
+    this.loadFournisseur();
+    this.fournisseurEditForm.disable();
+  }
+}
+
+async modifierFournisseur() {
+  this.isLoading = true;
+  this.errorMessage = '';
+  this.successMessage = '';
+
+  try {
+    const formValue = this.fournisseurEditForm.value;
+
+    // Créez un nouvel objet sans propriétés indésirables
+    const cleanedData: Fournisseurs = {
+      id: this.fournisseur.id,
+      nomComplet: formValue.nomComplet,
+      email: formValue.email,
+      adresse: formValue.adresse,
+      pays: formValue.pays,
+      telephone: formValue.telephone,
+      description: formValue.description,
+      ville: formValue.ville,
+      nomSociete: formValue.nomSociete,
+      photo: this.fournisseur.photo, // conservez la photo existante
+      createdAt: this.fournisseur.createdAt
+    };
+    
+    // Préparer les données pour l'API
+   const updatedFournisseur: Fournisseurs = {
+    id: this.fournisseur.id,
+    nomComplet: formValue.nomComplet,
+    email: formValue.email,
+    adresse: formValue.adresse,
+    pays: formValue.pays,
+    telephone: formValue.telephone,
+    description: formValue.description,
+    ville: formValue.ville,
+    nomSociete: formValue.nomSociete,
+    photo: this.fournisseur.photo,
+    createdAt: this.fournisseur.createdAt
+  };
+
+
+    // Appeler le service
+    await this.fournisseurService.updateFournisseur(
+      this.fournisseur.id,
+      updatedFournisseur,
+      this.selectedCompressedFile || undefined
+    ).toPromise();
+
+    this.successMessage = 'Fournisseur mis à jour avec succès!';
+    
+    // Réinitialiser après succès
+    this.selectedCompressedFile = null;
+    this.newPhotoUrl = null;
+    this.loadFournisseur();
+    
+    // Désactiver le mode édition après 2s
+    setTimeout(() => {
+      this.isEditing = false;
+      this.fournisseurEditForm.disable();
+    }, 2000);
+
+  } catch (error: any) {
+    console.error('Update error:', error);
+    this.errorMessage = error.error?.message || 'Erreur lors de la mise à jour';
+  } finally {
+    this.isLoading = false;
+  }
+}
+
 
   
-    private loadFournisseur(): void {
-      const id = Number(this.route.snapshot.paramMap.get('id'));
-      if (!id) {
-        console.error('ID du fournisseur non valide');
-        return;
-      }
-  
-      this.fournisseurService.getFournisseurById(id).subscribe({
-        next: (data) => this.fournisseur = data,
-        error: (err) => console.error('Erreur de chargement du fournisseur', err)
-      });
-    }
 
 }
  

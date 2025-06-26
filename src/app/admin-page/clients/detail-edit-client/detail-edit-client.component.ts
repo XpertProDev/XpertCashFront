@@ -288,10 +288,6 @@ loadEntrepriseInfo(): void {
     this.fileInput.nativeElement.click();
   }
 
-  
-
-  
-
   startEditing(): void {
     this.isEditing = true;
     this.modifierClientForm.enable(); // Active tous les champs du formulaire

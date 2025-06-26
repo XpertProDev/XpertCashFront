@@ -93,6 +93,8 @@ export class AddProduitComponent implements OnInit {
   get c() { return this.ajouteCategoryForm.controls; }
   get u() { return this.ajouteUniteForm.controls; }
   get f() { return this.ajouteProduitForm.controls; }
+  formSubmitted = false;
+  showBoutiqueError: boolean = false;
 
   clearImage() {
     this.newPhotoUrl = null;
@@ -186,10 +188,30 @@ export class AddProduitComponent implements OnInit {
 
   closePopupUnit(): void { this.showPopupUnit = false; }
 
+  // onToggleChange(event: Event) {
+  //   // event.target permet d’accéder au checkbox
+  //   const checkbox = event.target as HTMLInputElement;
+  //   console.log('isChecked:', checkbox.checked);
+  // }
+
   onToggleChange(event: Event) {
-    // event.target permet d’accéder au checkbox
     const checkbox = event.target as HTMLInputElement;
-    console.log('isChecked:', checkbox.checked);
+    const newValue = checkbox.checked;
+
+    if (newValue && this.boutiqueIdSelected.length === 0) {
+      this.errorMessage = "Veuillez sélectionner au moins une boutique avant d'ajouter des stocks.";
+       this.showBoutiqueError = true;
+      // Annule l'activation du switch
+      setTimeout(() => {
+        this.isChecked = false;
+      }, 0);
+    } else {
+      this.isChecked = newValue;
+      // Efface le message si le switch est désactivé
+      if (this.errorMessage === "Veuillez sélectionner au moins une boutique avant d'ajouter des stocks.") {
+        this.errorMessage = '';
+      }
+    }
   }
  
   onFileSelected(event: Event): void {
@@ -216,7 +238,7 @@ export class AddProduitComponent implements OnInit {
       reader.readAsDataURL(this.selectedFile);
     }
   }
- 
+
   setupFormSubscriptions() {
     const token = localStorage.getItem('authToken'); // ou via un service d'authentification
     if (token) {
@@ -264,15 +286,16 @@ export class AddProduitComponent implements OnInit {
     this.ajouteProduitForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prixVente: ['', Validators.required],
-      prixAchat: ['', Validators.required],
+      prixAchat: ['', [Validators.min(0)]],
       quantite: ['0'],
       seuilAlert: ['0'],
       description: [''],
-      codeBare: ['', [Validators.minLength(8), Validators.maxLength(13)]],
+      codeBare: ['', [Validators.minLength(8), Validators.maxLength(20)]],
       categorieId: [''],
       uniteId: [''],
       typeProduit: ['PHYSIQUE', Validators.required]
     });
+    this.formSubmitted = false;
 
     this.ajouteCategoryForm = this.fb.group({
       categoryName: ['', [/*Validators.required,*/ Validators.minLength(3), Validators.maxLength(20)]]
@@ -543,12 +566,29 @@ export class AddProduitComponent implements OnInit {
   }
 
   async onSubmit() {
+
+    this.formSubmitted = true; // Active le mode "soumis"
+    this.showBoutiqueError = false; 
+
+    // Vérifiez d'abord les boutiques avant le formulaire
+    if (this.boutiqueIdSelected.length === 0) {
+      this.showBoutiqueError = true;
+      this.errorMessage = "Veuillez sélectionner au moins une boutique.";
+      return;
+    }
+
     if (this.ajouteProduitForm.invalid) {
       this.errorMessage = "Veuillez vérifier les informations saisies.";
       return;
     }
     this.isLoading = true;
     const produit = this.ajouteProduitForm.value;
+
+    // Si le prix d'achat n'est pas fourni, mettez-le à null ou 0
+    if (produit.prixAchat === '' || produit.prixAchat === null) {
+      produit.prixAchat = null; // ou 0 selon vos besoins
+    }
+
     console.log('Produit soumis:', produit);
     const tokenStored = localStorage.getItem('authToken');
     if (!tokenStored) {
@@ -594,13 +634,6 @@ export class AddProduitComponent implements OnInit {
         const productName = produit.nom.trim()[0]; // Récupérer la première lettre du nom du produit
         finalImage = this.dataURLtoFile(this.generateImageFromLetter(productName), 'default.svg');
         console.log('Image par défaut utilisée:', finalImage);
-      }
-      // const boutiqueId = this.boutiqueIdSelected;
-      // const boutiqueId = this.boutiqueIdSelected || this.boutiquesList[0]?.id;
-      if (this.boutiqueIdSelected.length === 0) {
-        this.errorMessage = "Veuillez sélectionner au moins une boutique.";
-        this.isLoading = false;
-        return;
       }
       const quantitesSelected = this.boutiqueIdSelected.map(id => Number(this.quantitesMap[id]) || 0);
       const seuilsSelected = this.boutiqueIdSelected.map(id => Number(this.seuilsMap[id]) || 0);
@@ -787,12 +820,41 @@ export class AddProduitComponent implements OnInit {
     this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
   }
 
+  // confirmBoutiqueSelection(): void {
+  //   this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
+  //   this.boutiqueIdSelected = this.selectedBoutiques.map(b => b.id);
+  //   const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
+  //   this.controlBoutique.setValue(selectedNames.join(', '));
+  //   this.toggleBoutiqueSelectionPanel();
+  // }
+
   confirmBoutiqueSelection(): void {
     this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
     this.boutiqueIdSelected = this.selectedBoutiques.map(b => b.id);
     const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
     this.controlBoutique.setValue(selectedNames.join(', '));
     this.toggleBoutiqueSelectionPanel();
+    
+    // Réinitialisez l'erreur boutique
+    if (this.boutiqueIdSelected.length > 0) {
+      this.showBoutiqueError = false;
+      if (this.errorMessage === "Veuillez sélectionner au moins une boutique.") {
+        this.errorMessage = '';
+      }
+    }
+  }
+
+  // Vérifie si toutes les boutiques sont sélectionnées
+  areAllBoutiquesSelected(): boolean {
+    return this.boutiquesList.length > 0 && 
+          this.boutiquesList.every(b => b.selected);
+  }
+
+  // Sélectionne ou désélectionne toutes les boutiques
+  toggleSelectAllBoutiques(event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.boutiquesList.forEach(b => b.selected = isChecked);
+    this.updateSelectedBoutiques();
   }
 
   // Ajouter cette méthode

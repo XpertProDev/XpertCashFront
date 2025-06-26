@@ -23,7 +23,7 @@
 
 .champ_input {
   position: relative;
-  margin-bottom: 25px;
+  margin-bottom: 10px;
 }
 
 .champ_input_Categorie {
@@ -472,7 +472,7 @@ input:checked + .slider:before {
 }
 
 .error-message {
-  font-size: 14px;
+  font-size: 12px;
   color: red;
   font-weight: bold;
   // margin-top: 7px;
@@ -1001,4 +1001,49 @@ input:checked + .slider:before {
 
 .triple {
   margin-top: 20px;
+}
+
+.select-all {
+  font-weight: bold;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.select-all input[type="checkbox"] {
+  margin-right: 8px;
+  transform: scale(1.2);
+}
+
+/* Style pour les champs invalides */
+.invalid-field .input_focus {
+  border-color: red !important;
+}
+
+.invalid-field .label {
+  color: red !important;
+}
+
+/* Message d'erreur en rouge */
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Fichier SCSS */
+.invalid-field {
+  .input_focus {
+    border-color: red !important;
+  }
+
+  .label {
+    color: red !important;
+  }
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
 }

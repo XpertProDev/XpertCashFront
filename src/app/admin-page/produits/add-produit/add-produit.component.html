@@ -33,7 +33,7 @@
                   <label for="nomMagasin" class="label labelColor">Nom magasin</label>
                 </div> -->
                 <div class="double_input2">
-                  <div class="champ_input">
+                  <div class="champ_input" [class.invalid-field]="showBoutiqueError">
                     <input autocomplete="off" 
                            type="text" 
                            placeholder="Sélectionner vos boutiques"
@@ -63,7 +63,7 @@
                     -->
                   
                     <!-- Panel de sélection des boutiques -->
-                    <div class="boutique-selection-panel" *ngIf="showBoutiqueSelectionPanel">
+                    <!-- <div class="boutique-selection-panel" *ngIf="showBoutiqueSelectionPanel">
                       <div class="panel-header">
                         <h4>Sélectionner des boutiques</h4>
                         <button class="close-btn" (click)="toggleBoutiqueSelectionPanel()">&times;</button>
@@ -75,6 +75,36 @@
                                    [(ngModel)]="boutique.selected"
                                    (change)="updateSelectedBoutiques()"
                                    [ngModelOptions]="{standalone: true}">
+                            {{ boutique.nomBoutique }}
+                          </label>
+                        </div>
+                      </div>
+                      <div class="panel-footer">
+                        <button class="btn-confirm" (click)="confirmBoutiqueSelection()">Confirmer</button>
+                      </div>
+                    </div> -->
+                    <div class="boutique-selection-panel" *ngIf="showBoutiqueSelectionPanel">
+                      <div class="panel-header">
+                        <h4>Sélectionner des boutiques</h4>
+                        <button class="close-btn" (click)="toggleBoutiqueSelectionPanel()">&times;</button>
+                      </div>
+                      <div class="panel-body">
+                        <!-- Ajout de la case "Tout sélectionner" -->
+                        <div class="boutique-item select-all">
+                          <label>
+                            <input type="checkbox" 
+                                  [checked]="areAllBoutiquesSelected()"
+                                  (change)="toggleSelectAllBoutiques($event)">
+                            Sélectionner toutes les boutiques
+                          </label>
+                        </div>
+                        
+                        <div *ngFor="let boutique of boutiquesList" class="boutique-item">
+                          <label>
+                            <input type="checkbox" 
+                                  [(ngModel)]="boutique.selected"
+                                  (change)="updateSelectedBoutiques()"
+                                  [ngModelOptions]="{standalone: true}">
                             {{ boutique.nomBoutique }}
                           </label>
                         </div>
@@ -127,7 +157,7 @@
 
                   
                   <!-- Input de nom produits  -->
-                  <div class="champ_input">
+                  <div  class="champ_input" [class.invalid-field]="f['nom'].invalid && (f['nom'].touched || formSubmitted)">
                     <input autocomplete="off" formControlName="nom" type="text" class="input_focus " required id="nom" name="nom" placeholder="Saisis le nom de produit">
                     <label for="nom" class="label">Nom produit</label>
                     <div *ngIf="f['nom'].touched && f['nom'].invalid" class="error-message">
@@ -210,28 +240,36 @@
 
                 <div class="double_input_grid">
                   <!-- Input de nom produits  -->
-                  <div class="champ_input">
+                  <div class="champ_input" [class.invalid-field]="f['prixVente'].invalid && (f['prixVente'].touched || formSubmitted)">
                     <input autocomplete="off" formControlName="prixVente" type="number" class="input_focus " required id="prixVente" name="prixVente" placeholder="Saisis le nom de magasin" (input)="formatPrixVente()">
                     <label for="prixVente" class="label">Prix de vente</label>
                     <div class="nombreDevise" *ngIf="formattedPrixVente">
                       <p>{{ formattedPrixVente }}</p>
                     </div>
                     <div *ngIf="f['prixVente'].touched && f['prixVente'].invalid" class="error-message">
-                      Le prix de vente est vide.
+                      Ce champ est obligatoire.
                     </div>
                   </div>
                   
-                  <!-- Input de prixAchat  -->
-                  <div class="champ_input">
-                    <input autocomplete="off" formControlName="prixAchat" type="number" class="input_focus " required id="prixAchat" name="prixAchat" placeholder="Saisis le prix d'achat" (input)="formatCoutProduit()">
-                    <label for="prixAchat" class="label">Coût du produit</label>
-                    <div class="nombreDevise" *ngIf="formattedCoutProduit">
-                      <p>{{ formattedCoutProduit }}</p>
-                    </div>
-                    <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
-                      Le coût du produit est vide.
-                    </div>
+                                  <!-- Input de prixAchat  -->
+                <div class="champ_input">
+                  <input autocomplete="off" 
+                        formControlName="prixAchat" 
+                        type="number" 
+                        class="input_focus" 
+                        id="prixAchat" 
+                        name="prixAchat" 
+                        placeholder="Saisis le prix d'achat" 
+                        (input)="formatCoutProduit()">
+                  <label for="prixAchat" class="label">Coût du produit (Facultatif)</label>
+                  <div class="nombreDevise" *ngIf="formattedCoutProduit">
+                    <p>{{ formattedCoutProduit }}</p>
                   </div>
+                  <!-- Modifier le message d'erreur pour refléter que ce n'est plus obligatoire -->
+                  <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
+                    <span *ngIf="f['prixAchat'].errors?.['min']">Le coût ne peut pas être négatif.</span>
+                  </div>
+                </div>
 
                 </div>
 
@@ -259,11 +297,11 @@
                         placeholder="Numéro code barre"
                         inputmode="numeric"
                         pattern="[0-9]*"
-                        (keypress)="validateNumericInput($event)"> 
+                        (keypress)="validateNumericInput($event)" maxlength="20"> 
                     <label for="codeBare" class="label labelColor">Numéro code barre (Facultatif)</label>
                     <div *ngIf="f['codeBare'].touched && f['codeBare'].invalid" class="error-message">
                       <span *ngIf="f['codeBare'].errors?.['minlength']">Le code barre doit avoir au moins 8 caractères.</span>
-                      <span *ngIf="f['codeBare'].errors?.['maxlength']">Le code barre ne doit pas dépasser 13 caractères.</span>
+                      <span *ngIf="f['codeBare'].errors?.['maxlength']">Le code barre ne doit pas dépasser 20 caractères.</span>
                     </div>
                   </div>
                 
@@ -431,7 +469,7 @@
               <input class="input_focus" style="min-width: 150px;" type="text" formControlName="nomBoutique" placeholder="Saisis le nom de boutique">
               <label class="label">Nom boutque</label>
               <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
-                <small class="error">Le nom est vide.</small>
+                <small class="error">Ce champ est obligatoire.</small>
               </div>
             </div>
 
@@ -453,7 +491,7 @@
               <input class="input_focus" style="min-width: 150px;" type="number" formControlName="telephoneBoutique" placeholder="00 00 00 00">
               <label class="label">Phone</label>
               <div *ngIf="boutiqueForm.get('telephoneBoutique')?.invalid && boutiqueForm.get('telephoneBoutique')?.touched">
-                <small class="error">Le numéro de téléphone est requis.</small>
+                <small class="error">Ce champ est obligatoire.</small>
               </div>
             </div>
 

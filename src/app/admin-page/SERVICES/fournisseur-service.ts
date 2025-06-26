@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { map, Observable } from "rxjs";
 import { Fournisseurs } from "../MODELS/fournisseurs-model";
 import { environment } from "src/environments/environment";
 
@@ -34,16 +34,20 @@ addFournisseur(fournisseur: Fournisseurs, imageFournisseurFile?: File): Observab
 
 
   //Get fournisseur by id
-  getFournisseurById(id: number): Observable<Fournisseurs> {
-    const token = localStorage.getItem('authToken');
-    
+  getFournisseurById(id: number): Observable<{ fournisseur: Fournisseurs }> {
+    const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({
-      'Authorization': token ? `Bearer ${token}` : '',
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     });
-  
-    return this.http.get<Fournisseurs>(`${this.apiUrl}/get-fournisseur/${id}`, { headers });
+
+    return this.http.get<{ fournisseur: Fournisseurs }>(
+      `${this.apiUrl}/getFournisseur/${id}`, 
+      { headers }
+    );
   }
+
+
   //Get all fournisseurs
   getAllFournisseurs(): Observable<Fournisseurs[]> {
     const token = localStorage.getItem('authToken');
@@ -55,5 +59,30 @@ addFournisseur(fournisseur: Fournisseurs, imageFournisseurFile?: File): Observab
 
     return this.http.get<Fournisseurs[]>(`${this.apiUrl}/get-fournisseurs`, { headers });
   }
+
+// fournisseur.service.ts
+
+updateFournisseur(id: number, updatedFournisseur: any, imageFournisseurFile?: File): Observable<any> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+    });
+    const formData = new FormData();
+
+  formData.append('updatedFournisseur', new Blob(
+    [JSON.stringify(updatedFournisseur)],
+    { type: 'application/json' }
+  ));
+
+  if (imageFournisseurFile) {
+    formData.append('imageFournisseurFile', imageFournisseurFile);
+  }
+
+  
+
+    return this.http.put(`${this.apiUrl}/updateFournisseur/${id}`, formData, { headers });
+}
+
+
 
 }
