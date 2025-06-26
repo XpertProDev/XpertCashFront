@@ -272,6 +272,11 @@ export class StocksComponent implements OnInit {
     }
   }
 
+  getEntrepriseId(): number | null {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user.entrepriseId || null;
+  }
+
   // Récupère les informations utilisateur et stocke les données dans le localStorage
   getUserInfo(): void {
     this.usersService.getUserInfo().subscribe({
@@ -280,14 +285,18 @@ export class StocksComponent implements OnInit {
         this.userName = user.nomComplet;
         this.nomEntreprise = user.nomEntreprise;
         this.boutiques = user.boutiques; // Récupération de toutes les boutiques
+
+        this.selectedBoutique = null;
         
         // Sélectionner la première boutique par défaut
-        if (this.boutiques.length > 0) {
-          this.selectedBoutique = this.boutiques[0];
-          this.boutiqueName = this.selectedBoutique.nomBoutique;
-          this.addressBoutique = this.selectedBoutique.adresse;
-          this.loadProduits(this.selectedBoutique.id);
-        }
+        // if (this.boutiques.length > 0) {
+        //   this.selectedBoutique = this.boutiques[0];
+        //   this.boutiqueName = this.selectedBoutique.nomBoutique;
+        //   this.addressBoutique = this.selectedBoutique.adresse;
+        //   this.loadProduits(this.selectedBoutique.id);
+        // }
+
+        this.loadAllProduits();
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des informations utilisateur :", err);
@@ -377,18 +386,16 @@ export class StocksComponent implements OnInit {
   }
 
   loadAllProduits(): void {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const entrepriseId = user.entrepriseId;
+    const entrepriseId = this.getEntrepriseId();
     if (!entrepriseId) {
       console.error('ID entreprise manquant');
       return;
     }
-  
-    // Adaptez cette requête selon votre service pour obtenir tous les produits de l'entreprise
+
     this.produitService.getProduitsByEntrepriseId(entrepriseId).subscribe({
       next: (produits: Produit[]) => {
         this.tasks = produits
-          .filter(prod => prod.enStock)  // seulement les produits en stock
+          .filter(prod => prod.enStock)
           .map(prod => {
             const hasPhoto = prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined';
             const fullImageUrl = hasPhoto ? `${this.apiUrl}${prod.photo}` : '';
@@ -402,7 +409,7 @@ export class StocksComponent implements OnInit {
             const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
             return dateB - dateA;
           });
-  
+
         this.dataSource.data = this.tasks;
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;

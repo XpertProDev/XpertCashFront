@@ -72,7 +72,7 @@ export class FournisseursComponent {
           if (fournisseur.photo) {
             fournisseur.photo = `${this.imgUrl}${fournisseur.photo}`;
           } else {
-            fournisseur.photo = 'assets/images/default-fournisseur.png'; // Chemin par défaut si pas de photo
+            fournisseur.photo = 'assets/img/profil.png'; // Chemin par défaut si pas de photo
           }
         });
         console.log('Fournisseurs:', this.fournisseurs);
