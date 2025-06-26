@@ -1,4 +1,8 @@
 <!-- <p>{{ factureReel | json }}</p> -->
+<!-- Message d'erreur module non activé -->
+<div *ngIf="errorMessage" class="error-message">
+  {{ errorMessage }}
+</div>
 
 <div class="containerTable">
     <!-- En-tête -->
