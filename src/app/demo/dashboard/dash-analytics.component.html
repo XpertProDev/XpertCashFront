@@ -1,3 +1,23 @@
+<!-- Bandeau commun avec message conditionnel -->
+<div *ngIf="showBlockedPopup" class="top-banner" role="alert" aria-live="assertive">
+  <div class="banner-content">
+    <span class="icon">⚠️</span>
+    
+    <span *ngIf="isAdmin" class="message">
+      Votre période d'accès temporaire a expiré. Veuillez vérifier votre boîte mail et activer votre compte.
+    </span>
+    
+    <span *ngIf="!isAdmin" class="message">
+      Votre administrateur n'a pas activé son compte dans les délais. Veuillez patienter ou le contacter.
+    </span>
+    
+    <button class="logout-btn" (click)="onLogout()">Se déconnecter</button>
+  </div>
+</div>
+
+<div *ngIf="showBlockedPopup" class="click-blocker"></div>
+
+
 <div class="row">
   <!-- order-card start -->
   @for (card of cards; track card) {
@@ -299,3 +319,4 @@
     </app-card>
   </div>
 </div>
+

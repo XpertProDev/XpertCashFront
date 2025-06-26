@@ -12,6 +12,10 @@ export interface UserRequest {
   adresseEntreprise: string;
   logoEntreprise : string,
   siege: string;
+  userActivated: boolean;
+  adminActivated: boolean;
+  createdAt: string;
+  adminCreatedAt: string;
   boutiques: {
     id: number;
     nomBoutique: string;

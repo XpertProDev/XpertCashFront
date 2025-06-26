@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { Router } from '@angular/router';
 import { FactureService } from '../../SERVICES/facture.service';
 import { FournisseurService } from '../../SERVICES/fournisseur-service';
+import imageCompression from 'browser-image-compression';
 
 @Component({
   selector: 'app-add-fournisseur',
@@ -25,7 +26,7 @@ export class AddFournisseurComponent {
   indicatif: string = '';
   maxPhoneLength: number = 0;
   image: string | null = null; 
-  selectedLogoFile: File | null = null;
+ selectedLogoFile?: File;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
 
@@ -53,7 +54,9 @@ export class AddFournisseurComponent {
       adresse: [''],
       pays: [''],
       telephone: [''],
-      ville: ['']
+      ville: [''],
+      nomSociete: [''],
+      photo: [null],
     });
   }
 
@@ -89,7 +92,7 @@ export class AddFournisseurComponent {
   formatPhoneNumber() {
     const ctrl = this.fournisseurForm.get('telephone')!;
     let raw = ctrl.value as string;
-    const pays = this.fournisseurForm.get('pays')?.value as string;
+    const pays = this.fournisseurForm.get('pays')?.value as string; 
     const paysInfo = this.paysIndicatifs[pays];
   
     // 1) Retirer l’indicatif s’il est déjà présent
@@ -109,65 +112,100 @@ export class AddFournisseurComponent {
   }
   
   ajouterFournisseur() {
-    if (this.fournisseurForm.invalid) {
-      this.fournisseurForm.markAllAsTouched();
-      return;
-    }
-
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    const fournisseurData = {
-      ...this.fournisseurForm.value,
-      telephone: this.fournisseurForm.value.telephone.replace(/\s/g, '')
-    };
-
-    this.fournisseurService.addFournisseur(fournisseurData).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.successMessage = 'Fournisseur ajouté avec succès!';
-        setTimeout(() => this.router.navigate(['/fournisseurs']), 2000);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = error.error?.error || 'Une erreur est survenue';
-      }
-    });
+  if (this.fournisseurForm.invalid) {
+    this.fournisseurForm.markAllAsTouched();
+    return;
   }
+
+  this.isLoading = true;
+  this.errorMessage = '';
+  this.successMessage = '';
+
+  const fournisseurData = {
+    ...this.fournisseurForm.value,
+    telephone: this.fournisseurForm.value.telephone.replace(/\s/g, '')
+  };
+
+  // Passe aussi this.selectedLogoFile au service
+  this.fournisseurService.addFournisseur(fournisseurData, this.selectedLogoFile).subscribe({
+    next: (response) => {
+      this.isLoading = false;
+      this.successMessage = 'Fournisseur ajouté avec succès!';
+      setTimeout(() => this.router.navigate(['/fournisseurs']), 2000);
+    },
+    error: (error) => {
+      this.isLoading = false;
+      this.errorMessage = error.error?.error || 'Une erreur est survenue';
+    }
+  });
+}
+
 
   goToFournisseur() {
     this.router.navigate(['/fournisseurs']);
   }
 
-  onFileSelected(event: any): void {
-    const file: File = event.target.files[0];
-    if (file) {
-      this.selectedLogoFile = file;
+  async onFileSelected(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement;
+
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+
+    try {
+      const compressedFile = await this.testImageCompression(file);
+
+      if (!compressedFile) {
+        console.error("Compression échouée ou image invalide.");
+        return;
+      }
+
+      this.selectedLogoFile = compressedFile; // Stocke le fichier compressé à envoyer
+
+      // Affichage preview en base64
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        const img = new Image();
-        img.src = e.target.result;
-
-        img.onload = () => {
-          const MAX_SIZE = 800;
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-
-          if (img.width > MAX_SIZE || img.height > MAX_SIZE) {
-            const ratio = Math.min(MAX_SIZE / img.width, MAX_SIZE / img.height);
-            canvas.width = img.width * ratio;
-            canvas.height = img.height * ratio;
-            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-            this.image = canvas.toDataURL('image/jpeg', 0.8);
-          } else {
-            this.image = e.target.result;
-          }
-          this.cdRef.markForCheck();
-          this.fileInput.nativeElement.value = '';
-        };
+        this.image = e.target.result; // Base64 pour afficher l'image dans l'interface
+        this.cdRef.markForCheck();
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressedFile);
+
+    } catch (error) {
+      console.error("Erreur lors de la compression ou du traitement :", error);
+    }
+  }
+}
+
+
+     async testImageCompression(file: File): Promise<File | null> {
+    if (!file) {
+      console.log('Aucun fichier sélectionné.');
+      return null;
+    }
+  
+    console.log('Taille originale:', file.size / 1024, 'Ko');
+  
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1000,
+      useWebWorker: true,
+    };
+  
+    try {
+      const compressedFile = await imageCompression(file, options);
+      console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
+  
+      if (!compressedFile.type.startsWith('image/')) {
+        console.error('Le fichier compressé n\'est pas un format d\'image valide.');
+        this.errorMessage = 'Erreur de compression : Le fichier n\'est pas une image.';
+        return null;
+      }
+  
+  
+      return compressedFile;
+  
+    } catch (error) {
+      console.error('Erreur lors de la compression:', error);
+      return null;
     }
   }
 

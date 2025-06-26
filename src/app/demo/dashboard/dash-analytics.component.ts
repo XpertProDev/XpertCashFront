@@ -11,6 +11,7 @@ import { ApexOptions, ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ProduitService } from 'src/app/admin-page/SERVICES/produit.service';
+import { UserRequest } from 'src/app/admin-page/MODELS/user-request';
 @Component({
   selector: 'app-dash-analytics',
   standalone: true,
@@ -27,6 +28,7 @@ export default class DashAnalyticsComponent {
   chartOptions_2!: Partial<ApexOptions>;
   chartOptions_3!: Partial<ApexOptions>;
   boutiqueName: string = '';
+  userEmail: string = '';
 
   // constructor
   constructor(private userService: UsersService,private http: HttpClient, private produitService: ProduitService, 
@@ -225,6 +227,9 @@ export default class DashAnalyticsComponent {
     this.updateTotalProduits();
     this.getBoutiqueInfo();
     this.getBoutiqueName();
+    this.checkAccountStatus();
+
+
     
   }
 
@@ -523,6 +528,41 @@ getBoutiqueName() {
   ];
 
 
+  showBlockedPopup: boolean = false;
+
+ onLogout(): void {
+    this.userService.logoutUser();
+  }
  
   
+private checkAccountStatus(): void {
+  this.userService.getUserInfo().subscribe((user: UserRequest) => {
+    this.userEmail = user.email;
+    this.isAdmin = user.roleType === 'ADMIN';
+    const now = new Date();
+
+    if (this.isAdmin) {
+      const createdAt = user.createdAt ? new Date(user.createdAt) : null;
+      const diffInHours = createdAt ? (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60) : 0;
+
+      this.showBlockedPopup = !user.userActivated && diffInHours > 24;
+    } else {
+      if (user.adminActivated) {
+        this.showBlockedPopup = false;
+        return;
+      }
+
+      const adminCreatedAt = user.adminCreatedAt ? new Date(user.adminCreatedAt) : null;
+      const diffAdminInHours = adminCreatedAt ? (now.getTime() - adminCreatedAt.getTime()) / (1000 * 60 * 60) : 0;
+
+      this.showBlockedPopup = diffAdminInHours > 24;
+    }
+  });
+}
+
+
+isAdmin: boolean = false;
+
+
+
 }

@@ -319,7 +319,7 @@ export class StocksComponent implements OnInit {
               codeGenerique: prod.codeGenerique || "",
               codeBare: prod.codeBare || "Non numéro code barre",
               nom: prod.nom || "Nom inconnu",
-              description: prod.description || "Non description",
+              description: prod.description || "Sans description",
               prixVente: prod.prixVente || 0,
               prixAchat: prod.prixAchat || 0,
               quantite: prod.quantite || 0,
@@ -327,8 +327,8 @@ export class StocksComponent implements OnInit {
               enStock: prod.enStock || false,
               // photo: fullImageUrl,
               photo: fullImageUrl ? fullImageUrl : this.generateLetterAvatar(prod.nom),
-              nomCategorie: prod.nomCategorie || "Non catégorie",
-              nomUnite: prod.nomUnite || "Non unité",
+              nomCategorie: prod.nomCategorie || "Aucune categorie",
+              nomUnite: prod.nomUnite || "Sans unité",
               createdAt: prod.createdAt || new Date().toISOString(), // Assurer une valeur par défaut
               categorieId: prod.categorieId,
               uniteId: prod.uniteId,
@@ -391,7 +391,7 @@ export class StocksComponent implements OnInit {
           .filter(prod => prod.enStock)  // seulement les produits en stock
           .map(prod => {
             const hasPhoto = prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined';
-            const fullImageUrl = hasPhoto ? `${this.backendUrl}${prod.photo}` : '';
+            const fullImageUrl = hasPhoto ? `${this.apiUrl}${prod.photo}` : '';
             return {
               ...prod,
               photo: fullImageUrl ? fullImageUrl : this.generateLetterAvatar(prod.nom),

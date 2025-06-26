@@ -125,6 +125,7 @@ export class ProduitFormComponent {
           this.errorMessage = 'Erreur de compression : Le format de l\'image n\'est pas valide.';
           return;
         }
+        
     
         // Lire l'image compressée et afficher l'aperçu
         const reader = new FileReader();
@@ -136,7 +137,7 @@ export class ProduitFormComponent {
       } catch (error) {
         console.error('Erreur lors de la compression:', error);
       }
-    }
+    } 
   
     goToProduit() { this.router.navigate(['/produit']); }
     
