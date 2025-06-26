@@ -186,10 +186,29 @@ export class AddProduitComponent implements OnInit {
 
   closePopupUnit(): void { this.showPopupUnit = false; }
 
+  // onToggleChange(event: Event) {
+  //   // event.target permet d’accéder au checkbox
+  //   const checkbox = event.target as HTMLInputElement;
+  //   console.log('isChecked:', checkbox.checked);
+  // }
+
   onToggleChange(event: Event) {
-    // event.target permet d’accéder au checkbox
     const checkbox = event.target as HTMLInputElement;
-    console.log('isChecked:', checkbox.checked);
+    const newValue = checkbox.checked;
+
+    if (newValue && this.boutiqueIdSelected.length === 0) {
+      this.errorMessage = "Veuillez sélectionner au moins une boutique avant d'ajouter des stocks.";
+      // Annule l'activation du switch
+      setTimeout(() => {
+        this.isChecked = false;
+      }, 0);
+    } else {
+      this.isChecked = newValue;
+      // Efface le message si le switch est désactivé
+      if (this.errorMessage === "Veuillez sélectionner au moins une boutique avant d'ajouter des stocks.") {
+        this.errorMessage = '';
+      }
+    }
   }
  
   onFileSelected(event: Event): void {
@@ -268,7 +287,7 @@ export class AddProduitComponent implements OnInit {
       quantite: ['0'],
       seuilAlert: ['0'],
       description: [''],
-      codeBare: ['', [Validators.minLength(8), Validators.maxLength(13)]],
+      codeBare: ['', [Validators.minLength(8), Validators.maxLength(20)]],
       categorieId: [''],
       uniteId: [''],
       typeProduit: ['PHYSIQUE', Validators.required]
@@ -787,12 +806,26 @@ export class AddProduitComponent implements OnInit {
     this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
   }
 
+  // confirmBoutiqueSelection(): void {
+  //   this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
+  //   this.boutiqueIdSelected = this.selectedBoutiques.map(b => b.id);
+  //   const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
+  //   this.controlBoutique.setValue(selectedNames.join(', '));
+  //   this.toggleBoutiqueSelectionPanel();
+  // }
+
   confirmBoutiqueSelection(): void {
     this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
     this.boutiqueIdSelected = this.selectedBoutiques.map(b => b.id);
     const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
     this.controlBoutique.setValue(selectedNames.join(', '));
     this.toggleBoutiqueSelectionPanel();
+    
+    // Efface le message d'erreur si des boutiques sont sélectionnées
+    if (this.boutiqueIdSelected.length > 0 && 
+        this.errorMessage === "Veuillez sélectionner au moins une boutique avant d'ajouter des stocks.") {
+      this.errorMessage = '';
+    }
   }
 
   // Ajouter cette méthode
