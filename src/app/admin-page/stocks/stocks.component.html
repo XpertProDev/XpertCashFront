@@ -79,7 +79,7 @@
     <tbody>
       <!-- Boucle sur la liste filtrée et paginée -->
       <!-- (click)="openStockDetail(stock.id)"  -->
-      <tr *ngFor="let product of filteredProducts(); let i = index" style="font-size: 10px;" (click)="openStockDetail(product.id)" >
+      <tr *ngFor="let product of filteredProducts(); let i = index" (click)="openStockDetail(product.id)" >
         <td [innerHTML]="highlightMatch(product.codeGenerique || '')"></td>
         <td>
           <div class="imgProduit">
