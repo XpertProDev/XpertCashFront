@@ -67,20 +67,36 @@ export const NavigationItems: NavigationItem[] = [
       },
       {
         id: 'stock',
-        title: 'Mes Stocks',
-        type: 'item',
-        url: '/stocks',
-        classes: 'nav-item',
-        icon: 'feather icon-clipboard'
-      },
-      {
-        id: 'facture',
-        title: 'Factures',
-        type: 'item',
-        url: '/facture',
-        classes: 'nav-item',
-        icon: 'feather icon-file'
-      },
+        title: '',
+        type: 'group',
+        icon: 'icon-group',
+        children: [
+          {
+            id: 'stock',
+            title: 'Stock',
+            type: 'collapse',
+            icon: 'feather icon-box',
+            children: [
+              {
+                id: 'stocks',
+                title: 'Mes Stocks',
+                type: 'item',
+                url: '/stocks',
+              },
+              {
+                id: 'facture',
+                title: 'Factures',
+                type: 'item',
+                url: '/facture',
+                // classes: 'nav-item',
+                // icon: 'feather icon-file'
+              },
+
+            ]
+          }
+        ]
+    },
+
       {
         id: 'clients',
         title: 'Clients',
@@ -95,11 +111,28 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/fournisseurs',
         classes: 'nav-item',
-        icon: 'feather icon-briefcase'
+        icon: 'feather icon-user'
       },
-      {
+     
+     
+
+      
+
+      // Pour les compte
+      /*{
+        id: 'compte',
+        title: 'Comptes',
+        type: 'item',
+        url: '/compte',
+        classes: 'nav-item',
+        icon: 'feather icon-bell'
+      },*/
+    ]
+  },
+
+   {
         id: 'factures',
-        title: '',
+        title: 'Test',
         type: 'group',
         icon: 'icon-group',
         children: [
@@ -126,7 +159,15 @@ export const NavigationItems: NavigationItem[] = [
             ]
           }
         ]
-      },
+    },
+
+
+  {
+    id: 'Comptabilite',
+    title: '',
+    type: 'group',
+    icon: 'icon-group',
+    children: [
       {
         id: 'comptabilite',
         title: 'Comptabilite',
@@ -135,63 +176,10 @@ export const NavigationItems: NavigationItem[] = [
         classes: 'nav-item',
         icon: 'feather icon-clipboard'
       },
-
-      // Pour les compte
-      /*{
-        id: 'compte',
-        title: 'Comptes',
-        type: 'item',
-        url: '/compte',
-        classes: 'nav-item',
-        icon: 'feather icon-bell'
-      },*/
     ]
   },
 
-  // Produit et entrer 
-  /*
-  {
-    id: 'produitentrer',
-    title: 'produitentrer',
-    type: 'group',
-    icon: 'icon-group',
-    children: [
-      {
-        id: 'basic',
-        title: 'Produit & Entrer',
-        type: 'collapse',
-        icon: 'feather icon-box',
-        children: [
-          {
-            id: 'produit',
-            title: 'Produits',
-            type: 'item',
-            url: '/produit',
-            //classes: 'nav-item',
-          },
-          // {
-          //   id: 'addProduit',
-          //   title: 'Ajouter produit',
-          //   type: 'item',
-          //   url: '/addProduit',
-          //   //classes: 'nav-item',
-          // },
-          {
-            id: 'entrer',
-            title: 'Entrer',
-            type: 'item',
-            url: '/entrer',
-            //classes: 'nav-item',
-          },
-        ]
-      }
-    ]
-  },
-  */
 
-
-
-  // COMPTE 
   {
     id: 'Comptes',
     title: '',
@@ -208,6 +196,8 @@ export const NavigationItems: NavigationItem[] = [
       },
     ]
   },
+
+  
 
 
   // FIN 
