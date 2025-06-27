@@ -40,6 +40,7 @@ export class DetailEditEntrepriseClientComponent {
   clientsAffilies: Clients[] = [];
   indicatif: string = '';
   maxPhoneLength: number = 0;
+  isLoading = false;
   
   // Définissez les indicatifs par pays
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number, exemple: string } } = {
@@ -248,36 +249,53 @@ updatePhoneValidator(longueur: number): void {
   }
 
   onSubmit() {
-    this.errorMessage = '';
-    this.successMessage = '';
+      this.errorMessage = '';
+      this.successMessage = '';
+      
+      // Activer l'indicateur de chargement
+      this.isLoading = true;
 
-    if (this.entrepriseClientForm.valid && this.client?.entrepriseClient?.id) {
-      const updatedEntreprise = this.getFormData();
-  
-      this.entrepriseClientService.updateEntrepriseClient(
-        this.client.entrepriseClient.id,
-        updatedEntreprise
-      ).subscribe({
-        next: (updatedEntreprise) => {
-          console.log('Entreprise mise à jour:', updatedEntreprise);
-          this.client.entrepriseClient = { 
-            ...this.client.entrepriseClient, 
-            ...updatedEntreprise 
-          };
-          // Option 1 : Recharger les données du client
-          this.getClient(this.client.id!);
+      // Ajouter un délai de 3 secondes avant la modification
+      setTimeout(() => {
+          if (this.entrepriseClientForm.valid && this.client?.entrepriseClient?.id) {
+              const updatedEntreprise = this.getFormData();
           
-          // Option 2 : Naviguer vers la liste (avec rafraîchissement)
-          this.router.navigate(['/clients']);
-        },
-        error: (err) => {
-          console.error('Erreur lors de la mise à jour:', err);
-          alert(err.message || 'Erreur lors de la modification');
-        }
-      });
-    } else {
-      alert('Veuillez corriger les erreurs dans le formulaire');
-    }
+              this.entrepriseClientService.updateEntrepriseClient(
+              this.client.entrepriseClient.id,
+              updatedEntreprise
+              ).subscribe({
+              next: (updatedEntreprise) => {
+                  console.log('Entreprise mise à jour:', updatedEntreprise);
+                  this.client.entrepriseClient = { 
+                  ...this.client.entrepriseClient, 
+                  ...updatedEntreprise 
+                  };
+                  
+                  // Ajout du message de succès
+                  this.successMessage = 'Entreprise mise à jour avec succès !';
+                  
+                  // Option 1 : Recharger les données du client
+                  this.getClient(this.client.id!);
+                  
+                  // Désactiver l'indicateur de chargement
+                  this.isLoading = false;
+                  
+                  // Effacer le message de succès après 3 secondes
+                  setTimeout(() => {
+                      this.successMessage = '';
+                  }, 3000);
+              },
+              error: (err) => {
+                  console.error('Erreur lors de la mise à jour:', err);
+                  this.errorMessage = err.error?.message || 'Erreur lors de la modification';
+                  this.isLoading = false;
+              }
+              });
+          } else {
+              this.errorMessage = 'Veuillez corriger les erreurs dans le formulaire';
+              this.isLoading = false;
+          }
+      }, 3000); // Délai de 3 secondes
   }
 
   private getFormData(): Entreprise {

@@ -33,6 +33,7 @@ export class DetailEditEntrepriseComponent {
   indicatif: string = '';
   maxPhoneLength: number = 0;
   facturesEntreprise: any[] = [];
+  isLoading = false;
   loadingFactures = false;
   errorFactures = '';
   isEditing = false;
@@ -268,23 +269,46 @@ export class DetailEditEntrepriseComponent {
   }
 
   onSubmit() {
-    if (this.entrepriseForm.invalid) return;
+      if (this.entrepriseForm.invalid) return;
+      
+      // Réinitialiser les messages
+      this.errorMessage = '';
+      this.successMessage = '';
+      
+      // Activer l'indicateur de chargement
+      this.isLoading = true;
 
-    const updatedData: EntrepriseClient = {
-      ...this.entrepriseData,
-      ...this.entrepriseForm.value
-    };
+      // Ajouter un délai de 3 secondes avant la modification
+      setTimeout(() => {
+          const updatedData: EntrepriseClient = {
+              ...this.entrepriseData,
+              ...this.entrepriseForm.value
+          };
 
-    this.entrepriseService.updateEntrepriseClient(this.entrepriseId, updatedData).subscribe({
-      next: () => {
-        this.successMessage = 'Entreprise modifiée avec succès!';
-        this.errorMessage = '';
-        setTimeout(() => this.router.navigate(['/clients']), 2000);
-      },
-      error: (err) => {
-        this.errorMessage = err.message || 'Erreur lors de la modification';
-        this.successMessage = '';
-      }
-    });
+          this.entrepriseService.updateEntrepriseClient(this.entrepriseId, updatedData).subscribe({
+              next: () => {
+                  // Afficher le message de succès immédiatement
+                  this.successMessage = 'Entreprise modifiée avec succès!';
+                  this.errorMessage = '';
+                  this.isLoading = false;
+                  
+                  // Attendre 2 secondes avant de désactiver le mode édition
+                  setTimeout(() => {
+                      // Désactiver le mode édition après 2 secondes
+                      this.isEditing = false;
+                      this.entrepriseForm.disable();
+                      
+                      // Recharger les données
+                      this.loadEntrepriseData();
+                  }, 2000);
+              },
+              error: (err) => {
+                  this.errorMessage = err.message || 'Erreur lors de la modification';
+                  this.successMessage = '';
+                  this.isLoading = false;
+              }
+          });
+      }, 3000); // Délai initial de 3 secondes
   }
+
 }

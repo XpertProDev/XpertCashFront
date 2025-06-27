@@ -7,6 +7,9 @@ import { Fournisseurs } from '../../MODELS/fournisseurs-model';
 import { ActivatedRoute } from '@angular/router';
 import imageCompression from 'browser-image-compression';
 import { environment } from 'src/environments/environment';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @Component({
   selector: 'app-detail-edit-fournisseur',
@@ -15,6 +18,9 @@ import { environment } from 'src/environments/environment';
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
+    MatTabsModule,
+    MatExpansionModule, 
+    MatFormFieldModule,
   ],
   templateUrl: './detail-edit-fournisseur.component.html',
   styleUrl: './detail-edit-fournisseur.component.scss'
@@ -188,31 +194,6 @@ export class DetailEditFournisseurComponent {
     this.router.navigate(['/fournisseurs']);
   }
 
-  // private loadFournisseur(): void {
-  //   const id = Number(this.route.snapshot.paramMap.get('id'));
-  //   this.fournisseurService.getFournisseurById(id).subscribe({
-  //     next: (data) => {
-  //       this.fournisseur = data;
-  //       // Mettre à jour les valeurs du formulaire
-  //       this.fournisseurEditForm.patchValue({
-  //         nomComplet: data.nomComplet,
-  //         email: data.email,
-  //         adresse: data.adresse,
-  //         pays: data.pays,
-  //         telephone: data.telephone,
-  //         description: data.description,
-  //         ville: data.ville,
-  //         nomSociete: data.nomSociete
-  //       });
-  //       // Mettre à jour la photo
-  //       this.fournisseurPhotoUrl = data.photo 
-  //         ? `${environment.apiBaseUrl}/${data.photo}` 
-  //         : null;
-  //     },
-  //     error: (err) => console.error('Erreur de chargement', err)
-  //   });
-  // }
-
   // detail-edit-fournisseur.component.ts
   private loadFournisseur(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -270,6 +251,9 @@ async modifierFournisseur() {
   try {
     const formValue = this.fournisseurEditForm.value;
 
+    // Ajout du délai de 3 secondes avant la modification
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     // Créez un nouvel objet sans propriétés indésirables
     const cleanedData: Fournisseurs = {
       id: this.fournisseur.id,
@@ -286,20 +270,19 @@ async modifierFournisseur() {
     };
     
     // Préparer les données pour l'API
-   const updatedFournisseur: Fournisseurs = {
-    id: this.fournisseur.id,
-    nomComplet: formValue.nomComplet,
-    email: formValue.email,
-    adresse: formValue.adresse,
-    pays: formValue.pays,
-    telephone: formValue.telephone,
-    description: formValue.description,
-    ville: formValue.ville,
-    nomSociete: formValue.nomSociete,
-    photo: this.fournisseur.photo,
-    createdAt: this.fournisseur.createdAt
-  };
-
+    const updatedFournisseur: Fournisseurs = {
+      id: this.fournisseur.id,
+      nomComplet: formValue.nomComplet,
+      email: formValue.email,
+      adresse: formValue.adresse,
+      pays: formValue.pays,
+      telephone: formValue.telephone,
+      description: formValue.description,
+      ville: formValue.ville,
+      nomSociete: formValue.nomSociete,
+      photo: this.fournisseur.photo,
+      createdAt: this.fournisseur.createdAt
+    };
 
     // Appeler le service
     await this.fournisseurService.updateFournisseur(
@@ -316,10 +299,10 @@ async modifierFournisseur() {
     this.loadFournisseur();
     
     // Désactiver le mode édition après 2s
-    setTimeout(() => {
-      this.isEditing = false;
-      this.fournisseurEditForm.disable();
-    }, 2000);
+    // setTimeout(() => {
+    //   this.isEditing = false;
+    //   this.fournisseurEditForm.disable();
+    // }, 3000);
 
   } catch (error: any) {
     console.error('Update error:', error);

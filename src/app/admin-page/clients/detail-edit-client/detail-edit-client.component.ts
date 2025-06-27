@@ -63,6 +63,7 @@ export class DetailEditClientComponent {
   maxPhoneLength: number = 0;
   entrepriseIndicatif: string = '';
   entrepriseMaxPhoneLength: number = 0;
+  isLoading = false;
 
   facturesClient: any[] = [];
   loadingFactures = false;
@@ -574,106 +575,114 @@ loadFacturesClient() {
     });
   }
   
-ajouterEntreprise() {
-    if (this.entrepriseForm.invalid) return;
-  
-    const newEntreprise: Entreprise = {
-      nom: this.entrepriseForm.value.nom,
-      pays: this.entrepriseForm.value.pays,
-      email: this.entrepriseForm.value.email,
-      telephone: this.entrepriseForm.value.telephone,
-      adresse: this.entrepriseForm.value.adresse,
-      siege: this.entrepriseForm.value.siege,
-      secteur: this.entrepriseForm.value.secteur,
-      logo : this.entrepriseForm.value.logo,
-      nif: this.entrepriseForm.value.nif,
-      nina: this.entrepriseForm.value.nina,
-      banque: this.entrepriseForm.value.banque,
-      rccm: this.entrepriseForm.value.rccm,
-      siteWeb: this.entrepriseForm.value.siteWeb,
-      signataire: this.entrepriseForm.value.signataire,
-      signataireNom: this.entrepriseForm.value.signataireNom,
-      prefixe: this.entrepriseForm.value.prefixe,
-      suffixe: this.entrepriseForm.value.suffixe,
-      tauxTva: this.entrepriseForm.value.tauxTva
-
-
-    };
-  
-    this.entrepriseService.addEntreprise(newEntreprise).subscribe({
-      next: (createdEntreprise) => {
-        const current = this.optionsEntreprise$.value;
-        this.optionsEntreprise$.next([createdEntreprise, ...current]); // Nouvelle entreprise en tête
-        this.control.setValue(createdEntreprise);
-        this.closePopup();
-        this.entrepriseForm.reset();
-      },
-      error: (error) => {
-        this.errorMessageApi = error.message || 'Erreur lors de la création';
-      }
-    });
+  ajouterEntreprise() {
+      if (this.entrepriseForm.invalid) return;
+    
+      // Activer l'indicateur de chargement
+      this.isLoading = true;
+    
+      // Créer un délai de 3 secondes
+      setTimeout(() => {
+          const newEntreprise: Entreprise = {
+              nom: this.entrepriseForm.value.nom,
+              pays: this.entrepriseForm.value.pays,
+              email: this.entrepriseForm.value.email,
+              telephone: this.entrepriseForm.value.telephone,
+              adresse: this.entrepriseForm.value.adresse,
+              siege: this.entrepriseForm.value.siege,
+              secteur: this.entrepriseForm.value.secteur,
+              logo : this.entrepriseForm.value.logo,
+              nif: this.entrepriseForm.value.nif,
+              nina: this.entrepriseForm.value.nina,
+              banque: this.entrepriseForm.value.banque,
+              rccm: this.entrepriseForm.value.rccm,
+              siteWeb: this.entrepriseForm.value.siteWeb,
+              signataire: this.entrepriseForm.value.signataire,
+              signataireNom: this.entrepriseForm.value.signataireNom,
+              prefixe: this.entrepriseForm.value.prefixe,
+              suffixe: this.entrepriseForm.value.suffixe,
+              tauxTva: this.entrepriseForm.value.tauxTva
+          };
+      
+          this.entrepriseService.addEntreprise(newEntreprise).subscribe({
+              next: (createdEntreprise) => {
+                  const current = this.optionsEntreprise$.value;
+                  this.optionsEntreprise$.next([createdEntreprise, ...current]);
+                  this.control.setValue(createdEntreprise);
+                  this.closePopup();
+                  this.entrepriseForm.reset();
+                  this.isLoading = false;
+              },
+              error: (error) => {
+                  this.errorMessageApi = error.message || 'Erreur lors de la création';
+                  this.isLoading = false;
+              }
+          });
+      }, 3000); // Délai de 3 secondes
   }
 
   // Soumission du formulaire client
   modifierClient() {
-    // Marquer tous les champs comme touchés pour afficher les erreurs
-    this.markFormGroupTouched(this.modifierClientForm);
-  
-    if (this.modifierClientForm.invalid) {
-      this.errorMessage = 'Veuillez corriger les erreurs dans le formulaire.';
-      return;
-    }
-  
-    // Vérification de l'entreprise si le toggle est activé
-    let entrepriseClient: Entreprise | null = null;
-    if (this.isEntrepriseSelected) {
-      entrepriseClient = this.control.value;
-      if (!entrepriseClient) {
-        this.entrepriseRequiredError = true;
-        this.errorMessage = 'Veuillez sélectionner ou créer une entreprise.';
+      // Marquer tous les champs comme touchés pour afficher les erreurs
+      this.markFormGroupTouched(this.modifierClientForm);
+    
+      if (this.modifierClientForm.invalid) {
+        this.errorMessage = 'Veuillez corriger les erreurs dans le formulaire.';
         return;
       }
-    }
-  
-    // Construction de l'objet client
-    // const clientData: any = {
-    //   ...this.modifierClientForm.value,
-    //   id: this.clientId
-    // };
-
-     // Construction de l'objet client avec photo optionnelle
-    const clientData: any = {
-      ...this.modifierClientForm.value,
-      id: this.clientId,
-      photo: this.clientPhotoUrl // Ajout de la propriété photo
-    };
-
-    if (this.isEntrepriseSelected && this.control.value?.id) {
-      clientData.entrepriseClient = { id: this.control.value.id };
-    } else {
-      clientData.entrepriseClient = null;
-    }
-
-    const imageFile = this.selectedImageFile ?? undefined;
-  
-    // Appel au service
-    this.clientService.updateClient(this.clientId, clientData, imageFile).subscribe({
-      next: (updatedClient) => {
-        this.successMessage = 'Client modifié avec succès !';
-        this.errorMessage = '';
-        setTimeout(() => this.router.navigate(['/clients']), 2000);
-        if (updatedClient.photo) {
-          this.clientPhotoUrl = this.clientService.getFullImageUrl(updatedClient.photo);
+    
+      // Vérification de l'entreprise si le toggle est activé
+      let entrepriseClient: Entreprise | null = null;
+      if (this.isEntrepriseSelected) {
+        entrepriseClient = this.control.value;
+        if (!entrepriseClient) {
+          this.entrepriseRequiredError = true;
+          this.errorMessage = 'Veuillez sélectionner ou créer une entreprise.';
+          return;
         }
-        this.newPhotoUrl = null;
-        this.selectedImageFile = null;
-      },
-      error: (error) => {
-        console.error('Erreur:', error);
-        this.errorMessage = error.error?.message || 'Erreur lors de la modification du client ';
-        this.successMessage = '';
       }
-    });
+    
+      // Activer l'indicateur de chargement
+      this.isLoading = true;
+      
+      // Créer un délai de 3 secondes avant la modification
+      setTimeout(() => {
+          // Construction de l'objet client avec photo optionnelle
+          const clientData: any = {
+            ...this.modifierClientForm.value,
+            id: this.clientId,
+            photo: this.clientPhotoUrl
+          };
+
+          if (this.isEntrepriseSelected && this.control.value?.id) {
+            clientData.entrepriseClient = { id: this.control.value.id };
+          } else {
+            clientData.entrepriseClient = null;
+          }
+
+          const imageFile = this.selectedImageFile ?? undefined;
+        
+          // Appel au service
+          this.clientService.updateClient(this.clientId, clientData, imageFile).subscribe({
+            next: (updatedClient) => {
+              this.successMessage = 'Client modifié avec succès !';
+              this.errorMessage = '';
+              setTimeout(() => this.router.navigate(['/clients']), 2000);
+              if (updatedClient.photo) {
+                this.clientPhotoUrl = this.clientService.getFullImageUrl(updatedClient.photo);
+              }
+              this.newPhotoUrl = null;
+              this.selectedImageFile = null;
+              this.isLoading = false;
+            },
+            error: (error) => {
+              console.error('Erreur:', error);
+              this.errorMessage = error.error?.message || 'Erreur lors de la modification du client ';
+              this.successMessage = '';
+              this.isLoading = false;
+            }
+          });
+      }, 3000); // Délai de 3 secondes
   }
   
   // Méthode utilitaire pour marquer tous les champs comme touchés
