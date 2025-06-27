@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import jsPDF from 'jspdf';
@@ -42,7 +42,7 @@ import { environment } from 'src/environments/environment';
 })
 export class ProduitsComponent implements OnInit {
   boutiqueId!: number;
-   private backendUrl = environment.apiBaseUrl;
+  private backendUrl = environment.apiBaseUrl;
   searchText: string = '';
   tasks: Produit[] = [];
   imagePopup: string | null = null;
@@ -58,10 +58,10 @@ export class ProduitsComponent implements OnInit {
   boutiqueActuelle: string = "Toutes les boutiques";
   boutiques: any[] = []; 
   private apiUrl = environment.imgUrl;
-
+  isDataLoaded = false; 
   isLoading = false;
+  showNoProductsMessage = false;
 
-  
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -81,6 +81,7 @@ export class ProduitsComponent implements OnInit {
     private router: Router,
     private usersService: UsersService,
     private dialog: MatDialog,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -293,6 +294,7 @@ export class ProduitsComponent implements OnInit {
 
   // Récupère les informations utilisateur et stocke les données dans le localStorage
   getUserInfo(): void {
+     
     this.usersService.getUserInfo().subscribe({
       next: (user) => {
         console.log('Données reçues:', user);
@@ -323,10 +325,20 @@ export class ProduitsComponent implements OnInit {
         // }
   
         this.addressBoutique = this.selectedBoutique?.adresse || 'Adresse non trouvée';
+        
+        setTimeout(() => {
+          this.showNoProductsMessage = this.tasks.length === 0;
+          this.cdr.detectChanges();
+        }, 500);
       },
       error: (err) => {
         this.boutiques = [];
+        
         console.error("Erreur lors de la récupération des informations utilisateur :", err);
+        setTimeout(() => {
+          this.showNoProductsMessage = this.tasks.length === 0;
+          this.cdr.detectChanges();
+        }, 500);
       }
     });
   }
@@ -360,6 +372,8 @@ export class ProduitsComponent implements OnInit {
 
   // Ajoutez cette nouvelle méthode
   loadAllProduits(): void {
+    
+    this.showNoProductsMessage = false;
     if (!this.entrepriseId) {
       console.error('ID entreprise manquant');
       return;
@@ -388,13 +402,21 @@ export class ProduitsComponent implements OnInit {
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;
         }
+        
+        this.showNoProductsMessage = this.tasks.length === 0;
       },
-      error: (err) => console.error("Erreur :", err)
+      error: (err) => {
+         // Ajouter cette ligne
+        console.error("Erreur :", err);
+        this.showNoProductsMessage = this.tasks.length === 0;
+      }
     });
   }
 
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
   loadProduits(boutiqueId: number): void {
+    
+    this.showNoProductsMessage = false;
     if (!boutiqueId) {
       console.error('L\'ID de la boutique est manquant');
       return;
@@ -453,9 +475,12 @@ export class ProduitsComponent implements OnInit {
           this.dataSource.paginator = this.paginator;
         }
         this.isLoading = false;
+        
+        this.showNoProductsMessage = this.tasks.length === 0;
       },
       error: (err) => {
         this.isLoading = false;
+        
         if (err.message === 'BOUTIQUE_DESACTIVEE') {
           this.showSuspendedBoutiqueDialog();
           // Réinitialiser la sélection à la précédente
@@ -463,85 +488,86 @@ export class ProduitsComponent implements OnInit {
           return;
         }
         console.error("Erreur :", err);
+        this.showNoProductsMessage = this.tasks.length === 0;
       }
     });
   }
 
-rafraichirProduits(): void {
-  if (!this.selectedBoutique?.id) return;
+  rafraichirProduits(): void {
+    this.showNoProductsMessage = false;
+    if (!this.selectedBoutique?.id) return;
 
-  this.isLoading = true;
-  const start = Date.now();
+    this.isLoading = true;
+    const start = Date.now();
 
-  this.produitService.getProduitsEntreprise(this.selectedBoutique.id).subscribe({
-    next: (produits: Produit[]) => {
-      const elapsed = Date.now() - start;
-      const delay = Math.max(500 - elapsed, 0); // minimum 500 ms
+    this.produitService.getProduitsEntreprise(this.selectedBoutique.id).subscribe({
+      next: (produits: Produit[]) => {
+        const elapsed = Date.now() - start;
+        const delay = Math.max(500 - elapsed, 0); // minimum 500 ms
 
-      setTimeout(() => {
-        // Traitement des produits (ton code actuel)
-        this.tasks = produits.map(prod => {
-          const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
-            ? `${this.apiUrl}${prod.photo}`
-            
-            : '';
-          let createdAt = '';
-          if (prod.createdAt) {
-            if (prod.createdAt.includes('à')) {
-              const [datePart, timePart] = prod.createdAt.split(' à ');
-              // format personnalisé si besoin
-            } else {
-              createdAt = new Date(prod.createdAt).toISOString();
+        setTimeout(() => {
+          // Traitement des produits (ton code actuel)
+          this.tasks = produits.map(prod => {
+            const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
+              ? `${this.apiUrl}${prod.photo}`
+              
+              : '';
+            let createdAt = '';
+            if (prod.createdAt) {
+              if (prod.createdAt.includes('à')) {
+                const [datePart, timePart] = prod.createdAt.split(' à ');
+                // format personnalisé si besoin
+              } else {
+                createdAt = new Date(prod.createdAt).toISOString();
+              }
             }
+
+            return {
+              id: prod.id,
+              codeGenerique: prod.codeGenerique || '',
+              codeBare: prod.codeBare || '',
+              nom: prod.nom || 'Nom inconnu',
+              description: prod.description || '',
+              prixVente: prod.prixVente || 0,
+              prixAchat: prod.prixAchat || 0,
+              quantite: prod.quantite || 0,
+              seuilAlert: prod.seuilAlert || 0,
+              enStock: prod.enStock || false,
+              photo: fullImageUrl,
+              nomCategorie: prod.nomCategorie || '',
+              nomUnite: prod.nomUnite || '',
+              createdAt: createdAt,
+              categorieId: prod.categorieId || 0,
+              uniteId: prod.uniteId || 0,
+              typeProduit: prod.typeProduit || 'Non défini',
+              boutiques: prod.boutiques || []
+            } as Produit;
+          }).sort((a, b) => {
+            const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
+            const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
+            return dateB - dateA;
+          });
+
+          this.dataSource.data = this.tasks;
+          if (this.paginator) {
+            this.dataSource.paginator = this.paginator;
           }
 
-          return {
-            id: prod.id,
-            codeGenerique: prod.codeGenerique || '',
-            codeBare: prod.codeBare || '',
-            nom: prod.nom || 'Nom inconnu',
-            description: prod.description || '',
-            prixVente: prod.prixVente || 0,
-            prixAchat: prod.prixAchat || 0,
-            quantite: prod.quantite || 0,
-            seuilAlert: prod.seuilAlert || 0,
-            enStock: prod.enStock || false,
-            photo: fullImageUrl,
-            nomCategorie: prod.nomCategorie || '',
-            nomUnite: prod.nomUnite || '',
-            createdAt: createdAt,
-            categorieId: prod.categorieId || 0,
-            uniteId: prod.uniteId || 0,
-            typeProduit: prod.typeProduit || 'Non défini',
-            boutiques: prod.boutiques || []
-          } as Produit;
-        }).sort((a, b) => {
-          const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
-          const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
-          return dateB - dateA;
-        });
-
-        this.dataSource.data = this.tasks;
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
-        }
-
+          this.isLoading = false;
+        }, delay); 
+      },
+      error: (err) => {
         this.isLoading = false;
-      }, delay);
-    },
-    error: (err) => {
-      this.isLoading = false;
-      if (err.message === 'BOUTIQUE_DESACTIVEE') {
-        this.showSuspendedBoutiqueDialog();
-        this.selectedBoutique = this.previousSelectedBoutique;
-      } else {
-        console.error("Erreur :", err);
+        
+        if (err.message === 'BOUTIQUE_DESACTIVEE') {
+          this.showSuspendedBoutiqueDialog();
+          this.selectedBoutique = this.previousSelectedBoutique;
+        } else {
+          console.error("Erreur :", err);
+        }
       }
-    }
-  });
-}
-
-
+    });
+  }
   
   public showSuspendedBoutiqueDialog(): void {
     this.dialog.open(SuspendedBoutiqueDialogComponent, {

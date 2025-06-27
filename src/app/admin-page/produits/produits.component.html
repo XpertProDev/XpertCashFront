@@ -39,7 +39,7 @@
                 <p class="all_boutique">Toutes les boutiques</p>
             </div>
         
-            <ng-container *ngIf="(boutiques?.length || 0) > 0; else noBoutiques">
+            <ng-container *ngIf="(boutiques?.length || 0) > 0;">
                 <ng-container *ngFor="let boutique of boutiques || []; let i = index">
                     <div cdkDrag class="draggable-item" [class.name_boutique_active]="boutique.id === selectedBoutique?.id && boutique.actif"
                         [class.suspended-boutique]="!boutique.actif"
@@ -54,9 +54,9 @@
                 </ng-container>
             </ng-container>
 
-            <ng-template #noBoutiques>
+            <!-- <ng-template #noBoutiques>
                 <p class="no-boutiques-message">Aucune boutique trouvée</p>
-            </ng-template>
+            </ng-template> -->
         </div>
     </div>
 </div>
@@ -131,13 +131,13 @@
   </table>
 
   <!-- Message si aucun produit n'est présent -->
-  <div *ngIf="tasks.length === 0" style="text-align: center; margin-top: 20px;">
+  <div *ngIf="showNoProductsMessage && !isLoading" style="text-align: center; margin-top: 20px;">
     <p style="color: red;">Vous n'avez pas de produit</p>
   </div>
 
   <!-- Pagination -->
   <div class="pagination">
-    <mat-paginator [length]="tasks.length"
+    <mat-paginator *ngIf="tasks.length > 5" [length]="tasks.length"
                    [pageSize]="pageSize"
                    [pageSizeOptions]="[5, 10, 25, 100]"
                    (page)="onPageChange($event)">

@@ -81,9 +81,8 @@ export class FactureComponent  implements AfterViewInit {
   produit: Produit | undefined;
   stockHistory: any[] = [];
 
-  noFacturesAvailable = false;
-  messageNoFacture = 'Aucune facture disponible.';
-
+  showNoFactureMessage = false;
+  noFacturesMessage = 'Aucune facture disponible.';
   factures: FactureWithDataSource[] = [];
 
   // Ajouter ces nouvelles propriétés
@@ -504,25 +503,29 @@ blobToBase64(blob: Blob): Promise<string> {
   }
 
   getUserInfo(): void {
-    this.userService.getUserInfo().subscribe({
-      next: (user) => {
-      this.userInfo = user;
-        this.boutiques = user.boutiques;
-        this.entrepriseId = user.entrepriseId;
-        this.factureService.setBoutiques(this.boutiques);
-        if (this.boutiques.length > 0) {
-          this.selectedBoutique = null;
-          this.loadAllFactures();
-        } else {
-          this.noFacturesAvailable = true;
-          this.messageNoFacture = 'Aucune boutique trouvée.';
+      this.userService.getUserInfo().subscribe({
+        next: (user) => {
+          this.userInfo = user;
+          this.boutiques = user.boutiques;
+          this.entrepriseId = user.entrepriseId;
+          this.factureService.setBoutiques(this.boutiques);
+          
+          if (this.boutiques.length > 0) {
+            this.selectedBoutique = null;
+            this.showNoFactureMessage = false; // Ajouter cette ligne
+            this.loadAllFactures();
+          } else {
+            this.noFacturesMessage = 'Aucune boutique trouvée.'; // Modifier cette ligne
+            this.showNoFactureMessage = true; // Modifier cette ligne
+          }
+          this.showNoFactureMessage = false;
+        },
+        error: (err) => {
+          console.error("Erreur lors de la récupération des informations utilisateur :", err);
+          this.showNoFactureMessage = true; // Ajouter cette ligne
         }
-      },
-      error: (err) => {
-        console.error("Erreur lors de la récupération des informations utilisateur :", err);
-      }
-    });
-  }
+      });
+    }
 
   selectBoutique(boutique: any | null): void {
     if (boutique && !boutique.actif) {
@@ -540,6 +543,7 @@ blobToBase64(blob: Blob): Promise<string> {
 
   // Dans loadFactures()
   loadFactures(boutiqueId: number): void {
+    this.showNoFactureMessage = false;
     this.factureService.getFacturesByBoutique(boutiqueId).subscribe({
       next: (data) => {
         const facturesWithBoutique = data.map(f => ({
@@ -551,12 +555,14 @@ blobToBase64(blob: Blob): Promise<string> {
       error: (error) => {
         console.error('Erreur:', error);
         this.processFactures([]);
+        this.showNoFactureMessage = true;
       }
     });
   }
 
   // Dans loadAllFactures()
   loadAllFactures(): void {
+    this.showNoFactureMessage = false;
     const requests = this.boutiques.map(b => 
       this.factureService.getFacturesByBoutique(b.id)
     );
@@ -571,13 +577,17 @@ blobToBase64(blob: Blob): Promise<string> {
         });
         this.processFactures(allFactures);
       },
-      error: (error) => console.error('Erreur:', error)
+      error: (error) => {
+        console.error('Erreur:', error);
+        this.showNoFactureMessage = true;
+      }
     });
   }
 
   private processFactures(data: Facture[] | null): void {
     if (!data || !Array.isArray(data)) {
-      this.noFacturesAvailable = true;
+      this.showNoFactureMessage = true;
+      // this.noFacturesAvailable = true;
       this.factures = [];
       this.filteredFactures = [];
       return;
@@ -592,7 +602,7 @@ blobToBase64(blob: Blob): Promise<string> {
     }));
   
     this.filteredFactures = [...this.factures];
-    this.noFacturesAvailable = this.factures.length === 0;
+    this.showNoFactureMessage = this.factures.length === 0;
     this.updatePaginatedFactures();
   }
 

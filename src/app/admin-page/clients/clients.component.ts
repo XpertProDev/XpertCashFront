@@ -30,11 +30,7 @@ import { environment } from "src/environments/environment";
 })
 export class ClientsComponent implements OnInit  {
   // API URL de limage est http://31.207.34.194:8080
-    private apiUrl = environment.imgUrl;
-
-
-  
-
+  private apiUrl = environment.imgUrl;
   isListView = true;
   showDropdown = false;
   showPopup = false;
@@ -59,6 +55,8 @@ export class ClientsComponent implements OnInit  {
   currentListType: 'clients' | 'entreprises' = 'clients';
   entreprises: EntrepriseClient[] = [];
   messageNoEntreprise = 'Aucune entreprise disponible.';
+  clientsLoaded = false;
+  entreprisesLoaded = false;
 
   constructor(
     private clientService: ClientService,
@@ -67,9 +65,8 @@ export class ClientsComponent implements OnInit  {
   ) {}
 
   ngOnInit() {
-    // Récupérer les préférences depuis localStorage
     const savedView = localStorage.getItem('viewPreference');
-  this.isListView = savedView !== 'grid'; 
+    this.isListView = savedView !== 'grid'; 
     
     const savedListType = localStorage.getItem('listTypePreference');
     if (savedListType === 'clients' || savedListType === 'entreprises') {
@@ -79,11 +76,22 @@ export class ClientsComponent implements OnInit  {
     if (this.currentListType === 'clients') {
       this.getListClients();
     } else {
-      this.getListEntreprises(); // Charger les entreprises si c'est le type sélectionné
+      this.getListEntreprises();
     }
   }
 
   // Gestion de la pagination
+  // onPageChange(event: PageEvent): void {
+  //   if (this.currentListType === 'clients') {
+  //     this.currentPageClients = event.pageIndex;
+  //   } else {
+  //     this.currentPageEntreprises = event.pageIndex;
+  //   }
+    
+  //   this.currentPage = event.pageIndex;
+  //   this.pageSize = event.pageSize;
+  // }
+
   onPageChange(event: PageEvent): void {
     if (this.currentListType === 'clients') {
       this.currentPageClients = event.pageIndex;
@@ -93,6 +101,12 @@ export class ClientsComponent implements OnInit  {
     
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
+    
+    // Forcez la détection des changements
+    setTimeout(() => {
+      this.clientsLoaded = true;
+      this.entreprisesLoaded = true;
+    }, 0);
   }
 
   toggleView(viewType: 'list' | 'grid') {
@@ -110,15 +124,25 @@ export class ClientsComponent implements OnInit  {
     this.currentListType = type;
     this.showTypeDropdown = false;
     localStorage.setItem('listTypePreference', type);
+
+    this.clientsLoaded = false;
+    this.entreprisesLoaded = false;
     
-    if (type === 'entreprises' && this.entreprises.length === 0) {
+    // if (type === 'entreprises' && this.entreprises.length === 0) {
+    //   this.getListEntreprises();
+    // } else if (type === 'clients' && this.clients.length === 0) {
+    //   this.getListClients();
+    // }
+
+    if (type === 'entreprises') {
       this.getListEntreprises();
-    } else if (type === 'clients' && this.clients.length === 0) {
+    } else {
       this.getListClients();
     }
   }
 
   getListEntreprises() {
+    this.entreprisesLoaded = false;
     const token = localStorage.getItem('authToken');
     if (token) {
       // Utiliser le service EntrepriseService au lieu de ClientService
@@ -130,13 +154,16 @@ export class ClientsComponent implements OnInit  {
           this.entreprises = this.entreprises.sort((a: EntrepriseClient, b: EntrepriseClient) => 
             (b.id ?? 0) - (a.id ?? 0)
           );
+          this.entreprisesLoaded = true;
         },
         error: (err) => {
           console.error('Erreur lors de la récupération des entreprises :', err);
+          this.entreprisesLoaded = true;
         }
       });
     } else {
       console.error('Aucun token trouvé !');
+      this.entreprisesLoaded = true;
     }
   }
 
@@ -181,6 +208,7 @@ export class ClientsComponent implements OnInit  {
 
   // list clients 
  getListClients() {
+  this.clientsLoaded = false;
   const token = localStorage.getItem('authToken');
   if (token) {
     this.clientService.getListClients().subscribe({
@@ -215,13 +243,16 @@ export class ClientsComponent implements OnInit  {
           console.log('👤 Exemple client :', this.clients[0]);
         }
 
+        this.clientsLoaded = true;
       },
       error: (err) => {
         console.error('❌ Erreur récupération clients :', err);
+        this.clientsLoaded = true;
       }
     });
   } else {
     console.error('🔐 Aucun token trouvé !');
+    this.clientsLoaded = true;
   }
 }
 

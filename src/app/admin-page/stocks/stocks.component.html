@@ -117,13 +117,13 @@
   </table>
 
   <!-- Message si aucun produit n'est présent -->
-  <div *ngIf="tasks.length === 0" style="text-align: center; margin-top: 20px;">
+  <div *ngIf="showNoProductsMessage" style="text-align: center; margin-top: 20px;">
     <p style="color: red;">Vous n'avez pas de produit</p>
   </div>
 
   <!-- Pagination -->
   <div class="pagination">
-    <mat-paginator [length]="tasks.length"
+    <mat-paginator *ngIf="tasks.length > 5" [length]="tasks.length"
                    [pageSize]="pageSize"
                    [pageSizeOptions]="[5, 10, 25, 100]"
                    (page)="onPageChange($event)">

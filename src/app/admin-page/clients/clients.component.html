@@ -312,13 +312,13 @@
     </div>
 
     <!-- Message quand il n'y a pas d'entreprise -->
-    <div *ngIf="entreprises.length === 0 && currentListType === 'entreprises'" class="no-client-message">
+    <div *ngIf="entreprisesLoaded && entreprises.length === 0 && currentListType === 'entreprises'" class="no-client-message">
       {{ messageNoEntreprise }}
     </div>
 
     <!-- Pagination pour les entreprises -->
     <div class="pagination" *ngIf="currentListType === 'clients'">
-      <mat-paginator
+      <mat-paginator *ngIf="clients.length > 6"
         [length]="clients.length"
         [pageIndex]="currentPageClients"
         [pageSize]="pageSize"
@@ -328,13 +328,13 @@
     </div>
 
     <!-- Message quand il n'y a pas de client -->
-    <div *ngIf="clients.length === 0 && currentListType === 'clients'" class="no-client-message">
+    <div *ngIf="clientsLoaded && clients.length === 0 && currentListType === 'clients'" class="no-client-message">
       {{ messageNoClient }}
     </div>
 
     <!-- Pagination -->
     <div class="pagination" *ngIf="currentListType === 'entreprises'">
-      <mat-paginator
+      <mat-paginator *ngIf="entreprises.length > 6"
         [length]="entreprises.length"
         [pageIndex]="currentPageEntreprises"
         [pageSize]="pageSize"
