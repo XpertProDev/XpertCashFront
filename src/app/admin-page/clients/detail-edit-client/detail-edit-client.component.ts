@@ -583,41 +583,41 @@ loadFacturesClient() {
     
       // Créer un délai de 3 secondes
       setTimeout(() => {
-          const newEntreprise: Entreprise = {
-              nom: this.entrepriseForm.value.nom,
-              pays: this.entrepriseForm.value.pays,
-              email: this.entrepriseForm.value.email,
-              telephone: this.entrepriseForm.value.telephone,
-              adresse: this.entrepriseForm.value.adresse,
-              siege: this.entrepriseForm.value.siege,
-              secteur: this.entrepriseForm.value.secteur,
-              logo : this.entrepriseForm.value.logo,
-              nif: this.entrepriseForm.value.nif,
-              nina: this.entrepriseForm.value.nina,
-              banque: this.entrepriseForm.value.banque,
-              rccm: this.entrepriseForm.value.rccm,
-              siteWeb: this.entrepriseForm.value.siteWeb,
-              signataire: this.entrepriseForm.value.signataire,
-              signataireNom: this.entrepriseForm.value.signataireNom,
-              prefixe: this.entrepriseForm.value.prefixe,
-              suffixe: this.entrepriseForm.value.suffixe,
-              tauxTva: this.entrepriseForm.value.tauxTva
-          };
-      
-          this.entrepriseService.addEntreprise(newEntreprise).subscribe({
-              next: (createdEntreprise) => {
-                  const current = this.optionsEntreprise$.value;
-                  this.optionsEntreprise$.next([createdEntreprise, ...current]);
-                  this.control.setValue(createdEntreprise);
-                  this.closePopup();
-                  this.entrepriseForm.reset();
-                  this.isLoading = false;
-              },
-              error: (error) => {
-                  this.errorMessageApi = error.message || 'Erreur lors de la création';
-                  this.isLoading = false;
-              }
-          });
+        const newEntreprise: Entreprise = {
+            nom: this.entrepriseForm.value.nom,
+            pays: this.entrepriseForm.value.pays,
+            email: this.entrepriseForm.value.email,
+            telephone: this.entrepriseForm.value.telephone,
+            adresse: this.entrepriseForm.value.adresse,
+            siege: this.entrepriseForm.value.siege,
+            secteur: this.entrepriseForm.value.secteur,
+            logo : this.entrepriseForm.value.logo,
+            nif: this.entrepriseForm.value.nif,
+            nina: this.entrepriseForm.value.nina,
+            banque: this.entrepriseForm.value.banque,
+            rccm: this.entrepriseForm.value.rccm,
+            siteWeb: this.entrepriseForm.value.siteWeb,
+            signataire: this.entrepriseForm.value.signataire,
+            signataireNom: this.entrepriseForm.value.signataireNom,
+            prefixe: this.entrepriseForm.value.prefixe,
+            suffixe: this.entrepriseForm.value.suffixe,
+            tauxTva: this.entrepriseForm.value.tauxTva
+        };
+    
+        this.entrepriseService.addEntreprise(newEntreprise).subscribe({
+            next: (createdEntreprise) => {
+                const current = this.optionsEntreprise$.value;
+                this.optionsEntreprise$.next([createdEntreprise, ...current]);
+                this.control.setValue(createdEntreprise);
+                this.closePopup();
+                this.entrepriseForm.reset();
+                this.isLoading = false;
+            },
+            error: (error) => {
+                this.errorMessageApi = error.message || 'Erreur lors de la création';
+                this.isLoading = false;
+            }
+        });
       }, 3000); // Délai de 3 secondes
   }
 
