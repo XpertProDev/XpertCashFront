@@ -296,7 +296,14 @@ async modifierFournisseur() {
     // Réinitialiser après succès
     this.selectedCompressedFile = null;
     this.newPhotoUrl = null;
-    this.loadFournisseur();
+    setTimeout(() => {
+      // Désactiver le mode édition après 2 secondes
+      this.isEditing = false;
+      this.fournisseurEditForm.disable();
+      
+      // Recharger les données
+      this.loadFournisseur();
+    }, 500);
     
     // Désactiver le mode édition après 2s
     // setTimeout(() => {

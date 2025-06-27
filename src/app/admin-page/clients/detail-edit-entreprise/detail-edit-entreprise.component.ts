@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { EntrepriseClient } from '../../MODELS/entreprise-clients-model';
 import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-service';
@@ -37,6 +37,7 @@ export class DetailEditEntrepriseComponent {
   loadingFactures = false;
   errorFactures = '';
   isEditing = false;
+  control = new FormControl();
   selectedFactureId: number | null = null;
   factureDetails: any = null;
   entrepriseEmitter: any = {};
@@ -89,6 +90,8 @@ export class DetailEditEntrepriseComponent {
       this.loadFacturesEntreprise();
     });
     this.loadEntrepriseEmitter();
+    this.entrepriseForm.disable();
+    this.control.disable();
   }
 
   loadEntrepriseEmitter(): void {

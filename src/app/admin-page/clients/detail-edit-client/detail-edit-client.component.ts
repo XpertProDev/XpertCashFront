@@ -170,6 +170,7 @@ export class DetailEditClientComponent {
   }
 
   onFileSelected(event: Event): void {
+    this.errorMessage = '';
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
       const file = input.files[0];
@@ -556,6 +557,10 @@ loadFacturesClient() {
 
   // Ouvre/ferme le popup d’entreprise
   openPopup() {
+    if (!this.isEditing) {
+      this.errorMessage = "Activez le mode édition pour créer une entreprise";
+      return;
+    }
     if (!this.isEditing) return;
     
     this.getEntrepriseForm();
@@ -574,7 +579,9 @@ loadFacturesClient() {
     });
     
     this.showPopup = true;
+    this.entrepriseRequiredError = false;
   }
+  
   closePopup() { this.showPopup = false; }
   
   initEntreprise() {
@@ -636,6 +643,11 @@ loadFacturesClient() {
   }
 
   modifierClient() {
+
+    this.errorMessage = '';
+    this.errorMessageApi = '';
+    this.successMessage = '';
+
     // Marquer tous les champs comme touchés pour afficher les erreurs
     this.markFormGroupTouched(this.modifierClientForm);
 
@@ -645,14 +657,20 @@ loadFacturesClient() {
     }
 
     // Vérification de l'entreprise si le toggle est activé
-    let entrepriseClient: Entreprise | null = null;
-    if (this.isEntrepriseSelected) {
-      entrepriseClient = this.control.value;
-      if (!entrepriseClient) {
-        this.entrepriseRequiredError = true;
-        this.errorMessage = 'Veuillez sélectionner ou créer une entreprise.';
-        return;
-      }
+    // let entrepriseClient: Entreprise | null = null;
+    // if (this.isEntrepriseSelected) {
+    //   entrepriseClient = this.control.value;
+    //   if (!entrepriseClient) {
+    //     this.entrepriseRequiredError = true;
+    //     this.errorMessage = 'Veuillez sélectionner ou créer une entreprise.';
+    //     return;
+    //   }
+    // }
+
+
+    if (this.isEntrepriseSelected && !this.control.value) {
+      this.errorMessage = 'Veuillez sélectionner ou créer une entreprise.';
+      return;
     }
 
     // Activer l'indicateur de chargement
@@ -734,10 +752,13 @@ loadFacturesClient() {
     this.isEditing = !this.isEditing;
     
     if (this.isEditing) {
-      this.control.enable(); // Activer le contrôle
+      this.control.enable();
       this.modifierClientForm.enable();
     } else {
-      this.control.disable(); // Désactiver le contrôle
+      // Réinitialiser les erreurs en sortant du mode édition
+      this.errorMessage = '';
+      this.entrepriseRequiredError = false;
+      this.control.disable();
       this.modifierClientForm.disable();
       this.loadClientData();
     }

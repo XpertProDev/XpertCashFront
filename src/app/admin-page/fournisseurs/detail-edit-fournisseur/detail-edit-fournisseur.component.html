@@ -1,3 +1,16 @@
+
+<div class="toast-container">
+  <!-- Message d'erreur principal -->
+  <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <!-- Message de succès -->
+  <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+    {{ successMessage }}
+  </div>
+</div>
+
 <div class="container_client">
 
   <div *ngIf="isLoading" class="loading-overlay">
@@ -151,8 +164,8 @@
                 <!-- Message d'erreur global -->
               <div class="container_error_message">
                   <!-- Messages API -->
-                  <div *ngIf="errorMessage" class="error-messageApi2">{{ errorMessage }}</div>
-                  <div *ngIf="successMessage" class="success-messageApi2">{{ successMessage }}</div>
+                  <!-- <div *ngIf="errorMessage" class="error-messageApi2">{{ errorMessage }}</div>
+                  <div *ngIf="successMessage" class="success-messageApi2">{{ successMessage }}</div> -->
               </div>
 
               <div class="info_titre_input info_titre_input_btn">
