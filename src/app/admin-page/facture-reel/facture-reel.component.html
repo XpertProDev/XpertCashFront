@@ -8,6 +8,18 @@
     <!-- En-tête -->
     <div class="tasks-header">
       <h1 class="title">Factures </h1>
+  
+      <div class="actions">
+
+        <div class="contentIcon">
+          <div class="bare"></div>
+        </div>
+
+        <div class="inputSearch">
+          <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..."  />
+          <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-  search-2-line'" (click)="clearSearch()"></i>
+        </div>
+      </div>
     </div>
   
     <!-- Vue Grille -->
@@ -77,14 +89,14 @@
       </div>
     </div>
 
-      <!-- Message vide -->
-  <div *ngIf="factureReel.length === 0" class="no-client-message">
-    Aucun facture trouvé
-  </div>
+    <!-- Message vide -->
+    <div *ngIf="facturesLoaded && factureReel.length === 0" class="no-client-message">
+      Aucun facture trouvé
+    </div>
   
     <!-- Pagination -->
     <div class="pagination">
-      <mat-paginator [length]="factureReel.length" 
+      <mat-paginator *ngIf="factureReel.length > 6" [length]="factureReel.length" 
                      [pageSize]="pageSize" 
                      [pageSizeOptions]="[6, 10, 25, 100]"
                      (page)="onPageChange($event)">

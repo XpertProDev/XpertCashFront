@@ -58,6 +58,7 @@ export class FactureProformaComponent implements OnInit {
     showDropdown = false;
     searchTerm: string = '';
     filteredFactures: any[] = [];
+    facturesLoaded = false;
 
     // Pagination
     pageSize = 6;
@@ -157,6 +158,7 @@ export class FactureProformaComponent implements OnInit {
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
+        this.facturesLoaded = true;
       }
     });
   }
@@ -164,6 +166,7 @@ export class FactureProformaComponent implements OnInit {
 
   loadFactproformaOfEntreprise(userEntrepriseId: number) {
     this.isLoading = true;
+    this.facturesLoaded = false;
     this.factureProFormaService.getAlFactproformaOfEntreprise(userEntrepriseId).subscribe({
       next: (data) => {
         this.facturesproforma = data.map(facturesproforma => ({
@@ -171,11 +174,13 @@ export class FactureProformaComponent implements OnInit {
         }));
         this.filteredFactures = [...this.facturesproforma];
         this.isLoading = false;
+        this.facturesLoaded = true;
         console.log('Facture proforma récupérés:', this.facturesproforma);
       },
       error: (err) => {
         console.error('Erreur lors du chargement des facture proforma', err);
         this.isLoading = false;
+        this.facturesLoaded = true;
       }
     });
   }

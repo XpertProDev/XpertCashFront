@@ -24,10 +24,13 @@ export class FactureReelComponent implements OnInit {
   factureReel: any[] = [];
   userEntrepriseId: number | null = null;
   errorMessage: string = '';
+  facturesLoaded = false;
+  searchTerm: string = '';
   
   // Pagination
   pageSize = 6;
   currentPage = 0;
+  
 
   constructor(
     private factureReelService: FactureReelService,
@@ -47,15 +50,18 @@ export class FactureReelComponent implements OnInit {
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
+        this.facturesLoaded = true;
       }
     });
   }
 
 getAllFactureReelOfEntreprise(entrepriseId: number): void {
+  this.facturesLoaded = false;
   this.factureReelService.getAlFactproreelOfEntreprise(entrepriseId).subscribe(
     (response: any[]) => {
       this.factureReel = response;
       this.errorMessage = "";
+      this.facturesLoaded = true;
     },
     (error: any) => {
       console.error('Erreur lors de la récupération des factures réelles:', error);
@@ -74,6 +80,7 @@ getAllFactureReelOfEntreprise(entrepriseId: number): void {
       }
 
       this.factureReel = [];
+      this.facturesLoaded = true;
     }
   );
 }
@@ -92,20 +99,23 @@ getAllFactureReelOfEntreprise(entrepriseId: number): void {
     return this.factureReel.slice(start, start + this.pageSize);
   }
 
-getLibelleStatut(statut: string): string {
-  switch (statut) {
-    case 'EN_ATTENTE':
-      return 'En attente';
-    case 'PARTIELLEMENT_PAYEE':
-      return 'Part. payée';
-    case 'PAYEE':
-    case 'PAYE':
-      return 'Payée';
-    default:
-      return 'Inconnu';
+  getLibelleStatut(statut: string): string {
+    switch (statut) {
+      case 'EN_ATTENTE':
+        return 'En attente';
+      case 'PARTIELLEMENT_PAYEE':
+        return 'Part. payée';
+      case 'PAYEE':
+      case 'PAYE':
+        return 'Payée';
+      default:
+        return 'Inconnu';
+    }
   }
-}
 
+  clearSearch(): void {
+    this.searchTerm = '';
+  }
 
 
  getImageSrc(statut: string): string {
