@@ -27,6 +27,8 @@ export class AddFournisseurComponent {
   maxPhoneLength: number = 0;
   image: string | null = null; 
   selectedLogoFile?: File;
+  isPreviewVisible = false;
+  previewImage: string | null = null;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
 
@@ -174,6 +176,29 @@ export class AddFournisseurComponent {
 
   goToFournisseur() {
     this.router.navigate(['/fournisseurs']);
+  }
+
+  showImagePreview() {
+    if (this.image) {
+        this.previewImage = this.image;
+        this.isPreviewVisible = true;
+    }
+}
+
+  closePreview() {
+      this.isPreviewVisible = false;
+  }
+
+  removeImage() {
+      this.image = null;
+      this.selectedLogoFile = undefined;
+      this.previewImage = null;
+      this.isPreviewVisible = false;
+      
+      // Réinitialiser l'input file
+      if (this.fileInput && this.fileInput.nativeElement) {
+          this.fileInput.nativeElement.value = '';
+      }
   }
 
   async onFileSelected(event: Event): Promise<void> {

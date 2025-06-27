@@ -142,19 +142,30 @@
                             style="display: none;"
                             id="uniqueFileInputId">
 
-                      <div class="champ_grid" style="margin: 10px 0 15px; display: flex; align-items: center; justify-content: space-between;">
+                    <div class="champ_grid" style="margin: 10px 0 15px; display: flex; align-items: center; justify-content: space-between;">
                         <p style="margin: 0; font-size: 12px; display: flex; align-items: center;">
                             Changer votre logo ici 👉
                             <a href="javascript:void(0)"
-                            (click)="fileInput.click()"
-                            title="Changer le logo"
-                            style="padding-left: 8px; cursor: pointer; display: inline-flex; align-items: center;">
+                              (click)="fileInput.click()"
+                              title="Changer le logo"
+                              style="padding-left: 8px; cursor: pointer; display: inline-flex; align-items: center;">
                                 <img src="assets/img/appareil.png" alt="Changer logo" style="width: 25px; height: 25px;"/>
                             </a>
                         </p>
 
-                        <div class="imgClient2">
-                          <img src="assets/img/profil.png" alt="Photo client">
+                        <!-- Afficher l'image sélectionnée ou l'image par défaut -->
+                        <div class="imgClient2" (click)="showImagePreview()" style="position: relative; cursor: pointer;">
+                            <img [src]="image || 'assets/img/profil.png'" alt="Logo fournisseur">
+                        </div>
+                    </div>
+
+                    <!-- Overlay de prévisualisation -->
+                    <div *ngIf="isPreviewVisible" class="image-preview-overlay" (click)="closePreview()">
+                        <div class="image-preview-container" (click)="$event.stopPropagation()">
+                            <img [src]="previewImage" alt="Preview">
+                            <button class="close-btn" (click)="removeImage(); $event.stopPropagation()">
+                                <i class="fas fa-times"></i> <!-- Utilisez votre propre icône -->
+                            </button>
                         </div>
                     </div>
                                       
