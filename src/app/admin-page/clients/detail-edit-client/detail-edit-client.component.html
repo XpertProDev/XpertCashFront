@@ -1,3 +1,21 @@
+
+<div class="toast-container">
+  <!-- Message d'erreur principal -->
+  <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <!-- Message de succès -->
+  <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+    {{ successMessage }}
+  </div>
+  
+  <!-- Erreur API -->
+  <div *ngIf="errorMessageApi" class="alert alert-danger toast-message-danger">
+    {{ errorMessageApi }}
+  </div>
+</div>
+
 <div class="container_client">
 
   <div *ngIf="isLoading" class="loading-overlay">
@@ -197,15 +215,14 @@
           <!-- Boutons Ajouter et Sauvegarder -->
           <div class=" information_cadre_save" *ngIf="isEditing">
               <!-- Message d'erreur global -->
-            <div class="container_error_message">
-                <!-- Messages API -->
+            <!-- <div class="container_error_message">
                 <div *ngIf="errorMessage" class="error-messageApi2">{{ errorMessage }}</div>
                 <div *ngIf="successMessage" class="success-messageApi2">{{ successMessage }}</div>
-                <!-- Ajouter ce bloc d'erreur -->
                 <div *ngIf="entrepriseRequiredError" class="error-message">
                   Veuillez sélectionner ou créer une entreprise
                 </div>
-            </div>
+            </div> -->
+            <div></div>
 
             <div class="info_titre_input info_titre_input_btn">
               <div class="btn_annuler">
@@ -377,7 +394,10 @@
                 </div>
                 <div class="non_facture">
                   <ng-template #noFactureSelected>
-                    <p style="font-size: 12px; text-align: center; margin-top: 50%;">Cette facture n’est pas liée à cet utilisateur.</p>
+                    <div class="empty-preview">
+                      <i class="ri-file-text-line"></i>
+                      <p>Cette facture n’est pas liée à cet utilisateur.</p>
+                    </div>
                   </ng-template>
                 </div>
                 </div>
@@ -585,9 +605,9 @@
         </div>
 
         <div class="container_error_message">
-          <div *ngIf="errorMessageApi" class="error-messageApi">
+          <!-- <div *ngIf="errorMessageApi" class="error-messageApi">
           {{ errorMessageApi }}
-          </div>
+          </div> -->
         </div>
       
         <div class="popup-footer">
