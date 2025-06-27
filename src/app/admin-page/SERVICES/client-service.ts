@@ -83,35 +83,27 @@ export class ClientService {
   }
 
   // Ajoutez cette méthode dans votre ClientService
-updateClient(id: number, client: Clients, imageFile?: File): Observable<Clients> {
-  const token = localStorage.getItem('authToken') || '';
-  const headers = new HttpHeaders({
-    'Authorization': `Bearer ${token}`
-    // ❌ Ne pas fixer Content-Type ici — Angular le fait automatiquement avec FormData
-  });
+  updateClient(id: number, client: Clients, imageFile?: File): Observable<Clients> {
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
 
-  // Préparer les données en multipart/form-data
-  const formData = new FormData();
+    const formData = new FormData();
 
-  // Convertir l'objet client en JSON string
-  formData.append('client', new Blob(
-    [JSON.stringify(client)],
-    { type: 'application/json' }
-  ));
+    // Convertir l'objet client en JSON string
+    formData.append('client', new Blob(
+      [JSON.stringify(client)],
+      { type: 'application/json' }
+    ));
 
-  // Ajouter l'image si elle est fournie
-  if (imageFile) {
-    formData.append('imageClientFile', imageFile);
+    // Ajouter l'image si elle est fournie
+    if (imageFile) {
+      formData.append('imageClientFile', imageFile);
+    }
+
+    return this.http.put<Clients>(`${this.apiUrl}/clientupdate/${id}`, formData, { headers });
   }
-
-  return this.http.put<Clients>(`${this.apiUrl}/clientupdate/${id}`, formData, { headers }).pipe(
-    tap(response => console.log('Client mis à jour:', response)),
-    catchError(error => {
-      console.error('Erreur lors de la mise à jour du client', error);
-      return throwError(() => error);
-    })
-  );
-}
 
 // getFullImageUrl(relativePath: string): string {
 //   return relativePath 

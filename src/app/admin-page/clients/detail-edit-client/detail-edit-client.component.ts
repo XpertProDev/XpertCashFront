@@ -171,8 +171,9 @@ export class DetailEditClientComponent {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
+    if (input.files?.length) {
       const file = input.files[0];
+      this.selectedImageFile = file;
       
       // Vérification du format
       const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
@@ -358,6 +359,19 @@ loadEntrepriseInfo(): void {
     this.isEditing = false;
     this.modifierClientForm.disable();
     this.loadClientData(); // Recharge les données originales
+  }
+
+  getFullImageUrl(relativePath: string): string {
+    // Si le chemin est déjà une URL complète, retournez directement
+    if (relativePath.startsWith('http')) return relativePath;
+    
+    // Si c'est un chemin d'assets, retournez tel quel
+    if (relativePath.startsWith('assets')) return relativePath;
+    
+    // Sinon, construisez l'URL complète
+    return relativePath 
+      ? `${environment.imgUrl}${relativePath}`
+      : 'assets/img/profil.png';
   }
 
   private loadClientData() {
@@ -621,68 +635,88 @@ loadFacturesClient() {
       }, 3000); // Délai de 3 secondes
   }
 
-  // Soumission du formulaire client
   modifierClient() {
-      // Marquer tous les champs comme touchés pour afficher les erreurs
-      this.markFormGroupTouched(this.modifierClientForm);
-    
-      if (this.modifierClientForm.invalid) {
-        this.errorMessage = 'Veuillez corriger les erreurs dans le formulaire.';
+    // Marquer tous les champs comme touchés pour afficher les erreurs
+    this.markFormGroupTouched(this.modifierClientForm);
+
+    if (this.modifierClientForm.invalid) {
+      this.errorMessage = 'Veuillez corriger les erreurs dans le formulaire.';
+      return;
+    }
+
+    // Vérification de l'entreprise si le toggle est activé
+    let entrepriseClient: Entreprise | null = null;
+    if (this.isEntrepriseSelected) {
+      entrepriseClient = this.control.value;
+      if (!entrepriseClient) {
+        this.entrepriseRequiredError = true;
+        this.errorMessage = 'Veuillez sélectionner ou créer une entreprise.';
         return;
       }
-    
-      // Vérification de l'entreprise si le toggle est activé
-      let entrepriseClient: Entreprise | null = null;
-      if (this.isEntrepriseSelected) {
-        entrepriseClient = this.control.value;
-        if (!entrepriseClient) {
-          this.entrepriseRequiredError = true;
-          this.errorMessage = 'Veuillez sélectionner ou créer une entreprise.';
-          return;
-        }
-      }
-    
-      // Activer l'indicateur de chargement
-      this.isLoading = true;
-      
-      // Créer un délai de 3 secondes avant la modification
-      setTimeout(() => {
-          // Construction de l'objet client avec photo optionnelle
-          const clientData: any = {
-            ...this.modifierClientForm.value,
-            id: this.clientId,
-            photo: this.clientPhotoUrl
-          };
+    }
 
-          if (this.isEntrepriseSelected && this.control.value?.id) {
-            clientData.entrepriseClient = { id: this.control.value.id };
+    // Activer l'indicateur de chargement
+    this.isLoading = true;
+    
+    // Créer un délai de 3 secondes avant la modification
+    setTimeout(() => {
+      // Construction de l'objet client - NE PAS inclure l'URL complète
+      const clientData: any = {
+        ...this.modifierClientForm.value,
+        id: this.clientId,
+        // Supprimer la propriété photo ici
+      };
+
+      // Gestion spécifique de la photo :
+      let imageFile: File | undefined = undefined;
+      
+      if (this.selectedImageFile) {
+        // Cas 1 : Nouvelle image sélectionnée
+        imageFile = this.selectedImageFile;
+      } else if (this.clientPhotoUrl?.includes('assets')) {
+        // Cas 2 : Photo actuelle est l'image par défaut
+        clientData.photo = null; // Demander la suppression
+      }
+      
+      // Gestion de l'entreprise
+      if (this.isEntrepriseSelected && this.control.value?.id) {
+        clientData.entrepriseClient = { id: this.control.value.id };
+      } else {
+        clientData.entrepriseClient = null;
+      }
+
+      // Appel au service avec gestion du fichier image
+      this.clientService.updateClient(this.clientId, clientData, imageFile).subscribe({
+        next: (updatedClient) => {
+          // Mettre à jour l'URL de la photo dans l'interface
+          if (updatedClient.photo) {
+            // Utiliser getFullImageUrl pour reconstruire le chemin complet
+            this.clientPhotoUrl = this.clientService.getFullImageUrl(updatedClient.photo);
           } else {
-            clientData.entrepriseClient = null;
+            this.clientPhotoUrl = 'assets/img/profil.png';
           }
 
-          const imageFile = this.selectedImageFile ?? undefined;
-        
-          // Appel au service
-          this.clientService.updateClient(this.clientId, clientData, imageFile).subscribe({
-            next: (updatedClient) => {
-              this.successMessage = 'Client modifié avec succès !';
-              this.errorMessage = '';
-              setTimeout(() => this.router.navigate(['/clients']), 2000);
-              if (updatedClient.photo) {
-                this.clientPhotoUrl = this.clientService.getFullImageUrl(updatedClient.photo);
-              }
-              this.newPhotoUrl = null;
-              this.selectedImageFile = null;
-              this.isLoading = false;
-            },
-            error: (error) => {
-              console.error('Erreur:', error);
-              this.errorMessage = error.error?.message || 'Erreur lors de la modification du client ';
-              this.successMessage = '';
-              this.isLoading = false;
-            }
-          });
-      }, 3000); // Délai de 3 secondes
+          this.successMessage = 'Client modifié avec succès !';
+          this.errorMessage = '';
+          
+          // Réinitialiser les états d'image
+          this.newPhotoUrl = null;
+          this.selectedImageFile = null;
+          
+          // Désactiver le mode édition après succès
+          this.isEditing = false;
+          this.modifierClientForm.disable();
+          
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Erreur:', error);
+          this.errorMessage = error.error?.message || 'Erreur lors de la modification du client';
+          this.successMessage = '';
+          this.isLoading = false;
+        }
+      });
+    }, 3000);
   }
   
   // Méthode utilitaire pour marquer tous les champs comme touchés
