@@ -40,11 +40,19 @@ export class DetailEditFournisseurComponent {
   control = new FormControl();
   selectedFile: File | null = null;
   selectedCompressedFile: File | null = null;
+  indicatif: string = '';
+  maxPhoneLength: number = 0;
   
-  countryDialCodes = {
-    'Mali': '+223',
-    'Sénégal': '+221',
-    'Côte d\'Ivoire': '+225'
+  // countryDialCodes = {
+  //   'Mali': '+223',
+  //   'Sénégal': '+221',
+  //   'Côte d\'Ivoire': '+225'
+  // };
+
+  paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
+    'Mali': { indicatif: '+223', longueur: 8 },
+    'Sénégal': { indicatif: '+221', longueur: 9 },
+    'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 }
   };
 
   constructor(
@@ -84,17 +92,32 @@ export class DetailEditFournisseurComponent {
     });
   }
   
-  onPaysChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    const pays = select.value;
-    const dialCode = this.countryDialCodes[pays as keyof typeof this.countryDialCodes];
+  onPaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
     
-    if (dialCode) {
-      const currentPhone = this.fournisseurEditForm.get('telephone')?.value || '';
-      if (!currentPhone.startsWith(dialCode)) {
-        this.fournisseurEditForm.get('telephone')?.setValue(dialCode);
+    if (paysInfo) {
+      this.indicatif = `${paysInfo.indicatif} `;
+      this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
+      
+      if (!this.fournisseurEditForm.get('telephone')?.value.startsWith(this.indicatif)) {
+        this.fournisseurEditForm.get('telephone')?.setValue(this.indicatif);
       }
+      
+      this.updatePhoneValidator(paysInfo.longueur);
     }
+  }
+
+  updatePhoneValidator(longueur: number): void {
+    const validators = [];
+    
+    if (this.indicatif) {
+      const regex = new RegExp(`^\\${this.indicatif}\\s*\\d{${longueur}}$`);
+      validators.push(Validators.pattern(regex));
+    }
+    
+    this.fournisseurEditForm.get('telephone')?.setValidators(validators);
+    this.fournisseurEditForm.get('telephone')?.updateValueAndValidity();
   }
   
   onFileSelected(event: Event): void {
@@ -170,24 +193,40 @@ export class DetailEditFournisseurComponent {
       }
   }
 
-  formatPhoneNumber() {
-    const ctrl = this.fournisseurEditForm.get('telephone')!;
-    let raw = ctrl.value as string;
-    const pays = this.fournisseurEditForm.get('pays')?.value;
-    const dialCode = this.countryDialCodes[pays as keyof typeof this.countryDialCodes] || '';
+  // formatPhoneNumber() {
+  //   const ctrl = this.fournisseurEditForm.get('telephone')!;
+  //   let raw = ctrl.value as string;
+  //   const pays = this.fournisseurEditForm.get('pays')?.value;
+  //   const dialCode = this.countryDialCodes[pays as keyof typeof this.countryDialCodes] || '';
 
-    // Nettoyer le numéro
-    const cleaned = raw.replace(/\D/g, '');
+  //   // Nettoyer le numéro
+  //   const cleaned = raw.replace(/\D/g, '');
 
-    // Formater selon le pays
-    let formatted = cleaned;
-    if (dialCode && cleaned.startsWith(dialCode.replace('+', ''))) {
-      formatted = dialCode + ' ' + cleaned.substring(dialCode.length);
-    } else if (dialCode) {
-      formatted = dialCode + ' ' + cleaned;
+  //   // Formater selon le pays
+  //   let formatted = cleaned;
+  //   if (dialCode && cleaned.startsWith(dialCode.replace('+', ''))) {
+  //     formatted = dialCode + ' ' + cleaned.substring(dialCode.length);
+  //   } else if (dialCode) {
+  //     formatted = dialCode + ' ' + cleaned;
+  //   }
+
+  //   ctrl.setValue(formatted, { emitEvent: false });
+  // }
+
+  formatPhoneNumber(): void {
+    let valeur = this.fournisseurEditForm.get('telephone')?.value;
+    
+    if (!valeur.startsWith(this.indicatif)) {
+      this.fournisseurEditForm.get('telephone')?.setValue(this.indicatif);
+      return;
     }
 
-    ctrl.setValue(formatted, { emitEvent: false });
+    const chiffres = valeur.replace(this.indicatif, '').replace(/\D/g, '');
+    const numeroFormate = this.indicatif + chiffres;
+    
+    this.fournisseurEditForm.get('telephone')?.setValue(
+      numeroFormate.slice(0, this.maxPhoneLength)
+    );
   }
 
   goToFournisseur() {
@@ -202,6 +241,21 @@ export class DetailEditFournisseurComponent {
         // resp = { fournisseur: {...} }
         const data = resp.fournisseur;
         this.fournisseur = data;
+      
+        // Initialiser l'indicatif si pays existant
+        if (data.pays && this.paysIndicatifs[data.pays]) {
+          const paysInfo = this.paysIndicatifs[data.pays];
+          this.indicatif = `${paysInfo.indicatif} `;
+          this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
+          
+          // Formater le téléphone
+          let telephone = data.telephone || '';
+          if (telephone && !telephone.startsWith(this.indicatif)) {
+            telephone = this.indicatif + telephone.replace(/\D/g, '');
+          }
+          data.telephone = telephone.slice(0, this.maxPhoneLength);
+        }
+
         this.fournisseurEditForm.patchValue({
           nomComplet: data.nomComplet,
           email: data.email,

@@ -102,29 +102,37 @@
               </div>
 
               <div class="champ_grid_true">
-                <!-- Pays -->
-                <div class="champ_input">
-                  <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
-                    <option value="" disabled selected>Pays</option>
-                    <option value="Mali">Mali</option>
-                    <option value="Sénégal">Sénégal</option>
-                    <option value="Côte d'Ivoire">Côte d'Ivoire</option>
-                  </select>
-                  <label for="pays" class="label">Pays</label>
-                  <div *ngIf="fournisseurEditForm.get('pays')?.invalid && fournisseurEditForm.get('pays')?.touched" class="error">
-                    <small>Ce champ est requis</small>
+                  <!-- Pays -->
+                  <div class="champ_input">
+                    <select class="input_focus" 
+                            formControlName="pays" 
+                            (change)="onPaysChange($event)">
+                      <option value="" disabled selected>Pays</option>
+                      <option value="Mali">Mali</option>
+                      <option value="Sénégal">Sénégal</option>
+                      <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                    </select>
+                    <label for="pays" class="label">Pays</label>
+                    <div *ngIf="fournisseurEditForm.get('pays')?.invalid && fournisseurEditForm.get('pays')?.touched" class="error">
+                      <small>Ce champ est requis</small>
+                    </div>
                   </div>
-                </div>
 
-                <!-- Téléphone -->
-                <div class="champ_input">
-                  <input type="tel" class="input_focus"
-                        id="telephone" formControlName="telephone"
-                        name="telephone"
-                        placeholder="Saisis le numéro de téléphone"
-                        (input)="formatPhoneNumber()">
-                  <label for="telephone" class="label">Téléphone</label>
-                </div>
+                  <!-- Téléphone -->
+                  <div class="champ_input">
+                    <input type="tel" class="input_focus"
+                          id="telephone" formControlName="telephone"
+                          name="telephone"
+                          placeholder="Saisis le numéro de téléphone"
+                          (input)="formatPhoneNumber()">
+                    <label for="telephone" class="label">Téléphone</label>
+                    <!-- Ajouter la validation d'erreur -->
+                    <div *ngIf="fournisseurEditForm.get('telephone')?.touched && 
+                                fournisseurEditForm.get('telephone')?.invalid" 
+                        class="error">
+                      <small>Format invalide</small>
+                    </div>
+                  </div>
 
                 <!-- Email -->
                 <div class="champ_input">
