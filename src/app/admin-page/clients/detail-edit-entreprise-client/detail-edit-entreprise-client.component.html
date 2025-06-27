@@ -1,4 +1,12 @@
 <div class="container_global">
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Creation en cours...</p>
+    </div>
+  </div>
+
   <div class="content_formulaire">
     <div class="modal-body">
       <form [formGroup]="entrepriseClientForm" class="container_formulaire">
@@ -150,7 +158,6 @@
                 <div class="btn_ajouter">
                   <button class="btn_save" (click)="onSubmit()"
                         [disabled]="entrepriseClientForm.invalid"
-                        [disabled]="entrepriseClientForm.invalid" 
                         [style.backgroundColor]="entrepriseClientForm.valid ? '#0672E4' : '#0671e434'"
                         [style.color]="entrepriseClientForm.valid ? '#ffffff' : '#00000073'"
                         [style.cursor]="entrepriseClientForm.valid ? 'pointer' : 'no-drop'">

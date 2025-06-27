@@ -126,13 +126,13 @@
     </div>
 
     <!-- Message vide -->
-    <div *ngIf="fournisseurs.length === 0" class="no-client-message">
+    <div *ngIf="fournisseursLoaded && fournisseurs.length === 0" class="no-client-message">
       Aucun fournisseur trouvé
     </div>
 
     <!-- Pagination -->
     <div class="pagination">
-      <mat-paginator
+      <mat-paginator *ngIf="fournisseurs.length > 6"
         [length]="fournisseurs.length"
         [pageSize]="pageSize"
         [pageSizeOptions]="[6, 10, 25, 100]"

@@ -63,6 +63,7 @@ export class DetailEditClientComponent {
   maxPhoneLength: number = 0;
   entrepriseIndicatif: string = '';
   entrepriseMaxPhoneLength: number = 0;
+  isLoading = false;
 
   facturesClient: any[] = [];
   loadingFactures = false;
@@ -170,8 +171,9 @@ export class DetailEditClientComponent {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
+    if (input.files?.length) {
       const file = input.files[0];
+      this.selectedImageFile = file;
       
       // Vérification du format
       const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
@@ -357,6 +359,19 @@ loadEntrepriseInfo(): void {
     this.isEditing = false;
     this.modifierClientForm.disable();
     this.loadClientData(); // Recharge les données originales
+  }
+
+  getFullImageUrl(relativePath: string): string {
+    // Si le chemin est déjà une URL complète, retournez directement
+    if (relativePath.startsWith('http')) return relativePath;
+    
+    // Si c'est un chemin d'assets, retournez tel quel
+    if (relativePath.startsWith('assets')) return relativePath;
+    
+    // Sinon, construisez l'URL complète
+    return relativePath 
+      ? `${environment.imgUrl}${relativePath}`
+      : 'assets/img/profil.png';
   }
 
   private loadClientData() {
@@ -574,56 +589,61 @@ loadFacturesClient() {
     });
   }
   
-ajouterEntreprise() {
-    if (this.entrepriseForm.invalid) return;
-  
-    const newEntreprise: Entreprise = {
-      nom: this.entrepriseForm.value.nom,
-      pays: this.entrepriseForm.value.pays,
-      email: this.entrepriseForm.value.email,
-      telephone: this.entrepriseForm.value.telephone,
-      adresse: this.entrepriseForm.value.adresse,
-      siege: this.entrepriseForm.value.siege,
-      secteur: this.entrepriseForm.value.secteur,
-      logo : this.entrepriseForm.value.logo,
-      nif: this.entrepriseForm.value.nif,
-      nina: this.entrepriseForm.value.nina,
-      banque: this.entrepriseForm.value.banque,
-      rccm: this.entrepriseForm.value.rccm,
-      siteWeb: this.entrepriseForm.value.siteWeb,
-      signataire: this.entrepriseForm.value.signataire,
-      signataireNom: this.entrepriseForm.value.signataireNom,
-      prefixe: this.entrepriseForm.value.prefixe,
-      suffixe: this.entrepriseForm.value.suffixe,
-      tauxTva: this.entrepriseForm.value.tauxTva
-
-
-    };
-  
-    this.entrepriseService.addEntreprise(newEntreprise).subscribe({
-      next: (createdEntreprise) => {
-        const current = this.optionsEntreprise$.value;
-        this.optionsEntreprise$.next([createdEntreprise, ...current]); // Nouvelle entreprise en tête
-        this.control.setValue(createdEntreprise);
-        this.closePopup();
-        this.entrepriseForm.reset();
-      },
-      error: (error) => {
-        this.errorMessageApi = error.message || 'Erreur lors de la création';
-      }
-    });
+  ajouterEntreprise() {
+      if (this.entrepriseForm.invalid) return;
+    
+      // Activer l'indicateur de chargement
+      this.isLoading = true;
+    
+      // Créer un délai de 3 secondes
+      setTimeout(() => {
+        const newEntreprise: Entreprise = {
+            nom: this.entrepriseForm.value.nom,
+            pays: this.entrepriseForm.value.pays,
+            email: this.entrepriseForm.value.email,
+            telephone: this.entrepriseForm.value.telephone,
+            adresse: this.entrepriseForm.value.adresse,
+            siege: this.entrepriseForm.value.siege,
+            secteur: this.entrepriseForm.value.secteur,
+            logo : this.entrepriseForm.value.logo,
+            nif: this.entrepriseForm.value.nif,
+            nina: this.entrepriseForm.value.nina,
+            banque: this.entrepriseForm.value.banque,
+            rccm: this.entrepriseForm.value.rccm,
+            siteWeb: this.entrepriseForm.value.siteWeb,
+            signataire: this.entrepriseForm.value.signataire,
+            signataireNom: this.entrepriseForm.value.signataireNom,
+            prefixe: this.entrepriseForm.value.prefixe,
+            suffixe: this.entrepriseForm.value.suffixe,
+            tauxTva: this.entrepriseForm.value.tauxTva
+        };
+    
+        this.entrepriseService.addEntreprise(newEntreprise).subscribe({
+            next: (createdEntreprise) => {
+                const current = this.optionsEntreprise$.value;
+                this.optionsEntreprise$.next([createdEntreprise, ...current]);
+                this.control.setValue(createdEntreprise);
+                this.closePopup();
+                this.entrepriseForm.reset();
+                this.isLoading = false;
+            },
+            error: (error) => {
+                this.errorMessageApi = error.message || 'Erreur lors de la création';
+                this.isLoading = false;
+            }
+        });
+      }, 3000); // Délai de 3 secondes
   }
 
-  // Soumission du formulaire client
   modifierClient() {
     // Marquer tous les champs comme touchés pour afficher les erreurs
     this.markFormGroupTouched(this.modifierClientForm);
-  
+
     if (this.modifierClientForm.invalid) {
       this.errorMessage = 'Veuillez corriger les erreurs dans le formulaire.';
       return;
     }
-  
+
     // Vérification de l'entreprise si le toggle est activé
     let entrepriseClient: Entreprise | null = null;
     if (this.isEntrepriseSelected) {
@@ -634,46 +654,69 @@ ajouterEntreprise() {
         return;
       }
     }
-  
-    // Construction de l'objet client
-    // const clientData: any = {
-    //   ...this.modifierClientForm.value,
-    //   id: this.clientId
-    // };
 
-     // Construction de l'objet client avec photo optionnelle
-    const clientData: any = {
-      ...this.modifierClientForm.value,
-      id: this.clientId,
-      photo: this.clientPhotoUrl // Ajout de la propriété photo
-    };
+    // Activer l'indicateur de chargement
+    this.isLoading = true;
+    
+    // Créer un délai de 3 secondes avant la modification
+    setTimeout(() => {
+      // Construction de l'objet client - NE PAS inclure l'URL complète
+      const clientData: any = {
+        ...this.modifierClientForm.value,
+        id: this.clientId,
+        // Supprimer la propriété photo ici
+      };
 
-    if (this.isEntrepriseSelected && this.control.value?.id) {
-      clientData.entrepriseClient = { id: this.control.value.id };
-    } else {
-      clientData.entrepriseClient = null;
-    }
-
-    const imageFile = this.selectedImageFile ?? undefined;
-  
-    // Appel au service
-    this.clientService.updateClient(this.clientId, clientData, imageFile).subscribe({
-      next: (updatedClient) => {
-        this.successMessage = 'Client modifié avec succès !';
-        this.errorMessage = '';
-        setTimeout(() => this.router.navigate(['/clients']), 2000);
-        if (updatedClient.photo) {
-          this.clientPhotoUrl = this.clientService.getFullImageUrl(updatedClient.photo);
-        }
-        this.newPhotoUrl = null;
-        this.selectedImageFile = null;
-      },
-      error: (error) => {
-        console.error('Erreur:', error);
-        this.errorMessage = error.error?.message || 'Erreur lors de la modification du client ';
-        this.successMessage = '';
+      // Gestion spécifique de la photo :
+      let imageFile: File | undefined = undefined;
+      
+      if (this.selectedImageFile) {
+        // Cas 1 : Nouvelle image sélectionnée
+        imageFile = this.selectedImageFile;
+      } else if (this.clientPhotoUrl?.includes('assets')) {
+        // Cas 2 : Photo actuelle est l'image par défaut
+        clientData.photo = null; // Demander la suppression
       }
-    });
+      
+      // Gestion de l'entreprise
+      if (this.isEntrepriseSelected && this.control.value?.id) {
+        clientData.entrepriseClient = { id: this.control.value.id };
+      } else {
+        clientData.entrepriseClient = null;
+      }
+
+      // Appel au service avec gestion du fichier image
+      this.clientService.updateClient(this.clientId, clientData, imageFile).subscribe({
+        next: (updatedClient) => {
+          // Mettre à jour l'URL de la photo dans l'interface
+          if (updatedClient.photo) {
+            // Utiliser getFullImageUrl pour reconstruire le chemin complet
+            this.clientPhotoUrl = this.clientService.getFullImageUrl(updatedClient.photo);
+          } else {
+            this.clientPhotoUrl = 'assets/img/profil.png';
+          }
+
+          this.successMessage = 'Client modifié avec succès !';
+          this.errorMessage = '';
+          
+          // Réinitialiser les états d'image
+          this.newPhotoUrl = null;
+          this.selectedImageFile = null;
+          
+          // Désactiver le mode édition après succès
+          this.isEditing = false;
+          this.modifierClientForm.disable();
+          
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Erreur:', error);
+          this.errorMessage = error.error?.message || 'Erreur lors de la modification du client';
+          this.successMessage = '';
+          this.isLoading = false;
+        }
+      });
+    }, 3000);
   }
   
   // Méthode utilitaire pour marquer tous les champs comme touchés

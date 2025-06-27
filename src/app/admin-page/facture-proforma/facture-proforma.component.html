@@ -193,13 +193,13 @@
   </div>
 
   <!-- Message vide -->
-  <div *ngIf="filteredFactures.length === 0" class="no-client-message">
+  <div *ngIf="facturesLoaded && filteredFactures.length === 0" class="no-client-message">
     Aucun facture pro forma trouvé
   </div>
 
   <!-- Pagination -->
   <div class="pagination">
-    <mat-paginator [length]="filteredFactures.length" [pageSize]="pageSize" [pageSizeOptions]="[6, 10, 25, 100]"
+    <mat-paginator *ngIf="filteredFactures.length > 6" [length]="filteredFactures.length" [pageSize]="pageSize" [pageSizeOptions]="[6, 10, 25, 100]"
         (page)="onPageChange($event)">
     </mat-paginator>
   </div>

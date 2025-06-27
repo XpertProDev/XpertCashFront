@@ -30,6 +30,7 @@ export class FournisseursComponent {
   isListView = true;
   showDropdown = false;
   searchQuery = '';
+  fournisseursLoaded = false;
   
   // Pagination
   pageSize = 6;
@@ -37,10 +38,8 @@ export class FournisseursComponent {
   sortField = 'nom';
   sortDirection: 'asc' | 'desc' = 'asc';
   fournisseurs: Fournisseurs[] = [];
-    private imgUrl = environment.imgUrl;
+  private imgUrl = environment.imgUrl;
   
-
-
     constructor(
         private produitService: ProduitService,
         private fournisseurService: FournisseurService,
@@ -52,7 +51,12 @@ export class FournisseursComponent {
         private transfertService: TransfertService,
         // private fournisseurService: FournisseurService,
     ) {}
-    
+  
+  // ngOnInit(): void  {
+  //   const savedView = localStorage.getItem('fournisseurView');
+  //   this.isListView = savedView !== 'grid';
+  //   this.loadFournisseurs();
+  // }
 
   ngOnInit(): void  {
     const savedView = localStorage.getItem('fournisseurView');
@@ -60,10 +64,8 @@ export class FournisseursComponent {
     this.loadFournisseurs();
   }
 
-
-
-
   loadFournisseurs(): void {
+    this.fournisseursLoaded = false;
     this.fournisseurService.getAllFournisseurs().subscribe({
       next: (fournisseurs: Fournisseurs[]) => {
         this.fournisseurs = fournisseurs.reverse();
@@ -76,10 +78,12 @@ export class FournisseursComponent {
           }
         });
         console.log('Fournisseurs:', this.fournisseurs);
+        this.fournisseursLoaded = true;
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des fournisseurs", err);
         this.fournisseurs = [];
+        this.fournisseursLoaded = true;
       }
     });
   }
@@ -112,6 +116,9 @@ export class FournisseursComponent {
   onPageChange(event: PageEvent) {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
+
+    // Forcez la mise à jour de l'état de chargement
+    this.fournisseursLoaded = true;
   }
 
   get paginatedFournisseurs(): Fournisseurs[] {

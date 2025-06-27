@@ -1,4 +1,12 @@
 <div class="container_client">
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Creation en cours...</p>
+    </div>
+  </div>
+  
   <div class="information_cadre" style="margin-bottom: 20px; padding: 20px;">
     <div class="information_grid_two">
       <!-- Section Logo Entreprise -->

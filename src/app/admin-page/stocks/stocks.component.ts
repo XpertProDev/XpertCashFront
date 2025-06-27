@@ -67,6 +67,7 @@ export class StocksComponent implements OnInit {
   selectedFile: File | null = null;
   showDescription: boolean = false;
   private apiUrl = environment.imgUrl; // URL de base pour les images
+  showNoProductsMessage = false;
 
   constructor(
     private categorieService: CategorieService,
@@ -296,10 +297,12 @@ export class StocksComponent implements OnInit {
         //   this.loadProduits(this.selectedBoutique.id);
         // }
 
+        this.showNoProductsMessage = false;
         this.loadAllProduits();
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des informations utilisateur :", err);
+        this.showNoProductsMessage = true;
       }
     });
   }
@@ -307,12 +310,14 @@ export class StocksComponent implements OnInit {
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
   loadProduits(boutiqueId: number): void {
     // const boutiqueId = this.usersService.getUserBoutiqueId();
+    this.showNoProductsMessage = false;
     if (!boutiqueId) {
       console.error("L'ID de la boutique est manquant");
       return;
     }
     this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
       next: (produits: Produit[]) => {
+        
         console.log("Produits récupérés:", produits);
 
         this.tasks = produits
@@ -349,9 +354,11 @@ export class StocksComponent implements OnInit {
 
         this.dataSource.data = this.tasks;
         this.dataSource.paginator = this.paginator;
+        this.showNoProductsMessage = this.tasks.length === 0;
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des produits", err);
+        this.showNoProductsMessage = this.tasks.length === 0;
       },
     });
   }
@@ -366,6 +373,7 @@ export class StocksComponent implements OnInit {
   // }
 
   selectBoutique(boutique: any | null): void {
+    this.showNoProductsMessage = false;
     if (boutique && !boutique.actif) {
       this.showSuspendedBoutiqueDialog();
       return; // Ne pas changer la sélection si la boutique est désactivée
@@ -386,6 +394,7 @@ export class StocksComponent implements OnInit {
   }
 
   loadAllProduits(): void {
+    this.showNoProductsMessage = false;
     const entrepriseId = this.getEntrepriseId();
     if (!entrepriseId) {
       console.error('ID entreprise manquant');
@@ -414,8 +423,12 @@ export class StocksComponent implements OnInit {
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;
         }
+        this.showNoProductsMessage = this.tasks.length === 0;
       },
-      error: (err) => console.error("Erreur lors de la récupération des produits", err),
+      error: (err) => {
+        console.error("Erreur lors de la récupération des produits", err);
+        this.showNoProductsMessage = this.tasks.length === 0;
+      }
     });
   }
 

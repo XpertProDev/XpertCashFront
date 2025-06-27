@@ -25,7 +25,6 @@ import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-servic
   styleUrl: './add-clients.component.scss'
 })
 export class AddClientsComponent implements OnInit {
-
   errorMessage: string = '';
   errorMessageApi: string = '';
   successMessage = '';
@@ -102,41 +101,41 @@ export class AddClientsComponent implements OnInit {
   }
 
   async testImageCompression(file: File) {
-      if (!file) {
-        console.log('Aucun fichier sélectionné.');
+    if (!file) {
+      console.log('Aucun fichier sélectionné.');
+      return;
+    }
+  
+    console.log('Taille originale:', file.size / 1024, 'Ko');
+  
+    // Options de compression
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1000,
+      useWebWorker: true,
+    };
+  
+    try {
+      const compressedFile = await imageCompression(file, options);
+      console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
+  
+      // Vérifier si le fichier est bien en PNG/JPEG après compression
+      if (compressedFile.type !== 'image/png' && compressedFile.type !== 'image/jpeg') {
+        console.error('Le fichier compressé n\'est pas un format supporté (PNG ou JPEG).');
+        this.errorMessage = 'Erreur de compression : Le format de l\'image n\'est pas valide.';
         return;
       }
-    
-      console.log('Taille originale:', file.size / 1024, 'Ko');
-    
-      // Options de compression
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1000,
-        useWebWorker: true,
+  
+      // Lire l'image compressée et afficher l'aperçu
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newPhotoUrl = e.target?.result as string;
+        console.log('Image compressée prête à être affichée !');
       };
-    
-      try {
-        const compressedFile = await imageCompression(file, options);
-        console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
-    
-        // Vérifier si le fichier est bien en PNG/JPEG après compression
-        if (compressedFile.type !== 'image/png' && compressedFile.type !== 'image/jpeg') {
-          console.error('Le fichier compressé n\'est pas un format supporté (PNG ou JPEG).');
-          this.errorMessage = 'Erreur de compression : Le format de l\'image n\'est pas valide.';
-          return;
-        }
-    
-        // Lire l'image compressée et afficher l'aperçu
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.newPhotoUrl = e.target?.result as string;
-          console.log('Image compressée prête à être affichée !');
-        };
-        reader.readAsDataURL(compressedFile);
-      } catch (error) {
-        console.error('Erreur lors de la compression:', error);
-      }
+      reader.readAsDataURL(compressedFile);
+    } catch (error) {
+      console.error('Erreur lors de la compression:', error);
+    }
   }
 
   onFileSelected(event: Event): void {

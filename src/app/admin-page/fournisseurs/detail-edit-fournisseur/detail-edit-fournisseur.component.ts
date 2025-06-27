@@ -7,6 +7,9 @@ import { Fournisseurs } from '../../MODELS/fournisseurs-model';
 import { ActivatedRoute } from '@angular/router';
 import imageCompression from 'browser-image-compression';
 import { environment } from 'src/environments/environment';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @Component({
   selector: 'app-detail-edit-fournisseur',
@@ -15,6 +18,9 @@ import { environment } from 'src/environments/environment';
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
+    MatTabsModule,
+    MatExpansionModule, 
+    MatFormFieldModule,
   ],
   templateUrl: './detail-edit-fournisseur.component.html',
   styleUrl: './detail-edit-fournisseur.component.scss'
@@ -116,53 +122,55 @@ export class DetailEditFournisseurComponent {
     }
   }
 
-  async testImageCompression(file: File) {
-      if (!file) {
-        console.log('Aucun fichier sélectionné.');
-        return;
-      }
-    
-      console.log('Taille originale:', file.size / 1024, 'Ko');
-    
-      // Options de compression
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1000,
-        useWebWorker: true,
-      };
-    
-      try {
-        const compressedFile = await imageCompression(file, options);
-
-        // Convertir en File avec le bon type MIME
-        this.selectedCompressedFile = new File(
-          [compressedFile], 
-          file.name, 
-          { type: compressedFile.type }
-        );
-        // this.selectedCompressedFile = compressedFile;
-        this.selectedFile = compressedFile;
-        console.log('Taille après compression:', compressedFile.size / 1024, 'Ko');
-    
-        // Vérifier si le fichier est bien en PNG/JPEG après compression
-        if (compressedFile.type !== 'image/png' && compressedFile.type !== 'image/jpeg') {
-          console.error('Le fichier compressé n\'est pas un format supporté (PNG ou JPEG).');
-          this.errorMessage = 'Erreur de compression : Le format de l\'image n\'est pas valide.';
-          return;
-        }
-        
-    
-        // Lire l'image compressée et afficher l'aperçu
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.newPhotoUrl = e.target?.result as string;
-          console.log('Image compressée prête à être affichée !');
-        };
-        reader.readAsDataURL(compressedFile);
-      } catch (error) {
-        console.error('Erreur lors de la compression:', error);
-      }
+ async testImageCompression(file: File): Promise<File | null> {
+  if (!file) {
+    console.log('Aucun fichier sélectionné.');
+    return null;
   }
+
+  console.log('Taille originale:', file.size / 1024, 'Ko');
+
+  const options = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1000,
+    useWebWorker: true,
+  };
+
+  try {
+    const compressedBlob = await imageCompression(file, options);
+    console.log('Taille après compression:', compressedBlob.size / 1024, 'Ko');
+
+    if (!compressedBlob.type.startsWith('image/')) {
+      console.error('Le fichier compressé n\'est pas un format d\'image valide.');
+      this.errorMessage = 'Erreur de compression : Le fichier n\'est pas une image.';
+      return null;
+    }
+
+    // Extraire le nom de base sans extension
+    const originalName = file.name.split('.').slice(0, -1).join('.') || 'image';
+
+    // Déterminer la bonne extension selon le type MIME
+    let extension = 'png';
+    if (compressedBlob.type === 'image/jpeg') extension = 'jpg';
+    else if (compressedBlob.type === 'image/png') extension = 'png';
+    else if (compressedBlob.type === 'image/webp') extension = 'webp';
+
+    const finalFileName = `${originalName}.${extension}`;
+
+    // on recre img avec la bonne extension
+    const compressedFile = new File([compressedBlob], finalFileName, {
+      type: compressedBlob.type,
+      lastModified: Date.now(),
+    });
+
+    return compressedFile;
+
+  } catch (error) {
+    console.error('Erreur lors de la compression:', error);
+    return null;
+  }
+}
+
 
   formatPhoneNumber() {
     const ctrl = this.fournisseurEditForm.get('telephone')!;
@@ -187,31 +195,6 @@ export class DetailEditFournisseurComponent {
   goToFournisseur() {
     this.router.navigate(['/fournisseurs']);
   }
-
-  // private loadFournisseur(): void {
-  //   const id = Number(this.route.snapshot.paramMap.get('id'));
-  //   this.fournisseurService.getFournisseurById(id).subscribe({
-  //     next: (data) => {
-  //       this.fournisseur = data;
-  //       // Mettre à jour les valeurs du formulaire
-  //       this.fournisseurEditForm.patchValue({
-  //         nomComplet: data.nomComplet,
-  //         email: data.email,
-  //         adresse: data.adresse,
-  //         pays: data.pays,
-  //         telephone: data.telephone,
-  //         description: data.description,
-  //         ville: data.ville,
-  //         nomSociete: data.nomSociete
-  //       });
-  //       // Mettre à jour la photo
-  //       this.fournisseurPhotoUrl = data.photo 
-  //         ? `${environment.apiBaseUrl}/${data.photo}` 
-  //         : null;
-  //     },
-  //     error: (err) => console.error('Erreur de chargement', err)
-  //   });
-  // }
 
   // detail-edit-fournisseur.component.ts
   private loadFournisseur(): void {
@@ -270,6 +253,9 @@ async modifierFournisseur() {
   try {
     const formValue = this.fournisseurEditForm.value;
 
+    // Ajout du délai de 3 secondes avant la modification
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     // Créez un nouvel objet sans propriétés indésirables
     const cleanedData: Fournisseurs = {
       id: this.fournisseur.id,
@@ -286,20 +272,19 @@ async modifierFournisseur() {
     };
     
     // Préparer les données pour l'API
-   const updatedFournisseur: Fournisseurs = {
-    id: this.fournisseur.id,
-    nomComplet: formValue.nomComplet,
-    email: formValue.email,
-    adresse: formValue.adresse,
-    pays: formValue.pays,
-    telephone: formValue.telephone,
-    description: formValue.description,
-    ville: formValue.ville,
-    nomSociete: formValue.nomSociete,
-    photo: this.fournisseur.photo,
-    createdAt: this.fournisseur.createdAt
-  };
-
+    const updatedFournisseur: Fournisseurs = {
+      id: this.fournisseur.id,
+      nomComplet: formValue.nomComplet,
+      email: formValue.email,
+      adresse: formValue.adresse,
+      pays: formValue.pays,
+      telephone: formValue.telephone,
+      description: formValue.description,
+      ville: formValue.ville,
+      nomSociete: formValue.nomSociete,
+      photo: this.fournisseur.photo,
+      createdAt: this.fournisseur.createdAt
+    };
 
     // Appeler le service
     await this.fournisseurService.updateFournisseur(
@@ -316,10 +301,10 @@ async modifierFournisseur() {
     this.loadFournisseur();
     
     // Désactiver le mode édition après 2s
-    setTimeout(() => {
-      this.isEditing = false;
-      this.fournisseurEditForm.disable();
-    }, 2000);
+    // setTimeout(() => {
+    //   this.isEditing = false;
+    //   this.fournisseurEditForm.disable();
+    // }, 3000);
 
   } catch (error: any) {
     console.error('Update error:', error);
