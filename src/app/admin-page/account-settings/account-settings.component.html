@@ -624,7 +624,49 @@
                 <!-- // Securite  -->
                 <mat-tab label="App">
                     <div class="tab-content">
-                    Contenu de la application
+                    <!-- Start-->
+                     <div class="module-grid">
+                        <div class="module-card" *ngFor="let module of modules">
+
+
+                            <!-- Affichage du temps restant si en essai, et non encore acheté -->
+                            <div *ngIf="module.tempsRestantEssai" class="module-essai">
+                             Restant : {{ module.tempsRestantEssai }}
+                            </div>
+
+                            <div class="module-icon">
+                            <img [src]="'assets/modules/' + module.code.toLowerCase() + '.png'" alt="{{module.nom}}" />
+                            </div>
+
+                            <h2 class="module-title">{{ module.nom }}</h2>
+
+                            <p class="module-description">
+                            {{ module.description || 'Module supplémentaire pour votre entreprise' }}
+                            </p>
+
+                            <div *ngIf="module.payant" class="module-price">
+                            {{ module.prix | customNumber }}
+                            </div>
+
+
+                         <button 
+  *ngIf="!module.actif || (module.actif && module.tempsRestantEssai && module.tempsRestantEssai !== 'Terminé')" 
+  (click)="activerModule(module.code)" 
+  class="module-btn"
+>
+  {{ module.payant && module.tempsRestantEssai && module.tempsRestantEssai !== 'Terminé' ? 'Activer (Essai en cours)' : 'Activer' }}
+</button>
+
+<div *ngIf="module.actif && (!module.tempsRestantEssai || module.tempsRestantEssai === 'Terminé')" class="module-actif">
+  Activé
+</div>
+
+                            
+
+                        </div>
+                    </div>
+
+                     <!-- end -->
                     </div>
                 </mat-tab>
             </mat-tab-group>

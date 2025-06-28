@@ -14,6 +14,10 @@ import { UsersService } from '../SERVICES/users.service';
 import { UpdateUserRequest } from '../MODELS/profil.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { Module } from '../MODELS/Module-model';
+import { ModuleService } from '../SERVICES/Module-Service';
+import { CustomNumberPipe } from '../MODELS/customNumberPipe';
+
 
 
 @Component({
@@ -27,7 +31,9 @@ import { environment } from 'src/environments/environment';
     MatExpansionModule, 
     MatFormFieldModule,
     ReactiveFormsModule,
-    MatIconModule
+    MatIconModule,
+    CustomNumberPipe,
+
   ],
   templateUrl: './account-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -144,6 +150,7 @@ export class AccountSettingsComponent implements OnInit {
     private profilService: ProfilService,
     private usersService: UsersService,
     private zone: NgZone,
+    private moduleService: ModuleService
   ) {}
 
   ngOnInit() {
@@ -154,6 +161,7 @@ export class AccountSettingsComponent implements OnInit {
     this.listenToPrefixSuffixChanges();
     this.getConnectedUserId();
     this.getUserInfo();
+    this.loadModules();
 
     const savedPhoto = localStorage.getItem('photo');
     if (savedPhoto) {
@@ -639,5 +647,22 @@ onTauxTvaInput(event: Event): void {
 
 
   
+ modules: Module[] = [];
+  errorMsg = '';
+
+    loadModules(): void {
+    this.moduleService.getModulesEntreprise().subscribe({
+      next: (data) => this.modules = data,
+      error: (err) => this.errorMsg = 'Erreur lors du chargement des modules'
+    });
+  }
+
+
+
+activerModule(code: string) {
+  console.log('Activation demandée pour le module :', code);
+  // Appel au backend avec uniquement le code
+}
+
 
 }

@@ -27,6 +27,10 @@ import { ProduitFormComponent } from './admin-page/produits/produit-form/produit
 import { AddfactureProformaComponent } from './admin-page/facture-proforma/addfacture-proforma/addfacture-proforma.component';
 import { ClientFormComponent } from './admin-page/clients/client-form/client-form.component';
 import { EntrepriseFormComponent } from './admin-page/clients/entreprise-form/entreprise-form.component';
+import { NavGroupComponent } from './theme/layout/admin/navigation/nav-content/nav-group/nav-group.component';
+import { NavItemComponent } from './theme/layout/admin/navigation/nav-content/nav-item/nav-item.component';
+import { NavCollapseComponent } from './theme/layout/admin/navigation/nav-content/nav-collapse/nav-collapse.component';
+import { RouterModule } from '@angular/router';
 
 registerLocaleData(localeFr);
 
@@ -40,6 +44,9 @@ registerLocaleData(localeFr);
     AddfactureProformaComponent,
     ClientFormComponent,
     EntrepriseFormComponent,
+    NavGroupComponent,
+    NavItemComponent,
+    NavCollapseComponent,
   ],
   imports: [
     CommonModule,
@@ -57,6 +64,10 @@ registerLocaleData(localeFr);
     CodeInputModule,
     DragDropModule,
     MatSelectModule,
+    NavGroupComponent,
+    NavItemComponent,
+    NavCollapseComponent,
+    RouterModule
   ],
   providers: [
     provideHttpClient(),

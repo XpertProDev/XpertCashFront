@@ -4,6 +4,7 @@ export interface NavigationItem {
   type: 'item' | 'collapse' | 'group';
   translate?: string;
   icon?: string;
+  codeModule?: string;
   hidden?: boolean;
   url?: string;
   classes?: string;
@@ -14,8 +15,9 @@ export interface NavigationItem {
   badge?: {
     title?: string;
     type?: string;
+    
   };
-  children?: NavigationItem[];
+  children?: NavigationItem[ ];
 }
 
 export const NavigationItems: NavigationItem[] = [
@@ -154,6 +156,7 @@ export const NavigationItems: NavigationItem[] = [
                 title: 'Facture reelle',
                 type: 'item',
                 url: '/facture-reel',
+                // codeModule: 'FACTURE_REELLE'
               },
 
             ]
