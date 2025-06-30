@@ -18,6 +18,11 @@
 
 <div class="container_client">
 
+  <!-- Icon return  -->
+  <p class="retour_icon_text" (click)="navigateBack()" style="cursor: pointer; color: #0672E4;" title="Retour sur la page client">
+      <i class="ri-arrow-left-s-line"></i> <span style="margin-left: 8px; font-size: 12px;">Clients</span>
+  </p>
+
   <div *ngIf="isLoading" class="loading-overlay">
     <div class="loading-content">
       <div class="spinner"></div>

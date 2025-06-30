@@ -373,6 +373,9 @@ async modifierFournisseur() {
   }
 }
 
+navigateBack(){
+  this.router.navigate(['/fournisseurs'])
+}
 
   
 

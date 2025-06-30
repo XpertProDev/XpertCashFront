@@ -264,6 +264,10 @@ export class AddFournisseurComponent {
     }
   }
 
+  navigateBack() {
+    this.router.navigate(['/fournisseurs'])
+  }
+
 }
 
 

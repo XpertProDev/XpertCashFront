@@ -249,7 +249,8 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
   navigateBack() {
-    this.router.navigate(['/addfacture-proforma']);
+    // this.router.navigate(['/addfacture-proforma']);
+    this.router.navigate(['/facture-proforma']);
   }
 
   onToggleRemise() {

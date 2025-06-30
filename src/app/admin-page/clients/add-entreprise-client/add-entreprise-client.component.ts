@@ -140,4 +140,10 @@ export class AddEntrepriseClientComponent implements OnInit, OnDestroy  {
   goToClients() {
     this.router.navigate(['/clients']);
   }
+
+  navigateBack() {
+    this.router.navigate(['/clients'])
+  }
+
+
 }
