@@ -19,14 +19,67 @@
         </div>
       </div>
 
-      <div class="container_inputSearch" style="display: flex; align-items: center;">
-        <div class="inputSearch">
-          <i class="ri-search-2-line"></i>
-          <input type="text" [(ngModel)]="searchText" placeholder="Recherche...." />
+      <!-- Remplacez la partie .container_inputSearch par ce code -->
+      <div class="container_inputSearch" style="display: flex; align-items: center; position: relative;">
+        <!-- Barre de recherche avec tags -->
+        <div class="inputSearch" style="flex: 1; position: relative;">
+          <div class="tags-container" 
+            (click)="focusSearchInput()"
+            style="display: flex; flex-wrap: wrap; align-items: center; padding-left: 35px; min-height: 40px; border: 1.5px solid #000; border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; background: white; cursor: text;">   
+
+            <!-- Tags pour les filtres sélectionnés -->
+            <!-- <span *ngFor="let filter of selectedFilters" class="tag" style="display: flex; align-items: center; background: #e0e0e0; padding: 2px 8px; border-radius: 20px; margin: 2px 4px 2px 0;">
+              {{ filter.label }}
+              <span class="remove-chip" (click)="removeFilter(filter)">✖</span>
+            </span> -->
+            <!-- Remplacer la boucle *ngFor par -->
+            <span *ngIf="selectedFilters.length > 0" class="tag" style="display: flex; align-items: center; background: #e0e0e0; padding: 2px 8px; border-radius: 20px; margin: 2px 4px 2px 0;">
+              {{ selectedFilters[0].label }}
+              <span class="remove-chip" (click)="removeFilter(selectedFilters[0])">✖</span>
+            </span>
+
+              <!-- <span *ngIf="selectedFilters.length > 0" 
+                    class="reset-filter" 
+                    (click)="resetFilters()"
+                    style="margin-left: 5px; cursor: pointer; color: #0671e4;">
+                Réinitialiser
+              </span> -->
+              <!-- <i class="ri-close-line" (click)="removeFilter(filter)" style="margin-left: 5px; cursor: pointer;"></i> -->
+
+            <input 
+              #searchInput
+              type="text" 
+              [(ngModel)]="searchText" 
+              (ngModelChange)="applyFilters()" 
+              [placeholder]="getSearchPlaceholder()"
+              style="border: none; outline: none; flex: 1; padding: 5px 0; min-width: 120px;"
+              (click)="$event.stopPropagation()"
+            />
+
+            <i class="ri-search-2-line" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"></i>
+          </div>
         </div>
-        <div class="trier" title="Trier la recherche">
+
+        <!-- Bouton de tri -->
+        <div class="trier" title="Trier et filtrer" (click)="toggleFilterDropdown()" style="cursor: pointer;">
           <i style="font-size: 18px;" class="ri-arrow-down-s-fill"></i>
         </div>
+
+        <!-- Dropdown de filtres -->
+        <div class="filter-dropdown" *ngIf="showFilterDropdown" style="position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 100; width: 250px; margin-top: 5px;">
+          <div class="filter-section" style="padding: 10px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">Filtres</h4>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li (click)="addFilter({ type: 'nomCategorie', label: 'Catégorie' })" style="padding: 5px 10px; cursor: pointer; border-radius: 4px; margin-bottom: 5px;">Catégorie</li>
+              <li (click)="addFilter({ type: 'nomUnite', label: 'Unité' })" style="padding: 5px 10px; cursor: pointer; border-radius: 4px; margin-bottom: 5px;">Unité</li>
+            </ul>
+            <button (click)="resetFilters()" 
+                    style="background: none; border: none; color: #0671e4; cursor: pointer;">
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -68,7 +121,11 @@
   <table>
     <thead>
       <tr class="titleTableProduit">
-        <th>Code</th>
+        <th (click)="setSorting('codeGenerique')">
+          Code
+          <i *ngIf="sortColumn === 'codeGenerique'" 
+            class="{{ sortDirection === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line' }}"></i>
+        </th>
         <th>Photo</th>
         <th>Nom produit</th>
         <!-- <th>Description</th> -->
