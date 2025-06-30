@@ -18,10 +18,17 @@
           </div>
         </div>
       </div>
-      <div class="inputSearch">
-        <i class="ri-search-2-line"></i>
-        <input type="text" [(ngModel)]="searchText" placeholder="Recherche...." />
+
+      <div class="container_inputSearch" style="display: flex; align-items: center;">
+        <div class="inputSearch">
+          <i class="ri-search-2-line"></i>
+          <input type="text" [(ngModel)]="searchText" placeholder="Recherche...." />
+        </div>
+        <div class="trier" title="Trier la recherche">
+          <i style="font-size: 18px;" class="ri-arrow-down-s-fill"></i>
+        </div>
       </div>
+
     </div>
   </div>
 
