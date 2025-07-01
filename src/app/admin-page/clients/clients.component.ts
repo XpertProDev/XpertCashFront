@@ -11,6 +11,7 @@ import { EntrepriseClient } from "../MODELS/entreprise-clients-model";
 import { EntrepriseService } from "../SERVICES/entreprise-service";
 import { ClickOutsideDirective } from "../MODELS/click-outside.directive";
 import { environment } from "src/environments/environment";
+import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 
 @Component({
@@ -57,11 +58,13 @@ export class ClientsComponent implements OnInit  {
   messageNoEntreprise = 'Aucune entreprise disponible.';
   clientsLoaded = false;
   entreprisesLoaded = false;
+  searchText = '';
 
   constructor(
     private clientService: ClientService,
     private router: Router,
     private entrepriseService: EntrepriseService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
@@ -80,17 +83,45 @@ export class ClientsComponent implements OnInit  {
     }
   }
 
-  // Gestion de la pagination
-  // onPageChange(event: PageEvent): void {
-  //   if (this.currentListType === 'clients') {
-  //     this.currentPageClients = event.pageIndex;
-  //   } else {
-  //     this.currentPageEntreprises = event.pageIndex;
-  //   }
+  highlightMatch(text: string | null | undefined): SafeHtml {
+    if (!text) return '';
+    if (!this.searchText.trim()) return text;
     
-  //   this.currentPage = event.pageIndex;
-  //   this.pageSize = event.pageSize;
-  // }
+    const escapedSearch = this.searchText.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedSearch})`, 'gi');
+    
+    return this.sanitizer.bypassSecurityTrustHtml(
+      text.replace(regex, '<mark>$1</mark>')
+    );
+  }
+
+  // Gestionnaires de filtrage
+  get filteredClients(): Clients[] {
+    if (!this.searchText.trim()) return this.clients;
+    
+    const searchLower = this.searchText.toLowerCase().trim();
+    return this.clients.filter(client => 
+      (client.nomComplet?.toLowerCase().includes(searchLower)) ||
+      (client.email?.toLowerCase().includes(searchLower)) ||
+      (client.adresse?.toLowerCase().includes(searchLower)) ||
+      (client.telephone?.includes(searchLower))
+    );
+  }
+
+  get filteredEntreprises(): EntrepriseClient[] {
+    if (!this.searchText.trim()) return this.entreprises;
+    
+    const searchLower = this.searchText.toLowerCase().trim();
+    return this.entreprises.filter(entreprise => 
+      (entreprise.nom?.toLowerCase().includes(searchLower)) ||
+      (entreprise.email?.toLowerCase().includes(searchLower)) ||
+      (entreprise.adresse?.toLowerCase().includes(searchLower)) ||
+      (entreprise.telephone?.includes(searchLower)) ||
+      (entreprise.pays?.toLowerCase().includes(searchLower)) ||
+      (entreprise.siege?.toLowerCase().includes(searchLower)) ||
+      (entreprise.secteur?.toLowerCase().includes(searchLower))
+    );
+  }
 
   onPageChange(event: PageEvent): void {
     if (this.currentListType === 'clients') {
@@ -167,12 +198,6 @@ export class ClientsComponent implements OnInit  {
     }
   }
 
-  // Ajoutez ce getter pour la pagination des entreprises
-  get paginatedEntreprises(): EntrepriseClient[] {
-    const startIndex = this.currentPageEntreprises * this.pageSize;
-    return this.entreprises.slice(startIndex, startIndex + this.pageSize);
-  }
-
   // Modifie la fonction sort
   sort(field: string) {
     // Déterminer si le champ existe dans le type actuel
@@ -207,61 +232,64 @@ export class ClientsComponent implements OnInit  {
   }
 
   // list clients 
- getListClients() {
-  this.clientsLoaded = false;
-  const token = localStorage.getItem('authToken');
-  if (token) {
-    this.clientService.getListClients().subscribe({
-      next: (data) => {
-        console.log('📥 Données brutes:', data);
+  getListClients() {
+    this.clientsLoaded = false;
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      this.clientService.getListClients().subscribe({
+        next: (data) => {
+          console.log('📥 Données brutes:', data);
 
-        this.clients = data.map(client => {
-          return {
-            ...client,
-            photo: client.photo 
-            ? `${this.apiUrl}${client.photo}` 
-            : `/assets/img/profil.png`,
-            
-            entrepriseClient: client.entrepriseClient ? { 
-              id: client.entrepriseClient.id
-            } : null
-          };
-        });
+          this.clients = data.map(client => {
+            return {
+              ...client,
+              photo: client.photo 
+              ? `${this.apiUrl}${client.photo}` 
+              : `/assets/img/profil.png`,
+              
+              entrepriseClient: client.entrepriseClient ? { 
+                id: client.entrepriseClient.id
+              } : null
+            };
+          });
 
-        console.log('🖼️ URLs des photos clients :', this.clients.map(c => c.photo));
+          console.log('🖼️ URLs des photos clients :', this.clients.map(c => c.photo));
 
-        // Tri décroissant par ID
-        this.clients = this.clients.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+          // Tri décroissant par ID
+          this.clients = this.clients.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
 
-        this.totalClients = this.clients.length;
-        this.noClientsAvailable = this.clients.length === 0;
+          this.totalClients = this.clients.length;
+          this.noClientsAvailable = this.clients.length === 0;
 
-        this.dataSource.data = this.clients;
-        this.dataSource.paginator = this.paginator;
+          this.dataSource.data = this.clients;
+          this.dataSource.paginator = this.paginator;
 
-        if (this.clients.length > 0) {
-          console.log('👤 Exemple client :', this.clients[0]);
+          if (this.clients.length > 0) {
+            console.log('👤 Exemple client :', this.clients[0]);
+          }
+
+          this.clientsLoaded = true;
+        },
+        error: (err) => {
+          console.error('❌ Erreur récupération clients :', err);
+          this.clientsLoaded = true;
         }
-
-        this.clientsLoaded = true;
-      },
-      error: (err) => {
-        console.error('❌ Erreur récupération clients :', err);
-        this.clientsLoaded = true;
-      }
-    });
-  } else {
-    console.error('🔐 Aucun token trouvé !');
-    this.clientsLoaded = true;
+      });
+    } else {
+      console.error('🔐 Aucun token trouvé !');
+      this.clientsLoaded = true;
+    }
   }
-}
 
-
-
-  //liste entreprise client
+  // Mettre à jour les getters paginés pour utiliser les listes filtrées
   get paginatedClients(): Clients[] {
     const startIndex = this.currentPageClients * this.pageSize;
-    return this.clients.slice(startIndex, startIndex + this.pageSize);
+    return this.filteredClients.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  get paginatedEntreprises(): EntrepriseClient[] {
+    const startIndex = this.currentPageEntreprises * this.pageSize;
+    return this.filteredEntreprises.slice(startIndex, startIndex + this.pageSize);
   }
 
   // client id routing

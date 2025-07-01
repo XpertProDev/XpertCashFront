@@ -45,8 +45,10 @@
           <input 
             type="text"
             placeholder="Recherche...." 
+            [(ngModel)]="searchText"
           />
         </div>
+
       </div>
     </div>
     
@@ -76,13 +78,14 @@
                 </div>
               </td>
               <td>
-                <span *ngIf="client.nomComplet; else noNomComplet">{{ client.nomComplet }}</span>
+                <span *ngIf="client.nomComplet; else noNomComplet" 
+                      [innerHTML]="highlightMatch(client.nomComplet)"></span>
                 <ng-template #noNomComplet>
                   <span class="no-phone-text">Nom est vide</span>
                 </ng-template>
               </td>
               <td>
-                <span *ngIf="client.email; else noEmail">{{ client.email }}</span>
+                <span *ngIf="client.email; else noEmail" [innerHTML]="highlightMatch(client.email)">{{ client.email }}</span>
                 <ng-template #noEmail>
                   <span class="no-phone-text">Non email</span>
                 </ng-template>
@@ -135,7 +138,8 @@
               </ng-template>
 
               <h3>
-                <span *ngIf="client.nomComplet; else noNomComplet">{{ client.nomComplet }}</span>
+                <span *ngIf="client.nomComplet; else noNomComplet"
+                      [innerHTML]="highlightMatch(client.nomComplet)">{{ client.nomComplet }}</span>
                 <ng-template #noNomComplet>
                   <span class="no-phone-text">Nom est vide</span>
                 </ng-template>
@@ -148,7 +152,7 @@
             <div class="info_cadre">
               <p>
                 <i class="ri-mail-line"></i>
-                <span *ngIf="client.email; else noEmail">{{ client.email | truncateEmail }}</span>
+                <span *ngIf="client.email; else noEmail" [innerHTML]="highlightMatch(client.email)">{{ client.email | truncateEmail }}</span>
                 <ng-template #noEmail>
                   <span class="no-phone-text">Non email</span>
                 </ng-template>
@@ -217,13 +221,13 @@
                 </div>
               </td>
               <td>
-                <span *ngIf="entreprise.nom; else noNom">{{ entreprise.nom }}</span>
+                <span *ngIf="entreprise.nom; else noNom" [innerHTML]="highlightMatch(entreprise.nom)">{{ entreprise.nom }}</span>
                 <ng-template #noNom>
                   <span class="no-phone-text">Nom vide</span>
                 </ng-template>
               </td>
               <td>
-                <span *ngIf="entreprise.email; else noEmail">{{ entreprise.email }}</span>
+                <span *ngIf="entreprise.email; else noEmail" [innerHTML]="highlightMatch(entreprise.email)">{{ entreprise.email }}</span>
                 <ng-template #noEmail>
                   <span class="no-phone-text">Non email</span>
                 </ng-template>
@@ -259,7 +263,7 @@
           <div class="name_icon">
             <div class="tete">
               <h3>
-                <span *ngIf="entreprise.nom; else noNom">{{ entreprise.nom }}</span>
+                <span *ngIf="entreprise.nom; else noNom" [innerHTML]="highlightMatch(entreprise.nom)">{{ entreprise.nom }}</span>
                 <ng-template #noNom>
                   <span class="no-phone-text">Nom est vide</span>
                 </ng-template>
@@ -271,7 +275,7 @@
             <div class="info_cadre">
               <p>
                 <i class="ri-mail-line"></i>
-                <span *ngIf="entreprise.email; else noEmail">{{ entreprise.email | truncateEmail }}</span>
+                <span *ngIf="entreprise.email; else noEmail" [innerHTML]="highlightMatch(entreprise.email)">{{ entreprise.email | truncateEmail }}</span>
                 <ng-template #noEmail>
                   <span class="no-phone-text">Non email</span>
                 </ng-template>
