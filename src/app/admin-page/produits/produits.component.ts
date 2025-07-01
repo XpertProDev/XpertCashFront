@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import jsPDF from 'jspdf';
@@ -62,6 +62,31 @@ export class ProduitsComponent implements OnInit {
   isLoading = false;
   showNoProductsMessage = false;
 
+  showFilterDropdown = false;
+  selectedFilters: any[] = [];
+  allProducts: Produit[] = [];   // Tous les produits chargés
+  sortColumn: string | null = null;
+  sortDirection: 'asc' | 'desc' = 'asc';
+  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
+
+  // HostListener pour fermer les dropdowns
+  @HostListener('document:click', ['$event'])
+  onClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    
+    // Fermer le dropdown de filtre
+    if (!target.closest('.container_inputSearch') && 
+        !target.closest('.filter-dropdown') &&
+        !target.closest('.trier')) {
+      this.showFilterDropdown = false;
+    }
+    
+    // Fermer le dropdown d'export
+    if (!target.closest('.export-container')) {
+      this.showExportDropdown = false;
+    }
+  }
+
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -92,7 +117,82 @@ export class ProduitsComponent implements OnInit {
     // this.loadProduits();
   }
 
-  
+    // Méthodes de gestion des filtres
+  toggleFilterDropdown(): void {
+    this.showFilterDropdown = !this.showFilterDropdown;
+    this.showExportDropdown = false;
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.allProducts];
+    const searchLower = this.searchText.toLowerCase();
+
+    if (this.searchText) {
+      if (this.selectedFilters.length > 0) {
+        filtered = filtered.filter(product => {
+          return this.selectedFilters.every(filter => {
+            const key = filter.type as keyof Produit;
+            const value = product[key]?.toString().toLowerCase() || '';
+            return value.includes(searchLower);
+          });
+        });
+      } else {
+        filtered = filtered.filter(product => 
+          Object.values(product).some(val => 
+            val?.toString().toLowerCase().includes(searchLower)
+        ));
+      }
+    }
+
+    this.tasks = filtered;
+    this.currentPage = 0;
+  }
+
+  addFilter(filter: any): void {
+    if (this.isFilterSelected(filter.type)) {
+      this.selectedFilters = [];
+    } else {
+      this.selectedFilters = [filter];
+    }
+    this.showFilterDropdown = false;
+    this.applyFilters();
+    
+    setTimeout(() => {
+      if (this.searchInput?.nativeElement) {
+        this.searchInput.nativeElement.focus();
+      }
+    }, 0);
+  }
+
+  isFilterSelected(filterType: string): boolean {
+    return this.selectedFilters.some(f => f.type === filterType);
+  }
+
+  focusSearchInput(): void {
+    if (this.searchInput?.nativeElement) {
+      this.searchInput.nativeElement.focus();
+    }
+  }
+
+  removeFilter(filter: any): void {
+    this.selectedFilters = this.selectedFilters.filter(f => f !== filter);
+    this.applyFilters();
+  }
+
+  getSearchPlaceholder(): string {
+    if (this.selectedFilters.length > 0) {
+      return `Par ${this.selectedFilters.map(f => f.label).join(', ')}...`;
+    }
+    return "Recherche...";
+  }
+
+  resetFilters(): void {
+    this.selectedFilters = [];
+    this.searchText = '';
+    this.tasks = [...this.allProducts];
+    this.currentPage = 0;
+    this.showFilterDropdown = false;
+  }
 
   goToAddProduit() {
     this.router.navigate(['/addProduit']);
@@ -106,20 +206,25 @@ export class ProduitsComponent implements OnInit {
   }
 
   // Retourne la liste filtrée et paginée des produits
-  filteredProducts(): Produit[] {
-    const sortedProducts = [...this.tasks].sort((a, b) => {
-      const dateA = new Date(a.createdAt || new Date()).getTime();
-      const dateB = new Date(b.createdAt || new Date()).getTime();
+  // filteredProducts(): Produit[] {
+  //   const sortedProducts = [...this.tasks].sort((a, b) => {
+  //     const dateA = new Date(a.createdAt || new Date()).getTime();
+  //     const dateB = new Date(b.createdAt || new Date()).getTime();
 
-      return dateB - dateA;
-    });
-    const filtered = sortedProducts.filter(product =>
-      (product.nom && product.nom.toLowerCase().includes(this.searchText.toLowerCase())) ||
-      (product.codeGenerique && product.codeGenerique.toLowerCase().includes(this.searchText.toLowerCase())) ||
-      (product.codeBare && product.codeBare.toLowerCase().includes(this.searchText.toLowerCase())) 
-    );
+  //     return dateB - dateA;
+  //   });
+  //   const filtered = sortedProducts.filter(product =>
+  //     (product.nom && product.nom.toLowerCase().includes(this.searchText.toLowerCase())) ||
+  //     (product.codeGenerique && product.codeGenerique.toLowerCase().includes(this.searchText.toLowerCase())) ||
+  //     (product.codeBare && product.codeBare.toLowerCase().includes(this.searchText.toLowerCase())) 
+  //   );
+  //   const startIndex = this.currentPage * this.pageSize;
+  //   return filtered.slice(startIndex, startIndex + this.pageSize);
+  // }
+
+  filteredProducts(): Produit[] {
     const startIndex = this.currentPage * this.pageSize;
-    return filtered.slice(startIndex, startIndex + this.pageSize);
+    return this.tasks.slice(startIndex, startIndex + this.pageSize);
   }
 
   // Affichage/Masquage du dropdown d'export
@@ -318,6 +423,7 @@ export class ProduitsComponent implements OnInit {
           const boutiqueId = this.selectedBoutique.id;
           
         }
+        this.allProducts = [...this.tasks];
   
         // if (this.boutiques.length > 0) {
         //   this.selectedBoutique = this.boutiques[0];
@@ -404,6 +510,8 @@ export class ProduitsComponent implements OnInit {
         }
         
         this.showNoProductsMessage = this.tasks.length === 0;
+        this.allProducts = [...this.tasks]; // <-- Ajouter cette ligne
+        this.resetFilters(); // <-- Réinitialiser les filtres
       },
       error: (err) => {
          // Ajouter cette ligne
@@ -475,6 +583,8 @@ export class ProduitsComponent implements OnInit {
           this.dataSource.paginator = this.paginator;
         }
         this.isLoading = false;
+        this.allProducts = [...this.tasks];
+        this.resetFilters();
         
         this.showNoProductsMessage = this.tasks.length === 0;
       },
@@ -554,6 +664,8 @@ export class ProduitsComponent implements OnInit {
           }
 
           this.isLoading = false;
+          this.allProducts = [...this.tasks];
+          this.applyFilters();
         }, delay); 
       },
       error: (err) => {
