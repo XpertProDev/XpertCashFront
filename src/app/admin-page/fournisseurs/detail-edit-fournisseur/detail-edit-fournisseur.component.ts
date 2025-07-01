@@ -229,10 +229,6 @@ export class DetailEditFournisseurComponent {
     );
   }
 
-  goToFournisseur() {
-    this.router.navigate(['/fournisseurs']);
-  }
-
   // detail-edit-fournisseur.component.ts
   private loadFournisseur(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -296,6 +292,21 @@ export class DetailEditFournisseurComponent {
     this.fournisseurEditForm.disable();
   }
 }
+
+  goToFournisseur() {
+    // this.fournisseurEditForm.disable();
+    if (this.isEditing) {
+      this.cancelEditing();
+    } else {
+      this.router.navigate(['/fournisseurs']);
+    }
+  }
+
+  cancelEditing(): void {
+    this.isEditing = false;
+    this.fournisseurEditForm.disable();
+    this.loadFournisseur();
+  }
 
 async modifierFournisseur() {
   this.isLoading = true;

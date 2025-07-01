@@ -58,6 +58,7 @@ export class DetailBoutiqueComponent implements OnInit {
     this.initForm();
     this.loadBoutique();
     this.loadAllBoutiques();
+    this.boutiqueForm.disable();
   }
 
   private initForm(): void {
@@ -156,17 +157,43 @@ export class DetailBoutiqueComponent implements OnInit {
     this.isEditing = !this.isEditing;
     
     if (this.isEditing) {
-      this.control.enable();
       this.boutiqueForm.enable();
     } else {
-      // Réinitialiser les erreurs en sortant du mode édition
-      this.errorMessage = '';
-      this.control.disable();
       this.boutiqueForm.disable();
+      // Réinitialiser le formulaire avec les valeurs originales
+      if (this.boutique) {
+        this.boutiqueForm.patchValue({
+          nomBoutique: this.boutique.nomBoutique,
+          adresse: this.boutique.adresse,
+          email: this.boutique.email,
+          telephone: this.boutique.telephone
+        });
+      }
     }
   }
 
-// Modifiez la méthode existante
+  goToBoutique() {
+    if (this.isEditing) {
+      this.cancelEditing();
+    } else {
+      this.router.navigate(['/boutique']);
+    }
+  }
+
+  cancelEditing(): void {
+    this.isEditing = false;
+    this.boutiqueForm.disable();
+    this.loadBoutique();
+  }
+
+  getLoadingMessage(): string {
+    if (this.isLoading) return 'Chargement en cours...';
+    if (this.isUpdating) return 'Mise à jour du statut...';
+    if (this.isUpdating_boutique) return 'Mise à jour des informations...';
+    return 'Traitement en cours...';
+  }
+
+  // Modifiez la méthode existante
   toggleBoutiqueStatus(event: Event): void {
     event.preventDefault();
     this.checkboxRef = event.target as HTMLInputElement;
@@ -243,45 +270,45 @@ export class DetailBoutiqueComponent implements OnInit {
     alert('Échec de la mise à jour du statut');
   }
 
-  onSubmitBoutique(): void {
+  async onSubmitBoutique(): Promise<void> {
     if (this.boutiqueForm.invalid || !this.boutique) return;
 
-    this.isUpdating_boutique = true;
+    this.isLoading = true;
     this.errorMessage = null;
     this.successMessage = null;
 
-    // Clear les timeouts précédents
-    clearTimeout(this.successMessageTimeout);
-    clearTimeout(this.updateTimeout);
+    try {
+      // Délai minimum de 2 secondes pour le loading
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-    this.boutiqueService.updateBoutique(this.boutique.id, this.boutiqueForm.value)
-      .subscribe({
-          next: (response) => {
-            if (this.boutique) {
-              this.boutique = { 
-                ...this.boutique, 
-                ...this.boutiqueForm.value 
-              };
-            }
-            
-            // Clear les timeouts précédents
-            clearTimeout(this.successMessageTimeout);
-            clearTimeout(this.updateTimeout);
+      // Appel au service
+      const response = await this.boutiqueService.updateBoutique(
+        this.boutique.id, 
+        this.boutiqueForm.value
+      ).toPromise();
 
-            // Désactiver le loading après 2 secondes
-            this.updateTimeout = setTimeout(() => {
-              this.isUpdating_boutique = false;
-              // Afficher le message de succès après la fin du loading
-              this.successMessage = 'Boutique mise à jour avec succès !';
-              this.successMessageTimeout = setTimeout(() => {
-                this.successMessage = null;
-              }, 5000);
-            }, 2000);
-          },error: (err) => {
-          this.isUpdating_boutique = false;
-          this.errorMessage = err.error?.message || 'Erreur lors de la mise à jour';
-        }
-      });
+      // Mettre à jour la boutique locale
+      if (this.boutique) {
+        this.boutique = { 
+          ...this.boutique, 
+          ...this.boutiqueForm.value 
+        };
+      }
+
+      this.successMessage = 'Boutique mise à jour avec succès !';
+      
+      // Désactiver le mode édition après succès
+      this.toggleEditing();
+      
+      // Effacer le message après 5 secondes
+      setTimeout(() => this.successMessage = null, 5000);
+
+    } catch (err: any) {
+      console.error('Update error:', err);
+      this.errorMessage = err.error?.message || 'Erreur lors de la mise à jour';
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   toggleModificationForm() {
@@ -294,17 +321,17 @@ export class DetailBoutiqueComponent implements OnInit {
   }
 
   toggleTransferModal(): void {
-      // Fermer le modal de copie si ouvert
-      if (this.showCopyModal) {
-          this.showCopyModal = false;
-      }
-      
-      this.showTransferModal = !this.showTransferModal;
-      if (this.showTransferModal) {
-          this.loadAllBoutiques();
-          this.searchTerm = '';
-          this.filterBoutiques();
-      }
+    // Fermer le modal de copie si ouvert
+    if (this.showCopyModal) {
+        this.showCopyModal = false;
+    }
+    
+    this.showTransferModal = !this.showTransferModal;
+    if (this.showTransferModal) {
+        this.loadAllBoutiques();
+        this.searchTerm = '';
+        this.filterBoutiques();
+    }
   }
 
   toggleCopierModal(): void {
@@ -337,26 +364,26 @@ export class DetailBoutiqueComponent implements OnInit {
 
   // Filtrer les boutiques selon la recherche
   filterBoutiques(): void {
-      if (!this.searchTerm) {
-          this.filteredBoutiques = [...this.allBoutiques];
-          return;
-      }
-      
-      const term = this.searchTerm.toLowerCase();
-      this.filteredBoutiques = this.allBoutiques.filter(b => 
-          b.nomBoutique.toLowerCase().includes(term)
-      );
+    if (!this.searchTerm) {
+        this.filteredBoutiques = [...this.allBoutiques];
+        return;
+    }
+    
+    const term = this.searchTerm.toLowerCase();
+    this.filteredBoutiques = this.allBoutiques.filter(b => 
+        b.nomBoutique.toLowerCase().includes(term)
+    );
   }
 
 
 
   // Sélectionner une boutique pour le transfert
   selectBoutique(boutique: Boutique): void {
-      console.log('Boutique sélectionnée pour le transfert :', boutique);
-      // Ici vous pouvez implémenter la logique de transfert
-      
-      // Fermer le modal après sélection
-      this.closeTransferModal();
+    console.log('Boutique sélectionnée pour le transfert :', boutique);
+    // Ici vous pouvez implémenter la logique de transfert
+    
+    // Fermer le modal après sélection
+    this.closeTransferModal();
   }
   
 
