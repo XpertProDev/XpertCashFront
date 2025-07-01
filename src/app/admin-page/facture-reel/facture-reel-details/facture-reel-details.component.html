@@ -1,12 +1,19 @@
 <!-- <div>
     {{facture | json}}
 </div> -->
+
+
+<!-- Icon return  -->
+<p class="retour_icon_text" (click)="navigateBack()" style="cursor: pointer; color: #0672E4; margin-bottom: 15px;" title="Retour sur la page factures réelle">
+    <i class="ri-arrow-left-s-line"></i> <span style="margin-left: 8px; font-size: 12px;">Factures réelle</span>
+</p>
+
 <div class="container_global" *ngIf="facture as f; else noData">
   <div class="information_cadre div1" style="position: relative;">
     <div class="cadre_retour">
-      <div class="retour_icon" (click)="navigateBack()">
+      <!-- <div class="retour_icon" (click)="navigateBack()">
         <i class="ri-arrow-left-long-fill"></i>
-      </div>
+      </div> -->
 
       <div class="etat_envoyer" *ngIf="facture?.statutPaiement === 'EN_ATTENTE'">
           <button class="btn_etat btn_etat_annuler" 

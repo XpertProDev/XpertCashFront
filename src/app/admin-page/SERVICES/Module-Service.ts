@@ -10,14 +10,14 @@ import { environment } from 'src/environments/environment';
 })
 export class ModuleService {
 
-    private apiUrl = environment.apiBaseUrl;
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) {}
-  getModulesEntreprise(): Observable<Module[]> {
+    getModulesEntreprise(): Observable<Module[]> {
     const token = localStorage.getItem('authToken');
     if (!token) {
       console.error('Aucun token trouvé dans le localStorage');
-      return new Observable<Module[]>();  
+      return throwError(() => new Error('Token manquant'));
     }
 
     const headers = new HttpHeaders({

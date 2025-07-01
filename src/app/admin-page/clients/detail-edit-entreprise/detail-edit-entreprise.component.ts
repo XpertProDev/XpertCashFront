@@ -314,4 +314,8 @@ export class DetailEditEntrepriseComponent {
       }, 3000); // Délai initial de 3 secondes
   }
 
+  navigateBack() {
+    this.router.navigate(['/clients'])
+  }
+
 }

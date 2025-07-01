@@ -418,4 +418,8 @@ export class AddClientsComponent implements OnInit {
     this.router.navigate(['/clients']);
   }
 
+  navigateBack() {
+    this.router.navigate(['/clients'])
+  }
+
 }

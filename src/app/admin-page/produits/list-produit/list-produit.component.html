@@ -13,6 +13,11 @@
 
       <form class="container_formulaire" [formGroup]="modifierProduitForm">
 
+        <!-- Icon return  -->
+        <p class="retour_icon_text" (click)="navigateBack()" style="cursor: pointer; color: #0672E4;" title="Retour sur la page produit">
+            <i class="ri-arrow-left-s-line"></i> <span style="margin-left: 8px; font-size: 12px;">Produit</span>
+        </p>
+
         <!-- Titre d'ajout de produits  -->
         <div class="Title">
           <h3>Détails du produits</h3>
@@ -20,13 +25,13 @@
 
 
         <!-- Button return  -->
-        <div class="information_cadre">
+        <!-- <div class="information_cadre">
           <div class="cadre_retour">
             <div class="retour_icon" (click)="navigateBack()" style="cursor: pointer;" title="Retour sur la page produit">
                 <i class="ri-arrow-left-long-fill"></i>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <div class="form_left_right">
 

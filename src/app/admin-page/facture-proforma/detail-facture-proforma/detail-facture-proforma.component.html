@@ -6,7 +6,14 @@
 
 </div>
 
+
+<!-- Icon return  -->
+<p class="retour_icon_text" (click)="navigateBack()" style="cursor: pointer; color: #0672E4;" title="Retour sur la page facture pro forma">
+    <i class="ri-arrow-left-s-line"></i> <span style="margin-left: 8px; font-size: 12px;">Facture pro forma</span>
+</p>
+
 <div class="container_global">
+
     <div *ngIf="isLoading" class="loading-overlay">
         <div class="loading-content">
           <div class="spinner"></div>
@@ -517,149 +524,149 @@
     <div class="container_brouillon_facture">
         <div class="historical-timeline">
                     
-                            <!-- Titre + icône -->
-                            <div class="title_historique" style="display: flex; align-items: center; justify-content: space-between;">
-                                <h6 style="margin: 0;">Historique des actions</h6>
-                                <i class="ri-file-edit-line" 
-                                    style="font-size: 1.1rem; cursor: pointer; color: #555;"
-                                    (click)="toggleNotebook()"
-                                    title="Voir le cahier de notes">
-                                </i>
+            <!-- Titre + icône -->
+            <div class="title_historique" style="display: flex; align-items: center; justify-content: space-between;">
+                <h6 style="margin: 0;">Historique des actions</h6>
+                <i class="ri-file-edit-line" 
+                    style="font-size: 1.1rem; cursor: pointer; color: #555;"
+                    (click)="toggleNotebook()"
+                    title="Voir le cahier de notes">
+                </i>
+            </div>
+
+                <!-- Fiche (bloc-notes) -->
+            <div class="note-notebook" *ngIf="isNotebookOpen">
+                    <div class="notebook-header">
+                        <span class="title">🗒️ Mes notes</span>
+
+                        <!-- ➕ Ajouter une note -->
+                        <i
+                        *ngIf="!isAddNoteInputVisible"
+                        class="ri-add-line add-icon icon"
+                        (click)="toggleAddNoteInput()"
+                        title="Ajouter une note"
+                        ></i>
+
+                        <!-- Save when il y a du texte -->
+                        <i
+                        *ngIf="isAddNoteInputVisible && noteModification.trim() !== ''"
+                        class="ri-save-line add-icon icon"
+                        (click)="submitNote()"
+                        title="Enregistrer"
+                        ></i>
+
+                        <!-- close quand champ vide -->
+                        <i
+                        *ngIf="isAddNoteInputVisible && noteModification.trim() === ''"
+                        class="ri-close-line close-icon icon"
+                        (click)="closeNoteInput()"
+                        title="Annuler"
+                        ></i>
+                    </div>
+
+                            <!-- Champ de saisie -->
+                            <div class="add-note-inline" *ngIf="isAddNoteInputVisible">
+                                <textarea
+                                [(ngModel)]="noteModification"
+                                placeholder="Écris quelque chose..."
+                                rows="4"
+                                ></textarea>
                             </div>
 
-                            <!-- Fiche (bloc-notes) -->
-                        <div class="note-notebook" *ngIf="isNotebookOpen">
-                                <div class="notebook-header">
-                                    <span class="title">🗒️ Mes notes</span>
+                <!-- Liste des notes -->
+                    
+                <ul class="note-list">
+                    <span *ngIf="infoMessage" class="message-notes">
+                    {{ infoMessage }}
+                    </span>
 
-                                    <!-- ➕ Ajouter une note -->
-                                    <i
-                                    *ngIf="!isAddNoteInputVisible"
-                                    class="ri-add-line add-icon icon"
-                                    (click)="toggleAddNoteInput()"
-                                    title="Ajouter une note"
-                                    ></i>
+                        <li *ngFor="let note of notes; let i = index">
+                            <div class="note-item position-relative">
+                            <!-- Icône trois points en haut à droite -->
+                            <div class="note-options">
+                                <i 
+                                class="ri-more-2-fill" 
+                                (click)="toggleNoteMenu(i)" 
+                                title="Options"
+                                ></i>
 
-                                    <!-- Save when il y a du texte -->
-                                    <i
-                                    *ngIf="isAddNoteInputVisible && noteModification.trim() !== ''"
-                                    class="ri-save-line add-icon icon"
-                                    (click)="submitNote()"
-                                    title="Enregistrer"
-                                    ></i>
-
-                                    <!-- close quand champ vide -->
-                                    <i
-                                    *ngIf="isAddNoteInputVisible && noteModification.trim() === ''"
-                                    class="ri-close-line close-icon icon"
-                                    (click)="closeNoteInput()"
-                                    title="Annuler"
-                                    ></i>
-                                </div>
-
-                                        <!-- Champ de saisie -->
-                                        <div class="add-note-inline" *ngIf="isAddNoteInputVisible">
-                                            <textarea
-                                            [(ngModel)]="noteModification"
-                                            placeholder="Écris quelque chose..."
-                                            rows="4"
-                                            ></textarea>
+                                <!-- Menu déroulant -->
+                                <div class="note-menu" *ngIf="activeMenuIndex === i">
+                                <button (click)="editNote(i)">✏️ Modifier</button>
+                                <ng-container *ngIf="confirmDeleteIndex === i; else showDeleteButton">
+                                    <div class="confirm-dialog">
+                                        <p>Voulez-vous vraiment supprimer cette note ?</p>
+                                        <div class="confirm-dialog-buttons">
+                                            <button (click)="confirmDelete(i)">Oui</button>
+                                            <button (click)="cancelDelete()">Non</button>
                                         </div>
+                                    </div>
+                                </ng-container>
+                                <ng-template #showDeleteButton>
+                                    <button (click)="askDelete(i)">🗑️ Supprimer</button>
+                                </ng-template>
+                            </div>
 
-                            <!-- Liste des notes -->
-                              
-                            <ul class="note-list">
-                                <span *ngIf="infoMessage" class="message-notes">
-                                {{ infoMessage }}
+                            </div>
+                            <!-- Contenu de la note -->
+                            
+
+                            <div class="note-text">{{ note.content }}</div>
+
+                            <div class="note-meta">
+                                <span *ngIf="note.dateCreation" class="meta-date">{{ note.dateCreation | date:'dd/MM/yyyy HH:mm' }} ⦿ </span>
+                                <span class="meta-author">{{ note.auteur }}</span>
+                                <span *ngIf="note.modifiee" class="badge-modified">Modifiée</span>
+                                <span class="meta-numeroIdentifiant">{{ note.numeroIdentifiant }}</span>
+                            </div>
+                            </div>
+                        </li>
+                </ul>
+
+
+            </div>
+
+            <div class="timeline-container">
+                <div *ngFor="let event of historicalEvents" class="timeline-event">
+                    <div class="event-avatar">
+                        <img [src]="event.user.photo || 'assets/img/profil.png'" alt="Avatar" class="avatar"
+                            (error)="event.user.photo = 'assets/img/profil.png'">
+
+                    </div>
+                    
+                    <div class="event-content">
+                        <div class="event-header">
+                            <span class="user-name">{{event.user.nomComplet}}</span>
+                            <span class="event-date">{{event.date | date: 'dd/MM/yyyy HH:mm'}}</span>
+                        </div>
+                    
+                        <div class="event-action" [ngClass]="{
+                            'creation': event.type === 'creation',
+                            'approbation': event.type === 'approbation',
+                            'envoi': event.type === 'envoi',
+                            'validation': event.type === 'validation'
+                        }">
+                            <i class="action-icon" [ngClass]="{
+                            'ri-file-add-line': event.type === 'creation',
+                            'ri-checkbox-circle-line': event.type === 'approbation',
+                            'ri-send-plane-line': event.type === 'envoi',
+                            'ri-shield-check-line': event.type === 'validation'
+                            }"></i>
+                            {{event.description}}
+                            <div class="status-badge" *ngIf="event.status">
+                                {{event.status}}
+                            </div>
+                            
+                            <!-- Afficher les approbateurs pour les demandes d'approbation -->
+                            <div *ngIf="event.status === 'APPROBATION'" class="approbateurs-list">
+                                <span *ngFor="let approbateur of factureProForma.approbateurs">
+                                    {{approbateur.nomComplet}}
                                 </span>
-
-                                    <li *ngFor="let note of notes; let i = index">
-                                        <div class="note-item position-relative">
-                                        <!-- Icône trois points en haut à droite -->
-                                        <div class="note-options">
-                                            <i 
-                                            class="ri-more-2-fill" 
-                                            (click)="toggleNoteMenu(i)" 
-                                            title="Options"
-                                            ></i>
-
-                                            <!-- Menu déroulant -->
-                                         <div class="note-menu" *ngIf="activeMenuIndex === i">
-                                            <button (click)="editNote(i)">✏️ Modifier</button>
-                                            <ng-container *ngIf="confirmDeleteIndex === i; else showDeleteButton">
-                                                <div class="confirm-dialog">
-                                                    <p>Voulez-vous vraiment supprimer cette note ?</p>
-                                                    <div class="confirm-dialog-buttons">
-                                                        <button (click)="confirmDelete(i)">Oui</button>
-                                                        <button (click)="cancelDelete()">Non</button>
-                                                    </div>
-                                                </div>
-                                            </ng-container>
-                                            <ng-template #showDeleteButton>
-                                                <button (click)="askDelete(i)">🗑️ Supprimer</button>
-                                            </ng-template>
-                                        </div>
-
-                                        </div>
-                                        <!-- Contenu de la note -->
-                                        
-
-                                        <div class="note-text">{{ note.content }}</div>
-
-                                        <div class="note-meta">
-                                            <span *ngIf="note.dateCreation" class="meta-date">{{ note.dateCreation | date:'dd/MM/yyyy HH:mm' }} ⦿ </span>
-                                            <span class="meta-author">{{ note.auteur }}</span>
-                                            <span *ngIf="note.modifiee" class="badge-modified">Modifiée</span>
-                                            <span class="meta-numeroIdentifiant">{{ note.numeroIdentifiant }}</span>
-                                        </div>
-                                        </div>
-                                    </li>
-                            </ul>
-
-
-                        </div>
-
-                        <div class="timeline-container">
-                            <div *ngFor="let event of historicalEvents" class="timeline-event">
-                                <div class="event-avatar">
-                                    <img [src]="event.user.photo || 'assets/img/profil.png'" alt="Avatar" class="avatar"
-                                     (error)="event.user.photo = 'assets/img/profil.png'">
-
-                                </div>
-                                
-                                <div class="event-content">
-                                    <div class="event-header">
-                                        <span class="user-name">{{event.user.nomComplet}}</span>
-                                        <span class="event-date">{{event.date | date: 'dd/MM/yyyy HH:mm'}}</span>
-                                    </div>
-                                
-                                    <div class="event-action" [ngClass]="{
-                                        'creation': event.type === 'creation',
-                                        'approbation': event.type === 'approbation',
-                                        'envoi': event.type === 'envoi',
-                                        'validation': event.type === 'validation'
-                                    }">
-                                        <i class="action-icon" [ngClass]="{
-                                        'ri-file-add-line': event.type === 'creation',
-                                        'ri-checkbox-circle-line': event.type === 'approbation',
-                                        'ri-send-plane-line': event.type === 'envoi',
-                                        'ri-shield-check-line': event.type === 'validation'
-                                        }"></i>
-                                        {{event.description}}
-                                        <div class="status-badge" *ngIf="event.status">
-                                            {{event.status}}
-                                        </div>
-                                        
-                                        <!-- Afficher les approbateurs pour les demandes d'approbation -->
-                                        <div *ngIf="event.status === 'APPROBATION'" class="approbateurs-list">
-                                            <span *ngFor="let approbateur of factureProForma.approbateurs">
-                                                {{approbateur.nomComplet}}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
          </div>
     </div>
     

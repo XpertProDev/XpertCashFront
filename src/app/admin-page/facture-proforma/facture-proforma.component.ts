@@ -12,6 +12,7 @@ import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatInputModule } from '@angular/material/input';
 import { EntrepriseService } from '../SERVICES/entreprise-service';
+import { ModuleService } from '../SERVICES/Module-Service';
 
 @Component({
   selector: 'app-facture-proforma',
@@ -82,12 +83,16 @@ export class FactureProformaComponent implements OnInit {
       private factureProFormaService: FactureProFormaService,
       private produitService: ProduitService,
       private usersService: UsersService,
+      private moduleService: ModuleService,
+      
     ) {}
 
   ngOnInit(): void{
     const savedView = localStorage.getItem('factureView');
     this.isListView = savedView !== 'grid';
     this.getUserInfo();
+    this.verifierAcces();
+
   }
 
   toggleView(viewType: 'list' | 'grid') {
@@ -229,5 +234,42 @@ export class FactureProformaComponent implements OnInit {
     }
   }
 
+accesAutorise: boolean = false;
+chargementFini: boolean = false;
+messageErreur: string = "";
+tempsRestantEssai: string | null = null;
+
+verifierAcces(): void {
+  this.moduleService.getModulesEntreprise().subscribe({
+    next: (modules) => {
+      const moduleFacturation = modules.find(m => m.code === 'GESTION_FACTURATION');
+
+      if (moduleFacturation?.actif) {
+        this.accesAutorise = true;
+        this.tempsRestantEssai = moduleFacturation.tempsRestantEssai || null;
+      } else {
+        this.accesAutorise = false;
+        this.messageErreur = moduleFacturation?.tempsRestantEssai
+          ? "Votre période d'essai est terminée."
+          : "Ce module est inactif.";
+      }
+
+      this.chargementFini = true;
+    },
+    error: (err) => {
+      this.accesAutorise = false;
+      this.messageErreur = "Erreur lors de la vérification d'accès.";
+      this.chargementFini = true;
+    }
+  });
+}
+
+
+
+
+
+redirigerAccueil(): void {
+  this.router.navigate(['/']);
+}
   
 }

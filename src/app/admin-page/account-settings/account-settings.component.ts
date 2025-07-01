@@ -81,6 +81,8 @@ export class AccountSettingsComponent implements OnInit {
   isUserFormVisible = false;
   boutiques: any[] = [];
   showPasswordInPersonalForm: boolean = false;
+  modules: Module[] = [];
+  errorMsg = '';
 
     private apiUrl = environment.imgUrl;
     fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
@@ -646,10 +648,6 @@ onTauxTvaInput(event: Event): void {
   }
 
 
-  
- modules: Module[] = [];
-  errorMsg = '';
-
     loadModules(): void {
     this.moduleService.getModulesEntreprise().subscribe({
       next: (data) => this.modules = data,
@@ -658,10 +656,8 @@ onTauxTvaInput(event: Event): void {
   }
 
 
-
 activerModule(code: string) {
   console.log('Activation demandée pour le module :', code);
-  // Appel au backend avec uniquement le code
 }
 
 

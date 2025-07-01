@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { UsersService } from '../SERVICES/users.service';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
+import { ModuleService } from '../SERVICES/Module-Service';
 
 @Component({
   selector: 'app-facture-reel',
@@ -35,11 +36,13 @@ export class FactureReelComponent implements OnInit {
   constructor(
     private factureReelService: FactureReelService,
     private usersService: UsersService,
-    private router: Router
+    private router: Router,
+    private moduleService: ModuleService,
   ) {}
 
   ngOnInit(): void {
     this.getUserInfo();
+    this.verifierAcces();
   }
 
   getUserInfo(): void {
@@ -148,4 +151,43 @@ getAllFactureReelOfEntreprise(entrepriseId: number): void {
   showDetails(factureId: number): void {
     this.router.navigate(['/facture-reel-details', factureId]);
   }
+
+
+accesAutorise: boolean = false;
+chargementFini: boolean = false;
+messageErreur: string = "";
+tempsRestantEssai: string | null = null;
+
+verifierAcces(): void {
+  this.moduleService.getModulesEntreprise().subscribe({
+    next: (modules) => {
+      const moduleFacturation = modules.find(m => m.code === 'GESTION_FACTURATION');
+
+      if (moduleFacturation?.actif) {
+        this.accesAutorise = true;
+        this.tempsRestantEssai = moduleFacturation.tempsRestantEssai || null;
+      } else {
+        this.accesAutorise = false;
+        this.messageErreur = moduleFacturation?.tempsRestantEssai
+          ? "Votre période d'essai est terminée."
+          : "Ce module est inactif.";
+      }
+
+      this.chargementFini = true;
+    },
+    error: (err) => {
+      this.accesAutorise = false;
+      this.messageErreur = "Erreur lors de la vérification d'accès.";
+      this.chargementFini = true;
+    }
+  });
+}
+
+
+
+
+
+redirigerAccueil(): void {
+  this.router.navigate(['/']);
+}
 }

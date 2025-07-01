@@ -1,4 +1,4 @@
-<div class="containerTable">
+<div class="containerTable" *ngIf="chargementFini">
   <!-- En-tête : titre, actions et barre de recherche -->
   <div class="tasks-header">
       <h1 class="title">Facture pro forma</h1>
@@ -34,6 +34,23 @@
         </div>
       </div>
   </div>
+
+     <div class="access-overlay" *ngIf="!accesAutorise">
+    <div class="access-card">
+        <div class="icon-container" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+                <path d="M18 6L6 18" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 6L18 18" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <h1>Accès restreint</h1>
+        <div class="description">
+            <p class="message-principal">{{ messageErreur }}</p>
+            <p>Veuillez renouveler votre abonnement pour accéder à ce module.</p>
+        </div>
+        <button class="dashboard-button" (click)="redirigerAccueil()">OK</button>
+    </div>
+</div>
 
   <!-- Ajouter après la barre de recherche -->
   <div class="container_list_boutique">
@@ -205,3 +222,10 @@
   </div>
           
 </div>
+
+<!-- Blocage d'accès -->
+<ng-template #accesRefuse>
+  <div class="alert alert-warning" *ngIf="messageErreur">
+    {{ messageErreur }}
+  </div>
+</ng-template>

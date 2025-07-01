@@ -1925,5 +1925,9 @@ private formatDateForInput(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+navigateBack() {
+  this.router.navigate(['/facture-proforma'])
+}
+
 
 }

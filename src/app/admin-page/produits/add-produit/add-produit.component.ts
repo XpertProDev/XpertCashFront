@@ -239,6 +239,10 @@ export class AddProduitComponent implements OnInit {
     }
   }
 
+  navigateBack(){
+    this.router.navigate(['/produit'])
+  }
+
   setupFormSubscriptions() {
     const token = localStorage.getItem('authToken'); // ou via un service d'authentification
     if (token) {

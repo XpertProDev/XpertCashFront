@@ -7,6 +7,7 @@ import { AdminComponent } from './theme/layout/admin/admin.component';
 import { GuestComponent } from './theme/layout/guest/guest.component';
 import { authGuard } from './admin-page/guards/auth.guard';
 import { guestGuard } from './admin-page/guards/guestGuard';
+import { ModuleAccessGuard } from './admin-page/guards/ModuleAccessGuard';
 
 
 const routes: Routes = [
@@ -183,7 +184,9 @@ const routes: Routes = [
       },
       {
         path: 'facture-proforma-details/:id',
-        loadComponent: () => import('./admin-page/facture-proforma/detail-facture-proforma/detail-facture-proforma.component').then(m => m.DetailFactureProformaComponent)
+        loadComponent: () => import('./admin-page/facture-proforma/detail-facture-proforma/detail-facture-proforma.component').then(m => m.DetailFactureProformaComponent),
+        canActivate: [ModuleAccessGuard],
+        data: { codeModule: 'GESTION_FACTURATION' }
       },
       {
         path: 'ajouter-fournisseur',
@@ -207,7 +210,9 @@ const routes: Routes = [
       },
       {
         path: 'facture-reel-details/:id',
-        loadComponent: () => import('./admin-page/facture-reel/facture-reel-details/facture-reel-details.component').then(m => m.FactureReelDetailsComponent)
+        loadComponent: () => import('./admin-page/facture-reel/facture-reel-details/facture-reel-details.component').then(m => m.FactureReelDetailsComponent),
+        canActivate: [ModuleAccessGuard],
+        data: { codeModule: 'GESTION_FACTURATION' }
       },
       {
         path: 'account-settings',

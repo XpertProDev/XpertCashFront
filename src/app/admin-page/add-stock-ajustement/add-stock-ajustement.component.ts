@@ -879,6 +879,10 @@ onFournisseurChange() {
   console.log('✅ ID:', id, 'Nom:', this.codeFournisseur);
 }
 
+navigateBack() {
+  this.router.navigate(['/stocks'])
+}
+
 
   
 }

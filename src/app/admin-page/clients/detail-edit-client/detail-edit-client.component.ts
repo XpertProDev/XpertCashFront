@@ -818,5 +818,9 @@ loadFacturesClient() {
     this.entrepriseForm.controls['telephone'].updateValueAndValidity();
   }
 
+  navigateBack(){
+    this.router.navigate(['/clients'])
+  }
+
   
 }

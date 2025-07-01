@@ -650,16 +650,16 @@
 
 
                          <button 
-  *ngIf="!module.actif || (module.actif && module.tempsRestantEssai && module.tempsRestantEssai !== 'Terminé')" 
-  (click)="activerModule(module.code)" 
-  class="module-btn"
->
-  {{ module.payant && module.tempsRestantEssai && module.tempsRestantEssai !== 'Terminé' ? 'Activer (Essai en cours)' : 'Activer' }}
-</button>
+                            *ngIf="!module.actif || (module.actif && module.tempsRestantEssai && module.tempsRestantEssai !== 'Terminé')" 
+                            (click)="activerModule(module.code)" 
+                            class="module-btn"
+                            >
+                            {{ module.payant && module.tempsRestantEssai && module.tempsRestantEssai !== 'Terminé' ? 'Activer (Essai en cours)' : 'Activer' }}
+                            </button>
 
-<div *ngIf="module.actif && (!module.tempsRestantEssai || module.tempsRestantEssai === 'Terminé')" class="module-actif">
-  Activé
-</div>
+                            <div *ngIf="module.actif && (!module.tempsRestantEssai || module.tempsRestantEssai === 'Terminé')" class="module-actif">
+                            Activé
+                            </div>
 
                             
 

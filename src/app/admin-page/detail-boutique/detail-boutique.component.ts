@@ -200,6 +200,9 @@ export class DetailBoutiqueComponent implements OnInit {
     this.cd.detectChanges(); // Force la mise à jour du DOM
   }
 
+  navigateBack(){
+    this.router.navigate(['/boutique']);
+  }
   
 
 }
