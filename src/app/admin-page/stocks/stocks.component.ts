@@ -78,17 +78,34 @@ export class StocksComponent implements OnInit {
   // Ajoutez cette propriété
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
+  // @HostListener('document:click', ['$event'])
+  // onClick(event: MouseEvent): void {
+  //   const target = event.target as HTMLElement;
+  //   if (!target.closest('.container_inputSearch')) {
+  //     this.showFilterDropdown = false;
+  //   }
+    
+  //   // Réinitialiser les filtres si nécessaire
+  //   if (this.tasks.length === 0) {
+  //     this.selectedFilters = [];
+  //     this.sortColumn = null;
+  //   }
+  // }
+
   @HostListener('document:click', ['$event'])
   onClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    if (!target.closest('.container_inputSearch')) {
+    
+    // Fermer le dropdown si on clique en dehors
+    if (!target.closest('.container_inputSearch') && 
+        !target.closest('.filter-dropdown') &&
+        !target.closest('.trier')) {
       this.showFilterDropdown = false;
     }
     
-    // Réinitialiser les filtres si nécessaire
-    if (this.tasks.length === 0) {
-      this.selectedFilters = [];
-      this.sortColumn = null;
+    // Fermer le dropdown d'export si nécessaire
+    if (!target.closest('.export-container')) {
+      this.showExportDropdown = false;
     }
   }
 
@@ -424,9 +441,11 @@ export class StocksComponent implements OnInit {
     }
     this.currentPage = 0;
   }
-
+  
   toggleFilterDropdown(): void {
     this.showFilterDropdown = !this.showFilterDropdown;
+    // Fermer aussi le dropdown d'export si nécessaire
+    this.showExportDropdown = false;
   }
 
   loadAllProduits(): void {
@@ -566,6 +585,7 @@ export class StocksComponent implements OnInit {
     this.tasks = [...this.allProducts];
     this.filteredProduct = [];
     this.currentPage = 0;
+    this.showFilterDropdown = false;
   }
 
   setSorting(column: string): void {
@@ -587,8 +607,9 @@ export class StocksComponent implements OnInit {
       // Sinon, on remplace le filtre existant
       this.selectedFilters = [filter];
     }
-    
-    this.searchText = '';
+
+    this.showFilterDropdown = false;
+    // this.searchText = '';
     this.applyFilters();
     
     setTimeout(() => {
@@ -615,7 +636,7 @@ export class StocksComponent implements OnInit {
 
   getSearchPlaceholder(): string {
     if (this.selectedFilters.length > 0) {
-      return `Rechercher par ${this.selectedFilters.map(f => f.label).join(', ')}...`;
+      return `Par ${this.selectedFilters.map(f => f.label).join(', ')}...`;
     }
     return "Recherche...";
   }
