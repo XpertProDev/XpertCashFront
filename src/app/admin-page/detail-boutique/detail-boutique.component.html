@@ -52,13 +52,20 @@
                 </div>
 
                 <label class="switch">
-                    <!-- Activer/désactiver le toggle uniquement en mode édition -->
-                    <input type="checkbox"/>
+                    <input 
+                        type="checkbox" 
+                        [checked]="boutique?.actif"
+                        (change)="toggleBoutiqueStatus($event)"
+                        [disabled]="isUpdating"
+                    />
                     <span class="slider round"></span>
                 </label>
+                
+                <!-- Spinner avec délai de 3 secondes -->
+                <div *ngIf="isUpdating" class="spinner-border text-primary spinner-small" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
             </div>
-
-            
         </div>
         
         <!-- Section Informations Personnelles -->
@@ -279,7 +286,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    
+
                 <tr>
                     <td>
                         <label class="cyber-checkbox">
@@ -388,7 +395,25 @@
 
 </div>
 
+<!-- Ajoutez ceci en bas du template -->
+<div class="confirmation-modal" *ngIf="showConfirmationModal">
+  <div class="modal-content">
+    <h4>{{ confirmationTitle }}</h4>
+    <p>{{ confirmationMessage }}</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="cancelAction()">Annuler</button>
+      <button class="btn-confirm" (click)="handleStatusChange()">Confirmer</button>
+    </div>
+  </div>
+</div>
 
+
+<div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Connexion en cours...</p>
+    </div>
+</div>
 
 
 
@@ -604,24 +629,7 @@
     </div> -->
 </div>
 
-<div *ngIf="isLoading" class="loading-overlay">
-    <div class="loading-content">
-      <div class="spinner"></div>
-      <p>Connexion en cours...</p>
-    </div>
-</div>
 
 
 
 
-<!-- Ajoutez ceci en bas du template -->
-<div class="confirmation-modal" *ngIf="showConfirmationModal">
-  <div class="modal-content">
-    <h4>{{ confirmationTitle }}</h4>
-    <p>{{ confirmationMessage }}</p>
-    <div class="modal-actions">
-      <button class="btn-cancel" (click)="cancelAction()">Annuler</button>
-      <button class="btn-confirm" (click)="handleStatusChange()">Confirmer</button>
-    </div>
-  </div>
-</div>

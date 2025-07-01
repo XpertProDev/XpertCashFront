@@ -187,29 +187,44 @@ export class DetailBoutiqueComponent implements OnInit {
   }
 
   handleStatusChange(): void {
-    if (!this.boutique || this.pendingStatusChange === null) return;
+      if (!this.boutique || this.pendingStatusChange === null) return;
 
-    this.isUpdating = true;
-    this.showConfirmationModal = false;
+      this.isUpdating = true;
+      this.showConfirmationModal = false;
 
-    const operation$ = this.pendingStatusChange 
-      ? this.boutiqueService.activerBoutique(this.boutique.id)
-      : this.boutiqueService.desactiverBoutique(this.boutique.id);
+      // Démarrer un timer pour le délai minimum de 3 secondes
+      const minDelay = 3000;
+      const startTime = Date.now();
 
-    operation$.subscribe({
-      next: () => {
-        this.loadBoutique();
-        this.isUpdating = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.isUpdating = false;
-        if (this.checkboxRef) {
-          this.checkboxRef.checked = !this.pendingStatusChange;
-        }
-        this.showErrorMessage();
-      }
-    });
+      const operation$ = this.pendingStatusChange 
+          ? this.boutiqueService.activerBoutique(this.boutique.id)
+          : this.boutiqueService.desactiverBoutique(this.boutique.id);
+
+      operation$.subscribe({
+          next: () => {
+              const elapsed = Date.now() - startTime;
+              const remainingDelay = Math.max(minDelay - elapsed, 0);
+              
+              // Attendre le temps restant pour compléter les 3 secondes
+              setTimeout(() => {
+                  this.loadBoutique();
+                  this.isUpdating = false;
+              }, remainingDelay);
+          },
+          error: (err) => {
+              const elapsed = Date.now() - startTime;
+              const remainingDelay = Math.max(minDelay - elapsed, 0);
+              
+              setTimeout(() => {
+                  console.error(err);
+                  this.isUpdating = false;
+                  if (this.checkboxRef) {
+                      this.checkboxRef.checked = !this.pendingStatusChange;
+                  }
+                  this.showErrorMessage();
+              }, remainingDelay);
+          }
+      });
   }
 
   private showSuccessMessage(action: string): void {
@@ -297,8 +312,8 @@ export class DetailBoutiqueComponent implements OnInit {
             this.allBoutiques = boutiques.filter(b => b.id !== this.boutique?.id);
             
             // Initialiser les deux listes filtrées
-            this.filteredBoutiques = [...this.allBoutiques];
             this.filteredCopyBoutiques = [...this.allBoutiques];
+            this.filteredBoutiques = [...this.allBoutiques];
         },
         error: (err) => {
             console.error('Erreur lors du chargement des boutiques', err);
