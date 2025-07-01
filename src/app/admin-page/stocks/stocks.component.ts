@@ -525,14 +525,14 @@ export class StocksComponent implements OnInit {
 
     if (this.searchText) {
       if (this.selectedFilters.length > 0) {
-        // Recherche SEULEMENT dans les champs sélectionnés
-        filtered = filtered.filter(product => 
-          this.selectedFilters.some(filter => {
+        // Recherche SEULEMENT dans le champ du filtre sélectionné
+        filtered = filtered.filter(product => {
+          return this.selectedFilters.every(filter => {
             const key = filter.type as keyof Produit;
             const value = product[key]?.toString().toLowerCase() || '';
             return value.includes(searchLower);
-          })
-        );
+          });
+        });
       } else {
         // Recherche globale si aucun filtre sélectionné
         filtered = filtered.filter(product => 
@@ -580,17 +580,26 @@ export class StocksComponent implements OnInit {
 
   // Modifiez votre méthode addFilter
   addFilter(filter: any): void {
-    if (!this.selectedFilters.some(f => f.type === filter.type)) {
-      this.selectedFilters = [filter]; // Remplace tous les filtres existants
-      this.searchText = ''; // Réinitialise la recherche
-      this.applyFilters();
-      
-      setTimeout(() => {
-        if (this.searchInput?.nativeElement) {
-          this.searchInput.nativeElement.focus();
-        }
-      }, 0);
+    // Si le filtre est déjà sélectionné, on le désactive
+    if (this.isFilterSelected(filter.type)) {
+      this.selectedFilters = [];
+    } else {
+      // Sinon, on remplace le filtre existant
+      this.selectedFilters = [filter];
     }
+    
+    this.searchText = '';
+    this.applyFilters();
+    
+    setTimeout(() => {
+      if (this.searchInput?.nativeElement) {
+        this.searchInput.nativeElement.focus();
+      }
+    }, 0);
+  }
+
+  isFilterSelected(filterType: string): boolean {
+    return this.selectedFilters.some(f => f.type === filterType);
   }
 
   focusSearchInput(): void {

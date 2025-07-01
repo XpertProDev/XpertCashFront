@@ -33,7 +33,7 @@
               <span class="remove-chip" (click)="removeFilter(filter)">✖</span>
             </span> -->
             <!-- Remplacer la boucle *ngFor par -->
-            <span *ngIf="selectedFilters.length > 0" class="tag" style="display: flex; align-items: center; background: #e0e0e0; padding: 2px 8px; border-radius: 20px; margin: 2px 4px 2px 0;">
+            <span *ngIf="selectedFilters.length > 0" class="tag" style="display: flex; align-items: center; background: #e0e0e0; padding: 2px 8px; border-radius: 20px; margin: 2px 4px 2px 0; z-index: 12;">
               {{ selectedFilters[0].label }}
               <span class="remove-chip" (click)="removeFilter(selectedFilters[0])">✖</span>
             </span>
@@ -56,7 +56,7 @@
               (click)="$event.stopPropagation()"
             />
 
-            <i class="ri-search-2-line" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"></i>
+            <i class="ri-search-2-line" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); z-index: 1;"></i>
           </div>
         </div>
 
@@ -66,19 +66,32 @@
         </div>
 
         <!-- Dropdown de filtres -->
-        <div class="filter-dropdown" *ngIf="showFilterDropdown" style="position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 100; width: 250px; margin-top: 5px;">
-          <div class="filter-section" style="padding: 10px;">
-            <h4 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">Filtres</h4>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-              <li (click)="addFilter({ type: 'nomCategorie', label: 'Catégorie' })" style="padding: 5px 10px; cursor: pointer; border-radius: 4px; margin-bottom: 5px;">Catégorie</li>
-              <li (click)="addFilter({ type: 'nomUnite', label: 'Unité' })" style="padding: 5px 10px; cursor: pointer; border-radius: 4px; margin-bottom: 5px;">Unité</li>
-            </ul>
-            <button (click)="resetFilters()" 
-                    style="background: none; border: none; color: #0671e4; cursor: pointer;">
+      <div class="filter-dropdown" *ngIf="showFilterDropdown" 
+          style="position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 100; width: 250px; margin-top: 5px;">
+        <div class="filter-section" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="margin: 0; font-size: 16px; color: #333;">Filtres</h4>
+            <button (click)="resetFilters(); $event.stopPropagation()" 
+                    style="background: none; border: none; color: #0671e4; cursor: pointer; font-size: 13px;">
               Réinitialiser
             </button>
           </div>
+          <ul style="list-style: none; padding: 0; margin: 10px 0 0 0;">
+            <li (click)="addFilter({ type: 'nomCategorie', label: 'Catégorie' })" 
+                [class.disabled]="isFilterSelected('nomCategorie')"
+                style="padding: 8px 12px; cursor: pointer; border-radius: 4px; margin-bottom: 5px; transition: background 0.3s;"
+                [style.background]="isFilterSelected('nomCategorie') ? '#f0f0f0' : 'transparent'">
+              Catégorie
+            </li>
+            <li (click)="addFilter({ type: 'nomUnite', label: 'Unité' })" 
+                [class.disabled]="isFilterSelected('nomUnite')"
+                style="padding: 8px 12px; cursor: pointer; border-radius: 4px; transition: background 0.3s;"
+                [style.background]="isFilterSelected('nomUnite') ? '#f0f0f0' : 'transparent'">
+              Unité
+            </li>
+          </ul>
         </div>
+      </div>
 
       </div>
 
@@ -163,11 +176,12 @@
           {{ product.description | slice:0:20 }}{{ product.description.length > 20 ? '...' : '' }}
           <div class="description-hover" *ngIf="showDescription">{{ product.description }}</div>
         </td>-->
-        <td [innerHTML]="highlightMatch(product.nomCategorie || 'Aucune categorie')"></td>
+        <td [innerHTML]="highlightMatch(product.nomCategorie || 'non categorie')"></td>
         <td>{{ product.prixVente | customNumber}}</td>
         <td>{{ product.prixAchat | customNumber}}</td>
         <td style="background-color: #0671e410;" [innerHTML]="highlightMatch(product.quantite.toString())"></td>
-        <td>{{ product.nomUnite || 'Non unité' }}</td>
+        <!-- <td>{{ product.nomUnite || 'Non unité' }}</td> -->
+        <td [innerHTML]="highlightMatch(product.nomUnite || 'non unite')"></td>
         <td>{{ product.seuilAlert }}</td>
         <ng-container>
           <td  *ngIf="!selectedBoutique">{{ getBoutiqueNames(product.boutiques) }}</td>
