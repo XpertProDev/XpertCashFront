@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BoutiqueService } from '../SERVICES/boutique-service';
 import { Boutique } from '../MODELS/boutique-model';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-detail-boutique',
@@ -22,8 +22,19 @@ export class DetailBoutiqueComponent implements OnInit {
   errorMessage: string | null = null;
   boutiqueForm!: FormGroup;
   successMessage: string | null = null;
+  errorMessageApi: string | null = null;
   successMessageTimeout: any;
   updateTimeout: any;
+  isEditing = false;
+  showTransferModal = false;
+  allBoutiques: Boutique[] = [];
+  filteredBoutiques: Boutique[] = [];
+  searchTerm = '';
+  showCopyModal = false;
+  copySearchTerm = '';
+  filteredCopyBoutiques: Boutique[] = [];
+
+  control = new FormControl();
 
   isUpdating = false;
   isUpdating_boutique = false;
@@ -90,6 +101,62 @@ export class DetailBoutiqueComponent implements OnInit {
  
   getStatusColor(): string {
       return this.boutique?.actif ? '#008000' : '#ff0000';
+  }
+
+  // Méthodes pour gérer le popup de copie
+  toggleCopyModal(): void {
+      this.showCopyModal = !this.showCopyModal;
+      if (this.showCopyModal) {
+          // Réinitialiser la recherche
+          this.copySearchTerm = '';
+          this.filterCopyBoutiques();
+      }
+  }
+
+  // Sélectionner une boutique pour la copie
+  selectCopyBoutique(boutique: Boutique): void {
+      console.log('Boutique sélectionnée pour la copie :', boutique);
+      
+      // Ici vous pouvez implémenter la logique de copie
+      // Exemple: this.copyProductsToBoutique(boutique.id);
+      
+      // Fermer le modal après sélection
+      this.closeCopyModal();
+      
+      // Afficher un message de succès
+      this.successMessage = `Produits copiés vers ${boutique.nomBoutique} avec succès!`;
+      setTimeout(() => this.successMessage = null, 5000);
+  }
+
+  // Filtrer les boutiques pour la copie
+  filterCopyBoutiques(): void {
+      if (!this.copySearchTerm) {
+          this.filteredCopyBoutiques = [...this.allBoutiques];
+          return;
+      }
+      
+      const term = this.copySearchTerm.toLowerCase();
+      this.filteredCopyBoutiques = this.allBoutiques.filter(b => 
+          b.nomBoutique.toLowerCase().includes(term)
+      );
+  }
+
+  closeCopyModal(): void {
+      this.showCopyModal = false;
+  }
+
+  toggleEditing(): void {
+    this.isEditing = !this.isEditing;
+    
+    if (this.isEditing) {
+      this.control.enable();
+      this.boutiqueForm.enable();
+    } else {
+      // Réinitialiser les erreurs en sortant du mode édition
+      this.errorMessage = '';
+      this.control.disable();
+      this.boutiqueForm.disable();
+    }
   }
 
 // Modifiez la méthode existante
@@ -202,6 +269,65 @@ export class DetailBoutiqueComponent implements OnInit {
 
   navigateBack(){
     this.router.navigate(['/boutique']);
+  }
+
+  toggleTransferModal(): void {
+    this.showTransferModal = !this.showTransferModal;
+    if (this.showTransferModal) {
+        this.loadAllBoutiques();
+    }
+  }
+
+  toggleCopierModal(): void {
+    this.showTransferModal = !this.showTransferModal;
+    if (this.showTransferModal) {
+        this.loadAllBoutiques();
+    }
+  }
+
+  closeTransferModal(): void {
+    this.showTransferModal = false;
+    this.searchTerm = '';
+  }
+
+  // Charger toutes les boutiques (sauf la boutique actuelle)
+  loadAllBoutiques(): void {
+    this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+        next: (boutiques) => {
+            this.allBoutiques = boutiques.filter(b => b.id !== this.boutique?.id);
+            
+            // Initialiser les deux listes filtrées
+            this.filteredBoutiques = [...this.allBoutiques];
+            this.filteredCopyBoutiques = [...this.allBoutiques];
+        },
+        error: (err) => {
+            console.error('Erreur lors du chargement des boutiques', err);
+        }
+    });
+  }
+
+  // Filtrer les boutiques selon la recherche
+  filterBoutiques(): void {
+      if (!this.searchTerm) {
+          this.filteredBoutiques = [...this.allBoutiques];
+          return;
+      }
+      
+      const term = this.searchTerm.toLowerCase();
+      this.filteredBoutiques = this.allBoutiques.filter(b => 
+          b.nomBoutique.toLowerCase().includes(term)
+      );
+  }
+
+
+
+  // Sélectionner une boutique pour le transfert
+  selectBoutique(boutique: Boutique): void {
+      console.log('Boutique sélectionnée pour le transfert :', boutique);
+      // Ici vous pouvez implémenter la logique de transfert
+      
+      // Fermer le modal après sélection
+      this.closeTransferModal();
   }
   
 
