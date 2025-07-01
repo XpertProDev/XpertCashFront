@@ -33,7 +33,7 @@
   <div class="information_cadre" style="margin-bottom: 20px; padding: 20px;">
     <div class="info_personnel">
         <div class="information_grid_two">
-        <!-- Section Profil -->
+        <!-- Section Action boutique -->
         <div class="profil_section">
             <div class="section_title">
                 <div class="title">
@@ -47,7 +47,19 @@
                     <span 
                         class="h5 valueBoutique"
                         [style.color]="boutique?.actif ? '#008000' : '#ff0000'">
-                        {{ boutique?.actif ? 'Actif' : 'Inactif' }}
+                        <!-- Afficher 'Loading...' pendant la mise à jour -->
+                        <span *ngIf="isUpdating; else statusText">
+                            <span class="spinner-small"></span>
+                        </span>
+                
+                        <!-- Spinner avec délai de 3 secondes -->
+                        <div *ngIf="isUpdating" class="spinner-border text-primary spinner-small" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+
+                        <ng-template #statusText>
+                            {{ boutique?.actif ? 'Actif' : 'Inactif' }}
+                        </ng-template>
                     </span>
                 </div>
 
@@ -60,11 +72,6 @@
                     />
                     <span class="slider round"></span>
                 </label>
-                
-                <!-- Spinner avec délai de 3 secondes -->
-                <div *ngIf="isUpdating" class="spinner-border text-primary spinner-small" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
             </div>
         </div>
         

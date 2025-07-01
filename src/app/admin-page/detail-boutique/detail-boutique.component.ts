@@ -57,6 +57,7 @@ export class DetailBoutiqueComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadBoutique();
+    this.loadAllBoutiques();
   }
 
   private initForm(): void {
@@ -105,9 +106,14 @@ export class DetailBoutiqueComponent implements OnInit {
 
   // Méthodes pour gérer le popup de copie
   toggleCopyModal(): void {
+      // Fermer le modal de transfert si ouvert
+      if (this.showTransferModal) {
+          this.showTransferModal = false;
+      }
+      
       this.showCopyModal = !this.showCopyModal;
       if (this.showCopyModal) {
-          // Réinitialiser la recherche
+          this.loadAllBoutiques();
           this.copySearchTerm = '';
           this.filterCopyBoutiques();
       }
@@ -143,6 +149,7 @@ export class DetailBoutiqueComponent implements OnInit {
 
   closeCopyModal(): void {
       this.showCopyModal = false;
+      this.copySearchTerm = '';
   }
 
   toggleEditing(): void {
@@ -287,10 +294,17 @@ export class DetailBoutiqueComponent implements OnInit {
   }
 
   toggleTransferModal(): void {
-    this.showTransferModal = !this.showTransferModal;
-    if (this.showTransferModal) {
-        this.loadAllBoutiques();
-    }
+      // Fermer le modal de copie si ouvert
+      if (this.showCopyModal) {
+          this.showCopyModal = false;
+      }
+      
+      this.showTransferModal = !this.showTransferModal;
+      if (this.showTransferModal) {
+          this.loadAllBoutiques();
+          this.searchTerm = '';
+          this.filterBoutiques();
+      }
   }
 
   toggleCopierModal(): void {
