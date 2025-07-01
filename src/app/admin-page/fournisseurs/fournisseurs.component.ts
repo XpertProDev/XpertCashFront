@@ -12,6 +12,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { TruncateEmailPipe } from '../MODELS/truncate-email.pipe';
 import { environment } from 'src/environments/environment';
 import { FournisseurService } from '../SERVICES/fournisseur-service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser'; // Import ajouté
 
 @Component({
   selector: 'app-fournisseurs',
@@ -29,7 +30,7 @@ import { FournisseurService } from '../SERVICES/fournisseur-service';
 export class FournisseursComponent {
   isListView = true;
   showDropdown = false;
-  searchQuery = '';
+  searchText = ''; // Modifié de searchQuery à searchText
   fournisseursLoaded = false;
   
   // Pagination
@@ -40,7 +41,7 @@ export class FournisseursComponent {
   fournisseurs: Fournisseurs[] = [];
   private imgUrl = environment.imgUrl;
   
-    constructor(
+  constructor(
         private produitService: ProduitService,
         private fournisseurService: FournisseurService,
         private fb: FormBuilder,
@@ -49,15 +50,9 @@ export class FournisseursComponent {
         private stockService: StockService,
         private cdRef: ChangeDetectorRef,
         private transfertService: TransfertService,
-        // private fournisseurService: FournisseurService,
-    ) {}
+        private sanitizer: DomSanitizer // Injection ajoutée
+  ) {}
   
-  // ngOnInit(): void  {
-  //   const savedView = localStorage.getItem('fournisseurView');
-  //   this.isListView = savedView !== 'grid';
-  //   this.loadFournisseurs();
-  // }
-
   ngOnInit(): void  {
     const savedView = localStorage.getItem('fournisseurView');
     this.isListView = savedView !== 'grid';
@@ -93,7 +88,6 @@ export class FournisseursComponent {
     localStorage.setItem('fournisseurView', viewType);
   }
 
-
   sort(field: keyof Fournisseurs) {
     if (this.sortField === field) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -109,27 +103,46 @@ export class FournisseursComponent {
     });
   }
 
-  applyFilter() {
-    // Implémentez la logique de filtrage si nécessaire
+  // Nouvelle méthode pour mettre en évidence les correspondances
+  highlightMatch(text: string | null | undefined): SafeHtml {
+    if (!text) return '';
+    if (!this.searchText.trim()) return text;
+    
+    const escapedSearch = this.searchText.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedSearch})`, 'gi');
+    
+    return this.sanitizer.bypassSecurityTrustHtml(
+      text.replace(regex, '<mark>$1</mark>')
+    );
+  }
+
+  // Filtrage des fournisseurs
+  get filteredFournisseurs(): Fournisseurs[] {
+    if (!this.searchText.trim()) return this.fournisseurs;
+    
+    const searchLower = this.searchText.toLowerCase().trim();
+    return this.fournisseurs.filter(fournisseur => 
+      (fournisseur.nomComplet?.toLowerCase().includes(searchLower)) ||
+      (fournisseur.email?.toLowerCase().includes(searchLower)) ||
+      (fournisseur.adresse?.toLowerCase().includes(searchLower)) ||
+      (fournisseur.telephone?.includes(searchLower))
+    );
   }
 
   onPageChange(event: PageEvent) {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
-
-    // Forcez la mise à jour de l'état de chargement
     this.fournisseursLoaded = true;
   }
 
+  // Mise à jour pour utiliser la liste filtrée
   get paginatedFournisseurs(): Fournisseurs[] {
     const start = this.currentPage * this.pageSize;
-    return this.fournisseurs.slice(start, start + this.pageSize);
+    return this.filteredFournisseurs.slice(start, start + this.pageSize);
   }
 
   // Méthode pour ouvrir le détail d'un fournisseur
   openDetail(fournisseurId: number) {
     this.router.navigate(['/detail-fournisseur', fournisseurId]);
   }
-  
-  
 }
