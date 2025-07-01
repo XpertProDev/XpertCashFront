@@ -66,6 +66,8 @@ export class ListProduitComponent {
   urllink: string = "assets/img/appareil.jpg";
   newPhotoUrl: string | null = null;
   private backendUrl =environment.apiBaseUrl;
+    private apiUrl = environment.imgUrl;
+ 
 
   selectedFile: File | null | undefined = null;
   selectedBoutiqueId: number | null = null;
@@ -189,7 +191,7 @@ export class ListProduitComponent {
 
   getImageUrl(produit: Produit): string {
     if (produit.photo) {
-      return this.backendUrl + produit.photo;  // Si le produit a une image, on la récupère
+      return this.apiUrl + produit.photo;  // Si le produit a une image, on la récupère
     } else if (produit.nom) {
       const firstLetter = produit.nom.charAt(0).toUpperCase();  // Si pas d'image, on prend la première lettre du nom du produit
       return `assets/img/letters/${firstLetter}.png`;  // Assurez-vous d'avoir une image pour chaque lettre dans le dossier "assets/img/letters/"
