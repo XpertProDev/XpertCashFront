@@ -8,12 +8,14 @@ export class Users {
     nomEntreprise?: string;
     confirmPassword: any;
     enabledLien? : string;
+    photo? : string;
+    photoUrl? : string;
     
 
     constructor(
         id?: number,
         nomComplet?: string, email?: string, password?: string, phone?: string,
-        pays?: string, nomEntreprise?: string,enabledLien?: string
+        pays?: string, nomEntreprise?: string,enabledLien?: string, photo?: string, photoUrl?: string
     ) {
         this.id = id;
         this.nomComplet = nomComplet;
@@ -23,5 +25,8 @@ export class Users {
         this.pays = pays;
         this.nomEntreprise = nomEntreprise;
         this.enabledLien = enabledLien
+        this.photo = photo;
+        this.photoUrl = photoUrl
+
     }
 }

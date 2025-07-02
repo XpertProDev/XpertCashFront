@@ -9,6 +9,7 @@ import { Produit } from '../MODELS/produit.model';
 import { Users } from '../MODELS/utilisateur.model';
 
 
+
 @Component({
   selector: 'app-detail-boutique',
   imports: [
@@ -42,6 +43,9 @@ export class DetailBoutiqueComponent implements OnInit {
   selectedProductIds: number[] = [];
   copyWarningMessage: string | null = null;
   showCopyWarningModal = false;
+  photo: string = '';
+  private apiUrl = environment.imgUrl;
+
 
   control = new FormControl();
 
@@ -603,21 +607,32 @@ loadAllVendeursBoutique(): void {
   }
 
   this.boutiqueService.getVendeursByBoutiqueId(this.boutiqueId).subscribe({
-    next: (vendeurs) => {
-      console.log(`Liste des vendeurs récupérée (${vendeurs.length}) :`, vendeurs);
-      this.listeVendeurs = vendeurs;
-      this.errorMessage = '';
-    },
-    error: (err) => {
-      console.error('Erreur lors du chargement des vendeurs', err);
-      this.errorMessage = 'Impossible de charger les vendeurs pour cette boutique.';
-      this.listeVendeurs = [];
-    }
-  });
+  next: (vendeurs) => {
+    const timestamp = new Date().getTime();
+
+    this.listeVendeurs = vendeurs.map(vendeur => {
+      const fullImageUrl = (vendeur.photo && vendeur.photo !== 'null' && vendeur.photo !== 'undefined')
+        ? `${this.apiUrl}${vendeur.photo}?t=${timestamp}`
+        : 'assets/img/profil.png';
+
+      return {
+        ...vendeur,
+        photoUrl: fullImageUrl  // On stocke l'URL finale dans un autre champ
+      };
+    });
+  },
+  error: (err) => {
+    console.error('Erreur lors du chargement des vendeurs', err);
+    this.listeVendeurs = [];
+  }
+});
+
+
 }
 
 
 imageActuelle = '';
+
 
 ouvrirImage(photoUrl: string): void {
   this.imageActuelle = photoUrl || 'assets/defaultProfile/profil.png';
