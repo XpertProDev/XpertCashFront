@@ -24,7 +24,24 @@
     {{ copyErrorMessage }}
     </div>
 
+    <!-- Dans le toast-container -->
+    <!-- <div *ngIf="copyWarningMessage" class="alert alert-warning toast-message-warning">
+    {{ copyWarningMessage }}
+    </div> -->
 </div>
+
+<!-- Confirmation Modal -->
+<div class="confirmation-modal-aver" *ngIf="showCopyWarningModal">
+  <div class="modal-content-aver">
+    <h4 style="font-size: 16px; margin-bottom: 10px;">Avertissement</h4>
+    <p style="margin: 0; font-size: 12px;">Veuillez sélectionner au moins <br>un produit à copier.</p>
+    <div class="modal-actions-aver">
+      <button class="btn-confirm" style="font-size: 12px;" (click)="showCopyWarningModal = false">OK</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- Icon return  -->
 <p class="retour_icon_text" (click)="navigateBack()" style="cursor: pointer; color: #0672E4;" title="Retour sur la page boutique">
     <i class="ri-arrow-left-s-line"></i> <span style="margin-left: 8px; font-size: 12px;">Boutique</span>

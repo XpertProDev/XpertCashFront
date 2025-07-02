@@ -38,6 +38,8 @@ export class DetailBoutiqueComponent implements OnInit {
   selectedImageUrl: string | null = null;
   showImageModal = false;
   selectedProductIds: number[] = [];
+  copyWarningMessage: string | null = null;
+  showCopyWarningModal = false;
 
   control = new FormControl();
 
@@ -122,17 +124,27 @@ export class DetailBoutiqueComponent implements OnInit {
 
   // Méthodes pour gérer le popup de copie
   toggleCopyModal(): void {
-      // Fermer le modal de transfert si ouvert
-      if (this.showTransferModal) {
-          this.showTransferModal = false;
-      }
+    // Vérifier si des produits sont sélectionnés
+    if (this.selectedProductIds.length === 0) {
+      this.showCopyWarningModal = true;
+      this.copyWarningMessage = "Veuillez sélectionner au moins un produit à copier.";
       
-      this.showCopyModal = !this.showCopyModal;
-      if (this.showCopyModal) {
-          this.loadAllBoutiques();
-          this.copySearchTerm = '';
-          this.filterCopyBoutiques();
-      }
+      // Effacer le message après 3 secondes
+      setTimeout(() => this.copyWarningMessage = null, 3000);
+      return;
+    }
+
+    // Fermer le modal de transfert si ouvert
+    if (this.showTransferModal) {
+      this.showTransferModal = false;
+    }
+    
+    this.showCopyModal = !this.showCopyModal;
+    if (this.showCopyModal) {
+      this.loadAllBoutiques();
+      this.copySearchTerm = '';
+      this.filterCopyBoutiques();
+    }
   }
 
   // Sélectionner une boutique pour la copie
