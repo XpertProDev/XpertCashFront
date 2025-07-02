@@ -169,10 +169,10 @@ export class DetailBoutiqueComponent implements OnInit {
   // }
 
   selectCopyBoutique(boutique: Boutique): void {
-    if (!boutique.actif) {
-        const confirmCopy = confirm('Cette boutique est désactivée. Êtes-vous sûr de vouloir copier les produits vers cette boutique ?');
-        if (!confirmCopy) return;
-    }
+    // if (!boutique.actif) {
+    //     const confirmCopy = confirm('Cette boutique est désactivée. Êtes-vous sûr de vouloir copier les produits vers cette boutique ?');
+    //     if (!confirmCopy) return;
+    // }
     this.selectedCopyBoutique = boutique;
     this.confirmCopyProducts();
   }
