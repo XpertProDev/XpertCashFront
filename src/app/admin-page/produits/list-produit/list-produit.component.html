@@ -300,7 +300,7 @@
             </div>
             
             <!-- Les information des produit Inventaire  -->
-            <div class="information_cadre">
+            <!-- <div class="information_cadre">
               <div class="info_titre_input">
                 <h4>Inventaire</h4>
 
@@ -338,7 +338,7 @@
                 </div>
               </div>   
               
-            </div> 
+            </div> -->
             
             <!-- Les information des produit Photo  -->
             <div class="information_cadre">
@@ -356,9 +356,9 @@
                     <img [src]="newPhotoUrl ? newPhotoUrl : getImageUrl(produit)" alt="Produit">
                   </div> 
                   <button *ngIf="newPhotoUrl && newPhotoUrl !== urllink" (click)="clearImage()" class="clear-image-btn">
-                    <i class="ri-delete-bin-5-line"></i> 
+                    <i class="ri-delete-bin-5-line"></i>
                   </button>
-                  <div *ngIf="isEditing"> 
+                  <div *ngIf="isEditing">
                     <label for="file" class="footer_file"> 
                       <i class="ri-file-3-fill"></i>
                       <p>Choisir un fichier</p>
