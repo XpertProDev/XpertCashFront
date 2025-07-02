@@ -1866,6 +1866,23 @@ table {
   }
 }
 
+.badge-success {
+    background-color: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+
 .confirmation-modal-aver {
   position: fixed;
   top: 0;

@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { environment } from 'src/environments/environment';
 import { Produit } from '../MODELS/produit.model';
+import { Users } from '../MODELS/utilisateur.model';
+
 
 @Component({
   selector: 'app-detail-boutique',
@@ -94,6 +96,7 @@ export class DetailBoutiqueComponent implements OnInit {
       this.isLoading = false;
       return;
     }
+     this.boutiqueId = +id;
 
     this.boutiqueService.getBoutiqueById(+id).subscribe({
       next: (boutique) => {
@@ -107,6 +110,7 @@ export class DetailBoutiqueComponent implements OnInit {
         this.isLoading = false;
         
         this.loadProductsInBoutique(boutique.id);
+        this.loadAllVendeursBoutique();
 
         // Mise à jour du formulaire
         this.boutiqueForm.patchValue({
@@ -588,4 +592,44 @@ async confirmCopyProducts(): Promise<void> {
     }
   }
 
+  listeVendeurs: Users[] = [];
+  boutiqueId!: number;
+
+loadAllVendeursBoutique(): void {
+  if (!this.boutiqueId) {
+    this.errorMessage = "Identifiant boutique manquant";
+    console.log('Erreur : identifiant boutique manquant');
+    return;
+  }
+
+  this.boutiqueService.getVendeursByBoutiqueId(this.boutiqueId).subscribe({
+    next: (vendeurs) => {
+      console.log(`Liste des vendeurs récupérée (${vendeurs.length}) :`, vendeurs);
+      this.listeVendeurs = vendeurs;
+      this.errorMessage = '';
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des vendeurs', err);
+      this.errorMessage = 'Impossible de charger les vendeurs pour cette boutique.';
+      this.listeVendeurs = [];
+    }
+  });
+}
+
+
+imageActuelle = '';
+
+ouvrirImage(photoUrl: string): void {
+  this.imageActuelle = photoUrl || 'assets/defaultProfile/profil.png';
+  this.showImageModal = true;
+}
+
+fermerImage(): void {
+  this.showImageModal = false;
+}
+
+ajouterVendeur(): void {
+  // Rediriger vers une page d'ajout ou ouvrir un modal
+  console.log('Ajouter un vendeur cliqué');
+}
 }

@@ -11,6 +11,7 @@ import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common
 import { Users } from '../MODELS/utilisateur.model';
 import { log } from 'console';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { BoutiqueService } from '../SERVICES/boutique-service';
 
 @Component({
   selector: 'app-compte',
@@ -77,12 +78,15 @@ export class CompteComponent  implements OnInit {
     private http: HttpClient,
     private router: Router,
     private route: ActivatedRoute,
+    private boutiqueService: BoutiqueService,
   ) {}
 
   ngOnInit() {
     this.loadRoles();
     this.initForm();
     this.updatePaginatedUsers();
+    this.loadBoutiques();
+    this.handleRoleTypeChanges();
     
     this.usersService.getUserInfo().subscribe({
     next: (userData) => {
@@ -106,7 +110,8 @@ export class CompteComponent  implements OnInit {
       email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
       roleType: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
-      pays: ['', Validators.required]
+      pays: ['', Validators.required],
+      boutiqueId: [null],
     });
   }
 
@@ -209,7 +214,8 @@ export class CompteComponent  implements OnInit {
       email: '',
       roleType: '',
       phone: '',
-      pays: ''
+      pays: '',
+      boutiqueId: [null],
     });
   
     this.userForm.markAsPristine();
@@ -310,7 +316,41 @@ export class CompteComponent  implements OnInit {
     this.updatePaginatedUsers();
     inputElement.value = '';
   }
-  
+
+  boutiques: any[] = [];
+showBoutiqueSelect = false;
+
+handleRoleTypeChanges() {
+  this.userForm.get('roleType')?.valueChanges.subscribe(role => {
+    console.log('Rôle sélectionné :', role);
+
+    if (role === 'VENDEUR') {
+      this.showBoutiqueSelect = true;
+      this.userForm.get('boutiqueId')?.setValidators(Validators.required);
+      this.loadBoutiques();  // Charger les boutiques quand le rôle est VENDEUR
+    } else {
+      this.showBoutiqueSelect = false;
+      this.userForm.get('boutiqueId')?.clearValidators();
+      this.userForm.get('boutiqueId')?.setValue(null);
+    }
+    this.userForm.get('boutiqueId')?.updateValueAndValidity();
+  });
+}
+
+loadBoutiques() {
+  this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+    next: (data) => {
+      this.boutiques = data;
+      console.log("Liste des boutiques :", data);
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des boutiques', err);
+    }
+  });
+}
+
+
+
 
 }
 
