@@ -4,6 +4,8 @@ import { BoutiqueService } from '../SERVICES/boutique-service';
 import { Boutique } from '../MODELS/boutique-model';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { environment } from 'src/environments/environment';
+import { Produit } from '../MODELS/produit.model';
 
 @Component({
   selector: 'app-detail-boutique',
@@ -33,6 +35,9 @@ export class DetailBoutiqueComponent implements OnInit {
   showCopyModal = false;
   copySearchTerm = '';
   filteredCopyBoutiques: Boutique[] = [];
+  selectedImageUrl: string | null = null;
+  showImageModal = false;
+  selectedProductIds: number[] = [];
 
   control = new FormControl();
 
@@ -43,6 +48,10 @@ export class DetailBoutiqueComponent implements OnInit {
   confirmationMessage = '';
   pendingStatusChange: boolean | null = null;
   private checkboxRef?: HTMLInputElement;
+  // productsInBoutique: any[] = [];
+  productsInBoutique: Produit[] = [];
+  isLoadingProducts = false;
+  imgUrl = environment.imgUrl;
 
   constructor(
     private route: ActivatedRoute,
@@ -89,6 +98,7 @@ export class DetailBoutiqueComponent implements OnInit {
           telephone: boutique.telephone
         });
         this.isLoading = false;
+        this.loadProductsInBoutique(boutique.id);
       },
       error: (err) => {
         this.errorMessage = 'Échec du chargement des données';
@@ -375,8 +385,6 @@ export class DetailBoutiqueComponent implements OnInit {
     );
   }
 
-
-
   // Sélectionner une boutique pour le transfert
   selectBoutique(boutique: Boutique): void {
     console.log('Boutique sélectionnée pour le transfert :', boutique);
@@ -385,6 +393,89 @@ export class DetailBoutiqueComponent implements OnInit {
     // Fermer le modal après sélection
     this.closeTransferModal();
   }
+
+  // Ajoutez cette méthode
+  loadProductsInBoutique(boutiqueId: number): void {
+    this.isLoadingProducts = true;
+    this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
+      next: (produits: Produit[]) => {
+        this.productsInBoutique = produits.map(produit => {
+        const photoUrl = produit.photo 
+          ? `${this.imgUrl}${produit.photo}`
+          : this.generateInitialImage(produit.nom.charAt(0));
+        
+        return {
+          ...produit,
+          photoUrl: photoUrl // Garantit que photoUrl est toujours string
+        };
+      });
+        this.isLoadingProducts = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement produits', err);
+        this.isLoadingProducts = false;
+      }
+    });
+  }
+
+  handleImageError(event: Event, product: Produit): void {
+    const img = event.target as HTMLImageElement;
+    img.src = this.generateInitialImage(product.nom.charAt(0));
+    img.onerror = null; // Empêcher les boucles d'erreur
+  }
+
+  // Méthode pour générer une image avec initiale
+  generateInitialImage(letter: string): string {
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+        <rect width="100%" height="100%" fill="#0671e4ac"/>
+        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="100" fill="#fff">
+          ${letter.toUpperCase()}
+        </text> 
+      </svg>
+    `;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
+
+  // Implémentez les méthodes manquantes
+  toggleSelectAll(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      this.selectedProductIds = this.productsInBoutique.map(p => p.id);
+    } else {
+      this.selectedProductIds = [];
+    }
+  }
+
+  isProductSelected(id: number): boolean {
+    return this.selectedProductIds.includes(id);
+  }
   
+  openImageModal(imageUrl: string | undefined): void {
+  if (imageUrl) {
+    this.selectedImageUrl = imageUrl;
+    this.showImageModal = true;
+  } else {
+    // Gérer le cas où l'URL est undefined
+    console.warn("Aucune URL d'image fournie");
+  }
+}
+
+  closeImageModal(): void {
+    this.showImageModal = false;
+    this.selectedImageUrl = null;
+  }
+
+  // Dans la classe DetailBoutiqueComponent
+  toggleProductSelection(productId: number, event: Event): void {
+    event.stopPropagation();
+    const index = this.selectedProductIds.indexOf(productId);
+    
+    if (index === -1) {
+      this.selectedProductIds.push(productId);
+    } else {
+      this.selectedProductIds.splice(index, 1);
+    }
+  }
 
 }

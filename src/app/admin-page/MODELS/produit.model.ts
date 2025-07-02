@@ -27,4 +27,6 @@ export interface Produit {
   typeProduit?: string;
   
   boutiques?: Boutique[];
+
+  photoUrl?: string;
 }
