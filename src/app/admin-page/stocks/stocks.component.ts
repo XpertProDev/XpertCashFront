@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CategorieService } from '../SERVICES/categorie.service';
@@ -68,6 +68,46 @@ export class StocksComponent implements OnInit {
   showDescription: boolean = false;
   private apiUrl = environment.imgUrl; // URL de base pour les images
   showNoProductsMessage = false;
+  // Nouveaux états pour le filtrage
+  showFilterDropdown = false;
+  selectedFilters: any[] = [];
+  allProducts: Produit[] = [];   // Tous les produits chargés
+  filteredProduct: Produit[] = [];
+  sortColumn: string | null = null;
+  sortDirection: 'asc' | 'desc' = 'asc';
+  // Ajoutez cette propriété
+  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
+
+  // @HostListener('document:click', ['$event'])
+  // onClick(event: MouseEvent): void {
+  //   const target = event.target as HTMLElement;
+  //   if (!target.closest('.container_inputSearch')) {
+  //     this.showFilterDropdown = false;
+  //   }
+    
+  //   // Réinitialiser les filtres si nécessaire
+  //   if (this.tasks.length === 0) {
+  //     this.selectedFilters = [];
+  //     this.sortColumn = null;
+  //   }
+  // }
+
+  @HostListener('document:click', ['$event'])
+  onClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    
+    // Fermer le dropdown si on clique en dehors
+    if (!target.closest('.container_inputSearch') && 
+        !target.closest('.filter-dropdown') &&
+        !target.closest('.trier')) {
+      this.showFilterDropdown = false;
+    }
+    
+    // Fermer le dropdown d'export si nécessaire
+    if (!target.closest('.export-container')) {
+      this.showExportDropdown = false;
+    }
+  }
 
   constructor(
     private categorieService: CategorieService,
@@ -92,21 +132,29 @@ export class StocksComponent implements OnInit {
   }
 
   // Retourne la liste filtrée et paginée des produits
+  // filteredProducts(): Produit[] {
+  //   const sortedProducts = [...this.tasks].sort((a, b) => {
+  //     const dateA = new Date(a.createdAt || new Date()).getTime();
+  //     const dateB = new Date(b.createdAt || new Date()).getTime();
+
+  //     return dateB - dateA;
+  //   });
+  //   const filtered = sortedProducts.filter(product =>
+  //     (product.nom && product.nom.toLowerCase().includes(this.searchText.toLowerCase())) ||
+  //     (product.codeGenerique && product.codeGenerique.toLowerCase().includes(this.searchText.toLowerCase())) ||
+  //     (product.codeBare && product.codeBare.toLowerCase().includes(this.searchText.toLowerCase())) 
+
+  //   );
+  //   const startIndex = this.currentPage * this.pageSize;
+  //   return filtered.slice(startIndex, startIndex + this.pageSize);
+  // }
+
   filteredProducts(): Produit[] {
-    const sortedProducts = [...this.tasks].sort((a, b) => {
-      const dateA = new Date(a.createdAt || new Date()).getTime();
-      const dateB = new Date(b.createdAt || new Date()).getTime();
-
-      return dateB - dateA;
-    });
-    const filtered = sortedProducts.filter(product =>
-      (product.nom && product.nom.toLowerCase().includes(this.searchText.toLowerCase())) ||
-      (product.codeGenerique && product.codeGenerique.toLowerCase().includes(this.searchText.toLowerCase())) ||
-      (product.codeBare && product.codeBare.toLowerCase().includes(this.searchText.toLowerCase())) 
-
-    );
+    // Utilisez filteredProduct si disponible, sinon tasks
+    const productsToShow = this.filteredProduct.length > 0 ? this.filteredProduct : this.tasks;
+    
     const startIndex = this.currentPage * this.pageSize;
-    return filtered.slice(startIndex, startIndex + this.pageSize);
+    return productsToShow.slice(startIndex, startIndex + this.pageSize);
   }
 
   // Affichage/Masquage du dropdown d'export
@@ -352,6 +400,7 @@ export class StocksComponent implements OnInit {
           })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
+        this.allProducts = [...this.tasks];
         this.dataSource.data = this.tasks;
         this.dataSource.paginator = this.paginator;
         this.showNoProductsMessage = this.tasks.length === 0;
@@ -392,6 +441,12 @@ export class StocksComponent implements OnInit {
     }
     this.currentPage = 0;
   }
+  
+  toggleFilterDropdown(): void {
+    this.showFilterDropdown = !this.showFilterDropdown;
+    // Fermer aussi le dropdown d'export si nécessaire
+    this.showExportDropdown = false;
+  }
 
   loadAllProduits(): void {
     this.showNoProductsMessage = false;
@@ -423,6 +478,7 @@ export class StocksComponent implements OnInit {
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;
         }
+        this.allProducts = [...this.tasks];
         this.showNoProductsMessage = this.tasks.length === 0;
       },
       error: (err) => {
@@ -479,6 +535,110 @@ export class StocksComponent implements OnInit {
         }
       }
     });
+  }
+
+  // Méthode pour appliquer les filtres et le tri
+  applyFilters(): void {
+    let filtered = [...this.allProducts];
+    const searchLower = this.searchText.toLowerCase();
+
+    if (this.searchText) {
+      if (this.selectedFilters.length > 0) {
+        // Recherche SEULEMENT dans le champ du filtre sélectionné
+        filtered = filtered.filter(product => {
+          return this.selectedFilters.every(filter => {
+            const key = filter.type as keyof Produit;
+            const value = product[key]?.toString().toLowerCase() || '';
+            return value.includes(searchLower);
+          });
+        });
+      } else {
+        // Recherche globale si aucun filtre sélectionné
+        filtered = filtered.filter(product => 
+          Object.values(product).some(val => 
+            val?.toString().toLowerCase().includes(searchLower)
+        ));
+      }
+    }
+
+    // Tri des résultats
+    if (this.sortColumn) {
+      filtered.sort((a, b) => {
+        const key = this.sortColumn as keyof Produit;
+        const valA = a[key]?.toString().toLowerCase() || '';
+        const valB = b[key]?.toString().toLowerCase() || '';
+        
+        if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    this.tasks = filtered; // Mettre à jour les tâches affichées
+    this.filteredProduct = filtered;
+    this.currentPage = 0;
+  }
+
+  resetFilters(): void {
+    this.selectedFilters = [];
+    this.searchText = '';
+    this.tasks = [...this.allProducts];
+    this.filteredProduct = [];
+    this.currentPage = 0;
+    this.showFilterDropdown = false;
+  }
+
+  setSorting(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.applyFilters();
+  }
+
+  // Modifiez votre méthode addFilter
+  addFilter(filter: any): void {
+    // Si le filtre est déjà sélectionné, on le désactive
+    if (this.isFilterSelected(filter.type)) {
+      this.selectedFilters = [];
+    } else {
+      // Sinon, on remplace le filtre existant
+      this.selectedFilters = [filter];
+    }
+
+    this.showFilterDropdown = false;
+    // this.searchText = '';
+    this.applyFilters();
+    
+    setTimeout(() => {
+      if (this.searchInput?.nativeElement) {
+        this.searchInput.nativeElement.focus();
+      }
+    }, 0);
+  }
+
+  isFilterSelected(filterType: string): boolean {
+    return this.selectedFilters.some(f => f.type === filterType);
+  }
+
+  focusSearchInput(): void {
+    if (this.searchInput?.nativeElement) {
+      this.searchInput.nativeElement.focus();
+    }
+  }
+
+  removeFilter(filter: any): void {
+    this.selectedFilters = this.selectedFilters.filter(f => f !== filter);
+    this.applyFilters();
+  }
+
+  getSearchPlaceholder(): string {
+    if (this.selectedFilters.length > 0) {
+      return `Par ${this.selectedFilters.map(f => f.label).join(', ')}...`;
+    }
+    return "Recherche...";
   }
   
 }

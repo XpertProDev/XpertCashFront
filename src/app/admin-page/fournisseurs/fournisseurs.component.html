@@ -1,5 +1,3 @@
-<!-- <p>{{ fournisseurs | json }}</p> -->
-
 <!-- fournisseurs.component.html -->
 <div class="containerTable">
     <!-- En-tête -->
@@ -32,8 +30,7 @@
           <input 
             type="text"
             placeholder="Recherche...." 
-            [(ngModel)]="searchQuery"
-            (input)="applyFilter()"
+            [(ngModel)]="searchText"
           />
         </div>
       </div>
@@ -57,88 +54,91 @@
           <tr *ngFor="let fournisseur of paginatedFournisseurs" (click)="openDetail(fournisseur.id)">
             <td>
               <div class="imgClient">
-                <!-- <img [src]="product.photo"> -->
                 <img [src]="fournisseur.photo" alt="Photo fournisseur">
-                <!-- <img [src]="(!product.photo || product.photo === 'null' || product.photo.trim() === '') ? 'assets/img/image_product.png' : product.photo"> -->
               </div>
             </td>
-            <td>{{ fournisseur.nomComplet || 'Non renseigné' }}</td>
-            <td>{{ fournisseur.email || 'Non renseigné' }}</td>
-            <td>{{ fournisseur.adresse || 'Non renseigné' }}</td>
-            <td>{{ fournisseur.telephone || 'Non renseigné' }}</td>
+            <td>
+              <span *ngIf="fournisseur.nomComplet; else noNom" 
+                    [innerHTML]="highlightMatch(fournisseur.nomComplet)"></span>
+              <ng-template #noNom>Non renseigné</ng-template>
+            </td>
+            <td>
+              <span *ngIf="fournisseur.email; else noEmail" 
+                    [innerHTML]="highlightMatch(fournisseur.email)"></span>
+              <ng-template #noEmail>Non renseigné</ng-template>
+            </td>
+            <td>
+              <span *ngIf="fournisseur.adresse; else noAdresse" 
+                    [innerHTML]="highlightMatch(fournisseur.adresse)"></span>
+              <ng-template #noAdresse>Non renseigné</ng-template>
+            </td>
+            <td>
+              <span *ngIf="fournisseur.telephone; else noTel" 
+                    [innerHTML]="highlightMatch(fournisseur.telephone)"></span>
+              <ng-template #noTel>Non renseigné</ng-template>
+            </td>
             <td>{{ fournisseur.createdAt | date: 'dd/MM/yyyy' }}</td>
           </tr>
       </tbody>
     </table>
     
     <!-- Vue Cadre -->
-    <!-- <div class="container_cadre" *ngIf="!isListView">
-      <div class="grid-view">
-        <div class="client-card" *ngFor="let fournisseur of paginatedFournisseurs" (click)="openDetail(fournisseur.id)">
-          <div class="name_icon">
-            <h3>{{ fournisseur.nomComplet }}</h3>
-            <span class="dateCreat">{{ fournisseur.createdAt | date: 'dd/MM/yyyy' }}</span>
-          </div>
-            <div class="info_cadre">
-                <p><i class="ri-mail-line"></i>{{ fournisseur.email || 'Non renseigné' }}</p>
-                <p><i class="ri-map-pin-line"></i>{{ fournisseur.adresse || 'Non renseigné' }}</p>
-                <p><i class="ri-phone-line"></i>{{ fournisseur.telephone || 'Non renseigné' }}</p>
-            </div>
-        </div>
-      </div>
-    </div> -->
-
     <div class="container_cadre" *ngIf="!isListView">
       <div class="grid-view">
         <div class="client-card" *ngFor="let fournisseur of paginatedFournisseurs" (click)="openDetail(fournisseur.id)">
           <div class="content_img_info">
-            <!-- // image  -->
             <div class="imgFourni_grid">
               <img [src]="fournisseur.photo" alt="Icon fournisseur">
             </div>
-            <!-- '// info' -->
             <div class="info_fourni">
-              <!-- // nom  -->
               <div class="info_name">
-                <h3>{{ fournisseur.nomComplet }}</h3>
+                <h3 *ngIf="fournisseur.nomComplet; else noNomCard" 
+                    [innerHTML]="highlightMatch(fournisseur.nomComplet)"></h3>
+                <ng-template #noNomCard>Non renseigné</ng-template>
               </div>
-              <!-- email  -->
               <div class="info_email">
-              <p style="margin: 0; font-size: 12px;">
-                <i class="ri-mail-line"></i>
-                <!-- {{ fournisseur.email || truncateEmail }}</p> -->
-                {{ fournisseur.email ? (fournisseur.email | truncateEmail) : 'Non renseigné' }}
+                <p style="margin: 0; font-size: 12px;">
+                  <i class="ri-mail-line"></i>
+                  <span *ngIf="fournisseur.email; else noEmailCard" 
+                        [innerHTML]="highlightMatch(fournisseur.email | truncateEmail)"></span>
+                  <ng-template #noEmailCard>Non renseigné</ng-template>
+                </p>
               </div>
             </div>
           </div>
 
-          <!-- <div class="info_fourni_tel_adresse"> -->
           <div class="info_tel">
-            <p style="font-size: 12px; margin-bottom: 0;"> <i class="ri-phone-line"></i> {{ fournisseur.telephone || 'Non renseigné' }}</p>
+            <p style="font-size: 12px; margin-bottom: 0;">
+              <i class="ri-phone-line"></i>
+              <span *ngIf="fournisseur.telephone; else noTelCard" 
+                    [innerHTML]="highlightMatch(fournisseur.telephone)"></span>
+              <ng-template #noTelCard>Non renseigné</ng-template>
+            </p>
           </div>
-          <!-- </div> -->
           <div class="info_adresse">
-            <p style="font-size: 12px; margin: 0;"><i class="ri-map-pin-line"></i> {{ fournisseur.adresse || 'Non renseigné' }}</p>
+            <p style="font-size: 12px; margin: 0;">
+              <i class="ri-map-pin-line"></i>
+              <span *ngIf="fournisseur.adresse; else noAdresseCard" 
+                    [innerHTML]="highlightMatch(fournisseur.adresse)"></span>
+              <ng-template #noAdresseCard>Non renseigné</ng-template>
+            </p>
           </div>
-
         </div>
       </div>
     </div>
 
     <!-- Message vide -->
-    <div *ngIf="fournisseursLoaded && fournisseurs.length === 0" class="no-client-message">
+    <div *ngIf="fournisseursLoaded && filteredFournisseurs.length === 0" class="no-client-message">
       Aucun fournisseur trouvé
     </div>
 
     <!-- Pagination -->
     <div class="pagination">
-      <mat-paginator *ngIf="fournisseurs.length > 6"
-        [length]="fournisseurs.length"
+      <mat-paginator *ngIf="filteredFournisseurs.length > 6"
+        [length]="filteredFournisseurs.length"
         [pageSize]="pageSize"
         [pageSizeOptions]="[6, 10, 25, 100]"
         (page)="onPageChange($event)">
       </mat-paginator>
     </div>
 </div>
-
-<!-- {{fournisseurs | json}} -->

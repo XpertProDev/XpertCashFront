@@ -92,9 +92,17 @@
                 <small *ngIf="entrepriseForm.get('email')?.errors?.['email']">Format invalide.</small>
               </div>
             </div>
+            
+            <!-- Secteur -->
+            <div class="champ_input">
+              <input class="input_focus"
+                     id="secteur" formControlName="secteur"
+                     placeholder="Saisis le secteur">
+              <label for="secteur" class="label">Secteur</label>
+            </div>
           </div>
 
-          <div class="champ_grid_true">
+          <div class="champ_grid">
             <!-- Sélecteur de pays -->
             <div class="champ_input div1">
               <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
@@ -119,7 +127,7 @@
             </div>
           </div>
 
-          <div class="champ_grid_true">
+          <div class="champ_grid">
             <!-- Adresse -->
             <div class="champ_input">
               <input class="input_focus"
@@ -134,14 +142,6 @@
                      id="siege" formControlName="siege"
                      placeholder="Saisis la ville">
               <label for="siege" class="label">Ville</label>
-            </div>
-            
-            <!-- Secteur -->
-            <div class="champ_input">
-              <input class="input_focus"
-                     id="secteur" formControlName="secteur"
-                     placeholder="Saisis le secteur">
-              <label for="secteur" class="label">Secteur</label>
             </div>
           </div>
 

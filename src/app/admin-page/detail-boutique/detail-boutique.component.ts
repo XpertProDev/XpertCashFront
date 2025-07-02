@@ -3,7 +3,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BoutiqueService } from '../SERVICES/boutique-service';
 import { Boutique } from '../MODELS/boutique-model';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { environment } from 'src/environments/environment';
+import { Produit } from '../MODELS/produit.model';
 
 @Component({
   selector: 'app-detail-boutique',
@@ -22,8 +24,22 @@ export class DetailBoutiqueComponent implements OnInit {
   errorMessage: string | null = null;
   boutiqueForm!: FormGroup;
   successMessage: string | null = null;
+  errorMessageApi: string | null = null;
   successMessageTimeout: any;
   updateTimeout: any;
+  isEditing = false;
+  showTransferModal = false;
+  allBoutiques: Boutique[] = [];
+  filteredBoutiques: Boutique[] = [];
+  searchTerm = '';
+  showCopyModal = false;
+  copySearchTerm = '';
+  filteredCopyBoutiques: Boutique[] = [];
+  selectedImageUrl: string | null = null;
+  showImageModal = false;
+  selectedProductIds: number[] = [];
+
+  control = new FormControl();
 
   isUpdating = false;
   isUpdating_boutique = false;
@@ -32,6 +48,10 @@ export class DetailBoutiqueComponent implements OnInit {
   confirmationMessage = '';
   pendingStatusChange: boolean | null = null;
   private checkboxRef?: HTMLInputElement;
+  // productsInBoutique: any[] = [];
+  productsInBoutique: Produit[] = [];
+  isLoadingProducts = false;
+  imgUrl = environment.imgUrl;
 
   constructor(
     private route: ActivatedRoute,
@@ -46,6 +66,8 @@ export class DetailBoutiqueComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadBoutique();
+    this.loadAllBoutiques();
+    this.boutiqueForm.disable();
   }
 
   private initForm(): void {
@@ -76,6 +98,7 @@ export class DetailBoutiqueComponent implements OnInit {
           telephone: boutique.telephone
         });
         this.isLoading = false;
+        this.loadProductsInBoutique(boutique.id);
       },
       error: (err) => {
         this.errorMessage = 'Échec du chargement des données';
@@ -92,7 +115,95 @@ export class DetailBoutiqueComponent implements OnInit {
       return this.boutique?.actif ? '#008000' : '#ff0000';
   }
 
-// Modifiez la méthode existante
+  // Méthodes pour gérer le popup de copie
+  toggleCopyModal(): void {
+      // Fermer le modal de transfert si ouvert
+      if (this.showTransferModal) {
+          this.showTransferModal = false;
+      }
+      
+      this.showCopyModal = !this.showCopyModal;
+      if (this.showCopyModal) {
+          this.loadAllBoutiques();
+          this.copySearchTerm = '';
+          this.filterCopyBoutiques();
+      }
+  }
+
+  // Sélectionner une boutique pour la copie
+  selectCopyBoutique(boutique: Boutique): void {
+      console.log('Boutique sélectionnée pour la copie :', boutique);
+      
+      // Ici vous pouvez implémenter la logique de copie
+      // Exemple: this.copyProductsToBoutique(boutique.id);
+      
+      // Fermer le modal après sélection
+      this.closeCopyModal();
+      
+      // Afficher un message de succès
+      this.successMessage = `Produits copiés vers ${boutique.nomBoutique} avec succès!`;
+      setTimeout(() => this.successMessage = null, 5000);
+  }
+
+  // Filtrer les boutiques pour la copie
+  filterCopyBoutiques(): void {
+      if (!this.copySearchTerm) {
+          this.filteredCopyBoutiques = [...this.allBoutiques];
+          return;
+      }
+      
+      const term = this.copySearchTerm.toLowerCase();
+      this.filteredCopyBoutiques = this.allBoutiques.filter(b => 
+          b.nomBoutique.toLowerCase().includes(term)
+      );
+  }
+
+  closeCopyModal(): void {
+      this.showCopyModal = false;
+      this.copySearchTerm = '';
+  }
+
+  toggleEditing(): void {
+    this.isEditing = !this.isEditing;
+    
+    if (this.isEditing) {
+      this.boutiqueForm.enable();
+    } else {
+      this.boutiqueForm.disable();
+      // Réinitialiser le formulaire avec les valeurs originales
+      if (this.boutique) {
+        this.boutiqueForm.patchValue({
+          nomBoutique: this.boutique.nomBoutique,
+          adresse: this.boutique.adresse,
+          email: this.boutique.email,
+          telephone: this.boutique.telephone
+        });
+      }
+    }
+  }
+
+  goToBoutique() {
+    if (this.isEditing) {
+      this.cancelEditing();
+    } else {
+      this.router.navigate(['/boutique']);
+    }
+  }
+
+  cancelEditing(): void {
+    this.isEditing = false;
+    this.boutiqueForm.disable();
+    this.loadBoutique();
+  }
+
+  getLoadingMessage(): string {
+    if (this.isLoading) return 'Chargement en cours...';
+    if (this.isUpdating) return 'Mise à jour du statut...';
+    if (this.isUpdating_boutique) return 'Mise à jour des informations...';
+    return 'Traitement en cours...';
+  }
+
+  // Modifiez la méthode existante
   toggleBoutiqueStatus(event: Event): void {
     event.preventDefault();
     this.checkboxRef = event.target as HTMLInputElement;
@@ -120,29 +231,44 @@ export class DetailBoutiqueComponent implements OnInit {
   }
 
   handleStatusChange(): void {
-    if (!this.boutique || this.pendingStatusChange === null) return;
+      if (!this.boutique || this.pendingStatusChange === null) return;
 
-    this.isUpdating = true;
-    this.showConfirmationModal = false;
+      this.isUpdating = true;
+      this.showConfirmationModal = false;
 
-    const operation$ = this.pendingStatusChange 
-      ? this.boutiqueService.activerBoutique(this.boutique.id)
-      : this.boutiqueService.desactiverBoutique(this.boutique.id);
+      // Démarrer un timer pour le délai minimum de 3 secondes
+      const minDelay = 3000;
+      const startTime = Date.now();
 
-    operation$.subscribe({
-      next: () => {
-        this.loadBoutique();
-        this.isUpdating = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.isUpdating = false;
-        if (this.checkboxRef) {
-          this.checkboxRef.checked = !this.pendingStatusChange;
-        }
-        this.showErrorMessage();
-      }
-    });
+      const operation$ = this.pendingStatusChange 
+          ? this.boutiqueService.activerBoutique(this.boutique.id)
+          : this.boutiqueService.desactiverBoutique(this.boutique.id);
+
+      operation$.subscribe({
+          next: () => {
+              const elapsed = Date.now() - startTime;
+              const remainingDelay = Math.max(minDelay - elapsed, 0);
+              
+              // Attendre le temps restant pour compléter les 3 secondes
+              setTimeout(() => {
+                  this.loadBoutique();
+                  this.isUpdating = false;
+              }, remainingDelay);
+          },
+          error: (err) => {
+              const elapsed = Date.now() - startTime;
+              const remainingDelay = Math.max(minDelay - elapsed, 0);
+              
+              setTimeout(() => {
+                  console.error(err);
+                  this.isUpdating = false;
+                  if (this.checkboxRef) {
+                      this.checkboxRef.checked = !this.pendingStatusChange;
+                  }
+                  this.showErrorMessage();
+              }, remainingDelay);
+          }
+      });
   }
 
   private showSuccessMessage(action: string): void {
@@ -154,45 +280,45 @@ export class DetailBoutiqueComponent implements OnInit {
     alert('Échec de la mise à jour du statut');
   }
 
-  onSubmitBoutique(): void {
+  async onSubmitBoutique(): Promise<void> {
     if (this.boutiqueForm.invalid || !this.boutique) return;
 
-    this.isUpdating_boutique = true;
+    this.isLoading = true;
     this.errorMessage = null;
     this.successMessage = null;
 
-    // Clear les timeouts précédents
-    clearTimeout(this.successMessageTimeout);
-    clearTimeout(this.updateTimeout);
+    try {
+      // Délai minimum de 2 secondes pour le loading
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-    this.boutiqueService.updateBoutique(this.boutique.id, this.boutiqueForm.value)
-      .subscribe({
-          next: (response) => {
-            if (this.boutique) {
-              this.boutique = { 
-                ...this.boutique, 
-                ...this.boutiqueForm.value 
-              };
-            }
-            
-            // Clear les timeouts précédents
-            clearTimeout(this.successMessageTimeout);
-            clearTimeout(this.updateTimeout);
+      // Appel au service
+      const response = await this.boutiqueService.updateBoutique(
+        this.boutique.id, 
+        this.boutiqueForm.value
+      ).toPromise();
 
-            // Désactiver le loading après 2 secondes
-            this.updateTimeout = setTimeout(() => {
-              this.isUpdating_boutique = false;
-              // Afficher le message de succès après la fin du loading
-              this.successMessage = 'Boutique mise à jour avec succès !';
-              this.successMessageTimeout = setTimeout(() => {
-                this.successMessage = null;
-              }, 5000);
-            }, 2000);
-          },error: (err) => {
-          this.isUpdating_boutique = false;
-          this.errorMessage = err.error?.message || 'Erreur lors de la mise à jour';
-        }
-      });
+      // Mettre à jour la boutique locale
+      if (this.boutique) {
+        this.boutique = { 
+          ...this.boutique, 
+          ...this.boutiqueForm.value 
+        };
+      }
+
+      this.successMessage = 'Boutique mise à jour avec succès !';
+      
+      // Désactiver le mode édition après succès
+      this.toggleEditing();
+      
+      // Effacer le message après 5 secondes
+      setTimeout(() => this.successMessage = null, 5000);
+
+    } catch (err: any) {
+      console.error('Update error:', err);
+      this.errorMessage = err.error?.message || 'Erreur lors de la mise à jour';
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   toggleModificationForm() {
@@ -203,6 +329,153 @@ export class DetailBoutiqueComponent implements OnInit {
   navigateBack(){
     this.router.navigate(['/boutique']);
   }
+
+  toggleTransferModal(): void {
+    // Fermer le modal de copie si ouvert
+    if (this.showCopyModal) {
+        this.showCopyModal = false;
+    }
+    
+    this.showTransferModal = !this.showTransferModal;
+    if (this.showTransferModal) {
+        this.loadAllBoutiques();
+        this.searchTerm = '';
+        this.filterBoutiques();
+    }
+  }
+
+  toggleCopierModal(): void {
+    this.showTransferModal = !this.showTransferModal;
+    if (this.showTransferModal) {
+        this.loadAllBoutiques();
+    }
+  }
+
+  closeTransferModal(): void {
+    this.showTransferModal = false;
+    this.searchTerm = '';
+  }
+
+  // Charger toutes les boutiques (sauf la boutique actuelle)
+  loadAllBoutiques(): void {
+    this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+        next: (boutiques) => {
+            this.allBoutiques = boutiques.filter(b => b.id !== this.boutique?.id);
+            
+            // Initialiser les deux listes filtrées
+            this.filteredCopyBoutiques = [...this.allBoutiques];
+            this.filteredBoutiques = [...this.allBoutiques];
+        },
+        error: (err) => {
+            console.error('Erreur lors du chargement des boutiques', err);
+        }
+    });
+  }
+
+  // Filtrer les boutiques selon la recherche
+  filterBoutiques(): void {
+    if (!this.searchTerm) {
+        this.filteredBoutiques = [...this.allBoutiques];
+        return;
+    }
+    
+    const term = this.searchTerm.toLowerCase();
+    this.filteredBoutiques = this.allBoutiques.filter(b => 
+        b.nomBoutique.toLowerCase().includes(term)
+    );
+  }
+
+  // Sélectionner une boutique pour le transfert
+  selectBoutique(boutique: Boutique): void {
+    console.log('Boutique sélectionnée pour le transfert :', boutique);
+    // Ici vous pouvez implémenter la logique de transfert
+    
+    // Fermer le modal après sélection
+    this.closeTransferModal();
+  }
+
+  // Ajoutez cette méthode
+  loadProductsInBoutique(boutiqueId: number): void {
+    this.isLoadingProducts = true;
+    this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
+      next: (produits: Produit[]) => {
+        this.productsInBoutique = produits.map(produit => {
+        const photoUrl = produit.photo 
+          ? `${this.imgUrl}${produit.photo}`
+          : this.generateInitialImage(produit.nom.charAt(0));
+        
+        return {
+          ...produit,
+          photoUrl: photoUrl // Garantit que photoUrl est toujours string
+        };
+      });
+        this.isLoadingProducts = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement produits', err);
+        this.isLoadingProducts = false;
+      }
+    });
+  }
+
+  handleImageError(event: Event, product: Produit): void {
+    const img = event.target as HTMLImageElement;
+    img.src = this.generateInitialImage(product.nom.charAt(0));
+    img.onerror = null; // Empêcher les boucles d'erreur
+  }
+
+  // Méthode pour générer une image avec initiale
+  generateInitialImage(letter: string): string {
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+        <rect width="100%" height="100%" fill="#0671e4ac"/>
+        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="100" fill="#fff">
+          ${letter.toUpperCase()}
+        </text> 
+      </svg>
+    `;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
+
+  // Implémentez les méthodes manquantes
+  toggleSelectAll(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      this.selectedProductIds = this.productsInBoutique.map(p => p.id);
+    } else {
+      this.selectedProductIds = [];
+    }
+  }
+
+  isProductSelected(id: number): boolean {
+    return this.selectedProductIds.includes(id);
+  }
   
+  openImageModal(imageUrl: string | undefined): void {
+  if (imageUrl) {
+    this.selectedImageUrl = imageUrl;
+    this.showImageModal = true;
+  } else {
+    // Gérer le cas où l'URL est undefined
+    console.warn("Aucune URL d'image fournie");
+  }
+}
+
+  closeImageModal(): void {
+    this.showImageModal = false;
+    this.selectedImageUrl = null;
+  }
+
+  // Dans la classe DetailBoutiqueComponent
+  toggleProductSelection(productId: number, event: Event): void {
+    event.stopPropagation();
+    const index = this.selectedProductIds.indexOf(productId);
+    
+    if (index === -1) {
+      this.selectedProductIds.push(productId);
+    } else {
+      this.selectedProductIds.splice(index, 1);
+    }
+  }
 
 }
