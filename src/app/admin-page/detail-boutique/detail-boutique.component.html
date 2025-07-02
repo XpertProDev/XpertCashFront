@@ -262,143 +262,145 @@
             <!-- // les produits dans cette boutique  -->
 
             <!-- Tableau des produits -->
-            <table>
-            <thead>
-                <tr class="titleTableProduit">
-                <th>
-                    <label class="cyber-checkbox">
-                    <input 
-                        type="checkbox" 
-                        (change)="toggleSelectAll($event)">
-                        
-                        <span class="cyber-checkbox__mark">
-                        <div class="cyber-checkbox__box">
-                            <svg class="cyber-checkbox__check" viewBox="0 0 12 10">
-                            <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                            </svg>
-                        </div>
-                        <div class="cyber-checkbox__effects">
-                            <div class="cyber-checkbox__spark"></div>
-                            <div class="cyber-checkbox__spark"></div>
-                            <div class="cyber-checkbox__spark"></div>
-                            <div class="cyber-checkbox__spark"></div>
-                        </div>
-                        <div class="cyber-checkbox__particles">
-                            <div class="particle-1"></div>
-                            <div class="particle-2"></div>
-                            <div class="particle-3"></div>
-                            <div class="particle-4"></div>
-                            <div class="particle-5"></div>
-                            <div class="particle-6"></div>
-                            <div class="particle-7"></div>
-                            <div class="particle-8"></div>
-                        </div>
-                        </span>
-                    </label>
-                </th>
-                <th>Photo</th>
-                <th>Nom produit</th>
-                <th>Description</th>
-                <th>Catégorie</th>
-                <th>Prix Vente</th>
-                <th>En stock</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Chargement -->
-                <tr *ngIf="isLoadingProducts">
-                <td colspan="7" style="text-align: center; padding: 20px;">
-                    <div style="display: flex; justify-content: center; align-items: center;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <span style="margin-left: 10px;">Chargement des produits...</span>
-                    </div>
-                </td>
-                </tr>
+            <div class="table-scroll-container">
+                <table>
+                    <thead>
+                        <tr class="titleTableProduit">
+                        <th>
+                            <label class="cyber-checkbox">
+                            <input 
+                                type="checkbox" 
+                                (change)="toggleSelectAll($event)">
+                                
+                                <span class="cyber-checkbox__mark">
+                                <div class="cyber-checkbox__box">
+                                    <svg class="cyber-checkbox__check" viewBox="0 0 12 10">
+                                    <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="cyber-checkbox__effects">
+                                    <div class="cyber-checkbox__spark"></div>
+                                    <div class="cyber-checkbox__spark"></div>
+                                    <div class="cyber-checkbox__spark"></div>
+                                    <div class="cyber-checkbox__spark"></div>
+                                </div>
+                                <div class="cyber-checkbox__particles">
+                                    <div class="particle-1"></div>
+                                    <div class="particle-2"></div>
+                                    <div class="particle-3"></div>
+                                    <div class="particle-4"></div>
+                                    <div class="particle-5"></div>
+                                    <div class="particle-6"></div>
+                                    <div class="particle-7"></div>
+                                    <div class="particle-8"></div>
+                                </div>
+                                </span>
+                            </label>
+                        </th>
+                        <th>Photo</th>
+                        <th>Nom produit</th>
+                        <th>Description</th>
+                        <th>Catégorie</th>
+                        <th>Prix Vente</th>
+                        <th>En stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Chargement -->
+                        <tr *ngIf="isLoadingProducts">
+                        <td colspan="7" style="text-align: center; padding: 20px;">
+                            <div style="display: flex; justify-content: center; align-items: center;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <span style="margin-left: 10px;">Chargement des produits...</span>
+                            </div>
+                        </td>
+                        </tr>
 
-                <!-- Produits -->
-                <tr *ngFor="let product of productsInBoutique">
-                <td>
-                    <label class="cyber-checkbox">
-                    
-                    <input 
-                        type="checkbox" 
-                        [checked]="isProductSelected(product.id)"
-                        (change)="toggleProductSelection(product.id, $event)">
+                        <!-- Produits -->
+                        <tr *ngFor="let product of productsInBoutique">
+                        <td>
+                            <label class="cyber-checkbox">
+                            
+                            <input 
+                                type="checkbox" 
+                                [checked]="isProductSelected(product.id)"
+                                (change)="toggleProductSelection(product.id, $event)">
 
-                        <span class="cyber-checkbox__mark">
-                        <div class="cyber-checkbox__box">
-                            <svg class="cyber-checkbox__check" viewBox="0 0 12 10">
-                            <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                            </svg>
-                        </div>
-                        <div class="cyber-checkbox__effects">
-                            <div class="cyber-checkbox__spark"></div>
-                            <div class="cyber-checkbox__spark"></div>
-                            <div class="cyber-checkbox__spark"></div>
-                            <div class="cyber-checkbox__spark"></div>
-                        </div>
-                        <div class="cyber-checkbox__particles">
-                            <div class="particle-1"></div>
-                            <div class="particle-2"></div>
-                            <div class="particle-3"></div>
-                            <div class="particle-4"></div>
-                            <div class="particle-5"></div>
-                            <div class="particle-6"></div>
-                            <div class="particle-7"></div>
-                            <div class="particle-8"></div>
-                        </div>
-                        </span>
-                    </label>
-                </td>
-                <td>
-                    <div class="imgProduit">
-                        <img 
-                            [src]="product.photoUrl" 
-                            alt="{{product.nom}}" 
-                            (click)="openImageModal(product.photoUrl)"
-                            (error)="handleImageError($event, product)">
-                    </div>
-                </td>
-                <td>{{ product.nom }}</td>
-                <td class="description-cell">
-                    {{ product.description ? (product.description | slice:0:30) + (product.description.length > 30 ? '...' : '') : 'Aucune description' }}
-                    <div class="description-tooltip" *ngIf="product.description && product.description.length > 30">
-                    {{ product.description }}
-                    </div>
-                </td>
-                <td>{{ product.nomCategorie || 'Non catégorisé' }}</td>
-                <td>{{ product.prixVente | number:'1.2-2' }} FCFA</td>
-                <td [style.color]="product.quantite <= product.seuilAlert ? 'red' : 'inherit'">
-                    {{ product.quantite }}
-                    <i *ngIf="product.quantite <= product.seuilAlert" 
-                    class="ri-alarm-warning-fill"
-                    style="color: red; margin-left: 5px;"
-                    title="Stock bas!"></i>
-                </td>
-                </tr>
+                                <span class="cyber-checkbox__mark">
+                                <div class="cyber-checkbox__box">
+                                    <svg class="cyber-checkbox__check" viewBox="0 0 12 10">
+                                    <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="cyber-checkbox__effects">
+                                    <div class="cyber-checkbox__spark"></div>
+                                    <div class="cyber-checkbox__spark"></div>
+                                    <div class="cyber-checkbox__spark"></div>
+                                    <div class="cyber-checkbox__spark"></div>
+                                </div>
+                                <div class="cyber-checkbox__particles">
+                                    <div class="particle-1"></div>
+                                    <div class="particle-2"></div>
+                                    <div class="particle-3"></div>
+                                    <div class="particle-4"></div>
+                                    <div class="particle-5"></div>
+                                    <div class="particle-6"></div>
+                                    <div class="particle-7"></div>
+                                    <div class="particle-8"></div>
+                                </div>
+                                </span>
+                            </label>
+                        </td>
+                        <td>
+                            <div class="imgProduit">
+                                <img 
+                                    [src]="product.photoUrl" 
+                                    alt="{{product.nom}}" 
+                                    (click)="openImageModal(product.photoUrl)"
+                                    (error)="handleImageError($event, product)">
+                            </div>
+                        </td>
+                        <td>{{ product.nom }}</td>
+                        <td class="description-cell">
+                            {{ product.description ? (product.description | slice:0:30) + (product.description.length > 30 ? '...' : '') : 'Aucune description' }}
+                            <div class="description-tooltip" *ngIf="product.description && product.description.length > 30">
+                            {{ product.description }}
+                            </div>
+                        </td>
+                        <td>{{ product.nomCategorie || 'Non catégorisé' }}</td>
+                        <td>{{ product.prixVente | number:'1.2-2' }} FCFA</td>
+                        <td [style.color]="product.quantite <= product.seuilAlert ? 'red' : 'inherit'">
+                            {{ product.quantite }}
+                            <i *ngIf="product.quantite <= product.seuilAlert" 
+                            class="ri-alarm-warning-fill"
+                            style="color: red; margin-left: 5px;"
+                            title="Stock bas!"></i>
+                        </td>
+                        </tr>
 
-                <!-- Aucun produit -->
-                <tr *ngIf="!isLoadingProducts && productsInBoutique.length === 0">
-                <td colspan="7" style="text-align: center; padding: 20px;">
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                    <i class="ri-box-line" style="font-size: 48px; color: #6c757d;"></i>
-                    <p style="margin-top: 10px; margin-bottom: 5px;">Aucun produit dans cette boutique</p>
-                    <button class="btn btn-sm btn-outline-primary mt-2" routerLink="/addProduit">
-                        Ajouter un produit
-                    </button>
-                    </div>
-                </td>
-                </tr>
-            </tbody>
-            </table>
+                        <!-- Aucun produit -->
+                        <tr *ngIf="!isLoadingProducts && productsInBoutique.length === 0">
+                        <td colspan="7" style="text-align: center; padding: 20px;">
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                            <i class="ri-box-line" style="font-size: 48px; color: #6c757d;"></i>
+                            <p style="margin-top: 10px; margin-bottom: 5px;">Aucun produit dans cette boutique</p>
+                            <button class="btn btn-sm btn-outline-primary mt-2" routerLink="/addProduit">
+                                Ajouter un produit
+                            </button>
+                            </div>
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+             </div>
 
             <!-- Modal pour l'image -->
             <div class="modal" *ngIf="showImageModal" (click)="closeImageModal()">
-            <div class="modal-content" (click)="$event.stopPropagation()">
-                <img [src]="selectedImageUrl" alt="Produit en gros plan">
-            </div>
+                <div class="modal-content" (click)="$event.stopPropagation()">
+                    <img [src]="selectedImageUrl" alt="Produit en gros plan">
+                </div>
             </div>
 
         </div>
@@ -426,14 +428,3 @@
       <p>Connexion en cours...</p>
     </div>
 </div>
-
-<!-- En haut du template -->
-<!-- <div *ngIf="isLoading || isUpdating || isUpdating_boutique" class="loading-overlay">
-  <div class="loading-content">
-    <div class="spinner"></div>
-    <p>{{ getLoadingMessage() }}</p>
-  </div>
-</div> -->
-
-<!-- Supprimez l'ancien overlay en bas du template -->
-
