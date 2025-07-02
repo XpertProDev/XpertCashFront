@@ -4,6 +4,7 @@ import { Boutique } from "../MODELS/boutique-model";
 import { Observable, throwError } from "rxjs";
 import { environment } from "src/environments/environment";
 import { Produit } from "../MODELS/produit.model";
+import { Users } from "../MODELS/utilisateur.model";
 
 @Injectable({
   providedIn: 'root'
@@ -82,4 +83,20 @@ export class BoutiqueService {
       // Ajoutez l'option { headers } à la requête GET
       return this.http.get<Produit[]>(`${this.apiUrl}/boutique/${id}/produits`, { headers });
     }
+
+    getVendeursByBoutiqueId(id: number): Observable<Users[]> {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+
+      return this.http.get<Users[]>(`${this.apiUrl}/${id}/vendeurs`, { headers });
+    }
+
 }

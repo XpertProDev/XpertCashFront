@@ -270,7 +270,7 @@
                   <!-- En-tête dynamique -->
                   <div class="header_apercu" style="display: flex; align-items: center; gap: 5px; margin: 10px;">
                     <div class="logo_entreprise">
-                      <img [src]="entrepriseLogo"><!--  alt="Logo entreprise" -->
+                      <img [src]="entrepriseLogo || entrepriseLogo || 'assets/img/Votre.png'"><!--  alt="Logo entreprise" -->
                     </div>
                     <div class="entete_entreprise">
                       <p class="para1">{{ entrepriseNom }}</p>
