@@ -14,8 +14,17 @@
   <div *ngIf="errorMessageApi" class="alert alert-danger toast-message-danger">
     {{ errorMessageApi }}
   </div>
-</div>
 
+    <div *ngIf="copySuccessMessage" class="alert alert-warning toast-message-warning">
+    {{ copySuccessMessage }}
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="copyErrorMessage" class="alert alert-danger toast-message-danger">
+    {{ copyErrorMessage }}
+    </div>
+
+</div>
 <!-- Icon return  -->
 <p class="retour_icon_text" (click)="navigateBack()" style="cursor: pointer; color: #0672E4;" title="Retour sur la page boutique">
     <i class="ri-arrow-left-s-line"></i> <span style="margin-left: 8px; font-size: 12px;">Boutique</span>
@@ -386,9 +395,9 @@
                             <div style="display: flex; flex-direction: column; align-items: center;">
                             <i class="ri-box-line" style="font-size: 48px; color: #6c757d;"></i>
                             <p style="margin-top: 10px; margin-bottom: 5px;">Aucun produit dans cette boutique</p>
-                            <button class="btn btn-sm btn-outline-primary mt-2" routerLink="/addProduit">
+                            <!-- <button class="btn btn-sm btn-outline-primary mt-2" routerLink="/addProduit">
                                 Ajouter un produit
-                            </button>
+                            </button> -->
                             </div>
                         </td>
                         </tr>

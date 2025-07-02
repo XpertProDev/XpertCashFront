@@ -926,6 +926,21 @@ table {
   z-index: 9999;
 }
 
+/* Ajoutez dans votre fichier CSS */
+.toast-message-warning {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px;
+  border-radius: 5px;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  z-index: 1000;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
 .toast-message-success {
   background-color: #77eb87;
   border: 1px solid #ACCEBC;

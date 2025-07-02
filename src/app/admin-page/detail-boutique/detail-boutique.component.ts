@@ -53,6 +53,11 @@ export class DetailBoutiqueComponent implements OnInit {
   isLoadingProducts = false;
   imgUrl = environment.imgUrl;
 
+  isCopying = false;
+  copySuccessMessage: string | null = null;
+  copyErrorMessage: string | null = null;
+  selectedCopyBoutique: Boutique | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private boutiqueService: BoutiqueService,
@@ -131,19 +136,78 @@ export class DetailBoutiqueComponent implements OnInit {
   }
 
   // Sélectionner une boutique pour la copie
+  // selectCopyBoutique(boutique: Boutique): void {
+  //     console.log('Boutique sélectionnée pour la copie :', boutique);
+      
+  //     this.closeCopyModal();
+      
+  //     // Afficher un message de succès
+  //     this.successMessage = `Produits copiés vers ${boutique.nomBoutique} avec succès!`;
+  //     setTimeout(() => this.successMessage = null, 5000);
+  // }
+
   selectCopyBoutique(boutique: Boutique): void {
-      console.log('Boutique sélectionnée pour la copie :', boutique);
-      
-      // Ici vous pouvez implémenter la logique de copie
-      // Exemple: this.copyProductsToBoutique(boutique.id);
-      
-      // Fermer le modal après sélection
-      this.closeCopyModal();
-      
-      // Afficher un message de succès
-      this.successMessage = `Produits copiés vers ${boutique.nomBoutique} avec succès!`;
-      setTimeout(() => this.successMessage = null, 5000);
+    this.selectedCopyBoutique = boutique;
+    this.confirmCopyProducts();
   }
+
+async confirmCopyProducts(): Promise<void> {
+  if (!this.boutique || !this.selectedCopyBoutique) return;
+
+  this.isCopying = true;
+  this.copyErrorMessage = null;
+  this.copySuccessMessage = null;
+
+  try {
+    const detailsCopie = {
+      boutiqueSourceId: this.boutique.id,
+      boutiqueDestinationId: this.selectedCopyBoutique.id,
+      toutCopier: this.selectedProductIds.length === 0,
+      produitIds: this.selectedProductIds.length > 0 ? this.selectedProductIds : undefined
+    };
+
+    const response = await this.boutiqueService.copierProduits(detailsCopie).toPromise();
+    
+    // Gestion de la réponse
+    if (response && response.success !== undefined) {
+      if (response.success) {
+        this.copySuccessMessage = response.message;
+      } else {
+        // Cas spécial : aucun produit copié - afficher comme avertissement
+        this.copySuccessMessage = response.message;
+      }
+    } else if (response && response.message) {
+      // Cas de fallback
+      this.copySuccessMessage = response.message;
+    } else {
+      this.copyErrorMessage = 'Réponse inattendue du serveur';
+    }
+
+    this.selectedProductIds = [];
+  } catch (error: any) {
+    console.error('Erreur copie', error);
+    
+    // Gestion spécifique des différents formats d'erreur
+    if (error.error && error.error.message) {
+      this.copyErrorMessage = error.error.message;
+    } else if (error.message) {
+      this.copyErrorMessage = error.message;
+    } else if (typeof error === 'string') {
+      this.copyErrorMessage = error;
+    } else {
+      this.copyErrorMessage = 'Erreur lors de la copie des produits';
+    }
+  } finally {
+    this.isCopying = false;
+    this.closeCopyModal();
+    
+    // Effacer les messages après 5 secondes
+    setTimeout(() => {
+      this.copySuccessMessage = null;
+      this.copyErrorMessage = null;
+    }, 8000);
+  }
+}
 
   // Filtrer les boutiques pour la copie
   filterCopyBoutiques(): void {
