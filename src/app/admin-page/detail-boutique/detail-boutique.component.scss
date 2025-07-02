@@ -1982,15 +1982,18 @@ table {
 
 .inputSearch {
     position: relative;
-    //width: 300px;
+    top: -7px;
+    width: 280px;
     height: 40px;
     display: flex;
     align-items: center;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
-    border-radius: 20px;
+    // border-radius: 20px;
     padding: 0 15px;
     transition: all 0.3s ease-in-out;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
 
     &:hover {
         border-color: #0672E4;
@@ -2040,4 +2043,17 @@ table {
     right: 0;
     margin-right: 15px;
     font-size: 17px;
+}
+
+.trier {
+  border-top: 1px solid #ddd; 
+  border-right: 1px solid #ddd; 
+  border-bottom: 1px solid #ddd; 
+  border-top-right-radius: 5px; 
+  border-bottom-right-radius: 5px; 
+  padding: 5.5px 10px;
+  cursor: pointer;
+  position: relative;
+  top: -7px;
+  left: 0px;
 }

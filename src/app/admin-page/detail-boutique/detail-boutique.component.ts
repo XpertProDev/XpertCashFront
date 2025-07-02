@@ -490,21 +490,14 @@ async confirmCopyProducts(): Promise<void> {
     this.closeTransferModal();
   }
 
-  // Ajoutez cette méthode
   // loadProductsInBoutique(boutiqueId: number): void {
   //   this.isLoadingProducts = true;
   //   this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
-  //     next: (produits: Produit[]) => {
-  //       this.productsInBoutique = produits.map(produit => {
-  //       const photoUrl = produit.photo 
-  //         ? `${this.imgUrl}${produit.photo}`
-  //         : this.generateInitialImage(produit.nom.charAt(0));
-        
-  //       return {
+  //     next: (produits) => {
+  //       this.productsInBoutique = produits.map(produit => ({
   //         ...produit,
-  //         photoUrl: photoUrl // Garantit que photoUrl est toujours string
-  //       };
-  //     });
+  //         photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0))
+  //       }));
   //       this.isLoadingProducts = false;
   //     },
   //     error: (err) => {
@@ -518,10 +511,14 @@ async confirmCopyProducts(): Promise<void> {
     this.isLoadingProducts = true;
     this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
       next: (produits) => {
-        this.productsInBoutique = produits.map(produit => ({
+        // Trier par ID décroissant (supposant que les nouveaux IDs sont plus grands)
+        const produitsTries = produits.sort((a, b) => b.id - a.id);
+        
+        this.productsInBoutique = produitsTries.map(produit => ({
           ...produit,
           photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0))
         }));
+        
         this.isLoadingProducts = false;
       },
       error: (err) => {

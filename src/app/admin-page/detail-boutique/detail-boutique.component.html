@@ -206,7 +206,7 @@
         <!-- // Pour la copier des produit  -->
         <div class="content_copie_produit" [class.disabled-content]="!boutique?.actif">
 
-            <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; justify-content: space-between;">
                 <!-- // title  -->
                 <div class="section_title" style="display: flex; align-items: center;">
                     <div class="title">
@@ -294,9 +294,17 @@
 
                 </div>
 
-                <div class="inputSearch">
-                    <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..." (input)="filterBoutiques()" />
-                    <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch()"></i>
+                <div class="container_inputSearch" style="display: flex; align-items: center; position: relative;">
+                    <div class="inputSearch">
+                        <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..." (input)="filterBoutiques()" />
+                        <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-search-2-line'" (click)="clearSearch()"></i>
+                    </div>
+
+                    <!-- Bouton de tri -->
+                    <div class="trier" title="Trier et filtrer"  style="cursor: pointer;">
+                        <i style="font-size: 18px;" class="ri-arrow-down-s-fill"></i>
+                        <!-- <i style="font-size: 18px;" class="ri-close-line"></i> -->
+                    </div>
                 </div>
             </div>
 
