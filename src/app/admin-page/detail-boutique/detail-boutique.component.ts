@@ -62,6 +62,8 @@ export class DetailBoutiqueComponent implements OnInit {
   copyErrorMessage: string | null = null;
   selectedCopyBoutique: Boutique | null = null;
 
+  imageActuelle = '';
+
   constructor(
     private route: ActivatedRoute,
     private boutiqueService: BoutiqueService,
@@ -595,41 +597,41 @@ async confirmCopyProducts(): Promise<void> {
   listeVendeurs: Users[] = [];
   boutiqueId!: number;
 
-loadAllVendeursBoutique(): void {
-  if (!this.boutiqueId) {
-    this.errorMessage = "Identifiant boutique manquant";
-    console.log('Erreur : identifiant boutique manquant');
-    return;
+  loadAllVendeursBoutique(): void {
+    if (!this.boutiqueId) {
+      this.errorMessage = "Identifiant boutique manquant";
+      console.log('Erreur : identifiant boutique manquant');
+      return;
+    }
+
+    this.boutiqueService.getVendeursByBoutiqueId(this.boutiqueId).subscribe({
+      next: (vendeurs) => {
+        console.log(`Liste des vendeurs récupérée (${vendeurs.length}) :`, vendeurs);
+        this.listeVendeurs = vendeurs;
+        this.errorMessage = '';
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des vendeurs', err);
+        this.errorMessage = 'Impossible de charger les vendeurs pour cette boutique.';
+        this.listeVendeurs = [];
+      }
+    });
   }
 
-  this.boutiqueService.getVendeursByBoutiqueId(this.boutiqueId).subscribe({
-    next: (vendeurs) => {
-      console.log(`Liste des vendeurs récupérée (${vendeurs.length}) :`, vendeurs);
-      this.listeVendeurs = vendeurs;
-      this.errorMessage = '';
-    },
-    error: (err) => {
-      console.error('Erreur lors du chargement des vendeurs', err);
-      this.errorMessage = 'Impossible de charger les vendeurs pour cette boutique.';
-      this.listeVendeurs = [];
-    }
-  });
-}
+  ouvrirImage(photoUrl: string): void {
+    this.imageActuelle = photoUrl || 'assets/defaultProfile/profil.png';
+    this.showImageModal = true;
+  }
 
+  fermerImage(): void {
+    this.showImageModal = false;
+  }
 
-imageActuelle = '';
+  ajouterVendeur(): void {
+    // Rediriger vers une page d'ajout ou ouvrir un modal
+    console.log('Ajouter un vendeur cliqué');
+  }
 
-ouvrirImage(photoUrl: string): void {
-  this.imageActuelle = photoUrl || 'assets/defaultProfile/profil.png';
-  this.showImageModal = true;
-}
+  clearSearch(): void {}
 
-fermerImage(): void {
-  this.showImageModal = false;
-}
-
-ajouterVendeur(): void {
-  // Rediriger vers une page d'ajout ou ouvrir un modal
-  console.log('Ajouter un vendeur cliqué');
-}
 }
