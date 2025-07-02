@@ -933,12 +933,16 @@ table {
   right: 20px;
   padding: 15px;
   border-radius: 5px;
-  background-color: #fff3cd;
+  // background-color: #fff3cd;
+  // border: 1px solid #ffeeba;
+  background-color: #77eb87;
+  border: 1px solid #ACCEBC;
   color: #856404;
-  border: 1px solid #ffeeba;
   z-index: 1000;
   max-width: 400px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+  animation: fadeInOut 4s ease-in-out;
 }
 
 .toast-message-success {
@@ -968,18 +972,6 @@ table {
   transform: translateY(-20px);
 }
 
-.toast-message-warning {
-  background-color: #F3D8DA;
-  border: 1px solid #E7B1B6;
-  color: #000;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  animation: fadeInOut 4s ease-in-out;
-  transform: translateY(-20px);
-}
 
   // Ajouter l'animation pour tous les types d'alertes
   .alert {
@@ -1102,7 +1094,7 @@ table {
 .table-scroll-container {
   flex: 1;
   overflow-y: auto;
-  margin-top: 10px;
+  // margin-top: 10px;
   // border: 1px solid #e0e0e0;
   border-radius: 8px;
   // padding: 10px;
@@ -1892,7 +1884,7 @@ table {
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 320px;
+  width: 300px;
 }
 
 .modal-actions-aver {
@@ -1908,4 +1900,65 @@ table {
   padding: 4px 10px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+/* Ajouter ces styles */
+.disabled-content {
+  opacity: 0.7;
+  position: relative;
+  
+  .table-scroll-container {
+    .cyber-checkbox {
+      cursor: not-allowed;
+    }
+    
+    input[type="checkbox"] {
+      cursor: not-allowed;
+    }
+    
+    .imgProduit img {
+      cursor: default;
+      filter: grayscale(100%);
+    }
+  }
+}
+
+// .alert-warning {
+//   background-color: #fff8e1;
+//   border-left: 4px solid #ff9800;
+//   color: #ff9800;
+//   padding: 10px 15px;
+//   border-radius: 4px;
+//   font-weight: 500;
+// }
+
+/* Styles pour l'icône d'état */
+.boutique-status-icon {
+    margin-left: 8px;
+    color: #ff9800;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+/* Style pour les boutiques désactivées */
+.disabled-boutique {
+    opacity: 0.7;
+    position: relative;
+}
+
+/* Optionnel : ajouter un effet au survol */
+.boutique-item:hover {
+    background-color: #f5f5f5;
+}
+
+/* Désactiver le clic pour les boutiques désactivées */
+.disabled-boutique {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Rétablir le clic uniquement sur l'icône */
+.disabled-boutique .boutique-status-icon {
+    pointer-events: auto;
+    cursor: help;
 }

@@ -105,7 +105,17 @@ export class DetailBoutiqueComponent implements OnInit {
           telephone: boutique.telephone
         });
         this.isLoading = false;
+        
         this.loadProductsInBoutique(boutique.id);
+
+        // Mise à jour du formulaire
+        this.boutiqueForm.patchValue({
+          nomBoutique: boutique.nomBoutique,
+          adresse: boutique.adresse,
+          email: boutique.email,
+          telephone: boutique.telephone
+        });
+
       },
       error: (err) => {
         this.errorMessage = 'Échec du chargement des données';
@@ -159,6 +169,10 @@ export class DetailBoutiqueComponent implements OnInit {
   // }
 
   selectCopyBoutique(boutique: Boutique): void {
+    if (!boutique.actif) {
+        const confirmCopy = confirm('Cette boutique est désactivée. Êtes-vous sûr de vouloir copier les produits vers cette boutique ?');
+        if (!confirmCopy) return;
+    }
     this.selectedCopyBoutique = boutique;
     this.confirmCopyProducts();
   }
@@ -183,13 +197,13 @@ async confirmCopyProducts(): Promise<void> {
     // Gestion de la réponse
     if (response && response.success !== undefined) {
       if (response.success) {
-        this.copySuccessMessage = response.message;
+        this.copySuccessMessage = response.message; // Message de succès
       } else {
-        // Cas spécial : aucun produit copié - afficher comme avertissement
-        this.copySuccessMessage = response.message;
+        // Assigner le message d'erreur lorsque success est false
+        this.copyErrorMessage = response.message; // Correction ici
       }
     } else if (response && response.message) {
-      // Cas de fallback
+      // Cas de fallback - supposons que c'est un succès
       this.copySuccessMessage = response.message;
     } else {
       this.copyErrorMessage = 'Réponse inattendue du serveur';
@@ -213,7 +227,7 @@ async confirmCopyProducts(): Promise<void> {
     this.isCopying = false;
     this.closeCopyModal();
     
-    // Effacer les messages après 5 secondes
+    // Effacer les messages après 8 secondes
     setTimeout(() => {
       this.copySuccessMessage = null;
       this.copyErrorMessage = null;
@@ -471,20 +485,37 @@ async confirmCopyProducts(): Promise<void> {
   }
 
   // Ajoutez cette méthode
+  // loadProductsInBoutique(boutiqueId: number): void {
+  //   this.isLoadingProducts = true;
+  //   this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
+  //     next: (produits: Produit[]) => {
+  //       this.productsInBoutique = produits.map(produit => {
+  //       const photoUrl = produit.photo 
+  //         ? `${this.imgUrl}${produit.photo}`
+  //         : this.generateInitialImage(produit.nom.charAt(0));
+        
+  //       return {
+  //         ...produit,
+  //         photoUrl: photoUrl // Garantit que photoUrl est toujours string
+  //       };
+  //     });
+  //       this.isLoadingProducts = false;
+  //     },
+  //     error: (err) => {
+  //       console.error('Erreur chargement produits', err);
+  //       this.isLoadingProducts = false;
+  //     }
+  //   });
+  // }
+
   loadProductsInBoutique(boutiqueId: number): void {
     this.isLoadingProducts = true;
     this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
-      next: (produits: Produit[]) => {
-        this.productsInBoutique = produits.map(produit => {
-        const photoUrl = produit.photo 
-          ? `${this.imgUrl}${produit.photo}`
-          : this.generateInitialImage(produit.nom.charAt(0));
-        
-        return {
+      next: (produits) => {
+        this.productsInBoutique = produits.map(produit => ({
           ...produit,
-          photoUrl: photoUrl // Garantit que photoUrl est toujours string
-        };
-      });
+          photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0))
+        }));
         this.isLoadingProducts = false;
       },
       error: (err) => {
@@ -515,6 +546,7 @@ async confirmCopyProducts(): Promise<void> {
 
   // Implémentez les méthodes manquantes
   toggleSelectAll(event: Event): void {
+    if (!this.boutique?.actif) return;
     const checkbox = event.target as HTMLInputElement;
     if (checkbox.checked) {
       this.selectedProductIds = this.productsInBoutique.map(p => p.id);
@@ -528,6 +560,7 @@ async confirmCopyProducts(): Promise<void> {
   }
   
   openImageModal(imageUrl: string | undefined): void {
+  if (!this.boutique?.actif) return;
   if (imageUrl) {
     this.selectedImageUrl = imageUrl;
     this.showImageModal = true;
@@ -544,6 +577,7 @@ async confirmCopyProducts(): Promise<void> {
 
   // Dans la classe DetailBoutiqueComponent
   toggleProductSelection(productId: number, event: Event): void {
+    if (!this.boutique?.actif) return;
     event.stopPropagation();
     const index = this.selectedProductIds.indexOf(productId);
     

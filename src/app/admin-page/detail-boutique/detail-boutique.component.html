@@ -15,7 +15,7 @@
     {{ errorMessageApi }}
   </div>
 
-    <div *ngIf="copySuccessMessage" class="alert alert-warning toast-message-warning">
+    <div *ngIf="copySuccessMessage" class="alert alert-warning toast-message-success">
     {{ copySuccessMessage }}
     </div>
 
@@ -202,22 +202,23 @@
         </div>
 
         <!-- // Pour la copier des produit  -->
-        <div class="content_copie_produit">
+        <div class="content_copie_produit" [class.disabled-content]="!boutique?.actif">
+
             <!-- // title  -->
             <div class="section_title" style="display: flex; align-items: center;">
                 <div class="title">
                     <h6>Produits de la boutique</h6>
                 </div>
 
-                <div class="barre" style="margin-bottom: 8px;"></div>
+                <div class="barre" style="margin-bottom: 8px;" *ngIf="boutique?.actif"></div>
 
-                <div class="icon_content icon_delete" style="margin-bottom: 8px;">
+                <div class="icon_content icon_delete" style="margin-bottom: 8px;" *ngIf="boutique?.actif">
                     <i class="ri-delete-bin-6-line"></i>
                 </div>
 
-                <div class="barre" style="margin-bottom: 8px;"></div>
+                <div class="barre" style="margin-bottom: 8px;" *ngIf="boutique?.actif"></div>
 
-                <div class="icon_content" style="margin-bottom: 8px; position: relative;">
+                <div class="icon_content" style="margin-bottom: 8px; position: relative;" *ngIf="boutique?.actif">
                     <i class="ri-folder-transfer-line" (click)="toggleTransferModal()"></i>
 
                     <!-- Popup de transfert -->
@@ -251,7 +252,7 @@
                     <!-- Fin Popup de transfert -->
                 </div>
 
-                <div class="icon_content" style="margin-bottom: 8px; margin-left: 25px; position: relative;">
+                <div class="icon_content" style="margin-bottom: 8px; margin-left: 25px; position: relative;" *ngIf="boutique?.actif">
                     <i class="ri-file-copy-2-line" (click)="toggleCopyModal()"></i>
                     
                     <!-- Popup de copie -->
@@ -272,9 +273,13 @@
                                 <div 
                                     *ngFor="let boutique of filteredCopyBoutiques" 
                                     class="boutique-item"
+                                    [class.disabled-boutique]="!boutique.actif"
                                     (click)="selectCopyBoutique(boutique)"
                                 >
                                     {{ boutique.nomBoutique }}
+                                    <i *ngIf="!boutique.actif" style="font-size: 13px;"
+                                    class="ri-lock-line boutique-status-icon"
+                                    title="Boutique désactivée"></i>
                                 </div>
                                 <div *ngIf="filteredCopyBoutiques.length === 0" class="no-results">
                                     Aucune boutique trouvée
@@ -287,6 +292,10 @@
             </div>
             <!-- // les produits dans cette boutique  -->
 
+            <div *ngIf="!boutique?.actif" class="alert alert-warning" style="margin-bottom: 0px; text-align: center;">
+                <i class="ri-alert-line"></i> Boutique désactivée - Les produits ne sont pas visible
+            </div>
+
             <!-- Tableau des produits -->
             <div class="table-scroll-container">
                 <table>
@@ -296,7 +305,8 @@
                             <label class="cyber-checkbox">
                             <input 
                                 type="checkbox" 
-                                (change)="toggleSelectAll($event)">
+                                (change)="boutique?.actif ? toggleSelectAll($event) : null"
+                                [disabled]="!boutique?.actif">
                                 
                                 <span class="cyber-checkbox__mark">
                                 <div class="cyber-checkbox__box">
@@ -334,93 +344,89 @@
                     <tbody>
                         <!-- Chargement -->
                         <tr *ngIf="isLoadingProducts">
-                        <td colspan="7" style="text-align: center; padding: 20px;">
-                            <div style="display: flex; justify-content: center; align-items: center;">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <span style="margin-left: 10px;">Chargement des produits...</span>
-                            </div>
-                        </td>
+                            <td colspan="7" style="text-align: center; padding: 20px;">
+                                <div style="display: flex; justify-content: center; align-items: center;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span style="margin-left: 10px;">Chargement des produits...</span>
+                                </div>
+                            </td>
                         </tr>
 
                         <!-- Produits -->
                         <tr *ngFor="let product of productsInBoutique">
-                        <td>
-                            <label class="cyber-checkbox">
-                            
-                            <input 
-                                type="checkbox" 
-                                [checked]="isProductSelected(product.id)"
-                                (change)="toggleProductSelection(product.id, $event)">
+                            <td>
+                                <label class="cyber-checkbox">
+                                
+                                <input type="checkbox" 
+                                        [checked]="isProductSelected(product.id)"
+                                        (change)="boutique?.actif ? toggleProductSelection(product.id, $event) : null"
+                                        [disabled]="!boutique?.actif">
 
-                                <span class="cyber-checkbox__mark">
-                                <div class="cyber-checkbox__box">
-                                    <svg class="cyber-checkbox__check" viewBox="0 0 12 10">
-                                    <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                    </svg>
+                                    <span class="cyber-checkbox__mark">
+                                    <div class="cyber-checkbox__box">
+                                        <svg class="cyber-checkbox__check" viewBox="0 0 12 10">
+                                        <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="cyber-checkbox__effects">
+                                        <div class="cyber-checkbox__spark"></div>
+                                        <div class="cyber-checkbox__spark"></div>
+                                        <div class="cyber-checkbox__spark"></div>
+                                        <div class="cyber-checkbox__spark"></div>
+                                    </div>
+                                    <div class="cyber-checkbox__particles">
+                                        <div class="particle-1"></div>
+                                        <div class="particle-2"></div>
+                                        <div class="particle-3"></div>
+                                        <div class="particle-4"></div>
+                                        <div class="particle-5"></div>
+                                        <div class="particle-6"></div>
+                                        <div class="particle-7"></div>
+                                        <div class="particle-8"></div>
+                                    </div>
+                                    </span>
+                                </label>
+                            </td>
+                            <td>
+                                <div class="imgProduit">
+                                    <img [src]="product.photoUrl" 
+                                        alt="{{product.nom}}" 
+                                        (click)="boutique?.actif ? openImageModal(product.photoUrl) : null"
+                                        [class.disabled-image]="!boutique?.actif">
                                 </div>
-                                <div class="cyber-checkbox__effects">
-                                    <div class="cyber-checkbox__spark"></div>
-                                    <div class="cyber-checkbox__spark"></div>
-                                    <div class="cyber-checkbox__spark"></div>
-                                    <div class="cyber-checkbox__spark"></div>
+                            </td>
+                            <td>{{ product.nom }}</td>
+                            <td class="description-cell">
+                                {{ product.description ? (product.description | slice:0:30) + (product.description.length > 30 ? '...' : '') : 'Aucune description' }}
+                                <div class="description-tooltip" *ngIf="product.description && product.description.length > 30">
+                                {{ product.description }}
                                 </div>
-                                <div class="cyber-checkbox__particles">
-                                    <div class="particle-1"></div>
-                                    <div class="particle-2"></div>
-                                    <div class="particle-3"></div>
-                                    <div class="particle-4"></div>
-                                    <div class="particle-5"></div>
-                                    <div class="particle-6"></div>
-                                    <div class="particle-7"></div>
-                                    <div class="particle-8"></div>
-                                </div>
-                                </span>
-                            </label>
-                        </td>
-                        <td>
-                            <div class="imgProduit">
-                                <img 
-                                    [src]="product.photoUrl" 
-                                    alt="{{product.nom}}" 
-                                    (click)="openImageModal(product.photoUrl)"
-                                    (error)="handleImageError($event, product)">
-                            </div>
-                        </td>
-                        <td>{{ product.nom }}</td>
-                        <td class="description-cell">
-                            {{ product.description ? (product.description | slice:0:30) + (product.description.length > 30 ? '...' : '') : 'Aucune description' }}
-                            <div class="description-tooltip" *ngIf="product.description && product.description.length > 30">
-                            {{ product.description }}
-                            </div>
-                        </td>
-                        <td>{{ product.nomCategorie || 'Non catégorisé' }}</td>
-                        <td>{{ product.prixVente | number:'1.2-2' }} FCFA</td>
-                        <td [style.color]="product.quantite <= product.seuilAlert ? 'red' : 'inherit'">
-                            {{ product.quantite }}
-                            <i *ngIf="product.quantite <= product.seuilAlert" 
-                            class="ri-alarm-warning-fill"
-                            style="color: red; margin-left: 5px;"
-                            title="Stock bas!"></i>
-                        </td>
+                            </td>
+                            <td>{{ product.nomCategorie || 'Non catégorisé' }}</td>
+                            <td>{{ product.prixVente | number:'1.2-2' }} FCFA</td>
+                            <td [style.color]="product.quantite <= product.seuilAlert ? 'red' : 'inherit'">
+                                {{ product.quantite }}
+                                <i *ngIf="product.quantite <= product.seuilAlert" 
+                                class="ri-alarm-warning-fill"
+                                style="color: red; margin-left: 5px;"
+                                title="Stock bas!"></i>
+                            </td>
                         </tr>
 
                         <!-- Aucun produit -->
-                        <tr *ngIf="!isLoadingProducts && productsInBoutique.length === 0">
-                        <td colspan="7" style="text-align: center; padding: 20px;">
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                            <i class="ri-box-line" style="font-size: 48px; color: #6c757d;"></i>
-                            <p style="margin-top: 10px; margin-bottom: 5px;">Aucun produit dans cette boutique</p>
-                            <!-- <button class="btn btn-sm btn-outline-primary mt-2" routerLink="/addProduit">
-                                Ajouter un produit
-                            </button> -->
-                            </div>
-                        </td>
+                        <tr *ngIf="!isLoadingProducts && productsInBoutique.length === 0 && boutique?.actif">
+                            <td colspan="7" style="text-align: center; padding: 20px;">
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                <i class="ri-box-line" style="font-size: 48px; color: #6c757d;"></i>
+                                <p style="margin-top: 10px; margin-bottom: 5px;">Aucun produit dans cette boutique</p>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
-             </div>
+            </div>
 
             <!-- Modal pour l'image -->
             <div class="modal" *ngIf="showImageModal" (click)="closeImageModal()">
@@ -439,11 +445,11 @@
 <!-- Ajoutez ceci en bas du template -->
 <div class="confirmation-modal" *ngIf="showConfirmationModal">
   <div class="modal-content">
-    <h4>{{ confirmationTitle }}</h4>
-    <p>{{ confirmationMessage }}</p>
+    <h4 style="font-size: 16px; margin-bottom: 10px;">{{ confirmationTitle }}</h4>
+    <p style="font-size: 12px;">{{ confirmationMessage }}</p>
     <div class="modal-actions">
-      <button class="btn-cancel" (click)="cancelAction()">Annuler</button>
-      <button class="btn-confirm" (click)="handleStatusChange()">Confirmer</button>
+      <button class="btn-cancel" style="font-size: 12px;" (click)="cancelAction()">Annuler</button>
+      <button class="btn-confirm" style="font-size: 12px;" (click)="handleStatusChange()">Confirmer</button>
     </div>
   </div>
 </div>
