@@ -66,6 +66,9 @@ export class DetailBoutiqueComponent implements OnInit {
   copyErrorMessage: string | null = null;
   selectedCopyBoutique: Boutique | null = null;
 
+  showDeleteModal = false;
+  deleteMessage = '';
+  isDeleting = false;
   listeVendeurs: Users[] = [];
   boutiqueId!: number;
   imageActuelle = '';
@@ -182,10 +185,10 @@ export class DetailBoutiqueComponent implements OnInit {
   // }
 
   selectCopyBoutique(boutique: Boutique): void {
-    if (!boutique.actif) {
-        const confirmCopy = confirm('Cette boutique est désactivée. Êtes-vous sûr de vouloir copier les produits vers cette boutique ?');
-        if (!confirmCopy) return;
-    }
+    // if (!boutique.actif) {
+    //     const confirmCopy = confirm('Cette boutique est désactivée. Êtes-vous sûr de vouloir copier les produits vers cette boutique ?');
+    //     if (!confirmCopy) return;
+    // }
     this.selectedCopyBoutique = boutique;
     this.confirmCopyProducts();
   }
@@ -497,21 +500,14 @@ async confirmCopyProducts(): Promise<void> {
     this.closeTransferModal();
   }
 
-  // Ajoutez cette méthode
   // loadProductsInBoutique(boutiqueId: number): void {
   //   this.isLoadingProducts = true;
   //   this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
-  //     next: (produits: Produit[]) => {
-  //       this.productsInBoutique = produits.map(produit => {
-  //       const photoUrl = produit.photo 
-  //         ? `${this.imgUrl}${produit.photo}`
-  //         : this.generateInitialImage(produit.nom.charAt(0));
-        
-  //       return {
+  //     next: (produits) => {
+  //       this.productsInBoutique = produits.map(produit => ({
   //         ...produit,
-  //         photoUrl: photoUrl // Garantit que photoUrl est toujours string
-  //       };
-  //     });
+  //         photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0))
+  //       }));
   //       this.isLoadingProducts = false;
   //     },
   //     error: (err) => {
@@ -525,10 +521,14 @@ async confirmCopyProducts(): Promise<void> {
     this.isLoadingProducts = true;
     this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
       next: (produits) => {
-        this.productsInBoutique = produits.map(produit => ({
+        // Trier par ID décroissant (supposant que les nouveaux IDs sont plus grands)
+        const produitsTries = produits.sort((a, b) => b.id - a.id);
+        
+        this.productsInBoutique = produitsTries.map(produit => ({
           ...produit,
           photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0))
         }));
+        
         this.isLoadingProducts = false;
       },
       error: (err) => {
@@ -603,6 +603,7 @@ async confirmCopyProducts(): Promise<void> {
 
 
 
+
 loadAllVendeursBoutique(): void {
   if (!this.boutiqueId) {
     this.errorMessage = "Identifiant boutique manquant";
@@ -638,8 +639,93 @@ loadAllVendeursBoutique(): void {
 }
 
 
-ajouterVendeur(): void {
-  // Rediriger vers une page d'ajout ou ouvrir un modal
-  console.log('Ajouter un vendeur cliqué');
+
+
+ouvrirImage(photoUrl: string): void {
+  this.imageActuelle = photoUrl || 'assets/defaultProfile/profil.png';
+  this.showImageModal = true;
 }
+
+fermerImage(): void {
+  this.showImageModal = false;
+}
+
+  ajouterVendeur(): void {
+    // Rediriger vers une page d'ajout ou ouvrir un modal
+    console.log('Ajouter un vendeur cliqué');
+  }
+
+  clearSearch(): void {}
+
+deleteSelectedProducts(): void {
+  if (this.selectedProductIds.length === 0) {
+    this.copyWarningMessage = "Veuillez sélectionner au moins un produit à supprimer.";
+    this.showCopyWarningModal = true;
+    return;
+  }
+
+  this.deleteMessage = `Êtes-vous sûr de vouloir supprimer les ${this.selectedProductIds.length} produit(s) sélectionné(s) ?`;
+  this.showDeleteModal = true;
+}
+
+  // Confirmation de suppression
+  confirmDelete(): void {
+    this.showDeleteModal = false;
+    this.isDeleting = true;
+
+    const deletedIds: number[] = [];
+    const errors: string[] = [];
+
+    // Traitement séquentiel pour garder le contrôle
+    const deleteSequentially = async () => {
+      for (const id of this.selectedProductIds) {
+        try {
+          const response = await this.boutiqueService.deleteProduct(id).toPromise();
+          
+          // Gestion des réponses texte
+          if (typeof response === 'string' && response.includes('succès')) {
+            deletedIds.push(id);
+          } else {
+            errors.push(` Réponse inattendue`);
+          }
+        } catch (error) {
+          errors.push(`${error}`);
+        }
+      }
+
+      // Mise à jour de l'interface
+      this.isDeleting = false;
+      
+      if (deletedIds.length > 0) {
+        this.successMessage = `${deletedIds.length} produit(s) supprimé(s) avec succès.`;
+        
+        // Filtrer les produits supprimés
+        this.productsInBoutique = this.productsInBoutique.filter(
+          p => !deletedIds.includes(p.id)
+        );
+        
+        // Réinitialiser la sélection
+        this.selectedProductIds = this.selectedProductIds.filter(
+          id => !deletedIds.includes(id)
+        );
+      }
+      
+      if (errors.length > 0) {
+        this.errorMessage = errors.join(', ');
+      }
+
+      // Effacer les messages après 5 secondes
+      setTimeout(() => {
+        this.successMessage = null;
+        this.errorMessage = null;
+      }, 5000);
+    };
+
+    deleteSequentially();
+  }
+
+  cancelDelete(): void {
+    this.showDeleteModal = false;
+  }
+
 }
