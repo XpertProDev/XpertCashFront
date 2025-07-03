@@ -17,6 +17,7 @@ import { environment } from 'src/environments/environment';
 import { Module } from '../MODELS/Module-model';
 import { ModuleService } from '../SERVICES/Module-Service';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
+import { Router } from '@angular/router';
 
 
 
@@ -33,7 +34,6 @@ import { CustomNumberPipe } from '../MODELS/customNumberPipe';
     ReactiveFormsModule,
     MatIconModule,
     CustomNumberPipe,
-
   ],
   templateUrl: './account-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -84,10 +84,8 @@ export class AccountSettingsComponent implements OnInit {
   modules: Module[] = [];
   errorMsg = '';
 
-    private apiUrl = environment.imgUrl;
-    fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
-
-  
+  private apiUrl = environment.imgUrl;
+  fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
       
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
@@ -152,7 +150,8 @@ export class AccountSettingsComponent implements OnInit {
     private profilService: ProfilService,
     private usersService: UsersService,
     private zone: NgZone,
-    private moduleService: ModuleService
+    private moduleService: ModuleService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -658,6 +657,7 @@ onTauxTvaInput(event: Event): void {
 
 activerModule(code: string) {
   console.log('Activation demandée pour le module :', code);
+  this.router.navigate(['/pricing', code]);
 }
 
 

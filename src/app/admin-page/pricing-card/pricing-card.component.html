@@ -1,0 +1,118 @@
+<div class="icon_close" routerLink="/account-settings">
+    <i class="ri-close-fill"></i>
+</div>
+
+<div  class="app-container">
+
+    <!-- Enhanced floating elements with particles -->
+  <div class="particles-container">
+    <div *ngFor="let particle of particles" class="particle" [style]="particle.style"></div>
+  </div>
+
+  <!-- Floating elements -->
+  <div class="floating-element"></div>
+  <div class="floating-element"></div>
+  <div class="floating-element"></div>
+  
+  <div class="container">
+    <div class="header">
+      <h1>TCHAKEDA</h1>
+      <p>Déverrouiller les fonctionnalités avancées</p>
+    </div>
+    
+    <div class="plans-container">
+      <!-- Free Plan -->
+      <div class="plan-card free">
+        <h2 class="plan-title">
+          <i class="fas fa-gem"></i> Gratuit
+        </h2>
+        
+        <div class="features-list">
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-times"></i>
+            </div>
+            <span class="feature-text">Gestion de Facturation</span>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-check"></i>
+            </div>
+            <span class="feature-text">Gestion des Ventes</span>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-check"></i>
+            </div>
+            <span class="feature-text">Gestion des Clients</span>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-check"></i>
+            </div>
+            <span class="feature-text">Gestion des Entreprises Client</span>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-check"></i>
+            </div>
+            <span class="feature-text">Gestion des Employés</span>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-check"></i>
+            </div>
+            <span class="feature-text">Gestion des Boutiques (2)</span>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-check"></i>
+            </div>
+            <span class="feature-text">Gestion des Produits</span>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-check"></i>
+            </div>
+            <span class="feature-text">Gestion des Stocks</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Premium Plan -->
+      <div class="plan-card premium">
+        <div class="premium-badge">Populaire</div>
+        <h2 class="plan-title">
+          <i class="fas fa-crown"></i> SuperTchakeda
+        </h2>
+        
+        <div class="price">
+          <span class="price-amount">65 000 CFA</span>
+          <span class="price-period">/ mois</span>
+        </div>
+        <p class="discount">Économisez 20% avec un abonnement annuel</p>
+        
+        <div class="features-list">
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-check"></i>
+            </div>
+            <span class="feature-text">Gestion de Facturation</span>
+          </div>
+        </div>
+        
+        <button class="subscribe-btn wave-btn" (click)="subscribe($event)">
+          Abonnez-vous maintenant
+          <div class="wave"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
