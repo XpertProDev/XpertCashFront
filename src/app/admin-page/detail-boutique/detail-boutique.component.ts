@@ -66,6 +66,11 @@ export class DetailBoutiqueComponent implements OnInit {
   copyErrorMessage: string | null = null;
   selectedCopyBoutique: Boutique | null = null;
 
+  listeVendeurs: Users[] = [];
+  boutiqueId!: number;
+  imageActuelle = '';
+
+
   constructor(
     private route: ActivatedRoute,
     private boutiqueService: BoutiqueService,
@@ -596,8 +601,7 @@ async confirmCopyProducts(): Promise<void> {
     }
   }
 
-  listeVendeurs: Users[] = [];
-  boutiqueId!: number;
+
 
 loadAllVendeursBoutique(): void {
   if (!this.boutiqueId) {
@@ -608,7 +612,9 @@ loadAllVendeursBoutique(): void {
 
   this.boutiqueService.getVendeursByBoutiqueId(this.boutiqueId).subscribe({
   next: (vendeurs) => {
-    const timestamp = new Date().getTime();
+    console.log(`Liste des vendeurs récupérée (${vendeurs.length}) :`, vendeurs);
+
+    const timestamp = new Date().getTime(); // Pour éviter le cache navigateur
 
     this.listeVendeurs = vendeurs.map(vendeur => {
       const fullImageUrl = (vendeur.photo && vendeur.photo !== 'null' && vendeur.photo !== 'undefined')
@@ -617,9 +623,11 @@ loadAllVendeursBoutique(): void {
 
       return {
         ...vendeur,
-        photoUrl: fullImageUrl  // On stocke l'URL finale dans un autre champ
+        photo: fullImageUrl
       };
     });
+
+    this.errorMessage = '';
   },
   error: (err) => {
     console.error('Erreur lors du chargement des vendeurs', err);
@@ -627,21 +635,8 @@ loadAllVendeursBoutique(): void {
   }
 });
 
-
 }
 
-
-imageActuelle = '';
-
-
-ouvrirImage(photoUrl: string): void {
-  this.imageActuelle = photoUrl || 'assets/defaultProfile/profil.png';
-  this.showImageModal = true;
-}
-
-fermerImage(): void {
-  this.showImageModal = false;
-}
 
 ajouterVendeur(): void {
   // Rediriger vers une page d'ajout ou ouvrir un modal

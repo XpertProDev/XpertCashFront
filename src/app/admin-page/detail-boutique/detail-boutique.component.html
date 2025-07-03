@@ -448,13 +448,18 @@
             <h6>Liste des vendeurs</h6>
         </div>
 
+       
+
         <div class="barre" style="margin-bottom: 8px;"></div>
+
+        
 
         <div class="icon_content icon_delete" style="margin-bottom: 8px;">
             <i class="ri-delete-bin-6-line"></i>
         </div>
 
         <div class="barre" style="margin-bottom: 8px;"></div>
+        
 
         <div class="icon_content" style="margin-bottom: 8px; position: relative;">
             <i class="ri-folder-transfer-line"></i>
@@ -520,16 +525,20 @@
                     </td>
                     <td>
                         <div class="imgProduit" >
-                             <img [src]="vendeur.photoUrl" alt="{{ vendeur.nomComplet }}">
+                             <img [src]="vendeur.photo" alt="{{ vendeur.nomComplet }}">
+                             
+
+                            
                         </div>
                     </td>
                     <td>{{ vendeur.nomComplet }}</td>
                     <td>{{ vendeur.email }}</td>
                     <td>{{ vendeur.phone }}</td>
                     <td>
-                        <span [ngClass]="vendeur.enabledLien ? 'badge-danger' : 'badge-success'">
-                            {{ vendeur.enabledLien ? 'Inactif' : 'Actif' }}
+                        <span [ngClass]="vendeur.enabledLien ? 'badge-success' : 'badge-danger'">
+                            {{ vendeur.enabledLien ? 'Actif' : 'Inactif' }}
                         </span>
+
                     </td>
                 </tr>
 
@@ -539,20 +548,12 @@
                         <div style="display: flex; flex-direction: column; align-items: center;">
                             <i class="ri-user-line" style="font-size: 48px; color: #6c757d;"></i>
                             <p style="margin-top: 10px; margin-bottom: 5px;">Aucun vendeur enregistré</p>
-                            <button class="btn btn-sm btn-outline-primary mt-2" (click)="ajouterVendeur()">Ajouter un vendeur</button>
                         </div>
                     </td>
                 </tr>
 
             </tbody>
         </table>
-    </div>
-
-    <!-- Modal image -->
-    <div class="modal" [style.display]="showImageModal ? 'flex' : 'none'" (click)="fermerImage()">
-        <div class="modal-content">
-            <img [src]="imageActuelle" alt="Vendeur">
-        </div>
     </div>
 
 </div>
