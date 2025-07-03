@@ -9,6 +9,7 @@ import { Produit } from '../MODELS/produit.model';
 import { Users } from '../MODELS/utilisateur.model';
 
 
+
 @Component({
   selector: 'app-detail-boutique',
   imports: [
@@ -45,6 +46,9 @@ export class DetailBoutiqueComponent implements OnInit {
   deleteWarningMessage: string | null = null;
   showCopyWarningModal = false;
   showDeleteWarningModal = false;
+  photo: string = '';
+  private apiUrl = environment.imgUrl;
+
 
   control = new FormControl();
 
@@ -68,8 +72,10 @@ export class DetailBoutiqueComponent implements OnInit {
   showDeleteModal = false;
   deleteMessage = '';
   isDeleting = false;
-
+  listeVendeurs: Users[] = [];
+  boutiqueId!: number;
   imageActuelle = '';
+
 
   constructor(
     private route: ActivatedRoute,
@@ -598,38 +604,54 @@ async confirmCopyProducts(): Promise<void> {
     }
   }
 
-  listeVendeurs: Users[] = [];
-  boutiqueId!: number;
 
-  loadAllVendeursBoutique(): void {
-    if (!this.boutiqueId) {
-      this.errorMessage = "Identifiant boutique manquant";
-      console.log('Erreur : identifiant boutique manquant');
-      return;
-    }
 
-    this.boutiqueService.getVendeursByBoutiqueId(this.boutiqueId).subscribe({
-      next: (vendeurs) => {
-        console.log(`Liste des vendeurs récupérée (${vendeurs.length}) :`, vendeurs);
-        this.listeVendeurs = vendeurs;
-        this.errorMessage = '';
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des vendeurs', err);
-        this.errorMessage = 'Impossible de charger les vendeurs pour cette boutique.';
-        this.listeVendeurs = [];
-      }
+
+loadAllVendeursBoutique(): void {
+  if (!this.boutiqueId) {
+    this.errorMessage = "Identifiant boutique manquant";
+    console.log('Erreur : identifiant boutique manquant');
+    return;
+  }
+
+  this.boutiqueService.getVendeursByBoutiqueId(this.boutiqueId).subscribe({
+  next: (vendeurs) => {
+    console.log(`Liste des vendeurs récupérée (${vendeurs.length}) :`, vendeurs);
+
+    const timestamp = new Date().getTime(); // Pour éviter le cache navigateur
+
+    this.listeVendeurs = vendeurs.map(vendeur => {
+      const fullImageUrl = (vendeur.photo && vendeur.photo !== 'null' && vendeur.photo !== 'undefined')
+        ? `${this.apiUrl}${vendeur.photo}?t=${timestamp}`
+        : 'assets/img/profil.png';
+
+      return {
+        ...vendeur,
+        photo: fullImageUrl
+      };
     });
-  }
 
-  ouvrirImage(photoUrl: string): void {
-    this.imageActuelle = photoUrl || 'assets/defaultProfile/profil.png';
-    this.showImageModal = true;
+    this.errorMessage = '';
+  },
+  error: (err) => {
+    console.error('Erreur lors du chargement des vendeurs', err);
+    this.listeVendeurs = [];
   }
+});
 
-  fermerImage(): void {
-    this.showImageModal = false;
-  }
+}
+
+
+
+
+ouvrirImage(photoUrl: string): void {
+  this.imageActuelle = photoUrl || 'assets/defaultProfile/profil.png';
+  this.showImageModal = true;
+}
+
+fermerImage(): void {
+  this.showImageModal = false;
+}
 
   ajouterVendeur(): void {
     // Rediriger vers une page d'ajout ou ouvrir un modal
