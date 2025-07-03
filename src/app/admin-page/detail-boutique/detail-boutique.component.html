@@ -33,7 +33,7 @@
 <!-- Confirmation Modal -->
 <div class="confirmation-modal-aver" *ngIf="showCopyWarningModal">
   <div class="modal-content-aver">
-    <h4 style="font-size: 16px; margin-bottom: 10px;">Avertissement</h4>
+    <h4 style="font-size: 16px; margin-bottom: 10px;">Informations</h4>
     <p style="margin: 0; font-size: 12px;">Veuillez sélectionner au moins <br>un produit à copier.</p>
     <div class="modal-actions-aver">
       <button class="btn-confirm" style="font-size: 12px;" (click)="showCopyWarningModal = false">OK</button>
@@ -215,8 +215,9 @@
 
                     <div class="barre" style="margin-bottom: 8px;" *ngIf="boutique?.actif"></div>
 
+                    <!-- Icône de suppression avec gestion du clic -->
                     <div class="icon_content icon_delete" style="margin-bottom: 8px;" *ngIf="boutique?.actif">
-                        <i class="ri-delete-bin-6-line"></i>
+                        <i class="ri-delete-bin-6-line" (click)="deleteSelectedProducts()"></i>
                     </div>
 
                     <div class="barre" style="margin-bottom: 8px;" *ngIf="boutique?.actif"></div>
@@ -612,4 +613,34 @@
       <div class="spinner"></div>
       <p>Connexion en cours...</p>
     </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="confirmation-modal" *ngIf="showDeleteModal">
+  <div class="modal-content">
+    <h4 style="font-size: 16px; margin-bottom: 10px;">Confirmation de suppression</h4>
+    <p style="font-size: 12px;">{{ deleteMessage }}</p>
+    
+    <div class="modal-actions">
+      <button class="btn-cancel" style="font-size: 12px;" 
+              (click)="cancelDelete()"
+              [disabled]="isDeleting">
+        Annuler
+      </button>
+      
+      <button class="btn-confirm" style="font-size: 12px;" 
+              (click)="confirmDelete()"
+              [disabled]="isDeleting">
+        <span *ngIf="!isDeleting">Supprimer</span>
+        <span *ngIf="isDeleting">Traitement...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isDeleting" class="loading-overlay">
+  <div class="loading-content">
+    <div class="spinner"></div>
+    <p>Suppression en cours...</p>
+  </div>
 </div>

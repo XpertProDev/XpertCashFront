@@ -62,6 +62,10 @@ export class DetailBoutiqueComponent implements OnInit {
   copyErrorMessage: string | null = null;
   selectedCopyBoutique: Boutique | null = null;
 
+  showDeleteModal = false;
+  deleteMessage = '';
+  isDeleting = false;
+
   imageActuelle = '';
 
   constructor(
@@ -630,5 +634,76 @@ async confirmCopyProducts(): Promise<void> {
   }
 
   clearSearch(): void {}
+
+deleteSelectedProducts(): void {
+  if (this.selectedProductIds.length === 0) {
+    this.copyWarningMessage = "Veuillez sélectionner au moins un produit à supprimer.";
+    this.showCopyWarningModal = true;
+    return;
+  }
+
+  this.deleteMessage = `Êtes-vous sûr de vouloir supprimer les ${this.selectedProductIds.length} produit(s) sélectionné(s) ?`;
+  this.showDeleteModal = true;
+}
+
+  // Confirmation de suppression
+  confirmDelete(): void {
+    this.showDeleteModal = false;
+    this.isDeleting = true;
+
+    const deletedIds: number[] = [];
+    const errors: string[] = [];
+
+    // Traitement séquentiel pour garder le contrôle
+    const deleteSequentially = async () => {
+      for (const id of this.selectedProductIds) {
+        try {
+          const response = await this.boutiqueService.deleteProduct(id).toPromise();
+          
+          // Gestion des réponses texte
+          if (typeof response === 'string' && response.includes('succès')) {
+            deletedIds.push(id);
+          } else {
+            errors.push(` Réponse inattendue`);
+          }
+        } catch (error) {
+          errors.push(`${error}`);
+        }
+      }
+
+      // Mise à jour de l'interface
+      this.isDeleting = false;
+      
+      if (deletedIds.length > 0) {
+        this.successMessage = `${deletedIds.length} produit(s) supprimé(s) avec succès.`;
+        
+        // Filtrer les produits supprimés
+        this.productsInBoutique = this.productsInBoutique.filter(
+          p => !deletedIds.includes(p.id)
+        );
+        
+        // Réinitialiser la sélection
+        this.selectedProductIds = this.selectedProductIds.filter(
+          id => !deletedIds.includes(id)
+        );
+      }
+      
+      if (errors.length > 0) {
+        this.errorMessage = errors.join(', ');
+      }
+
+      // Effacer les messages après 5 secondes
+      setTimeout(() => {
+        this.successMessage = null;
+        this.errorMessage = null;
+      }, 5000);
+    };
+
+    deleteSequentially();
+  }
+
+  cancelDelete(): void {
+    this.showDeleteModal = false;
+  }
 
 }
