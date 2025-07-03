@@ -34,6 +34,7 @@ export class DetailBoutiqueComponent implements OnInit {
   allBoutiques: Boutique[] = [];
   filteredBoutiques: Boutique[] = [];
   searchTerm = '';
+  searchTerm1 = '';
   showCopyModal = false;
   copySearchTerm = '';
   filteredCopyBoutiques: Boutique[] = [];
@@ -41,7 +42,9 @@ export class DetailBoutiqueComponent implements OnInit {
   showImageModal = false;
   selectedProductIds: number[] = [];
   copyWarningMessage: string | null = null;
+  deleteWarningMessage: string | null = null;
   showCopyWarningModal = false;
+  showDeleteWarningModal = false;
 
   control = new FormControl();
 
@@ -635,16 +638,16 @@ async confirmCopyProducts(): Promise<void> {
 
   clearSearch(): void {}
 
-deleteSelectedProducts(): void {
-  if (this.selectedProductIds.length === 0) {
-    this.copyWarningMessage = "Veuillez sélectionner au moins un produit à supprimer.";
-    this.showCopyWarningModal = true;
-    return;
-  }
+  deleteSelectedProducts(): void {
+    if (this.selectedProductIds.length === 0) {
+      this.deleteWarningMessage = "Veuillez sélectionner au moins un produit à supprimer.";
+      this.showDeleteWarningModal = true;
+      return;
+    }
 
-  this.deleteMessage = `Êtes-vous sûr de vouloir supprimer les ${this.selectedProductIds.length} produit(s) sélectionné(s) ?`;
-  this.showDeleteModal = true;
-}
+    this.deleteMessage = `Êtes-vous sûr de vouloir supprimer les ${this.selectedProductIds.length} produit(s) sélectionné(s) ?`;
+    this.showDeleteModal = true;
+  }
 
   // Confirmation de suppression
   confirmDelete(): void {
