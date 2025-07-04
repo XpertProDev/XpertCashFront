@@ -5,6 +5,20 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ModuleService } from '../SERVICES/Module-Service';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 
+interface Plan {
+  name: string;
+  price: number;
+  storage: string;
+  bandwidth: string;
+  subdomains: number;
+  email: boolean;
+  siteBuilder: boolean;
+  backup: 'none' | 'manual' | 'auto';
+  ipsMonitoring: boolean;
+  ipTracking: boolean;
+  highlight?: boolean;
+}
+
 @Component({
   selector: 'app-pricing-card',
   imports: [FormsModule, CommonModule, ReactiveFormsModule, RouterLink, CustomNumberPipe],
@@ -18,8 +32,9 @@ export class PricingCardComponent {
   particles: any[] = [];
   moduleCode: string = '';
   moduleDetails: any;
-  moduleName: string = ''; // Valeur par défaut
+  moduleName: string = 'Nom module'; // Valeur par défaut
   modulePrice: number = 0; // Valeur par défaut
+  
 
   constructor(
     private route: ActivatedRoute,
@@ -98,4 +113,22 @@ export class PricingCardComponent {
 
     // Logique d'abonnement...
   }
+
+  plans: Plan[] = [
+    {
+      name: 'Professional', price: 49,
+      storage: '150 GB', bandwidth: '500 GB', subdomains: 3,
+      email: true, siteBuilder: true, backup: 'none', ipsMonitoring: false, ipTracking: false
+    },
+    {
+      name: 'Business', price: 79, highlight: true,
+      storage: '300 GB', bandwidth: '700 GB', subdomains: 5,
+      email: true, siteBuilder: true, backup: 'manual', ipsMonitoring: true, ipTracking: false
+    },
+    {
+      name: 'Enterprise', price: 99,
+      storage: '1 TB', bandwidth: '1500 GB', subdomains: 10,
+      email: true, siteBuilder: true, backup: 'auto', ipsMonitoring: true, ipTracking: true
+    }
+  ];
 }

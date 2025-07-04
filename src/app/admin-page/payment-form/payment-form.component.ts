@@ -22,8 +22,8 @@ export class PaymentFormComponent {
   paymentForm!: FormGroup;
   countries: Country[] = [
     { code: 'ML', name: 'Mali' },
-    { code: 'FR', name: 'France' },
-    { code: 'US', name: 'United States' },
+    { code: 'CI', name: 'Côte d\'Ivoire' },
+    { code: 'SN', name: 'Sénégal' },
     // ajoutez d'autres pays au besoin
   ];
   cardPreview: any = {};
