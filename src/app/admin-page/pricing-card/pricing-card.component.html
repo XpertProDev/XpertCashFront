@@ -43,7 +43,7 @@
       <div class="plan-header">
         <h2>Tchakeda Plus</h2>
         <div class="price">
-          50 000 CFA
+          {{ priceTchakedaPlus | customNumber }} CFA
           <div class="device">
             / 3 mois
           </div>
@@ -115,10 +115,24 @@
     <div class="plan-card" [class.highlight]="false">
       <div class="plan-header">
         <h2>Pro</h2>
-        <div class="price">
-          250 000 CFA
+        <!-- <div class="price">
+          {{ pricePro | customNumber }} CFA
           <div class="device">
             / 1 ans
+          </div>
+        </div> -->
+        <div class="price">
+          <!-- Prix barré sans remise -->
+          <!-- <span class="original-price" *ngIf="pricePro">
+            {{ (totalMensuel * 12) | customNumber }} CFA
+          </span> -->
+          
+          <!-- Prix avec remise -->
+          {{ pricePro | customNumber }} CFA
+          
+          <div class="device">
+            / 1 an
+            <span class="discount-badge">-10%</span>
           </div>
         </div>
         <div class="badge">Meilleur</div>
