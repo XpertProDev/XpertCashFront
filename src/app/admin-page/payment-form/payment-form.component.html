@@ -11,22 +11,22 @@
     <div class="divider"></div>
     
     <div class="price-display">
-      <span class="amount">20 000&nbsp;CFA</span>
+      <span class="amount">{{ modulePrice | customNumber }}&nbsp;CFA</span>
       <span class="period">/mois</span>
     </div>
 
     <div class="summary-list">
       <div class="list-item">
-        <span>Gestion des Factures Réelles</span>
-        <span>20,00 CFA</span>
+        <span>{{ moduleName }}</span>
+        <span>{{ modulePrice | customNumber }} CFA</span>
       </div>
       <div class="list-item">
         <span>Sous-total</span>
-        <span>20,00 CFA</span>
+        <span>{{ modulePrice | customNumber }} CFA</span>
       </div>
       <div class="list-item">
         <span>Taxes</span>
-        <span>0,00 CFA</span>
+        <span>00,00&nbsp;CFA</span>
       </div>
     </div>
 
@@ -34,7 +34,7 @@
 
     <div class="total-container">
       <h3>Total dû </h3>
-      <div class="total-amount">20,00&nbsp;CFA</div>
+      <div class="total-amount">{{ modulePrice | customNumber }}&nbsp;CFA</div>
     </div>
     
     <div class="security-badges">
@@ -46,11 +46,6 @@
   <!-- Colonne de droite : formulaire -->
   <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="form-card">
     <h2>Informations de paiement</h2>
-    
-    <div class="form-group">
-      <label>E-mail</label>
-      <input type="email" [value]="userEmail" readonly>
-    </div>
 
     <h3>Moyen de paiement</h3>
     
@@ -100,6 +95,11 @@
       <label>Nom du titulaire</label>
       <input formControlName="cardName" placeholder="Nom complet">
     </div>
+    
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" placeholder="Votre email">
+    </div>
 
     <h3>Adresse de facturation</h3>
     
@@ -136,7 +136,7 @@
             [disabled]="paymentForm.invalid" 
             class="submit-btn">
       <span class="btn-icon">🔒</span>
-      Payer 20,00 CFA
+      Payer {{ modulePrice | customNumber }} CFA
     </button>
     
     <div class="payment-methods">

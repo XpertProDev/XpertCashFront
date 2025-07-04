@@ -655,10 +655,9 @@ onTauxTvaInput(event: Event): void {
   }
 
 
-activerModule(code: string) {
-  console.log('Activation demandée pour le module :', code);
-  this.router.navigate(['/pricing', code]);
-}
+  activerModule(module: Module) {
+    this.router.navigate(['/pricing', module.code]);
+  }
 
 
 }

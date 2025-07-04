@@ -651,7 +651,7 @@
 
                          <button 
                             *ngIf="!module.actif || (module.actif && module.tempsRestantEssai && module.tempsRestantEssai !== 'Terminé')" 
-                            (click)="activerModule(module.code)" 
+                            (click)="activerModule(module)" 
                             class="module-btn"
                             >
                             {{ module.payant && module.tempsRestantEssai && module.tempsRestantEssai !== 'Terminé' ? 'Activer (Essai en cours)' : 'Activer' }}

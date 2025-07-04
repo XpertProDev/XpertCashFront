@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { map, startWith } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
+import { ModuleService } from '../SERVICES/Module-Service';
+import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 
 interface Country {
   code: string;
@@ -11,7 +14,7 @@ interface Country {
 
 @Component({
   selector: 'app-payment-form',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe],
   templateUrl: './payment-form.component.html',
   styleUrl: './payment-form.component.scss'
 })
@@ -23,12 +26,53 @@ export class PaymentFormComponent {
     { code: 'US', name: 'United States' },
     // ajoutez d'autres pays au besoin
   ];
-  userEmail = 'svdiakaridia38@gmail.com';
   cardPreview: any = {};
 
-  constructor(private fb: FormBuilder) {}
+  moduleCode: string = '';
+  moduleName: string = '';
+  modulePrice: number = 0;
+
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
+    private moduleService: ModuleService
+  ) {}
 
   ngOnInit(): void {
+    this.route.params.subscribe(params => {
+      this.moduleCode = params['moduleCode'];
+      this.loadModuleDetails();
+    });
+
+    this.intPaymentForm();
+    
+
+    // Suivi des changements pour la prévisualisation
+    this.paymentForm.valueChanges.subscribe(val => {
+      this.cardPreview = {
+        number: val.cardNumber?.replace(/\s/g, ''),
+        name: val.cardName,
+        expiry: val.expDate
+      };
+    });
+  }
+
+  loadModuleDetails() {
+    // Récupérer tous les modules et trouver celui correspondant au code
+    this.moduleService.getModulesEntreprise().subscribe({
+      next: (modules) => {
+        const foundModule = modules.find(module => module.code === this.moduleCode);
+        if (foundModule) {
+          this.moduleName = foundModule.nom;
+          this.modulePrice = foundModule.prix;
+        }
+      },
+      error: (err) => console.error('Erreur chargement modules', err)
+    });
+  }
+
+  intPaymentForm() {
     this.paymentForm = this.fb.group({
       cardNumber: ['', [Validators.required, Validators.pattern(/^\d{16}$/)]],
       expDate: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
@@ -40,15 +84,6 @@ export class PaymentFormComponent {
       city: ['', Validators.required],
       saveInfo: [false],
       acceptTerms: [false, Validators.requiredTrue],
-    });
-
-    // Suivi des changements pour la prévisualisation
-    this.paymentForm.valueChanges.subscribe(val => {
-      this.cardPreview = {
-        number: val.cardNumber?.replace(/\s/g, ''),
-        name: val.cardName,
-        expiry: val.expDate
-      };
     });
   }
 

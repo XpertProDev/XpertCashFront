@@ -9,6 +9,7 @@ import { authGuard } from './admin-page/guards/auth.guard';
 import { guestGuard } from './admin-page/guards/guestGuard';
 import { ModuleAccessGuard } from './admin-page/guards/ModuleAccessGuard';
 import { PricingCardComponent } from './admin-page/pricing-card/pricing-card.component';
+import { PaymentFormComponent } from './admin-page/payment-form/payment-form.component';
 
 
 const routes: Routes = [
@@ -227,10 +228,14 @@ const routes: Routes = [
         path: 'pricing/:moduleCode', 
         component: PricingCardComponent 
       },
-      {
-        path: 'payment-form',
-        loadComponent: () => import('./admin-page/payment-form/payment-form.component').then(m => m.PaymentFormComponent)
-      },
+      { 
+        path: 'payment-form/:moduleCode', 
+        component: PaymentFormComponent 
+      }
+      // {
+      //   path: 'payment-form',
+      //   loadComponent: () => import('./admin-page/payment-form/payment-form.component').then(m => m.PaymentFormComponent)
+      // },
     ]
   }
 ];

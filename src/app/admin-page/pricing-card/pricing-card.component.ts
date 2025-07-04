@@ -3,10 +3,11 @@ import { Component, HostListener } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ModuleService } from '../SERVICES/Module-Service';
+import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 
 @Component({
   selector: 'app-pricing-card',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, RouterLink, CustomNumberPipe],
   templateUrl: './pricing-card.component.html',
   styleUrl: './pricing-card.component.scss'
 })
@@ -17,6 +18,8 @@ export class PricingCardComponent {
   particles: any[] = [];
   moduleCode: string = '';
   moduleDetails: any;
+  moduleName: string = ''; // Valeur par défaut
+  modulePrice: number = 0; // Valeur par défaut
 
   constructor(
     private route: ActivatedRoute,
@@ -34,12 +37,17 @@ export class PricingCardComponent {
   }
 
   loadModuleDetails() {
-    // this.moduleService.getModuleDetails(this.moduleCode).subscribe({
-    //   next: (module) => {
-    //     this.moduleDetails = module;
-    //   },
-    //   error: (err) => console.error('Erreur chargement module', err)
-    // });
+    // Récupérer tous les modules et trouver celui correspondant au code
+    this.moduleService.getModulesEntreprise().subscribe({
+      next: (modules) => {
+        const foundModule = modules.find(module => module.code === this.moduleCode);
+        if (foundModule) {
+          this.moduleName = foundModule.nom;
+          this.modulePrice = foundModule.prix;
+        }
+      },
+      error: (err) => console.error('Erreur chargement modules', err)
+    });
   }
 
   generateParticles() {
@@ -79,7 +87,7 @@ export class PricingCardComponent {
       
       wave.style.left = `${x}px`;
       wave.style.top = `${y}px`;
-      this.router.navigate(['/payment-form'])
+      this.router.navigate(['/payment-form', this.moduleCode]);
       
       // Réinitialiser et relancer l'animation
       wave.style.animation = 'none';
