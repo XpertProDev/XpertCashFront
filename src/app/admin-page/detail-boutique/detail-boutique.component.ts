@@ -7,6 +7,7 @@ import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, 
 import { environment } from 'src/environments/environment';
 import { Produit } from '../MODELS/produit.model';
 import { Users } from '../MODELS/utilisateur.model';
+import { lastValueFrom } from 'rxjs';
 
 
 
@@ -669,60 +670,50 @@ deleteSelectedProducts(): void {
 }
 
   // Confirmation de suppression
-  confirmDelete(): void {
-    this.showDeleteModal = false;
-    this.isDeleting = true;
+async confirmDelete(): Promise<void> {
+  this.showDeleteModal = false;
+  this.isDeleting = true;
 
-    const deletedIds: number[] = [];
-    const errors: string[] = [];
+  const corbeilleIds: number[] = [];
+  const errors: string[] = [];
 
-    // Traitement séquentiel pour garder le contrôle
-    const deleteSequentially = async () => {
-      for (const id of this.selectedProductIds) {
-        try {
-          const response = await this.boutiqueService.deleteProduct(id).toPromise();
-          
-          // Gestion des réponses texte
-          if (typeof response === 'string' && response.includes('succès')) {
-            deletedIds.push(id);
-          } else {
-            errors.push(` Réponse inattendue`);
-          }
-        } catch (error) {
-          errors.push(`${error}`);
-        }
-      }
-
-      // Mise à jour de l'interface
-      this.isDeleting = false;
+  for (const id of this.selectedProductIds) {
+    try {
+      const response = await lastValueFrom(this.boutiqueService.mettreEnCorbeille(id));
       
-      if (deletedIds.length > 0) {
-        this.successMessage = `${deletedIds.length} produit(s) supprimé(s) avec succès.`;
-        
-        // Filtrer les produits supprimés
-        this.productsInBoutique = this.productsInBoutique.filter(
-          p => !deletedIds.includes(p.id)
-        );
-        
-        // Réinitialiser la sélection
-        this.selectedProductIds = this.selectedProductIds.filter(
-          id => !deletedIds.includes(id)
-        );
+      if (response.status === 'success') {
+        corbeilleIds.push(id);
+      } else {
+        errors.push(`Réponse inattendue: ${response.message}`);
       }
-      
-      if (errors.length > 0) {
-        this.errorMessage = errors.join(', ');
-      }
-
-      // Effacer les messages après 5 secondes
-      setTimeout(() => {
-        this.successMessage = null;
-        this.errorMessage = null;
-      }, 5000);
-    };
-
-    deleteSequentially();
+    } catch (error: any) {
+      errors.push(error.message || 'Erreur inconnue');
+    }
   }
+
+  this.isDeleting = false;
+  
+  if (corbeilleIds.length > 0) {
+    this.successMessage = `${corbeilleIds.length} produit(s) mis en corbeille avec succès.`;
+    
+    this.productsInBoutique = this.productsInBoutique.filter(
+      p => !corbeilleIds.includes(p.id)
+    );
+    
+    this.selectedProductIds = this.selectedProductIds.filter(
+      id => !corbeilleIds.includes(id)
+    );
+  }
+  
+  if (errors.length > 0) {
+    this.errorMessage = `Erreurs: ${errors.join(', ')}`;
+  }
+
+  setTimeout(() => {
+    this.successMessage = null;
+    this.errorMessage = null;
+  }, 5000);
+}
 
   cancelDelete(): void {
     this.showDeleteModal = false;

@@ -138,31 +138,31 @@ export class BoutiqueService {
     );
   }
 
-    deleteProduct(produitId: number): Observable<any> {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        return throwError('Aucun token trouvé');
+mettreEnCorbeille(produitId: number): Observable<{message: string, status: string}> {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    return throwError(() => new Error('Aucun token trouvé'));
+  }
+
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.delete<{message: string, status: string}>(
+    `${this.apiUrl}/corbeille/${produitId}`, 
+    { headers }
+  ).pipe(
+    catchError(error => {
+      let errorMsg = 'Erreur lors de la mise en corbeille';
+      if (error.error?.message) {
+        errorMsg = error.error.message;
+      } else if (error.message) {
+        errorMsg = error.message;
       }
+      return throwError(() => new Error(errorMsg));
+    })
+  );
+}
 
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${token}`
-      });
-
-      return this.http.delete(`${this.apiUrl}/deleteProduit/${produitId}`, {
-        headers,
-        responseType: 'text' // Force la réponse en texte
-      }).pipe(
-        catchError(error => {
-          // Convertir les erreurs en message lisible
-          let errorMsg = 'Erreur inconnue';
-          if (error.error && typeof error.error === 'string') {
-            errorMsg = error.error;
-          } else if (error.statusText) {
-            errorMsg = error.statusText;
-          }
-          return throwError(errorMsg);
-        })
-      );
-    }
 
 }
