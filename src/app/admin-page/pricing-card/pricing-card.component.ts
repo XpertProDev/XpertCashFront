@@ -17,6 +17,8 @@ export class PricingCardComponent {
   trialModules: Module[] = [];
   paidModules: Module[] = [];
   allModules: Module[] = [];
+  modulePrice: number = 0; 
+  moduleName: string = 'Nom module'; 
 
   // isPremiumHovered = false;
   constructor(
@@ -32,10 +34,33 @@ export class PricingCardComponent {
 
   loadModuleDetails() {}
 
-  subscribe(event: MouseEvent) {
+  // subscribe(event: MouseEvent) {
+  //   const button = event.target as HTMLElement;
+  //   const wave = button.querySelector('.wave') as HTMLElement;
+    
+  //   if (wave) {
+  //     // Positionner l'effet vague au point de clic
+  //     const rect = button.getBoundingClientRect();
+  //     const x = event.clientX - rect.left;
+  //     const y = event.clientY - rect.top;
+      
+  //     wave.style.left = `${x}px`;
+  //     wave.style.top = `${y}px`;
+  //     this.router.navigate(['/payment-form']);
+      
+  //     // Réinitialiser et relancer l'animation
+  //     wave.style.animation = 'none';
+  //     setTimeout(() => {
+  //       wave.style.animation = 'wave 1s ease';
+  //     }, 10);
+  //   }
+
+  //   // Logique d'abonnement...
+  // }
+
+  subscribe(event: MouseEvent, module: Module) {
     const button = event.target as HTMLElement;
     const wave = button.querySelector('.wave') as HTMLElement;
-    
     if (wave) {
       // Positionner l'effet vague au point de clic
       const rect = button.getBoundingClientRect();
@@ -53,8 +78,10 @@ export class PricingCardComponent {
       }, 10);
     }
 
-    // Logique d'abonnement...
+    // Naviguer vers /payment-form/:moduleCode
+    this.router.navigate(['/payment-form', module.code]);
   }
+
 
   loadModules() {
     this.moduleService.getModulesEntreprise().subscribe({

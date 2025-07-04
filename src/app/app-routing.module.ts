@@ -229,8 +229,8 @@ const routes: Routes = [
         component: PricingCardComponent 
       },
       { 
-        path: 'payment-form/:planCode', 
-        component: PaymentFormComponent 
+        path: 'payment-form/:moduleCode', 
+        loadComponent: () => import('./admin-page/payment-form/payment-form.component').then(m => m.PaymentFormComponent)
       }
       // {
       //   path: 'payment-form',

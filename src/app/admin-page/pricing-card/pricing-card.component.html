@@ -103,7 +103,12 @@
         </tr>
       </table>
 
-      <button class="select-btn">Sélectionner</button>
+      <!-- <button class="select-btn">Sélectionner</button> -->
+      <button
+        class="select-btn"
+        [routerLink]="['/payment-form', 'TCHAKEDA_PLUS']">
+        Sélectionner
+      </button>
     </div>
 
     <!-- Colonne Enterprise (1 an) -->
@@ -172,7 +177,11 @@
         </tr>
       </table>
 
-      <button class="select-btn">Sélectionner</button>
+      <button
+        class="select-btn"
+        [routerLink]="['/payment-form', 'PRO']">
+        Sélectionner
+      </button>
     </div>
   </div>
 </section>
