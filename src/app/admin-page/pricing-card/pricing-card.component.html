@@ -1,184 +1,178 @@
-
 <section class="pricing-section">
-      <div class="pricing-container">
-        <div class="plan-card" *ngFor="let plan of plans" [class.highlight]="plan.highlight">
-          <div class="plan-header">
-            <h2>{{ plan.name }}</h2>
-            <div class="price">\${{ plan.price }}</div>
-            <div *ngIf="plan.highlight" class="badge">Best</div>
-          </div>
 
-          <table class="features-table">
-            <tr>
-              <td>Cloud Disk Storage</td>
-              <td>{{ plan.storage }}</td>
-            </tr>
-            <tr>
-              <td>Monthly Bandwidth</td>
-              <td>{{ plan.bandwidth }}</td>
-            </tr>
-            <tr>
-              <td>Subdomain Name</td>
-              <td>{{ plan.subdomains }}</td>
-            </tr>
-            <tr>
-              <td>Email Address</td>
-              <td><span [class.available]="plan.email" [class.unavailable]="!plan.email"></span></td>
-            </tr>
-            <tr>
-              <td>Site Builder</td>
-              <td><span [class.available]="plan.siteBuilder" [class.unavailable]="!plan.siteBuilder"></span></td>
-            </tr>
-            <tr>
-              <td>Automatic Backup</td>
-              <td>
-                <ng-container [ngSwitch]="plan.backup">
-                  <span *ngSwitchCase="'auto'" class="available"></span>
-                  <span *ngSwitchCase="'manual'">Manual</span>
-                  <span *ngSwitchDefault class="unavailable"></span>
-                </ng-container>
-              </td>
-            </tr>
-            <tr>
-              <td>IPS Monitoring</td>
-              <td><span [class.available]="plan.ipsMonitoring" [class.unavailable]="!plan.ipsMonitoring"></span></td>
-            </tr>
-            <tr>
-              <td>IP Tracking</td>
-              <td><span [class.available]="plan.ipTracking" [class.unavailable]="!plan.ipTracking"></span></td>
-            </tr>
-          </table>
-
-          <button class="select-btn" [class.highlight]="plan.highlight">Select Plan</button>
-        </div>
-      </div>
-    </section>
-
-
-
-
-
-
-
-
-<!-- pricing-card.component.html -->
-<div class="pricing-container">
   <div class="icon_close" routerLink="/account-settings">
     <i class="ri-close-fill"></i>
   </div>
 
-  <div class="app-container">
-    <!-- Enhanced floating elements with particles -->
-    <div class="particles-container">
-      <div *ngFor="let particle of particles" class="particle" [ngStyle]="particle.style"></div>
+  <div class="pricing-container">
+    <!-- Colonne Professional (Gratuit) -->
+    <div class="plan-card" [class.highlight]="true" style="height: 10%;">
+      <div class="plan-header">
+        <h2>Gratuit</h2>
+        
+        <div class="price">
+          0 CFA
+          <div class="device">
+            / 1 mois
+          </div>
+        </div>
+      </div>
+
+      <table class="features-table">
+        <tr *ngFor="let module of paidModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span class="unavailable"></span>
+          </td>
+        </tr>
+        <tr *ngFor="let module of freeModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              <!-- {{ module.actif ? '✓' : '✗' }} -->
+            </span>
+          </td>
+        </tr>
+      </table>
+
+      <button class="select-btn" style="cursor: no-drop;" [class.highlight]="true">Votre plan actuel</button>
     </div>
 
-    <!-- Floating elements -->
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    
-    <div class="container">
-      <div class="header">
-        <h1>TCHAKEDA</h1>
-        <p>Déverrouiller les fonctionnalités avancées</p>
-      </div>
-      
-      <div class="plans-container">
-        <!-- Free Plan -->
-        <div class="plan-card free">
-          <h2 class="plan-title">
-            <i class="ri-gemini-2-line"></i> Gratuit
-          </h2>
-          
-          <div class="features-list">
-            <div class="feature">
-              <div class="feature-icon">
-                <i class="ri-close-line"></i>
-              </div>
-              <span class="feature-text">{{ moduleName }}</span>
-            </div>
-            
-            <div class="feature">
-              <div class="feature-icon">
-                <i class="ri-check-line"></i>
-              </div>
-              <span class="feature-text">Gestion des Ventes</span>
-            </div>
-            
-            <div class="feature">
-              <div class="feature-icon">
-                <i class="ri-check-line"></i>
-              </div>
-              <span class="feature-text">Gestion des Clients</span>
-            </div>
-            
-            <div class="feature">
-              <div class="feature-icon">
-                <i class="ri-check-line"></i>
-              </div>
-              <span class="feature-text">Gestion des Entreprises Client</span>
-            </div>
-            
-            <div class="feature">
-              <div class="feature-icon">
-                <i class="ri-check-line"></i>
-              </div>
-              <span class="feature-text">Gestion des Employés</span>
-            </div>
-            
-            <div class="feature">
-              <div class="feature-icon">
-                <i class="ri-check-line"></i>
-              </div>
-              <span class="feature-text">Gestion des Boutiques (2)</span>
-            </div>
-            
-            <div class="feature">
-              <div class="feature-icon">
-                <i class="ri-check-line"></i>
-              </div>
-              <span class="feature-text">Gestion des Produits</span>
-            </div>
-            
-            <div class="feature">
-              <div class="feature-icon">
-                <i class="ri-check-line"></i>
-              </div>
-              <span class="feature-text">Gestion des Stocks</span>
-            </div>
+    <!-- Colonne Business (3 mois) - Affiche TOUS les modules -->
+    <div class="plan-card" [class.highlight]="false">
+      <div class="plan-header">
+        <h2>Tchakeda Plus</h2>
+        <div class="price">
+          50 000 CFA
+          <div class="device">
+            / 3 mois
           </div>
         </div>
+      </div>
+
+      <table class="features-table">
         
-        <!-- Premium Plan -->
-        <div class="plan-card premium">
-          <div class="premium-badge">Populaire</div>
-          
-          <h2 class="plan-title">
-            <i class="ri-crown-line"></i> SuperTchakeda
-          </h2>
-          
-          <div class="price">
-            <span class="price-amount">{{ modulePrice | customNumber }} CFA</span>
-            <span class="price-period">/ mois</span>
+        <!-- Modules payants avec période d'essai -->
+        <tr *ngFor="let module of trialModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              <!-- {{ module.actif ? '✓' : '✗' }} -->
+            </span>
+          </td>
+        </tr>
+        
+        <!-- Modules payants sans période d'essai -->
+        <tr *ngFor="let module of paidModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span class="available"></span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- // Facture Pro forma  -->
+        <tr>
+          <td>Facture Pro forma</td>
+          <td>
+            <span class="availablee">✓</span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- // Facture Reelle  -->
+        <tr>
+          <td>Facture Réelle</td>
+          <td>
+            <span class="availablee">✓</span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- Modules gratuits -->
+        <tr *ngFor="let module of freeModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              <!-- {{ module.actif ? '✓' : '✗' }} -->
+            </span>
+          </td>
+        </tr>
+      </table>
+
+      <button class="select-btn">Sélectionner</button>
+    </div>
+
+    <!-- Colonne Enterprise (1 an) -->
+    <div class="plan-card" [class.highlight]="false">
+      <div class="plan-header">
+        <h2>Pro</h2>
+        <div class="price">
+          250 000 CFA
+          <div class="device">
+            / 1 ans
           </div>
-          <p class="discount">Économisez 20% avec un abonnement annuel</p>
-          
-          <div class="features-list">
-            <div class="feature">
-              <div class="feature-icon">
-                <i class="ri-check-line"></i>
-              </div>
-              <span class="feature-text">{{ moduleName }}</span>
-            </div>
-          </div>
-          
-          <button class="subscribe-btn wave-btn" (click)="subscribe($event)">
-            Abonnez-vous maintenant
-            <div class="wave"></div>
-          </button>
         </div>
+        <div class="badge">Meilleur</div>
       </div>
+
+      <table class="features-table">
+        
+        <!-- Modules payants avec période d'essai -->
+        <tr *ngFor="let module of trialModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              <!-- {{ module.actif ? '✓' : '✗' }} -->
+            </span>
+          </td>
+        </tr>
+        
+        <!-- Modules payants sans période d'essai -->
+        <tr *ngFor="let module of paidModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span class="available"></span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- // Facture Pro forma  -->
+        <tr>
+          <td>Facture Pro forma</td>
+          <td>
+            <span class="availablee">✓</span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- // Facture Reelle  -->
+        <tr>
+          <td>Facture Réelle</td>
+          <td>
+            <span class="availablee">✓</span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- Modules gratuits -->
+        <tr *ngFor="let module of freeModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              <!-- {{ module.actif ? '✓' : '✗' }} -->
+            </span>
+          </td>
+        </tr>
+      </table>
+
+      <button class="select-btn">Sélectionner</button>
     </div>
   </div>
-</div>
+</section>

@@ -4,20 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ModuleService } from '../SERVICES/Module-Service';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
-
-interface Plan {
-  name: string;
-  price: number;
-  storage: string;
-  bandwidth: string;
-  subdomains: number;
-  email: boolean;
-  siteBuilder: boolean;
-  backup: 'none' | 'manual' | 'auto';
-  ipsMonitoring: boolean;
-  ipTracking: boolean;
-  highlight?: boolean;
-}
+import { Module } from '../MODELS/Module-model';
 
 @Component({
   selector: 'app-pricing-card',
@@ -26,69 +13,24 @@ interface Plan {
   styleUrl: './pricing-card.component.scss'
 })
 export class PricingCardComponent {
-  // isPremiumHovered = false;
-  mouseX = 0;
-  mouseY = 0;
-  particles: any[] = [];
-  moduleCode: string = '';
-  moduleDetails: any;
-  moduleName: string = 'Nom module'; // Valeur par défaut
-  modulePrice: number = 0; // Valeur par défaut
-  
+  freeModules: Module[] = [];
+  trialModules: Module[] = [];
+  paidModules: Module[] = [];
+  allModules: Module[] = [];
 
+  // isPremiumHovered = false;
   constructor(
     private route: ActivatedRoute,
     private moduleService: ModuleService,
     private router: Router,
   ) {
-    this.generateParticles();
   }
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
-      this.moduleCode = params['moduleCode'];
-      this.loadModuleDetails();
-    });
+    this.loadModules();
   }
 
-  loadModuleDetails() {
-    // Récupérer tous les modules et trouver celui correspondant au code
-    this.moduleService.getModulesEntreprise().subscribe({
-      next: (modules) => {
-        const foundModule = modules.find(module => module.code === this.moduleCode);
-        if (foundModule) {
-          this.moduleName = foundModule.nom;
-          this.modulePrice = foundModule.prix;
-        }
-      },
-      error: (err) => console.error('Erreur chargement modules', err)
-    });
-  }
-
-  generateParticles() {
-    for (let i = 0; i < 30; i++) {
-      this.particles.push({
-        style: {
-          width: `${Math.random() * 40 + 10}px`,
-          height: `${Math.random() * 40 + 10}px`,
-          top: `${Math.random() * 100}%`,
-          left: `${Math.random() * 100}%`,
-          animationDelay: `${Math.random() * 10}s`,
-          opacity: Math.random() * 0.5 + 0.2
-        }
-      });
-    }
-  }
-
-  @HostListener('mousemove', ['$event'])
-  onMouseMove(event: MouseEvent) {
-    this.mouseX = event.clientX;
-    this.mouseY = event.clientY;
-  }
-
-  // onPremiumHover(hovered: boolean) {
-  //   this.isPremiumHovered = hovered;
-  // }
+  loadModuleDetails() {}
 
   subscribe(event: MouseEvent) {
     const button = event.target as HTMLElement;
@@ -102,7 +44,7 @@ export class PricingCardComponent {
       
       wave.style.left = `${x}px`;
       wave.style.top = `${y}px`;
-      this.router.navigate(['/payment-form', this.moduleCode]);
+      this.router.navigate(['/payment-form']);
       
       // Réinitialiser et relancer l'animation
       wave.style.animation = 'none';
@@ -114,21 +56,37 @@ export class PricingCardComponent {
     // Logique d'abonnement...
   }
 
-  plans: Plan[] = [
-    {
-      name: 'Professional', price: 49,
-      storage: '150 GB', bandwidth: '500 GB', subdomains: 3,
-      email: true, siteBuilder: true, backup: 'none', ipsMonitoring: false, ipTracking: false
-    },
-    {
-      name: 'Business', price: 79, highlight: true,
-      storage: '300 GB', bandwidth: '700 GB', subdomains: 5,
-      email: true, siteBuilder: true, backup: 'manual', ipsMonitoring: true, ipTracking: false
-    },
-    {
-      name: 'Enterprise', price: 99,
-      storage: '1 TB', bandwidth: '1500 GB', subdomains: 10,
-      email: true, siteBuilder: true, backup: 'auto', ipsMonitoring: true, ipTracking: true
-    }
-  ];
+  loadModules() {
+    this.moduleService.getModulesEntreprise().subscribe({
+      next: (modules) => {
+        // Modules gratuits
+        this.freeModules = modules.filter(m => !m.payant);
+        
+        // Modules payants avec période d'essai active
+        this.trialModules = modules.filter(m => 
+          m.payant && 
+          m.tempsRestantEssai && 
+          m.tempsRestantEssai !== 'Terminé'
+        );
+        
+        // Modules payants (sans période d'essai)
+        this.paidModules = modules.filter(m => 
+          m.payant && 
+          (!m.tempsRestantEssai || m.tempsRestantEssai === 'Terminé')
+        );
+        
+        // Tous les modules combinés
+        this.allModules = [...this.freeModules, ...this.trialModules, ...this.paidModules];
+      },
+      error: (error) => console.error(error)
+    });
+  }
+
+  getStatusIcon(active: boolean): string {
+    return active ? '✓' : '✗';
+  }
+
+  getStatusClass(active: boolean): string {
+    return active ? 'available' : 'unavailable';
+  }
 }

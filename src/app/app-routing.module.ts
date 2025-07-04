@@ -229,7 +229,7 @@ const routes: Routes = [
         component: PricingCardComponent 
       },
       { 
-        path: 'payment-form/:moduleCode', 
+        path: 'payment-form/:planCode', 
         component: PaymentFormComponent 
       }
       // {
