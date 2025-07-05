@@ -8,6 +8,8 @@ import { GuestComponent } from './theme/layout/guest/guest.component';
 import { authGuard } from './admin-page/guards/auth.guard';
 import { guestGuard } from './admin-page/guards/guestGuard';
 import { ModuleAccessGuard } from './admin-page/guards/ModuleAccessGuard';
+import { PricingCardComponent } from './admin-page/pricing-card/pricing-card.component';
+import { PaymentFormComponent } from './admin-page/payment-form/payment-form.component';
 
 
 const routes: Routes = [
@@ -221,7 +223,23 @@ const routes: Routes = [
       {
         path: 'style-facture',
         loadComponent: () => import('./admin-page/facture-proforma/style-facture/style-facture.component').then(m => m.StyleFactureComponent)
+      },
+      {
+        path: 'pricing/:moduleCode', 
+        component: PricingCardComponent 
+      },
+      // { 
+      //   path: 'payment-form/:moduleCode', 
+      //   loadComponent: () => import('./admin-page/payment-form/payment-form.component').then(m => m.PaymentFormComponent)
+      // },
+      {
+        path: 'payment-form/:plan',
+        component: PaymentFormComponent
       }
+      // {
+      //   path: 'payment-form',
+      //   loadComponent: () => import('./admin-page/payment-form/payment-form.component').then(m => m.PaymentFormComponent)
+      // },
     ]
   }
 ];

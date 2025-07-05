@@ -645,13 +645,12 @@
                             </p>
 
                             <div *ngIf="module.payant" class="module-price">
-                            {{ module.prix | customNumber }}
+                            {{ module.prix | customNumber }} CFA
                             </div>
-
 
                          <button 
                             *ngIf="!module.actif || (module.actif && module.tempsRestantEssai && module.tempsRestantEssai !== 'Terminé')" 
-                            (click)="activerModule(module.code)" 
+                            (click)="activerModule(module)" 
                             class="module-btn"
                             >
                             {{ module.payant && module.tempsRestantEssai && module.tempsRestantEssai !== 'Terminé' ? 'Activer (Essai en cours)' : 'Activer' }}
@@ -660,8 +659,6 @@
                             <div *ngIf="module.actif && (!module.tempsRestantEssai || module.tempsRestantEssai === 'Terminé')" class="module-actif">
                             Activé
                             </div>
-
-                            
 
                         </div>
                     </div>

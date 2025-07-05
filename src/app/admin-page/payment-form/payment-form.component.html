@@ -1,0 +1,200 @@
+
+<div class="toast-container">
+  <!-- Message d'erreur principal -->
+  <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <!-- Message de succès -->
+  <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+    {{ successMessage }}
+  </div>
+</div>
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Paiement en cours...</p>
+    </div>
+  </div>
+
+
+<div class="payment-container">
+
+  <!-- Colonne de gauche : résumé -->
+  <div class="summary-card" *ngIf="planDetails && planDetails.name">
+    <div class="brand-header">
+      <div class="logo-placeholder"></div>
+      <h2>{{ planDetails.name }}</h2>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="price-display">
+      <span class="amount">{{ planDetails.total | customNumber }}&nbsp;CFA</span>
+      <span class="period">/ {{ planDetails.duration }}</span>
+    </div>
+
+    <div class="summary-list">
+      <div class="list-item" *ngFor="let module of planDetails.pricePerModule">
+        <span>{{ module.nom }}</span>
+        <span>{{ module.prix | customNumber }} CFA</span>
+      </div>
+      
+      <div class="list-item">
+        <span>Sous-total</span>
+        <span>{{ planDetails.subtotal | customNumber }} CFA</span>
+      </div>
+      
+      <div class="list-item">
+        <span>Taxes</span>
+        <span>{{ planDetails.taxes | customNumber }} CFA</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="total-container">
+      <h3>Total dû </h3>
+      <div class="total-amount">{{ planDetails.total | customNumber }}&nbsp;CFA</div>
+    </div>
+    
+    <div class="security-badges">
+      <div class="lock-icon">🔒</div>
+      <span>Paiement sécurisé SSL</span>
+    </div>
+  </div>
+
+  <!-- <div *ngIf="isLoading" class="loading-state">
+    <div class="loader"></div>
+    <p>Chargement des détails du paiement...</p>
+  </div>
+
+  <div *ngIf="!isLoading && !planDetails" class="error-state">
+    <p>Impossible de charger les détails du plan. Veuillez réessayer.</p>
+    <button (click)="loadPlanDetails()">Réessayer</button>
+  </div> -->
+
+  <!-- Colonne de droite : formulaire -->
+  <form [formGroup]="paymentForm" class="form-card" 
+      *ngIf="planDetails">
+    <h2>Informations de paiement</h2>
+    
+    <h3>Moyen de paiement</h3>
+    
+    <div class="card-preview">
+      <div class="card-chip"></div>
+      <div class="card-number">{{ cardPreview?.number || '•••• •••• •••• ••••' }}</div>
+      <div class="card-footer">
+        <span>{{ cardPreview?.name || 'NOM TITULAIRE' }}</span>
+        <span>{{ cardPreview?.expiry || 'MM/AA' }}</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Module(s) inclus</label>
+      <div class="modules-list">
+        <div *ngFor="let module of planDetails.pricePerModule">
+          {{ module.nom }}
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" formControlName="dureeMois">
+    
+    <div class="form-group">
+      <label>Numéro de carte <span style="color: #ff0000;">*</span></label>
+      <div class="input-with-icon">
+        <!-- Activer le formatage ici -->
+        <input formControlName="numeroCarte" placeholder="1234 5678 9012 3456" 
+               (input)="formatCardNumber($event)">
+        <span class="input-icon">💳</span>
+      </div>
+      <!-- Corriger la validation ici -->
+      <div *ngIf="paymentForm.get('numeroCarte')?.invalid && paymentForm.get('numeroCarte')?.touched" 
+           class="error-message">
+        Numéro de carte invalide
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="form-group exp-field">
+        <label>Date d'expiration <span style="color: #ff0000;">*</span></label>
+        <input formControlName="dateExpiration" placeholder="MM/AA" 
+               (input)="formatExpDate($event)" maxlength="5">
+        <div *ngIf="paymentForm.get('dateExpiration')?.invalid && paymentForm.get('dateExpiration')?.touched" 
+             class="error-message">
+          Format MM/AA requis
+        </div>
+      </div>
+      
+      <div class="form-group cvc-field">
+        <label>CVC <span style="color: #ff0000;">*</span></label>
+        <div class="input-with-icon">
+          <input formControlName="cvc" placeholder="123" type="password" maxlength="4">
+          <span class="input-icon" title="Code de sécurité au dos de la carte">❓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Nom du titulaire <span style="color: #ff0000;">*</span></label>
+      <input formControlName="nomCompletProprietaire" placeholder="Nom complet">
+    </div>
+    
+    <div class="form-group">
+      <label>E-mail <span style="color: #ff0000;">*</span></label>
+      <input type="email" formControlName="emailProprietaireCarte" placeholder="Votre email">
+    </div>
+
+    <h3>Adresse de facturation</h3>
+    
+    <div class="form-group">
+      <label>Pays <span style="color: #ff0000;">*</span></label>
+      <select formControlName="pays">
+        <option *ngFor="let c of countries" [value]="c.code">{{ c.name }}</option>
+      </select>
+    </div>
+    
+    <div class="form-group address-field">
+      <label>Adresse <span style="color: #ff0000;">*</span></label>
+      <input formControlName="adresse" placeholder="Votre adresse...">
+    </div>
+    
+    <div class="form-group">
+      <label>Ville <span style="color: #ff0000;">*</span></label>
+      <input formControlName="ville" placeholder="Votre ville...">
+    </div>
+
+    <!-- <div class="checkbox-group">
+      <input type="checkbox" id="saveInfo" formControlName="saveInfo">
+      <label for="saveInfo">Enregistrer mes informations pour les prochains paiements</label>
+    </div> -->
+    
+    <div class="checkbox-group">
+      <!-- Correction: utiliser acceptTerms qui existe dans le FormGroup -->
+      <input type="checkbox" id="acceptTerms" formControlName="acceptTerms">
+      <label for="acceptTerms">J'accepte les <a href="#" class="terms-link">conditions d'utilisation</a></label>
+    </div>
+    
+    <button type="submit"  (click)="onSubmit()"
+        [disabled]="paymentForm.invalid || isSubmitting" 
+        class="submit-btn">
+  
+        <!-- Afficher le spinner pendant la soumission -->
+        <span *ngIf="isSubmitting" class="btn-spinner"></span>
+        
+        <span class="btn-icon" *ngIf="!isSubmitting">🔒</span>
+        
+        <span>
+          {{ isSubmitting ? 'Traitement en cours...' : 'Payer ' + (planDetails?.total | customNumber) + ' CFA' }}
+            <!-- {{ (planDetails?.total | customNumber) + ' CFA' }} -->
+        </span>
+      </button>
+    
+    <div class="payment-methods">
+      <div class="payment-icon">Visa</div>
+      <div class="payment-icon">Mastercard</div>
+    </div>
+  </form>
+</div>

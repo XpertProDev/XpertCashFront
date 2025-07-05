@@ -1,0 +1,201 @@
+<section class="pricing-section">
+
+  <div class="icon_close" routerLink="/account-settings">
+    <i class="ri-close-fill"></i>
+  </div>
+
+  <div class="pricing-container">
+    <!-- Colonne Professional (Gratuit) -->
+    <div class="plan-card" [class.highlight]="true" style="height: 10%;">
+      <div class="plan-header">
+        <h2>Gratuit</h2>
+        
+        <div class="price">
+          0 CFA
+          <div class="device">
+            / 1 mois
+          </div>
+        </div>
+      </div>
+
+      <table class="features-table">
+        <tr *ngFor="let module of paidModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span class="unavailable"></span>
+          </td>
+        </tr>
+        <tr *ngFor="let module of freeModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              <!-- {{ module.actif ? '✓' : '✗' }} -->
+            </span>
+          </td>
+        </tr>
+      </table>
+
+      <button class="select-btn" style="cursor: no-drop;" [class.highlight]="true">Votre plan actuel</button>
+    </div>
+
+    <!-- Colonne Business (3 mois) - Affiche TOUS les modules -->
+    <div class="plan-card" [class.highlight]="false">
+      <div class="plan-header">
+        <h2>Tchakeda Plus</h2>
+        <div class="price">
+          {{ priceTchakedaPlus | customNumber }} CFA
+          <div class="device">
+            / 3 mois
+          </div>
+        </div>
+      </div>
+
+      <table class="features-table">
+        
+        <!-- Modules payants avec période d'essai -->
+        <tr *ngFor="let module of trialModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              <!-- {{ module.actif ? '✓' : '✗' }} -->
+            </span>
+          </td>
+        </tr>
+        
+        <!-- Modules payants sans période d'essai -->
+        <tr *ngFor="let module of paidModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span class="available"></span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- // Facture Pro forma  -->
+        <tr>
+          <td>Facture Pro forma</td>
+          <td>
+            <span class="availablee">✓</span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- // Facture Reelle  -->
+        <tr>
+          <td>Facture Réelle</td>
+          <td>
+            <span class="availablee">✓</span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- Modules gratuits -->
+        <tr *ngFor="let module of freeModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              <!-- {{ module.actif ? '✓' : '✗' }} -->
+            </span>
+          </td>
+        </tr>
+      </table>
+
+      <!-- <button class="select-btn">Sélectionner</button> -->
+      <button
+        class="select-btn"
+        [routerLink]="['/payment-form', 'TCHAKEDA_PLUS']">
+        Sélectionner
+      </button>
+    </div>
+
+    <!-- Colonne Enterprise (1 an) -->
+    <div class="plan-card" [class.highlight]="false">
+      <div class="plan-header">
+        <h2>Pro</h2>
+        <!-- <div class="price">
+          {{ pricePro | customNumber }} CFA
+          <div class="device">
+            / 1 ans
+          </div>
+        </div> -->
+        <div class="price">
+          <!-- Prix barré sans remise -->
+          <!-- <span class="original-price" *ngIf="pricePro">
+            {{ (totalMensuel * 12) | customNumber }} CFA
+          </span> -->
+          
+          <!-- Prix avec remise -->
+          {{ pricePro | customNumber }} CFA
+          
+          <div class="device">
+            / 1 an
+            <span class="discount-badge">-10%</span>
+          </div>
+        </div>
+        <div class="badge">Meilleur</div>
+      </div>
+
+      <table class="features-table">
+        
+        <!-- Modules payants avec période d'essai -->
+        <tr *ngFor="let module of trialModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              <!-- {{ module.actif ? '✓' : '✗' }} -->
+            </span>
+          </td>
+        </tr>
+        
+        <!-- Modules payants sans période d'essai -->
+        <tr *ngFor="let module of paidModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span class="available"></span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- // Facture Pro forma  -->
+        <tr>
+          <td>Facture Pro forma</td>
+          <td>
+            <span class="availablee">✓</span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- // Facture Reelle  -->
+        <tr>
+          <td>Facture Réelle</td>
+          <td>
+            <span class="availablee">✓</span>
+            <!-- <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              {{ module.actif ? '✓' : '✗' }}
+            </span> -->
+          </td>
+        </tr>
+        <!-- Modules gratuits -->
+        <tr *ngFor="let module of freeModules">
+          <td>{{ module.nom }}</td>
+          <td>
+            <span [class.available]="module.actif" [class.unavailable]="!module.actif">
+              <!-- {{ module.actif ? '✓' : '✗' }} -->
+            </span>
+          </td>
+        </tr>
+      </table>
+
+      <button
+        class="select-btn"
+        [routerLink]="['/payment-form', 'PRO']">
+        Sélectionner
+      </button>
+    </div>
+  </div>
+</section>
