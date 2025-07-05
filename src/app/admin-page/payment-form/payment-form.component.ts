@@ -27,6 +27,8 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   errorMessage: string = '';
   successMessage = '';
+  isSubmitting = false;
+  allSucceeded = true;
 
   paymentError: string | null = null;
   private activationCounter = 0; // Ajouté
@@ -74,7 +76,7 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
 
   resetPlanDetails() {
     this.planDetails = null;
-    this.isLoading = true;
+    // this.isLoading = true;
     this.cardPreview = {};
     
     if (this.paymentForm) {
@@ -127,12 +129,12 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
           });
         }
 
-        this.isLoading = false;
+        // this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading modules', error);
-        this.isLoading = false;
+        // this.isLoading = false;
         this.cdr.detectChanges();
       }
     });
@@ -159,65 +161,81 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     this.paymentForm.get('dateExpiration')?.setValue(value, { emitEvent: false });
   }
 
-
   onSubmit() {
     if (!this.paymentForm || this.paymentForm.invalid || !this.planDetails) return;
     
-    this.paymentError = null;
-    this.errorMessage = ''; // Réinitialiser les messages
+    // this.isSubmitting = true;
+    this.errorMessage = '';
     this.successMessage = '';
     this.activationCounter = 0;
+    this.allSucceeded = true;
+    this.isLoading = true;
 
     const formData = this.paymentForm.value;
-    const modulesToActivate = this.planDetails.pricePerModule.map((mod: Module) => mod.nom);
+    const modulesToActivate = this.planDetails.pricePerModule.map((mod: any) => mod.nom);
     this.totalModules = modulesToActivate.length;
 
-    modulesToActivate.forEach((moduleName: string) => {
-      const demande: ModulePaiementModel = {
-        nomModule: moduleName,
-        dureeMois: formData.dureeMois,
-        numeroCarte: formData.numeroCarte.replace(/\s/g, ''),
-        cvc: formData.cvc,
-        dateExpiration: formData.dateExpiration.replace('/', ''),
-        nomCompletProprietaire: formData.nomCompletProprietaire,
-        emailProprietaireCarte: formData.emailProprietaireCarte,
-        pays: formData.pays,
-        adresse: formData.adresse,
-        ville: formData.ville
-      };
-      
-      this.moduleService.activerModule(demande).subscribe({
-        next: (response: string) => {
-          this.activationCounter++;
-          this.successMessage = response; // Afficher le message de succès
-         
-        },
-        error: (err) => {
-          this.activationCounter++;
-          this.errorMessage = err.message; 
-          
-          // Effacer le message après 5 secondes
-          setTimeout(() => {
-            this.errorMessage = 'null';
-          }, 5000);
-        }
+    setTimeout(() => {
+      modulesToActivate.forEach((moduleName: string) => {
+        const demande: ModulePaiementModel = {
+            nomModule: moduleName,
+            dureeMois: formData.dureeMois,
+            numeroCarte: formData.numeroCarte.replace(/\s/g, ''),
+            cvc: formData.cvc,
+            dateExpiration: formData.dateExpiration.replace('/', ''),
+            nomCompletProprietaire: formData.nomCompletProprietaire,
+            emailProprietaireCarte: formData.emailProprietaireCarte,
+            pays: formData.pays,
+            adresse: formData.adresse,
+            ville: formData.ville
+          };
+        
+        this.moduleService.activerModule(demande).subscribe({
+          next: (response: string) => {
+            this.activationCounter++;
+            this.successMessage = response;
+            this.checkIfAllDone();
+            this.isLoading = false;
+          },
+          error: (err) => {
+            this.activationCounter++;
+            this.errorMessage = err.message; 
+            this.allSucceeded = false;
+            this.checkIfAllDone();
+            this.isLoading = false;
+          }
+        });
       });
-    });
+    }, 3000);
   }
 
-  // private handleSuccess(response: string) {
-  //   this.successMessage = response;
-  //   this.isProcessing = false;
-
-  //   // Redirection après 3 secondes
-  //   setTimeout(() => {
-  //     this.router.navigate(['/payment-success'], {
-  //       state: { 
-  //         amount: this.planDetails.total
-  //       }
-  //     });
-  //   }, 3000);
-  // }
+  // Ajoutez cette nouvelle méthode
+  private checkIfAllDone() {
+    if (this.activationCounter === this.totalModules) {
+      setTimeout(() => {
+        // this.isSubmitting = false;
+        
+        if (this.allSucceeded) {
+          // Réinitialiser le formulaire
+          this.paymentForm.reset({
+            pays: 'ML',
+            acceptTerms: false
+          });
+          
+          // Réappliquer les valeurs du plan
+          if (this.planDetails) {
+            this.paymentForm.patchValue({
+              nomModule: this.planType,
+              dureeMois: this.planType === 'TCHAKEDA_PLUS' ? 3 : 12
+            });
+          }
+          
+          this.cardPreview = {};
+          this.successMessage = ''; // Effacer le message de succès
+        }
+      }, 3000);
+    }
+  }
 
   private handleError(err: any) {
     console.error('Payment error', err);

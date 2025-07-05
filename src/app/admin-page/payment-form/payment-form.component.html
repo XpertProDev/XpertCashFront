@@ -10,7 +10,6 @@
     {{ successMessage }}
   </div>
 </div>
-<div class="payment-container">
 
   <div *ngIf="isLoading" class="loading-overlay">
     <div class="loading-content">
@@ -19,8 +18,11 @@
     </div>
   </div>
 
+
+<div class="payment-container">
+
   <!-- Colonne de gauche : résumé -->
-  <div class="summary-card" *ngIf="!isLoading && planDetails && planDetails.name">
+  <div class="summary-card" *ngIf="planDetails && planDetails.name">
     <div class="brand-header">
       <div class="logo-placeholder"></div>
       <h2>{{ planDetails.name }}</h2>
@@ -63,7 +65,7 @@
     </div>
   </div>
 
-  <div *ngIf="isLoading" class="loading-state">
+  <!-- <div *ngIf="isLoading" class="loading-state">
     <div class="loader"></div>
     <p>Chargement des détails du paiement...</p>
   </div>
@@ -71,11 +73,11 @@
   <div *ngIf="!isLoading && !planDetails" class="error-state">
     <p>Impossible de charger les détails du plan. Veuillez réessayer.</p>
     <button (click)="loadPlanDetails()">Réessayer</button>
-  </div>
+  </div> -->
 
   <!-- Colonne de droite : formulaire -->
-  <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="form-card" 
-      *ngIf="!isLoading && planDetails">
+  <form [formGroup]="paymentForm" class="form-card" 
+      *ngIf="planDetails">
     <h2>Informations de paiement</h2>
     
     <h3>Moyen de paiement</h3>
@@ -101,7 +103,7 @@
     <input type="hidden" formControlName="dureeMois">
     
     <div class="form-group">
-      <label>Numéro de carte</label>
+      <label>Numéro de carte <span style="color: #ff0000;">*</span></label>
       <div class="input-with-icon">
         <!-- Activer le formatage ici -->
         <input formControlName="numeroCarte" placeholder="1234 5678 9012 3456" 
@@ -117,7 +119,7 @@
 
     <div class="row">
       <div class="form-group exp-field">
-        <label>Date d'expiration</label>
+        <label>Date d'expiration <span style="color: #ff0000;">*</span></label>
         <input formControlName="dateExpiration" placeholder="MM/AA" 
                (input)="formatExpDate($event)" maxlength="5">
         <div *ngIf="paymentForm.get('dateExpiration')?.invalid && paymentForm.get('dateExpiration')?.touched" 
@@ -127,7 +129,7 @@
       </div>
       
       <div class="form-group cvc-field">
-        <label>CVC</label>
+        <label>CVC <span style="color: #ff0000;">*</span></label>
         <div class="input-with-icon">
           <input formControlName="cvc" placeholder="123" type="password" maxlength="4">
           <span class="input-icon" title="Code de sécurité au dos de la carte">❓</span>
@@ -136,31 +138,31 @@
     </div>
 
     <div class="form-group">
-      <label>Nom du titulaire</label>
+      <label>Nom du titulaire <span style="color: #ff0000;">*</span></label>
       <input formControlName="nomCompletProprietaire" placeholder="Nom complet">
     </div>
     
     <div class="form-group">
-      <label>E-mail</label>
+      <label>E-mail <span style="color: #ff0000;">*</span></label>
       <input type="email" formControlName="emailProprietaireCarte" placeholder="Votre email">
     </div>
 
     <h3>Adresse de facturation</h3>
     
     <div class="form-group">
-      <label>Pays</label>
+      <label>Pays <span style="color: #ff0000;">*</span></label>
       <select formControlName="pays">
         <option *ngFor="let c of countries" [value]="c.code">{{ c.name }}</option>
       </select>
     </div>
     
     <div class="form-group address-field">
-      <label>Adresse</label>
+      <label>Adresse <span style="color: #ff0000;">*</span></label>
       <input formControlName="adresse" placeholder="Votre adresse...">
     </div>
     
     <div class="form-group">
-      <label>Ville</label>
+      <label>Ville <span style="color: #ff0000;">*</span></label>
       <input formControlName="ville" placeholder="Votre ville...">
     </div>
 
@@ -175,13 +177,20 @@
       <label for="acceptTerms">J'accepte les <a href="#" class="terms-link">conditions d'utilisation</a></label>
     </div>
     
-    <button type="submit" 
-            [disabled]="paymentForm.invalid" 
-            class="submit-btn">
-      <span class="btn-icon">🔒</span>
-      <span>Payer {{ planDetails?.total | customNumber }} CFA</span>
-      
-    </button>
+    <button type="submit"  (click)="onSubmit()"
+        [disabled]="paymentForm.invalid || isSubmitting" 
+        class="submit-btn">
+  
+        <!-- Afficher le spinner pendant la soumission -->
+        <span *ngIf="isSubmitting" class="btn-spinner"></span>
+        
+        <span class="btn-icon" *ngIf="!isSubmitting">🔒</span>
+        
+        <span>
+          {{ isSubmitting ? 'Traitement en cours...' : 'Payer ' + (planDetails?.total | customNumber) + ' CFA' }}
+            <!-- {{ (planDetails?.total | customNumber) + ' CFA' }} -->
+        </span>
+      </button>
     
     <div class="payment-methods">
       <div class="payment-icon">Visa</div>
