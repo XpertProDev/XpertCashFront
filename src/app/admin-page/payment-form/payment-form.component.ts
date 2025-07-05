@@ -1,11 +1,10 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map, startWith } from 'rxjs';
-import { Observable } from 'rxjs/internal/Observable';
+import { distinctUntilChanged, Subscription } from 'rxjs';
 import { ModuleService } from '../SERVICES/Module-Service';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
+import { CommonModule } from '@angular/common';
 
 interface Country {
   code: string;
@@ -14,65 +13,32 @@ interface Country {
 
 @Component({
   selector: 'app-payment-form',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe],
+   imports: [FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe],
   templateUrl: './payment-form.component.html',
-  styleUrl: './payment-form.component.scss'
+  styleUrls: ['./payment-form.component.scss']
 })
-export class PaymentFormComponent {
-  paymentForm!: FormGroup;
+export class PaymentFormComponent implements OnInit, OnDestroy {
+  paymentForm: FormGroup;
+  planType: string = '';
+  planDetails: any = null;
+  isLoading = true;
+  private subscription: Subscription = new Subscription();
+
   countries: Country[] = [
     { code: 'ML', name: 'Mali' },
     { code: 'CI', name: 'Côte d\'Ivoire' },
     { code: 'SN', name: 'Sénégal' },
-    // ajoutez d'autres pays au besoin
   ];
-  cardPreview: any = {};
 
-  moduleCode: string = '';
-  moduleName: string = '';
-  modulePrice: number = 0;
+  cardPreview: any = {};
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private moduleService: ModuleService
-  ) {}
-
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.moduleCode = params['moduleCode'];
-      this.loadModuleDetails();
-    });
-
-    this.intPaymentForm();
-    
-
-    // Suivi des changements pour la prévisualisation
-    this.paymentForm.valueChanges.subscribe(val => {
-      this.cardPreview = {
-        number: val.cardNumber?.replace(/\s/g, ''),
-        name: val.cardName,
-        expiry: val.expDate
-      };
-    });
-  }
-
-  loadModuleDetails() {
-    // Récupérer tous les modules et trouver celui correspondant au code
-    this.moduleService.getModulesEntreprise().subscribe({
-      next: (modules) => {
-        const foundModule = modules.find(module => module.code === this.moduleCode);
-        if (foundModule) {
-          this.moduleName = foundModule.nom;
-          this.modulePrice = foundModule.prix;
-        }
-      },
-      error: (err) => console.error('Erreur chargement modules', err)
-    });
-  }
-
-  intPaymentForm() {
+    private moduleService: ModuleService,
+    private cdr: ChangeDetectorRef
+  ) {
     this.paymentForm = this.fb.group({
       cardNumber: ['', [Validators.required, Validators.pattern(/^\d{16}$/)]],
       expDate: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
@@ -87,15 +53,85 @@ export class PaymentFormComponent {
     });
   }
 
+  ngOnInit(): void {
+    this.route.paramMap
+      .pipe(distinctUntilChanged((prev, curr) => prev.get('plan') === curr.get('plan')))
+      .subscribe(params => {
+        // Utilisation de snapshot pour une récupération fiable
+        this.planType = this.route.snapshot.paramMap.get('plan') || '';
+        console.log('Plan type from snapshot:', this.planType);
+        this.resetPlanDetails();
+        this.loadPlanDetails();
+      });
+  }
+
+  resetPlanDetails() {
+    this.planDetails = null;
+    this.isLoading = true;
+    this.cardPreview = {};
+    this.paymentForm.reset({
+      country: 'ML',
+      saveInfo: false,
+      acceptTerms: false
+    });
+    this.cdr.detectChanges();
+  }
+
+  loadPlanDetails() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+
+    this.subscription = this.moduleService.getModulesEntreprise().subscribe({
+      next: (modules) => {
+        console.log('Modules reçus:', modules);
+        
+        const paidModules = modules.filter(m => m.payant);
+        const totalMensuel = paidModules.reduce((sum, module) => sum + (module.prix || 0), 0);
+        
+        let name = '';
+        let duration = '';
+        let subtotal = 0;
+        
+        if (this.planType === 'TCHAKEDA_PLUS') {
+          name = 'Tchakeda Plus';
+          duration = '3 mois';
+          subtotal = totalMensuel * 3;
+        } else if (this.planType === 'PRO') {
+          name = 'Pro';
+          duration = '1 an';
+          subtotal = totalMensuel * 12 * 0.9;
+        } else {
+          console.error('Type de plan inconnu:', this.planType);
+        }
+
+        this.planDetails = {
+          name,
+          duration,
+          pricePerModule: paidModules,
+          subtotal,
+          taxes: 0,
+          total: subtotal
+        };
+
+        console.log('Plan details:', this.planDetails);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading modules', error);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   formatCardNumber(event: Event): void {
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/\D/g, '');
     
     if (value.length > 16) value = value.substring(0, 16);
-    
-    // Formatage en groupes de 4
     value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-    
     this.paymentForm.get('cardNumber')?.setValue(value, { emitEvent: true });
   }
 
@@ -105,7 +141,6 @@ export class PaymentFormComponent {
     
     if (value.length > 4) value = value.substring(0, 4);
     if (value.length > 2) value = value.replace(/^(\d{2})/, '$1/');
-    
     this.paymentForm.get('expDate')?.setValue(value, { emitEvent: true });
   }
 
@@ -113,11 +148,19 @@ export class PaymentFormComponent {
     if (this.paymentForm.valid) {
       const formData = {
         ...this.paymentForm.value,
-        cardNumber: this.paymentForm.value.cardNumber.replace(/\s/g, '')
+        cardNumber: this.paymentForm.value.cardNumber.replace(/\s/g, ''),
+        planType: this.planType,
+        planDetails: this.planDetails
       };
       
-      console.log('Données de paiement :', formData);
+      console.log('Payment data:', formData);
       // Envoyer au backend
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 }

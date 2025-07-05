@@ -1,32 +1,32 @@
 <div class="payment-container">
   <!-- Colonne de gauche : résumé -->
-  <div class="summary-card">
-    <!-- <button class="back-btn">&larr; Retour</button> -->
-    
+  <div class="summary-card" *ngIf="!isLoading && planDetails && planDetails.name">
     <div class="brand-header">
       <div class="logo-placeholder"></div>
-      <h2>Tchakeda Plus</h2>
+      <h2>{{ planDetails.name }}</h2>
     </div>
     
     <div class="divider"></div>
     
     <div class="price-display">
-      <span class="amount">{{ modulePrice | customNumber }}&nbsp;CFA</span>
-      <span class="period">/ 3 mois</span>
+      <span class="amount">{{ planDetails.total | customNumber }}&nbsp;CFA</span>
+      <span class="period">/ {{ planDetails.duration }}</span>
     </div>
 
     <div class="summary-list">
-      <div class="list-item">
-        <span>{{ moduleName }}</span>
-        <span>{{ modulePrice | customNumber }} CFA</span>
+      <div class="list-item" *ngFor="let module of planDetails.pricePerModule">
+        <span>{{ module.nom }}</span>
+        <span>{{ module.prix | customNumber }} CFA</span>
       </div>
+      
       <div class="list-item">
         <span>Sous-total</span>
-        <span>{{ modulePrice | customNumber }} CFA</span>
+        <span>{{ planDetails.subtotal | customNumber }} CFA</span>
       </div>
+      
       <div class="list-item">
         <span>Taxes</span>
-        <span>00,00&nbsp;CFA</span>
+        <span>{{ planDetails.taxes | customNumber }} CFA</span>
       </div>
     </div>
 
@@ -34,7 +34,7 @@
 
     <div class="total-container">
       <h3>Total dû </h3>
-      <div class="total-amount">{{ modulePrice | customNumber }}&nbsp;CFA</div>
+      <div class="total-amount">{{ planDetails.total | customNumber }}&nbsp;CFA</div>
     </div>
     
     <div class="security-badges">
@@ -43,10 +43,20 @@
     </div>
   </div>
 
-  <!-- Colonne de droite : formulaire -->
-  <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="form-card">
-    <h2>Informations de paiement</h2>
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loader"></div>
+    <p>Chargement des détails du paiement...</p>
+  </div>
 
+  <div *ngIf="!isLoading && !planDetails" class="error-state">
+    <p>Impossible de charger les détails du plan. Veuillez réessayer.</p>
+    <button (click)="loadPlanDetails()">Réessayer</button>
+  </div>
+
+  <!-- Colonne de droite : formulaire -->
+  <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="form-card" *ngIf="!isLoading && planDetails">
+    <h2>Informations de paiement</h2>
+    
     <h3>Moyen de paiement</h3>
     
     <div class="card-preview">
@@ -110,11 +120,9 @@
       </select>
     </div>
     
-    
-      
     <div class="form-group address-field">
-    <label>Adresse</label>
-    <input formControlName="address" placeholder="Votre adresse...">
+      <label>Adresse</label>
+      <input formControlName="address1" placeholder="Votre adresse...">
     </div>
     
     <div class="form-group">
@@ -136,13 +144,12 @@
             [disabled]="paymentForm.invalid" 
             class="submit-btn">
       <span class="btn-icon">🔒</span>
-      Payer {{ modulePrice | customNumber }} CFA
+      Payer {{ planDetails?.total | customNumber }} CFA
     </button>
     
     <div class="payment-methods">
       <div class="payment-icon">Visa</div>
       <div class="payment-icon">Mastercard</div>
-      <!-- <div class="payment-icon">Amex</div> -->
     </div>
   </form>
 </div>

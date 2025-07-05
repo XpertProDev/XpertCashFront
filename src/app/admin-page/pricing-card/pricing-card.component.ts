@@ -52,7 +52,7 @@ export class PricingCardComponent {
       
       wave.style.left = `${x}px`;
       wave.style.top = `${y}px`;
-      this.router.navigate(['/payment-form']);
+      // this.router.navigate(['/payment-form', module.code]);
       
       // Réinitialiser et relancer l'animation
       wave.style.animation = 'none';
