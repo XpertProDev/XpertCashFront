@@ -71,8 +71,8 @@
     <div class="form-group">
       <label>Numéro de carte</label>
       <div class="input-with-icon">
-        <input formControlName="cardNumber" placeholder="1234 5678 9012 3456" 
-               (input)="formatCardNumber($event)">
+        <input formControlName="numeroCarte" placeholder="1234 5678 9012 3456" >
+               <!-- //(input)="formatCardNumber($event)" -->
         <span class="input-icon">💳</span>
       </div>
       <div *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched" 
@@ -84,9 +84,9 @@
     <div class="row">
       <div class="form-group exp-field">
         <label>Date d'expiration</label>
-        <input formControlName="expDate" placeholder="MM/AA" 
+        <input formControlName="dateExpiration" placeholder="MM/AA" 
                (input)="formatExpDate($event)" maxlength="5">
-        <div *ngIf="paymentForm.get('expDate')?.invalid && paymentForm.get('expDate')?.touched" 
+        <div *ngIf="paymentForm.get('dateExpiration')?.invalid && paymentForm.get('dateExpiration')?.touched" 
              class="error-message">
           Format MM/AA requis
         </div>
@@ -103,31 +103,31 @@
 
     <div class="form-group">
       <label>Nom du titulaire</label>
-      <input formControlName="cardName" placeholder="Nom complet">
+      <input formControlName="nomCompletProprietaire" placeholder="Nom complet">
     </div>
     
-    <div class="form-group">
+   <div class="form-group">
       <label>E-mail</label>
-      <input type="email" placeholder="Votre email">
+      <input type="email" formControlName="emailProprietaireCarte" placeholder="Votre email"> <!-- Correction ici -->
     </div>
 
     <h3>Adresse de facturation</h3>
     
     <div class="form-group">
       <label>Pays</label>
-      <select formControlName="country">
+      <select formControlName="pays">
         <option *ngFor="let c of countries" [value]="c.code">{{ c.name }}</option>
       </select>
     </div>
     
     <div class="form-group address-field">
       <label>Adresse</label>
-      <input formControlName="address1" placeholder="Votre adresse...">
+      <input formControlName="adresse" placeholder="Votre adresse...">
     </div>
     
     <div class="form-group">
       <label>Ville</label>
-      <input formControlName="city" placeholder="Votre ville...">
+      <input formControlName="ville" placeholder="Votre ville...">
     </div>
 
     <div class="checkbox-group">
@@ -140,11 +140,12 @@
       <label for="acceptTerms">J'accepte les <a href="#" class="terms-link">conditions d'utilisation</a></label>
     </div>
     
-    <button type="submit" 
-            [disabled]="paymentForm.invalid" 
-            class="submit-btn">
+     <button type="submit" 
+          [disabled]="paymentForm.invalid || isProcessing" 
+          class="submit-btn">
       <span class="btn-icon">🔒</span>
-      Payer {{ planDetails?.total | customNumber }} CFA
+      <span *ngIf="!isProcessing">Payer {{ planDetails?.total | customNumber }} CFA</span>
+      <span *ngIf="isProcessing">Traitement...</span>
     </button>
     
     <div class="payment-methods">
