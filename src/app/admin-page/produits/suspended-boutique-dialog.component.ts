@@ -12,119 +12,92 @@ import { MatIconModule } from '@angular/material/icon';
     MatButtonModule,
     MatIconModule
   ],
-  template: `
-    <div class="ds-modal-content ds-elevated" role="dialog">
-      <!-- En-tête avec icône warning et titre -->
-      <div class="ds-modal-header">
-        <div class="ds-modal-title-wrapper">
-          <mat-icon class="warning-icon">warning</mat-icon>
-          <h2 mat-dialog-title class="ds-modal-title">Boutique suspendue</h2>
+    template: `
+    <div class="confirmation-modal-aver">
+      <div class="modal-content-aver">
+        <!-- En-tête avec icône warning et titre -->
+        <div class="modal-header-aver">
+          <div class="modal-title-wrapper-aver">
+            <mat-icon class="warning-icon">warning</mat-icon>
+            <h4 style="font-size: 16px; margin-bottom: 10px; color: #d20909;">Boutique suspendue</h4>
+          </div>
+          
         </div>
-        <button mat-icon-button class="ds-icon-button" (click)="dialogRef.close()">
-          <mat-icon>close</mat-icon>
-        </button>
+
+        <!-- Contenu -->
+        <div class="modal-body-aver">
+          <p style="margin: 0; font-size: 12px;">Cette boutique est actuellement suspendue. Vous ne pouvez pas accéder à ses produits.</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-actions-aver">
+          <button class="btn-confirm" style="font-size: 12px;" (click)="dialogRef.close()">OK</button>
+        </div>
       </div>
-
-      <!-- Contenu -->
-      <mat-dialog-content class="ds-modal-body">
-        <p>Cette boutique est actuellement suspendue. Vous ne pouvez pas accéder à ses produits.</p>
-      </mat-dialog-content>
-
     </div>
   `,
   styles: [`
-    /* Structure principale */
-    .ds-modal-content {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      max-width: 450px;
+    .confirmation-modal-aver {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1050;
     }
 
-    /* En-tête */
-    .ds-modal-header {
+    .confirmation-modal-aver .modal-content-aver {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 300px;
+    }
+
+    .modal-header-aver {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start; /* Alignement en haut pour séparer titre et bouton */
-      margin-bottom: 16px;
+      align-items: flex-start;
+      margin-bottom: 10px;
     }
 
-    .ds-modal-title-wrapper {
+    .modal-title-wrapper-aver {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .ds-modal-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin: 0;
-      color: #d32f2f; /* Rouge pour alerte */
-      margin-top: -13px;
-    }
-
-    /* Icônes */
     .warning-icon {
-      color: #ff9800; /* Orange warning */
-      font-size: 1.5rem;
-      width: 1.5rem;
-      height: 1.5rem;
+      color: #ff9800;
+      font-size: 1.2rem;
+      width: 1.2rem;
+      height: 1.2rem;
+      margin-bottom: 8px;
     }
 
-    .ds-icon-button {
-      color: #666;
-      margin-top: -8px; /* Décalage pour aligner avec le titre */
-      margin-right: -8px; /* Décalage pour espacer du bord */
-      transition: all 0.2s;
 
-      &:hover {
-        background: rgba(0, 0, 0, 0.04);
-      }
+
+    .modal-body-aver {
+      margin-bottom: 15px;
     }
 
-    /* Corps */
-    .ds-modal-body {
-      color: #0b3558;
-      font-size: 0.9375rem;
-      line-height: 1.5;
-      padding: 0 0 16px 0;
-    }
-
-    /* Pied de modal */
-    .ds-modal-footer {
-      padding-top: 16px;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    /* Utilitaires */
-    .ds-flex {
+    .modal-actions-aver {
       display: flex;
-      gap: 12px;
       justify-content: flex-end;
+      margin-top: 10px;
     }
 
-    /* Boutons (style DeepSeek-like) */
-    .ds-button {
-      border-radius: 4px;
-      padding: 8px 16px;
-      font-weight: 500;
-      font-size: 0.875rem;
-      cursor: pointer;
+    .btn-confirm {
+      background-color: #0672E4;
+      color: white;
       border: none;
-      transition: background 0.2s;
-
-      &--secondary {
-        background-color: #f0f0f0;
-        color: #333;
-      }
-
-      &--primary {
-        background-color: #1976d2;
-        color: white;
-      }
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
     }
   `]
 })

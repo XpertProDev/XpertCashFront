@@ -706,7 +706,7 @@ async confirmDelete(): Promise<void> {
   }
   
   if (errors.length > 0) {
-    this.errorMessage = `Erreurs: ${errors.join(', ')}`;
+    this.errorMessage = `${errors.join(', ')}`;
   }
 
   setTimeout(() => {

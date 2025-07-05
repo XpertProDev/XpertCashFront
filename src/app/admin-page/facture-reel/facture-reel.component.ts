@@ -105,7 +105,7 @@ getAllFactureReelOfEntreprise(entrepriseId: number): void {
   getLibelleStatut(statut: string): string {
     switch (statut) {
       case 'EN_ATTENTE':
-        return 'En attente';
+        return 'Non payé';
       case 'PARTIELLEMENT_PAYEE':
         return 'Part. payée';
       case 'PAYEE':
