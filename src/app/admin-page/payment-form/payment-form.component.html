@@ -1,4 +1,24 @@
+
+<div class="toast-container">
+  <!-- Message d'erreur principal -->
+  <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <!-- Message de succès -->
+  <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+    {{ successMessage }}
+  </div>
+</div>
 <div class="payment-container">
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Paiement en cours...</p>
+    </div>
+  </div>
+
   <!-- Colonne de gauche : résumé -->
   <div class="summary-card" *ngIf="!isLoading && planDetails && planDetails.name">
     <div class="brand-header">
@@ -54,7 +74,8 @@
   </div>
 
   <!-- Colonne de droite : formulaire -->
-  <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="form-card" *ngIf="!isLoading && planDetails">
+  <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="form-card" 
+      *ngIf="!isLoading && planDetails">
     <h2>Informations de paiement</h2>
     
     <h3>Moyen de paiement</h3>
@@ -69,18 +90,26 @@
     </div>
 
     <div class="form-group">
-      <label>Nom du titulaire</label>
-      <input formControlName="nomModule" placeholder="Nom de module">
+      <label>Module(s) inclus</label>
+      <div class="modules-list">
+        <div *ngFor="let module of planDetails.pricePerModule">
+          {{ module.nom }}
+        </div>
+      </div>
     </div>
+
+    <input type="hidden" formControlName="dureeMois">
     
     <div class="form-group">
       <label>Numéro de carte</label>
       <div class="input-with-icon">
-        <input formControlName="numeroCarte" placeholder="1234 5678 9012 3456" >
-               <!-- //(input)="formatCardNumber($event)" -->
+        <!-- Activer le formatage ici -->
+        <input formControlName="numeroCarte" placeholder="1234 5678 9012 3456" 
+               (input)="formatCardNumber($event)">
         <span class="input-icon">💳</span>
       </div>
-      <div *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched" 
+      <!-- Corriger la validation ici -->
+      <div *ngIf="paymentForm.get('numeroCarte')?.invalid && paymentForm.get('numeroCarte')?.touched" 
            class="error-message">
         Numéro de carte invalide
       </div>
@@ -111,9 +140,9 @@
       <input formControlName="nomCompletProprietaire" placeholder="Nom complet">
     </div>
     
-   <div class="form-group">
+    <div class="form-group">
       <label>E-mail</label>
-      <input type="email" formControlName="emailProprietaireCarte" placeholder="Votre email"> <!-- Correction ici -->
+      <input type="email" formControlName="emailProprietaireCarte" placeholder="Votre email">
     </div>
 
     <h3>Adresse de facturation</h3>
@@ -135,22 +164,23 @@
       <input formControlName="ville" placeholder="Votre ville...">
     </div>
 
-    <div class="checkbox-group">
+    <!-- <div class="checkbox-group">
       <input type="checkbox" id="saveInfo" formControlName="saveInfo">
       <label for="saveInfo">Enregistrer mes informations pour les prochains paiements</label>
-    </div>
+    </div> -->
     
     <div class="checkbox-group">
+      <!-- Correction: utiliser acceptTerms qui existe dans le FormGroup -->
       <input type="checkbox" id="acceptTerms" formControlName="acceptTerms">
       <label for="acceptTerms">J'accepte les <a href="#" class="terms-link">conditions d'utilisation</a></label>
     </div>
     
-     <button type="submit" 
-          [disabled]="paymentForm.invalid || isProcessing" 
-          class="submit-btn">
+    <button type="submit" 
+            [disabled]="paymentForm.invalid" 
+            class="submit-btn">
       <span class="btn-icon">🔒</span>
-      <span *ngIf="!isProcessing">Payer {{ planDetails?.total | customNumber }} CFA</span>
-      <span *ngIf="isProcessing">Traitement...</span>
+      <span>Payer {{ planDetails?.total | customNumber }} CFA</span>
+      
     </button>
     
     <div class="payment-methods">

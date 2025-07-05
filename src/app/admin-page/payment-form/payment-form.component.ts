@@ -3,9 +3,10 @@ import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } 
 import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, Subscription } from 'rxjs';
 import { ModuleService } from '../SERVICES/Module-Service';
-import { CustomNumberPipe } from '../MODELS/customNumberPipe';
-import { CommonModule } from '@angular/common';
 import { ModulePaiementModel } from '../MODELS/module-paiement-model';
+import { Module } from '../MODELS/Module-model'; // Import ajouté
+import { CommonModule } from '@angular/common';
+import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 
 interface Country {
   code: string;
@@ -14,19 +15,22 @@ interface Country {
 
 @Component({
   selector: 'app-payment-form',
-   imports: [FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe],
   templateUrl: './payment-form.component.html',
   styleUrls: ['./payment-form.component.scss']
 })
 export class PaymentFormComponent implements OnInit, OnDestroy {
-  paymentForm: FormGroup;
+  paymentForm!: FormGroup;
   planType: string = '';
   planDetails: any = null;
-  isLoading = true;
+  isLoading = false;
   private subscription: Subscription = new Subscription();
+  errorMessage: string = '';
+  successMessage = '';
 
-  isProcessing = false;
   paymentError: string | null = null;
+  private activationCounter = 0; // Ajouté
+  private totalModules = 0; // Ajouté
 
   countries: Country[] = [
     { code: 'ML', name: 'Mali' },
@@ -42,30 +46,27 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     private router: Router,
     private moduleService: ModuleService,
     private cdr: ChangeDetectorRef
-  ) {
+  ) {}
+
+  ngOnInit(): void {
     this.paymentForm = this.fb.group({
-      nomModule: [''],
-      dureeMois: [''],
-      numeroCarte: ['', [Validators.required, Validators.pattern(/^\d{16}$/)]],
+      nomModule: ['', Validators.required],
+      dureeMois: [0, Validators.required],
+      numeroCarte: ['', [Validators.required, Validators.pattern(/^[\d\s]{16,19}$/)]],
       dateExpiration: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
       cvc: ['', [Validators.required, Validators.pattern(/^\d{3,4}$/)]],
       nomCompletProprietaire: ['', Validators.required],
-      emailProprietaireCarte: ['', Validators.email],
+      emailProprietaireCarte: ['', [Validators.required, Validators.email]],
       pays: ['ML', Validators.required],
       adresse: ['', Validators.required],
-      ville: [''],
-      saveInfo: [false],
-      acceptTerms: [false, Validators.requiredTrue],
+      ville: ['', Validators.required],
+      acceptTerms: [false, Validators.requiredTrue]
     });
-  }
 
-  ngOnInit(): void {
     this.route.paramMap
       .pipe(distinctUntilChanged((prev, curr) => prev.get('plan') === curr.get('plan')))
       .subscribe(params => {
-        // Utilisation de snapshot pour une récupération fiable
         this.planType = this.route.snapshot.paramMap.get('plan') || '';
-        console.log('Plan type from snapshot:', this.planType);
         this.resetPlanDetails();
         this.loadPlanDetails();
       });
@@ -75,11 +76,14 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     this.planDetails = null;
     this.isLoading = true;
     this.cardPreview = {};
-    this.paymentForm.reset({
-      country: 'ML',
-      saveInfo: false,
-      acceptTerms: false
-    });
+    
+    if (this.paymentForm) {
+      this.paymentForm.reset({
+        pays: 'ML',
+        acceptTerms: false
+      });
+    }
+    
     this.cdr.detectChanges();
   }
 
@@ -89,9 +93,7 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     }
 
     this.subscription = this.moduleService.getModulesEntreprise().subscribe({
-      next: (modules) => {
-        console.log('Modules reçus:', modules);
-        
+      next: (modules: Module[]) => {
         const paidModules = modules.filter(m => m.payant);
         const totalMensuel = paidModules.reduce((sum, module) => sum + (module.prix || 0), 0);
         
@@ -107,8 +109,6 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
           name = 'Pro';
           duration = '1 an';
           subtotal = totalMensuel * 12 * 0.9;
-        } else {
-          console.error('Type de plan inconnu:', this.planType);
         }
 
         this.planDetails = {
@@ -120,7 +120,13 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
           total: subtotal
         };
 
-        console.log('Plan details:', this.planDetails);
+        if (this.paymentForm) {
+          this.paymentForm.patchValue({
+            nomModule: this.planType,
+            dureeMois: this.planType === 'TCHAKEDA_PLUS' ? 3 : 12
+          });
+        }
+
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -132,14 +138,16 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  // formatCardNumber(event: Event): void {
-  //   const input = event.target as HTMLInputElement;
-  //   let value = input.value.replace(/\D/g, '');
+  formatCardNumber(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, '');
     
-  //   if (value.length > 16) value = value.substring(0, 16);
-  //   value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-  //   this.paymentForm.get('cardNumber')?.setValue(value, { emitEvent: true });
-  // }
+    if (value.length > 16) value = value.substring(0, 16);
+    
+    value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+    
+    this.paymentForm.get('numeroCarte')?.setValue(value, { emitEvent: false });
+  }
 
   formatExpDate(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -147,44 +155,85 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     
     if (value.length > 4) value = value.substring(0, 4);
     if (value.length > 2) value = value.replace(/^(\d{2})/, '$1/');
-    this.paymentForm.get('expDate')?.setValue(value, { emitEvent: true });
+    
+    this.paymentForm.get('dateExpiration')?.setValue(value, { emitEvent: false });
   }
 
+
   onSubmit() {
-    if (this.paymentForm.invalid || this.isProcessing) return;
+    if (!this.paymentForm || this.paymentForm.invalid || !this.planDetails) return;
     
-    this.isProcessing = true;
     this.paymentError = null;
+    this.errorMessage = ''; // Réinitialiser les messages
+    this.successMessage = '';
+    this.activationCounter = 0;
 
     const formData = this.paymentForm.value;
-    const demande: ModulePaiementModel = {
-      nomModule: this.planType,
-      dureeMois: this.planType === 'TCHAKEDA_PLUS' ? 3 : 12,
-      numeroCarte: formData.cardNumber.replace(/\s/g, ''),
-      cvc: formData.cvc,
-      dateExpiration: formData.expDate.replace('/', ''),
-      nomCompletProprietaire: formData.cardName,
-      emailProprietaireCarte: formData.email,
-      pays: formData.country,
-      adresse: `${formData.address1}${formData.address2 ? ', ' + formData.address2 : ''}`,
-      ville: formData.city
-    };
+    const modulesToActivate = this.planDetails.pricePerModule.map((mod: Module) => mod.nom);
+    this.totalModules = modulesToActivate.length;
 
-    this.moduleService.activerModule(demande).subscribe({
-      next: (response) => {
-        this.router.navigate(['/payment-success'], {
-          state: { 
-            transaction: response.referenceTransaction,
-            amount: this.planDetails.total
-          }
-        });
-      },
-      error: (err) => {
-        console.error('Payment error', err);
-        this.isProcessing = false;
-        this.paymentError = this.getUserFriendlyError(err);
-      }
+    modulesToActivate.forEach((moduleName: string) => {
+      const demande: ModulePaiementModel = {
+        nomModule: moduleName,
+        dureeMois: formData.dureeMois,
+        numeroCarte: formData.numeroCarte.replace(/\s/g, ''),
+        cvc: formData.cvc,
+        dateExpiration: formData.dateExpiration.replace('/', ''),
+        nomCompletProprietaire: formData.nomCompletProprietaire,
+        emailProprietaireCarte: formData.emailProprietaireCarte,
+        pays: formData.pays,
+        adresse: formData.adresse,
+        ville: formData.ville
+      };
+      
+      this.moduleService.activerModule(demande).subscribe({
+        next: (response: string) => {
+          this.activationCounter++;
+          this.successMessage = response; // Afficher le message de succès
+         
+        },
+        error: (err) => {
+          this.activationCounter++;
+          this.errorMessage = err.message; 
+          
+          // Effacer le message après 5 secondes
+          setTimeout(() => {
+            this.errorMessage = 'null';
+          }, 5000);
+        }
+      });
     });
+  }
+
+  // private handleSuccess(response: string) {
+  //   this.successMessage = response;
+  //   this.isProcessing = false;
+
+  //   // Redirection après 3 secondes
+  //   setTimeout(() => {
+  //     this.router.navigate(['/payment-success'], {
+  //       state: { 
+  //         amount: this.planDetails.total
+  //       }
+  //     });
+  //   }, 3000);
+  // }
+
+  private handleError(err: any) {
+    console.error('Payment error', err);
+    
+    if (err.error instanceof ErrorEvent) {
+      // Erreur client
+      this.errorMessage = err.error.message;
+    } else {
+      // Erreur serveur
+      this.errorMessage = this.getUserFriendlyError(err);
+    }
+    
+    // Effacer le message après 5 secondes
+    setTimeout(() => {
+      this.errorMessage = ''; // Utiliser une chaîne vide au lieu de null
+    }, 5000);
   }
 
   private getUserFriendlyError(error: any): string {
@@ -194,6 +243,10 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
       return 'Données de paiement invalides.';
     } else if (error.status === 403) {
       return 'Action non autorisée. Seuls les administrateurs peuvent activer des modules.';
+    } else if (error.status === 404) {
+      return 'Module non trouvé.';
+    } else if (error.status === 500) {
+      return 'Erreur interne du serveur. Veuillez réessayer plus tard.';
     }
     return 'Une erreur inattendue est survenue. Veuillez réessayer.';
   }

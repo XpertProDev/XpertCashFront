@@ -29,6 +29,27 @@ export class ModuleService {
     return this.http.get<Module[]>(url, { headers });
   }
 
+  // Dans module.service.ts
+  // activerModule(demande: ModulePaiementModel): Observable<{ referenceTransaction: string }> {
+  //   const token = localStorage.getItem('authToken');
+  //   if (!token) {
+  //     return throwError(() => new Error('Token manquant'));
+  //   }
+
+  //   const headers = new HttpHeaders({
+  //     'Authorization': `Bearer ${token}`,
+  //     'Content-Type': 'application/json'
+  //   });
+
+  //   return this.http.post<{ referenceTransaction: string }>(
+  //     `${this.apiUrl}/modules/activer`, 
+  //     demande, 
+  //     { headers }
+  //   ).pipe(
+  //     catchError(this.handlePaymentError)
+  //   );
+  // }
+
   activerModule(demande: ModulePaiementModel): Observable<any> {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -43,38 +64,33 @@ export class ModuleService {
     return this.http.post(
       `${this.apiUrl}/modules/activer`, 
       demande, 
-      { headers }
+      { headers, responseType: 'text' } // Important: responseType: 'text'
     ).pipe(
       catchError(this.handlePaymentError)
     );
   }
 
- private handlePaymentError(error: HttpErrorResponse) {
-  console.error('Full error response:', error);
-  
-  let errorMessage = 'Erreur inconnue';
-  
-  if (error.error instanceof ErrorEvent) {
-    errorMessage = `Erreur client: ${error.error.message}`;
-  } else {
-    // Essayez d'extraire le message du backend
-    const backendError = error.error;
+  private handlePaymentError(error: HttpErrorResponse) {
+    let errorMessage = 'Erreur inconnue';
     
-    if (typeof backendError === 'string') {
-      errorMessage = backendError;
-    } else if (backendError?.message) {
-      errorMessage = backendError.message;
-    } else {
-      errorMessage = `Erreur serveur (${error.status}): ${error.statusText}`;
+    try {
+      // Essayer de parser la réponse JSON
+      const errorResponse = JSON.parse(error.error);
+      if (errorResponse.error) {
+        errorMessage = errorResponse.error;
+      } else if (errorResponse.message) {
+        errorMessage = errorResponse.message;
+      }
+    } catch (e) {
+      // Si le parsing échoue, utiliser le texte brut
+      errorMessage = error.error || error.message || 'Erreur inconnue';
     }
+    
+    return throwError(() => ({
+      status: error.status,
+      message: errorMessage
+    }));
   }
-  
-  return throwError(() => ({
-    status: error.status,
-    message: errorMessage,
-    backendResponse: error.error // Ajout pour le débogage
-  }));
-}
 
    
 }
