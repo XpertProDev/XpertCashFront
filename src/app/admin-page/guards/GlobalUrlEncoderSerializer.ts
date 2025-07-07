@@ -1,16 +1,18 @@
 import { DefaultUrlSerializer, UrlTree, UrlSerializer } from '@angular/router';
 
-
 export class GlobalUrlEncoderSerializer implements UrlSerializer {
   private readonly defaultSerializer = new DefaultUrlSerializer();
   private readonly ENCODED_PREFIX = 't_';
 
-  // Expressions régulières pour identifier les segments à encoder
-  private readonly ENCODING_RULES = [
-    /^[0-9]+$/,
-    /^[a-f0-9]{24}$/i,
-    /^(auth|token|session|key)/i,
-    /[A-Z0-9]{8,}/i
+  // Liste des chemins où on encode l'ID numérique
+  private readonly TARGET_PATHS = [
+    'detail-boutique',
+    'detail-produit',
+    'detail-client',
+    'detail-stock',
+    'facture-proforma-details',
+    'userPermission',
+    'facture-reel-details'
   ];
 
   parse(url: string): UrlTree {
@@ -18,7 +20,7 @@ export class GlobalUrlEncoderSerializer implements UrlSerializer {
     const [path, queryParams] = baseUrl.split('?');
 
     const decodedPath = path.split('/')
-      .map(segment => this.decodeSegmentIfNeeded(segment))
+      .map((segment, index, segments) => this.decodeSegmentIfNeeded(segment, segments, index))
       .join('/');
 
     const decodedQuery = queryParams 
@@ -26,14 +28,13 @@ export class GlobalUrlEncoderSerializer implements UrlSerializer {
           .map(param => {
             const [key, value] = param.split('=');
             return [
-              this.decodeSegmentIfNeeded(key),
-              value ? this.decodeSegmentIfNeeded(value) : ''
+              this.decodeSimple(key),
+              value ? this.decodeSimple(value) : ''
             ].join('=');
           })
           .join('&')
       : undefined;
 
-    // Reconstruction de l'URL
     let fullUrl = decodedPath;
     if (decodedQuery) fullUrl += `?${decodedQuery}`;
     if (fragment) fullUrl += `#${fragment}`;
@@ -47,7 +48,7 @@ export class GlobalUrlEncoderSerializer implements UrlSerializer {
     const [path, queryParams] = baseUrl.split('?');
 
     const encodedPath = path.split('/')
-      .map(segment => this.encodeSegmentIfNeeded(segment))
+      .map((segment, index, segments) => this.encodeSegmentIfNeeded(segment, segments, index))
       .join('/');
 
     const encodedQuery = queryParams
@@ -55,14 +56,13 @@ export class GlobalUrlEncoderSerializer implements UrlSerializer {
           .map(param => {
             const [key, value] = param.split('=');
             return [
-              this.encodeSegmentIfNeeded(key),
-              value ? this.encodeSegmentIfNeeded(value) : ''
+              this.encodeSimple(key),
+              value ? this.encodeSimple(value) : ''
             ].join('=');
           })
           .join('&')
       : undefined;
 
-    // Reconstruction de l'URL encodée
     let fullUrl = encodedPath;
     if (encodedQuery) fullUrl += `?${encodedQuery}`;
     if (fragment) fullUrl += `#${fragment}`;
@@ -70,14 +70,11 @@ export class GlobalUrlEncoderSerializer implements UrlSerializer {
     return fullUrl;
   }
 
-
-  private decodeSegmentIfNeeded(segment: string): string {
+  private decodeSegmentIfNeeded(segment: string, segments: string[], index: number): string {
     if (!segment?.startsWith(this.ENCODED_PREFIX)) return segment;
 
     const encodedContent = segment.substring(this.ENCODED_PREFIX.length);
     
-    if (!this.isValidBase64(encodedContent)) return segment;
-
     try {
       return decodeURIComponent(atob(encodedContent));
     } catch {
@@ -85,22 +82,22 @@ export class GlobalUrlEncoderSerializer implements UrlSerializer {
     }
   }
 
-  private encodeSegmentIfNeeded(segment: string): string {
-    if (!segment || !this.shouldEncodeSegment(segment)) return segment;
+  private encodeSegmentIfNeeded(segment: string, segments: string[], index: number): string {
+    if (!segment) return segment;
 
-    try {
+    // On cible uniquement l'ID qui suit un chemin spécifique
+    if (index > 0 && this.TARGET_PATHS.includes(segments[index - 1]) && /^\d+$/.test(segment)) {
       return `${this.ENCODED_PREFIX}${btoa(encodeURIComponent(segment))}`;
-    } catch {
-      return segment;
     }
+    
+    return segment;
   }
 
-  private shouldEncodeSegment(segment: string): boolean {
-    return this.ENCODING_RULES.some(rule => rule.test(segment));
+  private encodeSimple(value: string): string {
+    return value;
   }
 
-    private isValidBase64(str: string): boolean {
-    return /^[A-Za-z0-9_-]+={0,2}$/.test(str.replace(/[-_]/g, '')) && 
-            str.replace(/[-_]/g, '').length % 4 === 0;
-    }
+  private decodeSimple(value: string): string {
+    return value;
+  }
 }

@@ -51,6 +51,7 @@ interface HistoricalEvent {
   description: string;
   status?: StatutFactureProForma;
   Montant?: number; // Montant de la facture
+  dateRelance?: string;
 }
 
 @Component({
@@ -195,6 +196,7 @@ export class DetailFactureProformaComponent implements OnInit {
     siege: '',
     dateCreation: '',
     description: '',
+    dateRelance: '',
     totalHT: 0,
     tva: false,
     totalFacture: 0,
@@ -246,7 +248,8 @@ export class DetailFactureProformaComponent implements OnInit {
             },
         type: this.mapActionType(action.action),
         description: action.details,
-        status: this.mapActionToStatus(action.action)
+        status: this.mapActionToStatus(action.action),
+        dateRelance: action.action === 'Envoi' ? new Date(historique.dateRelance) : null
       }));
 
       // Ajouter la création si manquante

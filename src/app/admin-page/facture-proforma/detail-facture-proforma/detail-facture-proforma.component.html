@@ -628,6 +628,7 @@
 
             <div class="timeline-container">
                 <div *ngFor="let event of historicalEvents" class="timeline-event">
+
                     <div class="event-avatar">
                         <img [src]="event.user.photo || 'assets/img/profil.png'" alt="Avatar" class="avatar"
                             (error)="event.user.photo = 'assets/img/profil.png'">
@@ -652,10 +653,15 @@
                             'ri-send-plane-line': event.type === 'envoi',
                             'ri-shield-check-line': event.type === 'validation'
                             }"></i>
-                            {{event.description}}
+                            {{event.description}} 
+                            <span *ngIf="event.dateRelance">
+  | 📅 Relance prévue le : {{ event.dateRelance | date: 'short' }}
+</span>
                             <div class="status-badge" *ngIf="event.status">
                                 {{event.status}}
                             </div>
+
+                            
                             
                             <!-- Afficher les approbateurs pour les demandes d'approbation -->
                             <div *ngIf="event.status === 'APPROBATION'" class="approbateurs-list">
