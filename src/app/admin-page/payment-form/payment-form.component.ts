@@ -34,6 +34,12 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
   private activationCounter = 0; // Ajouté
   private totalModules = 0; // Ajouté
 
+  cardNumberDisplay: string = '•••• •••• •••• ••••';
+  cardExpiryDisplay: string = '••/••';
+  cardNameDisplay: string = 'NOM TITULAIRE';
+  cardCvcDisplay: string = '•••';
+  cardFlipped: boolean = false;
+
   countries: Country[] = [
     { code: 'ML', name: 'Mali' },
     { code: 'CI', name: 'Côte d\'Ivoire' },
@@ -87,6 +93,12 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     }
     
     this.cdr.detectChanges();
+    
+    this.cardNumberDisplay = '•••• •••• •••• ••••';
+    this.cardExpiryDisplay = '••/••';
+    this.cardNameDisplay = 'NOM TITULAIRE';
+    this.cardCvcDisplay = '•••';
+    this.cardFlipped = false;
   }
 
   loadPlanDetails() {
@@ -145,10 +157,10 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     let value = input.value.replace(/\D/g, '');
     
     if (value.length > 16) value = value.substring(0, 16);
-    
     value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
     
     this.paymentForm.get('numeroCarte')?.setValue(value, { emitEvent: false });
+    this.cardNumberDisplay = value || '•••• •••• •••• ••••';
   }
 
   formatExpDate(event: Event): void {
@@ -159,6 +171,27 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     if (value.length > 2) value = value.replace(/^(\d{2})/, '$1/');
     
     this.paymentForm.get('dateExpiration')?.setValue(value, { emitEvent: false });
+    this.cardExpiryDisplay = value || '••/••';
+  }
+
+  // Ajoutez cette nouvelle méthode pour le nom
+  formatCardHolderName(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+    this.cardNameDisplay = value.toUpperCase() || 'NOM TITULAIRE';
+  }
+
+  // Ajoutez cette méthode pour le CVC
+  onCvcInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 4) value = value.substring(0, 4);
+    this.cardCvcDisplay = value || '•••';
+  }
+
+  // Ajoutez cette méthode pour retourner la carte
+  flipCard(flip: boolean): void {
+    this.cardFlipped = flip;
   }
 
   onSubmit() {
@@ -232,6 +265,12 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
           
           this.cardPreview = {};
           this.successMessage = ''; // Effacer le message de succès
+
+          this.cardNumberDisplay = '•••• •••• •••• ••••';
+          this.cardExpiryDisplay = '••/••';
+          this.cardNameDisplay = 'NOM TITULAIRE';
+          this.cardCvcDisplay = '•••';
+          this.cardFlipped = false;
         }
       }, 3000);
     }
