@@ -654,9 +654,10 @@
                             'ri-shield-check-line': event.type === 'validation'
                             }"></i>
                             {{event.description}} 
+                            <br>
                             <span *ngIf="event.dateRelance">
-  | 📅 Relance prévue le : {{ event.dateRelance | date: 'short' }}
-</span>
+                             📅 Relance prévue le : {{ event.dateRelance | date:'dd-MM-yyyy':'fr_FR' }}
+                            </span>
                             <div class="status-badge" *ngIf="event.status">
                                 {{event.status}}
                             </div>
@@ -754,29 +755,41 @@
                         <p>Methode d'envoi : </p>
 
                         <div class="checkbox-group" (mousedown)="$event.stopPropagation()">
-                        <label class="custom-radio">
-                            <input
-                            type="radio"
-                            name="methodeEnvoi"
-                            value="physique"
-                            [(ngModel)]="methodeEnvoi"
-                            (change)="onMethodeEnvoiChange()"
-                            />
-                            <span class="radio-mark"></span>
-                            Physique
-                        </label>
+                            <label class="custom-radio">
+                                <input
+                                type="radio"
+                                name="methodeEnvoi"
+                                value="physique"
+                                [(ngModel)]="methodeEnvoi"
+                                (change)="onMethodeEnvoiChange()"
+                                />
+                                <span class="radio-mark"></span>
+                                Physique
+                            </label>
 
-                        <label class="custom-radio">
-                            <input
-                            type="radio"
-                            name="methodeEnvoi"
-                            value="email"
-                            [(ngModel)]="methodeEnvoi"
-                            (change)="onMethodeEnvoiChange()"
-                            />
-                            <span class="radio-mark"></span>
-                            Email
-                        </label>
+                            <label class="custom-radio">
+                                <input
+                                type="radio"
+                                name="methodeEnvoi"
+                                value="email"
+                                [(ngModel)]="methodeEnvoi"
+                                (change)="onMethodeEnvoiChange()"
+                                />
+                                <span class="radio-mark"></span>
+                                Email
+                            </label>
+
+                            <label class="custom-radio">
+                                <input
+                                    type="radio"
+                                    name="methodeEnvoi"
+                                    value="autre"
+                                    [(ngModel)]="methodeEnvoi"
+                                    (change)="onMethodeEnvoiChange()"
+                                />
+                                <span class="radio-mark"></span>
+                                Autre méthode
+                            </label>
                         </div>
                     </div>
 
@@ -784,6 +797,43 @@
                 <i class="ri-close-large-line"></i>
             </div>
         </div>
+
+
+        <div *ngIf="methodeEnvoi === 'autre'" class="autre-envoi-container">
+    
+    <div class="header-section">
+        <i class="ri-information-line icon-delivery"></i>
+
+        <h2>Méthode d'envoi personnalisée</h2>
+    </div>
+
+    <p class="intro-text">
+        Veuillez préciser la méthode d'envoi de votre choix. Cette information est obligatoire pour valider l'envoi.
+    </p>
+
+    <div class="form-group-custom">
+        <!-- <label for="justification">
+            📝 Justification <span class="required">*</span>
+        </label> -->
+        <textarea
+            id="justification"
+            [(ngModel)]="justification"
+            rows="4"
+            placeholder="Exemple : Envoi par coursier, remis en main propre, etc."
+            class="input-textarea"
+        ></textarea>
+    </div>
+
+    <div class="action-buttons">
+        <button
+            class="btn-confirm-wow"
+            [disabled]="!justification || justification.trim().length === 0 || isSending"
+            (click)="confirmEmailSend()"
+        >
+            {{ isSending ? '⏳ Envoi en cours...' : '✅ Confirmer l\'envoi' }}
+        </button>
+    </div>
+</div>
 
 
 
@@ -808,14 +858,12 @@
                             </span>
                             
                             <!-- Champ de saisie intégré -->
-                            <input 
-                                type="text"
+                            <input type="text"
                                 [(ngModel)]="currentEmail"
                                 (keydown.enter)="addEmail()"
                                 (keydown.backspace)="handleBackspace()"
                                 placeholder="Ajouter des destinataires..."
-                                class="inline-email-input"
-                            >
+                                class="inline-email-input">
                         </div>
                     </div>
                 </div>
@@ -846,8 +894,7 @@
                                 (keydown.enter)="addCcEmail()"
                                 (keydown.backspace)="handleCcBackspace()"
                                 placeholder="Ajouter des adresses en copie..."
-                                class="inline-email-input"
-                            >
+                                class="inline-email-input">
                         </div>
                     </div>
                 </div>
@@ -980,6 +1027,11 @@
                                     [disabled]="isSending">
                                 <span *ngIf="!isSending">Confirmer</span>
                                 <div *ngIf="isSending" class="mini-spinner"></div>
+                            </button>
+            
+                            <button *ngIf="methodeEnvoi === 'autre'" 
+                                    class="btn" style="background-color: transparent;">
+                                <span style="display: none;">Confirmer</span>
                             </button>
                         </div>
                    

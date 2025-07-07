@@ -3,9 +3,10 @@ import { Permission } from '../MODELS/permition.interface';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Users } from '../MODELS/utilisateur.model';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UsersService } from '../SERVICES/users.service';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-permission',
@@ -28,6 +29,8 @@ export class PermissionComponent implements OnInit {
   successMessage: string | null = null;
   validationError: string | null = null;
   originalSelectedPermissions: Set<number> = new Set();
+  isLoading: boolean = false;
+  isEditing: boolean = false;
 
   showConfirmationModal = false;
   confirmationTitle = '';
@@ -38,6 +41,7 @@ export class PermissionComponent implements OnInit {
   constructor(
       private usersService: UsersService,
       private route: ActivatedRoute,
+      private router: Router,
     ) {}
 
   permissions: Permission[] = [
@@ -300,6 +304,12 @@ export class PermissionComponent implements OnInit {
       resolve(confirm(message)); 
     });
   }
+
+  navigateBack() {
+    this.router.navigate(['/utilisateur']);
+  }
+
+  toggleEditing(): void {}
 
 
 }
