@@ -1,4 +1,226 @@
 
+.content_formulaire {
+  display: flex;
+}
+
+// .container_global {
+//   display: grid;
+//   grid-template-columns: 72% 28%;
+//   position: relative;
+// }
+
+
+/* formulaire */
+  
+.champ_input {
+  position: relative;
+  margin-bottom: 0px;
+}
+
+.formulaire {
+  position: relative;
+}
+
+.Title h3 {
+  font-size: 18px;
+}
+
+.input_focus {
+  width: 100%;
+  min-width: 250px;
+  height: 49px;
+  outline: none;
+  border-bottom: 1px solid rgb(53, 50, 50);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  margin: 10px 0 0;
+  transition: all 0.3s;
+  font-size: 14px;
+  //padding-left: 10px;
+  background: none;
+  // color: #695c5c;
+  color: #0672E4;
+}
+
+.champ_input .label {
+  position: absolute;
+  top: 22px;
+  left: 4px;
+  pointer-events: none;
+  color: rgb(107, 102, 102);
+}
+
+.input_focus:hover {
+  border-bottom: 1px solid #0672E4;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+
+.input_focus:not(:placeholder-shown) + .label,
+.input_focus:focus + .label {
+  // color: #0672E4;
+  color: rgb(66, 56, 56);
+  top: 0;
+  left: 0;
+  transition: all 0.3s ease-in-out;
+  background: none;
+  font-size: 11px;
+  padding: 0;
+}
+
+.input_focus::placeholder {
+  opacity: 0;
+}
+
+.input_focus:focus::placeholder {
+  opacity: 1;
+  animation-delay: 1s;
+  font-size: 12px;
+  transition: all 0.2s ease-in-out;
+}
+
+.info_titre_input_btn {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 20px;
+}
+  
+.info_titre_input {
+  padding: 20px; 
+}
+
+.formulaire {
+  position: relative;
+}
+
+.champ_grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+
+.champ_grid_triple {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.information_cadre {
+  width: 100%;
+  height: auto;
+  background-color: #fff;
+  box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.108);
+  border-radius: 5px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+  
+/* Masquer l'input checkbox original */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Le « slider » */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px; 
+  width: 14px;
+  left: 3px; 
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+/* Quand le checkbox est coché */
+input:checked + .slider {
+  background-color: #0672E4; /* Couleur au choix */
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+  
+.content_suspendre {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* Conteneur du toast */
 .toast-container {
     position: fixed;
@@ -938,21 +1160,3 @@
     }
   }
 }
-
-// .Container_terminer {
-//   position: sticky;
-//   bottom: 0;
-//   float: right;
-//   width: 40px;
-//   height: 40px;
-//   margin-right: -18px;
-// }
-
-// .Container_terminer .btn_terminer {
-//   border: none;
-//   background-color: #0672E4;
-//   color: #fff;
-//   border-radius: 50%;
-//   width: 100%;
-//   height: 100%;
-// }

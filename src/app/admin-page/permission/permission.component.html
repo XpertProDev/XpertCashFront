@@ -1,5 +1,124 @@
+<div class="container_global">
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Connexion en cours...</p>
+    </div>
+  </div>
+  
 
-<div class="container_detail_user">
+  <div class="content_formulaire">
+
+    <div class="modal-body">
+
+      <form class="container_formulaire" >
+
+        <!-- Icon return  -->
+        <p class="retour_icon_text" (click)="navigateBack()" style="cursor: pointer; color: #0672E4;" title="Retour sur la page produit">
+            <i class="ri-arrow-left-s-line"></i> <span style="margin-left: 8px; font-size: 12px;">Utilisateur</span>
+        </p>
+
+        <!-- Titre d'ajout de produits  -->
+        <!-- <div class="Title">
+          <h3>Utilisateur</h3>
+        </div> -->
+
+        <div class="form_left_right">
+
+          <!-- Formular ajouter produit  -->
+          <div class="formulaire">
+            
+            <!-- Les information des produit  -->
+            <div class="information_cadre">
+              <div class="info_titre_input">
+                <div class="content_return" style="display: flex; align-items: center; justify-content: space-between;">
+                  <h4>Information personnel</h4>
+                  <!-- <div class="icon_edit" style="cursor: pointer;">
+                    <i *ngIf="!isEditing" style="font-size: 16px;"
+                        class="ri-edit-box-line" 
+                        title="Cliquer ici pour modifier"
+                        (click)="toggleEditing()"></i>
+
+                    <i style="color: #ff0000; font-size: 16px;"
+                        class="ri-close-line" 
+                        title="Fermer l'édition"
+                        (click)="toggleEditing()"></i>
+                  </div> -->
+                </div>
+
+                <div class="champ_grid_triple">
+                  <!-- Input de nom produits  -->
+                  <div class="champ_input">
+                    <input type="text" class="input_focus" value="{{ user?.nomComplet }}" id="nomComplet" name="nomComplet" 
+                    placeholder="Saisis le nom" readonly style="cursor: auto;">
+                    <label for="nomComplet" class="label labelColor">Nom et prénom</label>
+                  </div>
+
+                  <!-- Input de Nom  -->
+                  <div class="champ_input">
+                    <input type="text" class="input_focus" value="{{ user?.email }}" id="email" name="email" 
+                    placeholder="Saisis l'adresse email" readonly style="cursor: auto;">
+                    <label for="email" class="label labelColor">Email</label>
+                  </div>
+
+                  <!-- Input de Nom  -->
+                  <div class="champ_input">
+                    <input type="text" class="input_focus" value="{{ user?.role?.name }}" id="role" name="role" readonly style="cursor: auto;">
+                    <label for="role" class="label labelColor">Rôle</label>
+                  </div>
+                </div>
+
+                <div class="champ_grid">
+                   <!-- Input de nom produits  -->
+                   <div class="champ_input">
+                    <input  type="text" class="input_focus" value="{{ user?.pays }}" id="pays" name="pays" 
+                    placeholder="Saisis le pays" readonly style="cursor: auto;">
+                    <label for="prixVente" class="label labelColor">Pays</label>
+                  </div>
+
+                  <!-- Input de prixAchat  -->
+                  <div class="champ_input">
+                    <input type="text" class="input_focus" value="{{ user?.phone }}" required id="phone" name="phone" 
+                    placeholder="Saisis le numéro de téléphone" readonly style="cursor: auto;">
+                    <label for="phone" class="label labelColor">Numéro de téléphone</label>
+                  </div>
+                </div>
+
+                <div class="champ_grid">
+                   <!-- Input de nom produits  -->
+                   <div class="champ_input">
+                    <input  type="text" class="input_focus" value="{{ user?.personalCode }}" id="codePin" name="codePin" readonly style="cursor: no-drop;">
+                    <label for="codePin" class="label labelColor">Code PIN</label>
+                  </div>
+
+                  <!-- Input de prixAchat  -->
+                  <div class="content_suspendre">
+                    <div class="name_permission">
+                        {{ user?.enabledLien ? 'Suspendre utilisateur' : 'Activer utilisateur' }}
+                    </div>
+
+                    <label class="switch">
+                        <input type="checkbox" [checked]="!user?.enabledLien" (change)="onSuspendChange($event)"/>
+                        <span class="slider round"></span>
+                    </label>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+        
+      </form>
+
+    </div>
+</div>
+</div>
+
+
+<!-- <div class="container_detail_user" style="margin-top: 20px;">
     <div class="title_div">
         <div class="title">
             <span class="h4">Information personnel</span>
@@ -50,7 +169,6 @@
                     [checked]="!user?.enabledLien"
                     (change)="onSuspendChange($event)">
                 
-                <!-- Le label englobe maintenant toute la carte -->
                 <label class="btn-lock" for="inpLock">
                     <div class="name_permission">
                         {{ user?.enabledLien ? 'Suspendre utilisateur' : 'Activer utilisateur' }}
@@ -84,7 +202,7 @@
     </div>
 
 
-</div>
+</div> -->
 
 <div class="toast-container">
     <!-- Ajouter la nouvelle alerte -->
