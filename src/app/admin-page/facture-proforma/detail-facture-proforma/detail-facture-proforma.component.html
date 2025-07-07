@@ -793,7 +793,7 @@
 
 
         <div *ngIf="methodeEnvoi === 'autre'" class="sous-methodes">
-            <h4>Sélectionnez une méthode :</h4>
+            <h6>Sélectionnez une méthode :</h6>
             <div class="sous-methodes-options">
                 <button (click)="selectSousMethode('whatsapp')">
                     <i class="ri-whatsapp-line"></i> WhatsApp
@@ -890,8 +890,7 @@
                                 (keydown.enter)="addCcEmail()"
                                 (keydown.backspace)="handleCcBackspace()"
                                 placeholder="Ajouter des adresses en copie..."
-                                class="inline-email-input"
-                            >
+                                class="inline-email-input">
                         </div>
                     </div>
                 </div>
@@ -1024,6 +1023,11 @@
                                     [disabled]="isSending">
                                 <span *ngIf="!isSending">Confirmer</span>
                                 <div *ngIf="isSending" class="mini-spinner"></div>
+                            </button>
+            
+                            <button *ngIf="methodeEnvoi === 'autre'" 
+                                    class="btn" style="background-color: transparent;">
+                                <span style="display: none;">Confirmer</span>
                             </button>
                         </div>
                    
