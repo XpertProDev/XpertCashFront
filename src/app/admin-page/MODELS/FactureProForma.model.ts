@@ -43,7 +43,8 @@ export interface FactureProForma {
   dateApprobation?: string;
   noteModification?: string;
   // dateAnnulation?: string;
-  methodeEnvoi?: 'EMAIL' | 'PHYSIQUE';
+  // methodeEnvoi?: 'EMAIL' | 'PHYSIQUE';
+  methodeEnvoi?: 'EMAIL' | 'PHYSIQUE' | 'AUTRE';
 
   montantTVA?: number;
   tauxTva?: number;

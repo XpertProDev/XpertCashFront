@@ -91,7 +91,8 @@ export class DetailFactureProformaComponent implements OnInit {
   emailSujet: string = '';
   emailMessage: string = '';
   // methodeEnvoi: string = 'EMAIL';
-  methodeEnvoi: 'physique' | 'email' = 'physique'; // Valeur par défaut
+  // methodeEnvoi: 'physique' | 'email' = 'physique';
+  methodeEnvoi: 'physique' | 'email' | 'autre' = 'physique';
   // Variables pour le déplacement
   isDragging = false;
   startX = 0;
@@ -112,6 +113,7 @@ export class DetailFactureProformaComponent implements OnInit {
   role: string | null = null;
   entrprisePhone: string | null = null;
   noteEditingIndex: number | null = null;
+  activeMenuIndex: number | null = null;
 
   siege!: string;
   email: string = '';
@@ -148,8 +150,10 @@ export class DetailFactureProformaComponent implements OnInit {
   infoMessage: string | null = null;
   confirmDeleteIndex: number | null = null;
   private apiUrl = environment.imgUrl;
+  whatsappPrepared: boolean = false;
   
-
+  selectedSousMethode: string | null = null;
+  whatsappNumber: string = '';
 
 
   @ViewChild('editableContent', { static: false }) editableContent!: ElementRef;
@@ -1037,34 +1041,36 @@ get labelNom(): string {
   }
 
   async confirmEmailSend() {
-    this.isSending = true;
-  
-    // Simuler un chargement de 3 secondes
-    await new Promise(resolve => setTimeout(resolve, 3000));
-  try {
-    // Mettre à jour la facture d'abord
-    const payload: Partial<FactureProForma> = {
-      statut: StatutFactureProForma.ENVOYE,
-      methodeEnvoi: this.methodeEnvoi.toUpperCase() as 'EMAIL' | 'PHYSIQUE',
-      dateRelance: this.dateRelance ? new Date(this.dateRelance).toISOString() : undefined
-    };
+      this.isSending = true;
+      
+      try {
+          // Mettre à jour la facture d'abord
+          const payload: Partial<FactureProForma> = {
+              statut: StatutFactureProForma.ENVOYE,
+              methodeEnvoi: this.methodeEnvoi.toUpperCase() as 'EMAIL' | 'PHYSIQUE' | 'AUTRE',
+              dateRelance: this.dateRelance ? new Date(this.dateRelance).toISOString() : undefined
+          };
 
-    const updatedFacture = await this.factureProFormaService.updateFactureProforma(
-      this.factureId,
-      this.activeRemise ? this.remisePourcentage : undefined,
-      this.activeTva,
-      payload
-    ).toPromise();
+          const updatedFacture = await this.factureProFormaService.updateFactureProforma(
+              this.factureId,
+              this.activeRemise ? this.remisePourcentage : undefined,
+              this.activeTva,
+              payload
+          ).toPromise();
 
-    if (this.methodeEnvoi === 'email') {
-      await this.handleEmailSending();
-    }
+          if (this.methodeEnvoi === 'email') {
+              await this.handleEmailSending();
+          } else if (this.methodeEnvoi === 'autre' && this.selectedSousMethode === 'whatsapp') {
+              await this.prepareWhatsApp();
+          }
 
-    this.showEmailPopup = false;
-    this.router.navigate(['/facture-proforma']);
-  } catch (error) {
-    this.handleError(error);
-  }
+          this.showEmailPopup = false;
+          this.router.navigate(['/facture-proforma']);
+      } catch (error) {
+          this.handleError(error);
+      } finally {
+          this.isSending = false;
+      }
   }
 
   private async handleEmailSending() {
@@ -1269,14 +1275,14 @@ get labelNom(): string {
     }
   }
 
-  // Ajouter cette méthode
-  onMethodeEnvoiChange() {
-    if (this.methodeEnvoi === 'physique') {
-      // Réinitialiser les champs email si besoin
-      // this.emailDestinatairesList = [];
-      // this.currentEmail = '';
-    }
-  }
+  // // Ajouter cette méthode
+  // onMethodeEnvoiChange() {
+  //   if (this.methodeEnvoi === 'physique') {
+  //     // Réinitialiser les champs email si besoin
+  //     // this.emailDestinatairesList = [];
+  //     // this.currentEmail = '';
+  //   }
+  // }
 
   async generatePDFAttachment(): Promise<File> {
     try {
@@ -1856,78 +1862,185 @@ toggleAddNoteInput() {
   this.isAddNoteInputVisible = false;
 }
 
-activeMenuIndex: number | null = null;
-toggleNoteMenu(index: number): void {
-  this.activeMenuIndex = this.activeMenuIndex === index ? null : index;
-  this.confirmDeleteIndex = null;
-}
+  toggleNoteMenu(index: number): void {
+    this.activeMenuIndex = this.activeMenuIndex === index ? null : index;
+    this.confirmDeleteIndex = null;
+  }
 
-editNote(index: number): void {
-  const note = this.notes[index];
-  console.log('Note sélectionnée pour modification:', note);
-  this.noteModification = note.content;
-  this.isAddNoteInputVisible = true;
-  this.activeMenuIndex = null;
-  this.noteEditingIndex = index;
-}
-
+  editNote(index: number): void {
+    const note = this.notes[index];
+    console.log('Note sélectionnée pour modification:', note);
+    this.noteModification = note.content;
+    this.isAddNoteInputVisible = true;
+    this.activeMenuIndex = null;
+    this.noteEditingIndex = index;
+  }
 
 
-askDelete(index: number) {
-  this.confirmDeleteIndex = index;
-}
+  askDelete(index: number) {
+    this.confirmDeleteIndex = index;
+  }
 
-confirmDelete(index: number) {
-  this.errorMessage = null;
-  const note = this.notes[index];
-  if (!note || !note.id) return;
+  confirmDelete(index: number) {
+    this.errorMessage = null;
+    const note = this.notes[index];
+    if (!note || !note.id) return;
 
-  this.factureProFormaService.deletNoteFactureProforma(this.factureId, note.id)
-    .subscribe({
-      next: () => {
-        // Rechercher la note par ID, pour éviter les erreurs d'index après suppression
-        const idIndex = this.notes.findIndex(n => n.id === note.id);
-        if (idIndex !== -1) {
-          this.notes.splice(idIndex, 1);
+    this.factureProFormaService.deletNoteFactureProforma(this.factureId, note.id)
+      .subscribe({
+        next: () => {
+          // Rechercher la note par ID, pour éviter les erreurs d'index après suppression
+          const idIndex = this.notes.findIndex(n => n.id === note.id);
+          if (idIndex !== -1) {
+            this.notes.splice(idIndex, 1);
+          }
+          this.confirmDeleteIndex = null;
+          this.activeMenuIndex = null;
+          console.log('Note supprimée avec succès');
+          this.loadHistoricalEvents();
+          this.loadNotes();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression de la note :', err);
+          //affiche erre errorMessage
+          this.errorMessage = err.error?.message || 'Erreur lors de la suppression de la note.';
+          this.activeMenuIndex = null;
+
         }
-        this.confirmDeleteIndex = null;
-        this.activeMenuIndex = null;
-        console.log('Note supprimée avec succès');
-        this.loadHistoricalEvents();
-        this.loadNotes();
-      },
-      error: (err) => {
-        console.error('Erreur lors de la suppression de la note :', err);
-        //affiche erre errorMessage
-        this.errorMessage = err.error?.message || 'Erreur lors de la suppression de la note.';
-        this.activeMenuIndex = null;
 
-      }
+        
+      });
+  }
 
+
+  cancelDelete() {
+    this.confirmDeleteIndex = null;
+    this.activeMenuIndex = null;
+  }
+
+  private setDefaultDateRelance(): void {
+    const now = new Date();
+    const in72h = new Date(now.getTime() + 72 * 60 * 60 * 1000);
+    this.dateRelance = this.formatDateForInput(in72h);
+  }
+
+  private formatDateForInput(date: Date): string {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  navigateBack() {
+    this.router.navigate(['/facture-proforma'])
+  }
+
+  // selectSousMethode(methode: string) {
+  //     this.selectedSousMethode = methode;
       
-    });
+  //     if (methode === 'whatsapp') {
+  //         this.prepareWhatsApp();
+  //     }
+  // }
+
+  selectSousMethode(methode: string) {
+    this.selectedSousMethode = methode;
+    this.whatsappPrepared = false; // Réinitialiser l'état
+  }
+
+  // async prepareWhatsApp() {
+  //     try {
+  //         // Générer le PDF
+  //         const pdfFile = await this.generatePDFAttachment();
+  //         const pdfUrl = URL.createObjectURL(pdfFile);
+          
+  //         // Téléphone par défaut
+  //         let phone = this.destinataire.telephone || '';
+          
+  //         // Nettoyer le numéro
+  //         phone = phone.replace(/\D/g, '');
+          
+  //         // Créer le lien WhatsApp
+  //         const whatsappLink = `https://wa.me/${phone}?text=${encodeURIComponent('Bonjour, veuillez trouver notre facture proforma en pièce jointe.')}`;
+          
+  //         // Ouvrir dans un nouvel onglet
+  //         window.open(whatsappLink, '_blank');
+          
+  //         // Télécharger automatiquement le PDF pour l'utilisateur
+  //         const a = document.createElement('a');
+  //         a.href = pdfUrl;
+  //         a.download = pdfFile.name;
+  //         document.body.appendChild(a);
+  //         a.click();
+  //         document.body.removeChild(a);
+          
+  //         // Fermer le popup après 2 secondes
+  //         setTimeout(() => {
+  //             this.showEmailPopup = false;
+  //             this.methodeEnvoi = 'physique'; // Réinitialiser
+  //             this.selectedSousMethode = null;
+  //         }, 2000);
+          
+  //     } catch (error) {
+  //         console.error('Erreur WhatsApp:', error);
+  //         this.errorMessage = "Erreur lors de la préparation du partage WhatsApp";
+  //     }
+  // }
+
+  // Modifiez la méthode onMethodeEnvoiChange
+  
+  async prepareWhatsApp() {
+    try {
+        // Générer le PDF
+        const pdfFile = await this.generatePDFAttachment();
+        const pdfUrl = URL.createObjectURL(pdfFile);
+
+        // Télécharger le PDF automatiquement
+        const a = document.createElement('a');
+        a.href = pdfUrl;
+        a.download = pdfFile.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Marquer comme préparé et afficher les instructions
+        this.whatsappPrepared = true;
+    } catch (error) {
+        console.error('Erreur WhatsApp:', error);
+        this.errorMessage = "Erreur lors de la préparation du partage WhatsApp";
+    }
 }
 
+openWhatsApp() {
+    // Ouvrir WhatsApp Web ou l'application mobile sans numéro spécifique
+    // const whatsappLink = 'https://web.whatsapp.com/';
+    // window.open(whatsappLink, '_blank');
 
-cancelDelete() {
-  this.confirmDeleteIndex = null;
-  this.activeMenuIndex = null;
+    // Option pour mobile (peut ne pas fonctionner sur tous les navigateurs)
+    const mobileLink = 'whatsapp://';
+    window.open(mobileLink, '_blank');
+
+    // Fermer le popup après ouverture
+    setTimeout(() => {
+        this.showEmailPopup = false;
+        this.methodeEnvoi = 'physique'; // Réinitialiser
+        this.selectedSousMethode = null;
+        this.whatsappPrepared = false;
+    }, 1000);
 }
 
-private setDefaultDateRelance(): void {
-  const now = new Date();
-  const in72h = new Date(now.getTime() + 72 * 60 * 60 * 1000);
-  this.dateRelance = this.formatDateForInput(in72h);
+resetWhatsApp() {
+    this.whatsappPrepared = false;
+    this.errorMessage = null;
 }
 
-private formatDateForInput(date: Date): string {
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
+  onMethodeEnvoiChange() {
+    this.selectedSousMethode = null;
+    
+    if (this.methodeEnvoi === 'email') {
+        this.prepareEmailContent();
+    }
+  }
 
-navigateBack() {
-  this.router.navigate(['/facture-proforma'])
-}
+  prepareEmailContent() {}
 
 
 }

@@ -748,29 +748,41 @@
                         <p>Methode d'envoi : </p>
 
                         <div class="checkbox-group" (mousedown)="$event.stopPropagation()">
-                        <label class="custom-radio">
-                            <input
-                            type="radio"
-                            name="methodeEnvoi"
-                            value="physique"
-                            [(ngModel)]="methodeEnvoi"
-                            (change)="onMethodeEnvoiChange()"
-                            />
-                            <span class="radio-mark"></span>
-                            Physique
-                        </label>
+                            <label class="custom-radio">
+                                <input
+                                type="radio"
+                                name="methodeEnvoi"
+                                value="physique"
+                                [(ngModel)]="methodeEnvoi"
+                                (change)="onMethodeEnvoiChange()"
+                                />
+                                <span class="radio-mark"></span>
+                                Physique
+                            </label>
 
-                        <label class="custom-radio">
-                            <input
-                            type="radio"
-                            name="methodeEnvoi"
-                            value="email"
-                            [(ngModel)]="methodeEnvoi"
-                            (change)="onMethodeEnvoiChange()"
-                            />
-                            <span class="radio-mark"></span>
-                            Email
-                        </label>
+                            <label class="custom-radio">
+                                <input
+                                type="radio"
+                                name="methodeEnvoi"
+                                value="email"
+                                [(ngModel)]="methodeEnvoi"
+                                (change)="onMethodeEnvoiChange()"
+                                />
+                                <span class="radio-mark"></span>
+                                Email
+                            </label>
+
+                            <label class="custom-radio">
+                                <input
+                                    type="radio"
+                                    name="methodeEnvoi"
+                                    value="autre"
+                                    [(ngModel)]="methodeEnvoi"
+                                    (change)="onMethodeEnvoiChange()"
+                                />
+                                <span class="radio-mark"></span>
+                                Autre méthode
+                            </label>
                         </div>
                     </div>
 
@@ -780,7 +792,47 @@
         </div>
 
 
+        <div *ngIf="methodeEnvoi === 'autre'" class="sous-methodes">
+            <h4>Sélectionnez une méthode :</h4>
+            <div class="sous-methodes-options">
+                <button (click)="selectSousMethode('whatsapp')">
+                    <i class="ri-whatsapp-line"></i> WhatsApp
+                </button>
+                <!-- Ajouter d'autres options ici si besoin -->
+            </div>
+        </div>
 
+        <div class="contenue_form_envoyer contenue_form_whatsapp" *ngIf="methodeEnvoi === 'autre' && selectedSousMethode === 'whatsapp'">
+            <div class="whatsapp-container">
+                <div class="whatsapp-header">
+                    <i class="ri-whatsapp-fill"></i>
+                    <h3>Partager via WhatsApp</h3>
+                </div>
+                
+                <div class="whatsapp-info" *ngIf="!whatsappPrepared">
+                    <p>La facture sera téléchargée sur votre appareil. Ensuite, vous pourrez la partager avec les contacts de votre choix sur WhatsApp.</p>
+                    <div class="whatsapp-actions">
+                        <button class="btn btn-primary" (click)="prepareWhatsApp()">
+                            <i class="ri-download-line"></i> Préparer et partager
+                        </button>
+                    </div>
+                </div>
+
+                <div class="whatsapp-instructions" *ngIf="whatsappPrepared">
+                    <p>1. Le PDF a été téléchargé sur votre appareil.</p>
+                    <p>2. Cliquez ci-dessous pour ouvrir WhatsApp.</p>
+                    <p>3. Sélectionnez les contacts auxquels vous souhaitez envoyer la facture et attachez le PDF.</p>
+                    <div class="whatsapp-actions">
+                        <button class="btn btn-primary" (click)="openWhatsApp()">
+                            <i class="ri-whatsapp-line"></i> Ouvrir WhatsApp
+                        </button>
+                        <button class="btn btn-secondary" (click)="resetWhatsApp()">
+                            Recommencer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="barre"></div>
 
@@ -802,14 +854,12 @@
                             </span>
                             
                             <!-- Champ de saisie intégré -->
-                            <input 
-                                type="text"
+                            <input type="text"
                                 [(ngModel)]="currentEmail"
                                 (keydown.enter)="addEmail()"
                                 (keydown.backspace)="handleBackspace()"
                                 placeholder="Ajouter des destinataires..."
-                                class="inline-email-input"
-                            >
+                                class="inline-email-input">
                         </div>
                     </div>
                 </div>
