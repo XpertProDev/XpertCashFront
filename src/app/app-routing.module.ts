@@ -1,6 +1,6 @@
 // Angular Import
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes, RouterModule, UrlSerializer } from '@angular/router';
 
 // project import
 import { AdminComponent } from './theme/layout/admin/admin.component';
@@ -10,6 +10,8 @@ import { guestGuard } from './admin-page/guards/guestGuard';
 import { ModuleAccessGuard } from './admin-page/guards/ModuleAccessGuard';
 import { PricingCardComponent } from './admin-page/pricing-card/pricing-card.component';
 import { PaymentFormComponent } from './admin-page/payment-form/payment-form.component';
+import { GlobalUrlEncoderSerializer } from './admin-page/guards/GlobalUrlEncoderSerializer';
+
 
 
 const routes: Routes = [
@@ -246,6 +248,9 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
+  providers: [
+    { provide: UrlSerializer, useClass: GlobalUrlEncoderSerializer }
+  ],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}
