@@ -71,6 +71,7 @@ export class ProduitService {
   getProduitById(productId: number): Observable<Produit> {
     const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    
     return this.http.get<Produit>(`${this.apiUrl}/produits/${productId}`, { headers });
   }
 

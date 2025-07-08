@@ -614,18 +614,31 @@
 
 <!-- Modal de confirmation de suppression -->
 <div class="confirmation-modal" *ngIf="showDeleteModal">
-  <div class="modal-content">
-    <h4 style="font-size: 16px; margin-bottom: 10px;">Confirmation de suppression</h4>
-    <p style="font-size: 12px;">{{ deleteMessage }}</p>
-    
-    <div class="modal-actions">
-      <button class="btn-cancel" style="font-size: 12px;" 
+  <div class="ds-modal-content ds-elevated ds-modal-content--dialog" role="dialog" style="font-size: var(--ds-font-size-m); line-height: var(--ds-line-height-m);">
+  <div class="ds-modal-content__header-wrapper">
+    <h4 class="ds-modal-content__title">Confirmation de suppression</h4>
+    <button class="ds-icon-button" tabindex="0" (click)="cancelDelete()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+        <path fill="currentColor" d="M4.397 4.554l.073-.084a.75.75 0 0 1 .976-.073l.084.073L12 10.939l6.47-6.47a.75.75 0 1 1 1.06 1.061L13.061 12l6.47 6.47a.75.75 0 0 1 .072.976l-.073.084a.75.75 0 0 1-.976.073l-.084-.073L12 13.061l-6.47 6.47a.75.75 0 0 1-1.06-1.061L10.939 12l-6.47-6.47a.75.75 0 0 1-.072-.976l.073-.084z"></path>
+      </svg>
+    </button>
+  </div>
+  
+  <div class="ds-modal-body">
+    <p>{{ deleteMessage }}</p>
+  </div>
+  
+  <div class="ds-modal-content__footer">
+    <div class="ds-flex" style="justify-content: flex-end; gap: 12px;">
+      <button class="ds-button ds-button--secondary ds-button--filled ds-button--rect ds-button--m" 
+              tabindex="0"
               (click)="cancelDelete()"
               [disabled]="isDeleting">
         Annuler
       </button>
       
-      <button class="btn-confirm" style="font-size: 12px;" 
+      <button class="ds-button ds-button--error ds-button--filled ds-button--rect ds-button--m" 
+              tabindex="0"
               (click)="confirmDelete()"
               [disabled]="isDeleting">
         <span *ngIf="!isDeleting">Supprimer</span>
@@ -633,6 +646,7 @@
       </button>
     </div>
   </div>
+</div>
 </div>
 
 <div *ngIf="isDeleting" class="loading-overlay">

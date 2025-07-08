@@ -94,6 +94,8 @@
               <th class="th">Produits</th>
               <th class="th">Statut</th>
               <th class="th">Total</th>
+              <th class="th">Date Relance</th>
+
           </tr>
       </thead>
       <tbody>
@@ -116,6 +118,11 @@
                   <!-- {{ getTotalFacture(facture) | customNumber }} -->
                 {{ facture.totalFacture| customNumber  }} CFA
               </td>
+
+               <td class="td">
+                {{ facture.dateRelance ? (facture.dateRelance | date: 'dd-MM-yyyy' : 'fr_FR') : 'pas de date' }}
+              </td>
+
           </tr>
       </tbody>
   </table>
@@ -175,6 +182,8 @@
               <td class="tb_total">||</td>
             </tr>
           </ng-container>
+
+          
         
           <ng-template #noLines>
             <tr>

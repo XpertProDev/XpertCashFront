@@ -192,7 +192,7 @@ export class FactureReelDetailsComponent implements OnInit {
     switch(statut) {
       case 'PAYEE': return 'Payée';
       case 'PARTIELLEMENT_PAYEE': return 'Partiellement payée';
-      case 'EN_ATTENTE': return 'En attente';
+      case 'EN_ATTENTE': return 'Non payé ';
       default: return statut;
     }
   }

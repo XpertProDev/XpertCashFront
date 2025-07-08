@@ -51,6 +51,7 @@ interface HistoricalEvent {
   description: string;
   status?: StatutFactureProForma;
   Montant?: number; // Montant de la facture
+  dateRelance?: string;
 }
 
 @Component({
@@ -85,6 +86,7 @@ export class DetailFactureProformaComponent implements OnInit {
   selectedStatutLabel = '';
   statusOptions = StatutFactureProForma;
   dateRelance?: string;
+  justification?: string;
   users: any[] = [];
   filteredUsers: any[] = [];
   emailDestinataires: string = '';
@@ -199,6 +201,8 @@ export class DetailFactureProformaComponent implements OnInit {
     siege: '',
     dateCreation: '',
     description: '',
+    dateRelance: '',
+    justification:'',
     totalHT: 0,
     tva: false,
     totalFacture: 0,
@@ -250,7 +254,8 @@ export class DetailFactureProformaComponent implements OnInit {
             },
         type: this.mapActionType(action.action),
         description: action.details,
-        status: this.mapActionToStatus(action.action)
+        status: this.mapActionToStatus(action.action),
+        dateRelance: action.action === 'Envoi' ? new Date(historique.dateRelance) : null
       }));
 
       // Ajouter la création si manquante
@@ -1040,38 +1045,64 @@ get labelNom(): string {
     this.router.navigate(['/facture-proforma']);
   }
 
-  async confirmEmailSend() {
-      this.isSending = true;
-      
-      try {
-          // Mettre à jour la facture d'abord
-          const payload: Partial<FactureProForma> = {
-              statut: StatutFactureProForma.ENVOYE,
-              methodeEnvoi: this.methodeEnvoi.toUpperCase() as 'EMAIL' | 'PHYSIQUE' | 'AUTRE',
-              dateRelance: this.dateRelance ? new Date(this.dateRelance).toISOString() : undefined
-          };
 
-          const updatedFacture = await this.factureProFormaService.updateFactureProforma(
-              this.factureId,
-              this.activeRemise ? this.remisePourcentage : undefined,
-              this.activeTva,
-              payload
-          ).toPromise();
 
-          if (this.methodeEnvoi === 'email') {
-              await this.handleEmailSending();
-          } else if (this.methodeEnvoi === 'autre' && this.selectedSousMethode === 'whatsapp') {
-              await this.prepareWhatsApp();
-          }
-
-          this.showEmailPopup = false;
-          this.router.navigate(['/facture-proforma']);
-      } catch (error) {
-          this.handleError(error);
-      } finally {
-          this.isSending = false;
-      }
+  onMethodeEnvoiChange() {
+    this.selectedSousMethode = null;
   }
+
+async confirmEmailSend() {
+    this.isSending = true;
+
+    try {
+        // Normaliser la méthode en majuscules dès le début
+        const methode = (this.methodeEnvoi ?? '').toUpperCase();
+
+        // Vérification stricte des valeurs autorisées
+        if (!['PHYSIQUE', 'EMAIL', 'AUTRE'].includes(methode)) {
+            throw new Error("Méthode d'envoi invalide.");
+        }
+
+        // Si méthode 'AUTRE', justification obligatoire
+        if (methode === 'AUTRE' && !(this.justification ?? '').trim().length) {
+            throw new Error("Veuillez fournir une justification pour la méthode 'Autre'.");
+        }
+
+        const payload: Partial<FactureProForma> = {
+            statut: StatutFactureProForma.ENVOYE,
+            methodeEnvoi: methode as 'EMAIL' | 'PHYSIQUE' | 'AUTRE',
+            dateRelance: this.dateRelance ? new Date(this.dateRelance).toISOString() : undefined,
+            justification: methode === 'AUTRE' ? (this.justification ?? '').trim() : undefined
+        };
+
+        // Appel au service pour mise à jour
+        const updatedFacture = await this.factureProFormaService.updateFactureProforma(
+            this.factureId,
+            this.activeRemise ? this.remisePourcentage : undefined,
+            this.activeTva,
+            payload
+        ).toPromise();
+
+        // Comportement selon la méthode sélectionnée
+        if (methode === 'EMAIL') {
+            await this.handleEmailSending();
+        } else if (methode === 'AUTRE' && this.selectedSousMethode?.toLowerCase() === 'whatsapp') {
+            await this.prepareWhatsApp();
+        } else if (methode === 'PHYSIQUE') {
+            console.log('📦 Facture envoyée par voie physique.');
+        }
+
+        this.showEmailPopup = false;
+        this.router.navigate(['/facture-proforma']);
+
+    } catch (error) {
+        this.handleError(error);
+    } finally {
+        this.isSending = false;
+    }
+}
+
+
 
   private async handleEmailSending() {
     // Collecter les données de l'email
@@ -2011,34 +2042,23 @@ toggleAddNoteInput() {
 
 openWhatsApp() {
     // Ouvrir WhatsApp Web ou l'application mobile sans numéro spécifique
-    // const whatsappLink = 'https://web.whatsapp.com/';
-    // window.open(whatsappLink, '_blank');
+    const whatsappLink = 'https://web.whatsapp.com/';
+    window.open(whatsappLink, '_blank');
 
     // Option pour mobile (peut ne pas fonctionner sur tous les navigateurs)
-    const mobileLink = 'whatsapp://';
-    window.open(mobileLink, '_blank');
+    // const mobileLink = 'whatsapp://';
+    // window.open(mobileLink, '_blank');
 
     // Fermer le popup après ouverture
     setTimeout(() => {
         this.showEmailPopup = false;
-        this.methodeEnvoi = 'physique'; // Réinitialiser
+        this.methodeEnvoi = 'autre'; // Réinitialiser
         this.selectedSousMethode = null;
         this.whatsappPrepared = false;
     }, 1000);
 }
 
-resetWhatsApp() {
-    this.whatsappPrepared = false;
-    this.errorMessage = null;
-}
 
-  onMethodeEnvoiChange() {
-    this.selectedSousMethode = null;
-    
-    if (this.methodeEnvoi === 'email') {
-        this.prepareEmailContent();
-    }
-  }
 
   prepareEmailContent() {}
 

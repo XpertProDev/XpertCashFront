@@ -45,6 +45,7 @@ export interface FactureProForma {
   // dateAnnulation?: string;
   // methodeEnvoi?: 'EMAIL' | 'PHYSIQUE';
   methodeEnvoi?: 'EMAIL' | 'PHYSIQUE' | 'AUTRE';
+  justification?: string;
 
   montantTVA?: number;
   tauxTva?: number;

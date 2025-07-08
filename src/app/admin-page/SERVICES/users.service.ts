@@ -197,9 +197,13 @@ export class UsersService {
   }
 
   
-  getUserById(userId: number): Observable<UserNewRequest> {
-    return this.http.get<UserNewRequest>(`${this.apiUrl}/user/${userId}`);
-  }
+getUserById(userId: number): Observable<UserNewRequest> {
+const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    
+    return this.http.get<UserNewRequest>(`${this.apiUrl}/user/${userId}`, { headers });
+}
+
 
   // Methode pour le service permission
   assignPermissionsToUser(userId: number, permissions: { [key: string]: boolean }): Observable<UserNewRequest> {

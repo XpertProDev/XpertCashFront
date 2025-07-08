@@ -628,6 +628,7 @@
 
             <div class="timeline-container">
                 <div *ngFor="let event of historicalEvents" class="timeline-event">
+
                     <div class="event-avatar">
                         <img [src]="event.user.photo || 'assets/img/profil.png'" alt="Avatar" class="avatar"
                             (error)="event.user.photo = 'assets/img/profil.png'">
@@ -652,10 +653,16 @@
                             'ri-send-plane-line': event.type === 'envoi',
                             'ri-shield-check-line': event.type === 'validation'
                             }"></i>
-                            {{event.description}}
+                            {{event.description}} 
+                            <br>
+                            <span *ngIf="event.dateRelance">
+                             📅 Relance prévue le : {{ event.dateRelance | date:'dd-MM-yyyy':'fr_FR' }}
+                            </span>
                             <div class="status-badge" *ngIf="event.status">
                                 {{event.status}}
                             </div>
+
+                            
                             
                             <!-- Afficher les approbateurs pour les demandes d'approbation -->
                             <div *ngIf="event.status === 'APPROBATION'" class="approbateurs-list">
@@ -792,47 +799,44 @@
         </div>
 
 
-        <div *ngIf="methodeEnvoi === 'autre'" class="sous-methodes">
-            <h6>Sélectionnez une méthode :</h6>
-            <div class="sous-methodes-options">
-                <button (click)="selectSousMethode('whatsapp')">
-                    <i class="ri-whatsapp-line"></i> WhatsApp
-                </button>
-                <!-- Ajouter d'autres options ici si besoin -->
-            </div>
-        </div>
+        <div *ngIf="methodeEnvoi === 'autre'" class="autre-envoi-container">
+    
+    <div class="header-section">
+        <i class="ri-information-line icon-delivery"></i>
 
-        <div class="contenue_form_envoyer contenue_form_whatsapp" *ngIf="methodeEnvoi === 'autre' && selectedSousMethode === 'whatsapp'">
-            <div class="whatsapp-container">
-                <div class="whatsapp-header">
-                    <i class="ri-whatsapp-fill"></i>
-                    <h3>Partager via WhatsApp</h3>
-                </div>
-                
-                <div class="whatsapp-info" *ngIf="!whatsappPrepared">
-                    <p>La facture sera téléchargée sur votre appareil. Ensuite, vous pourrez la partager avec les contacts de votre choix sur WhatsApp.</p>
-                    <div class="whatsapp-actions">
-                        <button class="btn btn-primary" (click)="prepareWhatsApp()">
-                            <i class="ri-download-line"></i> Préparer et partager
-                        </button>
-                    </div>
-                </div>
+        <h2>Méthode d'envoi personnalisée</h2>
+    </div>
 
-                <div class="whatsapp-instructions" *ngIf="whatsappPrepared">
-                    <p>1. Le PDF a été téléchargé sur votre appareil.</p>
-                    <p>2. Cliquez ci-dessous pour ouvrir WhatsApp.</p>
-                    <p>3. Sélectionnez les contacts auxquels vous souhaitez envoyer la facture et attachez le PDF.</p>
-                    <div class="whatsapp-actions">
-                        <button class="btn btn-primary" (click)="openWhatsApp()">
-                            <i class="ri-whatsapp-line"></i> Ouvrir WhatsApp
-                        </button>
-                        <button class="btn btn-secondary" (click)="resetWhatsApp()">
-                            Recommencer
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <p class="intro-text">
+        Veuillez préciser la méthode d'envoi de votre choix. Cette information est obligatoire pour valider l'envoi.
+    </p>
+
+    <div class="form-group-custom">
+        <!-- <label for="justification">
+            📝 Justification <span class="required">*</span>
+        </label> -->
+        <textarea
+            id="justification"
+            [(ngModel)]="justification"
+            rows="4"
+            placeholder="Exemple : Envoi par coursier, remis en main propre, etc."
+            class="input-textarea"
+        ></textarea>
+    </div>
+
+    <div class="action-buttons">
+        <button
+            class="btn-confirm-wow"
+            [disabled]="!justification || justification.trim().length === 0 || isSending"
+            (click)="confirmEmailSend()"
+        >
+            {{ isSending ? '⏳ Envoi en cours...' : '✅ Confirmer l\'envoi' }}
+        </button>
+    </div>
+</div>
+
+
+
 
         <div class="barre"></div>
 
