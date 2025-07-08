@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { FactureReelService } from '../../SERVICES/facturereel-service';
@@ -126,7 +126,7 @@ export class FactureReelDetailsComponent implements OnInit {
   loadFactureReelle(id: number): void {
     this.factureService.getFactureReelleById(id).subscribe({
       next: (data: FactureReelle) => {
-        console.log('Type de dateCreation :', typeof data.dateCreation, data.dateCreation);
+        console.log('les donner de facture :', data);
         // sum est un nombre, ligne est une LigneFacture
         data.totalHT = data.lignesFacture
           .reduce((sum: number, ligne: LigneFactureDTO) => sum + ligne.montantTotal, 0);
@@ -438,5 +438,8 @@ export class FactureReelDetailsComponent implements OnInit {
       }
     });
   }
+
+   @Input() nomComplet: string = '';
+  @Input() role: 'Validateur' | 'Createur' = 'Createur';
 
 }
