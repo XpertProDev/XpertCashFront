@@ -322,7 +322,6 @@ formatCardNumber(event: Event): void {
   this.cardType = this.detectCardType(value);
 }
 
-
 detectCardType(cardNumber: string): string {
   if (/^4/.test(cardNumber)) return 'visa';
   if (/^5[1-5]/.test(cardNumber) || /^2(2[2-9]|[3-6][0-9]|7[01]|720)/.test(cardNumber)) return 'mastercard';

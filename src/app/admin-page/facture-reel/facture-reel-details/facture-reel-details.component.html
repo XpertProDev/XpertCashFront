@@ -25,6 +25,12 @@
               <span *ngIf="isLoadingFacture">Traitement...</span>
           </button>
       </div>
+
+      <div class="lien_proforma">
+        <button class="btn_etat" style="color: green;" (click)="voirProforma()">
+          <span>Voir proforma</span>
+        </button>
+      </div>
     </div>
 
     <div class="info_titre_input">
@@ -110,7 +116,7 @@
             </td>
               <td>
                 <!-- {{ ((f.totalHT * f.remise / 100) | customNumber) }} -->
-              -{{ f.remise | customNumber }}
+              {{ f.remise | customNumber }}
             </td>
             </tr>
             <tr *ngIf="f.remise && f.remise > 0">

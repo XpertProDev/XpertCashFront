@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService } from '../SERVICES/client-service';
 import { FactureProFormaService } from '../SERVICES/factureproforma-service';
 import { ProduitService } from '../SERVICES/produit.service';
@@ -84,7 +84,7 @@ export class FactureProformaComponent implements OnInit {
       private produitService: ProduitService,
       private usersService: UsersService,
       private moduleService: ModuleService,
-      
+      private route: ActivatedRoute,
     ) {}
 
   ngOnInit(): void{
@@ -93,6 +93,12 @@ export class FactureProformaComponent implements OnInit {
     this.getUserInfo();
     this.verifierAcces();
 
+    this.route.queryParams.subscribe(params => {
+      const etatParam = params['etat'];
+      if (etatParam && this.statuts.some(s => s.value === etatParam)) {
+        this.selectStatut(etatParam);
+      }
+    });
   }
 
   toggleView(viewType: 'list' | 'grid') {
@@ -168,7 +174,6 @@ export class FactureProformaComponent implements OnInit {
     });
   }
 
-
   loadFactproformaOfEntreprise(userEntrepriseId: number) {
     this.isLoading = true;
     this.facturesLoaded = false;
@@ -177,7 +182,11 @@ export class FactureProformaComponent implements OnInit {
         this.facturesproforma = data.map(facturesproforma => ({
           ...facturesproforma,
         }));
-        this.filteredFactures = [...this.facturesproforma];
+        if (this.selectedStatut) {
+          this.filteredFactures = this.facturesproforma.filter(f => f.statut === this.selectedStatut);
+        } else {
+          this.filteredFactures = [...this.facturesproforma];
+        }
         this.isLoading = false;
         this.facturesLoaded = true;
         console.log('Facture proforma récupérés:', this.facturesproforma);

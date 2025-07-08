@@ -8,6 +8,18 @@
       <h1 class="title">Factures réelle</h1>
   
       <div class="actions">
+        <!-- Bouton pour basculer entre les vues -->
+        <div class="contentIcon" (click)="showDropdown = !showDropdown" clickOutside (clickOutside)="showDropdown = false">
+            <i [class]="isListView ? 'ri-list-check' : 'ri-apps-fill'"></i>
+            <div class="view-dropdown" *ngIf="showDropdown">
+                <div class="dropdown-item" (click)="toggleView('list')">
+                    Liste {{ isListView ? '✓' : '' }}
+                </div>
+                <div class="dropdown-item" (click)="toggleView('grid')">
+                    Cadre {{ !isListView ? '✓' : '' }}
+                </div>
+            </div>
+        </div>
 
         <div class="contentIcon">
           <div class="bare"></div>
@@ -21,24 +33,95 @@
     </div>
 
     <div class="access-overlay" *ngIf="!accesAutorise">
-    <div class="access-card">
-        <div class="icon-container" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
-                <path d="M18 6L6 18" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M6 6L18 18" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <div class="access-card">
+          <div class="icon-container" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+                  <path d="M18 6L6 18" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M6 6L18 18" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-        </div>
-        <h1>Accès restreint</h1>
-        <div class="description">
-            <p class="message-principal">{{ messageErreur }}</p>
-            <p>Veuillez renouveler votre abonnement pour accéder à ce module.</p>
-        </div>
-        <button class="dashboard-button" (click)="redirigerAccueil()">OK</button>
+          </div>
+          <h1>Accès restreint</h1>
+          <div class="description">
+              <p class="message-principal">{{ messageErreur }}</p>
+              <p>Veuillez renouveler votre abonnement pour accéder à ce module.</p>
+          </div>
+          <button class="dashboard-button" (click)="redirigerAccueil()">OK</button>
+      </div>
     </div>
+
+      <!-- Ajoutez cette section après l'en-tête et avant la vue grille -->
+    <div class="container_list_boutique">
+      <div class="content_list_boutique">
+        <div class="name_boutique">
+          <!-- Option "Tous les états" -->
+          <div class="all_boutique" 
+              [class.name_boutique_active]="selectedStatut === null"
+              (click)="selectStatut(null)">
+            <p class="all_boutique">Tous les statuts</p>
+          </div>
+
+          <div class="bare"></div>
+          
+          <!-- Options de statut de paiement -->
+          <ng-container *ngFor="let statut of statutsPaiement; let i = index">
+            <div class="statut-option" 
+                [class.name_boutique_active]="selectedStatut === statut.value"
+                (click)="selectStatut(statut.value)">
+              <p>
+                {{ statut.label }}
+              </p>
+            </div>
+            <div *ngIf="i !== statutsPaiement.length - 1" class="barre"></div>
+          </ng-container>
+        </div>
+      </div>
     </div>
+
+    <table *ngIf="isListView">
+      <thead>
+          <tr class="tr">
+              <th class="th" (click)="sort('numeroFacture')">
+                  N° Facture
+                  <i [class]="sortField === 'numeroFacture' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
+              </th>
+              <th class="th" (click)="sort('client.nom')">
+                  Client
+                  <i [class]="sortField === 'client.nom' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
+              </th>
+              <th class="th" (click)="sort('dateCreation')">
+                  Date
+                  <i [class]="sortField === 'dateCreation' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
+              </th>
+              <th class="th">Produits</th>
+              <th class="th">Statut</th>
+              <th class="th">Total</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr class="tr" *ngFor="let facture of paginatedFacturesReel" (click)="showDetails(facture.id)">
+              <td class="td">{{ facture.numeroFacture }}</td>
+              <td class="td">{{ facture.client?.nom || facture.entrepriseClient?.nom }}</td>
+              <td class="td">{{ facture.dateCreation | date: 'dd/MM/yyyy' }}</td>
+              <td class="td">
+                  <div *ngFor="let ligne of facture.lignesFacture?.slice(0,2)">
+                      {{ ligne.produitNom }} (x{{ ligne.quantite }})
+                  </div>
+                  <div *ngIf="facture.lignesFacture?.length > 2">...</div>
+              </td>
+              <td class="td">
+                  <span [ngClass]="getStatutClass(facture.statutPaiement)">
+                      {{ getLibelleStatut(facture.statutPaiement) }}
+                  </span>
+              </td>
+              <td class="td">
+                  {{ facture.totalFacture | customNumber }} CFA
+              </td>
+          </tr>
+      </tbody>
+    </table>
   
     <!-- Vue Grille -->
-    <div class="parent">
+    <div class="parent" *ngIf="!isListView">
       <div class="cadre_cahier" *ngFor="let facture of paginatedFacturesReel" (click)="showDetails(facture.id)">
         <div class="title_facture">
           <h5>Facture </h5>
@@ -108,10 +191,14 @@
     <div *ngIf="facturesLoaded && factureReel.length === 0" class="no-client-message">
       Aucun facture trouvé
     </div>
+
+    <div *ngIf="facturesLoaded && filteredFacturesReel.length === 0" class="no-client-message">
+      Aucun facture trouvé
+    </div>
   
     <!-- Pagination -->
     <div class="pagination">
-      <mat-paginator *ngIf="factureReel.length > 6" [length]="factureReel.length" 
+      <mat-paginator *ngIf="factureReel.length > 6" [length]="filteredFacturesReel.length" 
                      [pageSize]="pageSize" 
                      [pageSizeOptions]="[6, 10, 25, 100]"
                      (page)="onPageChange($event)">

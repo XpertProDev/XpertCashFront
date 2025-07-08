@@ -27,12 +27,28 @@ export class FactureReelComponent implements OnInit {
   errorMessage: string = '';
   facturesLoaded = false;
   searchTerm: string = '';
+  accesAutorise: boolean = false;
+  chargementFini: boolean = false;
+  messageErreur: string = "";
+  tempsRestantEssai: string | null = null;
   
   // Pagination
   pageSize = 6;
   currentPage = 0;
-  
 
+  isListView = false;
+  showDropdown = false;
+
+  sortField: string = 'numeroFacture';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  selectedStatut: string | null = null;
+  statutsPaiement = [
+    { value: 'EN_ATTENTE', label: 'Non payé' },
+    { value: 'PARTIELLEMENT_PAYEE', label: 'Part. Payé' },
+    { value: 'PAYEE', label: 'Payé' }
+  ];
+  
   constructor(
     private factureReelService: FactureReelService,
     private usersService: UsersService,
@@ -41,8 +57,40 @@ export class FactureReelComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const savedView = localStorage.getItem('factureReelView');
+    if (savedView) {
+      this.isListView = savedView === 'list';
+    }
+
     this.getUserInfo();
     this.verifierAcces();
+  }
+
+  toggleView(viewType: 'list' | 'grid'): void {
+    this.isListView = viewType === 'list';
+    this.showDropdown = false;
+    // Sauvegarder la préférence
+    localStorage.setItem('factureReelView', viewType);
+  }
+
+  sort(field: string): void {
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+
+    this.factureReel.sort((a, b) => {
+      // Gestion des propriétés imbriquées
+      const getValue = (obj: any, path: string) => 
+        path.split('.').reduce((o, p) => o?.[p], obj);
+      
+      const valueA = getValue(a, field)?.toString().toLowerCase() ?? '';
+      const valueB = getValue(b, field)?.toString().toLowerCase() ?? '';
+      
+      return valueA.localeCompare(valueB) * (this.sortDirection === 'asc' ? 1 : -1);
+    });
   }
 
   getUserInfo(): void {
@@ -58,39 +106,40 @@ export class FactureReelComponent implements OnInit {
     });
   }
 
-getAllFactureReelOfEntreprise(entrepriseId: number): void {
-  this.facturesLoaded = false;
-  this.factureReelService.getAlFactproreelOfEntreprise(entrepriseId).subscribe(
-    (response: any[]) => {
-      this.factureReel = response;
-      this.errorMessage = "";
-      this.facturesLoaded = true;
-    },
-    (error: any) => {
-      console.error('Erreur lors de la récupération des factures réelles:', error);
+  getAllFactureReelOfEntreprise(entrepriseId: number): void {
+    this.facturesLoaded = false;
+    this.factureReelService.getAlFactproreelOfEntreprise(entrepriseId).subscribe(
+      (response: any[]) => {
+        this.factureReel = response;
+        this.errorMessage = "";
+        this.facturesLoaded = true;
+      },
+      (error: any) => {
+        console.error('Erreur lors de la récupération des factures réelles:', error);
 
-      if (error.error && error.error.error && typeof error.error.error === 'string') {
-        let msg = error.error.error;
+        if (error.error && error.error.error && typeof error.error.error === 'string') {
+          let msg = error.error.error;
 
-        // Supprime le début standardisé "Une erreur est survenue : " s'il est présent
-        if (msg.startsWith("Une erreur est survenue :")) {
-          msg = msg.replace("Une erreur est survenue :", "").trim();
+          // Supprime le début standardisé "Une erreur est survenue : " s'il est présent
+          if (msg.startsWith("Une erreur est survenue :")) {
+            msg = msg.replace("Une erreur est survenue :", "").trim();
+          }
+
+          this.errorMessage = msg;
+        } else {
+          this.errorMessage = "Une erreur est survenue.";
         }
 
-        this.errorMessage = msg;
-      } else {
-        this.errorMessage = "Une erreur est survenue.";
+        this.factureReel = [];
+        this.facturesLoaded = true;
       }
+    );
+  }
 
-      this.factureReel = [];
-      this.facturesLoaded = true;
-    }
-  );
-}
-
-
-
-
+  selectStatut(statut: string | null): void {
+    this.selectedStatut = statut;
+    this.currentPage = 0;
+  }
 
   onPageChange(event: PageEvent) {
     this.currentPage = event.pageIndex;
@@ -99,7 +148,7 @@ getAllFactureReelOfEntreprise(entrepriseId: number): void {
 
   get paginatedFacturesReel(): any[] {
     const start = this.currentPage * this.pageSize;
-    return this.factureReel.slice(start, start + this.pageSize);
+    return this.filteredFacturesReel.slice(start, start + this.pageSize);
   }
 
   getLibelleStatut(statut: string): string {
@@ -120,20 +169,18 @@ getAllFactureReelOfEntreprise(entrepriseId: number): void {
     this.searchTerm = '';
   }
 
-
- getImageSrc(statut: string): string {
-  switch (statut) {
-    case 'EN_ATTENTE':
-      return 'assets/etiquette/Etiquette-Sy-XPERTPRO-orange.png';
-    case 'PARTIELLEMENT_PAYEE':
-      return 'assets/etiquette/Etiquette-Sy-XPERTPRO-bleu-.png';
-    case 'PAYEE':
-      return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Vert.png';
-    default:
-      return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Gris.png';
+  getImageSrc(statut: string): string {
+    switch (statut) {
+      case 'EN_ATTENTE':
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-orange.png';
+      case 'PARTIELLEMENT_PAYEE':
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-bleu-.png';
+      case 'PAYEE':
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Vert.png';
+      default:
+        return 'assets/etiquette/Etiquette-Sy-XPERTPRO-Gris.png';
+    }
   }
-}
-
 
   getStatutClass(statut: string): string {
     switch (statut) {
@@ -152,42 +199,56 @@ getAllFactureReelOfEntreprise(entrepriseId: number): void {
     this.router.navigate(['/facture-reel-details', factureId]);
   }
 
-
-accesAutorise: boolean = false;
-chargementFini: boolean = false;
-messageErreur: string = "";
-tempsRestantEssai: string | null = null;
-
-verifierAcces(): void {
-  this.moduleService.getModulesEntreprise().subscribe({
-    next: (modules) => {
-      const moduleFacturation = modules.find(m => m.code === 'GESTION_FACTURATION');
-
-      if (moduleFacturation?.actif) {
-        this.accesAutorise = true;
-        this.tempsRestantEssai = moduleFacturation.tempsRestantEssai || null;
-      } else {
-        this.accesAutorise = false;
-        this.messageErreur = moduleFacturation?.tempsRestantEssai
-          ? "Votre période d'essai est terminée."
-          : "Ce module est inactif.";
-      }
-
-      this.chargementFini = true;
-    },
-    error: (err) => {
-      this.accesAutorise = false;
-      this.messageErreur = "Erreur lors de la vérification d'accès.";
-      this.chargementFini = true;
+  // Getter pour les factures filtrées
+  get filteredFacturesReel(): any[] {
+    let result = [...this.factureReel];
+    
+    // Filtre par statut
+    if (this.selectedStatut) {
+      result = result.filter(f => f.statutPaiement === this.selectedStatut);
     }
-  });
-}
+    
+    // Filtre par recherche
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      result = result.filter(f => 
+        (f.numeroFacture?.toLowerCase().includes(term)) ||
+        (f.client?.nom?.toLowerCase().includes(term)) ||
+        (f.entrepriseClient?.nom?.toLowerCase().includes(term))
+      );
+    }
+    
+    return result;
+  }
+
+  verifierAcces(): void {
+    this.moduleService.getModulesEntreprise().subscribe({
+      next: (modules) => {
+        const moduleFacturation = modules.find(m => m.code === 'GESTION_FACTURATION');
+
+        if (moduleFacturation?.actif) {
+          this.accesAutorise = true;
+          this.tempsRestantEssai = moduleFacturation.tempsRestantEssai || null;
+        } else {
+          this.accesAutorise = false;
+          this.messageErreur = moduleFacturation?.tempsRestantEssai
+            ? "Votre période d'essai est terminée."
+            : "Ce module est inactif.";
+        }
+
+        this.chargementFini = true;
+      },
+      error: (err) => {
+        this.accesAutorise = false;
+        this.messageErreur = "Erreur lors de la vérification d'accès.";
+        this.chargementFini = true;
+      }
+    });
+  }
+
+  redirigerAccueil(): void {
+    this.router.navigate(['/']);
+  }
 
 
-
-
-
-redirigerAccueil(): void {
-  this.router.navigate(['/']);
-}
 }
