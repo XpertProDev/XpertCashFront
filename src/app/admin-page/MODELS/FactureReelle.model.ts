@@ -29,6 +29,7 @@ export interface FactureReelle {
   id: number;
   numeroFacture: string;
   dateCreation: string;
+  dateCreationPro: string;
   description: string;
   totalHT: number;
   totalFacture: number;
@@ -39,6 +40,8 @@ export interface FactureReelle {
   utilisateur: UserRequest | null;
   entrepriseClient: EntrepriseClientDTO | null;
   client: ClientDTO | null;
+  utilisateurValidateur?: string;
+  utilisateurCreateur?: string;
   lignesFacture: LigneFactureDTO[];
   statut: 'VALIDE' | 'ANNULEE';
 }

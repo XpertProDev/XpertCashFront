@@ -8,6 +8,8 @@
     <i class="ri-arrow-left-s-line"></i> <span style="margin-left: 8px; font-size: 12px;">Factures réelle</span>
 </p>
 
+
+
 <div class="container_global" *ngIf="facture as f; else noData">
   <div class="information_cadre div1" style="position: relative;">
     <div class="cadre_retour">
@@ -324,6 +326,8 @@
             <p>Montant total :</p>
           </div>
 
+          
+
           <!-- <div class="total_logo_virement">
             <ng-container *ngFor="let item of modesPaiementVisibles">
               <div class="total_montant_logo">
@@ -342,17 +346,52 @@
               </div>
             </ng-container>
           </div>
-
         </div>
-      
       </div>
     </div>
+     <div class="facture-header" *ngIf="facture">
+  <div class="user-badges-container">
+    
+    <!-- Badge Créateur -->
+    <div class="user-badge creator">
+      <div class="badge-icon">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+          <path fill="currentColor"
+            d="M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2M12.5,7V8H11V7H12.5M12.5,16V17H11V16H12.5M7,10.5V9H17V10.5H7M7,15V13.5H17V15H7Z" />
+        </svg>
+      </div>
+      <div class="badge-content">
+        <div class="user-name"> Créé par {{ facture.utilisateurCreateur }}</div>
+        <span class="dateC">Le  {{facture.dateCreation | date: 'dd/MM/yyyy'}}</span>
+      </div>
+    </div>
+
+    <!-- Badge Validateur -->
+    <div class="user-badge validator" *ngIf="facture.utilisateurValidateur">
+      <div class="badge-icon">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+          <path fill="currentColor"
+            d="M12,2C6.5,2 2,6.5 2,12C2,17.5 6.5,22 12,22C17.5,22 22,17.5 22,12C22,6.5 17.5,2 12,2M10,17L5,12L6.41,10.58L10,14.17L17.59,6.58L19,8L10,17Z" />
+        </svg>
+      </div>
+      <div class="badge-content">
+        <div class="user-name">Validé par {{ facture.utilisateurValidateur }}</div>
+        <span class="dateC">Le  {{facture.dateCreationPro | date: 'dd/MM/yyyy'}}</span>
+
+      </div>
+    </div>
+
   </div>
+</div>
+  </div>
+  
 </div>
 
 <ng-template #noData>
   <p>Aucune donnée d’aperçu… <a (click)="navigateBack()">Retour</a></p>
 </ng-template>
+
+
 
 <!-- Popup de confirmation pour l'annulation -->
 <div *ngIf="showAnnulationConfirmation" class="status-confirmation-popup">
@@ -373,3 +412,8 @@
     </div>
   </div>
 </div>
+
+
+
+
+

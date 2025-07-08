@@ -304,7 +304,7 @@ td.td_left {
 .cachet_container {
   height: 150px;
   width: 100%;
-  margin-top: 20px;
+  // margin-top: 20px;
 }
 
 .cachet_container {
@@ -405,10 +405,10 @@ td.td_left {
   /* En-tête */
   .facture-header {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-    border-bottom: 2px solid #333;
-    padding-bottom: 1rem;
+    justify-content: end;
+    // margin-bottom: 2rem;
+    // border-bottom: 2px solid #333;
+    // padding-bottom: 1rem;
   
     .company-info {
       h1 {
@@ -1064,3 +1064,93 @@ select.input_focus {
       opacity: 1;
     }
   }
+  
+
+  /* Style pour les badges utilisateurs */
+.user-badges-container {
+  display: flex;
+  gap: 12px;
+  // margin-bottom: 20px;
+ 
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .badge-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .badge-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .badge-label {
+    font-size: 8px;
+    font-weight: 500;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  
+  .user-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: #333;
+  
+  }
+    .dateC{
+      font-size: 8px;
+      display: flex;
+      justify-content: center;
+      
+    }
+}
+
+/* Style spécifique pour le créateur */
+.user-badge.creator {
+  border-left: 3px solid #0672e4; 
+  
+  .badge-icon {
+    background: rgba(78, 115, 255, 0.1);
+    color: #4e73ff;
+  }
+}
+
+/* Style spécifique pour le validateur */
+.user-badge.validator {
+  border-left: 3px solid #00c853;
+  
+  .badge-icon {
+    background: rgba(0, 200, 83, 0.1);
+    color: #00c853;
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .user-badges-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
