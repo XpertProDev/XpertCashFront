@@ -290,7 +290,7 @@ export class ProduitFormComponent {
     this.ajouteProduitForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prixVente: ['', Validators.required],
-      prixAchat: ['', Validators.required],
+      prixAchat: [''],
       quantite: ['0'],
       seuilAlert: ['0'],
       description: [''],
@@ -569,6 +569,11 @@ export class ProduitFormComponent {
   }
 
   async onSubmit() {
+
+    if (this.ajouteProduitForm.value.prixAchat === '') {
+      this.ajouteProduitForm.patchValue({ prixAchat: null });
+    }
+    
     if (this.ajouteProduitForm.invalid) {
       this.errorMessage = "Veuillez vérifier les informations saisies.";
       return;

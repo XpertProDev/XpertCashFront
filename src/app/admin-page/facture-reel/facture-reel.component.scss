@@ -32,9 +32,9 @@
   margin: 30px 0 20px;
 }
 
-.name_boutique p {
-  padding: 8px 15px;
-}
+// .name_boutique p {
+//   padding: 8px 15px;
+// }
 
 .name_boutique_active {
   background-color: #E9D421;
@@ -53,7 +53,8 @@
 .name_boutique {
   p {
     cursor: pointer;
-    padding: 8px 16px;
+    padding: 4px 16px;
+    // padding: 8px 16px;
     margin: 4px 0;
     transition: all 0.3s ease;
     font-weight: 500;
@@ -346,7 +347,7 @@ tr:hover {
     height: 25px;
     width: 1px;
     background-color: #0000003f;
-    margin: 8px 15px;
+    // margin: 8px 15px;
 }
 
 // table 

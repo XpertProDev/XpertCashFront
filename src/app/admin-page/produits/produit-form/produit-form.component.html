@@ -264,9 +264,12 @@
                     <p>{{ formattedCoutProduit }}</p>
                   </div>
                   <!-- Modifier le message d'erreur pour refléter que ce n'est plus obligatoire -->
-                  <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
+                   <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
                     <span *ngIf="f['prixAchat'].errors?.['min']">Le coût ne peut pas être négatif.</span>
                   </div>
+                  <!-- <div *ngIf="f['prixAchat'].touched && f['prixAchat'].invalid" class="error-message divError">
+                    <span *ngIf="f['prixAchat'].errors?.['min']">Le coût ne peut pas être négatif.</span>
+                  </div> -->
                 </div>
 
                 </div>
