@@ -152,16 +152,6 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  formatCardNumber(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, '');
-    
-    if (value.length > 16) value = value.substring(0, 16);
-    value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-    
-    this.paymentForm.get('numeroCarte')?.setValue(value, { emitEvent: false });
-    this.cardNumberDisplay = value || '•••• •••• •••• ••••';
-  }
 
   formatExpDate(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -313,4 +303,34 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
       this.subscription.unsubscribe();
     }
   }
+
+cardType: string = 'inconnue';
+
+
+formatCardNumber(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  let value = input.value.replace(/\D/g, '');
+
+  if (value.length > 16) value = value.substring(0, 16);
+
+  const formattedValue = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+
+  this.paymentForm.get('numeroCarte')?.setValue(formattedValue, { emitEvent: false });
+
+  this.cardNumberDisplay = formattedValue || '•••• •••• •••• ••••';
+
+  this.cardType = this.detectCardType(value);
+}
+
+
+detectCardType(cardNumber: string): string {
+  if (/^4/.test(cardNumber)) return 'visa';
+  if (/^5[1-5]/.test(cardNumber) || /^2(2[2-9]|[3-6][0-9]|7[01]|720)/.test(cardNumber)) return 'mastercard';
+  if (/^3[47]/.test(cardNumber)) return 'amex';
+  if (/^6(?:011|5)/.test(cardNumber)) return 'discover';
+  return 'inconnue';
+}
+
+
+
 }
