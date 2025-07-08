@@ -120,6 +120,7 @@ export class FactureReelDetailsComponent implements OnInit {
       montant: ['', [Validators.required, Validators.min(0.01)]],
       modePaiement: ['', Validators.required]
     });
+    
   }
 
   loadFactureReelle(id: number): void {
@@ -165,6 +166,12 @@ export class FactureReelDetailsComponent implements OnInit {
     } else {
       this.facture.statutPaiement = 'EN_ATTENTE';
     }
+  }
+
+  // Ajouter cette méthode
+  voirProforma() {
+    // Rediriger vers la liste des factures pro forma avec le paramètre d'état VALIDE
+    this.router.navigate(['/facture-proforma'], { queryParams: { etat: 'VALIDE' } });
   }
 
   loadMontantRestant() {
