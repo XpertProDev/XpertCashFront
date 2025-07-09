@@ -739,7 +739,7 @@ export class ListProduitComponent {
       this.showPopupMessage({
         title: 'Succès',
         message: 'Produit modifié avec succès',
-        image: 'assets/img/succes.png',
+        image: 'assets/img/succcccc.png',
         type: 'success'
       });
     },

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BoutiqueService } from '../SERVICES/boutique-service';
 import { Boutique } from '../MODELS/boutique-model';
@@ -76,6 +76,12 @@ export class DetailBoutiqueComponent implements OnInit {
   listeVendeurs: Users[] = [];
   boutiqueId!: number;
   imageActuelle = '';
+
+  selectedFilters: any[] = [];
+  showFilterDropdown = false;
+  searchText: string = '';
+  filteredProducts: Produit[] = [];
+  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
 
   constructor(
@@ -525,7 +531,6 @@ async confirmCopyProducts(): Promise<void> {
     this.isLoadingProducts = true;
     this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
       next: (produits) => {
-        // Trier par ID décroissant (supposant que les nouveaux IDs sont plus grands)
         const produitsTries = produits.sort((a, b) => b.id - a.id);
         
         this.productsInBoutique = produitsTries.map(produit => ({
@@ -533,6 +538,9 @@ async confirmCopyProducts(): Promise<void> {
           photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0))
         }));
         
+        // Initialiser les produits filtrés
+        // this.filteredProducts = [...this.productsInBoutique];
+        this.filteredProducts = [...this.productsInBoutique];
         this.isLoadingProducts = false;
       },
       error: (err) => {
@@ -540,6 +548,12 @@ async confirmCopyProducts(): Promise<void> {
         this.isLoadingProducts = false;
       }
     });
+  }
+
+  highlightMatch(text: string): string {
+    if (!this.searchText) return text;
+    const regex = new RegExp(`(${this.searchText})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
   }
 
   handleImageError(event: Event, product: Produit): void {
@@ -720,6 +734,81 @@ async confirmDelete(): Promise<void> {
 
   cancelDelete(): void {
     this.showDeleteModal = false;
+  }
+
+  // Ajouter ces méthodes dans la classe
+  toggleFilterDropdown(): void {
+    this.showFilterDropdown = !this.showFilterDropdown;
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.productsInBoutique]; // Utilisez la source originale
+    const searchLower = this.searchText.toLowerCase().trim();
+
+    if (this.searchText) {
+      if (this.selectedFilters.length > 0) {
+        filtered = filtered.filter(product => {
+          return this.selectedFilters.some(filter => {
+            const key = filter.type as keyof Produit;
+            const value = product[key]?.toString().toLowerCase() || '';
+            return value.includes(searchLower);
+          });
+        });
+      } else {
+        // Recherche dans toutes les propriétés
+        filtered = filtered.filter(product => 
+          Object.values(product).some(val => 
+            val?.toString().toLowerCase().includes(searchLower)
+        ));
+      }
+    }
+
+    this.filteredProducts = filtered;
+  }
+
+  addFilter(filter: any): void {
+    if (this.isFilterSelected(filter.type)) {
+      this.selectedFilters = [];
+    } else {
+      this.selectedFilters = [filter];
+    }
+    this.showFilterDropdown = false;
+    this.applyFilters();
+    
+    setTimeout(() => {
+      if (this.searchInput?.nativeElement) {
+        this.searchInput.nativeElement.focus();
+      }
+    }, 0);
+  }
+
+  isFilterSelected(filterType: string): boolean {
+    return this.selectedFilters.some(f => f.type === filterType);
+  }
+
+  focusSearchInput(): void {
+    if (this.searchInput?.nativeElement) {
+      this.searchInput.nativeElement.focus();
+    }
+  }
+
+  removeFilter(filter: any): void {
+    this.selectedFilters = this.selectedFilters.filter(f => f !== filter);
+    this.applyFilters();
+  }
+
+  getSearchPlaceholder(): string {
+    if (this.selectedFilters.length > 0) {
+      return `Rechercher par ${this.selectedFilters[0].label.toLowerCase()}...`;
+    }
+    return "Rechercher...";
+  }
+
+  resetFilters(): void {
+    this.selectedFilters = [];
+    this.searchText = '';
+    this.filteredProducts = [...this.productsInBoutique]; // Réinitialisez à la liste complète
+    this.showFilterDropdown = false;
   }
 
 }
