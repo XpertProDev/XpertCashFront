@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Injectable } from '@angular/core';
 import { Users } from '../MODELS/utilisateur.model';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, switchMap, tap, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { catchError, Observable, switchMap, tap, throwError } from 'rxjs';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
 import { UserRequest } from '../MODELS/user-request';
 import { environment } from 'src/environments/environment';
@@ -182,34 +182,45 @@ export class UsersService {
   }
 
 
-  getAllUsersOfEntreprise(entrepriseId: number): Observable<any[]> {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          console.error("Aucun token trouvé, requête annulée.");
-          return throwError(() => new Error("Aucun token trouvé"));
-        }
-      
-        const headers = new HttpHeaders({
-          Authorization: `Bearer ${token}`
-        });
+getAllUsersOfEntreprise(entrepriseId: number): Observable<any[]> {
+  const token = localStorage.getItem('authToken');
   
-    return this.http.get<any[]>(`${this.apiUrl}/entreprise/${entrepriseId}/allusers`, { headers });
+  if (!token) {
+    console.error("⛔ Aucun token trouvé, requête annulée.");
+    return throwError(() => new Error("Token JWT manquant"));
   }
+
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  });
+
+  const url = `${this.apiUrl}/entreprise/${entrepriseId}/allusers`;
+
+  return this.http.get<any[]>(url, { headers }).pipe(
+    catchError((error: HttpErrorResponse) => {
+      console.error("Erreur lors de la récupération des utilisateurs :", error);
+      return throwError(() => new Error("Erreur serveur ou accès refusé"));
+    })
+  );
+}
+
 
   
 getUserById(userId: number): Observable<UserNewRequest> {
 const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    
     return this.http.get<UserNewRequest>(`${this.apiUrl}/user/${userId}`, { headers });
 }
 
 
   // Methode pour le service permission
   assignPermissionsToUser(userId: number, permissions: { [key: string]: boolean }): Observable<UserNewRequest> {
-    const url = `${this.apiUrl}/${userId}/permissions`;
-    return this.http.post<UserNewRequest>(url, permissions);
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return this.http.post<UserNewRequest>(`${this.apiUrl}/${userId}/permissions`, permissions, { headers });
   }
+
 
   //Ajout de la boutique
   addBoutique(boutique: any): Observable<any> {
