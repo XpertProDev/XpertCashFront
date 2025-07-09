@@ -78,6 +78,9 @@ export class StocksComponent implements OnInit {
   // Ajoutez cette propriété
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
+  productCounts: { [boutiqueId: number]: number } = {};
+  totalAllProducts: number = 0;
+
   // @HostListener('document:click', ['$event'])
   // onClick(event: MouseEvent): void {
   //   const target = event.target as HTMLElement;
@@ -400,6 +403,7 @@ export class StocksComponent implements OnInit {
           })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
+        this.productCounts[boutiqueId] = produits.filter(prod => prod.enStock).length;
         this.allProducts = [...this.tasks];
         this.dataSource.data = this.tasks;
         this.dataSource.paginator = this.paginator;
@@ -473,6 +477,18 @@ export class StocksComponent implements OnInit {
             const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
             return dateB - dateA;
           });
+
+        const counts: { [id: number]: number } = {};
+        produits.forEach(prod => {
+          if (prod.enStock && prod.boutiques) {
+            prod.boutiques.forEach(b => {
+              counts[b.id] = (counts[b.id] || 0) + 1;
+            });
+          }
+        });
+        
+        this.productCounts = counts;
+        this.totalAllProducts = produits.filter(prod => prod.enStock).length;
 
         this.dataSource.data = this.tasks;
         if (this.paginator) {
