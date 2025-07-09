@@ -57,7 +57,13 @@
           <div class="all_boutique" 
               [class.name_boutique_active]="selectedStatut === null"
               (click)="selectStatut(null)">
-            <p class="all_boutique">Tous les statuts</p>
+            <!-- <p class="all_boutique">Tous les statuts</p> -->
+             <p class="all_boutique" style="display: flex; align-items: center;">
+                Tous les statuts
+                <span *ngIf="totalAllFactures > 0" class="facture-count">
+                  {{ totalAllFactures }}
+                </span>
+              </p>
           </div>
 
           <div class="bare"></div>
@@ -67,8 +73,14 @@
             <div class="statut-option" 
                 [class.name_boutique_active]="selectedStatut === statut.value"
                 (click)="selectStatut(statut.value)">
-              <p>
+              <!-- <p>
                 {{ statut.label }}
+              </p> -->
+              <p style="display: flex; align-items: center;">
+                {{ statut.label }}
+                <span *ngIf="factureCounts[statut.value] > 0" class="facture-count">
+                  {{ factureCounts[statut.value] }}
+                </span>
               </p>
             </div>
             <div *ngIf="i !== statutsPaiement.length - 1" class="barre"></div>

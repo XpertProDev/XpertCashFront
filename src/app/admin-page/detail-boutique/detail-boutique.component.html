@@ -220,8 +220,11 @@
             <div style="display: flex; justify-content: space-between;">
                 <!-- // title  -->
                 <div class="section_title" style="display: flex; align-items: center;">
-                    <div class="title">
-                        <h6>Produits de la boutique</h6>
+                    <div class="title" style="display: flex; align-items: center;">
+                        <h6 style="margin-right: 8px;">Produits de la boutique</h6>
+                        <div class="facture-count" *ngIf="productsInBoutique.length > 0" style="position: relative; top: -4px; right: 2px;">
+                            {{ productsInBoutique.length }}
+                        </div>
                     </div>
 
                     <div class="barre" style="margin-bottom: 8px;" *ngIf="boutique?.actif"></div>
@@ -302,6 +305,13 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Remplacez le badge existant par ce code -->
+                    <div style="position: relative; top: -4px; left: 10px;" *ngIf="selectedProductIds.length > 0">
+                        <span class="facture-count facture-select" title="Nombre sélectionné">
+                            {{ selectedProductIds.length }}
+                        </span>
                     </div>
 
                 </div>

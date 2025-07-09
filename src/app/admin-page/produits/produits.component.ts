@@ -61,6 +61,8 @@ export class ProduitsComponent implements OnInit {
   isDataLoaded = false; 
   isLoading = false;
   showNoProductsMessage = false;
+  productCounts: { [boutiqueId: number]: number } = {};
+  totalAllProducts: number = 0;
 
   showFilterDropdown = false;
   selectedFilters: any[] = [];
@@ -504,6 +506,17 @@ export class ProduitsComponent implements OnInit {
           return dateB - dateA;
         });
 
+        const counts: { [id: number]: number } = {};
+        produits.forEach(prod => {
+          if (prod.boutiques) {
+            prod.boutiques.forEach(b => {
+              counts[b.id] = (counts[b.id] || 0) + 1;
+            });
+          }
+        });
+        this.productCounts = counts;
+        this.totalAllProducts = produits.length;
+
         this.dataSource.data = this.tasks;
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;
@@ -577,6 +590,8 @@ export class ProduitsComponent implements OnInit {
           const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
           return dateB - dateA;
         })
+
+        this.productCounts[boutiqueId] = produits.length;
 
         this.dataSource.data = this.tasks;
         if (this.paginator) {

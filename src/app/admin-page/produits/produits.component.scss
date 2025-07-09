@@ -10,12 +10,20 @@ table {
 th, td {
   border-bottom: 1px solid #dddddd94;
   padding: 8px;
-  font-size: 11px;
+  // font-size: 13px;
+}
+
+tr {
+  font-size: 13px!important;
 }
 
 th {
   background-color: #f2f2f2;
 }
+
+// tr {
+//     font-size: 13px;
+// }
 
 tr:nth-child(even) {
   background-color: #f9f9f9;
@@ -780,9 +788,9 @@ img.roudel{
   font-size: 12px;
 }
 
-.tableProduit td{
-  font-size: 11px;
-}
+// .tableProduit td{
+//   font-size: 11px;
+// }
 
 // Detail
 
@@ -1204,4 +1212,24 @@ img.roudel_detail{
   opacity: 0.5;
   cursor: not-allowed !important;
   pointer-events: none;
+}
+
+.facture-count {
+  background-color: #ddd;
+  color: #000;
+  border-radius: 50%;
+  font-size: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+  margin-left: 10px;
+}
+
+/* Pour aligner correctement les éléments */
+.draggable-item p {
+  display: flex;
+  align-items: center;
 }

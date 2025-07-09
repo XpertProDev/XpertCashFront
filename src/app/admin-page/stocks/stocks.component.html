@@ -113,17 +113,27 @@
           <div class="all_boutique" 
                [class.name_boutique_active]="selectedBoutique === null"
                (click)="selectBoutique(null)">
-            <p class="all_boutique">Toutes les boutiques</p>
+            <!-- <p class="all_boutique">Toutes les boutiques</p> -->
+             <p class="all_boutique" style="display: flex; align-items: center;">
+                Toutes les boutiques
+                <span *ngIf="totalAllProducts > 0" class="facture-count">
+                  {{ totalAllProducts }}
+                </span>
+              </p>
           </div>
           
           <!-- Liste des boutiques -->
           <ng-container *ngFor="let boutique of boutiques; let i = index">
-            <p 
+              <p 
               [class.name_boutique_active]="boutique.id === selectedBoutique?.id && boutique.actif"
               [class.suspended-boutique]="!boutique.actif"
               [style.color]="boutique.actif"
-              (click)="boutique.actif ? selectBoutique(boutique) : showSuspendedBoutiqueDialog()">
+              (click)="boutique.actif ? selectBoutique(boutique) : showSuspendedBoutiqueDialog()"
+              style="display: flex; align-items: center;">
               {{ boutique.nomBoutique }}
+              <span *ngIf="productCounts[boutique.id] > 0" class="facture-count">
+                {{ productCounts[boutique.id] }}
+              </span>
               <i *ngIf="!boutique.actif" class="ri-error-warning-line warning-icon"></i>
             </p>
             <div *ngIf="i !== boutiques.length - 1" class="barre"></div>
