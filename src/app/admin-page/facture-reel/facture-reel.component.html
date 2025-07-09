@@ -198,7 +198,7 @@
   
     <!-- Pagination -->
     <div class="pagination">
-      <mat-paginator *ngIf="factureReel.length > 6" [length]="filteredFacturesReel.length" 
+      <mat-paginator *ngIf="factureReel.length > pageSize" [length]="filteredFacturesReel.length" 
                      [pageSize]="pageSize" 
                      [pageSizeOptions]="[6, 10, 25, 100]"
                      (page)="onPageChange($event)">

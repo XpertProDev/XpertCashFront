@@ -58,11 +58,13 @@ export class FactureProformaComponent implements OnInit {
     isListView = true;
     showDropdown = false;
     searchTerm: string = '';
-    filteredFactures: any[] = [];
+    // filteredFactures: any[] = [];
     facturesLoaded = false;
 
+    searchText: string = '';
+
     // Pagination
-    pageSize = 6;
+    pageSize = 10;
     currentPage = 0;
     sortField: string = 'numeroFacture'; // Au lieu de 'any'
     sortDirection: 'asc' | 'desc' = 'asc';
@@ -115,6 +117,22 @@ export class FactureProformaComponent implements OnInit {
   }
 
   // Corriger la signature de la méthode sort
+  // sort(field: string) { // Spécifier le type string explicitement
+  //   if (this.sortField === field) {
+  //     this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+  //   } else {
+  //     this.sortField = field;
+  //     this.sortDirection = 'asc';
+  //   }
+
+  //   this.facturesproforma.sort((a, b) => {
+  //     const valueA = a[field]?.toString().toLowerCase() ?? '';
+  //     const valueB = b[field]?.toString().toLowerCase() ?? '';
+  //     return valueA.localeCompare(valueB) * (this.sortDirection === 'asc' ? 1 : -1);
+  //   });
+  // }
+
+  // Corriger la signature de la méthode sort
   sort(field: string) { // Spécifier le type string explicitement
     if (this.sortField === field) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -130,6 +148,47 @@ export class FactureProformaComponent implements OnInit {
     });
   }
 
+  get filteredFactures(): any[] {
+    let result = [...this.facturesproforma];
+
+    // Filtre par statut
+    if (this.selectedStatut) {
+        result = result.filter(f => f.statut === this.selectedStatut);
+    }
+
+    // Filtre par texte
+    if (this.searchText.trim()) {
+        const searchLower = this.searchText.toLowerCase().trim();
+        result = result.filter(f => 
+            (f.numeroFacture?.toLowerCase().includes(searchLower)) ||
+            (f.client?.toLowerCase().includes(searchLower)) ||
+            (f.entrepriseClient?.toLowerCase().includes(searchLower)) ||
+            (f.totalFacture?.toString().includes(this.searchText))
+        );
+    }
+
+    // Tri
+    // if (this.sortField) {
+    //     result.sort((a, b) => {
+    //         let valueA = a[this.sortField];
+    //         let valueB = b[this.sortField];
+
+    //         // Cas particulier pour les dates
+    //         if (this.sortField === 'dateCreation') {
+    //             valueA = new Date(valueA).getTime();
+    //             valueB = new Date(valueB).getTime();
+    //             return (valueA - valueB) * (this.sortDirection === 'asc' ? 1 : -1);
+    //         }
+
+    //         valueA = (valueA ?? '').toString().toLowerCase();
+    //         valueB = (valueB ?? '').toString().toLowerCase();
+    //         return valueA.localeCompare(valueB) * (this.sortDirection === 'asc' ? 1 : -1);
+    //     });
+    // }
+
+    return result;
+}
+
   onPageChange(event: PageEvent) {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
@@ -139,13 +198,6 @@ export class FactureProformaComponent implements OnInit {
   selectStatut(statut: string | null): void {
     this.selectedStatut = statut;
     this.currentPage = 0;
-    
-    // Filtrer les factures ici plutôt que dans le template
-    if (statut) {
-      this.filteredFactures = this.facturesproforma.filter(f => f.statut === statut);
-    } else {
-      this.filteredFactures = [...this.facturesproforma];
-    }
   }
 
   // Modifier le getter paginatedFactures
@@ -165,7 +217,7 @@ export class FactureProformaComponent implements OnInit {
         this.userEntrepriseId = user.entrepriseId;
         this.loadFactproformaOfEntreprise(this.userEntrepriseId);
         // Initialiser avec toutes les factures
-        this.filteredFactures = [...this.facturesproforma];
+        // this.filteredFactures = [...this.facturesproforma];
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
@@ -178,24 +230,18 @@ export class FactureProformaComponent implements OnInit {
     this.isLoading = true;
     this.facturesLoaded = false;
     this.factureProFormaService.getAlFactproformaOfEntreprise(userEntrepriseId).subscribe({
-      next: (data) => {
-        this.facturesproforma = data.map(facturesproforma => ({
-          ...facturesproforma,
-        }));
-        if (this.selectedStatut) {
-          this.filteredFactures = this.facturesproforma.filter(f => f.statut === this.selectedStatut);
-        } else {
-          this.filteredFactures = [...this.facturesproforma];
+        next: (data) => {
+            this.facturesproforma = data.map(facturesproforma => ({
+                ...facturesproforma,
+            }));
+            this.isLoading = false;
+            this.facturesLoaded = true;
+        },
+        error: (err) => {
+            console.error('Erreur lors du chargement des facture proforma', err);
+            this.isLoading = false;
+            this.facturesLoaded = true;
         }
-        this.isLoading = false;
-        this.facturesLoaded = true;
-        console.log('Facture proforma récupérés:', this.facturesproforma);
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des facture proforma', err);
-        this.isLoading = false;
-        this.facturesLoaded = true;
-      }
     });
   }
 
@@ -273,9 +319,10 @@ verifierAcces(): void {
   });
 }
 
-
-
-
+ onSearchChange(): void {
+    this.currentPage = 0; // Réinitialiser à la première page
+    // Le filtrage sera géré automatiquement par le getter filteredFactures
+  }
 
 redirigerAccueil(): void {
   this.router.navigate(['/']);

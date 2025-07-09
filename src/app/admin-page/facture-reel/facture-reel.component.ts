@@ -33,7 +33,7 @@ export class FactureReelComponent implements OnInit {
   tempsRestantEssai: string | null = null;
   
   // Pagination
-  pageSize = 6;
+  pageSize = 10;
   currentPage = 0;
 
   isListView = false;

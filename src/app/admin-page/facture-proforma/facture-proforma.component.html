@@ -29,9 +29,15 @@
         </div>
 
         <div class="inputSearch">
-          <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..."  />
-          <i [ngClass]="searchTerm ? 'ri-close-line red-icon' : 'ri-  search-2-line'" (click)="clearSearch()"></i>
-        </div>
+          <input 
+              type="text"
+              placeholder="Recherche..." 
+              [(ngModel)]="searchText"
+              (ngModelChange)="onSearchChange()"
+          />
+          <i [ngClass]="searchText ? 'ri-close-line red-icon' : 'ri-search-2-line'" 
+              (click)="searchText = ''; onSearchChange()"></i>
+      </div>
       </div>
   </div>
 
@@ -222,17 +228,23 @@
 
   </div>
 
+  <div class="pagination">
+    <mat-paginator 
+      *ngIf="filteredFactures.length > pageSize" [length]="filteredFactures.length" [pageSize]="pageSize" [pageSizeOptions]="[6, 10, 25, 100]" (page)="onPageChange($event)">
+    </mat-paginator>
+  </div>
+
   <!-- Message vide -->
   <div *ngIf="facturesLoaded && filteredFactures.length === 0" class="no-client-message">
     Aucun facture pro forma trouvé
   </div>
 
   <!-- Pagination -->
-  <div class="pagination">
+  <!-- <div class="pagination">
     <mat-paginator *ngIf="filteredFactures.length > 6" [length]="filteredFactures.length" [pageSize]="pageSize" [pageSizeOptions]="[6, 10, 25, 100]"
         (page)="onPageChange($event)">
     </mat-paginator>
-  </div>
+  </div> -->
           
 </div>
 
