@@ -173,7 +173,7 @@
     height: 25px;
     width: 1px;
     background-color: #0000003f;
-    margin: 8px 15px;
+    margin: 8px 10px;
 }
 
 // table 
@@ -482,4 +482,28 @@ mat-paginator {
     font-size: 10px;
     font-style: italic;
     margin-left: auto;
+}
+
+/* Ajoutez ceci à votre fichier CSS/SCSS */
+.contentIcon {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0px 5px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contentIcon.active {
+  background-color: #e6f7ff; /* Couleur de fond pour l'élément actif */
+  border: 1px solid #1890ff; /* Bordure pour l'élément actif */
+}
+
+.contentIcon.active i {
+  color: #1890ff; /* Couleur de l'icône active */
+}
+
+.contentIcon:hover:not(.active) {
+  background-color: #f5f5f5; /* Effet hover pour les éléments non actifs */
 }

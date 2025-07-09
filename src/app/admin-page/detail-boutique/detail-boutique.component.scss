@@ -1980,75 +1980,75 @@ table {
     cursor: help;
 }
 
-.inputSearch {
-    position: relative;
-    top: -7px;
-    width: 280px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    // border-radius: 20px;
-    padding: 0 15px;
-    transition: all 0.3s ease-in-out;
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
+// .inputSearch {
+//     position: relative;
+//     top: -7px;
+//     width: 280px;
+//     height: 40px;
+//     display: flex;
+//     align-items: center;
+//     background-color: #f9f9f9;
+//     border: 1px solid #ddd;
+//     // border-radius: 20px;
+//     padding: 0 15px;
+//     transition: all 0.3s ease-in-out;
+//     border-top-left-radius: 20px;
+//     border-bottom-left-radius: 20px;
 
-    &:hover {
-        border-color: #0672E4;
-    }
+//     &:hover {
+//         border-color: #0672E4;
+//     }
 
-    input {
-        flex: 1;
-        height: 100%;
-        border: none;
-        outline: none;
-        background: transparent;
-        font-size: 14px;
-        color: #333;
-        padding-left: 10px;
+//     input {
+//         flex: 1;
+//         height: 100%;
+//         border: none;
+//         outline: none;
+//         background: transparent;
+//         font-size: 14px;
+//         color: #333;
+//         padding-left: 10px;
 
-        &::placeholder {
-            color: #aaa;
-            font-size: 13px;
-        }
-    }
+//         &::placeholder {
+//             color: #aaa;
+//             font-size: 13px;
+//         }
+//     }
 
-    i {
-        font-size: 18px;
-        cursor: pointer;
-        color: #aaa;
-        transition: all 0.3s ease-in-out;
+//     i {
+//         font-size: 18px;
+//         cursor: pointer;
+//         color: #aaa;
+//         transition: all 0.3s ease-in-out;
 
-        &:hover {
-            color: #0672E4;
-        }
-    }
+//         &:hover {
+//             color: #0672E4;
+//         }
+//     }
 
-    .red-icon {
-        color: red;
-    }
-}
+//     .red-icon {
+//         color: red;
+//     }
+// }
   
-.inputSearch input {
-    width: 100%;
-    height: 100%;
-    padding-left: 10px;
-    border-radius: 5px;
-}
+// .inputSearch input {
+//     width: 100%;
+//     height: 100%;
+//     padding-left: 10px;
+//     border-radius: 5px;
+// }
   
-.inputSearch i {
-    position: absolute;
-    right: 0;
-    margin-right: 15px;
-    font-size: 17px;
-}
+// .inputSearch i {
+//     position: absolute;
+//     right: 0;
+//     margin-right: 15px;
+//     font-size: 17px;
+// }
 
 .trier {
-  border-top: 1px solid #ddd; 
-  border-right: 1px solid #ddd; 
-  border-bottom: 1px solid #ddd; 
+  border-top: 1px solid #000; 
+  border-right: 1px solid #000; 
+  border-bottom: 1px solid #000; 
   border-top-right-radius: 5px; 
   border-bottom-right-radius: 5px; 
   padding: 5.5px 10px;
@@ -2058,83 +2058,83 @@ table {
   left: 0px;
 }
 
-.inputSearch {
-    position: relative;
-    top: -7px;
-    width: 310px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    // border-radius: 20px;
-    padding: 0 15px;
-    transition: all 0.3s ease-in-out;
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
+// .inputSearch {
+//     position: relative;
+//     top: -7px;
+//     width: 310px;
+//     height: 40px;
+//     display: flex;
+//     align-items: center;
+//     background-color: #f9f9f9;
+//     border: 1px solid #ddd;
+//     // border-radius: 20px;
+//     padding: 0 15px;
+//     transition: all 0.3s ease-in-out;
+//     border-top-left-radius: 20px;
+//     border-bottom-left-radius: 20px;
 
-    &:hover {
-        border-color: #0672E4;
-    }
+//     &:hover {
+//         border-color: #0672E4;
+//     }
 
-    input {
-        flex: 1;
-        height: 100%;
-        border: none;
-        outline: none;
-        background: transparent;
-        font-size: 14px;
-        color: #333;
-        padding-left: 10px;
+//     input {
+//         flex: 1;
+//         height: 100%;
+//         border: none;
+//         outline: none;
+//         background: transparent;
+//         font-size: 14px;
+//         color: #333;
+//         padding-left: 10px;
 
-        &::placeholder {
-            color: #aaa;
-            font-size: 13px;
-        }
-    }
+//         &::placeholder {
+//             color: #aaa;
+//             font-size: 13px;
+//         }
+//     }
 
-    i {
-        font-size: 18px;
-        cursor: pointer;
-        color: #aaa;
-        transition: all 0.3s ease-in-out;
+//     i {
+//         font-size: 18px;
+//         cursor: pointer;
+//         color: #aaa;
+//         transition: all 0.3s ease-in-out;
 
-        &:hover {
-            color: #0672E4;
-        }
-    }
+//         &:hover {
+//             color: #0672E4;
+//         }
+//     }
 
-    .red-icon {
-        color: red;
-    }
-}
+//     .red-icon {
+//         color: red;
+//     }
+// }
   
-.inputSearch input {
-    width: 100%;
-    height: 100%;
-    padding-left: 10px;
-    border-radius: 5px;
-}
+// .inputSearch input {
+//     width: 100%;
+//     height: 100%;
+//     padding-left: 10px;
+//     border-radius: 5px;
+// }
   
-.inputSearch i {
-    position: absolute;
-    right: 0;
-    margin-right: 15px;
-    font-size: 17px;
-}
+// .inputSearch i {
+//     position: absolute;
+//     right: 0;
+//     margin-right: 15px;
+//     font-size: 17px;
+// }
 
-.trier {
-  border-top: 1px solid #ddd; 
-  border-right: 1px solid #ddd; 
-  border-bottom: 1px solid #ddd; 
-  border-top-right-radius: 5px; 
-  border-bottom-right-radius: 5px; 
-  padding: 5.5px 10px;
-  cursor: pointer;
-  position: relative;
-  top: -7px;
-  left: 0px;
-}
+// .trier {
+//   border-top: 1px solid #ddd; 
+//   border-right: 1px solid #ddd; 
+//   border-bottom: 1px solid #ddd; 
+//   border-top-right-radius: 5px; 
+//   border-bottom-right-radius: 5px; 
+//   padding: 5.5px 10px;
+//   cursor: pointer;
+//   position: relative;
+//   top: -7px;
+//   left: 0px;
+// }
 
 
 .tags-container {

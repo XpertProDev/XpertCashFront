@@ -25,9 +25,8 @@
   
         <div class="barre"></div>
 
-        <div class="contentIcon" (click)="showTypeDropdown = !showTypeDropdown" clickOutside (clickOutside)="showTypeDropdown = false">
-          <i class="ri-arrow-left-right-line"></i>
-          <!-- Dropdown pour choisir le type -->
+        <!-- <div class="contentIcon" (click)="showTypeDropdown = !showTypeDropdown" clickOutside (clickOutside)="showTypeDropdown = false">
+          <i class="ri-folder-user-line"></i>
           <div class="view-dropdown" *ngIf="showTypeDropdown">
             <div class="dropdown-item" (click)="setListType('clients')">
                 Clients {{ currentListType === 'clients' ? '✓' : '' }}
@@ -36,6 +35,27 @@
                 Entreprises {{ currentListType === 'entreprises' ? '✓' : '' }}
             </div>
           </div>
+        </div>
+
+        <div class="barre"></div>
+
+        <div class="contentIcon">
+          <i class="ri-building-line"></i>
+        </div> -->
+
+        <!-- Modifier cette partie -->
+        <div class="contentIcon" 
+            [class.active]="currentListType === 'clients'"
+            (click)="setListType('clients')">
+          <i class="ri-folder-user-line"></i>
+        </div>
+
+        <div class="barre"></div>
+
+        <div class="contentIcon" 
+            [class.active]="currentListType === 'entreprises'"
+            (click)="setListType('entreprises')">
+          <i class="ri-building-line"></i>
         </div>
   
         <div class="barre"></div>
