@@ -1,5 +1,5 @@
 import packageInfo from '../../package.json';
-/*
+
 export const environment = {
   appVersion: packageInfo.version,
   production: true,
@@ -9,7 +9,7 @@ export const environment = {
   
 };
 
-*/
+/*
 
 export const environment = {
   appVersion: packageInfo.version,
@@ -18,4 +18,4 @@ export const environment = {
   apiBaseUrl: "https://xpertcash.tchakeda.com/api/v1/api/auth",
   imgUrl: "https://xpertcash.tchakeda.com",
 };
-
+*/
