@@ -52,7 +52,7 @@ export class ClientsComponent implements OnInit  {
   sortDirection: 'asc' | 'desc' = 'asc';
   noClientsAvailable = false;
   messageNoClient = 'Aucun client disponible.';
-  showTypeDropdown = false;
+  // showTypeDropdown = false;
   currentListType: 'clients' | 'entreprises' = 'clients';
   entreprises: EntrepriseClient[] = [];
   messageNoEntreprise = 'Aucune entreprise disponible.';
@@ -153,7 +153,7 @@ export class ClientsComponent implements OnInit  {
     this.currentPage = type === 'clients' ? this.currentPageClients : this.currentPageEntreprises;
     
     this.currentListType = type;
-    this.showTypeDropdown = false;
+    // this.showTypeDropdown = false;
     localStorage.setItem('listTypePreference', type);
 
     this.clientsLoaded = false;
