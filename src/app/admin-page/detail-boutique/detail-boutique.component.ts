@@ -50,7 +50,6 @@ export class DetailBoutiqueComponent implements OnInit {
   photo: string = '';
   private apiUrl = environment.imgUrl;
 
-
   control = new FormControl();
 
   isUpdating = false;
@@ -82,7 +81,6 @@ export class DetailBoutiqueComponent implements OnInit {
   searchText: string = '';
   filteredProducts: Produit[] = [];
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
-
 
   constructor(
     private route: ActivatedRoute,
@@ -532,14 +530,10 @@ async confirmCopyProducts(): Promise<void> {
     this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
       next: (produits) => {
         const produitsTries = produits.sort((a, b) => b.id - a.id);
-        
         this.productsInBoutique = produitsTries.map(produit => ({
           ...produit,
           photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0))
         }));
-        
-        // Initialiser les produits filtrés
-        // this.filteredProducts = [...this.productsInBoutique];
         this.filteredProducts = [...this.productsInBoutique];
         this.isLoadingProducts = false;
       },
@@ -799,7 +793,7 @@ async confirmDelete(): Promise<void> {
 
   getSearchPlaceholder(): string {
     if (this.selectedFilters.length > 0) {
-      return `Rechercher par ${this.selectedFilters[0].label.toLowerCase()}...`;
+      return `par ${this.selectedFilters[0].label.toLowerCase()}...`;
     }
     return "Rechercher...";
   }
