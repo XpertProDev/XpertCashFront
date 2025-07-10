@@ -89,6 +89,18 @@ export class PermissionComponent implements OnInit {
       imgUrl: 'assets/img/boutique.png',
       selected: false
     },
+     { 
+      id: 8,
+      name: 'Activer boutiques',
+      imgUrl: 'assets/img/boutique.png',
+      selected: false
+    },
+     { 
+      id: 9,
+      name: 'Desactver boutiques',
+      imgUrl: 'assets/img/boutique.png',
+      selected: false
+    },
   ];
 
   get selectedPermissions() {
@@ -144,6 +156,8 @@ export class PermissionComponent implements OnInit {
       'GERER_CLIENTS': 5,        // Gerer magasins
       'GERER_UTILISATEURS': 6,        // Gerer personnel
       'GERER_BOUTIQUE': 7,
+      'ACTIVER_BOUTIQUE': 8,
+      'DESACTIVER_BOUTIQUE': 9
     };
     return mapping[backendType] ?? -1;
   }
@@ -157,6 +171,8 @@ export class PermissionComponent implements OnInit {
       5: 'GERER_CLIENTS',
       6: 'GERER_UTILISATEURS',
       7: 'GERER_BOUTIQUE',
+      8:'ACTIVER_BOUTIQUE',
+      9:'DESACTIVER_BOUTIQUE'
 
     };
     return mapping[frontendId] ?? '';
