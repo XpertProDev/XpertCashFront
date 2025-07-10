@@ -63,6 +63,9 @@ export class FactureProformaComponent implements OnInit {
 
     searchText: string = '';
 
+    factureCounts: { [key: string]: number } = {};
+    totalAllFactures: number = 0;
+
     // Pagination
     pageSize = 10;
     currentPage = 0;
@@ -78,6 +81,10 @@ export class FactureProformaComponent implements OnInit {
       { value: 'ANNULE', label: 'Annulé' },
     ];
 
+    accesAutorise: boolean = false;
+    chargementFini: boolean = false;
+    messageErreur: string = "";
+    tempsRestantEssai: string | null = null;
 
     constructor(
       private router: Router,
@@ -234,6 +241,10 @@ export class FactureProformaComponent implements OnInit {
             this.facturesproforma = data.map(facturesproforma => ({
                 ...facturesproforma,
             }));
+            
+            // Calculer les comptages après le chargement
+            this.calculateFactureCounts();
+            
             this.isLoading = false;
             this.facturesLoaded = true;
         },
@@ -289,43 +300,53 @@ export class FactureProformaComponent implements OnInit {
     }
   }
 
-accesAutorise: boolean = false;
-chargementFini: boolean = false;
-messageErreur: string = "";
-tempsRestantEssai: string | null = null;
+  verifierAcces(): void {
+    this.moduleService.getModulesEntreprise().subscribe({
+      next: (modules) => {
+        const moduleFacturation = modules.find(m => m.code === 'GESTION_FACTURATION');
 
-verifierAcces(): void {
-  this.moduleService.getModulesEntreprise().subscribe({
-    next: (modules) => {
-      const moduleFacturation = modules.find(m => m.code === 'GESTION_FACTURATION');
+        if (moduleFacturation?.actif) {
+          this.accesAutorise = true;
+          this.tempsRestantEssai = moduleFacturation.tempsRestantEssai || null;
+        } else {
+          this.accesAutorise = false;
+          this.messageErreur = moduleFacturation?.tempsRestantEssai
+            ? "Votre période d'essai est terminée."
+            : "Ce module est inactif.";
+        }
 
-      if (moduleFacturation?.actif) {
-        this.accesAutorise = true;
-        this.tempsRestantEssai = moduleFacturation.tempsRestantEssai || null;
-      } else {
+        this.chargementFini = true;
+      },
+      error: (err) => {
         this.accesAutorise = false;
-        this.messageErreur = moduleFacturation?.tempsRestantEssai
-          ? "Votre période d'essai est terminée."
-          : "Ce module est inactif.";
+        this.messageErreur = "Erreur lors de la vérification d'accès.";
+        this.chargementFini = true;
       }
-
-      this.chargementFini = true;
-    },
-    error: (err) => {
-      this.accesAutorise = false;
-      this.messageErreur = "Erreur lors de la vérification d'accès.";
-      this.chargementFini = true;
-    }
-  });
-}
-
- onSearchChange(): void {
-    this.currentPage = 0; // Réinitialiser à la première page
-    // Le filtrage sera géré automatiquement par le getter filteredFactures
+    });
   }
 
-redirigerAccueil(): void {
-  this.router.navigate(['/']);
-}
+  onSearchChange(): void {
+      this.currentPage = 0; // Réinitialiser à la première page
+      // Le filtrage sera géré automatiquement par le getter filteredFactures
+    }
+
+  redirigerAccueil(): void {
+    this.router.navigate(['/']);
+  }
+
+  calculateFactureCounts(): void {
+    // Réinitialiser les compteurs
+    this.factureCounts = {};
+    this.totalAllFactures = this.facturesproforma.length;
+
+    // Compter par statut
+    this.facturesproforma.forEach(facture => {
+      const statut = facture.statut;
+      if (statut) {
+        this.factureCounts[statut] = (this.factureCounts[statut] || 0) + 1;
+      }
+    });
+  }
+
   
 }

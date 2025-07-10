@@ -96,17 +96,17 @@ export class FactureComponent  implements AfterViewInit {
   // Liste filtrée des stocks ajustés
   adjustedStocks: Stock[] = [];
   stock: Stock | null = null
-
   factureDataSource = new MatTableDataSource<any>();
-
   selectedBoutique: any = null;
-
   boutiques: any[] = [];
   entrepriseId!: number;
 
   userInfo: any;
 
-    private apiUrl = environment.imgUrl;
+  factureCounts: { [boutiqueId: number]: number } = {};
+  totalAllFactures: number = 0;
+
+  private apiUrl = environment.imgUrl;
   
 
    constructor(
@@ -550,6 +550,7 @@ blobToBase64(blob: Blob): Promise<string> {
           ...f,
           boutiqueIds: [boutiqueId] // Ajoute l'ID de la boutique à chaque facture
         }));
+        this.factureCounts[boutiqueId] = data.length;
         this.processFactures(facturesWithBoutique);
       },
       error: (error) => {
@@ -575,6 +576,16 @@ blobToBase64(blob: Blob): Promise<string> {
             boutiqueIds: [boutiqueId] // Ajoute l'ID de la boutique à chaque facture
           }));
         });
+
+        // Calculer les comptages
+        const counts: { [id: number]: number } = {};
+        responses.forEach((factures, index) => {
+          const boutiqueId = this.boutiques[index].id;
+          counts[boutiqueId] = factures.length;
+        });
+        this.factureCounts = counts;
+        this.totalAllFactures = responses.reduce((acc, factures) => acc + factures.length, 0);
+
         this.processFactures(allFactures);
       },
       error: (error) => {

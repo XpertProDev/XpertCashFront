@@ -31,6 +31,9 @@ export class FactureReelComponent implements OnInit {
   chargementFini: boolean = false;
   messageErreur: string = "";
   tempsRestantEssai: string | null = null;
+
+  factureCounts: { [key: string]: number } = {};
+  totalAllFactures: number = 0;
   
   // Pagination
   pageSize = 10;
@@ -113,6 +116,8 @@ export class FactureReelComponent implements OnInit {
         this.factureReel = response;
         this.errorMessage = "";
         this.facturesLoaded = true;
+
+        this.calculateFactureCounts();
       },
       (error: any) => {
         console.error('Erreur lors de la récupération des factures réelles:', error);
@@ -134,6 +139,20 @@ export class FactureReelComponent implements OnInit {
         this.facturesLoaded = true;
       }
     );
+  }
+
+  calculateFactureCounts(): void {
+    // Réinitialiser les compteurs
+    this.factureCounts = {};
+    this.totalAllFactures = this.factureReel.length;
+
+    // Compter par statut
+    this.factureReel.forEach(facture => {
+      const statut = facture.statutPaiement;
+      if (statut) {
+        this.factureCounts[statut] = (this.factureCounts[statut] || 0) + 1;
+      }
+    });
   }
 
   selectStatut(statut: string | null): void {
