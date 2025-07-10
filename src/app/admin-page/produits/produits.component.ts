@@ -300,7 +300,7 @@ export class ProduitsComponent implements OnInit {
       const pageTasks = this.tasks.slice(startIndex, startIndex + this.pageSize);
       
       if (!Array.isArray(pageTasks) || pageTasks.length === 0) {
-        console.error("Aucun produit trouvé sur cette page !");
+        console.error("Aucun produit trouvée sur cette page !");
         return;
       }
       
@@ -312,7 +312,7 @@ export class ProduitsComponent implements OnInit {
         task.prixVente ?? 0,
         task.prixAchat ?? 0,
         task.quantite ?? 0,
-        task.nomUnite ? `${task.nomUnite}` : 'Non Unité',
+        task.nomUnite ? `${task.nomUnite}` : 'Sans unité',
         task.seuilAlert ?? 0,
       ]);
       

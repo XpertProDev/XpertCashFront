@@ -497,7 +497,7 @@ getBoutiqueName() {
       if (userInfo && userInfo.boutiques && userInfo.boutiques.length > 0) {
         console.log(userInfo.boutiques[0]);
 
-        this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvé';
+        this.boutiqueName = userInfo.boutiques[0].nomBoutique || 'Nom de la boutique non trouvée';
       } else {
         console.error('Aucune boutique trouvée pour cet utilisateur');
         this.boutiqueName = 'Aucune boutique';

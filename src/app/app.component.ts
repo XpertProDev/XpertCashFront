@@ -97,7 +97,7 @@ checkLockStatus() {
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
     if (!user || !user.personalCode) {
-        console.warn("⚠️ Aucun utilisateur trouvé, pas de verrouillage.");
+        console.warn("⚠️ Aucun utilisateur trouvée, pas de verrouillage.");
         localStorage.removeItem('isLocked');
         return;
     }
