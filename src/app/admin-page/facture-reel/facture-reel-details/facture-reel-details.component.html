@@ -26,10 +26,15 @@
           </button>
       </div>
 
-      <div class="lien_proforma">
+      <div class="lien_proforma" style="display: flex; align-items: center; gap: 5px;">
         <button class="btn_etat" style="color: green;" (click)="voirProforma()">
           <span>Voir proforma</span>
         </button>
+
+
+        <div class="download_icon" (click)="download()">
+            <i class="ri-download-2-fill"></i>
+        </div>
       </div>
     </div>
 
@@ -49,6 +54,19 @@
                 Email : <a href="mailto:{{ email }}">{{ email }}</a>  
                 Téléphone : {{ telephone }}
               </div>
+            </div>
+          </div>
+
+          <div class="statut_paiement">
+            <!-- <div class="cadre_name_paiement">
+              NON PAYER
+            </div> --> 
+            <div class="cadre_name_paiement" [ngClass]="{
+              'payee': facture.statutPaiement === 'PAYEE',
+              'partiel': facture.statutPaiement === 'PARTIELLEMENT_PAYEE',
+              'attente': facture.statutPaiement === 'EN_ATTENTE'
+            }">
+              {{ getStatutText(facture.statutPaiement || '') }}
             </div>
           </div>
         </div>

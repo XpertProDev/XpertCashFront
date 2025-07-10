@@ -42,6 +42,9 @@ export class FactureReelDetailsComponent implements OnInit {
   tauxTva?: number | null;
   totauxParMode: { [key: string]: number } = {};
 
+  @Input() nomComplet: string = '';
+  @Input() role: 'Validateur' | 'Createur' = 'Createur';
+
   facture: FactureReelle | null = null;
   totalTVA: number = 0;
   montantCommercial: number = 0;
@@ -439,7 +442,8 @@ export class FactureReelDetailsComponent implements OnInit {
     });
   }
 
-   @Input() nomComplet: string = '';
-  @Input() role: 'Validateur' | 'Createur' = 'Createur';
+  async download() {
+
+  }
 
 }
