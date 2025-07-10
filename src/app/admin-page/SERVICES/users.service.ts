@@ -200,16 +200,17 @@ export class UsersService {
 getUserById(userId: number): Observable<UserNewRequest> {
 const token = localStorage.getItem('authToken') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    
     return this.http.get<UserNewRequest>(`${this.apiUrl}/user/${userId}`, { headers });
 }
 
 
   // Methode pour le service permission
   assignPermissionsToUser(userId: number, permissions: { [key: string]: boolean }): Observable<UserNewRequest> {
-    const url = `${this.apiUrl}/${userId}/permissions`;
-    return this.http.post<UserNewRequest>(url, permissions);
+    const token = localStorage.getItem('authToken') || '';
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return this.http.post<UserNewRequest>(`${this.apiUrl}/${userId}/permissions`, permissions, { headers });
   }
+
 
   //Ajout de la boutique
   addBoutique(boutique: any): Observable<any> {

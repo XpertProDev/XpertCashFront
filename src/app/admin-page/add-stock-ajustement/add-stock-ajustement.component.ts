@@ -78,6 +78,8 @@ export class AddStockAjustementComponent {
 
   showPopupBoutique = false;
 
+  
+
   // Contructor
   constructor(
       // private sharedDataService: SharedDataService,
@@ -330,6 +332,7 @@ export class AddStockAjustementComponent {
 
   getAjusteForm() {
     this.ajusteForm = this.fb.group({
+      boutiqueId: [null, Validators.required],
       descriptionGlobal: ['', [Validators.minLength(2), Validators.maxLength(100)]],
       codeFournisseur: ['', [Validators.minLength(4), Validators.maxLength(100)]],
      fournisseurId: [null, Validators.required],
@@ -500,13 +503,16 @@ export class AddStockAjustementComponent {
   
       const descriptionGlobal = this.ajusteForm.value.descriptionGlobal || '';
       const codeFournisseur = this.ajusteForm.value.codeFournisseur || '';
+      
   
       // ✅ construire dynamiquement l'objet à envoyer
       const dataToSend: any = {
+        boutiqueId: this.boutiqueIdSelected,
         produitsQuantites,
         description: descriptionGlobal,
         codeFournisseur,
         fournisseurId: this.fournisseurCtrl.value
+        
       };
 
       console.log('Data à envoyer:', dataToSend);
@@ -576,8 +582,10 @@ export class AddStockAjustementComponent {
       const descriptionGlobal = this.ajusteForm.value.descriptionGlobal || '';
   
       this.stockService.retirerStock({
+        boutiqueId: this.boutiqueIdSelected,
         produitsQuantites: produitsQuantites,
         description: descriptionGlobal
+        
       }).subscribe({
         next: (response) => {
           // Mise à jour locale
