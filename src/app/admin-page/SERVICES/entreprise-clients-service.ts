@@ -15,7 +15,7 @@ export class EntrepriseClientService {
   constructor(private http: HttpClient) { }
 
   addEntrepriseClient(entrepriseClient: EntrepriseClient): Observable<EntrepriseClient> {
-      const token = localStorage.getItem('authToken') || '';
+      const token = localStorage.getItem('accessToken') || '';
       const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -35,7 +35,7 @@ export class EntrepriseClientService {
   }
 
   updateEntrepriseClient(id: number, entrepriseClient: EntrepriseClient): Observable<EntrepriseClient> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -61,7 +61,7 @@ export class EntrepriseClientService {
   }
 
   getEntrepriseById(id: number): Observable<EntrepriseClient> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });

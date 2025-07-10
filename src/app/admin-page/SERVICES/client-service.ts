@@ -15,7 +15,7 @@ export class ClientService {
   constructor(private http: HttpClient) { }
 
   addClient(client: Clients): Observable<{ message: string; clientId: string; createdAt: string }> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -29,7 +29,7 @@ export class ClientService {
 
   // LL recuperation des clients
   getListClients(): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('Aucun token trouvé');
@@ -47,7 +47,7 @@ export class ClientService {
 
   //All client end Entreprise:
   getListEntreprises(): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('Aucun token trouvé');
@@ -68,7 +68,7 @@ export class ClientService {
   }
 
   getClientById(id: number): Observable<Clients> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -84,7 +84,7 @@ export class ClientService {
 
   // Ajoutez cette méthode dans votre ClientService
   updateClient(id: number, client: Clients, imageFile?: File): Observable<Clients> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });

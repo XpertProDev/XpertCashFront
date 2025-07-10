@@ -15,7 +15,7 @@ export class BoutiqueService {
   constructor(private http: HttpClient) { }
 
   updateBoutique(id: number, updates: { nomBoutique: string; adresse: string; telephone: string; email: string }): Observable<{ message?: string; error?: string }> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('Aucun token trouvé');
@@ -31,7 +31,7 @@ export class BoutiqueService {
 
   // LL recuperation de boutique dans e/ses
   getBoutiquesByEntreprise(): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('Aucun token trouvé');
@@ -47,19 +47,19 @@ export class BoutiqueService {
 
   // Nouvelle méthode pour récupérer les détails d'un produit par son ID
   getBoutiqueById(id: number): Observable<Boutique> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     return this.http.get<Boutique>(`${this.apiUrl}/boutique/${id}`, { headers });
   }
 
   activerBoutique(id: number): Observable<any> {
-      const token = localStorage.getItem('authToken') || '';
+      const token = localStorage.getItem('accessToken') || '';
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
       return this.http.put(`${this.apiUrl}/activerBoutique/${id}`, {}, { headers });
   }
   
   desactiverBoutique(id: number): Observable<any> {
-      const token = localStorage.getItem('authToken') || '';
+      const token = localStorage.getItem('accessToken') || '';
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
       return this.http.put(`${this.apiUrl}/desactiverBoutique/${id}`, {}, { headers });
   }
@@ -69,7 +69,7 @@ export class BoutiqueService {
   // }
 
   getProductsByBoutiqueId(id: number): Observable<Produit[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('Aucun token trouvé');
@@ -85,7 +85,7 @@ export class BoutiqueService {
   }
 
   getVendeursByBoutiqueId(id: number): Observable<Users[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('Aucun token trouvé');
@@ -105,7 +105,7 @@ export class BoutiqueService {
     toutCopier: boolean;
     produitIds?: number[];
   }): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       return throwError('Aucun token trouvé');
     }
@@ -139,7 +139,7 @@ export class BoutiqueService {
   }
 
 mettreEnCorbeille(produitId: number): Observable<{message: string, status: string}> {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('accessToken');
   if (!token) {
     return throwError(() => new Error('Aucun token trouvé'));
   }

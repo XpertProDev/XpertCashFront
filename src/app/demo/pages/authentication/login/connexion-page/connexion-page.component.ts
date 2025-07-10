@@ -142,11 +142,17 @@ export class ConnexionPageComponent {
       this.usersService.connexionUser(credentials).subscribe({
         next: (response) => {
           this.isLoading = false;
-  
-          if (response.token) {
-            console.log("Token généré :", response.token);
-            this.authService.saveToken(response.token);
-            this.router.navigate(['/analytics']);
+
+          if (response.accessToken && response.refreshToken) {
+            console.log("Access Token :", response.accessToken);
+            console.log("Refresh Token :", response.refreshToken);
+
+            this.authService.saveTokens(response.accessToken, response.refreshToken);
+            console.log("On va tenter la navigation vers /analytics");
+          this.router.navigate(['/analytics']).then(success => {
+            console.log("Navigation réussie ?", success);
+          });
+                      this.router.navigate(['/analytics']);
           } else {
             this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
             this.openPopup("Erreur de connexion", this.errorMessage, 'error');

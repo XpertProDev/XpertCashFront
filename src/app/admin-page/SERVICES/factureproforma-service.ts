@@ -21,7 +21,7 @@ export class FactureProFormaService {
     appliquerTVA?: boolean,
     appliquerAdjustments?: boolean
   ): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) return throwError(() => new Error('Token manquant'));
   
     const headers = new HttpHeaders({
@@ -52,7 +52,7 @@ export class FactureProFormaService {
 
   //Get facture proformat
   getAlFactproformaOfEntreprise(entrepriseId: number): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('Aucun token trouvé');
@@ -67,7 +67,7 @@ export class FactureProFormaService {
   }
 
   getFactureProformaById(id: number): Observable<FactureProForma> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -82,7 +82,7 @@ export class FactureProFormaService {
     modifications: Partial<FactureProForma>,
     idsApprobateurs?: number[]
   ): Observable<FactureProForma> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       return throwError(() => new Error('Token manquant'));
     }
@@ -150,7 +150,7 @@ export class FactureProFormaService {
       });
     }
 
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -165,7 +165,7 @@ export class FactureProFormaService {
 
   //Get History Facture
   getHistoriqueFacture(factureId: number): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -179,7 +179,7 @@ export class FactureProFormaService {
 
 //Endpoint pour recuperer les notes d'une facture proforma
   getNotesFactureProforma(id: number): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -189,7 +189,7 @@ export class FactureProFormaService {
 
   //Note by Id
     getNoteById(factureId: number, noteId: number): Observable<Note> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/json'
@@ -206,7 +206,7 @@ export class FactureProFormaService {
   //Endpoint pour modifier les notes
 
    updateNote(factureId: number, noteId: number, nouveauContenu: string): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -225,7 +225,7 @@ export class FactureProFormaService {
   }
 
   deletNoteFactureProforma(factureId: number, noteId: number): Observable<any> {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('accessToken');
   const headers = new HttpHeaders({
     'Authorization': `Bearer ${token}`,
     'Accept': 'application/json'
@@ -237,7 +237,7 @@ export class FactureProFormaService {
 }
 
   getFacturesByClient(clientId?: number, entrepriseClientId?: number): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     });

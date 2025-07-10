@@ -244,7 +244,7 @@ export class ProduitFormComponent {
   }
   
   setupFormSubscriptions() {
-    const token = localStorage.getItem('authToken'); // ou via un service d'authentification
+    const token = localStorage.getItem('accessToken'); // ou via un service d'authentification
     if (token) {
       this.categorieService.getCategories(token).subscribe(
         (categories) => {
@@ -580,7 +580,7 @@ export class ProduitFormComponent {
     }
     this.isSending = true;
     const produit = this.ajouteProduitForm.value;
-    const tokenStored = localStorage.getItem('authToken');
+    const tokenStored = localStorage.getItem('accessToken');
     if (!tokenStored) {
       this.showPopupMessage({
         title: 'Erreur',
@@ -730,7 +730,7 @@ export class ProduitFormComponent {
   //     }
   
   //     console.log('Produit soumis:', produit);
-  //     const tokenStored = localStorage.getItem('authToken');
+  //     const tokenStored = localStorage.getItem('accessToken');
   //     if (!tokenStored) {
   //       this.showPopupMessage({
   //         title: 'Erreur',

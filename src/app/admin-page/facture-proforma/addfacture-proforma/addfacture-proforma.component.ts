@@ -352,7 +352,7 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
   getListClients() {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (token) {
       this.clientService.getListClients().subscribe({
         next: (data) => {
@@ -390,7 +390,7 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
   getProduits() {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (token && this.userEntrepriseId) {
       this.produitService.getProduitsParEntreprise(this.userEntrepriseId!).subscribe({
         next: (data: Produit[]) => {
@@ -426,7 +426,7 @@ export class AddfactureProformaComponent implements OnInit {
   }
 
   creerFactureProforma() {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       console.error('Token manquant');
       return;

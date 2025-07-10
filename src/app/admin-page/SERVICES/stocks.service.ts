@@ -15,7 +15,7 @@ import { environment } from 'src/environments/environment';
   constructor(private http: HttpClient) { }
 
   ajouterStock(stockPayload: any): Observable<any> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -25,7 +25,7 @@ import { environment } from 'src/environments/environment';
   }
 
   retirerStock(stockPayload: any): Observable<any> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'

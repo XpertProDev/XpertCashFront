@@ -15,7 +15,7 @@ export class FournisseurService {
 ) { }
 
 addFournisseur(fournisseur: Fournisseurs, imageFournisseurFile?: File): Observable<any> {
-  const token = localStorage.getItem('authToken') || '';
+  const token = localStorage.getItem('accessToken') || '';
   const headers = new HttpHeaders({
     'Authorization': `Bearer ${token}`
   });
@@ -35,7 +35,7 @@ addFournisseur(fournisseur: Fournisseurs, imageFournisseurFile?: File): Observab
 
   //Get fournisseur by id
   getFournisseurById(id: number): Observable<{ fournisseur: Fournisseurs }> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -50,7 +50,7 @@ addFournisseur(fournisseur: Fournisseurs, imageFournisseurFile?: File): Observab
 
   //Get all fournisseurs
   getAllFournisseurs(): Observable<Fournisseurs[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
 
     const headers = new HttpHeaders({
       'Authorization': token ? `Bearer ${token}` : '',
@@ -63,7 +63,7 @@ addFournisseur(fournisseur: Fournisseurs, imageFournisseurFile?: File): Observab
 // fournisseur.service.ts
 
 updateFournisseur(id: number, updatedFournisseur: any, imageFournisseurFile?: File): Observable<any> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`
     });

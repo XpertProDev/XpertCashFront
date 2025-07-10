@@ -244,7 +244,7 @@ export class AddProduitComponent implements OnInit {
   }
 
   setupFormSubscriptions() {
-    const token = localStorage.getItem('authToken'); // ou via un service d'authentification
+    const token = localStorage.getItem('accessToken'); // ou via un service d'authentification
     if (token) {
       this.categorieService.getCategories(token).subscribe(
         (categories) => {
@@ -594,7 +594,7 @@ export class AddProduitComponent implements OnInit {
     }
 
     console.log('Produit soumis:', produit);
-    const tokenStored = localStorage.getItem('authToken');
+    const tokenStored = localStorage.getItem('accessToken');
     if (!tokenStored) {
       this.showPopupMessage({
         title: 'Erreur',

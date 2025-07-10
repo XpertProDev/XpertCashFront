@@ -15,7 +15,7 @@ export class ModuleService {
 
   constructor(private http: HttpClient) {}
     getModulesEntreprise(): Observable<Module[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       console.error('Aucun token trouvé dans le localStorage');
       return throwError(() => new Error('Token manquant'));
@@ -31,7 +31,7 @@ export class ModuleService {
 
   // Dans module.service.ts
   // activerModule(demande: ModulePaiementModel): Observable<{ referenceTransaction: string }> {
-  //   const token = localStorage.getItem('authToken');
+  //   const token = localStorage.getItem('accessToken');
   //   if (!token) {
   //     return throwError(() => new Error('Token manquant'));
   //   }
@@ -51,7 +51,7 @@ export class ModuleService {
   // }
 
   activerModule(demande: ModulePaiementModel): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       return throwError(() => new Error('Token manquant'));
     }

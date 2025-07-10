@@ -1,10 +1,17 @@
 import { ChangeDetectorRef, Injectable } from '@angular/core';
 import { Users } from '../MODELS/utilisateur.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, switchMap, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
 import { UserRequest } from '../MODELS/user-request';
 import { environment } from 'src/environments/environment';
+import { AuthService } from './auth.service';
+import { Router } from '@angular/router';
+
+interface RefreshTokenResponse {
+  accessToken: string;
+  message: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -14,14 +21,19 @@ export class UsersService {
   private apiUrl = environment.apiBaseUrl;
   public isLocked: boolean = false;
   
+  
 
   constructor(
     private http: HttpClient,
-  ) {}
+    private authService: AuthService,
+     private router: Router,
+   ) {}
+
+  
 
   // Méthode pour récupérer le token
   getToken(): string | null {
-    return localStorage.getItem('authToken');
+    return localStorage.getItem('accessToken');
   }
 
   //Inscription
@@ -30,65 +42,91 @@ export class UsersService {
   }
 
   // Connexion
-  connexionUser(credentials: { email: string; password: string }): Observable<{ message?: string; token?: string; error?: string }> {
-    return this.http.post<{ message?: string; token?: string; error?: string }>(`${this.apiUrl}/login`, credentials);
-  }
+connexionUser(credentials: { email: string; password: string }): Observable<{
+  accessToken?: string;
+  refreshToken?: string;
+  message?: string;
+  error?: string;
+}> {
+  return this.http.post<{
+    accessToken?: string;
+    refreshToken?: string;
+    message?: string;
+    error?: string;
+  }>(`${this.apiUrl}/login`, credentials);
+}
+
+
+
 
   // Déconnexion
   logoutUser(): void {
-    localStorage.removeItem('authToken');  
+    localStorage.removeItem('accessToken');  
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('isLocked');
     localStorage.removeItem('user');
-  
     this.isLocked = false;
-  
-    history.pushState(null, '', '/connexion');
-    window.location.href = "/connexion";
+    this.router.navigate(['/connexion']);
+
   }
   
   
   
   //Information sur User
-  getUserInfo(): Observable<UserRequest> {
-    const token = localStorage.getItem('authToken');
-    
-    if (!token) {
-      console.error('Aucun token trouvé');
-      return throwError('Aucun token trouvé');
-    }
-  
-    const decodedToken = this.decodeJwt(token);
-    const isTokenExpired = this.isTokenExpired(decodedToken);
-    
-    if (isTokenExpired) {
-      return this.getNewTokenFromApi().pipe(
-        switchMap((newTokenResponse) => {
-          localStorage.setItem('authToken', newTokenResponse.token);
-  
-          const headers = new HttpHeaders({
-            Authorization: `Bearer ${newTokenResponse.token}`
-          });
-  
-          return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
-            tap(user => {
-              localStorage.setItem('user', JSON.stringify(user));
-            })
-          );
-        })
-      );
-    } else {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${token}`
-      });
-  
-      return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
-        tap(user => {
-          localStorage.setItem('user', JSON.stringify(user));
-        })
-      );
-    }
+getUserInfo(): Observable<UserRequest> {
+  const token = localStorage.getItem('accessToken');
+
+  if (!token || token === 'null' || token.trim() === '') {
+    console.error('❌ Aucun token valide trouvé dans le localStorage');
+    return throwError(() => new Error('Aucun token valide trouvé'));
   }
+
+  const decodedToken = this.decodeJwt(token);
+  const isTokenExpired = this.isTokenExpired(decodedToken);
+
+  if (isTokenExpired) {
+    console.warn('⏳ Token expiré, tentative de refresh...');
+
+    return this.getNewTokenFromApi().pipe(
+      switchMap((newTokenResponse: RefreshTokenResponse) => {
+        const newAccessToken = newTokenResponse.accessToken;
+
+        if (!newAccessToken || newAccessToken.trim() === '') {
+          console.error('❌ Le token rafraîchi est vide ou invalide');
+          return throwError(() => new Error('Token rafraîchi invalide'));
+        }
+
+        localStorage.setItem('accessToken', newAccessToken);
+
+        const headers = new HttpHeaders({
+          Authorization: `Bearer ${newAccessToken}`
+        });
+
+        return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
+          tap(user => localStorage.setItem('user', JSON.stringify(user)))
+        );
+      }),
+      catchError(err => {
+        alert('Session expirée, veuillez vous reconnecter');
+        this.logoutUser();
+        return throwError(() => new Error('Session expirée'));
+      })
+    );
+  } else {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    console.log('➡️ Requête avec token existant :', headers.get('Authorization'));
+
+    return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
+      tap(user => localStorage.setItem('user', JSON.stringify(user)))
+    );
+  }
+}
+
+
+
   
     
   // Simpl dcodage JWT pour vérifier si le token est expiré
@@ -103,10 +141,10 @@ export class UsersService {
   }
     
   // Rafraîchir le token avec un refresh token (si applicable)
-  getNewTokenFromApi(): Observable<{ token: string }> {
-    const refreshToken = localStorage.getItem('refreshToken');
-    return this.http.post<{ token: string }>(`${this.apiUrl}/refresh-token`, { refreshToken });
-  }
+ getNewTokenFromApi(): Observable<RefreshTokenResponse> {
+  const refreshToken = this.authService.getRefreshToken();
+  return this.http.post<RefreshTokenResponse>(`${this.apiUrl}/refresh-token`, { refreshToken });
+}
 
   getUserBoutiqueId(): number | null {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -152,7 +190,7 @@ export class UsersService {
   
 
   updateBoutique(id: number, updates: { nomBoutique: string; adresse: string }): Observable<{ message?: string; error?: string }> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('Aucun token trouvé');
@@ -167,7 +205,7 @@ export class UsersService {
   }
 
   updateUser(id: number, formData: FormData): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('Aucun token trouvé');
@@ -183,7 +221,7 @@ export class UsersService {
 
 
   getAllUsersOfEntreprise(entrepriseId: number): Observable<any[]> {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('accessToken');
         if (!token) {
           console.error("Aucun token trouvé, requête annulée.");
           return throwError(() => new Error("Aucun token trouvé"));
@@ -198,7 +236,7 @@ export class UsersService {
 
   
 getUserById(userId: number): Observable<UserNewRequest> {
-const token = localStorage.getItem('authToken') || '';
+const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     return this.http.get<UserNewRequest>(`${this.apiUrl}/user/${userId}`, { headers });
 }
@@ -206,7 +244,7 @@ const token = localStorage.getItem('authToken') || '';
 
   // Methode pour le service permission
   assignPermissionsToUser(userId: number, permissions: { [key: string]: boolean }): Observable<UserNewRequest> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     return this.http.post<UserNewRequest>(`${this.apiUrl}/${userId}/permissions`, permissions, { headers });
   }
@@ -214,7 +252,7 @@ const token = localStorage.getItem('authToken') || '';
 
   //Ajout de la boutique
   addBoutique(boutique: any): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       console.error("Aucun token trouvé, requête annulée.");
       return throwError(() => new Error("Aucun token trouvé"));
@@ -231,7 +269,7 @@ const token = localStorage.getItem('authToken') || '';
   
   // LL recuperation de boutique dans e/ses
   getBoutiquesByEntreprise(): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('Aucun token trouvé');
@@ -247,7 +285,7 @@ const token = localStorage.getItem('authToken') || '';
 
   // Service pour suspendre user
   suspendUser(userId: number, suspend: boolean): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
         return throwError('Aucun token trouvé');
     }

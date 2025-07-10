@@ -5,32 +5,45 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly TOKEN_KEY = 'authToken';
+  private readonly ACCESS_TOKEN_KEY = 'accessToken';
+  private readonly REFRESH_TOKEN_KEY = 'refreshToken';
 
-  saveToken(token: string): void {
-    console.log("Token sauvegardé dans localStorage :", token);
-    localStorage.setItem(this.TOKEN_KEY, token);
-  }  
+  // Sauvegarder les deux tokens
+saveTokens(accessToken: string, refreshToken: string): void {
+  localStorage.setItem('accessToken', accessToken);
+  localStorage.setItem('refreshToken', refreshToken);
+}
+saveAccessToken(token: string): void {
+  localStorage.setItem('accessToken', token);
+}
 
-  // Récupérer le token depuis le localStorage
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
-  }
 
-  // Supprimer le token lors de la déconnexion
-  removeToken(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-  }
+  // Récupérer l'accessToken
+getAccessToken(): string | null {
+  const token = localStorage.getItem('accessToken');
+  console.log('🪪 Token lu depuis localStorage :', token);
+  return token;
+}
 
-  // Méthode d'authentification simple (à améliorer par la suite)
+
+  // Récupérer le refreshToken
+getRefreshToken(): string | null {
+  return localStorage.getItem('refreshToken');
+}
+
+  // Supprimer les tokens à la déconnexion
+removeTokens(): void {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+}
+
+  // Méthode d'authentification simple
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    return !!this.getAccessToken();
   }
 
-  // Ajoutez cette méthode pour corriger l'erreur
   isLoggedIn(): boolean {
     return this.isAuthenticated();
   }
-
-
 }
+

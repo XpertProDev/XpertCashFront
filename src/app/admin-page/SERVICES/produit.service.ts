@@ -34,7 +34,7 @@ export class ProduitService {
       formData.append('image', imageFile, imageFile.name);
     }
   
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -44,7 +44,7 @@ export class ProduitService {
   
 
   modifierProduit(produit: Produit, file?: File): Observable<Produit> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -69,7 +69,7 @@ export class ProduitService {
 
   // Nouvelle méthode pour récupérer les détails d'un produit par son ID
   getProduitById(productId: number): Observable<Produit> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     
     return this.http.get<Produit>(`${this.apiUrl}/produits/${productId}`, { headers });
@@ -77,7 +77,7 @@ export class ProduitService {
 
   // Méthode pour récupérer la liste des produits d'une boutique
   getProduitsEntreprise(boutiqueId: number): Observable<Produit[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
     return this.http.get<Produit[]>(`${this.apiUrl}/produits/${boutiqueId}/stock`, { headers }).pipe(
@@ -92,7 +92,7 @@ export class ProduitService {
 
   // Méthode pour récupérer les totaux des produits en stock (déjà existante)
   getProduitBoutique(boutiqueId: number): Observable<Map<string, number>> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       console.error('Aucun token trouvé');
       return throwError('Aucun token trouvé');
@@ -115,7 +115,7 @@ export class ProduitService {
 
   // Méthode pour recuperer les fournisseur de lutilisateur connecter
   getFournisseurs(): Observable<any[]> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });

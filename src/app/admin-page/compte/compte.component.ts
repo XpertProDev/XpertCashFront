@@ -166,7 +166,7 @@ export class CompteComponent  implements OnInit {
   }
 
   loadRoles() {
-    const token = localStorage.getItem('authToken'); 
+    const token = localStorage.getItem('accessToken'); 
     if (token) {
       this.rolesService.getAllRoles(token).subscribe({
         next: (data) => {
@@ -233,7 +233,7 @@ export class CompteComponent  implements OnInit {
     }
   
     const request: UserNewRequest = this.userForm.value;
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
   
     if (!token) {
       this.errorMessage = "Vous devez être connecté pour ajouter un utilisateur.";

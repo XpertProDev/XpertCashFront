@@ -174,7 +174,7 @@ export class ClientsComponent implements OnInit  {
 
   getListEntreprises() {
     this.entreprisesLoaded = false;
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (token) {
       // Utiliser le service EntrepriseService au lieu de ClientService
       this.entrepriseService.getListEntreprises().subscribe({
@@ -234,7 +234,7 @@ export class ClientsComponent implements OnInit  {
   // list clients 
   getListClients() {
     this.clientsLoaded = false;
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (token) {
       this.clientService.getListClients().subscribe({
         next: (data) => {

@@ -71,8 +71,8 @@ registerLocaleData(localeFr);
   ],
   providers: [
     provideHttpClient(),
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-    { provide: LOCALE_ID, useValue: 'fr-FR' }
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true, },
+    { provide: LOCALE_ID, useValue: 'fr-FR' },
   ],
   bootstrap: [AppComponent]
 })

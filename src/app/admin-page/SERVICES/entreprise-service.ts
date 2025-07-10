@@ -19,7 +19,7 @@ export class EntrepriseService {
   // Dans client.service.ts
 // Dans entreprise.service.ts
   getListEntreprises(): Observable<EntrepriseClient[]> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -40,7 +40,7 @@ export class EntrepriseService {
 
   // Ajouter une entreprise
   addEntreprise(entreprise: Entreprise): Observable<Entreprise> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -83,7 +83,7 @@ export class EntrepriseService {
 
   // Recuperer information d'une entreprise de la user connecter
   getEntrepriseById(id: number): Observable<Entreprise> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -103,7 +103,7 @@ export class EntrepriseService {
   }
 
   updateEntreprise(id: number, formData: FormData): Observable<string> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -125,7 +125,7 @@ export class EntrepriseService {
   }
 
   // updateEntreprise(id: number, formData: FormData): Observable<any> {
-  //   const token = localStorage.getItem('authToken') || '';
+  //   const token = localStorage.getItem('accessToken') || '';
   //   const headers = new HttpHeaders({
   //     'Authorization': `Bearer ${token}`
   //   });
@@ -145,7 +145,7 @@ export class EntrepriseService {
 
   // Get entreprise d'un user
   getEntrepriseInfo(): Observable<Entreprise> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
 
     if (!token) {
       console.error('Aucun token trouvé');
@@ -158,7 +158,7 @@ export class EntrepriseService {
     if (isTokenExpired) {
       return this.getNewTokenFromApi().pipe(
         switchMap((newTokenResponse) => {
-          localStorage.setItem('authToken', newTokenResponse.token);
+          localStorage.setItem('accessToken', newTokenResponse.token);
 
           const headers = new HttpHeaders({
             Authorization: `Bearer ${newTokenResponse.token}`

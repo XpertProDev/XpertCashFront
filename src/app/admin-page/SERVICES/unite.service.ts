@@ -34,7 +34,7 @@ export class UniteMesureService {
 
    // Ajouter une catégorie
     ajouterUnite(unity: UniteMesure): Observable<UniteMesure> {
-      const token = localStorage.getItem('authToken') || '';
+      const token = localStorage.getItem('accessToken') || '';
       const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`
       });

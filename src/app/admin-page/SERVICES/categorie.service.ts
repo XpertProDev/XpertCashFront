@@ -33,7 +33,7 @@ export class CategorieService {
 
   // Ajouter une catégorie
   ajouterCategorie(category: Categorie): Observable<Categorie> {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });

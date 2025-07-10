@@ -12,7 +12,7 @@ export class FactureReelService {
   constructor(private http: HttpClient) {}
 
   getFactureReelleById(id: number): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       console.error('Aucun token retrouvé en localStorage');
       return throwError(() => new Error('Aucun token trouvé'));
@@ -26,7 +26,7 @@ export class FactureReelService {
   }
 
   getAlFactproreelOfEntreprise(entrepriseId: number): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
 
     if (!token) {
       console.error('Aucun token trouvé');
@@ -42,7 +42,7 @@ export class FactureReelService {
 
   // Ajouter ces méthodes dans FactureReelService
   enregistrerPaiement(factureId: number, montant: number, modePaiement: string): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) return throwError(() => new Error('Aucun token trouvé'));
 
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
@@ -52,7 +52,7 @@ export class FactureReelService {
   }
 
   getHistoriquePaiements(factureId: number): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) return throwError(() => new Error('Aucun token trouvé'));
 
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
@@ -60,7 +60,7 @@ export class FactureReelService {
   }
 
   getMontantRestant(factureId: number): Observable<number> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) return throwError(() => new Error('Aucun token trouvé'));
 
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
@@ -69,7 +69,7 @@ export class FactureReelService {
 
   // Ajouter cette méthode dans FactureReelService
   annulerFactureReelle(factureId: number): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) return throwError(() => new Error('Aucun token trouvé'));
 
     const headers = new HttpHeaders({ 

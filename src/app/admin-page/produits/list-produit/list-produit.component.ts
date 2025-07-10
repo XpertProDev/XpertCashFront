@@ -244,7 +244,7 @@ export class ListProduitComponent {
 
   getFiltrageCategoriesUnites() {
     // 🟢 Filtrage des catégories (OK)
-    const token = localStorage.getItem('authToken'); // ou via un service d'authentification
+    const token = localStorage.getItem('accessToken'); // ou via un service d'authentification
     if (token) {
       this.categorieService.getCategories(token).subscribe(
         (categories) => {

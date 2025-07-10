@@ -233,7 +233,7 @@ export class AddClientsComponent implements OnInit {
   }
 
   private loadEntreprises() {
-    const token = localStorage.getItem('authToken') || '';
+    const token = localStorage.getItem('accessToken') || '';
     if (!token) return;
 
     this.entrepriseService.getListEntreprise(token).subscribe(
@@ -264,7 +264,7 @@ export class AddClientsComponent implements OnInit {
   }
 
   getListEntreprise() {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (token) {
       this.entrepriseService.getListEntreprise(token).subscribe(
         (entreprises) => {
