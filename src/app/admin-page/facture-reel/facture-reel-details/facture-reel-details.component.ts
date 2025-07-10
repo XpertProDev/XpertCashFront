@@ -444,193 +444,274 @@ export class FactureReelDetailsComponent implements OnInit {
     });
   }
 
-  async download() {
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+async download() {
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
-    // Logo
-    try {
-      if (this.logo) {
-        const imgData = this.logo.startsWith('data:image/') 
-          ? this.logo 
-          : await this.getImageFromUrl(this.logo);
-        const formatMatch = imgData.match(/^data:image\/(png|jpeg|gif);/);
-        const format = formatMatch ? formatMatch[1].toUpperCase() : 'PNG';
-        doc.addImage(imgData, format, 15, 10, 47, 17);
-      }
-    } catch (imgErr) {
-      console.error('Erreur de chargement du logo', imgErr);
-    }
-
-    // Infos entreprise
-    const infoX = 70;
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text(this.nom || 'Nom Entreprise', infoX, 12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Secteur : ${this.secteur || ''}`, infoX, 17);
-    doc.text(`Email : ${this.email || ''}`, infoX, 22);
-    doc.text(`Téléphone : ${this.telephone || ''}`, infoX + 60, 22);
-
-    // Séparateurs
-    doc.setDrawColor(200);
-    doc.line(15, 27, 195, 27);
-    doc.line(15, 28.5, 195, 28.5);
-
-    // Titre
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(85, 85, 85);
-    doc.text(`FACTURE : ${this.facture?.numeroFacture}`, 105, 36, { align: 'center' });
-
-    // Date
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    const dateStr = this.facture?.dateCreation 
-      ? new Date(this.facture.dateCreation).toLocaleDateString('fr-FR', { 
-          day: '2-digit', 
-          month: 'long', 
-          year: 'numeric' 
-        })
-      : '';
-    doc.text(`${this.siege || ''}, le ${dateStr}`, 195, 46, { align: 'right' });
-
-    // Client
-    const clientY = 56;
-    if (this.facture) {
-      const clientName = this.facture.client?.nom || 
-                        this.facture.entrepriseClient?.nom || 
-                        'Non spécifié';
-      doc.setFont('helvetica', 'bold');
-      doc.text('Doit :', 15, clientY);
-      doc.setFont('helvetica', 'normal');
-      doc.text(clientName, 15 + doc.getTextWidth('Doit :') + 2, clientY);
-    }
-
-    // Objet
-    doc.setFont('helvetica', 'bold');
-    doc.text('Objet :', 15, clientY + 7);
-    doc.setFont('helvetica', 'normal');
-    doc.text(this.facture?.description || '', 15 + doc.getTextWidth('Objet :') + 2, clientY + 7);
-
-    // Tableau des produits
-    const tableStartY = clientY + 17;
-    const customNumberPipe = new CustomNumberPipe();
-    const tableData = this.facture?.lignesFacture.map(ligne => [
-      ligne.produitNom,
-      ligne.ligneDescription,
-      customNumberPipe.transform(ligne.prixUnitaire),
-      ligne.quantite.toString(),
-      customNumberPipe.transform(ligne.montantTotal)
-    ]) || [];
-
-    // Totaux
-    tableData.push([
-      { content: 'Total HT', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
-      { content: customNumberPipe.transform(this.facture?.totalHT || 0), styles: { halign: 'right' } }
-    ] as any);
-
-    // Remise
-    if (this.facture?.remise && this.facture.remise > 0) {
-      tableData.push([
-        { content: 'Remise', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
-        { content: customNumberPipe.transform(this.facture.remise), styles: { halign: 'right' } }
-      ] as any);
-      
-      tableData.push([
-        { content: 'Montant Commercial', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
-        { content: customNumberPipe.transform(this.montantCommercial), styles: { halign: 'right' } }
-      ] as any);
-    }
-
-    // TVA
-    if (this.facture?.tva && this.tauxTva) {
-      const tauxPourcent = Math.round(this.tauxTva * 100);
-      tableData.push([
-        { content: `TVA (${tauxPourcent} %)`, colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
-        { content: customNumberPipe.transform(this.totalTVA), styles: { halign: 'right' } }
-      ] as any);
-      
-      tableData.push([
-        { content: 'Montant TTC', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
-        { content: customNumberPipe.transform(this.facture.totalFacture || 0), styles: { halign: 'right' } }
-      ] as any);
-    }
-
-    // Génération du tableau
-    (doc as any).autoTable({
-      head: [['Désignation', 'Description', 'Prix Unitaire (FCFA)', 'Quantité', 'Montant (FCFA)']],
-      body: tableData,
-      startY: tableStartY,
-      theme: 'grid',
-      styles: { 
-        fontSize: 9, 
-        cellPadding: 2, 
-        lineWidth: 0.1, 
-        lineColor: [221, 221, 221]
-      },
-      headStyles: { 
-        fillColor: [242, 242, 242], 
-        textColor: [0, 0, 0], 
-        fontSize: 8, 
-        fontStyle: 'bold'
-      },
-      margin: { left: 15, right: 15 },
-      columnStyles: {
-        0: { cellWidth: 30 },
-        1: { cellWidth: 60 },
-        2: { cellWidth: 33 },
-        3: { cellWidth: 20 },
-        4: { cellWidth: 35 },
-      }
-    });
-
-    // Montant en lettres
-    const tableEndY = (doc as any).lastAutoTable.finalY;
-    const amountY = tableEndY + 18;
-    const libelle = 'Arrêté la présente facture à la somme de : ';
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.text(libelle, 15, amountY);
+  // Filigrane "NON PAYÉ" en rotation (arrière-plan)
+  if (this.facture?.statutPaiement === 'EN_ATTENTE') {
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
     
-    const enLettresPipe = new EnLettresPipe();
-    const amountText = enLettresPipe.transform(this.facture?.totalFacture || 0);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text(amountText, 15 + doc.getTextWidth(libelle), amountY);
-
-    // Signature
-    const signatureY = amountY + 30;
-    doc.setFontSize(9);
-    doc.setFont('helvetica');
-    doc.text(this.signataire || 'Directeur', 180, signatureY, { align: 'right' });
-    doc.setFontSize(9);
-    doc.text(this.signataireNom || 'Nom du signataire', 180, signatureY + 8, { align: 'right' });
-
-    // Footer
-    const footerY = doc.internal.pageSize.height - 20;
-    doc.setLineWidth(0.2);
-    doc.setDrawColor(150);
-    doc.line(15, footerY - 5, 195, footerY - 5);
-    doc.setFontSize(8);
-    doc.setTextColor(100);
+    // Créer un canvas pour le filigrane
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     
-    if (this.siteWeb) {
-      doc.text(this.siteWeb, 105, footerY, { align: 'center' });
-    }
+    // Taille du canvas (en pixels)
+    canvas.width = pageWidth * 4;
+    canvas.height = pageHeight * 4;
     
-    const legalInfo = this.getLegalInfo();
-    if (legalInfo) {
-      doc.text(legalInfo, 105, footerY + 4, { align: 'center' });
-    }
+    // Configuration du filigrane
+    ctx.font = "bold 120px Arial";
+    ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     
-    const addressInfo = this.getAddressInfo();
-    if (addressInfo) {
-      doc.text(addressInfo, 105, footerY + 8, { align: 'center' });
-    }
-
-    // Téléchargement
-    doc.save(`Facture_${this.facture?.numeroFacture}.pdf`);
+    // Position centrale
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    
+    // Rotation de 45 degrés
+    ctx.translate(centerX, centerY);
+    ctx.rotate(-45 * Math.PI / 180);
+    ctx.translate(-centerX, -centerY);
+    
+    // Dessiner le texte
+    ctx.fillText("NON PAYÉ", centerX, centerY);
+    
+    // Convertir le canvas en image
+    const watermarkImage = canvas.toDataURL('image/png');
+    
+    // Ajouter l'image au PDF
+    doc.addImage(watermarkImage, 'PNG', 0, 0, pageWidth, pageHeight);
   }
+
+  // Logo
+  try {
+    if (this.logo) {
+      const imgData = this.logo.startsWith('data:image/') 
+        ? this.logo 
+        : await this.getImageFromUrl(this.logo);
+      const formatMatch = imgData.match(/^data:image\/(png|jpeg|gif);/);
+      const format = formatMatch ? formatMatch[1].toUpperCase() : 'PNG';
+      doc.addImage(imgData, format, 15, 10, 47, 17);
+    }
+  } catch (imgErr) {
+    console.error('Erreur de chargement du logo', imgErr);
+  }
+
+  // Infos entreprise
+  const infoX = 70;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text(this.nom || 'Nom Entreprise', infoX, 12);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Secteur : ${this.secteur || ''}`, infoX, 17);
+  doc.text(`Email : ${this.email || ''}`, infoX, 22);
+  doc.text(`Téléphone : ${this.telephone || ''}`, infoX + 60, 22);
+
+  // Séparateurs
+  doc.setDrawColor(200);
+  doc.line(15, 27, 195, 27);
+  doc.line(15, 28.5, 195, 28.5);
+
+  // Titre
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(85, 85, 85);
+  doc.text(`FACTURE : ${this.facture?.numeroFacture}`, 105, 36, { align: 'center' });
+
+  // Badge de statut de paiement
+  if (this.facture?.statutPaiement) {
+    const status = this.facture.statutPaiement;
+    const statusText = this.getStatutText(status);
+    
+    // Définir les couleurs selon le statut
+    let bgColor: [number, number, number] = [108, 117, 125]; // Gris par défaut
+    let textColor: [number, number, number] = [255, 255, 255]; // Texte blanc
+    
+    switch(status) {
+      case 'PAYEE':
+        bgColor = [40, 167, 69]; // Vert
+        break;
+      case 'PARTIELLEMENT_PAYEE':
+        bgColor = [255, 193, 7]; // Orange
+        textColor = [0, 0, 0]; // Texte noir
+        break;
+      case 'EN_ATTENTE':
+        bgColor = [220, 53, 69]; // Rouge
+        break;
+    }
+
+    // Calculer la position
+    const textWidth = doc.getTextWidth(statusText);
+    const badgeWidth = textWidth + 6;
+    const badgeX = 195 - 15 - badgeWidth; // 15mm de marge droite
+    const badgeY = 30; // Position verticale ajustée
+    
+    // Dessiner le badge
+    doc.setFillColor(...bgColor);
+    doc.rect(badgeX, badgeY, badgeWidth, 8, 'F');
+    
+    // Écrire le texte du badge
+    doc.setTextColor(...textColor);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text(statusText, badgeX + 3, badgeY + 5);
+    
+    // Réinitialiser la couleur du texte
+    doc.setTextColor(85, 85, 85);
+  }
+
+  // Date
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  const dateStr = this.facture?.dateCreation 
+    ? new Date(this.facture.dateCreation).toLocaleDateString('fr-FR', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric' 
+      })
+    : '';
+  doc.text(`${this.siege || ''}, le ${dateStr}`, 195, 46, { align: 'right' });
+
+  // Client
+  const clientY = 56;
+  if (this.facture) {
+    const clientName = this.facture.client?.nom || 
+                      this.facture.entrepriseClient?.nom || 
+                      'Non spécifié';
+    doc.setFont('helvetica', 'bold');
+    doc.text('Doit :', 15, clientY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(clientName, 15 + doc.getTextWidth('Doit :') + 2, clientY);
+  }
+
+  // Objet
+  doc.setFont('helvetica', 'bold');
+  doc.text('Objet :', 15, clientY + 7);
+  doc.setFont('helvetica', 'normal');
+  doc.text(this.facture?.description || '', 15 + doc.getTextWidth('Objet :') + 2, clientY + 7);
+
+  // Tableau des produits
+  const tableStartY = clientY + 17;
+  const customNumberPipe = new CustomNumberPipe();
+  const tableData = this.facture?.lignesFacture.map(ligne => [
+    ligne.produitNom,
+    ligne.ligneDescription,
+    customNumberPipe.transform(ligne.prixUnitaire),
+    ligne.quantite.toString(),
+    customNumberPipe.transform(ligne.montantTotal)
+  ]) || [];
+
+  // Totaux
+  tableData.push([
+    { content: 'Total HT', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
+    { content: customNumberPipe.transform(this.facture?.totalHT || 0), styles: { halign: 'right' } }
+  ] as any);
+
+  // Remise
+  if (this.facture?.remise && this.facture.remise > 0) {
+    tableData.push([
+      { content: 'Remise', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
+      { content: customNumberPipe.transform(this.facture.remise), styles: { halign: 'right' } }
+    ] as any);
+    
+    tableData.push([
+      { content: 'Montant Commercial', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
+      { content: customNumberPipe.transform(this.montantCommercial), styles: { halign: 'right' } }
+    ] as any);
+  }
+
+  // TVA
+  if (this.facture?.tva && this.tauxTva) {
+    const tauxPourcent = Math.round(this.tauxTva * 100);
+    tableData.push([
+      { content: `TVA (${tauxPourcent} %)`, colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
+      { content: customNumberPipe.transform(this.totalTVA), styles: { halign: 'right' } }
+    ] as any);
+    
+    tableData.push([
+      { content: 'Montant TTC', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
+      { content: customNumberPipe.transform(this.facture.totalFacture || 0), styles: { halign: 'right' } }
+    ] as any);
+  }
+
+  // Génération du tableau
+  (doc as any).autoTable({
+    head: [['Désignation', 'Description', 'Prix Unitaire (FCFA)', 'Quantité', 'Montant (FCFA)']],
+    body: tableData,
+    startY: tableStartY,
+    theme: 'grid',
+    styles: { 
+      fontSize: 9, 
+      cellPadding: 2, 
+      lineWidth: 0.1, 
+      lineColor: [221, 221, 221]
+    },
+    headStyles: { 
+      fillColor: [242, 242, 242], 
+      textColor: [0, 0, 0], 
+      fontSize: 8, 
+      fontStyle: 'bold'
+    },
+    margin: { left: 15, right: 15 },
+    columnStyles: {
+      0: { cellWidth: 30 },
+      1: { cellWidth: 60 },
+      2: { cellWidth: 33 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 35 },
+    }
+  });
+
+  // Montant en lettres
+  const tableEndY = (doc as any).lastAutoTable.finalY;
+  const amountY = tableEndY + 18;
+  const libelle = 'Arrêté la présente facture à la somme de : ';
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.text(libelle, 15, amountY);
+  
+  const enLettresPipe = new EnLettresPipe();
+  const amountText = enLettresPipe.transform(this.facture?.totalFacture || 0);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(amountText, 15 + doc.getTextWidth(libelle), amountY);
+
+  // Signature
+  const signatureY = amountY + 30;
+  doc.setFontSize(9);
+  doc.setFont('helvetica');
+  doc.text(this.signataire || 'Directeur', 180, signatureY, { align: 'right' });
+  doc.setFontSize(9);
+  doc.text(this.signataireNom || 'Nom du signataire', 180, signatureY + 8, { align: 'right' });
+
+  // Footer
+  const footerY = doc.internal.pageSize.height - 20;
+  doc.setLineWidth(0.2);
+  doc.setDrawColor(150);
+  doc.line(15, footerY - 5, 195, footerY - 5);
+  doc.setFontSize(8);
+  doc.setTextColor(100);
+  
+  if (this.siteWeb) {
+    doc.text(this.siteWeb, 105, footerY, { align: 'center' });
+  }
+  
+  const legalInfo = this.getLegalInfo();
+  if (legalInfo) {
+    doc.text(legalInfo, 105, footerY + 4, { align: 'center' });
+  }
+  
+  const addressInfo = this.getAddressInfo();
+  if (addressInfo) {
+    doc.text(addressInfo, 105, footerY + 8, { align: 'center' });
+  }
+
+  // Téléchargement
+  doc.save(`Facture_${this.facture?.numeroFacture}.pdf`);
+}
 
   private getImageFromUrl(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
