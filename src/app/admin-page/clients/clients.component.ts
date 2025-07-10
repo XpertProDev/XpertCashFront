@@ -76,11 +76,13 @@ export class ClientsComponent implements OnInit  {
       this.currentListType = savedListType;
     }
 
-    if (this.currentListType === 'clients') {
-      this.getListClients();
-    } else {
-      this.getListEntreprises();
-    }
+    // if (this.currentListType === 'clients') {
+    //   this.getListClients();
+    // } else {
+    //   this.getListEntreprises();
+    // }
+    this.getListClients();
+    this.getListEntreprises();
   }
 
   highlightMatch(text: string | null | undefined): SafeHtml {

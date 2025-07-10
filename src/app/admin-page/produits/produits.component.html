@@ -177,7 +177,7 @@
         <!-- <td>{{ product.nomUnite || 'Sans unité'}}</td> -->
         <td [innerHTML]="highlightMatch(product.nomUnite || 'non unite')"></td>
        <td>
-          {{ product.typeProduit === 'PHYSIQUE' ? 'PRODUIT' : (product.typeProduit === 'SERVICE' ? 'SERVICE' : 'Type Produit') }}
+          {{ product.typeProduit === 'PHYSIQUE' ? 'Produit' : (product.typeProduit === 'SERVICE' ? 'Service' : 'Type Produit') }}
         </td>
 
         <!-- <td>
