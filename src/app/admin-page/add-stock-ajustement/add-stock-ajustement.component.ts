@@ -620,7 +620,7 @@ export class AddStockAjustementComponent {
       return error.error.message || 'Quantité invalide ou stock insuffisant'; 
     }
     if (error.status === 404) {
-      return 'Produit non trouvé';
+      return 'Produit non trouvée';
     }
     return 'Erreur technique - Veuillez réessayer plus tard';
   }

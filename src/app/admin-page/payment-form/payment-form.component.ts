@@ -291,7 +291,7 @@ export class PaymentFormComponent implements OnInit, OnDestroy {
     } else if (error.status === 403) {
       return 'Action non autorisée. Seuls les administrateurs peuvent activer des modules.';
     } else if (error.status === 404) {
-      return 'Module non trouvé.';
+      return 'Module non trouvée.';
     } else if (error.status === 500) {
       return 'Erreur interne du serveur. Veuillez réessayer plus tard.';
     }

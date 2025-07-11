@@ -43,19 +43,26 @@
           <i class="ri-building-line"></i>
         </div> -->
 
-        <!-- Modifier cette partie -->
+        <!-- Pour les clients -->
         <div class="contentIcon" 
             [class.active]="currentListType === 'clients'"
             (click)="setListType('clients')">
           <i class="ri-folder-user-line"></i>
+          <div class="nombreCount">
+            <span>{{ clients.length }}</span>
+          </div>
         </div>
 
         <div class="barre"></div>
 
+        <!-- Pour les entreprises -->
         <div class="contentIcon" 
             [class.active]="currentListType === 'entreprises'"
             (click)="setListType('entreprises')">
           <i class="ri-building-line"></i>
+          <div class="nombreCount">
+            <span>{{ entreprises.length }}</span>
+          </div>
         </div>
   
         <div class="barre"></div>

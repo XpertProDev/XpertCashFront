@@ -210,6 +210,29 @@ tr:hover {
     background-color: #ddd;
 }
 
+.nombreCount {
+    border-radius: 50%;
+    position: absolute;
+    top: -15px;
+    right: -9px;
+    background-color: #ddd;
+    width: 18px;
+    height: 18px;
+    display: flex
+;
+    align-items: center;
+    justify-content: center;
+    right: -9px;
+}
+
+.nombreCount span {
+    // background-color: #ddd;
+    color: #000;
+    border-radius: 50%;
+    font-size: 9px;
+    // padding: 4px;
+}
+
 /* Dropdown styles */
 .contentIcon {
     position: relative;
