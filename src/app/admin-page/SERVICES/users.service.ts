@@ -89,31 +89,6 @@ getUserInfo(): Observable<UserRequest> {
     })
   );
 }
-
-
-
-
-  
-    
-  // Simpl dcodage JWT pour vérifier si le token est expiré
-  decodeJwt(token: string): any {
-    return JSON.parse(atob(token.split('.')[1]));
-  }
-  
-  // Vérifier si le token est expiré
-  isTokenExpired(decodedToken: any): boolean {
-    const expirationDate = new Date(decodedToken.exp * 1000);
-    return expirationDate < new Date();
-  }
-    
-  // Rafraîchir le token avec un refresh token (si applicable)
- getNewTokenFromApi(): Observable<RefreshTokenResponse> {
-  const refreshToken = this.authService.getRefreshToken();
-  return this.http.post<RefreshTokenResponse>(`${this.apiUrl}/refresh-token`, { refreshToken });
-}
-
-private sessionExpiredHandled = false;
-
 getValidAccessToken(): Observable<string> {
   const token = localStorage.getItem('accessToken');
 
@@ -149,6 +124,32 @@ getValidAccessToken(): Observable<string> {
     })
   );
 }
+
+
+
+
+  
+    
+  // Simpl dcodage JWT pour vérifier si le token est expiré
+  decodeJwt(token: string): any {
+    return JSON.parse(atob(token.split('.')[1]));
+  }
+  
+  // Vérifier si le token est expiré
+  isTokenExpired(decodedToken: any): boolean {
+    const expirationDate = new Date(decodedToken.exp * 1000);
+    return expirationDate < new Date();
+  }
+    
+  // Rafraîchir le token avec un refresh token (si applicable)
+ getNewTokenFromApi(): Observable<RefreshTokenResponse> {
+  const refreshToken = this.authService.getRefreshToken();
+  return this.http.post<RefreshTokenResponse>(`${this.apiUrl}/refresh-token`, { refreshToken });
+}
+
+private sessionExpiredHandled = false;
+
+
 
 
 

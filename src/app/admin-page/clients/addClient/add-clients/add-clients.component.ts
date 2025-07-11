@@ -6,11 +6,12 @@ import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, 
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Router } from '@angular/router';
 import imageCompression from 'browser-image-compression';
-import { Observable, startWith, map, of, BehaviorSubject, combineLatest } from 'rxjs';
+import { Observable, startWith, map, of, BehaviorSubject, combineLatest, switchMap, throwError } from 'rxjs';
 import { Clients } from 'src/app/admin-page/MODELS/clients-model';
 import { Entreprise } from 'src/app/admin-page/MODELS/entreprise-model';
 import { ClientService } from 'src/app/admin-page/SERVICES/client-service';
 import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-service';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 
 @Component({
   selector: 'app-add-clients',
@@ -58,6 +59,7 @@ export class AddClientsComponent implements OnInit {
     private fb: FormBuilder,
     private entrepriseService: EntrepriseService,
     private clientService: ClientService,
+    private usersService: UsersService,
   ) {}
 
   onPaysChange(event: any): void {
@@ -263,29 +265,32 @@ export class AddClientsComponent implements OnInit {
     );
   }
 
-  getListEntreprise() {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      this.entrepriseService.getListEntreprise().subscribe(
-        (entreprises) => {
-          console.log('Entreprise reçues depuis l\'API :', entreprises);
-          // Mettre à jour le BehaviorSubject
-          this.optionsEntreprise$.next(entreprises); 
-          this.filteredOptions = this.control.valueChanges.pipe(
-            startWith<string | Entreprise>(''),
-            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-            // Passer le tableau d'entreprises comme second paramètre
-            map(name => (name ? this._filter(name, this.optionsEntreprise$.value) : this.optionsEntreprise$.value.slice()))
-          );
-        }, 
-        (error) => {
-          console.error('Erreur lors de la récupération des entreprises :', error);
-        }
-      ); 
-    } else {
-      console.error('Aucun token trouvé !');
+getListEntreprise() {
+  this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Aucun token valide trouvé !');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+      return this.entrepriseService.getListEntreprise();
+    })
+  ).subscribe({
+    next: (entreprises) => {
+      console.log('Entreprises reçues depuis l\'API :', entreprises);
+      this.optionsEntreprise$.next(entreprises); 
+
+      this.filteredOptions = this.control.valueChanges.pipe(
+        startWith<string | Entreprise>(''),
+        map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
+        map(name => (name ? this._filter(name, this.optionsEntreprise$.value) : this.optionsEntreprise$.value.slice()))
+      );
+    },
+    error: (error) => {
+      console.error('Erreur lors de la récupération des entreprises :', error);
     }
-  }
+  });
+}
+
 
   private _filter(name: string, entreprises: Entreprise[]): Entreprise[] {
     const filterValue = name.toLowerCase();
