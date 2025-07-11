@@ -31,7 +31,7 @@
           <span>Voir proforma</span>
         </button>
 
-        <div class="download_icon" (click)="download()">
+        <div class="download_icon" (click)="download()" style="text-align: right;">
             <i class="ri-download-2-fill"></i>
         </div>
       </div>
@@ -311,8 +311,8 @@
           </div>
 
           <div class="total_montant">
-            <p>Montant dû : {{ (facture.totalFacture || 0) | customNumber }} FCFA</p>
-            <p>Montant restant : {{ montantRestant | customNumber }} FCFA </p>
+            <p>Montant dû : <span style="background-color: #ddd; background-color: #aaddaa91; padding: 5px 10px; border-radius: 10px;">{{ (facture.totalFacture || 0) | customNumber }} FCFA</span></p>
+            <p>Montant restant : <span style="background-color: #ddd; background-color: #b8b8b891; padding: 5px 10px; border-radius: 10px;">{{ montantRestant | customNumber }} FCFA </span></p>
           </div>
         </div>
         
