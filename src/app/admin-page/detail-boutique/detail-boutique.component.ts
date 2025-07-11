@@ -532,7 +532,9 @@ async confirmCopyProducts(): Promise<void> {
         const produitsTries = produits.sort((a, b) => b.id - a.id);
         this.productsInBoutique = produitsTries.map(produit => ({
           ...produit,
-          photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0))
+          photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0)),
+          nomCategorie: produit.categorie?.nom || '',
+          nomUnite: produit.uniteDeMesure?.nom || '',
         }));
         this.filteredProducts = [...this.productsInBoutique];
         this.isLoadingProducts = false;
