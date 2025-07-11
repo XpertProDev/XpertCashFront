@@ -168,7 +168,7 @@ export class CompteComponent  implements OnInit {
   loadRoles() {
     const token = localStorage.getItem('accessToken'); 
     if (token) {
-      this.rolesService.getAllRoles(token).subscribe({
+      this.rolesService.getAllRoles().subscribe({
         next: (data) => {
           this.roles = data;
         },

@@ -45,5 +45,8 @@ removeTokens(): void {
   isLoggedIn(): boolean {
     return this.isAuthenticated();
   }
+
+  // ici
+  
 }
 

@@ -31,6 +31,7 @@ import { NavGroupComponent } from './theme/layout/admin/navigation/nav-content/n
 import { NavItemComponent } from './theme/layout/admin/navigation/nav-content/nav-item/nav-item.component';
 import { NavCollapseComponent } from './theme/layout/admin/navigation/nav-content/nav-collapse/nav-collapse.component';
 import { RouterModule } from '@angular/router';
+import { SessionExpiredModalComponent } from './theme/shared/session-expired-modal/session-expired-modal.component';
 
 registerLocaleData(localeFr);
 
@@ -47,6 +48,7 @@ registerLocaleData(localeFr);
     NavGroupComponent,
     NavItemComponent,
     NavCollapseComponent,
+    SessionExpiredModalComponent
   ],
   imports: [
     CommonModule,

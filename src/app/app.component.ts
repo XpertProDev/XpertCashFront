@@ -4,12 +4,17 @@ import { SpinnerComponent } from './theme/shared/components/spinner/spinner.comp
 import { MatDialog } from '@angular/material/dialog';
 import { UnlockDialogComponent } from './unlock-dialog/unlock-dialog.component';
 import { CommonModule } from '@angular/common';
+import { UsersService } from './admin-page/SERVICES/users.service';
+import { SessionExpiredModalComponent } from './theme/shared/session-expired-modal/session-expired-modal.component';
+import { ModalService } from './admin-page/SERVICES/modalService';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterModule, SpinnerComponent, CommonModule, UnlockDialogComponent],
+  imports: [RouterModule, SpinnerComponent, CommonModule, UnlockDialogComponent, SessionExpiredModalComponent],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  standalone: true,
+  
 })
 
 export class AppComponent implements OnInit {
@@ -18,7 +23,9 @@ export class AppComponent implements OnInit {
   isLocked = false;
   isDialogOpen = false;
 
-  constructor(private dialog: MatDialog, private cdRef: ChangeDetectorRef) {
+  constructor(private dialog: MatDialog, private cdRef: ChangeDetectorRef, private usersService: UsersService,
+    private modalService: ModalService
+  ) {
     this.checkLockStatus();
     this.resetTimer();
   }
@@ -116,7 +123,18 @@ checkLockStatus() {
       }
       window.scrollTo(0, 0);
     });
+      this.modalService.sessionExpiredModal$.subscribe(() => {
+    console.log('✅ Session expirée détectée, affichage de la modale');
+    this.showSessionModal = true;
+  });
   }
+
+showSessionModal = false;
+
+handleSessionConfirm() {
+  this.usersService.logoutUser();
+  this.showSessionModal = false;
+}
 }
 
 

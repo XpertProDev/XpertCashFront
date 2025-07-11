@@ -1,12 +1,13 @@
 import { ChangeDetectorRef, Injectable } from '@angular/core';
 import { Users } from '../MODELS/utilisateur.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map, Observable, switchMap, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
 import { UserRequest } from '../MODELS/user-request';
 import { environment } from 'src/environments/environment';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
+import { ModalService } from './modalService';
 
 interface RefreshTokenResponse {
   accessToken: string;
@@ -20,6 +21,8 @@ interface RefreshTokenResponse {
 export class UsersService {
   private apiUrl = environment.apiBaseUrl;
   public isLocked: boolean = false;
+
+  
   
   
 
@@ -27,6 +30,7 @@ export class UsersService {
     private http: HttpClient,
     private authService: AuthService,
      private router: Router,
+     private modalService: ModalService
    ) {}
 
   
@@ -74,56 +78,18 @@ connexionUser(credentials: { email: string; password: string }): Observable<{
   
   //Information sur User
 getUserInfo(): Observable<UserRequest> {
-  const token = localStorage.getItem('accessToken');
-
-  if (!token || token === 'null' || token.trim() === '') {
-    console.error('❌ Aucun token valide trouvé dans le localStorage');
-    return throwError(() => new Error('Aucun token valide trouvé'));
-  }
-
-  const decodedToken = this.decodeJwt(token);
-  const isTokenExpired = this.isTokenExpired(decodedToken);
-
-  if (isTokenExpired) {
-    console.warn('⏳ Token expiré, tentative de refresh...');
-
-    return this.getNewTokenFromApi().pipe(
-      switchMap((newTokenResponse: RefreshTokenResponse) => {
-        const newAccessToken = newTokenResponse.accessToken;
-
-        if (!newAccessToken || newAccessToken.trim() === '') {
-          console.error('❌ Le token rafraîchi est vide ou invalide');
-          return throwError(() => new Error('Token rafraîchi invalide'));
-        }
-
-        localStorage.setItem('accessToken', newAccessToken);
-
-        const headers = new HttpHeaders({
-          Authorization: `Bearer ${newAccessToken}`
-        });
-
-        return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
-          tap(user => localStorage.setItem('user', JSON.stringify(user)))
-        );
-      }),
-      catchError(err => {
-        alert('Session expirée, veuillez vous reconnecter');
-        this.logoutUser();
-        return throwError(() => new Error('Session expirée'));
-      })
-    );
-  } else {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
-    console.log('➡️ Requête avec token existant :', headers.get('Authorization'));
-
-    return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
-      tap(user => localStorage.setItem('user', JSON.stringify(user)))
-    );
-  }
+  return this.getValidAccessToken().pipe(
+    switchMap((token) => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+      return this.http.get<UserRequest>(`${this.apiUrl}/user/info`, { headers }).pipe(
+        tap(user => localStorage.setItem('user', JSON.stringify(user)))
+      );
+    })
+  );
 }
+
 
 
 
@@ -145,6 +111,46 @@ getUserInfo(): Observable<UserRequest> {
   const refreshToken = this.authService.getRefreshToken();
   return this.http.post<RefreshTokenResponse>(`${this.apiUrl}/refresh-token`, { refreshToken });
 }
+
+private sessionExpiredHandled = false;
+
+getValidAccessToken(): Observable<string> {
+  const token = localStorage.getItem('accessToken');
+
+  if (!token || token === 'null' || token.trim() === '') {
+    console.error('❌ Aucun token valide trouvé dans le localStorage');
+    return throwError(() => new Error('Aucun token valide trouvé'));
+  }
+
+  const decodedToken = this.decodeJwt(token);
+  const isTokenExpired = this.isTokenExpired(decodedToken);
+
+  if (!isTokenExpired) {
+    return of(token);
+  }
+
+  console.warn('⏳ Token expiré, tentative de refresh...');
+
+  return this.getNewTokenFromApi().pipe(
+    map((response: RefreshTokenResponse) => {
+      const newToken = response.accessToken;
+      if (!newToken || newToken.trim() === '') {
+        throw new Error('Token rafraîchi invalide');
+      }
+      localStorage.setItem('accessToken', newToken);
+      return newToken;
+    }),
+    catchError(err => {
+      if (!this.sessionExpiredHandled) {
+        this.sessionExpiredHandled = true;
+        this.modalService.triggerSessionExpiredModal();
+      }
+      return throwError(() => new Error('Session expirée'));
+    })
+  );
+}
+
+
 
   getUserBoutiqueId(): number | null {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -189,121 +195,153 @@ getUserInfo(): Observable<UserRequest> {
   // }
   
 
-  updateBoutique(id: number, updates: { nomBoutique: string; adresse: string }): Observable<{ message?: string; error?: string }> {
-    const token = localStorage.getItem('accessToken');
-    
-    if (!token) {
-      console.error('Aucun token trouvé');
-      return throwError('Aucun token trouvé');
-    }
-    
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    
-    return this.http.put<{ message?: string; error?: string }>(`${this.apiUrl}/updatedBoutique/${id}`, updates, { headers });
-  }
+updateBoutique(id: number, updates: { nomBoutique: string; adresse: string }): Observable<{ message?: string; error?: string }> {
+  return this.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
 
-  updateUser(id: number, formData: FormData): Observable<any> {
-    const token = localStorage.getItem('accessToken');
-    
-    if (!token) {
-      console.error('Aucun token trouvé');
-      return throwError('Aucun token trouvé');
-    }
-    
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    
-    return this.http.patch(`${this.apiUrl}/updateUsers/${id}`, formData, { headers, responseType: 'text' });
-  }
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
 
-
-  getAllUsersOfEntreprise(entrepriseId: number): Observable<any[]> {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-          console.error("Aucun token trouvé, requête annulée.");
-          return throwError(() => new Error("Aucun token trouvé"));
-        }
-      
-        const headers = new HttpHeaders({
-          Authorization: `Bearer ${token}`
-        });
-  
-    return this.http.get<any[]>(`${this.apiUrl}/entreprise/${entrepriseId}/allusers`, { headers });
-  }
-
-  
-getUserById(userId: number): Observable<UserNewRequest> {
-const token = localStorage.getItem('accessToken') || '';
-    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    return this.http.get<UserNewRequest>(`${this.apiUrl}/user/${userId}`, { headers });
+      return this.http.put<{ message?: string; error?: string }>(`${this.apiUrl}/updatedBoutique/${id}`, updates, { headers });
+    }),
+    catchError(error => {
+      console.error('Erreur lors de la mise à jour de la boutique:', error);
+      return throwError(() => error);
+    })
+  );
 }
 
 
+updateUser(id: number, formData: FormData): Observable<any> {
+  return this.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+
+      return this.http.patch(`${this.apiUrl}/updateUsers/${id}`, formData, { headers, responseType: 'text' });
+    }),
+    catchError(error => {
+      console.error('Erreur lors de la mise à jour de l\'utilisateur:', error);
+      return throwError(() => error);
+    })
+  );
+}
+
+
+
+  getAllUsersOfEntreprise(entrepriseId: number): Observable<any[]> {
+  return this.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error("Aucun token trouvé, requête annulée.");
+        return throwError(() => new Error("Aucun token trouvé"));
+      }
+
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+
+      return this.http.get<any[]>(`${this.apiUrl}/entreprise/${entrepriseId}/allusers`, { headers });
+    }),
+    catchError(error => {
+      console.error('Erreur lors de la récupération des utilisateurs:', error);
+      return throwError(() => error);
+    })
+  );
+}
+
+
+  
+getUserById(userId: number): Observable<UserNewRequest> {
+  return this.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+      return this.http.get<UserNewRequest>(`${this.apiUrl}/user/${userId}`, { headers });
+    }),
+    catchError(error => {
+      console.error(`Erreur lors de la récupération de l'utilisateur ${userId}:`, error);
+      return throwError(() => error);
+    })
+  );
+}
+
+
+
+
   // Methode pour le service permission
-  assignPermissionsToUser(userId: number, permissions: { [key: string]: boolean }): Observable<UserNewRequest> {
-    const token = localStorage.getItem('accessToken') || '';
-    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    return this.http.post<UserNewRequest>(`${this.apiUrl}/${userId}/permissions`, permissions, { headers });
-  }
+assignPermissionsToUser(userId: number, permissions: { [key: string]: boolean }): Observable<UserNewRequest> {
+  return this.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+      return this.http.post<UserNewRequest>(`${this.apiUrl}/${userId}/permissions`, permissions, { headers });
+    })
+  );
+}
+
 
 
   //Ajout de la boutique
-  addBoutique(boutique: any): Observable<any> {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      console.error("Aucun token trouvé, requête annulée.");
-      return throwError(() => new Error("Aucun token trouvé"));
-    }
-  
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-  
-    console.log("Envoi de la requête POST à :", `${this.apiUrl}/ajouterBoutique`, "avec données :", boutique);
-  
-    return this.http.post<any>(`${this.apiUrl}/ajouterBoutique`, boutique, { headers });
-  }
+addBoutique(boutique: any): Observable<any> {
+  return this.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+
+      console.log("Envoi de la requête POST à :", `${this.apiUrl}/ajouterBoutique`, "avec données :", boutique);
+
+      return this.http.post<any>(`${this.apiUrl}/ajouterBoutique`, boutique, { headers });
+    })
+  );
+}
+
   
   // LL recuperation de boutique dans e/ses
   getBoutiquesByEntreprise(): Observable<any[]> {
-    const token = localStorage.getItem('accessToken');
-    
-    if (!token) {
-      console.error('Aucun token trouvé');
-      return throwError('Aucun token trouvé');
-    }
-  
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-  
-    return this.http.get<any[]>(`${this.apiUrl}/boutiqueEntreprise`, { headers });
-  }
+    return this.getValidAccessToken().pipe(
+      switchMap((token: string) => {
+        const headers = new HttpHeaders({
+          Authorization: `Bearer ${token}`
+        });
 
-  // Service pour suspendre user
-  suspendUser(userId: number, suspend: boolean): Observable<any> {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-        return throwError('Aucun token trouvé');
-    }
-
-    const headers = new HttpHeaders({
-        'Authorization': `Bearer ${token}`
-    });
-
-    return this.http.put(
-        `${this.apiUrl}/suspendre/${userId}`,
-        null,
-        { 
-            headers,
-            params: { suspend: suspend.toString() },
-            responseType: 'text' // <-- Ajoutez ceci
-        }
+        return this.http.get<any[]>(`${this.apiUrl}/boutiqueEntreprise`, { headers });
+      })
     );
   }
+
+
+  // Service pour suspendre user
+suspendUser(userId: number, suspend: boolean): Observable<any> {
+  return this.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      });
+
+      return this.http.put(
+        `${this.apiUrl}/suspendre/${userId}`,
+        null,
+        {
+          headers,
+          params: { suspend: suspend.toString() },
+          responseType: 'text' // si l'API retourne du texte brut
+        }
+      );
+    })
+  );
+}
+
 
     // Ajouter cette méthode dans UsersService
   forgotPassword(email: string): Observable<any> {

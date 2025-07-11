@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, switchMap } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { UsersService } from './users.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,42 +13,66 @@ import { environment } from 'src/environments/environment';
     private apiUrl = environment.apiBaseUrl;
   
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private usersService: UsersService) { }
 
-  ajouterStock(stockPayload: any): Observable<any> {
-    const token = localStorage.getItem('accessToken') || '';
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
-    
-    return this.http.patch(`${this.apiUrl}/ajouterStock`, stockPayload, { headers });
-  }
+ajouterStock(stockPayload: any): Observable<any> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
 
-  retirerStock(stockPayload: any): Observable<any> {
-    const token = localStorage.getItem('accessToken') || '';
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
-    
-    return this.http.patch(`${this.apiUrl}/retirerStock`, stockPayload, { headers });
-  }
-
-  getAllstockhistorique(produitId: number,token: string): Observable<any[]> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<any[]>(`${this.apiUrl}/stockhistorique/${produitId}`, { headers });
-  }
+      return this.http.patch(`${this.apiUrl}/ajouterStock`, stockPayload, { headers });
+    })
+  );
+}
 
 
+retirerStock(stockPayload: any): Observable<any> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
 
-  getAllStocks(token: string): Observable<any[]> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<any[]>(`${this.apiUrl}/getAllStock`, { headers });
-  }
-  getAllhistorique(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/stockhistorique`); 
-  }
+      return this.http.patch(`${this.apiUrl}/retirerStock`, stockPayload, { headers });
+    })
+  );
+}
+
+
+ getAllstockhistorique(produitId: number): Observable<any[]> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      return this.http.get<any[]>(`${this.apiUrl}/stockhistorique/${produitId}`, { headers });
+    })
+  );
+}
+
+
+
+
+ getAllStocks(): Observable<any[]> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      return this.http.get<any[]>(`${this.apiUrl}/getAllStock`, { headers });
+    })
+  );
+}
+
+ getAllhistorique(): Observable<any[]> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      return this.http.get<any[]>(`${this.apiUrl}/stockhistorique`, { headers });
+    })
+  );
+}
+
   
   
   

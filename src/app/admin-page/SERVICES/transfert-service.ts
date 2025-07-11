@@ -3,6 +3,8 @@ import { Injectable } from "@angular/core";
 import { Transfert } from "../MODELS/tranfert-model";
 import { Observable } from "rxjs/internal/Observable";
 import { environment } from "src/environments/environment";
+import { UsersService } from "./users.service";
+import { switchMap } from "rxjs";
 
 @Injectable({
     providedIn: 'root'
@@ -13,17 +15,24 @@ import { environment } from "src/environments/environment";
     private apiUrl = environment.apiBaseUrl;
   
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private usersService: UsersService) { }
 
   // Dans transfert.service.ts
-  effectuerTransfert(transfert: Transfert): Observable<any> {
-    const token = localStorage.getItem('accessToken') || '';
-    const headers = new HttpHeaders({
+effectuerTransfert(transfert: Transfert): Observable<any> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-    });
+      });
 
-    return this.http.post(`${this.apiUrl}/transferer-produits`, transfert, { headers, responseType: 'text' });
-  }
+      return this.http.post(`${this.apiUrl}/transferer-produits`, transfert, {
+        headers,
+        responseType: 'text'
+      });
+    })
+  );
+}
+
 
 }

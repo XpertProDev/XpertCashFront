@@ -270,7 +270,7 @@ export class AddStockAjustementComponent {
       console.error('Token introuvable');
       return; // Vous pouvez également rediriger l'utilisateur ou afficher un message d'erreur
     }
-    this.stockService.getAllStocks(token).subscribe({
+    this.stockService.getAllStocks().subscribe({
       next: (stocks: Stock[]) => {
         // Filtrer pour garder uniquement les stocks ayant une quantité ajoutée ou retirée supérieure à 0
         this.adjustedStocks = stocks.filter(stock =>

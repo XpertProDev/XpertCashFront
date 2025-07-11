@@ -246,7 +246,7 @@ export class ListProduitComponent {
     // 🟢 Filtrage des catégories (OK)
     const token = localStorage.getItem('accessToken'); // ou via un service d'authentification
     if (token) {
-      this.categorieService.getCategories(token).subscribe(
+      this.categorieService.getCategories().subscribe(
         (categories) => {
           console.log('Catégories reçues depuis l\'API :', categories); // Debug ici
           this.options = categories;
@@ -266,7 +266,7 @@ export class ListProduitComponent {
     }
     // 🟢 Filtrage des unité de mesure (OK)
     if (token) {
-      this.uniteMesureService.getUniteMesure(token).subscribe(
+      this.uniteMesureService.getUniteMesure().subscribe(
         (uniteMesures) => {
           console.log('Unité de mesure reçues depuis l\'API :', uniteMesures); // Debug ici
           this.optionsUnite = uniteMesures;

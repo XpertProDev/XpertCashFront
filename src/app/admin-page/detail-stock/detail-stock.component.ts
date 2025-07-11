@@ -83,7 +83,7 @@ export class DetailStockComponent {
       console.error('Token introuvable');
       return;
     }
-    this.stockService.getAllStocks(token).subscribe({
+    this.stockService.getAllStocks().subscribe({
       next: (stocks: Stock[]) => {
         console.log("recuperer", stocks)
         // Filtre pour garder uniquement les stocks ayant des ajustements
@@ -116,7 +116,7 @@ export class DetailStockComponent {
       return;
     }
   
-    this.stockService.getAllStocks(token).subscribe({
+    this.stockService.getAllStocks().subscribe({
       next: (stocks: Stock[]) => {
         // Chercher le stock dont l'ID correspond
         const selectedStock = stocks.find(stock => stock.id === stockId);
@@ -219,7 +219,7 @@ export class DetailStockComponent {
       console.error('Token introuvable');
       return;
     }
-    this.stockService.getAllstockhistorique(produitId, token).subscribe({
+    this.stockService.getAllstockhistorique(produitId).subscribe({
       next: (data: any[]) => {
         console.log('Historique de stock:', data);
         this.stockHistory = data;

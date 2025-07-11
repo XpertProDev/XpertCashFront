@@ -237,7 +237,7 @@ export class ClientFormComponent {
     const token = localStorage.getItem('accessToken') || '';
     if (!token) return;
 
-    this.entrepriseService.getListEntreprise(token).subscribe(
+    this.entrepriseService.getListEntreprise().subscribe(
         (list: Entreprise[]) => {
             this.optionsEntreprise$.next(list); // Mettre à jour le BehaviorSubject
             this.setupAutocomplete();
@@ -267,7 +267,7 @@ export class ClientFormComponent {
   getListEntreprise() {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      this.entrepriseService.getListEntreprise(token).subscribe(
+      this.entrepriseService.getListEntreprise().subscribe(
         (entreprises) => {
           console.log('Entreprise reçues depuis l\'API :', entreprises);
           // Mettre à jour le BehaviorSubject
