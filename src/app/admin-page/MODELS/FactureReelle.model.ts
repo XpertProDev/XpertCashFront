@@ -44,6 +44,11 @@ export interface FactureReelle {
   utilisateurCreateur?: string;
   lignesFacture: LigneFactureDTO[];
   statut: 'VALIDE' | 'ANNULEE';
+  factureProFormaId: number | null;
+
+  factureProForma: {
+    id: number;
+  };
 }
 
 export interface PaiementDTO {

@@ -173,11 +173,15 @@ export class FactureReelDetailsComponent implements OnInit {
     }
   }
 
-  // Ajouter cette méthode
-  voirProforma() {
-    // Rediriger vers la liste des factures pro forma avec le paramètre d'état VALIDE
-    this.router.navigate(['/facture-proforma'], { queryParams: { etat: 'VALIDE' } });
+voirProforma() {
+  if (this.facture?.factureProFormaId) {
+    this.router.navigate(['/facture-proforma-details', this.facture.factureProFormaId]);
+  } else {
+    console.error('Aucune facture proforma associée trouvée');
+    // Option: Afficher un message à l'utilisateur
+    this.errorMessage = "Aucune facture proforma associée";
   }
+}
 
   loadMontantRestant() {
     if (!this.facture) return;
