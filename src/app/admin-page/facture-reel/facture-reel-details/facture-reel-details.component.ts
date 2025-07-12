@@ -688,13 +688,25 @@ async download() {
   doc.setFontSize(9);
   doc.text(amountText, 15 + doc.getTextWidth(libelle), amountY);
 
-  // Signature
-  const signatureY = amountY + 30;
-  doc.setFontSize(9);
-  doc.setFont('helvetica');
-  doc.text(this.signataire || 'Directeur', 180, signatureY, { align: 'right' });
-  doc.setFontSize(9);
-  doc.text(this.signataireNom || 'Nom du signataire', 180, signatureY + 8, { align: 'right' });
+// Signature
+const signatureY = amountY + 30;
+doc.setFontSize(9);
+doc.setFont('helvetica');
+
+// Partie gauche : Pour acquit + nom du client (décalé pour laisser un espace)
+let clientName = 'Nom du client';
+if (this.facture) {
+  clientName = this.facture.client?.nom || this.facture.entrepriseClient?.nom || 'Non spécifié';
+}
+doc.setFont('helvetica', 'bold');
+doc.text('Pour acquit :', 29, signatureY);
+doc.setFont('helvetica', 'normal');
+doc.text(clientName, 29, signatureY + 16); // <- augmenté de 8 à 16
+
+// Partie droite : Signature + nom du signataire (aussi décalé)
+doc.setFont('helvetica');
+doc.text(this.signataire || '', 180, signatureY, { align: 'right' });
+doc.text(this.signataireNom || 'Nom du signataire', 183, signatureY + 16, { align: 'right' }); // <- aussi +16
 
   // Footer
   const footerY = doc.internal.pageSize.height - 20;
