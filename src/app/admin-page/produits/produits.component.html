@@ -234,28 +234,6 @@
         <li>Les colonnes obligatoires sont marquées d'un *</li>
         <li>Évitez de modifier les en-têtes de colonnes</li>
       </ol>
-
-      <div class="boutique-selection-section">
-        <h3>Sélectionnez les boutiques</h3>
-        
-        <div class="select-all">
-          <input type="checkbox" 
-                id="selectAllBoutiques"
-                [checked]="isAllBoutiquesSelected"
-                (change)="toggleAllBoutiques()">
-          <label for="selectAllBoutiques">Toutes les boutiques</label>
-        </div>
-        
-        <div class="boutique-list">
-          <div *ngFor="let boutique of boutiques" class="boutique-item">
-            <input type="checkbox" 
-                  [id]="'boutique-'+boutique.id"
-                  [checked]="selectedBoutiquesForImport.includes(boutique.id)"
-                  (change)="toggleBoutiqueSelection(boutique.id)">
-            <label [for]="'boutique-'+boutique.id">{{ boutique.nomBoutique }}</label>
-          </div>
-        </div>
-      </div>
       
       <div class="columns-info">
         <h4>Structure des colonnes :</h4>
@@ -276,6 +254,57 @@
       <button class="download-template" (click)="downloadExcelTemplate()">
         <i class="ri-download-line"></i> Télécharger le modèle
       </button>
+    </div>
+    
+    <!-- <div class="select_boutique" style="display: flex; justify-content: center;">
+      <button class="">
+        <i class="ri-check-double-line"></i> Sélectionnez les boutiques
+      </button>
+    </div> -->
+    <!-- Dans produits.component.html (remplacer la section boutique-selection-section) -->
+
+    <div class="double_input2">
+      <div class="champ_input" [class.invalid-field]="showBoutiqueError">
+        <input autocomplete="off" 
+              type="text" 
+              placeholder="Sélectionner vos boutiques"
+              class="input_focus" 
+              matInput 
+              (click)="toggleBoutiqueSelectionPanel()"
+              [value]="getSelectedBoutiquesText()"
+              readonly
+              style="cursor: pointer;">
+        <label for="boutiqueId" class="label"><i class="ri-check-double-line"></i> Sélectionner vos boutiques</label>
+        
+        <div class="boutique-selection-panel" *ngIf="showBoutiqueSelectionPanel">
+          <div class="panel-header">
+            <h4>Sélectionner des boutiques</h4>
+            <button class="close-btn" (click)="toggleBoutiqueSelectionPanel()">&times;</button>
+          </div>
+          <div class="panel-body">
+            <div class="boutique-item select-all">
+              <label>
+                <input type="checkbox" 
+                      [checked]="areAllBoutiquesSelected()"
+                      (change)="toggleSelectAllBoutiques($event)">
+                Sélectionner toutes les boutiques
+              </label>
+            </div>
+            
+            <div *ngFor="let boutique of boutiques" class="boutique-item">
+              <label>
+                <input type="checkbox" 
+                      [checked]="selectedBoutiquesForImport.includes(boutique.id)"
+                      (change)="toggleBoutiqueSelection(boutique.id)">
+                {{ boutique.nomBoutique }}
+              </label>
+            </div>
+          </div>
+          <div class="panel-footer">
+            <button class="btn-confirm" (click)="confirmBoutiqueSelection()">Confirmer</button>
+          </div>
+        </div>
+      </div>
     </div>
     
     <div class="file-upload-area" (click)="fileInput.click()" [class.active]="selectedFile">

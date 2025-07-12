@@ -81,6 +81,10 @@ export class ProduitsComponent implements OnInit {
   selectedBoutiquesForImport: number[] = [];
   isAllBoutiquesSelected = false;
 
+  showBoutiqueError: boolean = false;
+
+  showBoutiqueSelectionPanel: boolean = false;
+
   // HostListener pour fermer les dropdowns
   @HostListener('document:click', ['$event'])
   onClick(event: MouseEvent): void {
@@ -948,6 +952,45 @@ toggleAllBoutiques(): void {
       .map(b => b.id);
   }
   this.isAllBoutiquesSelected = !this.isAllBoutiquesSelected;
+}
+
+// Méthodes pour gérer le panel
+toggleBoutiqueSelectionPanel(): void {
+  this.showBoutiqueSelectionPanel = !this.showBoutiqueSelectionPanel;
+}
+
+areAllBoutiquesSelected(): boolean {
+  return this.boutiques.length > 0 && 
+         this.boutiques.every(b => this.selectedBoutiquesForImport.includes(b.id));
+}
+
+toggleSelectAllBoutiques(event: Event): void {
+  const isChecked = (event.target as HTMLInputElement).checked;
+  if (isChecked) {
+    this.selectedBoutiquesForImport = this.boutiques.map(b => b.id);
+  } else {
+    this.selectedBoutiquesForImport = [];
+  }
+}
+
+confirmBoutiqueSelection(): void {
+  this.toggleBoutiqueSelectionPanel();
+}
+
+getSelectedBoutiquesText(): string {
+  if (this.selectedBoutiquesForImport.length === 0) {
+    return '';
+  }
+
+  if (this.selectedBoutiquesForImport.length === this.boutiques.length) {
+    return 'Toutes les boutiques';
+  }
+
+  const selectedNames = this.boutiques
+    .filter(b => this.selectedBoutiquesForImport.includes(b.id))
+    .map(b => b.nomBoutique);
+
+  return selectedNames.join(', ');
 }
 
   
