@@ -1248,9 +1248,9 @@ img.roudel_detail{
 
   .modal-content {
     background-color: white;
-    padding: 30px;
+    padding: 20px;
     border-radius: 8px;
-    width: 90%;
+    width: 100%;
     max-width: 700px;
     max-height: 90vh;
     overflow-y: auto;
@@ -1284,6 +1284,7 @@ img.roudel_detail{
   h3 {
     margin-top: 0;
     color: #0671e4;
+    font-size: 13px;
   }
 
   .columns-info {
@@ -1294,6 +1295,17 @@ img.roudel_detail{
     border-radius: 4px;
     height: 140px;
     overflow-y: scroll;
+
+    ul {
+      padding-left: 20px;
+      margin-bottom: 0;
+
+      li {
+        margin-bottom: 8px;
+        line-height: 1.4;
+        font-size: 12px!important;
+      }
+    }
 
     &::-webkit-scrollbar {
       width: 2px;
@@ -1306,16 +1318,6 @@ img.roudel_detail{
     }
     &::-webkit-scrollbar-track {
       background: transparent;
-    }
-
-    ul {
-      padding-left: 20px;
-      margin-bottom: 0;
-
-      li {
-        margin-bottom: 8px;
-        line-height: 1.4;
-      }
     }
   }
 
@@ -1514,4 +1516,13 @@ img.roudel_detail{
           }
       }
   }
+}
+
+.container_modal_excel {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  gap: 20px;
 }
