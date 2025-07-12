@@ -78,6 +78,9 @@ export class ProduitsComponent implements OnInit {
   importSuccess = false;
   importErrors: string[] = [];
 
+  selectedBoutiquesForImport: number[] = [];
+  isAllBoutiquesSelected = false;
+
   // HostListener pour fermer les dropdowns
   @HostListener('document:click', ['$event'])
   onClick(event: MouseEvent): void {
@@ -871,8 +874,15 @@ uploadExcel() {
   if (this.selectedBoutique?.id) {
     formData.append('boutiqueId', this.selectedBoutique.id.toString());
   }
+
+    // Vérifier qu'au moins une boutique est sélectionnée
+  if (this.selectedBoutiquesForImport.length === 0) {
+    this.importMessage = "Veuillez sélectionner au moins une boutique";
+    this.importSuccess = false;
+    return;
+  }
   
-  this.produitService.importProduitsFromExcel(formData).subscribe({
+  this.produitService.importProduitsFromExcel(formData, this.selectedBoutiquesForImport).subscribe({
     next: (response: any) => {
       this.isImporting = false;
       
@@ -918,6 +928,26 @@ uploadExcel() {
       }
     }
   });
+}
+
+toggleBoutiqueSelection(id: number): void {
+  const index = this.selectedBoutiquesForImport.indexOf(id);
+  if (index === -1) {
+    this.selectedBoutiquesForImport.push(id);
+  } else {
+    this.selectedBoutiquesForImport.splice(index, 1);
+  }
+}
+
+toggleAllBoutiques(): void {
+  if (this.isAllBoutiquesSelected) {
+    this.selectedBoutiquesForImport = [];
+  } else {
+    this.selectedBoutiquesForImport = this.boutiques
+      .filter(b => b.actif)
+      .map(b => b.id);
+  }
+  this.isAllBoutiquesSelected = !this.isAllBoutiquesSelected;
 }
 
   

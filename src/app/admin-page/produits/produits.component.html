@@ -234,6 +234,28 @@
         <li>Les colonnes obligatoires sont marquées d'un *</li>
         <li>Évitez de modifier les en-têtes de colonnes</li>
       </ol>
+
+      <div class="boutique-selection-section">
+        <h3>Sélectionnez les boutiques</h3>
+        
+        <div class="select-all">
+          <input type="checkbox" 
+                id="selectAllBoutiques"
+                [checked]="isAllBoutiquesSelected"
+                (change)="toggleAllBoutiques()">
+          <label for="selectAllBoutiques">Toutes les boutiques</label>
+        </div>
+        
+        <div class="boutique-list">
+          <div *ngFor="let boutique of boutiques" class="boutique-item">
+            <input type="checkbox" 
+                  [id]="'boutique-'+boutique.id"
+                  [checked]="selectedBoutiquesForImport.includes(boutique.id)"
+                  (change)="toggleBoutiqueSelection(boutique.id)">
+            <label [for]="'boutique-'+boutique.id">{{ boutique.nomBoutique }}</label>
+          </div>
+        </div>
+      </div>
       
       <div class="columns-info">
         <h4>Structure des colonnes :</h4>
@@ -245,7 +267,7 @@
           <li><strong>Prix Achat*</strong> - Prix d'achat (nombre)</li>
           <li><strong>Quantité*</strong> - Quantité initiale (nombre entier)</li>
           <li><strong>Unité</strong> - Unité de mesure existante</li>
-          <li><strong>Code Barre</strong> - Code barre (texte)</li>
+          <li><strong>Code Barre</strong> - Code barre (nombre entier)</li>
           <li><strong>Type Produit</strong> - PHYSIQUE ou SERVICE</li>
           <li><strong>Seuil Alert</strong> - Seuil d'alerte stock (nombre entier)</li>
         </ul>

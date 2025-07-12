@@ -1426,3 +1426,37 @@ img.roudel_detail{
     margin-bottom: 0;
   }
 }
+
+.boutique-selection-section {
+  margin: 20px 0;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  
+  h3 {
+    margin-top: 0;
+    color: #333;
+  }
+}
+
+.select-all {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.boutique-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.boutique-item {
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  
+  input {
+    margin-right: 10px;
+  }
+}
