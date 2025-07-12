@@ -117,7 +117,7 @@ getValidAccessToken(): Observable<string> {
     }),
     catchError(err => {
       if (!this.sessionExpiredHandled) {
-        this.sessionExpiredHandled = true;
+        this.sessionExpiredHandled = false;
         this.modalService.triggerSessionExpiredModal();
       }
       return throwError(() => new Error('Session expirée'));
@@ -135,17 +135,27 @@ getValidAccessToken(): Observable<string> {
     return JSON.parse(atob(token.split('.')[1]));
   }
   
-  // Vérifier si le token est expiré
-  isTokenExpired(decodedToken: any): boolean {
-    const expirationDate = new Date(decodedToken.exp * 1000);
-    return expirationDate < new Date();
-  }
+// Vérifier si le token est expiré (avec marge de sécurité de 30 secondes)
+isTokenExpired(decodedToken: any): boolean {
+  const expirationDate = new Date(decodedToken.exp * 1000);
+  return expirationDate.getTime() < new Date().getTime() + 30 * 1000;
+}
     
   // Rafraîchir le token avec un refresh token (si applicable)
- getNewTokenFromApi(): Observable<RefreshTokenResponse> {
-  const refreshToken = this.authService.getRefreshToken();
-  return this.http.post<RefreshTokenResponse>(`${this.apiUrl}/refresh-token`, { refreshToken });
+getNewTokenFromApi(): Observable<RefreshTokenResponse> {
+  const refreshToken = localStorage.getItem('refreshToken');
+
+  if (!refreshToken || refreshToken.trim() === '') {
+    console.error('❌ Aucun refresh token trouvé');
+    return throwError(() => new Error('Refresh token manquant'));
+  }
+
+  return this.http.post<RefreshTokenResponse>(
+    `${this.apiUrl}/refresh-token`,
+    { refreshToken } // Le backend doit l'accepter dans le body
+  );
 }
+
 
 private sessionExpiredHandled = false;
 
