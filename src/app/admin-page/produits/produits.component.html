@@ -5,7 +5,10 @@
 
     <div class="actions">
       <button class="add-task" (click)="goToAddProduit()">Ajouter un produit</button>
-      <button style="border: none; border-radius: 2px; background-color: #333; padding: 2px 10px; margin-left: 10px; color: #fff;">Importer excel</button>
+      <!-- <button style="border: none; border-radius: 2px; background-color: #333; padding: 2px 10px; margin-left: 10px; color: #fff;">Importer excel</button> -->
+       <button class="add-task" (click)="openExcelImportModal()" style="border: none; border-radius: 2px; background-color: #333; padding: 2px 10px; margin-left: 10px; color: #fff;">
+          Importer excel
+        </button>
       <div class="contentIcon">
         <i class="ri-refresh-line" (click)="rafraichirProduits()" *ngIf="!isLoading"></i>
         <i *ngIf="isLoading" class="ri-loader-line ri-spin"></i>
@@ -213,5 +216,72 @@
                    [pageSizeOptions]="[5, 10, 25, 100]"
                    (page)="onPageChange($event)">
     </mat-paginator>
+  </div>
+</div>
+
+<!-- Modal d'importation Excel -->
+<div class="modal" *ngIf="showExcelImportModal">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <span class="close" (click)="closeExcelImportModal()">&times;</span>
+    
+    <h2>Importer des produits depuis Excel</h2>
+    
+    <div class="import-instructions">
+      <h3>Instructions pour préparer votre fichier Excel :</h3>
+      <ol>
+        <li>Téléchargez notre modèle Excel ci-dessous</li>
+        <li>Remplissez les colonnes avec vos données</li>
+        <li>Les colonnes obligatoires sont marquées d'un *</li>
+        <li>Évitez de modifier les en-têtes de colonnes</li>
+      </ol>
+      
+      <div class="columns-info">
+        <h4>Structure des colonnes :</h4>
+        <ul>
+          <li><strong>Nom produit*</strong> - Nom du produit (texte)</li>
+          <li><strong>Description</strong> - Description du produit</li>
+          <li><strong>Catégorie*</strong> - Nom de la catégorie existante</li>
+          <li><strong>Prix Vente*</strong> - Prix de vente (nombre)</li>
+          <li><strong>Prix Achat*</strong> - Prix d'achat (nombre)</li>
+          <li><strong>Quantité*</strong> - Quantité initiale (nombre entier)</li>
+          <li><strong>Unité</strong> - Unité de mesure existante</li>
+          <li><strong>Code Barre</strong> - Code barre (texte)</li>
+          <li><strong>Type Produit</strong> - PHYSIQUE ou SERVICE</li>
+          <li><strong>Seuil Alert</strong> - Seuil d'alerte stock (nombre entier)</li>
+        </ul>
+      </div>
+      
+      <button class="download-template" (click)="downloadExcelTemplate()">
+        <i class="ri-download-line"></i> Télécharger le modèle
+      </button>
+    </div>
+    
+    <div class="file-upload-area" (click)="fileInput.click()" [class.active]="selectedFile">
+      <input type="file" #fileInput (change)="onFileSelected($event)" accept=".xlsx, .xls" hidden>
+      <i class="ri-upload-cloud-2-line"></i>
+      <p *ngIf="!selectedFile">Cliquez pour sélectionner votre fichier Excel</p>
+      <p *ngIf="selectedFile">{{ selectedFile.name }}</p>
+      <small>Formats acceptés: .xlsx, .xls (Max 5MB)</small>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="closeExcelImportModal()">Annuler</button>
+      <button class="btn-import" 
+              (click)="uploadExcel()" 
+              [disabled]="!selectedFile || isImporting">
+        <span *ngIf="!isImporting">Importer</span>
+        <span *ngIf="isImporting">Import en cours...</span>
+      </button>
+    </div>
+    
+    <div *ngIf="importMessage" class="import-status" [class.success]="importSuccess" [class.error]="!importSuccess">
+      {{ importMessage }}
+      <div *ngIf="importErrors.length > 0" class="import-errors">
+        <h4>Erreurs survenues :</h4>
+        <ul>
+          <li *ngFor="let error of importErrors">{{ error }}</li>
+        </ul>
+      </div>
+    </div>
   </div>
 </div>

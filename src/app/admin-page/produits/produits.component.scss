@@ -1233,3 +1233,196 @@ img.roudel_detail{
   display: flex;
   align-items: center;
 }
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  .modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 15px;
+    }
+  }
+}
+
+.import-instructions {
+  background-color: #f9f9f9;
+  border-left: 4px solid #0671e4;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+
+  h3 {
+    margin-top: 0;
+    color: #0671e4;
+  }
+
+  .columns-info {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 4px;
+
+    ul {
+      padding-left: 20px;
+      margin-bottom: 0;
+
+      li {
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+    }
+  }
+
+  .download-template {
+    background-color: #0671e4;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+
+    &:hover {
+      background-color: #055cb9;
+    }
+  }
+}
+
+.file-upload-area {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin: 20px 0;
+
+  &:hover, &.active {
+    border-color: #0671e4;
+    background-color: #f0f8ff;
+  }
+
+  i {
+    font-size: 48px;
+    color: #0671e4;
+    margin-bottom: 15px;
+  }
+
+  p {
+    margin: 10px 0;
+    font-size: 16px;
+  }
+
+  small {
+    color: #777;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+
+  .btn-cancel {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #eaeaea;
+    }
+  }
+
+  .btn-import {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover:not([disabled]) {
+      background-color: #218838;
+    }
+
+    &[disabled] {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.import-status {
+  padding: 15px;
+  border-radius: 4px;
+  margin-top: 20px;
+
+  &.success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+
+  &.error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+}
+
+.import-errors {
+  margin-top: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 10px;
+  border-radius: 4px;
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  ul {
+    padding-left: 20px;
+    margin-bottom: 0;
+  }
+}

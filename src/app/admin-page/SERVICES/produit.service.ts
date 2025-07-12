@@ -146,6 +146,21 @@ getFournisseurs(): Observable<any[]> {
   );
 }
 
+importProduitsFromExcel(formData: FormData): Observable<any> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}` 
+      });
+      
+      // Ajoutez les headers ici dans la requête POST
+      return this.http.post(`${this.apiUrl}/import-produits-excel`, formData, { headers });
+    })
+  );
+}
+
+
+
   
   
   
