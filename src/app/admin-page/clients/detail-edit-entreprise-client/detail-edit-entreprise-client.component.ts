@@ -2,12 +2,13 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService } from '../../SERVICES/client-service';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Subject, switchMap, throwError } from 'rxjs';
 import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-service';
 import { CommonModule } from '@angular/common';
 import { Clients } from '../../MODELS/clients-model';
 import { Entreprise } from '../../MODELS/entreprise-model';
 import { TruncateEmailPipe } from '../../MODELS/truncate-email.pipe';
+import { UsersService } from '../../SERVICES/users.service';
 
 @Component({
   selector: 'app-detail-edit-entreprise-client',
@@ -55,6 +56,7 @@ export class DetailEditEntrepriseClientComponent {
     private route: ActivatedRoute,
     private fb: FormBuilder,
     private entrepriseClientService: EntrepriseClientService,
+    private usersService : UsersService
   ) {}
 
   ngOnInit() {
@@ -192,42 +194,43 @@ updatePhoneValidator(longueur: number): void {
   }
 
   // list clients 
-  getListClients() {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      this.clientService.getListClients().subscribe({
-        next: (data) => {
-          console.log('Données brutes:', data);
-          this.clients = data.map(client => ({
-            ...client,
-            entrepriseClient: client.entrepriseClient ? { 
-              id: client.entrepriseClient.id,
-              nom: client.entrepriseClient.nom
-            } : null
-          }));
-          
-          // 1. Trier par id décroissant pour que les plus récents (id élevés) soient en tête
-          this.clients = data.sort((a, b) => {
-            // si vous avez un champ createdAt : return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            return (b.id ?? 0) - (a.id ?? 0);
-          });
+ getListClients() {
+  this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('🔐 Aucun token trouvé !');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+      return this.clientService.getListClients();
+    })
+  ).subscribe({
+    next: (data) => {
+      console.log('Données brutes:', data);
 
-          // Vérifiez un client spécifique
-          if (this.clients.length > 0) {
-            console.log('Exemple de client:', this.clients[0]);
-            console.log('Entreprise associée:', this.clients[0].entrepriseClient);
-          }
-  
-          console.log('Clients récupérées (triées) :', this.clients);
-        },
-        error: (err) => {
-          console.error('Erreur lors de la récupération des clients :', err);
-        }
-      });
-    } else {
-      console.error('Aucun token trouvé !');
+      this.clients = data.map(client => ({
+        ...client,
+        entrepriseClient: client.entrepriseClient ? { 
+          id: client.entrepriseClient.id,
+          nom: client.entrepriseClient.nom
+        } : null
+      }));
+
+      // Trier par id décroissant
+      this.clients = this.clients.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+
+      if (this.clients.length > 0) {
+        console.log('Exemple de client:', this.clients[0]);
+        console.log('Entreprise associée:', this.clients[0].entrepriseClient);
+      }
+
+      console.log('Clients récupérées (triées) :', this.clients);
+    },
+    error: (err) => {
+      console.error('Erreur lors de la récupération des clients :', err);
     }
-  }
+  });
+}
+
 
   // client id routing
   openClientDetail(clientId: number): void {

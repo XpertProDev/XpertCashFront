@@ -5,7 +5,7 @@
 
     <div class="actions">
       <button class="add-task" (click)="goToAddProduit()">Ajouter un produit</button>
-      <button style="border: none; border-radius: 2px; background-color: #333; padding: 2px 10px; margin-left: 10px;">Importer excel</button>
+      <button style="border: none; border-radius: 2px; background-color: #333; padding: 2px 10px; margin-left: 10px; color: #fff;">Importer excel</button>
       <div class="contentIcon">
         <i class="ri-refresh-line" (click)="rafraichirProduits()" *ngIf="!isLoading"></i>
         <i *ngIf="isLoading" class="ri-loader-line ri-spin"></i>

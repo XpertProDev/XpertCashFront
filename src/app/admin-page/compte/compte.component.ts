@@ -12,6 +12,7 @@ import { Users } from '../MODELS/utilisateur.model';
 import { log } from 'console';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { BoutiqueService } from '../SERVICES/boutique-service';
+import { of, switchMap, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-compte',
@@ -165,19 +166,25 @@ export class CompteComponent  implements OnInit {
     this.paginatedUsers = this.filteredUsers.slice(startIndex, startIndex + this.pageSize);
   }
 
-  loadRoles() {
-    const token = localStorage.getItem('accessToken'); 
-    if (token) {
-      this.rolesService.getAllRoles().subscribe({
-        next: (data) => {
-          this.roles = data;
-        },
-        error: (err) => {
-          console.error('Erreur lors du chargement des rôles', err);
-        }
-      });
+loadRoles() {
+  this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('🔐 Aucun token trouvé !');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+      return this.rolesService.getAllRoles();
+    })
+  ).subscribe({
+    next: (data) => {
+      this.roles = data;
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des rôles', err);
     }
-  }
+  });
+}
+
 
   loadUsersOfEntreprise(entrepriseId: number) {
     this.isLoading = true;
@@ -223,63 +230,63 @@ export class CompteComponent  implements OnInit {
     this.userForm.updateValueAndValidity();
   }
 
-  onSubmit(): void {
-    this.errorMessage = null;
-    this.successMessage = null;
-  
-    if (this.userForm.invalid) {
-      this.errorMessage = "Veuillez remplir tous les champs correctement.";
-      return;
-    }
-  
-    const request: UserNewRequest = this.userForm.value;
-    const token = localStorage.getItem('accessToken');
-  
-    if (!token) {
-      this.errorMessage = "Vous devez être connecté pour ajouter un utilisateur.";
-      return;
-    }
-  
-    this.isLoading = true;
-  
-    console.log("Données envoyées :", request);
-    //console.log("Token utilisé :", token);
-  
-    this.usersService.addUserToEntreprise(request, token).subscribe({
-      next: (response) => {
-        //console.log("Réponse du serveur :", response);
-  
-        if (response.id) {
-          this.successMessage = "Utilisateur ajouté avec succès !";
-          this.userForm.reset();
-          this.closePopup();
-          
-          // Redirection avec l'ID du nouvel utilisateur
-          this.router.navigate(['/userPermission', response.id]);
-          
-          // Rafraîchir la liste avec l'ID stocké
-          this.loadUsersOfEntreprise(this.entrepriseId);
-        }
-  
-        // Rafraîchir la liste des utilisateurs
-        this.usersService.getUserInfo().subscribe({
-          next: (userData) => {
-            if (userData && userData.id) {
-              const entrepriseId = userData.id;
-              this.loadUsersOfEntreprise(entrepriseId);
-            }
-          },
-          error: (err) => {
-            console.error("Erreur lors de la récupération des informations utilisateur :", err);
-          }
-        });
-  
-        this.isLoading = false;
-        this.closePopup();
-        setTimeout(() => this.successMessage = null, 3000);
-      },
-    });
+ onSubmit(): void {
+  this.errorMessage = null;
+  this.successMessage = null;
+
+  if (this.userForm.invalid) {
+    this.errorMessage = "Veuillez remplir tous les champs correctement.";
+    return;
   }
+
+  const request: UserNewRequest = this.userForm.value;
+  this.isLoading = true;
+
+  this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        this.errorMessage = "Vous devez être connecté pour ajouter un utilisateur.";
+        this.isLoading = false;
+        return throwError(() => new Error("Aucun token trouvé"));
+      }
+      console.log("Données envoyées :", request);
+      return this.usersService.addUserToEntreprise(request, token);
+    }),
+    switchMap(response => {
+      if (response.id) {
+        this.successMessage = "Utilisateur ajouté avec succès !";
+        this.userForm.reset();
+        this.closePopup();
+
+        // Redirection avec l'ID du nouvel utilisateur
+        this.router.navigate(['/userPermission', response.id]);
+
+        // Rafraîchir la liste avec l'ID stocké
+        this.loadUsersOfEntreprise(this.entrepriseId);
+
+        // Rafraîchir la liste des utilisateurs via getUserInfo
+        return this.usersService.getUserInfo();
+      } else {
+        return of(null);
+      }
+    })
+  ).subscribe({
+    next: (userData) => {
+      if (userData && userData.id) {
+        const entrepriseId = userData.id;
+        this.loadUsersOfEntreprise(entrepriseId);
+      }
+      this.isLoading = false;
+      setTimeout(() => this.successMessage = null, 3000);
+    },
+    error: (err) => {
+      console.error("Erreur lors de l'ajout utilisateur ou récupération info utilisateur :", err);
+      this.errorMessage = err.message || "Une erreur est survenue";
+      this.isLoading = false;
+    }
+  });
+}
+
 
   openPermissionDetail(userId: number): void {
     this.router.navigate(['/userPermission', userId]);

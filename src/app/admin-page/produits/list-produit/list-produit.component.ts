@@ -112,7 +112,8 @@ export class ListProduitComponent {
     private produitService: ProduitService,
     private fb: FormBuilder,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private usersService: UsersService,
   ) {}
 
   ngOnInit(): void  {
@@ -242,49 +243,49 @@ export class ListProduitComponent {
   }
   
 
-  getFiltrageCategoriesUnites() {
-    // 🟢 Filtrage des catégories (OK)
-    const token = localStorage.getItem('accessToken'); // ou via un service d'authentification
-    if (token) {
-      this.categorieService.getCategories().subscribe(
-        (categories) => {
-          console.log('Catégories reçues depuis l\'API :', categories); // Debug ici
-          this.options = categories;
-          this.filteredOptions = this.myControl.valueChanges.pipe(
-            startWith<string | Categorie>(''),
-            // map(value => (typeof value === 'string' ? value : value.nom)),
-            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-            map(name => (name ? this._filter(name) : this.options.slice()))
-          );
-        },
-        (error) => {
-          console.error('Erreur lors de la récupération des catégories :', error);
-        }
-      );
-    } else {
-      console.error('Aucun token trouvé !');
-    }
-    // 🟢 Filtrage des unité de mesure (OK)
-    if (token) {
-      this.uniteMesureService.getUniteMesure().subscribe(
-        (uniteMesures) => {
-          console.log('Unité de mesure reçues depuis l\'API :', uniteMesures); // Debug ici
-          this.optionsUnite = uniteMesures;
-          this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
-            startWith<string | UniteMesure>(''),
-            // map(value => (typeof value === 'string' ? value : value.nom)),
-            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-            map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
-          );
-        },
-        (error) => {
-          console.error('Erreur lors de la récupération des catégories :', error);
-        }
-      );
-    } else {
-      console.error('Aucun token trouvé !');
-    }
+ getFiltrageCategoriesUnites() {
+  const token = this.usersService.getValidAccessToken(); // ✅ Centralisation de l’accès au token
+
+  if (!token) {
+    console.error('Aucun token trouvé !');
+    return;
   }
+
+  // 🟢 Filtrage des catégories
+  this.categorieService.getCategories().subscribe({
+    next: (categories) => {
+      console.log('Catégories reçues depuis l\'API :', categories);
+      this.options = categories;
+
+      this.filteredOptions = this.myControl.valueChanges.pipe(
+        startWith<string | Categorie>(''),
+        map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
+        map(name => (name ? this._filter(name) : this.options.slice()))
+      );
+    },
+    error: (error) => {
+      console.error('Erreur lors de la récupération des catégories :', error);
+    }
+  });
+
+  // 🟢 Filtrage des unités de mesure
+  this.uniteMesureService.getUniteMesure().subscribe({
+    next: (uniteMesures) => {
+      console.log('Unités de mesure reçues depuis l\'API :', uniteMesures);
+      this.optionsUnite = uniteMesures;
+
+      this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
+        startWith<string | UniteMesure>(''),
+        map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
+        map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
+      );
+    },
+    error: (error) => {
+      console.error('Erreur lors de la récupération des unités de mesure :', error);
+    }
+  });
+}
+
 
   getModifierProduitForm() {
     this.modifierProduitForm = this.fb.group({

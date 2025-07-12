@@ -244,7 +244,7 @@ export class ProduitFormComponent {
   }
   
   setupFormSubscriptions() {
-    const token = localStorage.getItem('accessToken'); // ou via un service d'authentification
+    const token = this.usersService.getValidAccessToken(); // ou via un service d'authentification
     if (token) {
       this.categorieService.getCategories().subscribe(
         (categories) => {

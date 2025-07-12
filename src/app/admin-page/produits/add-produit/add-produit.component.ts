@@ -244,47 +244,45 @@ export class AddProduitComponent implements OnInit {
   }
 
   setupFormSubscriptions() {
-    const token = localStorage.getItem('accessToken'); // ou via un service d'authentification
-    if (token) {
-      this.categorieService.getCategories().subscribe(
-        (categories) => {
-          console.log('Catégories reçues depuis l\'API :', categories); // Debug ici
-          this.options = categories;
-          this.filteredOptions = this.myControl.valueChanges.pipe(
-            startWith<string | Categorie>(''),
-            // map(value => (typeof value === 'string' ? value : value.nom)),
-            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-            map(name => (name ? this._filter(name) : this.options.slice()))
-          );
-        },
-        (error) => {
-          console.error('Erreur lors de la récupération des catégories :', error);
-        }
-      );
-    } else {
-      console.error('Aucun token trouvé !');
-    }
-    // 🟢 Filtrage des unité de mesure (OK)
-    if (token) {
-      this.uniteMesureService.getUniteMesure().subscribe(
-        (uniteMesures) => {
-          console.log('Unité de mesure reçues depuis l\'API :', uniteMesures); // Debug ici
-          this.optionsUnite = uniteMesures;
-          this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
-            startWith<string | UniteMesure>(''),
-            // map(value => (typeof value === 'string' ? value : value.nom)),
-            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-            map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
-          );
-        },
-        (error) => {
-          console.error('Erreur lors de la récupération des catégories :', error);
-        }
-      );
-    } else {
-      console.error('Aucun token trouvé !');
-    }
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    console.error('Aucun token trouvé !');
+    return;
   }
+
+  // Chargement des catégories
+  this.categorieService.getCategories().subscribe({
+    next: (categories) => {
+      console.log('Catégories reçues depuis l\'API :', categories);
+      this.options = categories;
+      this.filteredOptions = this.myControl.valueChanges.pipe(
+        startWith<string | Categorie>(''),
+        map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
+        map(name => (name ? this._filter(name) : this.options.slice()))
+      );
+    },
+    error: (error) => {
+      console.error('Erreur lors de la récupération des catégories :', error);
+    }
+  });
+
+  // Chargement des unités de mesure
+  this.uniteMesureService.getUniteMesure().subscribe({
+    next: (uniteMesures) => {
+      console.log('Unité de mesure reçues depuis l\'API :', uniteMesures);
+      this.optionsUnite = uniteMesures;
+      this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
+        startWith<string | UniteMesure>(''),
+        map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
+        map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
+      );
+    },
+    error: (error) => {
+      console.error('Erreur lors de la récupération des unités de mesure :', error);
+    }
+  });
+}
+
 
   loadInitialData() {
     this.ajouteProduitForm = this.fb.group({

@@ -1,3 +1,13 @@
+export interface Categorie {
+  id: number;
+  nom: string;
+  createdAt?: string;
+}
+
+export interface UniteDeMesure {
+  id: number;
+  nom: string;
+}
 export interface Boutique {
   id: number;
   nom: string;
@@ -13,19 +23,31 @@ export interface Produit {
   prixAchat: number;
   quantite: number;
   seuilAlert: number;
+
+  // Identifiants (possiblement redondants avec les objets complets)
   categorieId: number | null;
   uniteId: number | null;
+  boutiqueId: number | null;
+
+  categorie?: Categorie;
+  uniteDeMesure?: UniteDeMesure;
+
+  // Champs àplatir pour faciliter le binding ou les filtres
+  nomCategorie?: string;
+  nomUnite?: string;
+  nomBoutique?: string;
+
   codeBare: string;
   photo: string;
   enStock: boolean;
-  nomCategorie?: string;
-  nomUnite?: string;
   createdAt?: string;
   lastUpdated?: string;
-  boutiqueId: number | null;
-  nomBoutique?: string;
   typeProduit?: string;
-  
+
+  deleted?: boolean;
+  deletedAt?: string | null;
+  deletedBy?: string | null;
+
   boutiques?: Boutique[];
 
   photoUrl?: string;

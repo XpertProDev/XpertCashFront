@@ -12,6 +12,8 @@ import { EntrepriseService } from "../SERVICES/entreprise-service";
 import { ClickOutsideDirective } from "../MODELS/click-outside.directive";
 import { environment } from "src/environments/environment";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
+import { UsersService } from "../SERVICES/users.service";
+import { switchMap, throwError } from "rxjs";
 
 
 @Component({
@@ -64,7 +66,8 @@ export class ClientsComponent implements OnInit  {
     private clientService: ClientService,
     private router: Router,
     private entrepriseService: EntrepriseService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private usersService: UsersService,
   ) {}
 
   ngOnInit() {
@@ -174,31 +177,30 @@ export class ClientsComponent implements OnInit  {
     }
   }
 
-  getListEntreprises() {
-    this.entreprisesLoaded = false;
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      // Utiliser le service EntrepriseService au lieu de ClientService
-      this.entrepriseService.getListEntreprises().subscribe({
-        next: (data: EntrepriseClient[]) => {
-          console.log('Entreprises récupérées:', data);
-          this.entreprises = data;
-          
-          this.entreprises = this.entreprises.sort((a: EntrepriseClient, b: EntrepriseClient) => 
-            (b.id ?? 0) - (a.id ?? 0)
-          );
-          this.entreprisesLoaded = true;
-        },
-        error: (err) => {
-          console.error('Erreur lors de la récupération des entreprises :', err);
-          this.entreprisesLoaded = true;
-        }
-      });
-    } else {
-      console.error('Aucun token trouvé !');
+ getListEntreprises() {
+  this.entreprisesLoaded = false;
+
+  this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Aucun token valide trouvé !');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+      return this.entrepriseService.getListEntreprises();
+    })
+  ).subscribe({
+    next: (data: EntrepriseClient[]) => {
+      console.log('Entreprises récupérées:', data);
+      this.entreprises = data.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+      this.entreprisesLoaded = true;
+    },
+    error: (err) => {
+      console.error('Erreur lors de la récupération des entreprises :', err);
       this.entreprisesLoaded = true;
     }
-  }
+  });
+}
+
 
   // Modifie la fonction sort
   sort(field: string) {
@@ -235,53 +237,54 @@ export class ClientsComponent implements OnInit  {
 
   // list clients 
   getListClients() {
-    this.clientsLoaded = false;
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      this.clientService.getListClients().subscribe({
-        next: (data) => {
-          console.log('📥 Données brutes:', data);
+  this.clientsLoaded = false;
 
-          this.clients = data.map(client => {
-            return {
-              ...client,
-              photo: client.photo 
-              ? `${this.apiUrl}${client.photo}` 
-              : `/assets/img/profil.png`,
-              
-              entrepriseClient: client.entrepriseClient ? { 
-                id: client.entrepriseClient.id
-              } : null
-            };
-          });
+  this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('🔐 Aucun token valide trouvé !');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+      return this.clientService.getListClients();
+    })
+  ).subscribe({
+    next: (data) => {
+      console.log('📥 Données brutes:', data);
 
-          console.log('🖼️ URLs des photos clients :', this.clients.map(c => c.photo));
-
-          // Tri décroissant par ID
-          this.clients = this.clients.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
-
-          this.totalClients = this.clients.length;
-          this.noClientsAvailable = this.clients.length === 0;
-
-          this.dataSource.data = this.clients;
-          this.dataSource.paginator = this.paginator;
-
-          if (this.clients.length > 0) {
-            console.log('👤 Exemple client :', this.clients[0]);
-          }
-
-          this.clientsLoaded = true;
-        },
-        error: (err) => {
-          console.error('❌ Erreur récupération clients :', err);
-          this.clientsLoaded = true;
-        }
+      this.clients = data.map(client => {
+        return {
+          ...client,
+          photo: client.photo 
+            ? `${this.apiUrl}${client.photo}` 
+            : `/assets/img/profil.png`,
+          entrepriseClient: client.entrepriseClient 
+            ? { id: client.entrepriseClient.id } 
+            : null
+        };
       });
-    } else {
-      console.error('🔐 Aucun token trouvé !');
+
+      console.log('🖼️ URLs des photos clients :', this.clients.map(c => c.photo));
+
+      this.clients = this.clients.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+      this.totalClients = this.clients.length;
+      this.noClientsAvailable = this.clients.length === 0;
+
+      this.dataSource.data = this.clients;
+      this.dataSource.paginator = this.paginator;
+
+      if (this.clients.length > 0) {
+        console.log('👤 Exemple client :', this.clients[0]);
+      }
+
+      this.clientsLoaded = true;
+    },
+    error: (err) => {
+      console.error('❌ Erreur récupération clients :', err);
       this.clientsLoaded = true;
     }
-  }
+  });
+}
+
 
   // Mettre à jour les getters paginés pour utiliser les listes filtrées
   get paginatedClients(): Clients[] {

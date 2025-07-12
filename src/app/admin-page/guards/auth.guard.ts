@@ -1,20 +1,24 @@
-import { CanActivateFn } from '@angular/router';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { CanActivateFn, Router } from '@angular/router';
+import { catchError, map, of } from 'rxjs';
+import { UsersService } from '../SERVICES/users.service';
 
-// Vérifier si l'utilisateur est authentifié via le token
 export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
-  
-  // Vérification si le token d'authentification est présent dans localStorage
-  const token = localStorage.getItem('accessToken');
+  const usersService = inject(UsersService);
 
-  if (!token) {
-    // Si aucun token, redirige vers la page de connexion
-    router.navigate(['/connexion']);
-    return false;
-  }
-
-  // Si le token est présent, l'utilisateur peut accéder à la route
-  return true;
+  return usersService.getValidAccessToken().pipe(
+    map(token => {
+      if (token) {
+        return true;
+      } else {
+        router.navigate(['/connexion']);
+        return false;
+      }
+    }),
+    catchError(() => {
+      router.navigate(['/connexion']);
+      return of(false);
+    })
+  );
 };

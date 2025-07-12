@@ -9,7 +9,7 @@ import { FactureProFormaService } from '../../SERVICES/factureproforma-service';
 import { Produit } from '../../MODELS/produit.model';
 import { ProduitService } from '../../SERVICES/produit.service';
 import { UsersService } from '../../SERVICES/users.service';
-import { Observable, map, startWith } from 'rxjs';
+import { Observable, map, startWith, switchMap, throwError } from 'rxjs';
 import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { FactureProForma } from '../../MODELS/FactureProForma.model';
@@ -351,56 +351,80 @@ export class AddfactureProformaComponent implements OnInit {
     this.router.navigate(['/facture-proforma']);
   }
 
-  getListClients() {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      this.clientService.getListClients().subscribe({
-        next: (data) => {
-          this.clients = data.map(client => ({
-            ...client,
-            entrepriseClient: client.entrepriseClient
-              ? { id: client.entrepriseClient.id, nom: client.entrepriseClient.nom }
-              : null
-          })).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+ getListClients() {
+  this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Token manquant pour clients');
+        return throwError(() => new Error('Token manquant'));
+      }
+      return this.clientService.getListClients();
+    })
+  ).subscribe({
+    next: (data) => {
+      this.clients = data.map(client => ({
+        ...client,
+        entrepriseClient: client.entrepriseClient
+          ? { id: client.entrepriseClient.id, nom: client.entrepriseClient.nom }
+          : null
+      })).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
 
-          this.clientControl.setValue(null);
-          this.totalClients = this.clients.length;
-          this.noClientsAvailable = this.clients.length === 0;
-        },
-        error: (err) => console.error('Erreur récupération clients :', err)
-      });
-    } else {
-      console.error('Token manquant pour clients');
+      this.clientControl.setValue(null);
+      this.totalClients = this.clients.length;
+      this.noClientsAvailable = this.clients.length === 0;
+    },
+    error: (err) => {
+      console.error('Erreur récupération clients :', err);
     }
+  });
+}
+
+
+ getListEntreprise() {
+  const token = this.usersService.getToken();
+  if (!token) {
+    console.error('Token manquant pour entreprises');
+    return;
   }
 
-  getListEntreprise() {
-    const token = this.usersService.getToken();
-    if (token) {
-      this.clientService.getListEntreprises().subscribe({
-        next: (data) => {
-          this.entreprises = data.sort((a: any, b: any) => (b.id ?? 0) - (a.id ?? 0));
-          this.entrepriseControl.setValue(null);
-        },
-        error: (err) => console.error('Erreur récupération entreprises :', err)
-      });
-    } else {
-      console.error('Token manquant pour entreprises');
+  this.clientService.getListEntreprises().subscribe({
+    next: (data) => {
+      this.entreprises = data.sort((a: any, b: any) => (b.id ?? 0) - (a.id ?? 0));
+      this.entrepriseControl.setValue(null);
+    },
+    error: (err) => {
+      console.error('Erreur récupération entreprises :', err);
     }
-  }
+  });
+}
 
-  getProduits() {
-    const token = localStorage.getItem('accessToken');
-    if (token && this.userEntrepriseId) {
-      this.produitService.getProduitsParEntreprise(this.userEntrepriseId!).subscribe({
+
+getProduits() {
+  this.usersService.getValidAccessToken().subscribe({
+    next: (token) => {
+      if (!token) {
+        console.error('Token manquant pour récupérer les produits');
+        return;
+      }
+
+      if (!this.userEntrepriseId) {
+        console.error('ID entreprise utilisateur manquant');
+        return;
+      }
+
+      this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
         next: (data: Produit[]) => {
           console.log('Produits récupérés :', data);
           this.produits = data;
         },
         error: (err) => console.error('Erreur récupération produits :', err)
       });
-    }
-  }
+    },
+    error: (err) => console.error('Erreur récupération token :', err)
+  });
+}
+
+
 
   getPrixVente(produitId: number | null): number {
     if (!produitId) return 0;
@@ -425,88 +449,106 @@ export class AddfactureProformaComponent implements OnInit {
     return totalConfirmed + totalInput;
   }
 
-  creerFactureProforma() {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      console.error('Token manquant');
-      return;
-    }
-
-    if (!this.selectedClientId && !this.selectedEntreprise) {
-      this.errorMessage = 'Sélectionnez un client ou une entreprise';
-      this.showExistingInvoiceError = true;
-      return;
-    }
-
-    const allLignes = [...this.confirmedLignes];
-    const currentLine = this.inputLignes[0];
-    if (currentLine.produitId && currentLine.quantite > 0) {
-      const produitExiste = allLignes.some(l => l.produitId === currentLine.produitId);
-      if (produitExiste) {
-        this.showDuplicatePopup = true;
+creerFactureProforma() {
+  this.usersService.getValidAccessToken().subscribe({
+    next: (token) => {
+      if (!token) {
+        console.error('Token manquant');
         return;
       }
-      allLignes.push(currentLine);
-    }
 
-    if (allLignes.length === 0) {
-      alert('Ajoutez au moins un produit');
-      return;
-    }
-
-    const dateSeule = this.dateFacture.includes('T')
-      ? this.dateFacture.split('T')[0]
-      : this.dateFacture;
-
-    const facture: any = {
-      description: this.description,
-      lignesFacture: allLignes.map(ligne => ({
-        produit: { id: ligne.produitId },
-        quantite: ligne.quantite,
-        ligneDescription: ligne.ligneDescription,
-      }))
-    };
-
-    if (this.dateFacture) {
-      facture.dateFacture = dateSeule;
-    }
-
-    if (this.typeDestinataire === 'client' && this.selectedClientId) {
-      facture.client = { id: this.selectedClientId };
-    } else if (this.typeDestinataire === 'entreprise' && this.selectedEntreprise) {
-      facture.entrepriseClient = { id: this.selectedEntreprise.id };
-    } else {
-      console.error('Destinataire non spécifié');
-      return;
-    }
-
-    this.factureProFormaService.creerFactureProforma(
-      facture,
-      this.activeRemise ? this.remisePourcentage : undefined,
-      this.activeTva,
-      (this.activeRemise || this.activeTva)
-    ).subscribe({
-      next: (res) => {
-        console.log('Facture créée avec succès:', res);
-        this.formStateService.clearState();
-        this.confirmedLignes = [];
-        this.inputLignes = [{
-          produitId: null,
-          quantite: 1,
-          ligneDescription: null,
-          isDuplicate: false
-        }];
-        this.router.navigate(['/facture-proforma']);
-      },
-      error: (err) => {
-        const serverMessage = typeof err.error === 'string'
-          ? err.error
-          : err.error?.message;
-        this.errorMessage = serverMessage || 'Erreur lors de la création : erreur inconnue';
+      // Validation des destinataires
+      if (!this.selectedClientId && !this.selectedEntreprise) {
+        this.errorMessage = 'Sélectionnez un client ou une entreprise';
         this.showExistingInvoiceError = true;
+        return;
       }
-    });
-  }
+
+      // Préparation des lignes de facture
+      const allLignes = [...this.confirmedLignes];
+      const currentLine = this.inputLignes[0];
+
+      // Ajout de la ligne courante si valide et non dupliquée
+      if (currentLine.produitId && currentLine.quantite > 0) {
+        const produitExiste = allLignes.some(l => l.produitId === currentLine.produitId);
+        if (produitExiste) {
+          this.showDuplicatePopup = true;
+          return;
+        }
+        allLignes.push(currentLine);
+      }
+
+      if (allLignes.length === 0) {
+        alert('Ajoutez au moins un produit');
+        return;
+      }
+
+      // Formatage de la date (seulement la partie date sans heure)
+      const dateSeule = this.dateFacture.includes('T') ? this.dateFacture.split('T')[0] : this.dateFacture;
+
+      // Construction de l’objet facture à envoyer
+      const facture: any = {
+        description: this.description,
+        lignesFacture: allLignes.map(ligne => ({
+          produit: { id: ligne.produitId },
+          quantite: ligne.quantite,
+          ligneDescription: ligne.ligneDescription,
+        }))
+      };
+
+      if (this.dateFacture) {
+        facture.dateFacture = dateSeule;
+      }
+
+      // Définir le client ou l’entreprise selon le type destinataire
+      if (this.typeDestinataire === 'client' && this.selectedClientId) {
+        facture.client = { id: this.selectedClientId };
+      } else if (this.typeDestinataire === 'entreprise' && this.selectedEntreprise) {
+        facture.entrepriseClient = { id: this.selectedEntreprise.id };
+      } else {
+        console.error('Destinataire non spécifié');
+        return;
+      }
+
+      // Appel au service pour créer la facture proforma avec le token
+      this.factureProFormaService.creerFactureProforma(
+        facture,
+        this.activeRemise ? this.remisePourcentage : undefined,
+        this.activeTva,
+        this.activeRemise || this.activeTva,
+       
+      ).subscribe({
+        next: (res) => {
+          console.log('Facture créée avec succès:', res);
+
+          // Réinitialisation du formulaire et de l’état local
+          this.formStateService.clearState();
+          this.confirmedLignes = [];
+          this.inputLignes = [{
+            produitId: null,
+            quantite: 1,
+            ligneDescription: null,
+            isDuplicate: false
+          }];
+
+          // Navigation vers la liste des factures
+          this.router.navigate(['/facture-proforma']);
+        },
+        error: (err) => {
+          const serverMessage = typeof err.error === 'string' ? err.error : err.error?.message;
+          this.errorMessage = serverMessage || 'Erreur lors de la création : erreur inconnue';
+          this.showExistingInvoiceError = true;
+        }
+      });
+
+    },
+    error: (err) => {
+      console.error('Erreur récupération token :', err);
+    }
+  });
+}
+
+
 
   removePendingAdjustment(index: number): void {
     this.pendingAdjustments.splice(index, 1);

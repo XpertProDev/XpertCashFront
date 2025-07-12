@@ -1,5 +1,7 @@
 // auth.service.ts
 import { Injectable } from '@angular/core';
+import { UsersService } from './users.service';
+import { catchError, map, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -7,6 +9,8 @@ import { Injectable } from '@angular/core';
 export class AuthService {
   private readonly ACCESS_TOKEN_KEY = 'accessToken';
   private readonly REFRESH_TOKEN_KEY = 'refreshToken';
+
+  constructor(private usersService: UsersService) {}
 
   // Sauvegarder les deux tokens
 saveTokens(accessToken: string, refreshToken: string): void {
@@ -19,11 +23,18 @@ saveAccessToken(token: string): void {
 
 
   // Récupérer l'accessToken
-getAccessToken(): string | null {
-  const token = localStorage.getItem('accessToken');
-  console.log('🪪 Token lu depuis localStorage :', token);
-  return token;
+getAccessToken(): void {
+  this.usersService.getValidAccessToken().subscribe({
+    next: (token) => {
+      console.log('🪪 Token lu depuis localStorage (async) :', token);
+      // utilise le token ici
+    },
+    error: (err) => {
+      console.error('Erreur lors de la récupération du token :', err);
+    }
+  });
 }
+
 
 
   // Récupérer le refreshToken
@@ -38,13 +49,18 @@ removeTokens(): void {
 }
 
   // Méthode d'authentification simple
-  isAuthenticated(): boolean {
-    return !!this.getAccessToken();
-  }
+ isAuthenticated(): Observable<boolean> {
+  return this.usersService.getValidAccessToken().pipe(
+    map(token => !!token),
+    catchError(() => of(false))
+  );
+}
 
-  isLoggedIn(): boolean {
-    return this.isAuthenticated();
-  }
+
+ isLoggedIn(): Observable<boolean> {
+  return this.isAuthenticated();
+}
+
 
   // ici
   

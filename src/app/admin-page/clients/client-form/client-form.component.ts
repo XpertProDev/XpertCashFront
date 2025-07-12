@@ -2,13 +2,14 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import imageCompression from 'browser-image-compression';
-import { Observable, of, BehaviorSubject, combineLatest, startWith, map } from 'rxjs';
+import { Observable, of, BehaviorSubject, combineLatest, startWith, map, switchMap, throwError } from 'rxjs';
 import { Clients } from '../../MODELS/clients-model';
 import { Entreprise } from '../../MODELS/entreprise-model';
 import { ClientService } from '../../SERVICES/client-service';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
 import { CommonModule } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { UsersService } from '../../SERVICES/users.service';
 
 @Component({
   selector: 'app-client-form',
@@ -59,6 +60,7 @@ export class ClientFormComponent {
     private fb: FormBuilder,
     private entrepriseService: EntrepriseService,
     private clientService: ClientService,
+    private usersService: UsersService
   ) {}
 
   onPaysChange(event: any): void {
@@ -264,29 +266,32 @@ export class ClientFormComponent {
     );
   }
 
-  getListEntreprise() {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      this.entrepriseService.getListEntreprise().subscribe(
-        (entreprises) => {
-          console.log('Entreprise reçues depuis l\'API :', entreprises);
-          // Mettre à jour le BehaviorSubject
-          this.optionsEntreprise$.next(entreprises); 
-          this.filteredOptions = this.control.valueChanges.pipe(
-            startWith<string | Entreprise>(''),
-            map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-            // Passer le tableau d'entreprises comme second paramètre
-            map(name => (name ? this._filter(name, this.optionsEntreprise$.value) : this.optionsEntreprise$.value.slice()))
-          );
-        }, 
-        (error) => {
-          console.error('Erreur lors de la récupération des entreprises :', error);
-        }
-      ); 
-    } else {
-      console.error('Aucun token trouvé !');
+getListEntreprise() {
+  this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Aucun token valide trouvé !');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+      return this.entrepriseService.getListEntreprise();
+    })
+  ).subscribe(
+    (entreprises) => {
+      console.log('Entreprises reçues depuis l\'API :', entreprises);
+      // Mettre à jour le BehaviorSubject
+      this.optionsEntreprise$.next(entreprises); 
+      this.filteredOptions = this.control.valueChanges.pipe(
+        startWith<string | Entreprise>(''),
+        map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
+        map(name => (name ? this._filter(name, this.optionsEntreprise$.value) : this.optionsEntreprise$.value.slice()))
+      );
+    }, 
+    (error) => {
+      console.error('Erreur lors de la récupération des entreprises :', error);
     }
-  }
+  );
+}
+
 
   private _filter(name: string, entreprises: Entreprise[]): Entreprise[] {
     const filterValue = name.toLowerCase();

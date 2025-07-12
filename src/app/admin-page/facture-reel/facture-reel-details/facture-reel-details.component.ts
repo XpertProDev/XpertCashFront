@@ -623,7 +623,7 @@ async download() {
     
     tableData.push([
       { content: 'Montant Commercial', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
-      { content: customNumberPipe.transform(this.montantCommercial), styles: { halign: 'right' } }
+        { content: customNumberPipe.transform(this.facture.totalHT - (this.facture.totalHT * this.facture.remise / 100)), styles: { halign: 'right' } }
     ] as any);
   }
 
