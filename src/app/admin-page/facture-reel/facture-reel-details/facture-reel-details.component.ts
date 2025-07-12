@@ -496,7 +496,7 @@ async download() {
       const imgData = this.logo.startsWith('data:image/') 
         ? this.logo 
         : await this.getImageFromUrl(this.logo);
-      const formatMatch = imgData.match(/^data:image\/(png|jpeg|gif);/);
+      const formatMatch = imgData.match(/^data:image\/(png|jpeg|jpg|gif);/);
       const format = formatMatch ? formatMatch[1].toUpperCase() : 'PNG';
       doc.addImage(imgData, format, 15, 10, 47, 17);
     }
@@ -616,14 +616,19 @@ async download() {
 
   // Remise
   if (this.facture?.remise && this.facture.remise > 0) {
+    const remisePourcent = this.facture.totalHT > 0 
+    ? Math.round((this.facture.remise / this.facture.totalHT) * 100) 
+    : 0;
     tableData.push([
-      { content: 'Remise', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
+      { content: `Remise ${remisePourcent}%`, colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
       { content: customNumberPipe.transform(this.facture.remise), styles: { halign: 'right' } }
     ] as any);
     
+    const montantCommercial = this.facture.totalHT - this.facture.remise;
+
     tableData.push([
       { content: 'Montant Commercial', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
-        { content: customNumberPipe.transform(this.facture.totalHT - (this.facture.totalHT * this.facture.remise / 100)), styles: { halign: 'right' } }
+      { content: customNumberPipe.transform(montantCommercial), styles: { halign: 'right' } }
     ] as any);
   }
 

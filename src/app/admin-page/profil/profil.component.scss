@@ -960,17 +960,22 @@ a:hover img {
 }
 
 .menu-button {
-  position: absolute;
-  top: 32px;
-  right: 0;
-  cursor: pointer;
-  z-index: 11;
-  font-size: 14px;
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: opacity 0.2s ease;
-  opacity: 0; /* 👈 masqué par défaut */
+ position: absolute;
+    top: 0px;
+    right: 0;
+    cursor: pointer;
+    z-index: 11;
+    background-color: rgba(255, 255, 255, 0.465);
+    /* margin: 33px; */
+    border-radius: 4px;
+    opacity: 0;
+    font-size: 50%;
+    height: 100%;
+}
+.in{
+  font-size: 10px;
+    top: 43%;
+    position: relative;
 }
 
 /* 👇 Affiche le bouton uniquement au hover du parent */

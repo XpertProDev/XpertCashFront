@@ -33,30 +33,28 @@
 
                         <!-- Icône en haut à droite -->
                         <div class="menu-button" (click)="toggleMenu($event)">
-                          <span>changer la photo</span>
+                         <div class="in">
+                           <span>changer la photo de profil</span>
+                         </div>
                         </div>
 
                     </div>
                   <!-- Dropdown -->
                       <div class="dropdown-menu" *ngIf="menuOuvert">
                           <button (click)="visualiserPhoto($event)">
-                          <i class="fa fa-eye icon-in-menu"></i>
-                          Voir la photo
-                        </button>
+                            <i class="fa fa-eye icon-in-menu"></i>
+                            Voir la photo
+                          </button>
 
-                        <button (click)="changerPhoto($event)">
-                          <i class="fas fa-camera icon-in-menu"></i>
-                          Modifier
-                        </button>
-                        <button (click)="supprimerPhoto($event)">
-                          <i class="fas fa-trash icon-in-menu"></i>
-                          Supprimer
-                        </button>
-                    </div>
-
-
-
-
+                          <button (click)="changerPhoto($event)">
+                            <i class="fa fa-folder-open icon-in-menu"></i>
+                            Modifier
+                          </button>
+                          <button (click)="supprimerPhoto($event)">
+                            <i class="fas fa-trash icon-in-menu"></i>
+                            Supprimer
+                          </button>
+                      </div>
 
                     <input
                       type="file"

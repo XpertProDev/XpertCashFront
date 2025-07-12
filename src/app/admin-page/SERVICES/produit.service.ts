@@ -146,6 +146,23 @@ getFournisseurs(): Observable<any[]> {
   );
 }
 
+// Ajoutez un paramètre pour les IDs de boutiques
+importProduitsFromExcel(formData: FormData, boutiqueIds: number[]): Observable<any> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}` 
+      });
+      
+      // Ajoutez les IDs de boutique dans le FormData
+      formData.append('boutiqueIds', JSON.stringify(boutiqueIds));
+      
+      return this.http.post(`${this.apiUrl}/import-produits-excel`, formData, { headers });
+    })
+  );
+}
+
+
   
   
   
