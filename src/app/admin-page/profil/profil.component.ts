@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { AuthService } from '../SERVICES/auth.service';
 import { UpdateUserRequest } from '../MODELS/profil.model';
@@ -29,7 +29,8 @@ export class ProfilComponent  implements OnInit{
   userId!: number;
   nomComplet: string = '';
   password: string = '';
-  photo: string = '';
+  photo: string | null = null;
+
 
   imageFile: File | null = null;
 
@@ -515,4 +516,42 @@ async onFileSelected(event: Event): Promise<void> {
    toggleCodeVisibility() {
     this.showCode = !this.showCode;
   }
+
+
+@HostListener('document:click', ['$event'])
+onDocumentClick(event: MouseEvent): void {
+  const target = event.target as HTMLElement;
+  const clickedInside = target.closest('.profile-img-wrapper, .dropdown-menu');
+
+  if (!clickedInside) {
+    this.menuOuvert = false;
+  }
+}
+
+menuOuvert: boolean = false;
+toggleMenu(event: MouseEvent): void {
+  event.stopPropagation(); 
+  this.menuOuvert = !this.menuOuvert;
+}
+
+
+
+supprimerPhoto(event: MouseEvent): void {
+  event.stopPropagation();
+
+  const formData = new FormData();
+  formData.append('deletePhoto', 'true');
+  formData.append('user', JSON.stringify({})); // s’il faut envoyer un objet non vide
+
+  this.usersService.updateUser(this.userId, formData).subscribe({
+    next: () => {
+      this.photo = null; // ou this.photoR selon ton binding
+    },
+    error: (err) => {
+      console.error('Erreur suppression photo', err);
+    }
+  });
+}
+
+
 }
