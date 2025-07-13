@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { AuthService } from '../SERVICES/auth.service';
 import { UpdateUserRequest } from '../MODELS/profil.model';
@@ -534,23 +534,127 @@ toggleMenu(event: MouseEvent): void {
   this.menuOuvert = !this.menuOuvert;
 }
 
-
+afficherConfirmation: boolean = false;
 
 supprimerPhoto(event: MouseEvent): void {
   event.stopPropagation();
+  this.afficherConfirmation = true;
+}
 
+confirmerSuppression(): void {
   const formData = new FormData();
   formData.append('deletePhoto', 'true');
-  formData.append('user', JSON.stringify({})); // s’il faut envoyer un objet non vide
+  formData.append('user', JSON.stringify({}));
 
   this.usersService.updateUser(this.userId, formData).subscribe({
     next: () => {
-      this.photo = null; // ou this.photoR selon ton binding
+      this.photo = null;
+      localStorage.removeItem('photo');
+      window.dispatchEvent(new Event('storage-photo-update'));
+      this.afficherConfirmation = false;
     },
     error: (err) => {
       console.error('Erreur suppression photo', err);
+      this.afficherConfirmation = false;
     }
   });
+}
+
+annulerSuppression(): void {
+  this.afficherConfirmation = false;
+}
+
+@ViewChild('video') videoElement!: ElementRef;
+@ViewChild('canvas') canvasElement!: ElementRef;
+
+
+cameraActive = false;
+ouvrirCamera(event: MouseEvent): void {
+  event.stopPropagation();
+  this.cameraActive = true;
+
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then((stream) => {
+      this.videoElement.nativeElement.srcObject = stream;
+    })
+    .catch((err) => {
+      console.error("Erreur ouverture caméra :", err);
+    });
+}
+fermerCamera(): void {
+  this.cameraActive = false;
+
+  const stream = this.videoElement.nativeElement.srcObject;
+  const tracks = stream?.getTracks();
+
+  tracks?.forEach((track: any) => track.stop());
+  this.videoElement.nativeElement.srcObject = null;
+}
+
+async prendrePhoto(): Promise<void> {
+  const video = this.videoElement.nativeElement;
+  const canvas = this.canvasElement.nativeElement;
+
+  const width = video.videoWidth;
+  const height = video.videoHeight;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, width, height);
+
+  // Récupère l'image en base64
+  const base64DataUrl = canvas.toDataURL('image/jpeg');
+
+  // Convertir base64 → Blob → File
+  const blob = await (await fetch(base64DataUrl)).blob();
+  const file = new File([blob], `photo_profil_${Date.now()}.jpg`, {
+    type: 'image/jpeg'
+  });
+
+  try {
+    const compressedFile = await this.testImageCompression(file);
+
+    if (!compressedFile) {
+      console.error("Compression échouée ou image invalide.");
+      return;
+    }
+
+    this.imageFile = compressedFile;
+
+    // Affichage dans le profil (base64 preview)
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const base64 = e.target.result;
+      this.photo = base64;
+      localStorage.setItem('photo', base64);
+      window.dispatchEvent(new Event('storage-photo-update'));
+    };
+    reader.readAsDataURL(compressedFile);
+
+    const formData = new FormData();
+    formData.append('photo', this.imageFile, this.imageFile.name);
+
+    this.usersService.updateUser(this.userId, formData).subscribe({
+      next: (response) => {
+        console.log("✅ Image mise à jour depuis caméra :", response);
+        this.successMessage = "Photo prise et mise à jour avec succès !";
+        this.fermerCamera();
+        setTimeout(() => this.successMessage = null, 5000);
+      },
+      error: (error) => {
+        console.error("❌ Erreur de mise à jour :", error);
+        this.errorMessage = "Erreur lors de l'envoi de la photo.";
+        setTimeout(() => this.errorMessage = null, 5000);
+      }
+    });
+
+  } catch (error) {
+    console.error("Erreur lors du traitement de la photo :", error);
+    this.errorMessage = "Erreur lors de la prise ou de l'envoi.";
+    setTimeout(() => this.errorMessage = null, 5000);
+  }
 }
 
 

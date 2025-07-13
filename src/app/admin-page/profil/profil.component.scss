@@ -960,23 +960,36 @@ a:hover img {
 }
 
 .menu-button {
- position: absolute;
+    position: absolute;
     top: 0px;
-    right: 0;
+    right: 0px;
     cursor: pointer;
     z-index: 11;
-    background-color: rgba(255, 255, 255, 0.465);
-    /* margin: 33px; */
+    background-color: rgba(0, 0, 0, 0.47);
     border-radius: 4px;
     opacity: 0;
     font-size: 50%;
     height: 100%;
+    width: 100%;
 }
-.in{
-  font-size: 10px;
-    top: 43%;
-    position: relative;
+.in {
+  font-size: 12px;
+  top: 9%;
+  position: relative;
+  font-weight: 400;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px;
 }
+
+.in i {
+  font-size: 20px;
+  color: white;
+}
+
 
 /* 👇 Affiche le bouton uniquement au hover du parent */
 .profile-img-wrapper:hover .menu-button {
@@ -1017,6 +1030,19 @@ a:hover img {
 .dropdown-menu button:hover {
   background-color: #f0f0f0;
 }
+
+
+
+.dropdown-menu .danger-btn:hover {
+  background-color: #ffc3c190;
+  color: #ea3b3b;
+}
+
+.dropdown-menu .danger-btn:hover .icon-in-menu {
+  color: #ea3b3b !important;
+}
+
+
 
 .icon-in-menu {
   font-size: 16px;
@@ -1301,3 +1327,170 @@ a:hover img {
   border-color: #2196f3;
   transform: scale(1.05);
 }
+
+// ici
+
+.confirmation-modal-aver {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.confirmation-modal-aver .modal-content-aver {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 300px;
+  animation: fadeInScale 0.25s ease-in-out;
+}
+
+.modal-actions-aver {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  gap: 25px;
+}
+
+.btn-confirm,
+.btn-cancel {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-confirm {
+  background-color: #1daa61;
+  color: #fff;
+}
+
+.btn-confirm:hover {
+  background-color: #4ff09d;
+  color: #fff;
+}
+
+.btn-cancel {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btn-cancel:hover {
+  background-color: #c8c8c8;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+
+.camera-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.camera-content {
+  position: relative;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+video {
+  width: 300px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.close-camera-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: red;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  z-index: 1001;
+  backdrop-filter: blur(5px);
+  transition: background 0.3s ease;
+}
+.close-camera-btn:hover {
+  background: rgba(255, 0, 0, 0.3);
+}
+
+.capture-btn {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #0672E4;
+  color: white;
+  border: none;
+  font-size: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.capture-btn:hover {
+  box-shadow: 0 10px 25px rgba(0, 123, 255, 0.6);
+  animation: pulseAnim 1s infinite;
+}
+
+/* Pulse animation for capture button */
+.pulse {
+  animation: pulseAnim 1.5s infinite;
+}
+
+@keyframes pulseAnim {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.6),
+                0 0 0 0 rgba(0, 123, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0.2),
+                0 0 0 20px rgba(0, 123, 255, 0);
+  }
+  80% {
+    box-shadow: 0 0 0 15px rgba(0, 123, 255, 0),
+                0 0 0 30px rgba(0, 123, 255, 0);
+  }
+  90% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0),
+                0 0 0 0 rgba(0, 123, 255, 0);
+  }
+}
+
+
+
+

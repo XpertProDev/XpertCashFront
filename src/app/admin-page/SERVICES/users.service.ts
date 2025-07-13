@@ -69,9 +69,10 @@ connexionUser(credentials: { email: string; password: string }): Observable<{
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('isLocked');
     localStorage.removeItem('user');
+    localStorage.removeItem('photo');
+    window.dispatchEvent(new Event('storage-photo-update'));
     this.isLocked = false;
     this.router.navigate(['/connexion']);
-
   }
   
   

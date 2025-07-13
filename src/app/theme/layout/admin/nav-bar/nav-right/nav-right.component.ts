@@ -60,14 +60,18 @@ export class NavRightComponent implements OnInit{
     
   }
 
-    // Fonction fléchée pour éviter les problèmes de "this"
- private updatePhotoListener = () => {
+  // Fonction fléchée pour éviter les problèmes de "this"
+private updatePhotoListener(event: Event): void {
   const newPhoto = localStorage.getItem('photo');
   if (newPhoto) {
     this.photo = newPhoto;
     this.photoUrl = this.base64ToObjectUrl(newPhoto);
+  } else {
+    this.photo = null;
+    this.photoUrl = null;
   }
-};
+}
+private boundUpdatePhotoListener = this.updatePhotoListener.bind(this);
 
 
   ngOnInit(): void {
@@ -80,12 +84,14 @@ export class NavRightComponent implements OnInit{
     this.photoUrl = this.base64ToObjectUrl(savedPhoto);
     }
 
-  window.addEventListener('storage-photo-update', this.updatePhotoListener);
-  }
+  window.addEventListener('storage-photo-update', this.boundUpdatePhotoListener);
+}
 
-   ngOnDestroy(): void {
-    window.removeEventListener('storage-photo-update', this.updatePhotoListener);
-  }
+ngOnDestroy(): void {
+  window.removeEventListener('storage-photo-update', this.boundUpdatePhotoListener);
+}
+
+  
   
 
   // public method 
@@ -98,7 +104,7 @@ export class NavRightComponent implements OnInit{
   getUserInfo(): void {
     this.userService.getUserInfo().subscribe({
       next: (user) => {
-        this.userName = user.nomComplet; // Récupération du nom
+        this.userName = user.nomComplet;
         this.nomEntreprise = user.nomEntreprise
       },
       error: (err) => {
