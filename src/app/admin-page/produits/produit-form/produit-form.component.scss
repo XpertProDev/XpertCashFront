@@ -1014,3 +1014,17 @@ input:checked + .slider:before {
 .triple {
   margin-top: 20px;
 }
+
+.ferme_mat_option i {
+  font-size: 22px;
+}
+
+/* Dans votre fichier SCSS global ou composant */
+.mat-form-field-suffix .mat-icon {
+  display: none !important;
+}
+
+.mat-form-field-appearance-fill .mat-form-field-flex {
+  background-color: transparent !important;
+  padding: 0 !important;
+}
