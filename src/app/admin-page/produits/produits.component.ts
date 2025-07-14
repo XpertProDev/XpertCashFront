@@ -803,195 +803,206 @@ export class ProduitsComponent implements OnInit {
   }
 
   openExcelImportModal() {
-  this.resetImportState();
-  this.showExcelImportModal = true;
-}
-
-closeExcelImportModal() {
-  this.showExcelImportModal = false;
-  this.resetImportState();
-}
-
-resetImportState() {
-  this.selectedFile = null;
-  this.isImporting = false;
-  this.importMessage = '';
-  this.importSuccess = false;
-  this.importErrors = [];
-}
-
-// Télécharger le modèle Excel
-downloadExcelTemplate() {
-  const template = `
-    | Nom produit* | Description | Catégorie* | Prix Vente* | Prix Achat* | Quantité* | Unité | Code Barre | Type Produit | Seuil Alert |
-    |--------------|-------------|------------|------------|------------|----------|-------|------------|--------------|-------------|
-    | Ex: T-Shirt  |             | Vêtements  | 25.99      | 15.50      | 100      | Pièce | 123456789  | PHYSIQUE     | 10          |
-  `;
-
-  const blob = new Blob([template], { type: 'text/plain' });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'modele-import-produits.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(url);
-}
-
-// Gestion de la sélection de fichier
-onFileSelected(event: any) {
-  const file: File = event.target.files[0];
-  if (file) {
-    // Vérifier la taille du fichier (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      this.importMessage = 'Le fichier est trop volumineux (max 5MB)';
-      this.importSuccess = false;
-      return;
-    }
-    
-    // Vérifier l'extension
-    const validExtensions = ['.xlsx', '.xls'];
-    const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-    
-    if (!validExtensions.includes(extension)) {
-      this.importMessage = 'Format de fichier non supporté';
-      this.importSuccess = false;
-      return;
-    }
-    
-    this.selectedFile = file;
-  }
-}
-
-uploadExcel() {
-  if (!this.selectedFile || !this.entrepriseId) return;
-  
-  this.isImporting = true;
-  this.importMessage = '';
-  this.importErrors = [];
-  
-  const formData = new FormData();
-  formData.append('file', this.selectedFile);
-  formData.append('entrepriseId', this.entrepriseId.toString());
-  
-  if (this.selectedBoutique?.id) {
-    formData.append('boutiqueId', this.selectedBoutique.id.toString());
+    this.resetImportState();
+    this.showExcelImportModal = true;
   }
 
-    // Vérifier qu'au moins une boutique est sélectionnée
-  if (this.selectedBoutiquesForImport.length === 0) {
-    this.importMessage = "Veuillez sélectionner au moins une boutique";
+  closeExcelImportModal() {
+    this.showExcelImportModal = false;
+    this.resetImportState();
+  }
+
+  resetImportState() {
+    this.selectedFile = null;
+    this.isImporting = false;
+    this.importMessage = '';
     this.importSuccess = false;
-    return;
+    this.importErrors = [];
   }
-  
-  this.produitService.importProduitsFromExcel(formData, this.selectedBoutiquesForImport).subscribe({
-    next: (response: any) => {
-      this.isImporting = false;
-      
-      // Correction clé ici : utiliser 'count' au lieu de 'successCount'
-      if (response.count > 0) {
-        this.importSuccess = true;
-        this.importMessage = `Importation réussie ! ${response.count} produits ajoutés.`;
-      } else {
+
+  // Télécharger le modèle Excel
+  downloadExcelTemplate() {
+    const template = `
+      | Nom produit* | Description | Catégorie* | Prix Vente* | Prix Achat* | Quantité* | Unité | Code Barre | Type Produit | Seuil Alert |
+      |--------------|-------------|------------|------------|------------|----------|-------|------------|--------------|-------------|
+      | Ex: T-Shirt  |             | Vêtements  | 25.99      | 15.50      | 100      | Pièce | 123456789  | PHYSIQUE     | 10          |
+    `;
+
+    const blob = new Blob([template], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'modele-import-produits.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+
+  // Gestion de la sélection de fichier
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      // Vérifier la taille du fichier (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.importMessage = 'Le fichier est trop volumineux (max 5MB)';
         this.importSuccess = false;
-        this.importMessage = "Aucun produit ajouté";
+        return;
       }
       
-      if (response.errors) {
-        this.importErrors = response.errors;
+      // Vérifier l'extension
+      const validExtensions = ['.xlsx', '.xls'];
+      const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+      
+      if (!validExtensions.includes(extension)) {
+        this.importMessage = 'Format de fichier non supporté';
+        this.importSuccess = false;
+        return;
       }
       
-      // Rafraîchir les données
-      setTimeout(() => {
-        if (this.selectedBoutique) {
-          this.loadProduits(this.selectedBoutique.id);
-        } else {
-          this.loadAllProduits();
-        }
-      }, 2000);
-    },
-    error: (error) => {
-      this.isImporting = false;
+      this.selectedFile = file;
+    }
+  }
+
+  uploadExcel() {
+    if (!this.selectedFile || !this.entrepriseId) return;
+    
+    this.isImporting = true;
+    this.importMessage = '';
+    this.importErrors = [];
+    
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+    formData.append('entrepriseId', this.entrepriseId.toString());
+    
+    if (this.selectedBoutique?.id) {
+      formData.append('boutiqueId', this.selectedBoutique.id.toString());
+    }
+
+      // Vérifier qu'au moins une boutique est sélectionnée
+    if (this.selectedBoutiquesForImport.length === 0) {
+      this.importMessage = "Veuillez sélectionner au moins une boutique";
       this.importSuccess = false;
-      
-      // Gestion améliorée des erreurs
-      if (error.error) {
-        if (error.error.error) {
-          this.importMessage = error.error.error;
-        } else if (error.error.message) {
-          this.importMessage = error.error.message;
+      return;
+    }
+    
+    this.produitService.importProduitsFromExcel(formData, this.selectedBoutiquesForImport).subscribe({
+      next: (response: any) => {
+        this.isImporting = false;
+        
+        // Correction clé ici : utiliser 'count' au lieu de 'successCount'
+        if (response.count > 0) {
+          this.importSuccess = true;
+          this.importMessage = `Importation réussie ! ${response.count} produits ajoutés.`;
+        } else {
+          this.importSuccess = false;
+          this.importMessage = "Aucun produit ajouté";
         }
         
-        if (error.error.errors) {
-          this.importErrors = error.error.errors;
+        if (response.errors) {
+          this.importErrors = response.errors;
         }
-      } else {
-        this.importMessage = 'Erreur inconnue lors de l\'importation';
+        
+        // Rafraîchir les données
+        // setTimeout(() => {
+        //   if (this.selectedBoutique) {
+        //     this.loadProduits(this.selectedBoutique.id);
+        //   } else {
+        //     this.loadAllProduits();
+        //   }
+        // }, 2000);
+        // Fermer le modal après 3 secondes seulement si l'import est réussi
+        if (this.importSuccess) {
+          setTimeout(() => {
+            if (this.selectedBoutique) {
+            this.loadProduits(this.selectedBoutique.id);
+          } else {
+            this.loadAllProduits();
+            this.closeExcelImportModal();
+          }
+          }, 2000);
+        }
+      },
+      error: (error) => {
+        this.isImporting = false;
+        this.importSuccess = false;
+        
+        // Gestion améliorée des erreurs
+        if (error.error) {
+          if (error.error.error) {
+            this.importMessage = error.error.error;
+          } else if (error.error.message) {
+            this.importMessage = error.error.message;
+          }
+          
+          if (error.error.errors) {
+            this.importErrors = error.error.errors;
+          }
+        } else {
+          this.importMessage = 'Erreur inconnue lors de l\'importation';
+        }
       }
+    });
+  }
+
+  toggleBoutiqueSelection(id: number): void {
+    const index = this.selectedBoutiquesForImport.indexOf(id);
+    if (index === -1) {
+      this.selectedBoutiquesForImport.push(id);
+    } else {
+      this.selectedBoutiquesForImport.splice(index, 1);
     }
-  });
-}
-
-toggleBoutiqueSelection(id: number): void {
-  const index = this.selectedBoutiquesForImport.indexOf(id);
-  if (index === -1) {
-    this.selectedBoutiquesForImport.push(id);
-  } else {
-    this.selectedBoutiquesForImport.splice(index, 1);
-  }
-}
-
-toggleAllBoutiques(): void {
-  if (this.isAllBoutiquesSelected) {
-    this.selectedBoutiquesForImport = [];
-  } else {
-    this.selectedBoutiquesForImport = this.boutiques
-      .filter(b => b.actif)
-      .map(b => b.id);
-  }
-  this.isAllBoutiquesSelected = !this.isAllBoutiquesSelected;
-}
-
-// Méthodes pour gérer le panel
-toggleBoutiqueSelectionPanel(): void {
-  this.showBoutiqueSelectionPanel = !this.showBoutiqueSelectionPanel;
-}
-
-areAllBoutiquesSelected(): boolean {
-  return this.boutiques.length > 0 && 
-         this.boutiques.every(b => this.selectedBoutiquesForImport.includes(b.id));
-}
-
-toggleSelectAllBoutiques(event: Event): void {
-  const isChecked = (event.target as HTMLInputElement).checked;
-  if (isChecked) {
-    this.selectedBoutiquesForImport = this.boutiques.map(b => b.id);
-  } else {
-    this.selectedBoutiquesForImport = [];
-  }
-}
-
-confirmBoutiqueSelection(): void {
-  this.toggleBoutiqueSelectionPanel();
-}
-
-getSelectedBoutiquesText(): string {
-  if (this.selectedBoutiquesForImport.length === 0) {
-    return '';
   }
 
-  if (this.selectedBoutiquesForImport.length === this.boutiques.length) {
-    return 'Toutes les boutiques';
+  toggleAllBoutiques(): void {
+    if (this.isAllBoutiquesSelected) {
+      this.selectedBoutiquesForImport = [];
+    } else {
+      this.selectedBoutiquesForImport = this.boutiques
+        .filter(b => b.actif)
+        .map(b => b.id);
+    }
+    this.isAllBoutiquesSelected = !this.isAllBoutiquesSelected;
   }
 
-  const selectedNames = this.boutiques
-    .filter(b => this.selectedBoutiquesForImport.includes(b.id))
-    .map(b => b.nomBoutique);
+  // Méthodes pour gérer le panel
+  toggleBoutiqueSelectionPanel(): void {
+    this.showBoutiqueSelectionPanel = !this.showBoutiqueSelectionPanel;
+  }
 
-  return selectedNames.join(', ');
-}
+  areAllBoutiquesSelected(): boolean {
+    return this.boutiques.length > 0 && 
+          this.boutiques.every(b => this.selectedBoutiquesForImport.includes(b.id));
+  }
+
+  toggleSelectAllBoutiques(event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    if (isChecked) {
+      this.selectedBoutiquesForImport = this.boutiques.map(b => b.id);
+    } else {
+      this.selectedBoutiquesForImport = [];
+    }
+  }
+
+  confirmBoutiqueSelection(): void {
+    this.toggleBoutiqueSelectionPanel();
+  }
+
+  getSelectedBoutiquesText(): string {
+    if (this.selectedBoutiquesForImport.length === 0) {
+      return '';
+    }
+
+    if (this.selectedBoutiquesForImport.length === this.boutiques.length) {
+      return 'Toutes les boutiques';
+    }
+
+    const selectedNames = this.boutiques
+      .filter(b => this.selectedBoutiquesForImport.includes(b.id))
+      .map(b => b.nomBoutique);
+
+    return selectedNames.join(', ');
+  }
 
   
 }

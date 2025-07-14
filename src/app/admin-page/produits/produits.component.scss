@@ -1293,7 +1293,7 @@ img.roudel_detail{
     background-color: #fff;
     border: 1px solid #eee;
     border-radius: 4px;
-    height: 140px;
+    height: 175px;
     overflow-y: scroll;
 
     ul {
@@ -1525,4 +1525,10 @@ img.roudel_detail{
   grid-column-gap: 0px;
   grid-row-gap: 0px;
   gap: 20px;
+}
+
+.btn-import i {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 1.2em;
 }

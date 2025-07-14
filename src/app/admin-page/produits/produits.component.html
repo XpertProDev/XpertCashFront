@@ -315,9 +315,11 @@
           <button class="btn-cancel" (click)="closeExcelImportModal()">Annuler</button>
           <button class="btn-import" 
                   (click)="uploadExcel()" 
-                  [disabled]="!selectedFile || isImporting">
-            <span *ngIf="!isImporting">Importer</span>
-            <span *ngIf="isImporting">Import en cours...</span>
+                  [disabled]="!selectedFile">
+            
+            <!-- Remplacer le texte par un spinner -->
+            <ng-container>Importer</ng-container>
+            <!-- <i *ngIf="isImporting" class="ri-loader-4-line ri-spin"></i> -->
           </button>
         </div>
         
