@@ -291,7 +291,7 @@ export class ListProduitComponent {
     this.modifierProduitForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prixVente: ['', Validators.required],
-      prixAchat: ['', Validators.required],
+      prixAchat: [''],
       quantite: [''],
       seuilAlert: ['', Validators.required],
       description: [''],

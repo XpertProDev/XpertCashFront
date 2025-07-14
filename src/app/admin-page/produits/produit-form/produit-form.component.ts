@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import imageCompression from 'browser-image-compression';
@@ -11,7 +11,7 @@ import { ProduitService } from '../../SERVICES/produit.service';
 import { UniteMesureService } from '../../SERVICES/unite.service';
 import { UsersService } from '../../SERVICES/users.service';
 import { CommonModule } from '@angular/common';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatAutocomplete, MatAutocompleteModule, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
 import { NgxBarcode6Module } from 'ngx-barcode6';
 import { Produit } from '../../MODELS/produit.model';
@@ -98,6 +98,13 @@ export class ProduitFormComponent {
   get c() { return this.ajouteCategoryForm.controls; }
   get u() { return this.ajouteUniteForm.controls; }
   get f() { return this.ajouteProduitForm.controls; }
+
+  isUniteDropdownOpen: boolean = false;
+  isCategoryDropdownOpen: boolean = false;
+  @ViewChild('autoUnite') autoUnite!: MatAutocomplete;
+  @ViewChild(MatAutocompleteTrigger) uniteAutocompleteTrigger!: MatAutocompleteTrigger;
+  @ViewChild('autoCategory') autoCategory!: MatAutocomplete;
+  @ViewChild(MatAutocompleteTrigger) categoryAutocompleteTrigger!: MatAutocompleteTrigger;
 
   clearImage() {
     this.newPhotoUrl = null;
@@ -354,6 +361,20 @@ export class ProduitFormComponent {
     this.setupAutocompleteFilters();
     this.getFilteredStreetsBoutique();
     this.getBoutiqueName();
+
+    document.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      
+      // Fermer le dropdown catégorie
+      if (!target.closest('.champ_input_cate') && this.isCategoryDropdownOpen) {
+        this.closeCategoryDropdown();
+      }
+      
+      // Fermer le dropdown unité
+      if (!target.closest('.champ_input_uni') && this.isUniteDropdownOpen) {
+        this.closeUniteDropdown();
+      }
+    });
     // Partage de donner de user
     // this.sharedDataService.boutiqueName$.subscribe(name => {
     //   console.log("AddProduitComponent - Nom boutique récupéré :", name);
@@ -1057,6 +1078,34 @@ export class ProduitFormComponent {
 
   gotToReturn() {
     this.router.navigate(['/addfacture-proforma']);
+  }
+
+  toggleUniteDropdown(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    if (this.uniteAutocompleteTrigger) {
+      this.uniteAutocompleteTrigger.openPanel();
+    }
+  }
+
+  closeUniteDropdown(): void {
+    if (this.uniteAutocompleteTrigger) {
+      this.uniteAutocompleteTrigger.closePanel();
+      this.isUniteDropdownOpen = false;
+    }
+  }
+
+  toggleCategoryDropdown(event?: MouseEvent): void {
+     if (event) event.stopPropagation();
+    if (this.categoryAutocompleteTrigger) {
+      this.categoryAutocompleteTrigger.openPanel();
+    }
+  }
+
+  closeCategoryDropdown(): void {
+    if (this.categoryAutocompleteTrigger) {
+      this.categoryAutocompleteTrigger.closePanel();
+      this.isCategoryDropdownOpen = false;
+    }
   }
 
 }

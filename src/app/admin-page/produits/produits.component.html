@@ -241,12 +241,12 @@
         <div class="columns-info">
           <h6>Structure des colonnes :</h6>
           <ul>
-            <li><strong>Nom produit*</strong> - Nom du produit (texte)</li>
+            <li><strong>Nom produit <span style="color: red;">*</span></strong> - Nom du produit (texte)</li>
             <li><strong>Description</strong> - Description du produit</li>
-            <li><strong>Catégorie*</strong> - Nom de la catégorie existante</li>
-            <li><strong>Prix Vente*</strong> - Prix de vente (nombre)</li>
-            <li><strong>Prix Achat*</strong> - Prix d'achat (nombre)</li>
-            <li><strong>Quantité*</strong> - Quantité initiale (nombre entier)</li>
+            <li><strong>Catégorie <span style="color: red;">*</span></strong> - Nom de la catégorie existante</li>
+            <li><strong>Prix Vente <span style="color: red;">*</span></strong> - Prix de vente (nombre)</li>
+            <li><strong>Prix Achat <span style="color: red;">*</span></strong> - Prix d'achat (nombre)</li>
+            <li><strong>Quantité <span style="color: red;">*</span></strong> - Quantité initiale (nombre entier)</li>
             <li><strong>Unité</strong> - Unité de mesure existante</li>
             <li><strong>Code Barre</strong> - Code barre (nombre entier)</li>
             <li><strong>Type Produit</strong> - PHYSIQUE ou SERVICE</li>
@@ -316,9 +316,11 @@
           <button class="btn-cancel" (click)="closeExcelImportModal()">Annuler</button>
           <button class="btn-import" 
                   (click)="uploadExcel()" 
-                  [disabled]="!selectedFile || isImporting">
-            <span *ngIf="!isImporting">Importer</span>
-            <span *ngIf="isImporting">Import en cours...</span>
+                  [disabled]="!selectedFile">
+            
+            <!-- Remplacer le texte par un spinner -->
+            <ng-container>Importer</ng-container>
+            <!-- <i *ngIf="isImporting" class="ri-loader-4-line ri-spin"></i> -->
           </button>
         </div>
         

@@ -1014,3 +1014,40 @@ input:checked + .slider:before {
 .triple {
   margin-top: 20px;
 }
+
+.ferme_mat_option i {
+  font-size: 22px;
+}
+
+/* Dans votre fichier SCSS global ou composant */
+.mat-form-field-suffix .mat-icon {
+  display: none !important;
+}
+
+.mat-form-field-appearance-fill .mat-form-field-flex {
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
+/* Dans votre fichier CSS global ou composant */
+.champ_input_categorie, 
+.champ_input_unite {
+  pointer-events: none;
+}
+
+.champ_input_categorie > *, 
+.champ_input_unite > * {
+  pointer-events: auto;
+}
+
+/* Empêcher le comportement par défaut du panel */
+.mat-autocomplete-panel {
+  pointer-events: auto !important;
+}
+
+/* Style pour les icônes de fermeture */
+.arrow_bas i {
+  pointer-events: auto;
+  z-index: 1000;
+  position: relative;
+}
