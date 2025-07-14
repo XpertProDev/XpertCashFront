@@ -899,7 +899,7 @@ export class ProduitsComponent implements OnInit {
   uploadExcel() {
     if (!this.selectedFile || !this.entrepriseId) return;
     
-    this.isImporting = true;
+    // this.isImporting = true;
     this.importMessage = '';
     this.importErrors = [];
     
@@ -920,7 +920,7 @@ export class ProduitsComponent implements OnInit {
     
     this.produitService.importProduitsFromExcel(formData, this.selectedBoutiquesForImport).subscribe({
       next: (response: any) => {
-        this.isImporting = false;
+        // this.isImporting = false;
         
         // Correction clé ici : utiliser 'count' au lieu de 'successCount'
         if (response.count > 0) {
@@ -956,7 +956,7 @@ export class ProduitsComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.isImporting = false;
+        // this.isImporting = false;
         this.importSuccess = false;
         
         // Gestion améliorée des erreurs
@@ -1035,6 +1035,7 @@ export class ProduitsComponent implements OnInit {
 
     return selectedNames.join(', ');
   }
+  
 
   
 }
