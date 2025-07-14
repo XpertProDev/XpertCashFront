@@ -822,17 +822,49 @@ export class ProduitsComponent implements OnInit {
 
   // Télécharger le modèle Excel
   downloadExcelTemplate() {
-    const template = `
-      | Nom produit* | Description | Catégorie* | Prix Vente* | Prix Achat* | Quantité* | Unité | Code Barre | Type Produit | Seuil Alert |
-      |--------------|-------------|------------|------------|------------|----------|-------|------------|--------------|-------------|
-      | Ex: T-Shirt  |             | Vêtements  | 25.99      | 15.50      | 100      | Pièce | 123456789  | PHYSIQUE     | 10          |
-    `;
-
-    const blob = new Blob([template], { type: 'text/plain' });
+    // Création du workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Données du modèle
+    const data = [
+      // En-têtes avec mise en forme
+      ['Nom produit*', 'Description', 'Catégorie*', 'Prix Vente*', 'Prix Achat*', 'Quantité*', 'Unité', 'Code Barre', 'Type Produit', 'Seuil Alert'],
+      // Ligne d'exemple
+      ['T-Shirt', 'T-shirt en coton', 'Vêtements', 25.99, 15.50, 100, 'Pièce', 123456789, 'PHYSIQUE', 10],
+      // Ligne de note explicative
+      ['', '', '', '', '', '', '', '', '', '']
+    ];
+    
+    // Création de la worksheet avec les données
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    
+    // Largeurs de colonnes personnalisées
+    const colWidths = [
+      { wch: 20 }, // Nom produit
+      { wch: 25 }, // Description
+      { wch: 15 }, // Catégorie
+      { wch: 12 }, // Prix Vente
+      { wch: 12 }, // Prix Achat
+      { wch: 10 }, // Quantité
+      { wch: 10 }, // Unité
+      { wch: 15 }, // Code Barre
+      { wch: 12 }, // Type Produit
+      { wch: 12 }  // Seuil Alert
+    ];
+    ws['!cols'] = colWidths;
+    
+    // Ajout de la worksheet au workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Modèle Produits');
+    
+    // Génération du fichier
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    
+    // Téléchargement
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'modele-import-produits.csv';
+    a.download = 'modele-import-produits.xlsx';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
