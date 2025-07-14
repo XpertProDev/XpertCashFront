@@ -1,0 +1,608 @@
+
+.container {
+    display: flex;
+    width: 100%;
+  }
+  
+  .sidebar {
+    width: 280px;
+    background-color: #f0f0f0;
+    padding: 20px;
+    // height: 50vh;
+  }
+  
+  .profile {
+    text-align: center;
+  }
+  
+  .profile h2 {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .profile .profil_email {
+    font-size: 12px;
+  }
+
+
+
+.profile-img-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  margin: 20px auto;
+}
+
+.profile-img-wrapper:hover {
+  transform: scale(1.03);
+}
+
+.profile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.profile-img-wrapper:hover .overlay {
+  opacity: 1;
+}
+
+.camera-icon {
+  width: 30px;
+  height: 30px;
+  background: #ffffff;
+  padding: 6px;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.menu-button {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    cursor: pointer;
+    z-index: 11;
+    background-color: rgba(0, 0, 0, 0.47);
+    border-radius: 4px;
+    opacity: 0;
+    font-size: 50%;
+    height: 100%;
+    width: 100%;
+}
+.in {
+  font-size: 12px;
+  top: 9%;
+  position: relative;
+  font-weight: 400;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px;
+}
+
+.in i {
+  font-size: 20px;
+  color: white;
+}
+
+
+/* 👇 Affiche le bouton uniquement au hover du parent */
+.profile-img-wrapper:hover .menu-button {
+  opacity: 1;
+}
+
+
+.dropdown-menu {
+  position: absolute;
+  top: 21%;
+  left: 31%;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px 0;
+  min-width: 150px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  animation: dropdownFade 0.2s ease-out;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.dropdown-menu button {
+  all: unset;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+  border-radius: 6px;
+  margin: 2px 8px;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f0f0f0;
+}
+
+
+
+.dropdown-menu .danger-btn:hover {
+  background-color: #ffc3c190;
+  color: #ea3b3b;
+}
+
+.dropdown-menu .danger-btn:hover .icon-in-menu {
+  color: #ea3b3b !important;
+}
+
+
+
+.icon-in-menu {
+  font-size: 16px;
+  color: #888;
+  transition: color 0.2s ease;
+}
+
+.dropdown-menu button:hover .icon-in-menu {
+  color: #007bff;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.photo-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeInBackdrop 0.3s ease-out;
+}
+
+@keyframes fadeInBackdrop {
+  from { background: rgba(0,0,0,0); }
+  to   { background: rgba(0,0,0,0.7); }
+}
+
+.photo-modal-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  animation: modalFadeIn 0.4s ease-out;
+  transform-origin: center center;
+}
+
+.photo-modal-content img {
+  max-width: 100%;
+  max-height: 50vh;
+  border-radius: 10px;
+}
+
+.fermer-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 23px;
+  height: 23px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.fermer-btn:hover {
+  background: #cc0000;
+}
+
+
+
+  
+  .stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+  }
+  
+  .team {
+    margin-top: 30px;
+  }
+  
+  .member {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .member img {
+    width: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .status {
+    margin-left: auto;
+    padding: 5px 10px;
+    border-radius: 15px;
+  }
+  
+  .status.offline {
+    background-color: #ccc;
+  }
+  
+  .status.available {
+    background-color: #a8e063;
+  }
+  
+  .status.busy {
+    background-color: #ff6347;
+  }
+  
+  .main-content {
+    flex-grow: 1;
+    padding: 20px 20px 20px 40px;
+  }
+  
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .search-bar {
+    display: flex;
+  }
+  
+  .search-bar input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+  }
+  
+  .search-bar button {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 0 4px 4px 0;
+    background-color: #f0f0f0;
+    cursor: pointer;
+  }
+  
+  .form-row {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-row label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .form-row input, .form-row textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .form-row textarea {
+    resize: vertical;
+  }
+
+.container_form_profil {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 20px
+}
+    
+.div1 {
+    grid-column: span 2 / span 2;
+}
+
+.div3 {
+    grid-column: span 2 / span 2;
+    grid-column-start: 3;
+}
+
+.div4 {
+    grid-column: span 2 / span 2;
+    grid-row-start: 2;
+}
+
+.div5 {
+    grid-column: span 2 / span 2;
+    grid-column-start: 3;
+    grid-row-start: 2;
+}
+
+// .div7 {
+//     grid-column: span 2 / span 2;
+//     grid-row-start: 3;
+// }
+
+// .div8 {
+//     grid-column: span 2 / span 2;
+//     grid-column-start: 3;
+//     grid-row-start: 3;
+// }
+
+///////// PARAMETRE DE COMPTE
+/////
+
+.container_parametre {
+    margin: 40px 10px;
+}
+
+.title p {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.cadre {
+    width: 100%;
+    background-color: #fff;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+    // margin-bottom: 15px;
+}
+
+.cadre_cursor {
+    cursor: pointer;
+}
+
+.cadre:hover {
+    transition: all 0.1s;
+    box-shadow: rgba(0, 0, 0, 0.113) 0px 1px 2px 0px;
+}
+
+.title_cadre span {
+    font-size: 14px;
+    letter-spacing: 0.60px;
+}
+
+.icon_cadre i {
+    font-size: 20px;
+}
+
+.icon_cadre .btn {
+    padding: 5px 20px;
+    background-color: #0671e434;
+    color: #000000;
+    border: none;
+    font-size: 14px;
+}
+
+.icon_cadre .btn:hover {
+    background-color: #0671e45d;
+    transition: all .5;
+}
+
+.boutiques-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.boutique-tag {
+  background-color: #f0f0f0;
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid #ddd;
+  font-size: 0.9em;
+  transition: all 0.3s ease;
+}
+
+.boutique-tag-updated {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+  transform: scale(1.05);
+}
+
+// ici
+
+.confirmation-modal-aver {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.confirmation-modal-aver .modal-content-aver {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 300px;
+  animation: fadeInScale 0.25s ease-in-out;
+}
+
+.modal-actions-aver {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  gap: 25px;
+}
+
+.btn-confirm,
+.btn-cancel {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-confirm {
+  background-color: #1daa61;
+  color: #fff;
+}
+
+.btn-confirm:hover {
+  background-color: #4ff09d;
+  color: #fff;
+}
+
+.btn-cancel {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btn-cancel:hover {
+  background-color: #c8c8c8;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+
+.camera-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.camera-content {
+  position: relative;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+video {
+  width: 300px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.close-camera-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: red;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  z-index: 1001;
+  backdrop-filter: blur(5px);
+  transition: background 0.3s ease;
+}
+.close-camera-btn:hover {
+  background: rgba(255, 0, 0, 0.3);
+}
+
+.capture-btn {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #0672E4;
+  color: white;
+  border: none;
+  font-size: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.capture-btn:hover {
+  box-shadow: 0 10px 25px rgba(0, 123, 255, 0.6);
+  animation: pulseAnim 1s infinite;
+}
+
+/* Pulse animation for capture button */
+.pulse {
+  animation: pulseAnim 1.5s infinite;
+}
+
+@keyframes pulseAnim {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.6),
+                0 0 0 0 rgba(0, 123, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0.2),
+                0 0 0 20px rgba(0, 123, 255, 0);
+  }
+  80% {
+    box-shadow: 0 0 0 15px rgba(0, 123, 255, 0),
+                0 0 0 30px rgba(0, 123, 255, 0);
+  }
+  90% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0),
+                0 0 0 0 rgba(0, 123, 255, 0);
+  }
+}

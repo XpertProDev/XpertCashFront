@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { UsersService } from './admin-page/SERVICES/users.service';
 import { SessionExpiredModalComponent } from './theme/shared/session-expired-modal/session-expired-modal.component';
 import { ModalService } from './admin-page/SERVICES/modalService';
+import { LockService } from './admin-page/SERVICES/lock.service';
 
 @Component({
   selector: 'app-root',
@@ -23,12 +24,13 @@ export class AppComponent implements OnInit {
   isLocked = false;
   isDialogOpen = false;
 
-  constructor(private dialog: MatDialog, private cdRef: ChangeDetectorRef, private usersService: UsersService,
-    private modalService: ModalService
-  ) {
-    this.checkLockStatus();
-    this.resetTimer();
-  }
+constructor(
+  private dialog: MatDialog,
+  private cdRef: ChangeDetectorRef,
+  private usersService: UsersService,
+  private modalService: ModalService,
+  private lockService: LockService
+) {}
 
   @HostListener('window:mousemove')
   @HostListener('window:keydown')
@@ -37,7 +39,7 @@ export class AppComponent implements OnInit {
     if (this.isLocked) return;
 
     clearTimeout(this.inactivityTimer);
-    this.inactivityTimer = setTimeout(() => this.lockScreen(), 10000 * 1000);
+    this.inactivityTimer = setTimeout(() => this.lockScreen(), 2.75 * 60 * 60 * 1000);
   }
 
   lockScreen() {
@@ -55,6 +57,8 @@ export class AppComponent implements OnInit {
     }
   
     this.isLocked = true;
+    this.lockService.updateLockState(true);
+    this.lockService.playSound('lock');
     localStorage.setItem('isLocked', 'true');
     this.isDialogOpen = true;
   
@@ -77,6 +81,8 @@ export class AppComponent implements OnInit {
       if (codeEntered === user.personalCode) {
         console.log("Code correct, déverrouillage...");
         this.isLocked = false;
+        this.lockService.updateLockState(false);
+        this.lockService.playSound('lock');
         this.isDialogOpen = false;
         localStorage.removeItem('isLocked');
       
@@ -115,19 +121,22 @@ checkLockStatus() {
 }
 
 
-  ngOnInit() {
-    this.checkLockStatus();
-    this.router.events.subscribe((evt) => {
-      if (!(evt instanceof NavigationEnd)) {
-        return;
-      }
+
+ngOnInit() {
+  this.lockService.registerApp(this);
+  this.checkLockStatus();
+
+  this.router.events.subscribe((evt) => {
+    if (evt instanceof NavigationEnd) {
       window.scrollTo(0, 0);
-    });
-      this.modalService.sessionExpiredModal$.subscribe(() => {
+    }
+  });
+
+  this.modalService.sessionExpiredModal$.subscribe(() => {
     console.log('✅ Session expirée détectée, affichage de la modale');
     this.showSessionModal = true;
   });
-  }
+}
 
 showSessionModal = false;
 

@@ -115,13 +115,13 @@
             <div class="champ_grid_true">
               <!-- Sélecteur de pays -->
               <div class="champ_input div1">
-                <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
-                    <option value="" disabled>Pays</option> <!-- Retirer 'selected' ici -->
-                    <option value="Mali">Mali</option>
-                    <option value="Sénégal">Sénégal</option>
-                    <option value="Côte d'Ivoire">Côte d'Ivoire</option>
-                <label for="telephone" class="label">Pays</label>
-                </select>
+               <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
+                    <option value="" disabled selected>Pays</option>
+                    <option *ngFor="let nomPays of paysKeys" [value]="nomPays">
+                      {{ nomPays }} ({{ paysIndicatifs[nomPays].indicatif }})
+                    </option>
+                  </select>
+                  <label for="pays" class="label">Pays</label>
               </div>
 
               <!-- Champ téléphone -->
@@ -576,17 +576,16 @@
           <!-- Modifiez le sélecteur de pays et le champ téléphone -->
           <div class="grid_colonne">
             <!-- Pays -->
-            <div class="champ_input div1">
-              <select class="input_focus" 
-                      formControlName="pays" 
-                      (change)="onEntreprisePaysChange($event)">
-                <option value="" disabled selected>Pays</option>
-                <option value="Mali">Mali</option>
-                <option value="Sénégal">Sénégal</option>
-                <option value="Côte d'Ivoire">Côte d'Ivoire</option>
-              </select>
-              <!-- <label class="label">Pays</label> Label corrigé -->
-            </div>
+                 <div class="champ_input div1">
+                  <select class="input_focus" formControlName="pays" (change)="onEntreprisePaysChange($event)">
+                    <option value="" disabled selected>Pays</option>
+                    <option *ngFor="let nomPays of paysKeys" [value]="nomPays">
+                      {{ nomPays }} ({{ paysIndicatifs[nomPays].indicatif }})
+                    </option>
+                  </select>
+                  <label for="pays" class="label">Pays</label>
+                 
+                </div>
 
             <!-- Téléphone -->
             <div class="champ_input div2">

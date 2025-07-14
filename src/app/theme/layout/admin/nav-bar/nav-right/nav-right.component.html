@@ -17,7 +17,8 @@
           <!-- <li class="n-title">
             <p class="m-b-0">NEW</p>
           </li>-->
-         <!-- <li class="notification">
+         
+          <!-- <li class="notification">
             <div class="media">
               <img class="img-radius" src="assets/images/user/avatar-1.jpg" alt="Generic placeholder image" />
               <div class="media-body">
@@ -97,20 +98,34 @@
       </div>
     </div>
   </li>
-  <!-- <li (click)="this.visibleUserList = !this.visibleUserList">
-    <div class="dropdown">
-      <a href="javascript:" class="displayChatbox dropdown-toggle">
-        <i class="icon feather icon-mail" title="Mail InBox"></i>
-        <span class="badge bg-success"><span class="sr-only"></span></span>
-      </a>
-    </div>
-  </li> -->
+ 
+  <!-- lockManually -->
+  <li>
+   <div class="dropdown">
+  <a href="javascript:void(0)" 
+     (click)="lockManually()" 
+     class="displayChatbox dropdown-toggle" 
+     [title]="isLocked ? 'Écran verrouillé' : 'Verrouiller l\'écran'">
+    
+    <i class="icon feather" [ngClass]="isLocked ? 'icon-lock' : 'icon-unlock'"></i>
+    
+    <span class="badge bg-success">
+      <span class="sr-only"></span>
+    </span>
+  </a>
+</div>
+
+  </li>
+
 
   <li>
     <div class="bare_vertical">
       <div class="bare"></div>
     </div>
   </li>
+
+  
+
 
   <!-- Pour le nom de ta société -->
   <li>

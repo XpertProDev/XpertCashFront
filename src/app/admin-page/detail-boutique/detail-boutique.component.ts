@@ -807,4 +807,51 @@ async confirmDelete(): Promise<void> {
     this.showFilterDropdown = false;
   }
 
+showConfirmationModalB = false;
+isDeletingB = false;
+
+deleteBoutique() {
+  if (!this.boutique) {
+    console.error("La boutique n'est pas disponible.");
+    return;
+  }
+
+   this.showConfirmationModalB = true;
+}
+
+async confirmDeleteB(): Promise<void> {
+  this.showConfirmationModalB = false
+  if (!this.boutique) return;
+
+  this.showConfirmationModal = false;
+  this.isDeletingB = true;
+
+  this.errorMessage = null;
+  this.successMessage = null;
+
+  try {
+    const response = await lastValueFrom(this.boutiqueService.deleteBoutique(this.boutique.id));
+    this.successMessage = 'Boutique supprimée avec succès.';
+    this.router.navigate(['/boutiques']);
+  } catch (err: any) {
+    let message = err?.error?.error || 'Erreur lors de la suppression.';
+    const prefix = "Une erreur est survenue : ";
+    if (message.startsWith(prefix)) {
+      message = message.substring(prefix.length);
+    }
+    this.errorMessage = message;
+  } finally {
+    this.isDeletingB = false;
+    setTimeout(() => {
+      this.errorMessage = null;
+      this.successMessage = null;
+    }, 5000);
+  }
+}
+
+
+
+
+
+
 }

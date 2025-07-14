@@ -102,11 +102,47 @@ export class DetailEditClientComponent {
   displayedColumns1 = ['numero', 'date', 'statut', 'montant'];
 
   // Définir les indicatifs par pays
-  paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
-    'Mali': { indicatif: '+223', longueur: 8 },
-    'Sénégal': { indicatif: '+221', longueur: 9 },
-    'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 }
+   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
+  'Mali': { indicatif: '+223', longueur: 8 },
+  'Sénégal': { indicatif: '+221', longueur: 9 },
+  'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 },
+  'Burkina Faso': { indicatif: '+226', longueur: 8 },
+  'Niger': { indicatif: '+227', longueur: 8 },
+  'France': { indicatif: '+33', longueur: 9 },
+  'Belgique': { indicatif: '+32', longueur: 9 },
+  'Suisse': { indicatif: '+41', longueur: 9 },
+  'Canada': { indicatif: '+1', longueur: 10 },
+  'États-Unis': { indicatif: '+1', longueur: 10 },
+  'Maroc': { indicatif: '+212', longueur: 9 },
+  'Algérie': { indicatif: '+213', longueur: 9 },
+  'Tunisie': { indicatif: '+216', longueur: 8 },
+  'Togo': { indicatif: '+228', longueur: 8 },
+  'Bénin': { indicatif: '+229', longueur: 8 },
+  'Guinée': { indicatif: '+224', longueur: 9 },
+  'Tchad': { indicatif: '+235', longueur: 8 },
+  'Cameroun': { indicatif: '+237', longueur: 9 },
+  'RDC': { indicatif: '+243', longueur: 9 },
+  'Gabon': { indicatif: '+241', longueur: 9 },
+  'Afrique du Sud': { indicatif: '+27', longueur: 9 },
+  'Rwanda': { indicatif: '+250', longueur: 9 },
+  'Kenya': { indicatif: '+254', longueur: 9 },
+  'Nigéria': { indicatif: '+234', longueur: 10 },
+  'Ghana': { indicatif: '+233', longueur: 9 },
+  'Éthiopie': { indicatif: '+251', longueur: 9 },
+  'Égypte': { indicatif: '+20', longueur: 10 },
+  'Inde': { indicatif: '+91', longueur: 10 },
+  'Chine': { indicatif: '+86', longueur: 11 },
+  'Mexique': { indicatif: '+52', longueur: 10 },
+  'Allemagne': { indicatif: '+49', longueur: 10 },
+  'Espagne': { indicatif: '+34', longueur: 9 },
+  'Italie': { indicatif: '+39', longueur: 10 },
+  'Royaume-Uni': { indicatif: '+44', longueur: 10 },
+  'Pays-Bas': { indicatif: '+31', longueur: 9 },
+  'Portugal': { indicatif: '+351', longueur: 9 }
   };
+
+  paysKeys: string[] = Object.keys(this.paysIndicatifs);
+
 
 
 

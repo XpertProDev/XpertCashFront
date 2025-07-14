@@ -1,16 +1,5 @@
 // .account-settings {
 // }
-@import './profile';
-
-.blurred{
-  font-style: italic;
-  color: red;
-  filter: blur(6px);
-}
-.showCode{
-  font-style: italic;
-  color: red;
-}
 
 .section {
   padding: 10px;
@@ -64,7 +53,7 @@
 
 .facture_model {
   // width: 30%;
-  height: 64%;
+  height: 60%;
   background-color: #ffffff;
   // box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   border: 1px solid #b9b9b9;
@@ -272,6 +261,24 @@ td.td_left {
   position: relative;
   top: 8px;
 }
+.cachetSign{
+  display: block;
+  text-align: center;
+  font-size: 7px;
+  font-weight: 600;
+  color: #000;
+  font-family: brittany;
+  margin-top: 40%;
+  }
+  .cachetSignP{
+  display: block;
+  text-align: center;
+  font-size: 7px;
+  font-weight: 600;
+  color: #000;
+  font-family: brittany;
+  margin-top: 40%;
+  }
 
 .cachet_preview {
   position: relative;
@@ -282,6 +289,7 @@ td.td_left {
 .cachet_preview h6 {
   text-align: center;
   font-size: 10px;
+  top: 8px;
 }
 
 .name_directeur_preview {
@@ -370,7 +378,7 @@ a:hover img {
 
   .champ_grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     grid-template-rows: 1fr;
     grid-column-gap: 0px;
     grid-row-gap: 0px;
@@ -704,164 +712,3 @@ a:hover img {
   margin: 5px 0px;
 }
 
-///////////////////////// STYLE POUR COMPTE 
-
-.champ_grid_double {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 1fr;
-  grid-column-gap: 0px;
-  grid-row-gap: 0px;
-  gap: 15px;
-}
-
-// .cadre_photo {
-//   display: flex;
-//   justify-content: center;
-//   text-align: center;
-// }
-
-.img_profil {
-  width: 100px;
-  height: 100px;
-  display: flex;
-  justify-content: center;
-  margin: 20px auto;
-}
-
-.img_profil img {
-  width: 100%;
-  height: 100%;
-}
-
-.img_profil:hover {
-  transform: scale(1.03);
-}
-
-.setting_profil {
-  background-color: #fff;
-  border: 1px solid #e9e9e9;
-  box-shadow: rgba(0, 0, 0, 0.004) 0px 0px 0px 1px;
-  border-radius: 20px;
-}
-
-.btn_changer_profil {
-  display: flex;
-  justify-content: center;
-}
-
-.btn_changer_profil .btn {
-  background-color: #0672E4;
-  color: #fff;
-  font-size: 12px;
-  border-radius: 20px;
-  padding: 8px 20px;
-  cursor: pointer;
-}
-
-.info_capacity_profil p {
-  text-align: center;
-}
-
-.tilte_profil {
-  margin: 20px 20px 0;
-  text-align: left;
-}
-
-.tilte_profil h4 {
-  font-size: 18px;
-  margin-bottom: 5px;
-  font-weight: 600;
-  letter-spacing: 0.50px;
-}
-
-.tilte_profil p {
-  font-size: 12px;
-  letter-spacing: 0.40px;
-  margin-bottom: 0;
-}
-
-.btn_save {
-  text-align: right;
-  margin-top: 10px;
-}
-
-.btn_save .btn {
-  padding: 5px 28px;
-  background-color: #0672E4;
-  color: #fff;
-  border: none;
-}
-
-.info_titre_input {
-  margin: 0 20px 20px 20px;
-}
-
-.btn_save .btn:hover {
-  background-color: #0263cb;
-  transition: all .5;
-}
-
-.info_capacity_profil {
-  margin-top: 10px;
-}
-
-.info_capacity_profil p {
-  font-size: 12px;
-  margin: 22px 0;
-}
-
-/* Conteneur du toast */
-.toast-container {
-  position: fixed;
-  top: 60px;
-  right: 35px;
-  z-index: 9999;
-}
-
- // toast success
-.toast-message-success {
-  background-color: #D5E6DE;
-  border: 1px solid #ACCEBC;
-  color: #000;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  animation: fadeInOut 4s ease-in-out;
-  transform: translateY(-20px);
-}
-
-//toast success
-.toast-message-danger {
-  background-color: #F3D8DA;
-  border: 1px solid #E7B1B6;
-  color: #000;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  animation: fadeInOut 4s ease-in-out;
-  transform: translateY(-20px);
-}
-
-/* Animation pour faire apparaître et disparaître le toast */
-@keyframes fadeInOut {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  20% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(2px); /* Le toast disparaît avec un léger mouvement vers le bas */
-  }
-}

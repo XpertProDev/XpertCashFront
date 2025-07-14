@@ -77,15 +77,14 @@
                   <div class="grid_colonne">
                     <!-- Pays -->
                     <div class="champ_input div1">
-                      <select class="input_focus" 
-                              formControlName="pays" 
-                              (change)="onEntreprisePaysChange($event)">
+                      <select class="input_focus" formControlName="pays" (change)="onEntreprisePaysChange($event)">
                         <option value="" disabled selected>Pays</option>
-                        <option value="Mali">Mali</option>
-                        <option value="Sénégal">Sénégal</option>
-                        <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                        <option *ngFor="let nomPays of paysKeys" [value]="nomPays">
+                          {{ nomPays }} ({{ paysIndicatifs[nomPays].indicatif }})
+                        </option>
                       </select>
                       <label for="pays" class="label">Pays</label>
+                    
                     </div>
         
                     <!-- Téléphone -->

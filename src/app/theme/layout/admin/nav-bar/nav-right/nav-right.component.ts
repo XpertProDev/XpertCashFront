@@ -12,6 +12,7 @@ import { ChatMsgComponent } from './chat-msg/chat-msg.component';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { Router, RouterLink } from '@angular/router';
 import { StockService } from 'src/app/admin-page/SERVICES/stocks.service';
+import { LockService } from 'src/app/admin-page/SERVICES/lock.service';
 
 @Component({
   selector: 'app-nav-right',
@@ -46,6 +47,8 @@ export class NavRightComponent implements OnInit{
   photo: string | null = null;
   photoUrl: string | null = null;
 
+  isLocked = false;
+
 
 
 
@@ -53,7 +56,8 @@ export class NavRightComponent implements OnInit{
   constructor(
     private userService: UsersService,
     private router: Router,
-    private stockService: StockService
+    private stockService: StockService,
+    private lockService: LockService
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
@@ -85,6 +89,12 @@ private boundUpdatePhotoListener = this.updatePhotoListener.bind(this);
     }
 
   window.addEventListener('storage-photo-update', this.boundUpdatePhotoListener);
+
+   this.lockService.isLocked$.subscribe(locked => {
+      this.isLocked = locked;
+    });
+
+  
 }
 
 ngOnDestroy(): void {
@@ -183,4 +193,7 @@ ngOnDestroy(): void {
   return URL.createObjectURL(blob);
 }
 
+lockManually() {
+  this.lockService.lockNow();
+}
 }

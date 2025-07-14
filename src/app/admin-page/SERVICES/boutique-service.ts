@@ -121,6 +121,25 @@ desactiverBoutique(id: number): Observable<any> {
   );
 }
 
+//Delet
+deleteBoutique(id: number): Observable<any> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+      return this.http.delete(`${this.apiUrl}/boutique/${id}`, { headers });
+    }),
+    catchError(error => {
+      console.error('Erreur lors de la suppression de la boutique:', error);
+      return throwError(() => error);
+    })
+  );
+}
+
+
 
   // getProductsByBoutiqueId(id: number): Observable<any> {
   //   return this.http.get<any>(`${this.apiUrl}/boutiques/${id}/produits`);

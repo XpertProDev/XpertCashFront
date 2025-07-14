@@ -112,8 +112,37 @@
                     <span class="slider round"></span>
                 </label>
             </div>
+
+            <!-- Bouton supprimer placé sous le container principal -->
+                <div class="delete-boutique-container" style="margin-top: 22px;">
+                     <span style="font-size: 13px;">Supprimer la boutique</span>
+                     <label class="switch2">
+                          <button 
+                        class="delete-boutique-btn" 
+                        (click)="deleteBoutique()" 
+                        [disabled]="isDeleting"
+                        aria-label="Supprimer la boutique"
+                        title="Supprimer la boutique">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                        
+                     </label>
+                  
+                </div>
         </div>
         
+        <!-- Modal de confirmation personnalisée -->
+        <div class="confirmation-modal-averB" *ngIf="showConfirmationModalB">
+        <div class="modal-content-averB">
+            <h4 style="font-size: 16px; margin-bottom: 10px;">Confirmation</h4>
+            <p style="margin: 0; font-size: 12px;">Êtes-vous sûr de vouloir supprimer cette boutique ?</p>
+            <div class="modal-actions-averB">
+            <button class="btn-confirm" style="font-size: 12px;" (click)="confirmDeleteB()">OUI</button>
+            <button class="btn-cancel" style="font-size: 12px;" (click)="showConfirmationModalB = false">NON</button>
+            </div>
+        </div>
+        </div>
+
         <!-- Section Informations Personnelles -->
         <div class="info_section">
             <div class="section_title">
