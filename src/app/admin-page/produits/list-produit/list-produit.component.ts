@@ -80,6 +80,10 @@ export class ListProduitComponent {
   showPopupCategory: boolean = false;
   showPopupUnit: boolean = false;
   isEditing: boolean = false;
+
+  //////// FOCUS CATEGORY
+  myControl = new FormControl();
+  uniteControl = new FormControl();
     
   // Produit 
   produit: Produit = {
@@ -201,9 +205,6 @@ export class ListProduitComponent {
     }
   }
   
-  //////// FOCUS CATEGORY
-  myControl = new FormControl();
-  uniteControl = new FormControl();
 
   options: Categorie[] = []; // Liste des catégories récupérées
   optionsUnite: UniteMesure[] = []; // Liste des unites récupérées

@@ -23,16 +23,37 @@
   <div class="content_formulaire">
     <div class="modal-body">
       <form [formGroup]="entrepriseClientForm" class="container_formulaire">
+
+        <!-- Icon return  -->
+        <p class="retour_icon_text" (click)="navigateBack()" style="cursor: pointer; color: #0672E4;" title="Retour sur la page produit">
+            <i class="ri-arrow-left-s-line"></i> <span style="margin-left: 8px; font-size: 12px;">Clients</span>
+        </p>
+
         <!-- Titre d'ajout de produits -->
-        <div class="Title">
+        <!-- <div class="Title">
           <h3>Modifier un entreprise client</h3>
-        </div>
+        </div> -->
 
         <div class="form_left_right" *ngIf="client?.entrepriseClient">
           <div class="formulaire">
             <!-- Cadre contenant le select et la description -->
             <div class="information_cadre">
               <div class="info_titre_input">
+
+                <div class="content_return" style="display: flex; align-items: center; justify-content: space-between;">
+                  <h4>Modifier un entreprise client</h4>
+                  <div class="icon_edit" style="cursor: pointer;">
+                    <i *ngIf="!isEditing" style="font-size: 16px;"
+                        class="ri-edit-box-line" 
+                        title="Cliquer ici pour modifier"
+                        (click)="toggleEditing()"></i>
+
+                    <i *ngIf="isEditing" style="color: #ff0000; font-size: 16px;"
+                        class="ri-close-line" 
+                        title="Fermer l'édition"
+                        (click)="toggleEditing()"></i>
+                  </div>
+                </div>
                 
                 <div class="double_input">
                   <!-- Nom et prenom -->
@@ -155,7 +176,7 @@
             </div> -->
 
             <!-- Boutons Ajouter et Sauvegarder -->
-            <div class="information_cadre information_cadre_save">
+            <div class="information_cadre information_cadre_save" *ngIf="isEditing">
 
               <!-- Message d'erreur global -->
               <div class="container_error_message">

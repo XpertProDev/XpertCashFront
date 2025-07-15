@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService } from '../../SERVICES/client-service';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subject, switchMap, throwError } from 'rxjs';
 import { EntrepriseClientService } from '../../SERVICES/entreprise-clients-service';
 import { CommonModule } from '@angular/common';
@@ -42,6 +42,8 @@ export class DetailEditEntrepriseClientComponent {
   indicatif: string = '';
   maxPhoneLength: number = 0;
   isLoading = false;
+  isEditing: boolean = false;
+  myControl = new FormControl();
   
   // Définissez les indicatifs par pays
   paysIndicatifs: { [key: string]: { indicatif: string, longueur: number, exemple: string } } = {
@@ -68,6 +70,7 @@ export class DetailEditEntrepriseClientComponent {
     this.currentClientId = id;
     this.getClient(id);
     this.getFormEntreprise();
+    this.myControl.disable();
   }
 
   onPaysChange(event: any): void {
@@ -252,6 +255,7 @@ updatePhoneValidator(longueur: number): void {
   }
 
   onSubmit() {
+    if (!this.isEditing) return;
       this.errorMessage = '';
       this.successMessage = '';
       
@@ -280,6 +284,7 @@ updatePhoneValidator(longueur: number): void {
                   // Option 1 : Recharger les données du client
                   this.getClient(this.client.id!);
                   
+                  this.isEditing = false;
                   // Désactiver l'indicateur de chargement
                   this.isLoading = false;
                   
@@ -324,6 +329,25 @@ updatePhoneValidator(longueur: number): void {
       tauxTva: this.client.entrepriseClient?.tauxTva
 
     };
+  }
+
+  navigateBack() {
+    this.router.navigate(['/clients']);
+  }
+
+  toggleEditing(): void {
+    this.isEditing = !this.isEditing;
+    
+    if (this.isEditing) {
+      // Activer tous les contrôles
+      this.entrepriseClientForm.enable();
+      this.myControl.enable();
+    } else {
+      // Désactiver et réinitialiser
+      this.entrepriseClientForm.disable();
+      this.myControl.disable();
+      
+    }
   }
 
 }
