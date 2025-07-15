@@ -348,8 +348,8 @@
             
                 <div *ngIf="isChecked">
                   <ng-container *ngFor="let boutique of boutiquesList">
-                    <div *ngIf="boutique.selected" class=" double_input_grid">
-                      <div class="champ_input champ_input2">
+                    <div *ngIf="boutique.selected" class="double_input_grid_true">
+                      <div class="champ_input">
                         <!-- Quantité -->
                         <input  [ngModel]="quantitesMap[boutique.id] || 0" 
                           (ngModelChange)="quantitesMap[boutique.id] = $event"  
@@ -359,7 +359,7 @@
                       </div>
                 
                       <!-- Seuil d'alerte -->
-                      <div class="champ_input champ_input2">
+                      <div class="champ_input">
                         <input 
                           [(ngModel)]="seuilsMap[boutique.id]" 
                           [ngModelOptions]="{standalone: true}" 
@@ -367,6 +367,15 @@
                           class="input_focus" 
                           placeholder="Seuil d'alerte pour {{ boutique.nomBoutique }}">
                         <label for="seuilAlert" class="label labelColor">Seuil d'alerte pour {{ boutique.nomBoutique }}</label>
+                      </div>
+                
+                      <!-- date de preemption -->
+                      <div class="champ_input">
+                        <input 
+                          type="number" 
+                          class="input_focus" 
+                          placeholder="Saisis la date de preemption">
+                        <label for="date_preemption" class="label labelColor">La date de preemption</label>
                       </div>
                     </div>
                   </ng-container>
