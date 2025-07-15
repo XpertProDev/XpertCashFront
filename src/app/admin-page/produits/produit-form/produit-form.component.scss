@@ -1028,3 +1028,26 @@ input:checked + .slider:before {
   background-color: transparent !important;
   padding: 0 !important;
 }
+
+/* Dans votre fichier CSS global ou composant */
+.champ_input_categorie, 
+.champ_input_unite {
+  pointer-events: none;
+}
+
+.champ_input_categorie > *, 
+.champ_input_unite > * {
+  pointer-events: auto;
+}
+
+/* Empêcher le comportement par défaut du panel */
+.mat-autocomplete-panel {
+  pointer-events: auto !important;
+}
+
+/* Style pour les icônes de fermeture */
+.arrow_bas i {
+  pointer-events: auto;
+  z-index: 1000;
+  position: relative;
+}
