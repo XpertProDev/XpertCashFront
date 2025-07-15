@@ -45,6 +45,7 @@ export interface FactureReelle {
   lignesFacture: LigneFactureDTO[];
   statut: 'VALIDE' | 'ANNULEE';
   factureProFormaId: number | null;
+  montantRestant?: number;
 
   factureProForma: {
     id: number;

@@ -97,33 +97,41 @@ export class AddClientsComponent implements OnInit {
     private usersService: UsersService,
   ) {}
 
-  onPaysChange(event: any): void {
-    const paysSelectionne = event.target.value;
-    const paysInfo = this.paysIndicatifs[paysSelectionne];
-  
-    if (paysInfo) {
-      this.indicatif = `${paysInfo.indicatif} `;
-      this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
-  
-      if (!this.clientForm.get('telephone')?.value.startsWith(this.indicatif)) {
-        this.clientForm.get('telephone')?.setValue(this.indicatif);
-      }
-  
-      this.updatePhoneValidator(paysInfo.longueur);
-    }
+onPaysChange(event: any): void {
+  const paysSelectionne = event.target.value;
+  const paysInfo = this.paysIndicatifs[paysSelectionne];
+
+  if (!paysInfo) return;
+
+  this.indicatif = paysInfo.indicatif;
+  this.maxPhoneLength = paysInfo.longueur;
+
+  const ctrl = this.clientForm.get('telephone');
+  let currentValue = ctrl?.value ?? '';
+
+  const prefix = this.indicatif.replace(/\D/g, '');
+  const valueNumerique = currentValue.replace(/\D/g, '');
+
+  if (!valueNumerique.startsWith(prefix)) {
+    ctrl?.setValue(this.indicatif);
+  } else {
+    const reste = valueNumerique.slice(prefix.length, prefix.length + this.maxPhoneLength);
+    ctrl?.setValue(this.indicatif + reste);
   }
 
-  updatePhoneValidator(longueur: number): void {
-    // on impose exactement {longueur} chiffres après l’indicatif
-       const regex = new RegExp(`^\\${this.entrepriseIndicatif.trim()}\\s?\\d{${longueur}}$`);
-    this.clientForm.controls['telephone'].setValidators([
-      Validators.required,
-      Validators.pattern(regex)
-    ]);
-    this.clientForm.controls['telephone'].updateValueAndValidity();
-  }
-  
+  this.updatePhoneValidator(paysInfo.longueur);
+}
 
+
+
+private updatePhoneValidator(longueur: number): void {
+  const ctrl = this.clientForm.get('telephone');
+  const regex = new RegExp(`^\\${this.indicatif}\\s?\\d{${longueur}}$`);
+  ctrl?.setValidators([Validators.required, Validators.pattern(regex)]);
+  ctrl?.updateValueAndValidity();
+}
+
+  
   formatPhoneNumber(): void {
     let valeur = this.clientForm.get('telephone')?.value;
     
