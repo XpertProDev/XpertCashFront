@@ -614,6 +614,7 @@ export class ProduitFormComponent {
     }
 
     const addToStock = this.isChecked;
+    const datePreemption = this.ajouteProduitForm.get('datePreemption')?.value;
 
     try {
       let finalImage: File;
@@ -655,7 +656,8 @@ export class ProduitFormComponent {
           seuilsSelected,
           produit,
           finalImage,
-          addToStock
+          addToStock,
+          datePreemption,
         )
         .subscribe({
           next: (produits: Produit[]) => {
@@ -667,6 +669,7 @@ export class ProduitFormComponent {
                 description: produit.description || '', // Valeur par défaut si undefined
                 prixVente: produit.prixVente,
                 prixAchat: produit.prixAchat,
+                datePreemption: produit.datePreemption,
                 categorieId: produit.categorieId,
                 uniteId: produit.uniteId,
                 typeProduit: produit.typeProduit,

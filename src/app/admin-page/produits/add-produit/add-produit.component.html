@@ -370,12 +370,14 @@
                       </div>
                 
                       <!-- date de preemption -->
-                      <div class="champ_input">
+                     <div class="champ_input">
                         <input 
-                          type="number" 
+                          type="date" 
                           class="input_focus" 
-                          placeholder="Saisis la date de preemption">
-                        <label for="date_preemption" class="label labelColor">La date de preemption</label>
+                          formControlName="datePreemption"
+                          id="datePreemption"
+                          name="datePreemption">
+                        <label for="datePreemption" class="label labelColor">Date de préemption (Facultatif)</label>
                       </div>
                     </div>
                   </ng-container>

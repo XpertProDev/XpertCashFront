@@ -21,7 +21,8 @@ export class ProduitService {
   seuilAlert: number[],
   produit: any,
   imageFile: File | null,
-  addToStock: boolean
+  addToStock: boolean,
+  datePreemption: string | null
 ): Observable<Produit[]> {
   const url = `${this.apiUrl}/create?addToStock=${addToStock}`;
   const formData: FormData = new FormData();
@@ -33,6 +34,11 @@ export class ProduitService {
 
   if (imageFile) {
     formData.append('image', imageFile, imageFile.name);
+  }
+
+  // Ajouter dans formData
+  if (datePreemption) {
+    formData.append('datePreemption', datePreemption);
   }
 
   return this.usersService.getValidAccessToken().pipe(
