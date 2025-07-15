@@ -165,22 +165,29 @@
 
         <!-- signature -->
 
-          <div class="footer_container">
-          <div class="acquis">
-            <h6 style="font-size: 12px;">Pour acquit</h6>
-          </div>
-
-          <div class="cachet_container">
-            <div></div>
-            <div class="cachet">
+        <div class="footer_container1">
+          <!-- Ligne avec "Pour acquit" à gauche et le nom du signataire à droite -->
+          <div class="ligne_haut">
+            <div class="acquis">
+              <h6>Pour acquit</h6>
+            </div>
+            <div class="signataire_header">
               <h6>{{ signataire }}</h6>
-              <!-- <div class="logo_entreprise">
-                 <img [src]="signaturNum" (error)="logo = fallbackLogo" alt="Logo de l'entreprise">
-              </div> -->
-              <h4 class="name_directeur">{{ signataireNom }}</h4>
             </div>
           </div>
+
+          <!-- Signature + nom complet sous le nom du signataire -->
+          <div class="signature_bloc">
+            <div class="signaturNum">
+              <img [src]="signaturNum" (error)="logo = fallbackLogo" alt="Signature">
+            </div>
+            <h4 class="name_directeur">{{ signataireNom }}</h4>
+          </div>
         </div>
+
+
+
+        
 
 
       </div>

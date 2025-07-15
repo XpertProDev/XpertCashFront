@@ -303,43 +303,51 @@ td.td_left {
   // margin-left: 37px;
 }
 
-.cachet_container {
-  height: 150px;
-  width: 100%;
-  // margin-top: 20px;
+.footer_container1 {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 40px;
 }
 
-.cachet_container {
+/* Ligne du haut : acquit à gauche, nom à droite */
+.ligne_haut {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
 }
 
-.acquis {
+.acquis h6,
+.signataire_header h6 {
+  font-size: 12px;
+  margin: 0;
+}
+
+/* Bloc signature en dessous du nom, aligné à droite */
+.signature_bloc {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  // margin-top: 10px;
+}
+
+.signaturNum img {
+  width: 100px;
+  height: auto;
   position: relative;
-  top: 80px;
-  left: 40px;
-}
-
-.cachet {
-  position: relative;
-  top: 30px;
-  right: 41px;
-}
-
-.cachet h6{
-    text-align: center;
-    font-size: 12px;
-    position: relative;
-    top: 23px;;
+  left: 25px;
 }
 
 .name_directeur {
-    position: relative;
-    top: 60px;
-    font-size: 12px;
-    top: 25px;
+  font-size: 12px;
+  // margin-top: 5px;
+  position: relative;
+  left: 12px;
 
 }
+
+
+
+
 
 .container_footer {
   display: flex;
