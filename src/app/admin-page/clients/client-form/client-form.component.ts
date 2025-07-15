@@ -398,7 +398,10 @@ getListEntreprise() {
       signataireNom: this.entrepriseForm.value.signataireNom,
       prefixe: this.entrepriseForm.value.prefixe,
       suffixe: this.entrepriseForm.value.suffixe,
-      tauxTva: this.entrepriseForm.value.tauxTva
+      tauxTva: this.entrepriseForm.value.tauxTva,
+      signaturNum: this.entrepriseForm.value.signaturNum
+
+      
 
 
     };

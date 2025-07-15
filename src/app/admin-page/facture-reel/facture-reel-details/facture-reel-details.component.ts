@@ -30,6 +30,7 @@ export class FactureReelDetailsComponent implements OnInit {
   siege!: string;
   email!: string;
   logo: string | null = null;
+  signaturNum: string | null = null;
   secteur!: string;
   telephone!: string;
   adresse!: string;
@@ -374,6 +375,8 @@ voirProforma() {
         this.signataire = entreprise.signataire;
         this.signataireNom = entreprise.signataireNom;
         this.tauxTva = entreprise.tauxTva;
+        this.signaturNum = entreprise.signaturNum ? `${this.apiUrl}${entreprise.signaturNum}` : null;
+
       },
       error: (err) => {
         console.error('Erreur lors de la récupération des infos entreprise :', err);

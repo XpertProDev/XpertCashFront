@@ -321,7 +321,8 @@ updatePhoneValidator(longueur: number): void {
       signataireNom: this.client.entrepriseClient?.signataireNom,
       prefixe: this.client.entrepriseClient?.prefixe,
       suffixe: this.client.entrepriseClient?.suffixe,
-      tauxTva: this.client.entrepriseClient?.tauxTva
+      tauxTva: this.client.entrepriseClient?.tauxTva,
+      signaturNum: this.client.entrepriseClient?.signaturNum
 
     };
   }
