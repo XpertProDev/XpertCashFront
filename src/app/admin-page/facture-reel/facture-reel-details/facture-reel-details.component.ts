@@ -451,45 +451,6 @@ voirProforma() {
 async download() {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
-  // Filigrane "NON PAYÉ" en rotation (arrière-plan)
-  if (this.facture?.statutPaiement === 'EN_ATTENTE') {
-    const pageWidth = doc.internal.pageSize.width;
-    const pageHeight = doc.internal.pageSize.height;
-    
-    // Créer un canvas pour le filigrane
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Taille du canvas (en pixels)
-    canvas.width = pageWidth * 4;
-    canvas.height = pageHeight * 4;
-    
-    // Configuration du filigrane
-    ctx.font = "bold 120px Arial";
-    ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    
-    // Position centrale
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    
-    // Rotation de 45 degrés
-    ctx.translate(centerX, centerY);
-    ctx.rotate(-45 * Math.PI / 180);
-    ctx.translate(-centerX, -centerY);
-    
-    // Dessiner le texte
-    ctx.fillText("NON PAYÉ", centerX, centerY);
-    
-    // Convertir le canvas en image
-    const watermarkImage = canvas.toDataURL('image/png');
-    
-    // Ajouter l'image au PDF
-    doc.addImage(watermarkImage, 'PNG', 0, 0, pageWidth, pageHeight);
-  }
-
   // Logo
   try {
     if (this.logo) {
@@ -526,46 +487,57 @@ async download() {
   doc.text(`FACTURE : ${this.facture?.numeroFacture}`, 105, 36, { align: 'center' });
 
   // Badge de statut de paiement
-  if (this.facture?.statutPaiement) {
-    const status = this.facture.statutPaiement;
-    const statusText = this.getStatutText(status);
-    
-    // Définir les couleurs selon le statut
-    let bgColor: [number, number, number] = [108, 117, 125]; // Gris par défaut
-    let textColor: [number, number, number] = [255, 255, 255]; // Texte blanc
-    
-    switch(status) {
-      case 'PAYEE':
-        bgColor = [40, 167, 69]; // Vert
-        break;
-      case 'PARTIELLEMENT_PAYEE':
-        bgColor = [255, 193, 7]; // Orange
-        textColor = [0, 0, 0]; // Texte noir
-        break;
-      case 'EN_ATTENTE':
-        bgColor = [220, 53, 69]; // Rouge
-        break;
-    }
+//  if (this.facture?.statutPaiement) {
+//   const status = this.facture.statutPaiement;
+//   const statusText = this.getStatutText(status);
 
-    // Calculer la position
-    const textWidth = doc.getTextWidth(statusText);
-    const badgeWidth = textWidth + 6;
-    const badgeX = 195 - 15 - badgeWidth; // 15mm de marge droite
-    const badgeY = 30; // Position verticale ajustée
-    
-    // Dessiner le badge
-    doc.setFillColor(...bgColor);
-    doc.rect(badgeX, badgeY, badgeWidth, 8, 'F');
-    
-    // Écrire le texte du badge
-    doc.setTextColor(...textColor);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text(statusText, badgeX + 3, badgeY + 5);
-    
-    // Réinitialiser la couleur du texte
-    doc.setTextColor(85, 85, 85);
-  }
+//   let bgColor: [number, number, number] = [108, 117, 125];
+//   let textColor: [number, number, number] = [255, 255, 255];
+
+//   switch (status) {
+//     case 'PAYEE':
+//       bgColor = [40, 167, 69];
+//       break;
+//     case 'PARTIELLEMENT_PAYEE':
+//       bgColor = [255, 193, 7];
+//       textColor = [0, 0, 0];
+//       break;
+//     case 'EN_ATTENTE':
+//       bgColor = [220, 53, 69];
+//       break;
+//   }
+
+//   // Position et dimensions
+//   const textWidth = doc.getTextWidth(statusText);
+//   const badgeWidth = textWidth + 8;
+//   const badgeHeight = 10;
+
+//   // Choisis une position "hors contenu"
+//   const centerX = 180;
+//   const centerY = 33;
+
+//   // Appliquer rotation
+//   doc.saveGraphicsState();
+//   doc.setFillColor(...bgColor);
+//   doc.setTextColor(...textColor);
+//   doc.setFontSize(9);
+//   doc.setFont('helvetica', 'bold');
+
+//   // Rotation 45° autour du point (centerX, centerY)
+
+
+//   // Dessiner le rectangle tourné
+//   doc.rect(centerX - badgeWidth / 2, centerY - badgeHeight / 2, badgeWidth, badgeHeight, 'F');
+
+//   // Écrire le texte centré dans le badge
+//   doc.text(statusText, centerX, centerY + 3, { align: 'center' });
+
+//   doc.restoreGraphicsState(); // Revenir à l’orientation normale
+
+//   // Reset couleur
+//   doc.setTextColor(85, 85, 85);
+// }
+
 
   // Date
   doc.setFontSize(10);
@@ -646,6 +618,25 @@ async download() {
     ] as any);
   }
 
+  // Si paiement partiel ou complet, afficher les montants payés et restants
+const facture = this.facture;
+if (facture && facture.statutPaiement !== 'EN_ATTENTE') {
+  const montantPaye = (facture.totalFacture || 0) - (facture.montantRestant || 0);
+  const montantRestant = facture.montantRestant || 0;
+
+  tableData.push([
+    { content: 'Montant payé', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
+    { content: customNumberPipe.transform(montantPaye), styles: { halign: 'right' } }
+  ] as any);
+
+  tableData.push([
+    { content: 'Reste à payer', colSpan: 4, styles: { fontStyle: 'normal', halign: 'center' } },
+    { content: customNumberPipe.transform(montantRestant), styles: { halign: 'right' } }
+  ] as any);
+}
+
+
+
   // Génération du tableau
   (doc as any).autoTable({
     head: [['Désignation', 'Description', 'Prix Unitaire (FCFA)', 'Quantité', 'Montant (FCFA)']],
@@ -674,19 +665,30 @@ async download() {
     }
   });
 
-  // Montant en lettres
-  const tableEndY = (doc as any).lastAutoTable.finalY;
-  const amountY = tableEndY + 18;
-  const libelle = 'Arrêté la présente facture à la somme de : ';
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.text(libelle, 15, amountY);
-  
-  const enLettresPipe = new EnLettresPipe();
-  const amountText = enLettresPipe.transform(this.facture?.totalFacture || 0);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.text(amountText, 15 + doc.getTextWidth(libelle), amountY);
+// Montant en lettres
+const tableEndY = (doc as any).lastAutoTable.finalY;
+const amountY = tableEndY + 18;
+const libelle = 'Arrêté la présente facture à la somme de : ';
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(8);
+doc.text(libelle, 17, amountY);
+
+// Déterminer le montant à afficher en lettres
+const currentFacture = this.facture;
+let montantPourTexte = currentFacture?.totalFacture || 0;
+
+if (currentFacture?.statutPaiement !== 'EN_ATTENTE' && currentFacture?.montantRestant != null) {
+  montantPourTexte = currentFacture.montantRestant;
+}
+
+// Convertir en lettres
+const enLettresPipe = new EnLettresPipe();
+const amountText = enLettresPipe.transform(montantPourTexte);
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
+doc.text(amountText, 15 + doc.getTextWidth(libelle), amountY);
+
 
 // Signature
 const signatureY = amountY + 30;
@@ -726,6 +728,68 @@ doc.text(this.signataireNom || 'Nom du signataire', 183, signatureY + 16, { alig
   if (addressInfo) {
     doc.text(addressInfo, 105, footerY + 8, { align: 'center' });
   }
+
+  //filigran
+  const statut = this.facture?.statutPaiement;
+
+let filigraneTexte = '';
+let filigraneCouleur = '';
+
+if (statut === 'EN_ATTENTE') {
+  filigraneTexte = 'NON PAYÉ';
+  filigraneCouleur = 'rgba(255, 0, 0, 0.08)';
+} else if (statut === 'PARTIELLEMENT_PAYEE') {
+  filigraneTexte = 'PAYÉ EN PARTIE';
+  filigraneCouleur = 'rgba(255, 165, 0, 0.15)';
+} else if (statut === 'PAYEE') {
+  filigraneTexte = 'PAYÉ';
+  filigraneCouleur = 'rgba(0, 200, 0, 0.23)';
+}
+
+if (filigraneTexte) {
+  const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
+
+  // Canvas HD pour qualité
+  const scaleFactor = 30; 
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  canvas.width = pageWidth * scaleFactor;
+  canvas.height = pageHeight * scaleFactor;
+
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  ctx.font = `bold ${19 * scaleFactor}px Arial`;
+  ctx.fillStyle = filigraneCouleur;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const dyInMM = 10;
+  const dy = dyInMM * scaleFactor; 
+  ctx.translate(centerX, centerY + dy);
+  ctx.rotate(-45 * Math.PI / 180);
+  ctx.fillText(filigraneTexte, 0, 0);
+  ctx.resetTransform();
+
+  const watermarkImage = canvas.toDataURL('image/png');
+
+  doc.addImage(
+    watermarkImage,
+    'PNG',
+    0,
+    0,
+    pageWidth,
+    pageHeight
+  );
+
+  console.log('✅ Filigrane visible :', filigraneTexte, '| Couleur :', filigraneCouleur);
+}
+
+
+
 
   // Téléchargement
   doc.save(`Facture_${this.facture?.numeroFacture}.pdf`);

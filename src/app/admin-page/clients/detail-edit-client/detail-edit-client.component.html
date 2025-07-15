@@ -118,7 +118,7 @@
                <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
                     <option value="" disabled selected>Pays</option>
                     <option *ngFor="let nomPays of paysKeys" [value]="nomPays">
-                      {{ nomPays }} ({{ paysIndicatifs[nomPays].indicatif }})
+                      {{ nomPays }} 
                     </option>
                   </select>
                   <label for="pays" class="label">Pays</label>

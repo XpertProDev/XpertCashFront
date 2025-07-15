@@ -385,7 +385,7 @@
       </div>
       <div class="badge-content">
         <div class="user-name"> Créé par {{ facture.utilisateurCreateur }}</div>
-        <span class="dateC">Le  {{facture.dateCreation | date: 'dd/MM/yyyy'}}</span>
+        <span class="dateC">Le  {{facture.dateCreationPro | date: 'dd/MM/yyyy'}}</span>
       </div>
     </div>
 
@@ -399,7 +399,7 @@
       </div>
       <div class="badge-content">
         <div class="user-name">Validé par {{ facture.utilisateurValidateur }}</div>
-        <span class="dateC">Le  {{facture.dateCreationPro | date: 'dd/MM/yyyy'}}</span>
+        <span class="dateC">Le  {{facture.dateCreation | date: 'dd/MM/yyyy'}}</span>
 
       </div>
     </div>

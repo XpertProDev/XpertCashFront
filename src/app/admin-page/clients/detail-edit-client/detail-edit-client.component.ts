@@ -335,53 +335,65 @@ loadEntrepriseInfo(): void {
   }
 
   // Ajoutez ces méthodes
-  onPaysChange(event: any): void {
-    const paysSelectionne = event.target.value;
-    const paysInfo = this.paysIndicatifs[paysSelectionne];
-  
-    if (paysInfo) {
-      this.indicatif = `${paysInfo.indicatif} `; // Ajout d'un espace après l'indicatif
-      this.maxPhoneLength = this.indicatif.length + paysInfo.longueur;
-      this.modifierClientForm.get('telephone')?.enable();
-  
-      // Met à jour la valeur avec l'indicatif + espace
-      const currentPhone = this.modifierClientForm.get('telephone')?.value || '';
-      if (!currentPhone.startsWith(this.indicatif)) {
-        this.modifierClientForm.get('telephone')?.setValue(this.indicatif);
-      }
-  
-      this.updatePhoneValidator(paysInfo.longueur);
+onPaysChange(event: any): void {
+  const paysSelectionne = event.target.value;
+  const paysInfo = this.paysIndicatifs[paysSelectionne];
+
+  if (paysInfo) {
+    this.indicatif = paysInfo.indicatif; // ← pas d’espace ici
+    this.maxPhoneLength = paysInfo.longueur;
+    this.modifierClientForm.get('telephone')?.enable();
+
+    const ctrl = this.modifierClientForm.get('telephone');
+    let valeur = ctrl?.value ?? '';
+
+    const prefix = this.indicatif.replace(/\D/g, '');
+    const chiffres = valeur.replace(/\D/g, '');
+
+    // Si le numéro ne commence pas par l’indicatif, on réinitialise
+    if (!chiffres.startsWith(prefix)) {
+      ctrl?.setValue(this.indicatif);
     } else {
-      this.modifierClientForm.get('telephone')?.disable();
+      const reste = chiffres.slice(prefix.length);
+      ctrl?.setValue(this.indicatif + reste);
     }
+
+    this.updatePhoneValidator(this.maxPhoneLength);
+  } else {
+    this.modifierClientForm.get('telephone')?.disable();
   }
+}
+
 
   // Modifiez la méthode updatePhoneValidator
   updatePhoneValidator(longueur: number): void {
-    this.modifierClientForm.controls['telephone'].setValidators([
-      Validators.pattern(`^\\${this.indicatif}\\d{${longueur}}$`)
-    ]);
-    this.modifierClientForm.controls['telephone'].updateValueAndValidity();
-  }
+  const regex = new RegExp(`^\\${this.indicatif}\\s?\\d{${longueur}}$`);
+  this.modifierClientForm.controls['telephone'].setValidators([
+    Validators.pattern(regex)
+  ]);
+  this.modifierClientForm.controls['telephone'].updateValueAndValidity();
+}
+
   
   // Modifiez la méthode formatPhoneNumber
-  formatPhoneNumber(): void {
-    let valeur = this.modifierClientForm.get('telephone')?.value;
-    
-    // Garantit que l'indicatif avec espace est présent
-    if (!valeur.startsWith(this.indicatif)) {
-      this.modifierClientForm.get('telephone')?.setValue(this.indicatif);
-      return;
-    }
+formatPhoneNumber(): void {
+  const ctrl = this.modifierClientForm.get('telephone');
+  let valeur = ctrl?.value ?? '';
 
-    // Garde uniquement les chiffres après l'indicatif
-    const chiffres = valeur.replace(this.indicatif, '').replace(/\D/g, '');
-    const numeroFormate = this.indicatif + chiffres;
-    
-    // Limite la longueur selon le pays
-    const maxLength = this.indicatif.length + this.maxPhoneLength;
-    this.modifierClientForm.get('telephone')?.setValue(numeroFormate.slice(0, maxLength));
+  // Nettoie tout sauf les chiffres
+  let numerique = valeur.replace(/\D/g, '');
+  const prefix = this.indicatif.replace(/\D/g, '');
+
+  // Supprime l’indicatif s’il est déjà dans la valeur
+  if (numerique.startsWith(prefix)) {
+    numerique = numerique.slice(prefix.length);
   }
+
+  // Formate et limite la longueur
+  const numeroFormate = this.indicatif + numerique.slice(0, this.maxPhoneLength);
+  ctrl?.setValue(numeroFormate);
+}
+
 
   goToStock() {
     this.router.navigate(['/clients']);
