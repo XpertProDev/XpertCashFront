@@ -95,6 +95,7 @@ export class AddProduitComponent implements OnInit {
   get f() { return this.ajouteProduitForm.controls; }
   formSubmitted = false;
   showBoutiqueError: boolean = false;
+  preemptionDatesMap: { [boutiqueId: number]: string } = {};
 
   clearImage() {
     this.newPhotoUrl = null;
@@ -295,6 +296,7 @@ export class AddProduitComponent implements OnInit {
       codeBare: ['', [Validators.minLength(8), Validators.maxLength(20)]],
       categorieId: [''],
       uniteId: [''],
+      datePreemption: [''],
       typeProduit: ['PHYSIQUE', Validators.required]
     });
     this.formSubmitted = false;
@@ -585,6 +587,7 @@ export class AddProduitComponent implements OnInit {
     }
     this.isLoading = true;
     const produit = this.ajouteProduitForm.value;
+    const datePreemption = this.ajouteProduitForm.get('datePreemption')?.value;
 
     // Si le prix d'achat n'est pas fourni, mettez-le à null ou 0
     if (produit.prixAchat === '' || produit.prixAchat === null) {
@@ -646,7 +649,8 @@ export class AddProduitComponent implements OnInit {
             seuilsSelected,
             produit, 
             finalImage, 
-            addToStock
+            addToStock,
+            datePreemption,
         ).subscribe({
           next: data => {
             this.showPopupMessage({

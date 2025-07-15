@@ -828,11 +828,11 @@ export class ProduitsComponent implements OnInit {
     // Données du modèle
     const data = [
       // En-têtes avec mise en forme
-      ['Nom produit*', 'Description', 'Catégorie*', 'Prix Vente*', 'Prix Achat*', 'Quantité*', 'Unité', 'Code Barre', 'Type Produit', 'Seuil Alert'],
+      ['Nom produit*', 'Description', 'Catégorie*', 'Prix Vente*', 'Prix Achat*', 'Quantité*', 'Unité', 'Code Barre', 'Type Produit', 'Date Preemption', 'Seuil Alert'],
       // Ligne d'exemple
-      ['T-Shirt', 'T-shirt en coton', 'Vêtements', 25.99, 15.50, 100, 'Pièce', 123456789, 'PHYSIQUE', 10],
+      ['T-Shirt', 'T-shirt en coton', 'Vêtements', 25.99, 15.50, 100, 'Pièce', 123456789, 'PHYSIQUE', '29-12-2026', 10],
       // Ligne de note explicative
-      ['', '', '', '', '', '', '', '', '', '']
+      // ['', '', '', '', '', '', '', '', '', '', '']
     ];
     
     // Création de la worksheet avec les données
@@ -849,6 +849,7 @@ export class ProduitsComponent implements OnInit {
       { wch: 10 }, // Unité
       { wch: 15 }, // Code Barre
       { wch: 12 }, // Type Produit
+      { wch: 12 }, // Date preemption
       { wch: 12 }  // Seuil Alert
     ];
     ws['!cols'] = colWidths;
@@ -871,8 +872,33 @@ export class ProduitsComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
+  validateExcelDates(file: File): Promise<boolean> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Vérifier le format des dates (colonne 9)
+        for (let i = 1; i < jsonData.length; i++) {
+          const row = jsonData[i] as any[];
+          if (row[9]) {
+            if (!/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[012])-\d{4}$/.test(row[9])) {
+              resolve(false);
+              return;
+            }
+          }
+        }
+        resolve(true);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
   // Gestion de la sélection de fichier
-  onFileSelected(event: any) {
+  async onFileSelected(event: any) {
     const file: File = event.target.files[0];
     if (file) {
       // Vérifier la taille du fichier (max 5MB)
@@ -893,6 +919,15 @@ export class ProduitsComponent implements OnInit {
       }
       
       this.selectedFile = file;
+
+      // Ajouter la validation
+      const isValid = await this.validateExcelDates(file);
+      if (!isValid) {
+        this.importMessage = 'Format de date invalide. Utilisez dd-MM-yyyy';
+        this.importSuccess = false;
+        this.selectedFile = null;
+        return;
+      }
     }
   }
 
@@ -958,6 +993,10 @@ export class ProduitsComponent implements OnInit {
       error: (error) => {
         // this.isImporting = false;
         this.importSuccess = false;
+
+        if (this.importMessage.includes('Date') || this.importMessage.includes('Preemption')) {
+          this.importMessage += '. Format de date invalide. Utilisez dd-MM-yyyy.';
+        }
         
         // Gestion améliorée des erreurs
         if (error.error) {

@@ -44,6 +44,8 @@ export interface Produit {
   lastUpdated?: string;
   typeProduit?: string;
 
+  datePreemption?: string;
+
   deleted?: boolean;
   deletedAt?: string | null;
   deletedBy?: string | null;
