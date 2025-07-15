@@ -115,7 +115,7 @@ export class AddClientsComponent implements OnInit {
 
   updatePhoneValidator(longueur: number): void {
     // on impose exactement {longueur} chiffres après l’indicatif
-    const regex = new RegExp(`^\\${this.indicatif}\\d{${longueur}}$`);
+       const regex = new RegExp(`^\\${this.entrepriseIndicatif.trim()}\\s?\\d{${longueur}}$`);
     this.clientForm.controls['telephone'].setValidators([
       Validators.required,
       Validators.pattern(regex)

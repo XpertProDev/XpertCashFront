@@ -102,7 +102,8 @@ export class AddEntrepriseClientComponent implements OnInit, OnDestroy  {
   // Méthode de mise à jour du validateur
   private updatePhoneValidator(longueur: number): void {
     const ctrl = this.entrepriseClientForm.get('telephone')!;
-    const regex = new RegExp(`^\\${this.entrepriseIndicatif.trim()}\\s\\d{${longueur}}$`);
+   const regex = new RegExp(`^\\${this.entrepriseIndicatif.trim()}\\s?\\d{${longueur}}$`);
+
     ctrl.setValidators([Validators.required, Validators.pattern(regex)]);
     ctrl.updateValueAndValidity();
   }

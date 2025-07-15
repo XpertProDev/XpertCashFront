@@ -12,7 +12,8 @@ export class GlobalUrlEncoderSerializer implements UrlSerializer {
     'detail-stock',
     'facture-proforma-details',
     'userPermission',
-    'facture-reel-details'
+    'facture-reel-details',
+    'detail-entreprise'
   ];
 
   parse(url: string): UrlTree {
