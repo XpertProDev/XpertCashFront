@@ -812,4 +812,23 @@ if (filigraneTexte) {
     });
   }
 
+
+  // Variables pour gérer la signature
+signatureImage: string | ArrayBuffer | null = null;
+signatureValidee: boolean = false;
+
+onSignatureUpload(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = e => {
+      this.signatureImage = e.target?.result || null;
+    };
+
+    reader.readAsDataURL(file);
+  }
+}
+
 }
