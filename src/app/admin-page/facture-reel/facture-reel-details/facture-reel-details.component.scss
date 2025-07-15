@@ -330,11 +330,20 @@ td.td_left {
   // margin-top: 10px;
 }
 
+.signaturNum {
+  width: 100px;
+  height: 80px; 
+  position: relative;
+  left: 25px;
+}
+
 .signaturNum img {
   width: 100px;
   height: auto;
+  object-fit: contain;
   position: relative;
-  left: 25px;
+  top: -11px;
+  right: 37px;
 }
 
 .name_directeur {
