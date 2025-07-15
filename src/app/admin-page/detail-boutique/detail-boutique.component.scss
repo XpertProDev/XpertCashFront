@@ -32,7 +32,7 @@
 
 .information_grid_two {
     display: grid;
-    grid-template-columns: 27% 2fr ;
+    grid-template-columns: 20% 2fr ;
     gap: 20px;
 }
 
@@ -1183,7 +1183,7 @@ table {
   transition: color 0.2s;
   bottom: 10px;
   position: relative;
-  left: 7px;
+  left: 10px;
   
 }
 
@@ -1199,12 +1199,12 @@ table {
 }
 
 .btn-confirm {
-  background-color: #1daa61;
+  background-color: #0672E4;
   color: #fff;
 }
 
 .btn-confirm:hover {
-  background-color: #4ff09d;
+  background-color: #1b83f2;
   color: #fff;
 }
 

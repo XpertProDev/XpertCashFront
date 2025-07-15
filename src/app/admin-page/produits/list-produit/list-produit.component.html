@@ -155,7 +155,7 @@
                     <div class="champ_input">
                       <input type="text" placeholder="Saisis l'unité de mesure" 
                           matInput [formControl]="uniteControl" class="input_focus"
-                          [matAutocomplete]="autoUnite" style="cursor: pointer;" [value]="produit.nomUnite || 'non unite'"
+                          [matAutocomplete]="autoUnite" style="cursor: pointer;" [value]="produit.nomUnite || 'sans unite'"
                           [attr.disabled]="!isEditing ? '' : null">
                       <label for="uniteId" class="label labelCategory">Unité de mesure</label>
                       <mat-autocomplete autoActiveFirstOption #autoUnite="matAutocomplete" (optionSelected)="onUniteSelected($event)" [displayWith]="displayFnUnite">

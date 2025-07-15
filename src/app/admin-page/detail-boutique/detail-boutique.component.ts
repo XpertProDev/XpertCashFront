@@ -832,7 +832,7 @@ async confirmDeleteB(): Promise<void> {
   try {
     const response = await lastValueFrom(this.boutiqueService.deleteBoutique(this.boutique.id));
     this.successMessage = 'Boutique supprimée avec succès.';
-    this.router.navigate(['/boutiques']);
+    this.router.navigate(['/boutique']);
   } catch (err: any) {
     let message = err?.error?.error || 'Erreur lors de la suppression.';
     const prefix = "Une erreur est survenue : ";

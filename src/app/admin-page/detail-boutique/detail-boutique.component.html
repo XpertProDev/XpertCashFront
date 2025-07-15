@@ -74,61 +74,60 @@
         <div class="information_grid_two">
         <!-- Section Action boutique -->
         <div class="profil_section">
-            <div class="section_title">
-                <div class="title">
-                    <h6>Action boutique</h6>
+                <div class="section_title">
+                    <div class="title">
+                        <h6>Action boutique</h6>
+                    </div>
                 </div>
-            </div>
 
-            <div class="container_boutique_action">
-                <div class="name_permission">
-                    Status : 
-                    <span 
-                        class="valueBoutique" style="font-size: 15px;"
-                        [style.color]="boutique?.actif ? '#008000' : '#ff0000'">
-                        <!-- Afficher 'Loading...' pendant la mise à jour -->
-                        <span *ngIf="isUpdating; else statusText">
-                            <span class="spinner-small"></span>
+                <div class="container_boutique_action">
+                    <div class="name_permission">
+                        Status : 
+                        <span 
+                            class="valueBoutique" style="font-size: 15px;"
+                            [style.color]="boutique?.actif ? '#008000' : '#ff0000'">
+                            <!-- Afficher 'Loading...' pendant la mise à jour -->
+                            <span *ngIf="isUpdating; else statusText">
+                                <span class="spinner-small"></span>
+                            </span>
+                    
+                            <!-- Spinner avec délai de 3 secondes -->
+                            <div *ngIf="isUpdating" class="spinner-border text-primary spinner-small" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+
+                            <ng-template #statusText>
+                                {{ boutique?.actif ? 'Actif' : 'Inactif' }}
+                            </ng-template>
                         </span>
-                
-                        <!-- Spinner avec délai de 3 secondes -->
-                        <div *ngIf="isUpdating" class="spinner-border text-primary spinner-small" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
+                    </div>
 
-                        <ng-template #statusText>
-                            {{ boutique?.actif ? 'Actif' : 'Inactif' }}
-                        </ng-template>
-                    </span>
+                    <label class="switch">
+                        <input 
+                            type="checkbox" 
+                            [checked]="boutique?.actif"
+                            (change)="toggleBoutiqueStatus($event)"
+                            [disabled]="isUpdating"
+                        />
+                        <span class="slider round"></span>
+                    </label>
                 </div>
 
-                <label class="switch">
-                    <input 
-                        type="checkbox" 
-                        [checked]="boutique?.actif"
-                        (change)="toggleBoutiqueStatus($event)"
-                        [disabled]="isUpdating"
-                    />
-                    <span class="slider round"></span>
-                </label>
-            </div>
-
-            <!-- Bouton supprimer placé sous le container principal -->
-                <div class="delete-boutique-container" style="margin-top: 22px;">
-                     <span style="font-size: 13px;">Supprimer la boutique</span>
-                     <label class="switch2">
-                          <button 
-                        class="delete-boutique-btn" 
-                        (click)="deleteBoutique()" 
-                        [disabled]="isDeleting"
-                        aria-label="Supprimer la boutique"
-                        title="Supprimer la boutique">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                        
-                     </label>
-                  
-                </div>
+                <!-- Bouton supprimer  -->
+                    <div class="delete-boutique-container" style="margin-top: 22px;"
+                    *ngIf="productsInBoutique.length === 0">
+                            <span style="font-size: 13px;">Supprimer la boutique</span>
+                            <label class="switch2">
+                                <button 
+                            class="delete-boutique-btn" 
+                            (click)="deleteBoutique()" 
+                            [disabled]="isDeleting"
+                            aria-label="Supprimer la boutique"
+                            title="Supprimer la boutique">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                            </label>
+                    </div>
         </div>
         
         <!-- Modal de confirmation personnalisée -->
@@ -522,7 +521,7 @@
                                 {{ product.description }}
                                 </div>
                             </td>
-                            <td [innerHTML]="highlightMatch(product.nomCategorie || 'non catégorisé')"></td><!--{{ product.nomCategorie || 'Non catégorisé' }}-->
+                            <td [innerHTML]="highlightMatch(product.nomCategorie || 'sans catégorie')"></td><!--{{ product.nomCategorie || 'Non catégorisé' }}-->
                             <td>{{ product.prixVente | number:'1.2-2' }} FCFA</td>
                             <td [style.color]="product.quantite <= product.seuilAlert ? 'red' : 'inherit'">
                                 {{ product.quantite }}

@@ -5,10 +5,11 @@
 
     <div class="actions">
       <button class="add-task" (click)="goToAddProduit()">Ajouter un produit</button>
-      <!-- <button style="border: none; border-radius: 2px; background-color: #333; padding: 2px 10px; margin-left: 10px; color: #fff;">Importer excel</button> -->
-       <button class="add-task" (click)="openExcelImportModal()" style="border: none; border-radius: 2px; background-color: #ffffff; padding: 2px 10px; margin-left: 10px; color: #fff;">
-        <img src="assets/icon/excel.png" alt="Importer Excel" style="height: 20px;" />
+       <button class="add-task1" (click)="openExcelImportModal()" title="importer Excel">
+        <img src="assets/icon/excel.png" alt="Importer Excel"/>
       </button>
+
+       <div class="bare"></div>
 
       <div class="contentIcon">
         <i class="ri-refresh-line" (click)="rafraichirProduits()" *ngIf="!isLoading"></i>
@@ -172,15 +173,15 @@
         <!-- <div> {{ product | json }}</div> -->
         <td [innerHTML]="highlightMatch(product.nom)" ></td>
         <td class="description-cell" (mouseover)="showDescription = true" (mouseout)="showDescription = false">
-          {{ product.description ? (product.description | slice:0:20) + (product.description.length > 20 ? '...' : '') : 'Non description' }}
-          <div class="description-hover" *ngIf="showDescription">{{ product.description || 'Non description' }}</div>
+          {{ product.description ? (product.description | slice:0:20) + (product.description.length > 20 ? '...' : '') : 'sans description' }}
+          <div class="description-hover" *ngIf="showDescription">{{ product.description || 'sans description' }}</div>
         </td>
-        <td [innerHTML]="highlightMatch(product.nomCategorie || 'non categorie')"></td>
+        <td [innerHTML]="highlightMatch(product.nomCategorie || 'sans categorie')"></td>
         <td>{{ product.prixVente | customNumber }}</td>
         <td>{{ product.prixAchat | customNumber }}</td>
         <!-- <td style="background-color: #0671e410;" [innerHTML]="highlightMatch(product.quantite.toString())"></td> -->
         <!-- <td>{{ product.nomUnite || 'Sans unité'}}</td> -->
-        <td [innerHTML]="highlightMatch(product.nomUnite || 'non unite')"></td>
+        <td [innerHTML]="highlightMatch(product.nomUnite || 'sans unite')"></td>
        <td>
           {{ product.typeProduit === 'PHYSIQUE' ? 'Produit' : (product.typeProduit === 'SERVICE' ? 'Service' : 'Type Produit') }}
         </td>
