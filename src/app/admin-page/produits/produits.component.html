@@ -112,7 +112,8 @@
             </div>
         
             <ng-container *ngIf="(boutiques?.length || 0) > 0;">
-                <ng-container *ngFor="let boutique of boutiques || []; let i = index">
+                <!-- <ng-container *ngFor="let boutique of boutiques || []; let i = index"> -->
+                  <ng-container *ngFor="let boutique of boutiquesSansEntrepots; let i = index">
                     <div cdkDrag class="draggable-item" [class.name_boutique_active]="boutique.id === selectedBoutique?.id && boutique.actif"
                         [class.suspended-boutique]="!boutique.actif"
                         [style.color]="boutique.actif"

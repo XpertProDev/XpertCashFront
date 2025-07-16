@@ -119,11 +119,11 @@
                 <span *ngIf="totalAllProducts > 0" class="facture-count">
                   {{ totalAllProducts }}
                 </span>
-              </p>
+              </p> 
           </div>
           
           <!-- Liste des boutiques -->
-          <ng-container *ngFor="let boutique of boutiques; let i = index">
+          <ng-container *ngFor="let boutique of boutiquesSansEntrepots; let i = index">
               <p 
               [class.name_boutique_active]="boutique.id === selectedBoutique?.id && boutique.actif"
               [class.suspended-boutique]="!boutique.actif"

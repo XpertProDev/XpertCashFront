@@ -153,11 +153,17 @@ export class StocksComponent implements OnInit {
   // }
 
   filteredProducts(): Produit[] {
-    // Utilisez filteredProduct si disponible, sinon tasks
+    // Exclure les produits liés à des entrepôts
+      const produitsSansEntrepots = this.tasks.filter(p => {
+        const boutique = this.boutiques.find(b => b.id === p.boutiqueId);
+        return boutique && boutique.typeBoutique !== 'ENTREPOT';
+      });
+    
     const productsToShow = this.filteredProduct.length > 0 ? this.filteredProduct : this.tasks;
     
     const startIndex = this.currentPage * this.pageSize;
-    return productsToShow.slice(startIndex, startIndex + this.pageSize);
+    // return productsToShow.slice(startIndex, startIndex + this.pageSize);
+     return produitsSansEntrepots.slice(startIndex, startIndex + this.pageSize);
   }
 
   // Affichage/Masquage du dropdown d'export
@@ -657,4 +663,7 @@ export class StocksComponent implements OnInit {
     return "Recherche...";
   }
   
+  get boutiquesSansEntrepots(): any[] {
+  return this.boutiques?.filter(b => b.typeBoutique !== 'ENTREPOT') || [];
+}
 }

@@ -239,8 +239,14 @@ export class ProduitsComponent implements OnInit {
   // }
 
   filteredProducts(): Produit[] {
+     // Exclure les produits liés à des entrepôts
+      const produitsSansEntrepots = this.tasks.filter(p => {
+        const boutique = this.boutiques.find(b => b.id === p.boutiqueId);
+        return boutique && boutique.typeBoutique !== 'ENTREPOT';
+      });
     const startIndex = this.currentPage * this.pageSize;
-    return this.tasks.slice(startIndex, startIndex + this.pageSize);
+    // return this.tasks.slice(startIndex, startIndex + this.pageSize);
+    return produitsSansEntrepots.slice(startIndex, startIndex + this.pageSize);
   }
 
   // Affichage/Masquage du dropdown d'export
@@ -1075,6 +1081,9 @@ export class ProduitsComponent implements OnInit {
     return selectedNames.join(', ');
   }
   
+get boutiquesSansEntrepots(): any[] {
+  return this.boutiques?.filter(b => b.typeBoutique !== 'ENTREPOT') || [];
+}
 
   
 }
