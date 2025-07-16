@@ -6,4 +6,5 @@ export interface Boutique {
     email: string;
     createdAt?: string;
     actif: boolean;
+    type: string
 }

@@ -43,6 +43,7 @@
           <th>Adresse </th>
           <th>Téléphone </th>
           <th>Date de Creation </th>
+          <th>Type</th>
           <th>Statut</th>
         </tr>
       </thead>
@@ -53,6 +54,25 @@
           <td>{{ boutique.adresse || 'Non adresse'  }}</td>
           <td>{{ boutique.telephone || 'Non téléphone'  }}</td>
           <td>{{ boutique.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <!-- <td [ngClass]="boutique.typeBoutique === 'ENTREPOT' ? 'entrepot' : 'boutique'">
+            {{ boutique.typeBoutique === 'ENTREPOT' ? 'Entrepôt' : 'Boutique' }}
+          </td> -->
+
+          <td class="type-indicator">
+            <ng-container *ngIf="boutique.typeBoutique === 'ENTREPOT'; else boutiqueText">
+              <span class="dot" style="background-color: #e67e22;"></span>
+              Entrepôt
+            </ng-container>
+            <ng-template #boutiqueText>
+              Boutique
+            </ng-template>
+          </td>
+
+
+        
+
+
+
           <td class="content_statut_boutique">
             <span class="statut_boutique" 
                   [ngStyle]="{
@@ -78,18 +98,49 @@
           <button class="close-btn" (click)="closePopup()">&times;</button>
       </div>
       <form [formGroup]="boutiqueForm">
+             <div class="triple">
+                <div class="radio-group">
+                    <div class="radio-option">
+                      <input type="radio"
+                            id="typeBoutique"
+                            formControlName="type"
+                            name="typeBoutique"
+                            value="BOUTIQUE"
+                            class="radio-input">
+                      <label for="typeBoutique" class="radio-label">
+                        <span class="radio-custom"></span> Boutique
+                      </label>
+                    </div>
+
+                    <div class="radio-option">
+                      <input type="radio"
+                            id="typeEntrepot"
+                            formControlName="type"
+                            name="typeBoutique"
+                            value="ENTREPOT"
+                            class="radio-input">
+                      <label for="typeEntrepot" class="radio-label">
+                        <span class="radio-custom"></span> Entrepôt
+                      </label>
+                    </div>
+                </div>
+              </div>
+
 
         <div class="popup-body">
           
           <div class="champ_grid">
             <!-- Input de nom de boutique  -->
+             
+
+
             <div class="champ_input">
               <input class="input_focus" type="text" formControlName="nomBoutique" placeholder="Saisis le nom de boutique">
               <label class="label">Nom boutque</label>
               <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
                 <small class="error">Le nom boutique complet est vide.</small>
               </div>
-            </div>
+            </div> 
 
             <!-- Input d'email'  -->
             <div class="champ_input">

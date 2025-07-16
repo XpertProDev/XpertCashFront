@@ -659,8 +659,8 @@ doc.setFont('helvetica', 'bold');
 doc.text(this.signataire || '', 180, signatureY, { align: 'right' });
 
 // === Signature (image en bas à droite, ajustée) ===
-const signatureImageWidth = 30;
-const signatureImageHeight = 30;
+const signatureImageWidth = 33;
+const signatureImageHeight = 33;
 
 // ↓ Ajustements ici
 const signatureImageX = 180 - signatureImageWidth - 6; // décalé 5px à gauche
@@ -681,7 +681,7 @@ if (this.signaturNum) {
 // === Cachet superposé (ajusté) ===
 const cachetImageWidth = 40;
 const cachetImageHeight = 40;
-const cachetImageX = signatureImageX - 17; // un peu plus à gauche
+const cachetImageX = signatureImageX - 12; // un peu plus à gauche
 const cachetImageY = signatureImageY + 3;  // un peu plus en haut
 
 if (this.cachetNum) {

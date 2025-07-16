@@ -50,6 +50,7 @@ export class BoutiqueComponent implements OnInit {
       email: [''],
       telephone: ['', [Validators.pattern(/^\d{8,15}$/)]],
       adresse: [''],
+      type: ['BOUTIQUE', Validators.required]
     });
   }
   
