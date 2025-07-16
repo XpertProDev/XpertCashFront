@@ -322,7 +322,9 @@ updatePhoneValidator(longueur: number): void {
       prefixe: this.client.entrepriseClient?.prefixe,
       suffixe: this.client.entrepriseClient?.suffixe,
       tauxTva: this.client.entrepriseClient?.tauxTva,
-      signaturNum: this.client.entrepriseClient?.signaturNum
+      signaturNum: this.client.entrepriseClient?.signaturNum,
+      cachetNum: this.client.entrepriseClient?.cachetNum
+
 
     };
   }

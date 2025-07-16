@@ -334,23 +334,34 @@ td.td_left {
   width: 100px;
   height: 80px; 
   position: relative;
-  left: 25px;
 }
 
-.signaturNum img {
-  width: 100px;
-  height: auto;
-  object-fit: contain;
-  position: relative;
-  top: -11px;
-  right: 37px;
+.signaturNum .img {
+ position: absolute;
+    top: 0;
+    right: 48px;
+    width: 121%;
+    height: auto;
+    object-fit: contain;
+    z-index: 1;
+}
+
+/* Cachet par-dessus */
+.signaturNum .cachetNum {
+position: absolute;
+    top: 10px;
+    right: 61px;
+    width: 150%;
+    height: auto;
+    object-fit: contain;
+    z-index: 2;
+    opacity: 0.7; 
 }
 
 .name_directeur {
   font-size: 12px;
-  // margin-top: 5px;
   position: relative;
-  left: 12px;
+  right: 12px;
 
 }
 

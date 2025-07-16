@@ -31,6 +31,8 @@ export class FactureReelDetailsComponent implements OnInit {
   email!: string;
   logo: string | null = null;
   signaturNum: string | null = null;
+  cachetNum: string | null = null;
+
   secteur!: string;
   telephone!: string;
   adresse!: string;
@@ -376,6 +378,8 @@ voirProforma() {
         this.signataireNom = entreprise.signataireNom;
         this.tauxTva = entreprise.tauxTva;
         this.signaturNum = entreprise.signaturNum ? `${this.apiUrl}${entreprise.signaturNum}` : null;
+        this.cachetNum = entreprise.cachetNum ? `${this.apiUrl}${entreprise.cachetNum}` : null;
+
 
       },
       error: (err) => {
@@ -489,57 +493,6 @@ async download() {
   doc.setTextColor(85, 85, 85);
   doc.text(`FACTURE : ${this.facture?.numeroFacture}`, 105, 36, { align: 'center' });
 
-  // Badge de statut de paiement
-//  if (this.facture?.statutPaiement) {
-//   const status = this.facture.statutPaiement;
-//   const statusText = this.getStatutText(status);
-
-//   let bgColor: [number, number, number] = [108, 117, 125];
-//   let textColor: [number, number, number] = [255, 255, 255];
-
-//   switch (status) {
-//     case 'PAYEE':
-//       bgColor = [40, 167, 69];
-//       break;
-//     case 'PARTIELLEMENT_PAYEE':
-//       bgColor = [255, 193, 7];
-//       textColor = [0, 0, 0];
-//       break;
-//     case 'EN_ATTENTE':
-//       bgColor = [220, 53, 69];
-//       break;
-//   }
-
-//   // Position et dimensions
-//   const textWidth = doc.getTextWidth(statusText);
-//   const badgeWidth = textWidth + 8;
-//   const badgeHeight = 10;
-
-//   // Choisis une position "hors contenu"
-//   const centerX = 180;
-//   const centerY = 33;
-
-//   // Appliquer rotation
-//   doc.saveGraphicsState();
-//   doc.setFillColor(...bgColor);
-//   doc.setTextColor(...textColor);
-//   doc.setFontSize(9);
-//   doc.setFont('helvetica', 'bold');
-
-//   // Rotation 45° autour du point (centerX, centerY)
-
-
-//   // Dessiner le rectangle tourné
-//   doc.rect(centerX - badgeWidth / 2, centerY - badgeHeight / 2, badgeWidth, badgeHeight, 'F');
-
-//   // Écrire le texte centré dans le badge
-//   doc.text(statusText, centerX, centerY + 3, { align: 'center' });
-
-//   doc.restoreGraphicsState(); // Revenir à l’orientation normale
-
-//   // Reset couleur
-//   doc.setTextColor(85, 85, 85);
-// }
 
 
   // Date
@@ -695,20 +648,59 @@ doc.text(amountText, 15 + doc.getTextWidth(libelle), amountY);
 
 // Signature
 const signatureY = amountY + 30;
+
+// "Pour acquit" à gauche
 doc.setFontSize(9);
-doc.setFont('helvetica');
-let clientName = 'Nom du client';
-if (this.facture) {
-  clientName = this.facture.client?.nom || this.facture.entrepriseClient?.nom || 'Non spécifié';
-}
 doc.setFont('helvetica', 'bold');
 doc.text('Pour acquit :', 29, signatureY);
-doc.setFont('helvetica', 'normal');
-doc.text(clientName, 29, signatureY + 16);
 
-doc.setFont('helvetica');
+// Nom du signataire à droite (au même niveau que "Pour acquit")
+doc.setFont('helvetica', 'bold');
 doc.text(this.signataire || '', 180, signatureY, { align: 'right' });
-doc.text(this.signataireNom || 'Nom du signataire', 183, signatureY + 16, { align: 'right' });
+
+// === Signature (image en bas à droite, ajustée) ===
+const signatureImageWidth = 30;
+const signatureImageHeight = 30;
+
+// ↓ Ajustements ici
+const signatureImageX = 180 - signatureImageWidth - 6; // décalé 5px à gauche
+const signatureImageY = signatureY + 1; // 3px plus haut
+
+if (this.signaturNum) {
+  doc.addImage(
+    this.signaturNum,
+    'PNG',
+    signatureImageX,
+    signatureImageY,
+    signatureImageWidth,
+    signatureImageHeight
+  );
+}
+
+
+// === Cachet superposé (ajusté) ===
+const cachetImageWidth = 40;
+const cachetImageHeight = 40;
+const cachetImageX = signatureImageX - 17; // un peu plus à gauche
+const cachetImageY = signatureImageY + 3;  // un peu plus en haut
+
+if (this.cachetNum) {
+  doc.addImage(
+    this.cachetNum,
+    'PNG',
+    cachetImageX,
+    cachetImageY,
+    cachetImageWidth,
+    cachetImageHeight
+  );
+}
+
+
+// === Nom complet du signataire (sous l’image) ===
+doc.setFontSize(9);
+doc.setFont('helvetica', 'bold');
+doc.text(this.signataireNom || '', 180, signatureImageY + signatureImageHeight + 4, { align: 'right' });
+
 
   // Footer
   const footerY = doc.internal.pageSize.height - 20;

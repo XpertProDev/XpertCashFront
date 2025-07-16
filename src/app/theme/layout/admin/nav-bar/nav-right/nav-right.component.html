@@ -102,17 +102,17 @@
   <!-- lockManually -->
   <li>
    <div class="dropdown">
-  <a href="javascript:void(0)" 
-     (click)="lockManually()" 
-     class="displayChatbox dropdown-toggle" 
-     [title]="isLocked ? 'Écran verrouillé' : 'Verrouiller l\'écran'">
-    
-    <i class="icon feather" [ngClass]="isLocked ? 'icon-lock' : 'icon-unlock'"></i>
-    
-    <span class="badge bg-success">
-      <span class="sr-only"></span>
-    </span>
-  </a>
+    <a href="javascript:void(0)" 
+      (click)="lockManually()" 
+      class="displayChatbox dropdown-toggle" 
+      [title]="isLocked ? 'Écran verrouillé' : 'Verrouiller l\'écran'">
+      
+      <i class="fa"  [ngClass]="isLocked ? 'fa-lock' : 'fa-unlock'"></i>
+      
+      <!-- <span class="badge bg-success">
+        <span class="sr-only"></span>
+      </span> -->
+    </a>
 </div>
 
   </li>

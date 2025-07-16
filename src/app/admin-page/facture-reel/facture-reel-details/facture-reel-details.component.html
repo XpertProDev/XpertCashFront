@@ -179,16 +179,12 @@
           <!-- Signature + nom complet sous le nom du signataire -->
           <div class="signature_bloc">
             <div class="signaturNum">
-              <img [src]="signaturNum" (error)="logo = fallbackLogo" alt="Signature">
+              <img class="img" [src]="signaturNum" (error)="logo = fallbackLogo" alt="Signature">
+              <img class="cachetNum" [src]="cachetNum" (error)="logo = fallbackLogo" alt="cachetNum">
             </div>
             <h4 class="name_directeur">{{ signataireNom }}</h4>
           </div>
         </div>
-
-
-
-        
-
 
       </div>
     </div>
