@@ -30,13 +30,21 @@ constructor(
   private usersService: UsersService,
   private modalService: ModalService,
   private lockService: LockService
-) {}
+) {
+  window.addEventListener('user-logged-out', () => {
+    this.isLocked = false;
+    clearTimeout(this.inactivityTimer);
+    this.isDialogOpen = false;
+    this.dialog.closeAll();
+  });
+}
 
   @HostListener('window:mousemove')
   @HostListener('window:keydown')
   @HostListener('window:click')
   resetTimer() {
     if (this.isLocked) return;
+    if (!this.isLoggedIn) return; 
 
     clearTimeout(this.inactivityTimer);
     this.inactivityTimer = setTimeout(() => this.lockScreen(), 2.75 * 60 * 60 * 1000);
@@ -106,6 +114,11 @@ constructor(
   
 
 checkLockStatus() {
+   if (!this.isLoggedIn) {
+    localStorage.removeItem('isLocked');
+    return;
+  }
+
     const wasLocked = localStorage.getItem('isLocked') === 'true';
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
@@ -118,6 +131,10 @@ checkLockStatus() {
     if (wasLocked) {
         this.lockScreen();
     }
+}
+
+get isLoggedIn(): boolean {
+  return !!localStorage.getItem('user');
 }
 
 

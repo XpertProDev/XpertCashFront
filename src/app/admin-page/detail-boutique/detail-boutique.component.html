@@ -76,7 +76,7 @@
         <div class="profil_section">
                 <div class="section_title">
                     <div class="title">
-                        <h6>Action boutique</h6>
+                        <h6>Action {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'la boutique' }}</h6>
                     </div>
                 </div>
 
@@ -115,7 +115,13 @@
 
                 <!-- Bouton supprimer  -->
                     <div class="delete-boutique-container" style="margin-top: 22px;">
-                            <span style="font-size: 13px;">Supprimer la boutique</span>
+                           <span style="font-size: 13px;">
+                              <span style="font-size: 13px;">
+                                Supprimer {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'la boutique' }}
+                                </span>
+
+                            </span>
+
                             <label class="switch2">
                                 <button 
                             class="delete-boutique-btn" 
@@ -133,7 +139,7 @@
         <div class="confirmation-modal-averB" *ngIf="showConfirmationModalB">
         <div class="modal-content-averB">
             <h4 style="font-size: 16px; margin-bottom: 10px;">Confirmation</h4>
-            <p style="margin: 0; font-size: 12px;">Êtes-vous sûr de vouloir supprimer cette boutique ?</p>
+            <p style="margin: 0; font-size: 12px;">Êtes-vous sûr de vouloir supprimer {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'la boutique' }} ?</p>
             <div class="modal-actions-averB">
             <button class="btn-confirm" style="font-size: 12px;" (click)="confirmDeleteB()">OUI</button>
             <button class="btn-cancel" style="font-size: 12px;" (click)="showConfirmationModalB = false">NON</button>
@@ -145,7 +151,7 @@
         <div class="info_section">
             <div class="section_title">
                 <div class="title title_display">
-                    <h6>Informations sur la boutique</h6>
+                    <h6>Informations sur {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'la boutique' }}</h6>
                     <div class="icon_edit">
                     <i *ngIf="!isEditing" 
                         class="ri-edit-box-line" 
@@ -248,7 +254,7 @@
                 <!-- // title  -->
                 <div class="section_title" style="display: flex; align-items: center;">
                     <div class="title" style="display: flex; align-items: center;">
-                        <h6 style="margin-right: 8px;">Produits de la boutique</h6>
+                        <h6 style="margin-right: 8px;">Produits de {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'la boutique' }}</h6>
                         <div class="facture-count" *ngIf="productsInBoutique.length > 0" style="position: relative; top: -4px; right: 2px;">
                             {{ productsInBoutique.length }}
                         </div>
@@ -536,7 +542,7 @@
                             <td colspan="7" style="text-align: center; padding: 20px;">
                                 <div style="display: flex; flex-direction: column; align-items: center;">
                                 <i class="ri-box-line" style="font-size: 48px; color: #6c757d;"></i>
-                                <p style="margin-top: 10px; margin-bottom: 5px;">Aucun produit dans cette boutique</p> 
+                                <p style="margin-top: 10px; margin-bottom: 5px;">Aucun produit dans {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'la boutique' }}</p> 
                                 </div>
                             </td>
                         </tr>

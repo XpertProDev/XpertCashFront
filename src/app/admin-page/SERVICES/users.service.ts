@@ -72,6 +72,7 @@ connexionUser(credentials: { email: string; password: string }): Observable<{
     localStorage.removeItem('photo');
     window.dispatchEvent(new Event('storage-photo-update'));
     this.isLocked = false;
+    window.dispatchEvent(new Event('user-logged-out'));
     this.router.navigate(['/connexion']);
   }
   

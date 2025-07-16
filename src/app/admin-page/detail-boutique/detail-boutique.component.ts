@@ -80,6 +80,8 @@ export class DetailBoutiqueComponent implements OnInit {
   showFilterDropdown = false;
   searchText: string = '';
   filteredProducts: Produit[] = [];
+
+  
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
   constructor(

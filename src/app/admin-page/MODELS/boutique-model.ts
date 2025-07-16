@@ -6,5 +6,6 @@ export interface Boutique {
     email: string;
     createdAt?: string;
     actif: boolean;
-    type: string
+    type: string;
+    typeBoutique: string
 }
