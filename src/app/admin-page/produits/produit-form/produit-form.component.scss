@@ -36,7 +36,7 @@
 
 .input_focus {
   width: 100%;
-  min-width: 250px;
+  // min-width: 250px;
   height: 49px;
   outline: none;
   border-bottom: 1px solid rgb(53, 50, 50);
@@ -49,6 +49,15 @@
   //padding-left: 10px;
   background: none;
   color: #695c5c;
+}
+
+.double_input_grid_true {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  gap: 20px;
 }
 
 .champ_input .label {
@@ -91,7 +100,7 @@
 
 .input_focus2 {
   width: 100%;
-  min-width: 250px;
+  // min-width: 250px;
   // height: 70px;
   outline: none;
   border-top: none;

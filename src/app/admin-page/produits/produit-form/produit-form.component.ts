@@ -304,6 +304,7 @@ export class ProduitFormComponent {
       codeBare: ['', [Validators.minLength(8), Validators.maxLength(13)]],
       categorieId: [''],
       uniteId: [''],
+      datePreemption: [''],
       typeProduit: ['PHYSIQUE', Validators.required]
     });
 
