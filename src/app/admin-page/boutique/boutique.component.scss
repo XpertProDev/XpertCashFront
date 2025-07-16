@@ -523,3 +523,38 @@ tr:hover {
   height: 7px;
   border-radius: 50%;
 }
+
+
+.filter-container {
+  position: relative;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.iconDrop i {
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.filter-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.filter-option:hover {
+  background-color: #f1f1f1;
+}

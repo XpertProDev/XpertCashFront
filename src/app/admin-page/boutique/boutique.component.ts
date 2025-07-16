@@ -118,19 +118,21 @@ export class BoutiqueComponent implements OnInit {
     });
   }
 
-  filterBoutiques(): void {
-    const term = this.searchTerm.toLowerCase();
-  
-    if (!term) {
-      this.filteredBoutiques = [...this.boutiques];
-      return;
-    }
-  
-    this.filteredBoutiques = this.boutiques.filter(boutique =>
-      (boutique.nomBoutique && boutique.nomBoutique.toLowerCase().includes(term)) || 
+ filterBoutiques(): void {
+  const term = this.searchTerm.toLowerCase();
+
+  this.filteredBoutiques = this.boutiques.filter(boutique => {
+    const matchTerm = !term || (
+      (boutique.nomBoutique && boutique.nomBoutique.toLowerCase().includes(term)) ||
       (boutique.adresse && boutique.adresse.toLowerCase().includes(term))
     );
-  }
+
+    const matchType = this.filtreType === 'ALL' || boutique.typeBoutique === this.filtreType;
+
+    return matchTerm && matchType;
+  });
+}
+
   
 
   clearSearch(): void {
@@ -143,6 +145,20 @@ export class BoutiqueComponent implements OnInit {
   }
 
 
-  
+showFiltreDropdown: boolean = false;
+filtreType: 'ALL' | 'BOUTIQUE' | 'ENTREPOT' = 'ALL';
+
+
+toggleFiltreDropdown(): void {
+  this.showFiltreDropdown = !this.showFiltreDropdown;
+}
+
+filtrerParType(type: 'ALL' | 'BOUTIQUE' | 'ENTREPOT'): void {
+  this.filtreType = type;
+  this.showFiltreDropdown = false; // Ferme le menu après sélection
+  this.filterBoutiques();
+}
+
+
 }
 

@@ -26,6 +26,17 @@
         <button class="add-task" (click)="openPopup()">Ajouter </button>
         <div class="contentIcon">
           <div class="bare"></div>
+           <div class="filter-container">
+              <div class="iconDrop">
+                <i class="ri-filter-3-line" (click)="toggleFiltreDropdown()"></i>
+              </div>
+
+              <div class="filter-dropdown" *ngIf="showFiltreDropdown">
+                <div class="filter-option" (click)="filtrerParType('ALL')">Tous</div>
+                <div class="filter-option" (click)="filtrerParType('BOUTIQUE')">Boutiques</div>
+                <div class="filter-option" (click)="filtrerParType('ENTREPOT')">Entrepôts</div>
+              </div>
+            </div>
         </div>
         <div class="inputSearch">
           <input [(ngModel)]="searchTerm" type="text" placeholder="Recherche..." (input)="filterBoutiques()" />
