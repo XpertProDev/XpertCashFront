@@ -1176,7 +1176,7 @@ table {
 .delete-boutique-btn {
   background-color: transparent;
   border: none;
-  color: #dc3545;
+  color: #7a7a7ae7;
   cursor: pointer;
   font-size: 20px;
   padding: 0;
@@ -1185,6 +1185,10 @@ table {
   position: relative;
   left: 10px;
   
+}
+
+.delete-boutique-btn:hover{
+  color: #fa2a2a;
 }
 
 .btn-confirm,

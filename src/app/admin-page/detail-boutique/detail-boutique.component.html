@@ -415,7 +415,7 @@
             </div>
 
             <div *ngIf="!boutique?.actif" class="alert alert-warning" style="margin-bottom: 0px; text-align: center;">
-                <i class="ri-alert-line"></i> Boutique désactivée - Les produits ne sont pas visible
+                <i class="ri-alert-line"></i> {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'la boutique' }} désactivée - Les produits ne sont pas visible
             </div>
 
             <!-- Tableau des produits -->
