@@ -318,4 +318,56 @@ export class DetailEditEntrepriseComponent {
     this.router.navigate(['/clients'])
   }
 
+entrepriseClient: EntrepriseClient | null = null;
+
+showConfirmationModalE = false;
+isDeletingE = false;
+
+deleteEntreprise() {
+  if (!this.entrepriseClient && !this.entrepriseId) {
+    console.error("Entreprise cliente ou ID non disponible.");
+    return;
+  }
+
+  this.showConfirmationModalE = true;
+}
+
+async confirmDeleteE(): Promise<void> {
+  this.showConfirmationModalE = false;
+
+  if (!this.entrepriseClient && !this.entrepriseId) {
+    this.errorMessage = "Entreprise non disponible pour suppression.";
+    return;
+  }
+
+  this.isDeletingE = true;
+  this.errorMessage = '';
+  this.successMessage = '';
+
+  try {
+    const idToDelete = this.entrepriseClient?.id || this.entrepriseId;
+    // Un seul appel delete, on récupère le message (string) ici
+    const message = await this.entrepriseService.deleteEntreprise(idToDelete).toPromise();
+    this.successMessage = message || 'Entreprise supprimée avec succès !';
+
+    setTimeout(() => {
+      this.router.navigate(['/clients']);
+    }, 2000); 
+  } catch (err: any) {
+    let message = err?.error?.error || 'Erreur lors de la suppression.';
+    const prefix = "Une erreur est survenue : ";
+    if (message.startsWith(prefix)) {
+      message = message.substring(prefix.length);
+    }
+    this.errorMessage = message;
+  } finally {
+    this.isDeletingE = false;
+    setTimeout(() => {
+      this.errorMessage = '';
+      this.successMessage = '';
+    }, 5000);
+  }
+}
+
+
 }

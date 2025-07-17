@@ -39,16 +39,49 @@
           <img src="assets/img/office_building.png" alt="Logo entreprise" class="profile-img" />
         </div> -->
 
-        <div class="profile-img-wrapper" (click)="triggerFileInput()">
-              <img src="assets/img/office_building.png"
-                  alt="Photo de profil" 
-                  class="profile-img" />
-              
-              <div class="overlay">
-                <img src="assets/img/appareil.jpg" alt="Modifier" class="camera-icon" />
-              </div>
+            <div class="profile-img-wrapper" (click)="triggerFileInput()">
+                  <img src="assets/img/office_building.png"
+                      alt="Photo de profil" 
+                      class="profile-img" />
+                  
+                  <div class="overlay">
+                    <img src="assets/img/appareil.jpg" alt="Modifier" class="camera-icon" />
+                  </div>
             </div>
+
+             <!-- Bouton supprimer  -->
+                    <div class="delete-entrepriseClient-container" style="margin-top: 22px;">
+                           <span style="font-size: 13px;">
+                              <span style="font-size: 13px;">
+                                Supprimer Entreprise
+                                </span>
+
+                            </span>
+
+                            <label class="switch2">
+                                <button 
+                            class="delete-boutique-btn" 
+                            (click)="deleteEntreprise()" 
+                            [disabled]="isDeletingE"
+                            aria-label="Supprimer la boutique"
+                            title="Supprimer la boutique">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                            </label>
+                    </div> 
       </div>
+
+       <!-- Modal de confirmation personnalisée -->
+        <div class="confirmation-modal-averB" *ngIf="showConfirmationModalE">
+        <div class="modal-content-averB">
+            <h4 style="font-size: 16px; margin-bottom: 10px;">Confirmation</h4>
+            <p style="margin: 0; font-size: 12px;">Êtes-vous sûr de vouloir supprimer cette entreprise ?</p>
+            <div class="modal-actions-averB">
+            <button class="btn-confirm" style="font-size: 12px;" (click)="confirmDeleteE()">OUI</button>
+            <button class="btn-cancel" style="font-size: 12px;" (click)="showConfirmationModalE = false">NON</button>
+            </div>
+        </div>
+        </div>
       
       <!-- Section Informations Entreprise -->
       <div class="info_section">
