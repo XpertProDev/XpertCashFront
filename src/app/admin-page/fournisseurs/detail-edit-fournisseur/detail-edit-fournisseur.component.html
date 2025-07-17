@@ -53,7 +53,41 @@
             <p style="margin: 0; font-size: 8px; text-align: center;">Formats JPG, GIF ou PNG autorisés. <br> Taille maximale : 800 Ko.</p>
           </div>
 
+          <!-- Bouton supprimer  -->
+                    <div class="delete-boutique-container" style="margin-top: 22px;">
+                           <span style="font-size: 13px;">
+                              <span style="font-size: 13px;">
+                                Supprimer le fournisseur
+                                </span>
+
+                            </span>
+
+                            <label class="switch2">
+                                <button 
+                            class="delete-boutique-btn" 
+                            (click)="deleteFournisseur()" 
+                            [disabled]="isDeletingF"
+                            aria-label="Supprimer le fournisseur"
+                            title="Supprimer le fournisseur">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                            </label>
+                    </div>
         </div>
+
+          <!-- Modal de confirmation personnalisée -->
+        <div class="confirmation-modal-averB" *ngIf="showConfirmationModalF">
+          <div class="modal-content-averB">
+              <h4 style="font-size: 16px; margin-bottom: 10px;">Confirmation</h4>
+              <p style="margin: 0; font-size: 12px;">Êtes-vous sûr de vouloir supprimer ce fournisseur ?</p>
+              <div class="modal-actions-averB">
+              <button class="btn-confirm" style="font-size: 12px;" (click)="confirmDeleteF()">OUI</button>
+              <button class="btn-cancel" style="font-size: 12px;" (click)="showConfirmationModalF = false">NON</button>
+              </div>
+          </div>
+        </div>
+
+        
         
           <!-- Section Informations Personnelles -->
           <div class="info_section">

@@ -416,6 +416,27 @@ getProduits() {
         next: (data: Produit[]) => {
           console.log('Produits récupérés :', data);
           this.produits = data;
+
+          // Filtrer uniquement les produits liés à au moins une boutique non entrepôt
+          const produitsBoutiques = this.produits.filter(p =>
+            Array.isArray(p.boutiques) &&
+            p.boutiques.some(b => (b.typeBoutique || '').toUpperCase() !== 'ENTREPOT')
+          );
+
+          // Mettre à jour filteredProduits pour l'autocomplete
+          this.filteredProduits = this.productControl.valueChanges.pipe(
+            startWith(null),
+            map(value => typeof value === 'string' ? value : value?.nom),
+            map(name => {
+              if (!name) return produitsBoutiques;
+              const lowerName = name.toLowerCase();
+              return produitsBoutiques.filter(p =>
+                p.nom?.toLowerCase().includes(lowerName)
+              );
+            })
+          );
+
+          console.log("Produits visibles dans autocomplete :", produitsBoutiques);
         },
         error: (err) => console.error('Erreur récupération produits :', err)
       });
@@ -423,6 +444,7 @@ getProduits() {
     error: (err) => console.error('Erreur récupération token :', err)
   });
 }
+
 
 
 

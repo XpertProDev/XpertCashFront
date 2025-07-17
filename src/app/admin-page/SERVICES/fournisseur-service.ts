@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { map, Observable, switchMap } from "rxjs";
+import { catchError, map, Observable, switchMap, throwError } from "rxjs";
 import { Fournisseurs } from "../MODELS/fournisseurs-model";
 import { environment } from "src/environments/environment";
 import { UsersService } from "./users.service";
@@ -101,6 +101,43 @@ updateFournisseur(
     })
   );
 }
+
+// Delete fournisseur
+
+deleteFournisseur(id: number): Observable<{ message: string }> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        return throwError(() => new Error('Token manquant'));
+      }
+
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
+
+      // 👇 Attente d'une réponse JSON (pas text)
+      return this.http.delete<{ message: string }>(
+        `${this.apiUrl}/fournisseur/${id}`,
+        { headers }
+      );
+    }),
+    catchError(error => {
+      let errorMsg = 'Erreur inconnue';
+
+      if (error.error instanceof ErrorEvent) {
+        errorMsg = `Erreur: ${error.error.message}`;
+      } else if (error.status === 404) {
+        errorMsg = 'Fournisseur non trouvé';
+      } else if (error.status === 403) {
+        errorMsg = error.error?.message || 'Accès refusé';
+      }
+
+      return throwError(() => new Error(errorMsg));
+    })
+  );
+}
+
 
 
 
