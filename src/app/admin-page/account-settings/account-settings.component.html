@@ -377,26 +377,34 @@
                                         </div>
 
                                         <!-- // sachet  -->
-                            <div class="footer_container1">
-                                    <!-- Ligne avec "Pour acquit" à gauche et le nom du signataire à droite -->
-                                    <div class="ligne_haut">
-                                        <div class="acquis">
-                                        <h6>Pour acquit</h6>
-                                        </div>
-                                        <div class="signataire_header">
-                                        <h6>{{ form.get('signataire')?.value }}</h6>
-                                        </div>
-                                    </div>
+                                        <div class="footer_container1">
+                                            <!-- Ligne avec "Pour acquit" à gauche et le nom du signataire à droite -->
+                                            <div class="ligne_haut">
+                                                <div class="acquis">
+                                                <h6>Pour acquit</h6>
+                                                </div>
+                                                <div class="signataire_header">
+                                                    <h6>{{ form.get('signataire')?.value }}</h6>
+                                                </div>
+                                            </div>
 
-                                    <!-- Signature + nom complet sous le nom du signataire -->
-                                    <div class="signature_bloc">
-                                        <div class="signaturNum">
-                                        <img class="img" [src]="signaturNum" (error)="logo = fallbackLogo" alt="Signature">
-                                        <img class="cachetNum" [src]="cachetNum" (error)="logo = fallbackLogo" alt="cachetNum">
+                                            <!-- Signature + nom complet sous le nom du signataire -->
+                                            <div class="signature_bloc" style="position: relative;">
+                                                <div class="signaturNum">
+                                                    <img class="img" 
+                                                        [src]="signaturNum" 
+                                                        (error)="signaturNum = 'assets/img/sinum.png'" 
+                                                        alt="Signature">
+                                                </div>
+                                                <h4 class="name_directeur">{{ form.get('signataireNom')?.value }}</h4>
+                                                <div class="img_signaturNum">
+                                                    <img class="cachetNum"
+                                                        [src]="cachetNum" 
+                                                        (error)="cachetNum = 'assets/img/tampon.png'" 
+                                                        alt="Cachet">
+                                                </div>
+                                            </div>
                                         </div>
-                                        <h4 class="name_directeur">{{ form.get('signataireNom')?.value }}</h4>
-                                    </div>
-                            </div>
                             
                                     </div>
 
