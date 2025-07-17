@@ -395,14 +395,12 @@
                                                         [src]="signaturNum" 
                                                         (error)="signaturNum = 'assets/img/sinum.png'" 
                                                         alt="Signature">
-                                                </div>
-                                                <h4 class="name_directeur">{{ form.get('signataireNom')?.value }}</h4>
-                                                <div class="img_signaturNum">
-                                                    <img class="cachetNum"
+                                                         <img class="cachetNum"
                                                         [src]="cachetNum" 
                                                         (error)="cachetNum = 'assets/img/tampon.png'" 
                                                         alt="Cachet">
                                                 </div>
+                                                <h4 class="name_directeur">{{ form.get('signataireNom')?.value }}</h4>
                                             </div>
                                         </div>
                             
