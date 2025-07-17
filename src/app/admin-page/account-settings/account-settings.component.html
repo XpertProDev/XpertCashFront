@@ -840,9 +840,23 @@
                 <div class="cachet_preview">
                     <h6>{{ form.get('signataire')?.value }}</h6>
                     <h6 class="name_directeur_preview">{{ form.get('signataireNom')?.value }}</h6>
-                     <span class="cachetSignP" >
+                     <!-- <span class="cachetSignP" >
                             {{form.get('signataireNom')?.value }}
-                     </span>
+                     </span> -->
+                     <div class="signaturNum_preview" style="position: relative;">
+                        <div class="imgcachet">
+                            <img [src]="cachetNum" 
+                             (error)="cachetNum = 'assets/img/tampon.png'" 
+                             alt="Cachet"
+                             class="cachet-img-preview">
+                        </div>
+                        <div class="imgsigneture">
+                            <img [src]="signaturNum" style="position: relative; left: 25px;"
+                             (error)="signaturNum = 'assets/img/sinum.png'" 
+                             alt="Signature"
+                             class="signature-img-preview">
+                        </div>
+                    </div>
                       
                 </div>
             </div>
