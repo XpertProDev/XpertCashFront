@@ -9,7 +9,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { CategorieService } from '../SERVICES/categorie.service';
 import { ProduitService } from '../SERVICES/produit.service';
-import { Produit } from '../MODELS/produit.model';
+import { Boutique, Produit } from '../MODELS/produit.model';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
@@ -62,7 +62,6 @@ export class ProduitsComponent implements OnInit {
   isLoading = false;
   showNoProductsMessage = false;
   productCounts: { [boutiqueId: number]: number } = {};
-  totalAllProducts: number = 0;
 
   showFilterDropdown = false;
   selectedFilters: any[] = [];
@@ -239,14 +238,8 @@ export class ProduitsComponent implements OnInit {
   // }
 
   filteredProducts(): Produit[] {
-     // Exclure les produits liés à des entrepôts
-      const produitsSansEntrepots = this.tasks.filter(p => {
-        const boutique = this.boutiques.find(b => b.id === p.boutiqueId);
-        return boutique && boutique.typeBoutique !== 'ENTREPOT';
-      });
     const startIndex = this.currentPage * this.pageSize;
-    // return this.tasks.slice(startIndex, startIndex + this.pageSize);
-    return produitsSansEntrepots.slice(startIndex, startIndex + this.pageSize);
+    return this.tasks.slice(startIndex, startIndex + this.pageSize);
   }
 
   // Affichage/Masquage du dropdown d'export
@@ -509,45 +502,52 @@ export class ProduitsComponent implements OnInit {
 
     this.produitService.getProduitsByEntrepriseId(this.entrepriseId).subscribe({
       next: (produits: Produit[]) => {
-        this.tasks = produits.map(prod => {
-          // Reprenez ici la même logique de mapping que dans loadProduits()
-          const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
-            ? `${this.apiUrl}${prod.photo}`
-            : '';
+      // Filtrer les produits qui appartiennent à au moins une boutique non entrepôt et active
+          const boutiquesValidesIds = this.boutiques
+            .filter(b => b.typeBoutique !== 'ENTREPOT' && b.actif)
+            .map(b => b.id);
 
-          return {
-            ...prod,
-            photo: fullImageUrl,
-            createdAt: this.formatDate(prod.createdAt?.toString() || ''),
-          } as Produit;
-        }).sort((a, b) => {
-          const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
-          const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
-          return dateB - dateA;
-        });
+          const produitsFiltres = produits.filter(prod => {
+            return prod.boutiques?.some(b => boutiquesValidesIds.includes(b.id));
+          });
 
-        const counts: { [id: number]: number } = {};
-        produits.forEach(prod => {
-          if (prod.boutiques) {
-            prod.boutiques.forEach(b => {
-              counts[b.id] = (counts[b.id] || 0) + 1;
+          this.tasks = produitsFiltres.map(prod => {
+            const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
+              ? `${this.apiUrl}${prod.photo}`
+              : '';
+
+            return {
+              ...prod,
+              photo: fullImageUrl,
+              createdAt: this.formatDate(prod.createdAt?.toString() || ''),
+            } as Produit;
+          }).sort((a, b) => {
+            const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
+            const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
+            return dateB - dateA;
+          });
+
+          const counts: { [id: number]: number } = {};
+          produitsFiltres.forEach(prod => {
+            prod.boutiques?.forEach(b => {
+              if (boutiquesValidesIds.includes(b.id)) {
+                counts[b.id] = (counts[b.id] || 0) + 1;
+              }
             });
-          }
-        });
-        this.productCounts = counts;
-        this.totalAllProducts = produits.length;
+          });
+          this.productCounts = counts;
 
-        this.dataSource.data = this.tasks;
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
+          this.dataSource.data = this.tasks;
+          if (this.paginator) {
+            this.dataSource.paginator = this.paginator;
+          }
+          
+          this.showNoProductsMessage = this.tasks.length === 0;
+          this.allProducts = [...this.tasks];
+          this.resetFilters();
         }
-        
-        this.showNoProductsMessage = this.tasks.length === 0;
-        this.allProducts = [...this.tasks]; // <-- Ajouter cette ligne
-        this.resetFilters(); // <-- Réinitialiser les filtres
-      },
+        ,
       error: (err) => {
-         // Ajouter cette ligne
         console.error("Erreur :", err);
         this.showNoProductsMessage = this.tasks.length === 0;
       }
@@ -562,6 +562,17 @@ export class ProduitsComponent implements OnInit {
       console.error('L\'ID de la boutique est manquant');
       return;
     }
+
+    const boutique = this.boutiques.find(b => b.id === boutiqueId);
+      if (boutique?.typeBoutique === 'ENTREPOT') {
+        this.tasks = [];
+        this.dataSource.data = [];
+        this.productCounts[boutiqueId] = 0;
+        this.showNoProductsMessage = true;
+        this.isLoading = false;
+        return;
+      }
+
 
     this.produitService.getProduitsEntreprise(boutiqueId).subscribe({
       next: (produits: Produit[]) => {
@@ -611,7 +622,8 @@ export class ProduitsComponent implements OnInit {
           return dateB - dateA;
         })
 
-        this.productCounts[boutiqueId] = produits.length;
+        this.productCounts[boutiqueId] = this.tasks.length;
+
 
         this.dataSource.data = this.tasks;
         if (this.paginator) {
@@ -1085,5 +1097,15 @@ get boutiquesSansEntrepots(): any[] {
   return this.boutiques?.filter(b => b.typeBoutique !== 'ENTREPOT') || [];
 }
 
-  
+get boutiquesActivesSansEntrepots(): Boutique[] {
+  return this.boutiques?.filter(b => b.typeBoutique !== 'ENTREPOT' && b.actif) || [];
+}
+
+
+  get totalAllProducts(): number {
+  return this.boutiquesActivesSansEntrepots
+    .map(b => this.productCounts[b.id] || 0)
+    .reduce((acc, curr) => acc + curr, 0);
+}
+
 }

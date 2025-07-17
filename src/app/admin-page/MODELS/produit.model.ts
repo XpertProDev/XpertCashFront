@@ -12,6 +12,7 @@ export interface Boutique {
   id: number;
   nom: string;
   quantite: number;
+  typeBoutique: string
 }
 
 export interface Produit {

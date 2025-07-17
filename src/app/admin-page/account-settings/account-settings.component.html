@@ -377,16 +377,27 @@
                                         </div>
 
                                         <!-- // sachet  -->
-                                        <div class="cachet_container">
-                                            <div></div>
-                                            <div class="cachet">
-                                                <h6>{{ form.get('signataire')?.value }}</h6>
-                                                <h6 class="name_directeur">{{ form.get('signataireNom')?.value }}</h6>
-                                                  <span class="cachetSign" >
-                                                        {{form.get('signataireNom')?.value }}
-                                                  </span>
-                                            </div>
+                            <div class="footer_container1">
+                                    <!-- Ligne avec "Pour acquit" à gauche et le nom du signataire à droite -->
+                                    <div class="ligne_haut">
+                                        <div class="acquis">
+                                        <h6>Pour acquit</h6>
                                         </div>
+                                        <div class="signataire_header">
+                                        <h6>{{ form.get('signataire')?.value }}</h6>
+                                        </div>
+                                    </div>
+
+                                    <!-- Signature + nom complet sous le nom du signataire -->
+                                    <div class="signature_bloc">
+                                        <div class="signaturNum">
+                                        <img class="img" [src]="signaturNum" (error)="logo = fallbackLogo" alt="Signature">
+                                        <img class="cachetNum" [src]="cachetNum" (error)="logo = fallbackLogo" alt="cachetNum">
+                                        </div>
+                                        <h4 class="name_directeur">{{ form.get('signataireNom')?.value }}</h4>
+                                    </div>
+                            </div>
+                            
                                     </div>
 
                                     <!-- // Footer  -->
@@ -443,7 +454,7 @@
                                             <img src="assets/img/appareil.png" alt="Changer logo" style="width: 25px; height: 25px;"/>
                                         </a>
                                     </p>
-                                </div>
+                                 </div>
                                 
                                     <div class="champ_grid">
                                         <!-- // Input de Nom entreprise  -->
@@ -579,9 +590,23 @@
                                             <label class="label">Poste</label>
                                         </div>
 
-                                        
-
                                     </div>
+
+                                    <div class="champ_grid" style="margin: 10px 0 15px; display: flex; gap: 30px; align-items: center;">
+                                        <div style="display: flex; align-items: center; font-size: 12px; cursor: pointer;" (click)="signatureInput.click()">
+                                            <p style="margin: 0; padding-right: 8px;">Upload signature numérique</p>
+                                            <img src="assets/img/appareil.png" alt="Upload signature" style="width: 25px; height: 25px;" />
+                                            <input accept="image/*" (change)="onSignaturSelected($event)"  #signatureInput type="file" style="display: none;" />
+                                        </div>
+
+                                        <div style="display: flex; align-items: center; font-size: 12px; cursor: pointer;" (click)="cachetInput.click()">
+                                            <p style="margin: 0; padding-right: 8px;">Upload cachet numérique</p>
+                                            <img src="assets/img/appareil.png" alt="Upload cachet" style="width: 25px; height: 25px;" />
+                                            <input accept="image/*" (change)="onCachetSelected($event)" #cachetInput type="file" style="display: none;" />
+                                        </div>
+                                    </div>
+                                   
+
 
 
                                     <!-- // Btn confirm   -->

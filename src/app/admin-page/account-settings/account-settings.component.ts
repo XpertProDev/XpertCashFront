@@ -60,6 +60,10 @@ export class AccountSettingsComponent implements OnInit {
   imageFile: File | null = null;
   // isUserFormVisible = false;
   @ViewChild('fileInput') fileInput!: ElementRef;
+  @ViewChild('signatureInput') signatureInput!: ElementRef;
+  @ViewChild('signatureInput') cachetInput!: ElementRef;
+
+
   showCurrentPassword: boolean = false;
   showNewPassword: boolean = false;
   showConfirmPassword: boolean = false;
@@ -86,6 +90,12 @@ export class AccountSettingsComponent implements OnInit {
 
   private apiUrl = environment.imgUrl;
   fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
+
+  selectedSignaturNum: File | null = null;
+  selectedCachetNum: File | null = null;
+
+  signaturNum: string | null = null;
+  cachetNum: string | null = null;
       
   paysFlags: { [key: string]: string } = {
     'Mali': '🇲🇱',
@@ -219,7 +229,8 @@ export class AccountSettingsComponent implements OnInit {
         this.nomCompletForm.patchValue({
         nomComplet: user.nomComplet,
         phone: user.phone,
-        password: '' // On laisse le mot de passe vide
+        password: '', // On laisse le mot de passe vide
+        
       });
       this.cdRef.detectChanges();
         
@@ -324,6 +335,9 @@ onTauxTvaInput(event: Event): void {
         console.log('Logo path from server:', entreprise.logo);
         // this.logoUrl = entreprise.logo ? `http://localhost:8080/${entreprise.logo}` : 'assets/img/logo.jpeg';
        this.logo = `${this.apiUrl}${entreprise.logo}`;
+       this.cachetNum = `${this.apiUrl}${entreprise.cachetNum}`,
+       this.signaturNum = `${this.apiUrl}${entreprise.signaturNum}`
+
 
         this.cdRef.markForCheck();
       },
@@ -345,7 +359,7 @@ onTauxTvaInput(event: Event): void {
     this.showPreview = false;
   }
 
-  // Gestionnaire de sélection de fichier
+  // Gestionnaire de sélection de fichier logo
   onFileSelected(event: any): void {
     const file: File = event.target.files[0];
     if (file) {
@@ -376,7 +390,69 @@ onTauxTvaInput(event: Event): void {
       reader.readAsDataURL(file);
     }
   }
+   onCachetSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedCachetNum = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const img = new Image();
+        img.src = e.target.result;
 
+        img.onload = () => {
+          const MAX_SIZE = 800;
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          if (img.width > MAX_SIZE || img.height > MAX_SIZE) {
+            const ratio = Math.min(MAX_SIZE / img.width, MAX_SIZE / img.height);
+            canvas.width = img.width * ratio;
+            canvas.height = img.height * ratio;
+            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+            this.logo = canvas.toDataURL('image/jpeg', 0.8);
+          } else {
+            this.logo = e.target.result;
+          }
+          this.cdRef.markForCheck();
+          this.cachetInput.nativeElement.value = '';
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+ 
+ onSignaturSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedSignaturNum = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const img = new Image();
+        img.src = e.target.result;
+
+        img.onload = () => {
+          const MAX_SIZE = 800;
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          if (img.width > MAX_SIZE || img.height > MAX_SIZE) {
+            const ratio = Math.min(MAX_SIZE / img.width, MAX_SIZE / img.height);
+            canvas.width = img.width * ratio;
+            canvas.height = img.height * ratio;
+            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+            this.logo = canvas.toDataURL('image/jpeg', 0.8);
+          } else {
+            this.logo = e.target.result;
+          }
+          this.cdRef.markForCheck();
+          this.signatureInput.nativeElement.value = '';
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  
   onSubmit() {
     if (!this.entrepriseId) {
       console.error('ID de l\'entreprise manquant');
@@ -392,6 +468,13 @@ onTauxTvaInput(event: Event): void {
       formData.append('logo', this.selectedLogoFile);
     }
 
+    if (this.selectedSignaturNum) {
+      formData.append('siganture', this.selectedSignaturNum);
+    }
+    if (this.selectedCachetNum) {
+      formData.append('cachet', this.selectedCachetNum);
+    }
+
     setTimeout(() => {
       this.entrepriseService.updateEntreprise(this.entrepriseId!, formData).subscribe({
         next: (response) => {
@@ -399,6 +482,8 @@ onTauxTvaInput(event: Event): void {
           this.snackBar.open(response, 'Fermer', { duration: 3000 });
           this.getEntrepriseInfo();
           this.selectedLogoFile = null;
+          this.selectedSignaturNum = null;
+          this.selectedCachetNum = null;
         },
         error: (error) => {
           this.isLoading = false;
@@ -660,4 +745,9 @@ onTauxTvaInput(event: Event): void {
   }
 
 
+    changerCachet(event: Event) {
+    event.stopPropagation();
+    const cachetInput = document.getElementById('profilePhotoInput') as HTMLInputElement;
+    cachetInput.click();
+  }
 }

@@ -712,3 +712,68 @@ a:hover img {
   margin: 5px 0px;
 }
 
+.footer_container1 {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 40px;
+}
+
+/* Ligne du haut : acquit à gauche, nom à droite */
+.ligne_haut {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.acquis h6,
+.signataire_header h6 {
+  font-size: 7px;
+  margin: 0;
+}
+
+/* Bloc signature en dessous du nom, aligné à droite */
+.signature_bloc {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  // margin-top: 10px;
+}
+
+.signaturNum {
+  width: 100px;
+  height: 80px; 
+  position: relative;
+}
+
+.signaturNum .img {
+ position: absolute;
+    top: -7px;
+    right: 14px;
+    width: 34%;
+    height: auto;
+    object-fit: contain;
+    z-index: 1;
+    opacity: 0.7; 
+
+    
+}
+
+/* Cachet par-dessus */
+.signaturNum .cachetNum {
+position: absolute;
+    right: 30px;
+    width: 40%;
+    height: auto;
+    object-fit: contain;
+    z-index: 2;
+    opacity: 0.7;
+    margin-top: -7px;
+}
+
+.name_directeur {
+      font-size: 6px;
+    position: relative;
+    right: 0;
+    margin-top: -69px;
+
+}
