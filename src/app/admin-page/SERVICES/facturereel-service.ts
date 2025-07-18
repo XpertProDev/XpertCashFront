@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { catchError, Observable, switchMap, throwError } from "rxjs";
 import { environment } from "src/environments/environment";
@@ -108,6 +108,34 @@ getHistoriquePaiements(factureId: number): Observable<any[]> {
     catchError(err => {
       console.error('Erreur lors de l\'annulation de la facture :', err);
       return throwError(() => err);
+    })
+  );
+}
+
+
+//Trier
+
+getFacturesParPeriode(
+  type: 'jour' | 'mois' | 'annee' | 'personnalise',
+  dateDebut?: string,
+  dateFin?: string
+): Observable<any[]> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+
+      let params = new HttpParams().set('typePeriode', type);
+
+      if (type === 'personnalise') {
+        if (!dateDebut || !dateFin) {
+          throw new Error("Pour 'personnalise', les dates dateDebut et dateFin sont obligatoires.");
+        }
+        params = params.set('dateDebut', dateDebut).set('dateFin', dateFin);
+      }
+
+      return this.http.get<any[]>(`${this.apiUrl}/par-periode`, { headers, params });
     })
   );
 }

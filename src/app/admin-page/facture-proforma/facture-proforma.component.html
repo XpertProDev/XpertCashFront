@@ -27,45 +27,44 @@
         <div class="contentIcon">
           <div class="bare"></div>
         </div>
-         <!-- filter-dropdown.component.html -->
 
-      <!-- Bouton filtre qui ouvre le menu -->
-          <button mat-icon-button [matMenuTriggerFor]="filterMenu" aria-label="Ouvrir filtre">
-            <mat-icon>filter_list</mat-icon>
-          </button>
+        <!-- Bouton filtre qui ouvre le menu -->
 
-          <!-- Menu déroulant filtre -->
-          <mat-menu #filterMenu="matMenu" class="custom-filter-menu">
-            <div class="filter-content">
-              <!-- Date début -->
-              <mat-form-field appearance="outline" class="full-width mb-2">
-              <mat-label>Date début</mat-label>
-              <input matInput [matDatepicker]="pickerDebut" [(ngModel)]="dateDebut" placeholder="Choisir date début">
-              <mat-datepicker-toggle matSuffix [for]="pickerDebut"></mat-datepicker-toggle>
-              <mat-datepicker #pickerDebut></mat-datepicker>
-              </mat-form-field>
+          <div class="filter-toggle-icon" (click)="toggleDropdown()">
+            <i class="ri-filter-line"></i>
+          </div>
 
+          <!-- Le  dropdown  indépendamment) -->
+          <div class="filter-dropdown-wrapper" *ngIf="dropdownOuvert">
+            <div class="filter-dropdown">
+              <div class="filter-type">
+                <div
+                  *ngFor="let type of typesPeriode"
+                  class="filter-option"
+                  [class.active]="type.value === typeSelectionne"
+                  (click)="choisirType(type.value)">
+                  {{ type.label }}
+                </div>
+              </div>
 
-              <!-- Date fin -->
-              <mat-form-field appearance="outline" class="full-width mb-2">
-                <mat-label>Date fin</mat-label>
-                <input matInput [matDatepicker]="pickerFin" [(ngModel)]="dateFin" placeholder="Choisir date fin">
-                <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
-                <mat-datepicker #pickerFin></mat-datepicker>
-              </mat-form-field>
+              <div *ngIf="typeSelectionne === 'personnalise'" class="filter-date">
+                <label>Date début</label>
+                <input type="date" [(ngModel)]="dateDebut" />
+                <label>Date fin</label>
+                <input type="date" [(ngModel)]="dateFin" />
+              </div>
 
-         
-              <!-- Bouton appliquer -->
-              <button mat-flat-button color="primary" class="full-width" (click)="appliquerFiltre()">
-                Appliquer les filtres
-              </button>
+              <button class="filter-btn" (click)="appliquerFiltre()">🔍 Appliquer</button>
             </div>
-          </mat-menu>
+          </div>
 
 
 
-     
+
          <!-- fin -->
+          <div class="contentIcon">
+          <div class="bare"></div>
+        </div>
 
         <div class="inputSearch">
           <input 
@@ -160,7 +159,7 @@
           </tr>
       </thead>
       <tbody>
-          <tr class="tr" *ngFor="let facture of (filtrageActif ? filteredFacturess : paginatedFactures)" (click)="showDetails(facture.id)">
+          <tr class="tr" *ngFor="let facture of paginatedFactures" (click)="showDetails(facture.id)">
               <td class="td">{{ facture.numeroFacture }}</td>
               <td class="td">{{ facture.client || facture.entrepriseClient }}</td>
               <td class="td">{{ facture.dateCreation | date: 'dd/MM/yyyy' }}</td>
@@ -189,7 +188,7 @@
   </table>
 
   <div class="parent" *ngIf="!isListView">
-    <div class="cadre_cahier" *ngFor="let facture of (filtrageActif ? filteredFacturess : paginatedFactures)" (click)="showDetails(facture.id)">
+    <div class="cadre_cahier" *ngFor="let facture of paginatedFactures" (click)="showDetails(facture.id)">
       <div class="title_facture">
         <h5>Facture Pro forma</h5>
       </div>

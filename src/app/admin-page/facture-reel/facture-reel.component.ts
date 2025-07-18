@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FactureReelService } from '../SERVICES/facturereel-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -269,5 +269,82 @@ export class FactureReelComponent implements OnInit {
     this.router.navigate(['/']);
   }
 
+   // Trier
+    typeSelectionne: 'jour' | 'mois' | 'annee' | 'personnalise' = 'jour';
+    dateDebut: string = '';
+    dateFin: string = '';
+    factures: any[] = [];
+
+    dropdownOuvert = false;
+
+
+
+    typesPeriode = [
+    { value: 'jour', label: 'Par jour' },
+    { value: 'mois', label: 'Par mois' },
+    { value: 'annee', label: 'Par année' },
+    { value: 'personnalise', label: 'Personnalisé' }
+  ];
+
+   get labelTypeSelectionne(): string {
+    return this.typesPeriode.find(t => t.value === this.typeSelectionne)?.label || 'Filtrer';
+  }
+
+   toggleDropdown() {
+    this.dropdownOuvert = !this.dropdownOuvert;
+  }
+
+  choisirType(type: any) {
+    this.typeSelectionne = type;
+    this.dateDebut = '';
+    this.dateFin = '';
+  }
+
+    @HostListener('document:click', ['$event.target'])
+  onClickOutside(target: HTMLElement) {
+    if (!target.closest('.filter-dropdown-wrapper') && !target.closest('.filter-toggle-icon')) {
+      this.dropdownOuvert = false;
+      this.reinitialiserFiltre();
+    }
+  }
+
+
+
+reinitialiserFiltre() {
+  this.typeSelectionne = 'jour'; 
+  this.dateDebut = '';
+  this.dateFin = '';
+  this.dropdownOuvert = false;
+
+  this.factureReelService.getFacturesParPeriode('jour').subscribe({
+    next: (data) => {
+      this.factureReel = data;
+      this.currentPage = 0;
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des factures:', err);
+    }
+  });
+}
+
+   appliquerFiltre() {
+    if (this.typeSelectionne === 'personnalise' && (!this.dateDebut || !this.dateFin)) {
+      alert("Veuillez sélectionner une date de début et de fin.");
+      return;
+    }
+
+    this.factureReelService
+      .getFacturesParPeriode(this.typeSelectionne, this.dateDebut, this.dateFin)
+      .subscribe({
+        next: (data) => {
+          this.factureReel = data;
+          this.currentPage = 0;
+          this.dropdownOuvert = false;
+        },
+        error: (err) => {
+          console.error('Erreur de chargement des factures:', err);
+        }
+      });
+  }
 
 }

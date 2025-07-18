@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService } from '../SERVICES/client-service';
@@ -105,6 +105,14 @@ export class FactureProformaComponent implements OnInit {
     chargementFini: boolean = false;
     messageErreur: string = "";
     tempsRestantEssai: string | null = null;
+
+     // Trier
+    typeSelectionne: 'jour' | 'mois' | 'annee' | 'personnalise' = 'jour';
+    dateDebut: string = '';
+    dateFin: string = '';
+    factures: any[] = [];
+
+    dropdownOuvert = false;
 
     constructor(
       private router: Router,
@@ -219,7 +227,6 @@ export class FactureProformaComponent implements OnInit {
   onPageChange(event: PageEvent) {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
-    this.updatePaginatedFactures();
   }
 
   // Méthode pour filtrer par statut
@@ -230,9 +237,9 @@ export class FactureProformaComponent implements OnInit {
 
   // Modifier le getter paginatedFactures
   get paginatedFactures(): any[] {
-    const start = this.currentPage * this.pageSize;
-    return this.filteredFactures.slice(start, start + this.pageSize);
-  }
+  const start = this.currentPage * this.pageSize;
+  return this.filteredFactures.slice(start, start + this.pageSize);
+}
 
   getTotalFacture(facture: any): number {
       return facture.ligneFactureProforma?.reduce((acc: number, ligne: any) => acc + ligne.montantTotal, 0) || 0;
@@ -370,83 +377,72 @@ export class FactureProformaComponent implements OnInit {
   }
 
   
- // Trier
- dateDebut: Date | null = null;
-  dateFin: Date | null = null;
-  jourSelectionne: number | '' = '';
-  moisSelectionne: number | '' = '';
-  anneeSelectionnee: number | '' = '';
 
 
+    typesPeriode = [
+    { value: 'jour', label: 'Par jour' },
+    { value: 'mois', label: 'Par mois' },
+    { value: 'annee', label: 'Par année' },
+    { value: 'personnalise', label: 'Personnalisé' }
+  ];
 
+   get labelTypeSelectionne(): string {
+    return this.typesPeriode.find(t => t.value === this.typeSelectionne)?.label || 'Filtrer';
+  }
+
+   toggleDropdown() {
+    this.dropdownOuvert = !this.dropdownOuvert;
+  }
+
+  choisirType(type: any) {
+    this.typeSelectionne = type;
+    this.dateDebut = '';
+    this.dateFin = '';
+  }
 
   appliquerFiltre() {
-  let type: 'jour' | 'mois' | 'annee' | 'personnalise' = 'jour';
-  let dateDebutStr = '';
-  let dateFinStr = '';
+    if (this.typeSelectionne === 'personnalise' && (!this.dateDebut || !this.dateFin)) {
+      alert("Veuillez sélectionner une date de début et de fin.");
+      return;
+    }
 
-  if (this.dateDebut && this.dateFin) {
-    type = 'personnalise';
-    dateDebutStr = this.dateDebut ? this.dateDebut.toISOString().substring(0, 10) : '';
-    dateFinStr = this.dateFin ? this.dateFin.toISOString().substring(0, 10) : '';
-  } else if (this.anneeSelectionnee) {
-    type = 'annee';
-  } else if (this.moisSelectionne !== '') {
-    type = 'mois';
-  } else if (this.jourSelectionne !== '') {
-    type = 'jour';
+    this.factureProFormaService
+      .getFacturesParPeriode(this.typeSelectionne, this.dateDebut, this.dateFin)
+      .subscribe({
+        next: (data) => {
+          this.facturesproforma = data;
+          this.currentPage = 0;
+          this.dropdownOuvert = false;
+        },
+        error: (err) => {
+          console.error('Erreur de chargement des factures:', err);
+        }
+      });
   }
 
-  this.factureProFormaService.getFacturesParPeriode(type, dateDebutStr, dateFinStr).subscribe({
-  next: (factures) => {
-    this.facturesFiltrees = factures;
-    this.currentPage = 0;
-    this.filtrageActif = true;
-    this.updatePaginatedFactures();
-  },
-  error: (err) => {
-    console.error('Erreur récupération factures', err);
-    this.facturesFiltrees = [];
-    this.filteredFacturess = [];
-    this.filtrageActif = false;
+  @HostListener('document:click', ['$event.target'])
+onClickOutside(target: HTMLElement) {
+  if (!target.closest('.filter-dropdown-wrapper') && !target.closest('.filter-toggle-icon')) {
+    this.dropdownOuvert = false;
+    this.reinitialiserFiltre();
   }
-
-});
-
-
- 
 }
 
+reinitialiserFiltre() {
+  this.typeSelectionne = 'jour'; 
+  this.dateDebut = '';
+  this.dateFin = '';
+  this.dropdownOuvert = false;
 
-  filtrageLocalApresChargement() {
-    this.facturesFiltrees = this.facturesFiltrees.filter(f => {
-      const d = new Date(f.date);
-
-      const correspondJour =
-        this.jourSelectionne === '' || d.getDay() === this.jourSelectionne;
-
-      const correspondMois =
-        this.moisSelectionne === '' || d.getMonth() === this.moisSelectionne;
-
-      const correspondAnnee =
-        this.anneeSelectionnee === '' || d.getFullYear() === this.anneeSelectionnee;
-
-      return correspondJour && correspondMois && correspondAnnee;
-    });
-  }
-
-  updatePaginatedFactures() {
-  const start = this.currentPage * this.pageSize;
-  const end = start + this.pageSize;
-  this.filteredFacturess = this.facturesFiltrees.slice(start, end);
+  this.factureProFormaService.getFacturesParPeriode('jour').subscribe({
+    next: (data) => {
+      this.facturesproforma = data;
+      this.currentPage = 0;
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des factures:', err);
+    }
+  });
 }
-
-filtrageActif = false;
-
-resetFiltrage() {
-  this.filtrageActif = false;
-  this.currentPage = 0;
-}
-
 
 }
