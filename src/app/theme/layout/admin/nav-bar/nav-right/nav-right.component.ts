@@ -13,6 +13,7 @@ import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { Router, RouterLink } from '@angular/router';
 import { StockService } from 'src/app/admin-page/SERVICES/stocks.service';
 import { LockService } from 'src/app/admin-page/SERVICES/lock.service';
+import { WebSocketService } from 'src/app/admin-page/SERVICES/websocket.service';
 
 @Component({
   selector: 'app-nav-right',
@@ -57,7 +58,8 @@ export class NavRightComponent implements OnInit{
     private userService: UsersService,
     private router: Router,
     private stockService: StockService,
-    private lockService: LockService
+    private lockService: LockService,
+    private webSocketService: WebSocketService,
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
@@ -94,11 +96,26 @@ private boundUpdatePhotoListener = this.updatePhotoListener.bind(this);
       this.isLocked = locked;
     });
 
+    this.webSocketService.connect();
+    this.webSocketService.notifications$.subscribe(notification => {
+      if (notification?.type === 'FACTURE_APPROBATION') {
+        this.stockHistory.unshift({
+          nomComplet: 'Système',
+          role: 'Notification',
+          action: 'Demande d\'approbation',
+          description: notification.message,
+          relativeTime: this.getRelativeTime(new Date().toISOString()),
+          factureId: notification.details.factureId
+        });
+      }
+    });
   
 }
 
 ngOnDestroy(): void {
   window.removeEventListener('storage-photo-update', this.boundUpdatePhotoListener);
+    this.webSocketService.disconnect();
+
 }
 
   

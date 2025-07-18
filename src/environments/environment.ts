@@ -3,10 +3,10 @@ import packageInfo from '../../package.json';
 export const environment = {
   appVersion: packageInfo.version,
   production: true,
-  apiUrl: 'http://192.168.1.3:4200',
-  apiBaseUrl: "http://192.168.1.3:8080/api/auth",
-  imgUrl: "http://192.168.1.3:8080",
-  
+  apiUrl: 'http://192.168.1.7:4200',
+  apiBaseUrl: "http://192.168.1.7:8080/api/auth",
+  imgUrl: "http://192.168.1.7:8080",
+  wsEndpoint:  'http://192.168.1.7:8080/ws',
 };
 
 // export const environment = {
