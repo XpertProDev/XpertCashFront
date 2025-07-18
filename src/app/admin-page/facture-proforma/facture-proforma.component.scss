@@ -943,3 +943,50 @@ tr.tr:hover {
   display: flex;
   align-items: center;
 }
+
+.custom-filter-menu .mat-menu-content {
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.filter-content {
+  width: 270px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.mb-2 {
+  margin-bottom: 12px;
+}
+
+.mb-4 {
+  margin-bottom: 24px;
+}
+
+.mt-4 {
+  margin-top: 24px;
+}
+
+.resultats-container {
+  max-width: 700px;
+  margin: auto;
+  padding: 0 12px;
+}
+
+.facture-item {
+  background: #f9f9f9;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.no-result {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+}

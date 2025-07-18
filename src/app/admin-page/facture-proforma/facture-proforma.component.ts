@@ -13,6 +13,14 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatInputModule } from '@angular/material/input';
 import { EntrepriseService } from '../SERVICES/entreprise-service';
 import { ModuleService } from '../SERVICES/Module-Service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatOptionModule, MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
+import { MatMenuModule } from '@angular/material/menu';
+
 
 @Component({
   selector: 'app-facture-proforma',
@@ -23,6 +31,16 @@ import { ModuleService } from '../SERVICES/Module-Service';
     CustomNumberPipe,
     MatInputModule,
     MatPaginatorModule,
+
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
+    MatDatepickerModule,
+    MatInputModule,
+    MatNativeDateModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
   ],
   templateUrl: './facture-proforma.component.html',
   styleUrl: './facture-proforma.component.scss',
@@ -69,6 +87,8 @@ export class FactureProformaComponent implements OnInit {
     // Pagination
     pageSize = 10;
     currentPage = 0;
+    facturesFiltrees: any[] = [];  // résultats backend filtrés
+    filteredFacturess: any[] = [];
     sortField: string = 'numeroFacture'; // Au lieu de 'any'
     sortDirection: 'asc' | 'desc' = 'asc';
     // Ajouter dans la classe
@@ -199,6 +219,7 @@ export class FactureProformaComponent implements OnInit {
   onPageChange(event: PageEvent) {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
+    this.updatePaginatedFactures();
   }
 
   // Méthode pour filtrer par statut
@@ -349,4 +370,83 @@ export class FactureProformaComponent implements OnInit {
   }
 
   
+ // Trier
+ dateDebut: Date | null = null;
+  dateFin: Date | null = null;
+  jourSelectionne: number | '' = '';
+  moisSelectionne: number | '' = '';
+  anneeSelectionnee: number | '' = '';
+
+
+
+
+  appliquerFiltre() {
+  let type: 'jour' | 'mois' | 'annee' | 'personnalise' = 'jour';
+  let dateDebutStr = '';
+  let dateFinStr = '';
+
+  if (this.dateDebut && this.dateFin) {
+    type = 'personnalise';
+    dateDebutStr = this.dateDebut ? this.dateDebut.toISOString().substring(0, 10) : '';
+    dateFinStr = this.dateFin ? this.dateFin.toISOString().substring(0, 10) : '';
+  } else if (this.anneeSelectionnee) {
+    type = 'annee';
+  } else if (this.moisSelectionne !== '') {
+    type = 'mois';
+  } else if (this.jourSelectionne !== '') {
+    type = 'jour';
+  }
+
+  this.factureProFormaService.getFacturesParPeriode(type, dateDebutStr, dateFinStr).subscribe({
+  next: (factures) => {
+    this.facturesFiltrees = factures;
+    this.currentPage = 0;
+    this.filtrageActif = true;
+    this.updatePaginatedFactures();
+  },
+  error: (err) => {
+    console.error('Erreur récupération factures', err);
+    this.facturesFiltrees = [];
+    this.filteredFacturess = [];
+    this.filtrageActif = false;
+  }
+
+});
+
+
+ 
+}
+
+
+  filtrageLocalApresChargement() {
+    this.facturesFiltrees = this.facturesFiltrees.filter(f => {
+      const d = new Date(f.date);
+
+      const correspondJour =
+        this.jourSelectionne === '' || d.getDay() === this.jourSelectionne;
+
+      const correspondMois =
+        this.moisSelectionne === '' || d.getMonth() === this.moisSelectionne;
+
+      const correspondAnnee =
+        this.anneeSelectionnee === '' || d.getFullYear() === this.anneeSelectionnee;
+
+      return correspondJour && correspondMois && correspondAnnee;
+    });
+  }
+
+  updatePaginatedFactures() {
+  const start = this.currentPage * this.pageSize;
+  const end = start + this.pageSize;
+  this.filteredFacturess = this.facturesFiltrees.slice(start, end);
+}
+
+filtrageActif = false;
+
+resetFiltrage() {
+  this.filtrageActif = false;
+  this.currentPage = 0;
+}
+
+
 }
