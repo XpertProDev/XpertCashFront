@@ -7,13 +7,11 @@ import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
-import { ChatUserListComponent } from './chat-user-list/chat-user-list.component';
 import { ChatMsgComponent } from './chat-msg/chat-msg.component';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { Router, RouterLink } from '@angular/router';
 import { StockService } from 'src/app/admin-page/SERVICES/stocks.service';
 import { LockService } from 'src/app/admin-page/SERVICES/lock.service';
-import { WebSocketService } from 'src/app/admin-page/SERVICES/websocket.service';
 
 @Component({
   selector: 'app-nav-right',
@@ -59,7 +57,6 @@ export class NavRightComponent implements OnInit{
     private router: Router,
     private stockService: StockService,
     private lockService: LockService,
-    private webSocketService: WebSocketService,
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
@@ -95,26 +92,11 @@ private boundUpdatePhotoListener = this.updatePhotoListener.bind(this);
    this.lockService.isLocked$.subscribe(locked => {
       this.isLocked = locked;
     });
-
-    this.webSocketService.connect();
-    this.webSocketService.notifications$.subscribe(notification => {
-      if (notification?.type === 'FACTURE_APPROBATION') {
-        this.stockHistory.unshift({
-          nomComplet: 'Système',
-          role: 'Notification',
-          action: 'Demande d\'approbation',
-          description: notification.message,
-          relativeTime: this.getRelativeTime(new Date().toISOString()),
-          factureId: notification.details.factureId
-        });
-      }
-    });
   
 }
 
 ngOnDestroy(): void {
   window.removeEventListener('storage-photo-update', this.boundUpdatePhotoListener);
-    this.webSocketService.disconnect();
 
 }
 
