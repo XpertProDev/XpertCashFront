@@ -16,6 +16,7 @@ import { WebSocketService } from 'src/app/admin-page/SERVICES/websocket.service'
 import { GlobalNotificationDto } from 'src/app/admin-page/MODELS/global_notification.dto';
 import { BehaviorSubject } from 'rxjs';
 import { GlobalNotificationService } from 'src/app/admin-page/SERVICES/global_notification_service';
+import { NotificationManagerService } from 'src/app/admin-page/SERVICES/NotificationManagerService';
 
 @Component({
   selector: 'app-nav-right',
@@ -64,6 +65,7 @@ export class NavRightComponent implements OnInit{
     private lockService: LockService,
     private webSocketService: WebSocketService,
     private globalNotificationService: GlobalNotificationService,
+    private notificationManager: NotificationManagerService
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
@@ -95,6 +97,7 @@ export class NavRightComponent implements OnInit{
     this.lockService.isLocked$.subscribe(locked => {
       this.isLocked = locked;
     });
+    
 
     // 1️⃣ Historique de stock
     this.stockService.getAllhistorique().subscribe(data => {
@@ -107,18 +110,29 @@ export class NavRightComponent implements OnInit{
     this.globalNotificationService.getAllForCurrentUser()
       .subscribe(list => this.notificationsList = list);
 
-    // 3️⃣ Connexion WS + réception en temps réel
     this.webSocketService.connect();
     this.webSocketService.notifications$
       .subscribe((newNotif: GlobalNotificationDto) => {
         if (newNotif) {
-          this.notificationsList = [ newNotif, ...this.notificationsList ];
+          console.log('Nouvelle notification WebSocket :', newNotif);
+          this.notificationsList = [newNotif, ...this.notificationsList];
         }
       });
+
+      this.notificationManager.getNotifications()
+      .subscribe(list => this.notificationsList = list);
 
       // 4️⃣ Gestion du verrouillage et photo (inchangé)
     this.lockService.isLocked$.subscribe(locked => this.isLocked = locked);
     window.addEventListener('storage-photo-update', this.boundUpdatePhotoListener);
+  }
+
+  private flashNotificationBadge() {
+    const badge = document.querySelector('.notification-badge');
+    if (badge) {
+      badge.classList.add('flash');
+      setTimeout(() => badge.classList.remove('flash'), 2000);
+    }
   }
 
   ngOnDestroy(): void {
