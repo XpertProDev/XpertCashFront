@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Client, Frame, Message } from '@stomp/stompjs';
+import { Client, Frame, Message, Versions } from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService } from './auth.service';
@@ -29,6 +29,9 @@ export class WebSocketService {
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
+      // Ajoutez ces 2 lignes :
+      stompVersions: new Versions(['v10.stomp']),
+      forceBinaryWSFrames: true
     });
 
     this.stompClient.onConnect = (frame: Frame) => {
