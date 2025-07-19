@@ -22,30 +22,31 @@ export class WebSocketService {
     const socket = new SockJS(environment.wsEndpoint);
     this.stompClient = new Client({
       webSocketFactory: () => socket,
-      debug: (str) => console.log(str),
+      connectHeaders: {
+        Authorization: 'Bearer ' + this.authService.getToken()
+      },
+      debug: str => console.log(str),
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
     });
 
     this.stompClient.onConnect = (frame: Frame) => {
-        this.subscribeToUserQueue();
+      this.subscribeToUserQueue();
     };
-
     this.stompClient.activate();
   }
 
+
   private subscribeToUserQueue() {
-    const userId = this.usersService.getUserInfo();
-    if (userId) {
-        this.stompClient.subscribe(
-        `/user/queue/notifications`,
-        (message: Message) => {
-            this.notificationsSubject.next(JSON.parse(message.body));
-        }
-        );
-    }
-    }
+    this.stompClient.subscribe(
+      `/user/queue/notifications`,
+      (msg: Message) => {
+        this.notificationsSubject.next(JSON.parse(msg.body));
+      }
+    );
+  }
+
 
   disconnect() {
     if (this.stompClient) {
