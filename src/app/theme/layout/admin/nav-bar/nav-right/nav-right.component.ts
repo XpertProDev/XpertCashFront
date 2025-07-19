@@ -7,12 +7,15 @@ import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
-import { ChatUserListComponent } from './chat-user-list/chat-user-list.component';
 import { ChatMsgComponent } from './chat-msg/chat-msg.component';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { Router, RouterLink } from '@angular/router';
 import { StockService } from 'src/app/admin-page/SERVICES/stocks.service';
 import { LockService } from 'src/app/admin-page/SERVICES/lock.service';
+import { WebSocketService } from 'src/app/admin-page/SERVICES/websocket.service';
+import { GlobalNotificationDto } from 'src/app/admin-page/MODELS/global_notification.dto';
+import { BehaviorSubject } from 'rxjs';
+import { GlobalNotificationService } from 'src/app/admin-page/SERVICES/global_notification_service';
 
 @Component({
   selector: 'app-nav-right',
@@ -37,27 +40,30 @@ import { LockService } from 'src/app/admin-page/SERVICES/lock.service';
 })
 export class NavRightComponent implements OnInit{
   stockHistory: any[] = [];
+  // --- notifications persistées + temps réel ---
+  notificationsList: GlobalNotificationDto[] = [];
   // public props
   visibleUserList: boolean;
   chatMessage: boolean;
   friendId!: number;
   userName: string = '';
   nomEntreprise = '';
-
   photo: string | null = null;
   photoUrl: string | null = null;
-
   isLocked = false;
+  private boundUpdatePhotoListener = this.updatePhotoListener.bind(this);
 
-
-
+  private notificationsSubject = new BehaviorSubject<GlobalNotificationDto | null>(null);
+  public notifications$ = this.notificationsSubject.asObservable();
 
   // constructor
   constructor(
     private userService: UsersService,
     private router: Router,
     private stockService: StockService,
-    private lockService: LockService
+    private lockService: LockService,
+    private webSocketService: WebSocketService,
+    private globalNotificationService: GlobalNotificationService,
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
@@ -65,46 +71,61 @@ export class NavRightComponent implements OnInit{
   }
 
   // Fonction fléchée pour éviter les problèmes de "this"
-private updatePhotoListener(event: Event): void {
-  const newPhoto = localStorage.getItem('photo');
-  if (newPhoto) {
-    this.photo = newPhoto;
-    this.photoUrl = this.base64ToObjectUrl(newPhoto);
-  } else {
-    this.photo = null;
-    this.photoUrl = null;
+  private updatePhotoListener(event: Event): void {
+    const newPhoto = localStorage.getItem('photo');
+    if (newPhoto) {
+      this.photo = newPhoto;
+      this.photoUrl = this.base64ToObjectUrl(newPhoto);
+    } else {
+      this.photo = null;
+      this.photoUrl = null;
+    }
   }
-}
-private boundUpdatePhotoListener = this.updatePhotoListener.bind(this);
-
 
   ngOnInit(): void {
+    // 1️⃣ Récupération des infos utilisateur et photo
     this.getUserInfo();
-    this.getAllhistorique();
-
-      const savedPhoto = localStorage.getItem('photo');
+    const savedPhoto = localStorage.getItem('photo');
     if (savedPhoto) {
-    this.photo = savedPhoto;
-    this.photoUrl = this.base64ToObjectUrl(savedPhoto);
+      this.photo = savedPhoto;
+      this.photoUrl = this.base64ToObjectUrl(savedPhoto);
     }
 
-  window.addEventListener('storage-photo-update', this.boundUpdatePhotoListener);
-
-   this.lockService.isLocked$.subscribe(locked => {
+    // 2️⃣ Verrouillage écran
+    this.lockService.isLocked$.subscribe(locked => {
       this.isLocked = locked;
     });
 
-  
-}
+    // 1️⃣ Historique de stock
+    this.stockService.getAllhistorique().subscribe(data => {
+      this.stockHistory = data
+        .map(item => ({ ...item, relativeTime: this.getRelativeTime(item.createdAt) }))
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    });
 
-ngOnDestroy(): void {
-  window.removeEventListener('storage-photo-update', this.boundUpdatePhotoListener);
-}
+    // 2️⃣ Notifications persistées
+    this.globalNotificationService.getAllForCurrentUser()
+      .subscribe(list => this.notificationsList = list);
 
-  
-  
+    // 3️⃣ Connexion WS + réception en temps réel
+    this.webSocketService.connect();
+    this.webSocketService.notifications$
+      .subscribe((newNotif: GlobalNotificationDto) => {
+        if (newNotif) {
+          this.notificationsList = [ newNotif, ...this.notificationsList ];
+        }
+      });
 
-  // public method 
+      // 4️⃣ Gestion du verrouillage et photo (inchangé)
+    this.lockService.isLocked$.subscribe(locked => this.isLocked = locked);
+    window.addEventListener('storage-photo-update', this.boundUpdatePhotoListener);
+  }
+
+  ngOnDestroy(): void {
+    this.webSocketService.disconnect();
+    window.removeEventListener('storage-photo-update', this.boundUpdatePhotoListener);
+  }
+
   // eslint-disable-next-line
   onChatToggle(friendID: any) {
     this.friendId = friendID;
@@ -123,8 +144,6 @@ ngOnDestroy(): void {
     });
   }
 
- 
-
   getAllhistorique() {
     this.stockService.getAllhistorique().subscribe(
       (data) => {
@@ -142,7 +161,6 @@ ngOnDestroy(): void {
       }
     );
   }
-  
   
   getRelativeTime(date: string): string {
     const currentTime = new Date();
@@ -168,8 +186,6 @@ ngOnDestroy(): void {
     }
     return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
   }
-  
-  
 
   goToCompte() {
     this.router.navigate(['/utilisateur']);

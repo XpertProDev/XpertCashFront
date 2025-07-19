@@ -32,7 +32,7 @@ import { NavItemComponent } from './theme/layout/admin/navigation/nav-content/na
 import { NavCollapseComponent } from './theme/layout/admin/navigation/nav-content/nav-collapse/nav-collapse.component';
 import { RouterModule } from '@angular/router';
 import { SessionExpiredModalComponent } from './theme/shared/session-expired-modal/session-expired-modal.component';
-import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { WebSocketService } from './admin-page/SERVICES/websocket.service';
 
 registerLocaleData(localeFr);
 
@@ -71,9 +71,9 @@ registerLocaleData(localeFr);
     NavItemComponent,
     NavCollapseComponent,
     RouterModule,
-    MatMomentDateModule
   ],
   providers: [
+    WebSocketService,
     provideHttpClient(),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true, },
     { provide: LOCALE_ID, useValue: 'fr-FR' },

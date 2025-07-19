@@ -390,7 +390,8 @@ onTauxTvaInput(event: Event): void {
       reader.readAsDataURL(file);
     }
   }
-   onCachetSelected(event: any): void {
+
+  onCachetSelected(event: any): void {
     const file: File = event.target.files[0];
     if (file) {
       this.selectedCachetNum = file;
@@ -409,9 +410,11 @@ onTauxTvaInput(event: Event): void {
             canvas.width = img.width * ratio;
             canvas.height = img.height * ratio;
             ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-            this.logo = canvas.toDataURL('image/jpeg', 0.8);
+            // Correction ici : assignez à cachetNum
+            this.cachetNum = canvas.toDataURL('image/jpeg', 0.8);
           } else {
-            this.logo = e.target.result;
+            // Correction ici : assignez à cachetNum
+            this.cachetNum = e.target.result;
           }
           this.cdRef.markForCheck();
           this.cachetInput.nativeElement.value = '';
@@ -421,7 +424,7 @@ onTauxTvaInput(event: Event): void {
     }
   }
  
- onSignaturSelected(event: any): void {
+  onSignaturSelected(event: any): void {
     const file: File = event.target.files[0];
     if (file) {
       this.selectedSignaturNum = file;
@@ -440,9 +443,11 @@ onTauxTvaInput(event: Event): void {
             canvas.width = img.width * ratio;
             canvas.height = img.height * ratio;
             ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-            this.logo = canvas.toDataURL('image/jpeg', 0.8);
+            // Correction ici : assignez à signaturNum
+            this.signaturNum = canvas.toDataURL('image/jpeg', 0.8);
           } else {
-            this.logo = e.target.result;
+            // Correction ici : assignez à signaturNum
+            this.signaturNum = e.target.result;
           }
           this.cdRef.markForCheck();
           this.signatureInput.nativeElement.value = '';
@@ -451,7 +456,6 @@ onTauxTvaInput(event: Event): void {
       reader.readAsDataURL(file);
     }
   }
-
   
   onSubmit() {
     if (!this.entrepriseId) {

@@ -186,25 +186,34 @@ loadRoles() {
 }
 
 
-  loadUsersOfEntreprise(entrepriseId: number) {
-    this.isLoading = true;
-    this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
-      next: (data) => {
-        this.users = data.map(user => ({
-          ...user,
-          flag: this.paysFlags[user.pays] || ''
-        }));
-        this.filteredUsers = this.users; // Mise à jour des utilisateurs filtrés
-        this.updatePaginatedUsers();
-        this.isLoading = false;
-        console.log('Utilisateurs récupérés:', this.users);
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des utilisateurs', err);
-        this.isLoading = false;
-      }
-    });
-  }
+ loadUsersOfEntreprise(entrepriseId: number) {
+  this.isLoading = true;
+  const token = this.usersService.getToken(); 
+  const connectedUserId = token ? this.usersService.extractUserIdFromToken(token) : null;
+
+  this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
+    next: (data) => {
+      // ⚠️ Exclure l'utilisateur connecté
+      const filteredData = data.filter(user => user.id !== connectedUserId);
+
+      this.users = filteredData.map(user => ({
+        ...user,
+        flag: this.paysFlags[user.pays] || ''
+      }));
+
+      this.filteredUsers = this.users;
+      this.updatePaginatedUsers();
+      this.isLoading = false;
+
+      console.log('Utilisateurs récupérés (hors connecté) :', this.users);
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des utilisateurs', err);
+      this.isLoading = false;
+    }
+  });
+}
+
 
   openPopup() {
     this.showPopup = true;
