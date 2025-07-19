@@ -290,7 +290,7 @@ export class DetailEditFournisseurComponent {
     this.fournisseurEditForm.enable();
   } else {
     // Réinitialiser les modifications
-    this.selectedCompressedFile = null;
+    this.selectedFile = null;
     this.newPhotoUrl = null;
     this.loadFournisseur();
     this.fournisseurEditForm.disable();
@@ -357,13 +357,13 @@ async modifierFournisseur() {
     await this.fournisseurService.updateFournisseur(
       this.fournisseur.id,
       updatedFournisseur,
-      this.selectedCompressedFile || undefined
+      this.selectedFile || undefined
     ).toPromise();
 
     this.successMessage = 'Fournisseur mis à jour avec succès!';
     
     // Réinitialiser après succès
-    this.selectedCompressedFile = null;
+    this.selectedFile = null;
     this.newPhotoUrl = null;
     setTimeout(() => {
       // Désactiver le mode édition après 2 secondes

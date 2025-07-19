@@ -12,7 +12,6 @@ import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { Router, RouterLink } from '@angular/router';
 import { StockService } from 'src/app/admin-page/SERVICES/stocks.service';
 import { LockService } from 'src/app/admin-page/SERVICES/lock.service';
-import { WebSocketService } from 'src/app/admin-page/SERVICES/websocket.service';
 import { GlobalNotificationDto } from 'src/app/admin-page/MODELS/global_notification.dto';
 import { BehaviorSubject } from 'rxjs';
 import { GlobalNotificationService } from 'src/app/admin-page/SERVICES/global_notification_service';
@@ -62,7 +61,6 @@ export class NavRightComponent implements OnInit{
     private router: Router,
     private stockService: StockService,
     private lockService: LockService,
-    private webSocketService: WebSocketService,
     private globalNotificationService: GlobalNotificationService,
   ) {
     this.visibleUserList = false;
@@ -107,14 +105,7 @@ export class NavRightComponent implements OnInit{
     this.globalNotificationService.getAllForCurrentUser()
       .subscribe(list => this.notificationsList = list);
 
-    // 3️⃣ Connexion WS + réception en temps réel
-    this.webSocketService.connect();
-    this.webSocketService.notifications$
-      .subscribe((newNotif: GlobalNotificationDto) => {
-        if (newNotif) {
-          this.notificationsList = [ newNotif, ...this.notificationsList ];
-        }
-      });
+    
 
       // 4️⃣ Gestion du verrouillage et photo (inchangé)
     this.lockService.isLocked$.subscribe(locked => this.isLocked = locked);
@@ -122,7 +113,6 @@ export class NavRightComponent implements OnInit{
   }
 
   ngOnDestroy(): void {
-    this.webSocketService.disconnect();
     window.removeEventListener('storage-photo-update', this.boundUpdatePhotoListener);
   }
 
