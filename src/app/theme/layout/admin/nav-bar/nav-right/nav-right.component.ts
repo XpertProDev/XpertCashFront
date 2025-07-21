@@ -12,9 +12,11 @@ import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { Router, RouterLink } from '@angular/router';
 import { StockService } from 'src/app/admin-page/SERVICES/stocks.service';
 import { LockService } from 'src/app/admin-page/SERVICES/lock.service';
+import { WebSocketService } from 'src/app/admin-page/SERVICES/websocket.service';
 import { GlobalNotificationDto } from 'src/app/admin-page/MODELS/global_notification.dto';
 import { BehaviorSubject } from 'rxjs';
 import { GlobalNotificationService } from 'src/app/admin-page/SERVICES/global_notification_service';
+import { NotificationManagerService } from 'src/app/admin-page/SERVICES/NotificationManagerService';
 
 @Component({
   selector: 'app-nav-right',
@@ -61,7 +63,9 @@ export class NavRightComponent implements OnInit{
     private router: Router,
     private stockService: StockService,
     private lockService: LockService,
+    private webSocketService: WebSocketService,
     private globalNotificationService: GlobalNotificationService,
+    private notificationManager: NotificationManagerService
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
@@ -93,6 +97,7 @@ export class NavRightComponent implements OnInit{
     this.lockService.isLocked$.subscribe(locked => {
       this.isLocked = locked;
     });
+    
 
     // 1️⃣ Historique de stock
     this.stockService.getAllhistorique().subscribe(data => {
@@ -105,14 +110,33 @@ export class NavRightComponent implements OnInit{
     this.globalNotificationService.getAllForCurrentUser()
       .subscribe(list => this.notificationsList = list);
 
-    
+    this.webSocketService.connect();
+    this.webSocketService.notifications$
+      .subscribe((newNotif: GlobalNotificationDto) => {
+        if (newNotif) {
+          console.log('Nouvelle notification WebSocket :', newNotif);
+          this.notificationsList = [newNotif, ...this.notificationsList];
+        }
+      });
+
+      this.notificationManager.getNotifications()
+      .subscribe(list => this.notificationsList = list);
 
       // 4️⃣ Gestion du verrouillage et photo (inchangé)
     this.lockService.isLocked$.subscribe(locked => this.isLocked = locked);
     window.addEventListener('storage-photo-update', this.boundUpdatePhotoListener);
   }
 
+  private flashNotificationBadge() {
+    const badge = document.querySelector('.notification-badge');
+    if (badge) {
+      badge.classList.add('flash');
+      setTimeout(() => badge.classList.remove('flash'), 2000);
+    }
+  }
+
   ngOnDestroy(): void {
+    this.webSocketService.disconnect();
     window.removeEventListener('storage-photo-update', this.boundUpdatePhotoListener);
   }
 

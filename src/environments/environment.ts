@@ -6,6 +6,7 @@ export const environment = {
   apiUrl: 'http://localhost:4200',
   apiBaseUrl: "http://localhost:8080/api/auth",
   imgUrl: "http://localhost:8080",
+   wsEndpoint: 'http://192.168.1.15:8080/api/auth/ws'
   
 };
 

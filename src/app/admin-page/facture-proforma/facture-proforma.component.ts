@@ -429,12 +429,12 @@ onClickOutside(target: HTMLElement) {
 }
 
 reinitialiserFiltre() {
-  this.typeSelectionne = 'jour'; 
+  this.typeSelectionne = 'annee'; 
   this.dateDebut = '';
   this.dateFin = '';
   this.dropdownOuvert = false;
 
-  this.factureProFormaService.getFacturesParPeriode('jour').subscribe({
+  this.factureProFormaService.getFacturesParPeriode('annee').subscribe({
     next: (data) => {
       this.facturesproforma = data;
       this.currentPage = 0;

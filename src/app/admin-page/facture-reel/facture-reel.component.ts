@@ -311,12 +311,12 @@ export class FactureReelComponent implements OnInit {
 
 
 reinitialiserFiltre() {
-  this.typeSelectionne = 'jour'; 
+  this.typeSelectionne = 'annee'; 
   this.dateDebut = '';
   this.dateFin = '';
   this.dropdownOuvert = false;
 
-  this.factureReelService.getFacturesParPeriode('jour').subscribe({
+  this.factureReelService.getFacturesParPeriode('annee').subscribe({
     next: (data) => {
       this.factureReel = data;
       this.currentPage = 0;
