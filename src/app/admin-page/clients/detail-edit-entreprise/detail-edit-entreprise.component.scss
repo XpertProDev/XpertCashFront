@@ -204,6 +204,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  left: 10px;
+  position: relative;
   // border-radius: 50%;
 }
 
@@ -216,6 +218,7 @@
   justify-content: center;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
+  border-radius: 50px;
 }
 
 .profile-img-wrapper:hover .overlay {

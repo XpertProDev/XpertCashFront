@@ -405,7 +405,7 @@ getListEntreprise() {
     this.entrepriseService.addEntreprise(newEntreprise).subscribe({
       next: (createdEntreprise) => {
         const current = this.optionsEntreprise$.value;
-        this.optionsEntreprise$.next([createdEntreprise, ...current]); // Nouvelle entreprise en tête
+        this.optionsEntreprise$.next([createdEntreprise, ...current]);
         this.control.setValue(createdEntreprise);
         this.closePopup();
         this.entrepriseForm.reset();

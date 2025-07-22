@@ -268,7 +268,8 @@ export class DetailFactureProformaComponent implements OnInit {
           },
 
           type: 'creation',
-          description: 'Création de la facture ' + this.factureProForma.totalFacture,
+          description: 'Création de la facture ' + this.factureProForma.totalFacture + ' Fcfa',
+
         });
         console.log( "les information ", this.historicalEvents);
       }
