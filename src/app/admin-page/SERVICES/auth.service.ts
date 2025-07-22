@@ -67,6 +67,23 @@ export class AuthService {
   }
 
 
+  // public getCurrentUserToken(): Observable<string | null> {
+  //   // on récupère le même champ que dans saveTokens()
+  //   return of(localStorage.getItem(this.ACCESS_TOKEN_KEY));
+  // }
+  
+  public getCurrentUserToken(): Observable<string> {
+    const token = localStorage.getItem(this.ACCESS_TOKEN_KEY);
+    if (!token) {
+      // soit on propage une erreur :
+      throw new Error('Aucun token trouvé en localStorage');
+      // — ou bien on renvoie une chaîne vide pour éviter le null :
+      // return of('');
+    }
+    return of(token);
+  }
+
+
   // ici
   // 
   

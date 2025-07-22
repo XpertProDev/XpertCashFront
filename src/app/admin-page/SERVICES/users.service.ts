@@ -57,7 +57,7 @@ connexionUser(credentials: { email: string; password: string }): Observable<{
     refreshToken?: string;
     message?: string;
     error?: string;
-  }>(`${this.apiUrl}/login`, credentials);
+  }>(`${this.apiUrl}/login`, credentials, { withCredentials: true });
 }
 
 
