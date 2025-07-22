@@ -1,5 +1,5 @@
 // angular import
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { filter } from 'rxjs/operators'; // Import manquant ajouté
 
@@ -56,6 +56,14 @@ export class NavRightComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private notificationSubscription: Subscription | null = null;
 
+  get unreadCount(): number {
+    return this.notificationsList.filter(notif => !notif.read).length;
+  }
+
+  // get unreadNotifications() {
+  //   return this.notificationsList.filter(n => !n.read);
+  // }
+
   constructor(
     private userService: UsersService,
     private router: Router,
@@ -63,6 +71,7 @@ export class NavRightComponent implements OnInit, OnDestroy {
     private lockService: LockService,
     private webSocketService: WebSocketService,
     private globalNotificationService: GlobalNotificationService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
@@ -84,11 +93,33 @@ export class NavRightComponent implements OnInit, OnDestroy {
     this.updatePhotoFromLocalStorage();
     this.setupLockScreenListener();
     this.loadStockHistory();
-    this.setupNotificationSystem();
+    // this.setupNotificationSystem();
     // this.setupWebSocket();
     this.loadInitialNotifications();
     this.initializeWebSocket();
+    // this.calculateUnreadCount();
   }
+
+  // Méthode pour marquer une notification comme lue
+  markNotificationAsRead(notification: GlobalNotificationDto, event?: Event) {
+    if (event) {
+      event.stopPropagation(); // Empêcher la propagation du clic
+    }
+
+    if (notification.read) return; // Déjà lue
+
+    this.globalNotificationService.markAsRead(notification.id).subscribe({
+      next: () => {
+        notification.read = true;
+      },
+      error: (err) => console.error('Erreur', err)
+    });
+  }
+
+  // Calculer le nombre de notifications non lues
+  // private calculateUnreadCount() {
+  //   this.unreadCount = this.notificationsList.filter(n => !n.read).length;
+  // }
 
   private initializeWebSocket(): void {
     // 1) listener photo
@@ -105,7 +136,9 @@ export class NavRightComponent implements OnInit, OnDestroy {
         this.webSocketService.subscribe(
           '/user/queue/notifications',
           (notif: GlobalNotificationDto) => {
+            notif.read = false; // Nouvelles notifications non lues
             this.notificationsList = [notif, ...this.notificationsList];
+            // this.calculateUnreadCount();
             this.flashNotificationBadge();
           }
         );
@@ -114,15 +147,15 @@ export class NavRightComponent implements OnInit, OnDestroy {
     });
   }
 
-  private subscribeNotifications() {
-    this.webSocketService.subscribe(
-      '/user/queue/notifications',
-      (notif: GlobalNotificationDto) => {
-        console.log('🥳 Notification reçue !', notif);
-        this.notificationsList.unshift(notif);
-      }
-    );
-  }
+  // private subscribeNotifications() {
+  //   this.webSocketService.subscribe(
+  //     '/user/queue/notifications',
+  //     (notif: GlobalNotificationDto) => {
+  //       console.log('🥳 Notification reçue !', notif);
+  //       this.notificationsList.unshift(notif);
+  //     }
+  //   );
+  // }
 
 
   // private setupWebSocket() {
@@ -137,13 +170,14 @@ export class NavRightComponent implements OnInit, OnDestroy {
   //   });
   // }
 
-  private loadInitialNotifications() {
+private loadInitialNotifications() {
     this.globalNotificationService.getAllForCurrentUser().pipe(
-      takeUntil(this.destroy$)
+        takeUntil(this.destroy$)
     ).subscribe(notifications => {
-      this.notificationsList = notifications;
+        this.notificationsList = notifications;
+        this.cdr.detectChanges();
     });
-  }
+}
 
   private updatePhotoFromLocalStorage(): void {
     const savedPhoto = localStorage.getItem('photo');
@@ -175,11 +209,11 @@ export class NavRightComponent implements OnInit, OnDestroy {
     });
   }
 
-  private setupNotificationSystem(): void {
-    this.globalNotificationService.getAllForCurrentUser().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(list => this.notificationsList = list);
-  }
+  // private setupNotificationSystem(): void {
+  //   this.globalNotificationService.getAllForCurrentUser().pipe(
+  //     takeUntil(this.destroy$)
+  //   ).subscribe(list => this.notificationsList = list);
+  // }
 
   private flashNotificationBadge() {
     const badge = document.querySelector('.notification-badge');

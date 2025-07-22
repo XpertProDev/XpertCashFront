@@ -39,7 +39,24 @@ export class GlobalNotificationService {
             );
             })
         );
-        }
+    }
+
+markAsRead(notificationId: number): Observable<any> {
+    return this.usersService.getValidAccessToken().pipe(
+        switchMap(token => {
+            return this.http.put(
+                // AJOUTEZ LE CHEMIN COMPLET
+                `${this.apiUrl}/notifications/${notificationId}/read`,
+                null,
+                { 
+                    headers: new HttpHeaders({ 
+                        'Authorization': `Bearer ${token}` 
+                    }) 
+                }
+            );
+        })
+    );
+}
 
     
 }

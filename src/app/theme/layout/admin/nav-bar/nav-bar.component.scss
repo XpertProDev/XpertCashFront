@@ -21,7 +21,20 @@
     height: 100%;
   }
 
-
-
-
+.notification {
+  position: relative;
+  padding-right: 40px;
+  
+  .mark-read-container {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  &.unread {
+    background-color: rgba(240, 248, 255, 0.7);
+    border-left: 3px solid #007bff;
+  }
+}
   
