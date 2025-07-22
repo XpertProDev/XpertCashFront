@@ -4,7 +4,7 @@
       <a ngbDropdownToggle href="javascript:">
         <i class="icon feather icon-bell" title="Notification"></i>
         <!-- <span class="badge bg-danger"><span class="sr-only"></span></span> -->
-        <span class="badge bg-danger">
+        <span class="badge bg-danger" *ngIf="notificationsList.length > 0">
           {{ notificationsList.length }}
         </span>
       </a>
