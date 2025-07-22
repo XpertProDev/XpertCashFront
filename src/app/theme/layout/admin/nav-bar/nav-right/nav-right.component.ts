@@ -100,9 +100,10 @@ export class NavRightComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (frame) => {
         console.log('STOMP connecté :', frame);
+        // this.subscribeNotifications();
         // on s'abonne à notre topic de notifications
         this.webSocketService.subscribe(
-          '/topic/notifications',
+          '/user/queue/notifications',
           (notif: GlobalNotificationDto) => {
             this.notificationsList = [notif, ...this.notificationsList];
             this.flashNotificationBadge();
@@ -112,6 +113,17 @@ export class NavRightComponent implements OnInit, OnDestroy {
       error: (err) => console.error('Erreur de connexion WebSocket :', err)
     });
   }
+
+  private subscribeNotifications() {
+    this.webSocketService.subscribe(
+      '/user/queue/notifications',
+      (notif: GlobalNotificationDto) => {
+        console.log('🥳 Notification reçue !', notif);
+        this.notificationsList.unshift(notif);
+      }
+    );
+  }
+
 
   // private setupWebSocket() {
   //   this.webSocketService.connect().pipe(

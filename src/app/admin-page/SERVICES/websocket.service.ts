@@ -9,6 +9,7 @@ import { environment } from 'src/environments/environment';
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
   private client: Client;
+  
 
   constructor(private authService: AuthService) {
     this.client = new Client({
