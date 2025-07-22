@@ -78,3 +78,13 @@
     border: 2px solid #ffffff;
     box-shadow: 0 2px 4px #4099ff;
 }
+
+/* Ajoutez dans votre fichier CSS */
+.notification-badge.flash {
+  animation: flash 1s ease-in-out infinite;
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}

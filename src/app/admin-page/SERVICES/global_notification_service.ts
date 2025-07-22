@@ -14,21 +14,49 @@ export class GlobalNotificationService {
         private usersService: UsersService,
     ) {}
 
+    // getAllForCurrentUser(): Observable<GlobalNotificationDto[]> {
+    //     return this.usersService.getValidAccessToken().pipe(
+    //         switchMap(token => {
+    //             const headers = new HttpHeaders({
+    //             'Authorization': `Bearer ${token}`
+    //             });
+        
+    //             return this.http.get<GlobalNotificationDto[]>(`${this.apiUrl}/list/global/notifications`,  { headers });
+    //         }),
+    //         catchError((error) => {
+    //             console.error('Erreur lors de la récupération de la facture réelle :', error);
+    //             return throwError(() => error);
+    //         })
+    //     );
+    // }
+
     getAllForCurrentUser(): Observable<GlobalNotificationDto[]> {
         return this.usersService.getValidAccessToken().pipe(
             switchMap(token => {
-                const headers = new HttpHeaders({
-                'Authorization': `Bearer ${token}`
-                });
-        
-                return this.http.get<GlobalNotificationDto[]>(`${this.apiUrl}/list/global/notifications`,  { headers });
-            }),
-            catchError((error) => {
-                console.error('Erreur lors de la récupération de la facture réelle :', error);
-                return throwError(() => error);
+            return this.http.get<GlobalNotificationDto[]>(
+                `${this.apiUrl}/list/global/notifications`,
+                { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) }
+            );
             })
         );
     }
+
+markAsRead(notificationId: number): Observable<any> {
+    return this.usersService.getValidAccessToken().pipe(
+        switchMap(token => {
+            return this.http.put(
+                // AJOUTEZ LE CHEMIN COMPLET
+                `${this.apiUrl}/notifications/${notificationId}/read`,
+                null,
+                { 
+                    headers: new HttpHeaders({ 
+                        'Authorization': `Bearer ${token}` 
+                    }) 
+                }
+            );
+        })
+    );
+}
 
     
 }

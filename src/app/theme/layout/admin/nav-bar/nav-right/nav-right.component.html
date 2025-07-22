@@ -4,8 +4,11 @@
       <a ngbDropdownToggle href="javascript:">
         <i class="icon feather icon-bell" title="Notification"></i>
         <!-- <span class="badge bg-danger"><span class="sr-only"></span></span> -->
-        <span class="badge bg-danger">
+        <!-- <span class="badge bg-danger" *ngIf="notificationsList.length > 0">
           {{ notificationsList.length }}
+        </span> -->
+        <span class="badge bg-danger notification-badge" *ngIf="unreadCount > 0">
+            {{ unreadCount }}
         </span>
       </a>
       <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end notification">
@@ -71,18 +74,29 @@
           </li>-->
 
           <ul class="noti-body notifications">
-            <li class="notification" *ngFor="let notif of notificationsList">
+            <li class="notification" *ngFor="let notif of notificationsList" 
+                [class.unread]="!notif.read"
+                (click)="markNotificationAsRead(notif, $event)">
+
               <div class="media">
-                <img class="img-radius" src="assets/img/profil.png" alt="User Image" />
                 <div class="media-body">
                   <p>
                     <strong>{{ notif.senderName || 'Système' }}</strong>
-                    <span class="n-time text-muted">
+                    <span class="n-time text-muted" style="display: flex;">
                       <i class="icon feather icon-clock m-r-10"></i>
                       {{ getRelativeTime(notif.createdAt) }}
                     </span>
                   </p>
                   <p><b>{{ notif.message }}</b></p>
+                </div>
+                
+                <!-- DÉPLACEZ LE BOUTON ICI -->
+                <div class="mark-read-container" *ngIf="!notif.read">
+                  <button class="btn btn-sm btn-icon mark-read-btn"
+                          (click)="markNotificationAsRead(notif, $event)"
+                          title="Marquer comme lu">
+                    <i class="fa fa-check"></i>
+                  </button>
                 </div>
               </div>
             </li>

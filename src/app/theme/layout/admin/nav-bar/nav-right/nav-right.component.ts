@@ -1,6 +1,7 @@
 // angular import
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { filter } from 'rxjs/operators'; // Import manquant ajouté
 
 // bootstrap import
 import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
@@ -14,16 +15,14 @@ import { StockService } from 'src/app/admin-page/SERVICES/stocks.service';
 import { LockService } from 'src/app/admin-page/SERVICES/lock.service';
 import { WebSocketService } from 'src/app/admin-page/SERVICES/websocket.service';
 import { GlobalNotificationDto } from 'src/app/admin-page/MODELS/global_notification.dto';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, catchError, of, Subject, Subscription, switchMap, takeUntil } from 'rxjs';
 import { GlobalNotificationService } from 'src/app/admin-page/SERVICES/global_notification_service';
-import { NotificationManagerService } from 'src/app/admin-page/SERVICES/NotificationManagerService';
 
 @Component({
   selector: 'app-nav-right',
   imports: [
     SharedModule,
     RouterLink,
-
   ],
   templateUrl: './nav-right.component.html',
   styleUrls: ['./nav-right.component.scss'],
@@ -39,11 +38,9 @@ import { NotificationManagerService } from 'src/app/admin-page/SERVICES/Notifica
     ])
   ]
 })
-export class NavRightComponent implements OnInit{
+export class NavRightComponent implements OnInit, OnDestroy {
   stockHistory: any[] = [];
-  // --- notifications persistées + temps réel ---
   notificationsList: GlobalNotificationDto[] = [];
-  // public props
   visibleUserList: boolean;
   chatMessage: boolean;
   friendId!: number;
@@ -52,12 +49,21 @@ export class NavRightComponent implements OnInit{
   photo: string | null = null;
   photoUrl: string | null = null;
   isLocked = false;
+  
   private boundUpdatePhotoListener = this.updatePhotoListener.bind(this);
-
   private notificationsSubject = new BehaviorSubject<GlobalNotificationDto | null>(null);
   public notifications$ = this.notificationsSubject.asObservable();
+  private destroy$ = new Subject<void>();
+  private notificationSubscription: Subscription | null = null;
 
-  // constructor
+  get unreadCount(): number {
+    return this.notificationsList.filter(notif => !notif.read).length;
+  }
+
+  // get unreadNotifications() {
+  //   return this.notificationsList.filter(n => !n.read);
+  // }
+
   constructor(
     private userService: UsersService,
     private router: Router,
@@ -65,14 +71,12 @@ export class NavRightComponent implements OnInit{
     private lockService: LockService,
     private webSocketService: WebSocketService,
     private globalNotificationService: GlobalNotificationService,
-    private notificationManager: NotificationManagerService
+    private cdr: ChangeDetectorRef,
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
-    
   }
 
-  // Fonction fléchée pour éviter les problèmes de "this"
   private updatePhotoListener(event: Event): void {
     const newPhoto = localStorage.getItem('photo');
     if (newPhoto) {
@@ -85,47 +89,131 @@ export class NavRightComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    // 1️⃣ Récupération des infos utilisateur et photo
     this.getUserInfo();
+    this.updatePhotoFromLocalStorage();
+    this.setupLockScreenListener();
+    this.loadStockHistory();
+    // this.setupNotificationSystem();
+    // this.setupWebSocket();
+    this.loadInitialNotifications();
+    this.initializeWebSocket();
+    // this.calculateUnreadCount();
+  }
+
+  // Méthode pour marquer une notification comme lue
+  markNotificationAsRead(notification: GlobalNotificationDto, event?: Event) {
+    if (event) {
+      event.stopPropagation(); // Empêcher la propagation du clic
+    }
+
+    if (notification.read) return; // Déjà lue
+
+    this.globalNotificationService.markAsRead(notification.id).subscribe({
+      next: () => {
+        notification.read = true;
+      },
+      error: (err) => console.error('Erreur', err)
+    });
+  }
+
+  // Calculer le nombre de notifications non lues
+  // private calculateUnreadCount() {
+  //   this.unreadCount = this.notificationsList.filter(n => !n.read).length;
+  // }
+
+  private initializeWebSocket(): void {
+    // 1) listener photo
+    window.addEventListener('storage-photo-update', this.boundUpdatePhotoListener);
+
+    // 2) connexion STOMP + abonnement notifications
+    this.webSocketService.connect().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (frame) => {
+        console.log('STOMP connecté :', frame);
+        // this.subscribeNotifications();
+        // on s'abonne à notre topic de notifications
+        this.webSocketService.subscribe(
+          '/user/queue/notifications',
+          (notif: GlobalNotificationDto) => {
+            notif.read = false; // Nouvelles notifications non lues
+            this.notificationsList = [notif, ...this.notificationsList];
+            // this.calculateUnreadCount();
+            this.flashNotificationBadge();
+          }
+        );
+      },
+      error: (err) => console.error('Erreur de connexion WebSocket :', err)
+    });
+  }
+
+  // private subscribeNotifications() {
+  //   this.webSocketService.subscribe(
+  //     '/user/queue/notifications',
+  //     (notif: GlobalNotificationDto) => {
+  //       console.log('🥳 Notification reçue !', notif);
+  //       this.notificationsList.unshift(notif);
+  //     }
+  //   );
+  // }
+
+
+  // private setupWebSocket() {
+  //   this.webSocketService.connect().pipe(
+  //     takeUntil(this.destroy$)
+  //   ).subscribe({
+  //     next: (notification: GlobalNotificationDto) => {
+  //       this.notificationsList = [notification, ...this.notificationsList];
+  //       this.flashNotificationBadge();
+  //     },
+  //     error: (err) => console.error('WebSocket error:', err)
+  //   });
+  // }
+
+private loadInitialNotifications() {
+    this.globalNotificationService.getAllForCurrentUser().pipe(
+        takeUntil(this.destroy$)
+    ).subscribe(notifications => {
+        this.notificationsList = notifications;
+        this.cdr.detectChanges();
+    });
+}
+
+  private updatePhotoFromLocalStorage(): void {
     const savedPhoto = localStorage.getItem('photo');
     if (savedPhoto) {
       this.photo = savedPhoto;
       this.photoUrl = this.base64ToObjectUrl(savedPhoto);
     }
+  }
 
-    // 2️⃣ Verrouillage écran
-    this.lockService.isLocked$.subscribe(locked => {
-      this.isLocked = locked;
-    });
-    
+  private setupLockScreenListener(): void {
+    this.lockService.isLocked$.pipe(takeUntil(this.destroy$))
+      .subscribe(locked => this.isLocked = locked);
+  }
 
-    // 1️⃣ Historique de stock
-    this.stockService.getAllhistorique().subscribe(data => {
+  private loadStockHistory(): void {
+    this.stockService.getAllhistorique().pipe(
+      takeUntil(this.destroy$),
+      catchError(err => {
+        console.error('Erreur historique stock:', err);
+        return of([]);
+      })
+    ).subscribe(data => {
       this.stockHistory = data
-        .map(item => ({ ...item, relativeTime: this.getRelativeTime(item.createdAt) }))
+        .map(item => ({ 
+          ...item, 
+          relativeTime: this.getRelativeTime(item.createdAt) 
+        }))
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     });
-
-    // 2️⃣ Notifications persistées
-    this.globalNotificationService.getAllForCurrentUser()
-      .subscribe(list => this.notificationsList = list);
-
-    this.webSocketService.connect();
-    this.webSocketService.notifications$
-      .subscribe((newNotif: GlobalNotificationDto) => {
-        if (newNotif) {
-          console.log('Nouvelle notification WebSocket :', newNotif);
-          this.notificationsList = [newNotif, ...this.notificationsList];
-        }
-      });
-
-      this.notificationManager.getNotifications()
-      .subscribe(list => this.notificationsList = list);
-
-      // 4️⃣ Gestion du verrouillage et photo (inchangé)
-    this.lockService.isLocked$.subscribe(locked => this.isLocked = locked);
-    window.addEventListener('storage-photo-update', this.boundUpdatePhotoListener);
   }
+
+  // private setupNotificationSystem(): void {
+  //   this.globalNotificationService.getAllForCurrentUser().pipe(
+  //     takeUntil(this.destroy$)
+  //   ).subscribe(list => this.notificationsList = list);
+  // }
 
   private flashNotificationBadge() {
     const badge = document.querySelector('.notification-badge');
@@ -136,11 +224,12 @@ export class NavRightComponent implements OnInit{
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     this.webSocketService.disconnect();
     window.removeEventListener('storage-photo-update', this.boundUpdatePhotoListener);
   }
 
-  // eslint-disable-next-line
   onChatToggle(friendID: any) {
     this.friendId = friendID;
     this.chatMessage = !this.chatMessage;
@@ -150,7 +239,7 @@ export class NavRightComponent implements OnInit{
     this.userService.getUserInfo().subscribe({
       next: (user) => {
         this.userName = user.nomComplet;
-        this.nomEntreprise = user.nomEntreprise
+        this.nomEntreprise = user.nomEntreprise;
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);
@@ -158,24 +247,6 @@ export class NavRightComponent implements OnInit{
     });
   }
 
-  getAllhistorique() {
-    this.stockService.getAllhistorique().subscribe(
-      (data) => {
-        this.stockHistory = data
-          .map(item => ({
-            ...item,
-            relativeTime: this.getRelativeTime(item.createdAt)
-          }))
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  
-        console.log('Historique trié :', this.stockHistory);
-      },
-      (error) => {
-        console.error("Erreur lors de la récupération de l'historique", error);
-      }
-    );
-  }
-  
   getRelativeTime(date: string): string {
     const currentTime = new Date();
     const eventTime = new Date(date);
@@ -210,20 +281,20 @@ export class NavRightComponent implements OnInit{
   }
 
   private base64ToObjectUrl(base64: string): string {
-  const byteString = atob(base64.split(',')[1]);
-  const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+    const byteString = atob(base64.split(',')[1]);
+    const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
 
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    const blob = new Blob([ab], { type: mimeString });
+    return URL.createObjectURL(blob);
   }
 
-  const blob = new Blob([ab], { type: mimeString });
-  return URL.createObjectURL(blob);
-}
-
-lockManually() {
-  this.lockService.lockNow();
-}
+  lockManually() {
+    this.lockService.lockNow();
+  }
 }

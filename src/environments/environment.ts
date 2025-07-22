@@ -1,6 +1,17 @@
 import packageInfo from '../../package.json';
 
+
 export const environment = {
+  appVersion: packageInfo.version,
+  production: true,
+  apiUrl: 'http://192.168.1.14:4200',
+  apiBaseUrl: 'http://192.168.1.14:8080/api/auth',
+  imgUrl: "http://192.168.1.14:8080",
+  wsEndpoint: 'http://192.168.1.14:8080/ws'
+  
+};
+
+/*export const environment = {
   appVersion: packageInfo.version,
   production: true,
   apiUrl: 'http://localhost:4200',
@@ -9,6 +20,7 @@ export const environment = {
    wsEndpoint: 'http://192.168.1.15:8080/api/auth/ws'
   
 };
+*/
 
 
 
