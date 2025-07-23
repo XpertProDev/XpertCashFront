@@ -17,6 +17,7 @@ import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { MatDialog } from '@angular/material/dialog';
 import { environment } from 'src/environments/environment';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 // Ajouter cette interface pour les pièces jointes
 interface EmailAttachment {
@@ -34,8 +35,6 @@ interface Note {
   modifiee?: boolean;
   dateModification?: Date;
   numeroIdentifiant: string;
-
-
 }
 
 // Interface modifiée
@@ -55,7 +54,7 @@ interface HistoricalEvent {
 
 @Component({
   selector: 'app-detail-facture-proforma',
-  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe,], //EnLettresPipe,
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe, DragDropModule], //EnLettresPipe,
   templateUrl: './detail-facture-proforma.component.html',
   styleUrl: './detail-facture-proforma.component.scss'
 })
@@ -268,8 +267,7 @@ export class DetailFactureProformaComponent implements OnInit {
           },
 
           type: 'creation',
-          description: 'Création de la facture ' + this.factureProForma.totalFacture + ' Fcfa',
-
+          description: 'Création de la facture ' + this.factureProForma.totalFacture,
         });
         console.log( "les information ", this.historicalEvents);
       }
@@ -982,36 +980,28 @@ get labelNom(): string {
   }
 
   loadUsersOfEntreprise(entrepriseId: number) {
-  if (entrepriseId == null) {
-    console.error('ID d’entreprise invalide:', entrepriseId);
-    return;
-  }
-
-  const token = this.usersService.getToken();
-  const connectedUserId = token ? this.usersService.extractUserIdFromToken(token) : null;
-
-  this.isLoading = true;
-  this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
-    next: (data) => {
-      const filteredData = data.filter(user => user.id !== connectedUserId);
-
-      this.users = filteredData.map(user => ({
-        ...user,
-        selected: false
-      }));
-
-      this.filteredUsers = this.users;
-      this.isLoading = false;
-
-      console.log('Utilisateurs récupérés (hors connecté):', this.users);
-    },
-    error: (err) => {
-      console.error('Erreur lors du chargement des utilisateurs', err);
-      this.isLoading = false;
+    if (entrepriseId == null) {
+      console.error('ID d’entreprise invalide:', entrepriseId);
+      return;
     }
-  });
-}
 
+    this.isLoading = true;
+    this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
+      next: (data) => {
+        this.users = data.map(user => ({
+          ...user,
+          selected: false
+        }));
+        this.filteredUsers = this.users;
+        this.isLoading = false;
+        console.log('Utilisateurs récupérés:', this.users);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des utilisateurs', err);
+        this.isLoading = false;
+      }
+    });
+  }
 
   // Méthode appelée au changement de <select>
   onProduitChange(produitId: number | null, ligne: any, index: number) {
@@ -2069,6 +2059,19 @@ openWhatsApp() {
 
 
   prepareEmailContent() {}
+
+
+dropConfirmed(event: CdkDragDrop<any[]>) {
+  if (event.previousIndex !== event.currentIndex) {
+    moveItemInArray(this.confirmedLignes, event.previousIndex, event.currentIndex);
+    this.saveNewOrder();
+  }
+}
+
+private saveNewOrder() {
+  // Optionnel : Sauvegarder le nouvel ordre dans le backend
+  console.log('Nouvel ordre des produits:', this.confirmedLignes);
+}
 
 
 }
