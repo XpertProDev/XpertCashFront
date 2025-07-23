@@ -531,11 +531,20 @@
             <!-- Titre + icône -->
             <div class="title_historique" style="display: flex; align-items: center; justify-content: space-between;">
                 <h6 style="margin: 0;">Historique des actions</h6>
-                <i class="ri-file-edit-line" 
-                    style="font-size: 1.1rem; cursor: pointer; color: #555;"
-                    (click)="toggleNotebook()"
-                    title="Voir le cahier de notes">
-                </i>
+                <div style="position: relative;">
+                    <i class="ri-file-edit-line" 
+                        style="font-size: 1.1rem; cursor: pointer; color: #555;"
+                        (click)="toggleNotebook()"
+                        title="Voir le cahier de notes">
+                    </i>
+
+                    <div class="count_note" *ngIf="notes.length > 0; else noNote">
+                        {{ notes.length }}
+                    </div>
+                    <ng-template #noNote>
+                        <div class="count_note">0</div>
+                    </ng-template>
+                </div>
             </div>
 
                 <!-- Fiche (bloc-notes) -->

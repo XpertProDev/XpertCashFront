@@ -1068,3 +1068,18 @@ th {
 .tr_stock.cdk-drop-list-dragging .tr_stock:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+.count_note {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #E9D421;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  position: absolute;
+  top: -8px;
+  right: -9px;
+  cursor: pointer;
+}
