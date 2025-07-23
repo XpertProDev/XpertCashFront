@@ -87,7 +87,7 @@ export class CompteComponent  implements OnInit {
     this.initForm();
     this.updatePaginatedUsers();
     this.loadBoutiques();
-    this.handleRoleTypeChanges();
+    // this.handleRoleTypeChanges();
     
     this.usersService.getUserInfo().subscribe({
     next: (userData) => {
@@ -112,7 +112,7 @@ export class CompteComponent  implements OnInit {
       roleType: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
       pays: ['', Validators.required],
-      boutiqueId: [null],
+      // boutiqueId: [null],
     });
   }
 
@@ -231,7 +231,7 @@ loadRoles() {
       roleType: '',
       phone: '',
       pays: '',
-      boutiqueId: [null],
+      // boutiqueId: [null],
     });
   
     this.userForm.markAsPristine();
@@ -336,6 +336,7 @@ loadRoles() {
   boutiques: any[] = [];
 showBoutiqueSelect = false;
 
+/*
 handleRoleTypeChanges() {
   this.userForm.get('roleType')?.valueChanges.subscribe(role => {
     console.log('Rôle sélectionné :', role);
@@ -352,6 +353,7 @@ handleRoleTypeChanges() {
     this.userForm.get('boutiqueId')?.updateValueAndValidity();
   });
 }
+*/
 
 loadBoutiques() {
   this.boutiqueService.getBoutiquesByEntreprise().subscribe({

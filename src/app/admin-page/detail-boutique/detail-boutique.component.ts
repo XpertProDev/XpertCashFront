@@ -132,7 +132,7 @@ export class DetailBoutiqueComponent implements OnInit {
         this.isLoading = false;
         
         this.loadProductsInBoutique(boutique.id);
-        this.loadAllVendeursBoutique();
+        // this.loadAllVendeursBoutique();
 
         // Mise à jour du formulaire
         this.boutiqueForm.patchValue({
@@ -619,7 +619,7 @@ async confirmCopyProducts(): Promise<void> {
 
 
 
-
+/*
 loadAllVendeursBoutique(): void {
   if (!this.boutiqueId) {
     this.errorMessage = "Identifiant boutique manquant";
@@ -653,6 +653,7 @@ loadAllVendeursBoutique(): void {
 });
 
 }
+*/
 
 
 

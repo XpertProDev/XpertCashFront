@@ -163,7 +163,7 @@ deleteBoutique(id: number): Observable<any> {
 }
 
 
-  getVendeursByBoutiqueId(id: number): Observable<Users[]> {
+/*  getVendeursByBoutiqueId(id: number): Observable<Users[]> {
   return this.usersService.getValidAccessToken().pipe(
     switchMap(token => {
       if (!token) {
@@ -179,7 +179,7 @@ deleteBoutique(id: number): Observable<any> {
     })
   );
 }
-
+*/
   
  copierProduits(detailsCopie: {
   boutiqueSourceId: number;
