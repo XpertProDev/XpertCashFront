@@ -3,12 +3,12 @@ import packageInfo from '../../package.json';
 export const environment = {
   appVersion: packageInfo.version,
   production: true,
-  apiUrl: 'http://192.168.1.10:4200',
-  apiBaseUrl: 'http://192.168.1.10:8080/api/auth',
-  imgUrl: "http://192.168.1.10:8080",
+  apiUrl: 'http://192.168.1.11:4200',
+  apiBaseUrl: 'http://192.168.1.11:8080/api/auth',
+  imgUrl: "http://192.168.1.11:8080",
     // Utiliser SockJS au lieu de WebSocket natif
-  wsEndpoint: 'http://192.168.1.10:8080/ws'
-  // wsEndpoint: 'http://192.168.1.10:8080/api/auth/ws'
+  wsEndpoint: 'http://192.168.1.11:8080/ws'
+  // wsEndpoint: 'http://192.168.1.11:8080/api/auth/ws'
   
 };
 

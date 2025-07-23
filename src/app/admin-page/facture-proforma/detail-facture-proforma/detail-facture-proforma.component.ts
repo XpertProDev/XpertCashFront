@@ -18,6 +18,7 @@ import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { MatDialog } from '@angular/material/dialog';
 import { environment } from 'src/environments/environment';
 import { T } from '@angular/cdk/portal-directives.d-BoG39gYN';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 // Ajouter cette interface pour les pièces jointes
 interface EmailAttachment {
@@ -35,8 +36,6 @@ interface Note {
   modifiee?: boolean;
   dateModification?: Date;
   numeroIdentifiant: string;
-
-
 }
 
 // Interface modifiée
@@ -56,7 +55,7 @@ interface HistoricalEvent {
 
 @Component({
   selector: 'app-detail-facture-proforma',
-  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe,], //EnLettresPipe,
+  imports: [ FormsModule, CommonModule, ReactiveFormsModule, CustomNumberPipe, DragDropModule], //EnLettresPipe,
   templateUrl: './detail-facture-proforma.component.html',
   styleUrl: './detail-facture-proforma.component.scss'
 })
@@ -2061,6 +2060,19 @@ openWhatsApp() {
 
 
   prepareEmailContent() {}
+
+
+dropConfirmed(event: CdkDragDrop<any[]>) {
+  if (event.previousIndex !== event.currentIndex) {
+    moveItemInArray(this.confirmedLignes, event.previousIndex, event.currentIndex);
+    this.saveNewOrder();
+  }
+}
+
+private saveNewOrder() {
+  // Optionnel : Sauvegarder le nouvel ordre dans le backend
+  console.log('Nouvel ordre des produits:', this.confirmedLignes);
+}
 
 
 }

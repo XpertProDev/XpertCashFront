@@ -1049,3 +1049,22 @@ th {
   min-width: 150px;
   padding: 15px;
 }
+
+.cdk-drag-preview {
+  background-color: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  opacity: 0.9;
+  cursor: grabbing;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.tr_stock.cdk-drop-list-dragging .tr_stock:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
