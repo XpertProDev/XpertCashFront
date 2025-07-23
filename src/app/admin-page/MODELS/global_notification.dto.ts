@@ -4,4 +4,5 @@ export interface GlobalNotificationDto {
   createdAt: string;
   senderName: string;
   read: boolean;
+  
 }
