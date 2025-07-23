@@ -269,10 +269,8 @@
 
                     <div class="barre" style="margin-bottom: 8px;" *ngIf="boutique?.actif"></div>
 
-                    <div class="icon_content" style="margin-bottom: 8px; position: relative;" *ngIf="boutique?.actif">
+                    <!-- <div class="icon_content" style="margin-bottom: 8px; position: relative;" *ngIf="boutique?.actif">
                         <i class="ri-folder-transfer-line" (click)="toggleTransferModal()"></i>
-
-                        <!-- Popup de transfert -->
                         <div *ngIf="showTransferModal" class="transfer-modal">
                             <div class="modal-header">
                                 <h5>Déplacer vers</h5>
@@ -299,12 +297,11 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- Fin Popup de transfert -->
-                    </div>
+                        </div> 
+                    </div>-->
 
-                    <div class="icon_content" style="margin-bottom: 8px; margin-left: 25px; position: relative;" *ngIf="boutique?.actif">
-                        <i class="ri-file-copy-2-line" (click)="toggleCopyModal()"></i>
+                    <div class="icon_content" style="margin-bottom: 8px; position: relative;" *ngIf="boutique?.actif">
+                        <i class="ri-file-copy-2-line" (click)="toggleCopyModal()" title="Copier le produit vers une autre boutique"></i>
                         
                         <!-- Popup de copie -->
                         <div *ngIf="showCopyModal" class="copy-modal">
