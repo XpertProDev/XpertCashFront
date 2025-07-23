@@ -284,23 +284,38 @@ export class PermissionComponent implements OnInit {
     const userId = this.route.snapshot.params['userId'];
     const isChecked = this.pendingAction === 'suspend';
 
-    this.usersService.suspendUser(userId, isChecked).subscribe({
-      next: (response: string) => {
-        this.successMessage = response;
-        if (this.user) {
-          this.user.enabledLien = !isChecked;
-        }
-        this.showConfirmationModal = false;
-        setTimeout(() => this.successMessage = null, 5000);
-      },
-      error: (err) => {
-        this.errorMessage = err.error || "Erreur lors de l'opération";
-        console.error(err);
-        this.checkboxRef!.checked = !isChecked;
-        this.showConfirmationModal = false;
-        setTimeout(() => this.errorMessage = null, 5000);
+   this.usersService.suspendUser(userId, isChecked).subscribe({
+  next: (response: string) => {
+    this.successMessage = response;
+    if (this.user) {
+      this.user.enabledLien = !isChecked;
+    }
+    this.showConfirmationModal = false;
+    setTimeout(() => this.successMessage = null, 5000);
+  },
+  error: (err) => {
+    let errorMsg = "Erreur lors de l'opération";
+
+    if (err.error) {
+      try {
+        const parsed = typeof err.error === 'string' ? JSON.parse(err.error) : err.error;
+        errorMsg = parsed.error || parsed.message || JSON.stringify(parsed);
+      } catch {
+        errorMsg = err.error;
       }
-    });
+    } else if (err.message) {
+      errorMsg = err.message;
+    }
+
+    this.errorMessage = errorMsg;
+    console.error(err);
+
+    this.checkboxRef!.checked = !isChecked;
+    this.showConfirmationModal = false;
+    setTimeout(() => this.errorMessage = null, 5000);
+  }
+});
+
   }
   
   private showSuccessMessage(isChecked: boolean) {

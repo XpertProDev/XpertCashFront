@@ -943,3 +943,128 @@ tr.tr:hover {
   display: flex;
   align-items: center;
 }
+
+
+.filter-dropdown-wrapper {
+  position: relative;
+  display: inline-block; /* essentiel pour que le menu s'ajuste au contenu */
+}
+
+.filter-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-toggle:hover {
+  background-color: #eef1f4;
+}
+
+.filter-label {
+  font-weight: 500;
+}
+
+.filter-arrow {
+  font-size: 14px;
+  color: #666;
+}
+
+.filter-dropdown {
+  min-width: 260px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  margin-top: 8px;
+  position: absolute;
+  z-index: 1000;
+}
+
+.filter-type {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filter-option {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+  color: #333;
+}
+
+.filter-option:hover {
+  background-color: #f1f3f6;
+}
+
+.filter-option.active {
+  background-color: #1976d2;
+  color: white;
+  font-weight: 500;
+}
+
+.filter-date label {
+  display: block;
+  font-size: 13px;
+  margin: 8px 0 4px;
+  color: #555;
+}
+
+.filter-date input {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.filter-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px;
+  font-weight: 500;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.filter-btn:hover {
+  background-color: #155fa0;
+}
+/* Bouton rond avec icône */
+.filter-toggle-icon { 
+  width: 40px;
+  height: 40px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.filter-toggle-icon:hover {
+  background-color: #e0e0e0;
+}
+
+.filter-toggle-icon i {
+  font-size: 18px;
+  color: #333;
+}
+
+

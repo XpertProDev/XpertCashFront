@@ -288,7 +288,7 @@ private updatePhoneValidator(longueur: number): void {
         },
         err => {
             console.error('Erreur lors de la récupération des entreprises :', err);
-            this.errorMessage = err.error?.error || 'Erreur chargement entreprises';
+            this.errorMessage = err.error?.error || 'Client physiques';
         }
     );
   }
@@ -405,7 +405,7 @@ getListEntreprise() {
     this.entrepriseService.addEntreprise(newEntreprise).subscribe({
       next: (createdEntreprise) => {
         const current = this.optionsEntreprise$.value;
-        this.optionsEntreprise$.next([createdEntreprise, ...current]); // Nouvelle entreprise en tête
+        this.optionsEntreprise$.next([createdEntreprise, ...current]);
         this.control.setValue(createdEntreprise);
         this.closePopup();
         this.entrepriseForm.reset();

@@ -50,7 +50,7 @@ export class EntrepriseService {
         'Content-Type': 'application/json'
       });
 
-      return this.http.post<Entreprise>(`${this.apiUrl}/entreprises`, entreprise, { headers });
+      return this.http.post<Entreprise>(`${this.apiUrl}/entreprise-clients`, entreprise, { headers });
     }),
     tap((newEntreprise) => {
       const currentEntreprise = this.entrepriseSubject.value;
@@ -211,4 +211,6 @@ export class EntrepriseService {
     const refreshToken = localStorage.getItem('refreshToken');
     return this.http.post<{ token: string }>(`${this.apiUrl}/refresh-token`, { refreshToken });
   }
+
+ 
 }

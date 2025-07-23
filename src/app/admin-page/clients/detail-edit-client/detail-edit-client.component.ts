@@ -881,5 +881,58 @@ getListEntreprise() {
     this.router.navigate(['/clients'])
   }
 
-  
+client: Clients | null = null;
+
+showConfirmationModalC = false;
+isDeletingC = false;
+
+deleteClient() {
+  if (!this.client && !this.clientId) {
+    console.error("Client ou ID non disponible.");
+    return;
+  }
+
+  this.showConfirmationModalC = true;
 }
+
+
+async confirmDeleteC(): Promise<void> {
+  this.showConfirmationModalC = false;
+
+  if (!this.client && !this.clientId) {
+    this.errorMessage = "Client non disponible pour suppression.";
+    return;
+  }
+
+  this.isDeletingC = true;
+  this.errorMessage = '';
+  this.successMessage = '';
+
+  try {
+    const idToDelete = this.client?.id || this.clientId;
+    const message = await this.clientService.deleteClient(idToDelete).toPromise();
+    this.successMessage = message || 'Client supprimé avec succès !';
+
+    setTimeout(() => {
+      this.router.navigate(['/clients']);
+    }, 2000);
+  } catch (err: any) {
+    let message = err?.message || err?.error || 'Erreur lors de la suppression.';
+
+    const prefix = "Une erreur est survenue : ";
+    if (message.startsWith(prefix)) {
+      message = message.substring(prefix.length);
+    }
+    this.errorMessage = message;
+  } finally {
+    this.isDeletingC = false;
+    setTimeout(() => {
+      this.errorMessage = '';
+      this.successMessage = '';
+    }, 5000);
+  }
+}
+
+
+  
+} 

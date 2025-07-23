@@ -155,7 +155,7 @@ toggleFiltreDropdown(): void {
 
 filtrerParType(type: 'ALL' | 'BOUTIQUE' | 'ENTREPOT'): void {
   this.filtreType = type;
-  this.showFiltreDropdown = false; // Ferme le menu après sélection
+  this.showFiltreDropdown = false;
   this.filterBoutiques();
 }
 

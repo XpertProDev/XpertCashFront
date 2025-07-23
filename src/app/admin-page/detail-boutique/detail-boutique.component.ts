@@ -706,18 +706,21 @@ async confirmDelete(): Promise<void> {
     }
   }
 
-  this.isDeleting = false;
-  
+ this.isDeleting = false;
+
   if (corbeilleIds.length > 0) {
     this.successMessage = `${corbeilleIds.length} produit(s) mis en corbeille avec succès.`;
-    
+
+    // ✅ Mise à jour locale : on filtre les produits supprimés
     this.productsInBoutique = this.productsInBoutique.filter(
       p => !corbeilleIds.includes(p.id)
     );
-    
-    this.selectedProductIds = this.selectedProductIds.filter(
-      id => !corbeilleIds.includes(id)
+
+    this.filteredProducts = this.filteredProducts.filter(
+      p => !corbeilleIds.includes(p.id)
     );
+
+    this.selectedProductIds = [];
   }
   
   if (errors.length > 0) {

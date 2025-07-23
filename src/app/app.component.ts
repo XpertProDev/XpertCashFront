@@ -162,7 +162,3 @@ handleSessionConfirm() {
   this.showSessionModal = false;
 }
 }
-
-
-
-

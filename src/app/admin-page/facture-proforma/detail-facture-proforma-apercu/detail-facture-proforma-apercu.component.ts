@@ -41,7 +41,7 @@ export class DetailFactureProformaApercuComponent implements OnInit {
   tauxTva!: number;
 
   private apiUrl = environment.imgUrl;
-fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
+ fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
 
 
   constructor(

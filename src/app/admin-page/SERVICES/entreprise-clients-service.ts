@@ -27,7 +27,7 @@ export class EntrepriseClientService {
         'Content-Type': 'application/json'
       });
 
-      return this.http.post<EntrepriseClient>(`${this.apiUrl}/entreprises`, entrepriseClient, { headers });
+      return this.http.post<EntrepriseClient>(`${this.apiUrl}/entreprise-clients`, entrepriseClient, { headers });
     }),
     catchError(error => {
       let errorMsg = 'Erreur inconnue';
@@ -90,6 +90,34 @@ export class EntrepriseClientService {
     catchError(error => {
       let errorMsg = 'Erreur lors de la récupération';
       if (error.status === 404) {
+        errorMsg = 'Entreprise non trouvée';
+      }
+      return throwError(() => new Error(errorMsg));
+    })
+  );
+}
+
+ //Delete entreprise
+  deleteEntreprise(id: number): Observable<string> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        return throwError(() => new Error('Token manquant'));
+      }
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
+      return this.http.delete<string>(`${this.apiUrl}/entrepriseClients/${id}`, {
+        headers,
+        responseType: 'text' as 'json' 
+      });
+    }),
+    catchError(error => {
+      let errorMsg = 'Erreur inconnue';
+      if (error.error instanceof ErrorEvent) {
+        errorMsg = `Erreur: ${error.error.message}`;
+      } else if (error.status === 404) {
         errorMsg = 'Entreprise non trouvée';
       }
       return throwError(() => new Error(errorMsg));

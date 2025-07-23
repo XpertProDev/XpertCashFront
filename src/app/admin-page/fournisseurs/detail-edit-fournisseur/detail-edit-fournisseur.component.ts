@@ -42,6 +42,8 @@ export class DetailEditFournisseurComponent {
   selectedCompressedFile: File | null = null;
   indicatif: string = '';
   maxPhoneLength: number = 0;
+  fournisseursId!: number;
+
   
   // countryDialCodes = {
   //   'Mali': '+223',
@@ -288,7 +290,7 @@ export class DetailEditFournisseurComponent {
     this.fournisseurEditForm.enable();
   } else {
     // Réinitialiser les modifications
-    this.selectedCompressedFile = null;
+    this.selectedFile = null;
     this.newPhotoUrl = null;
     this.loadFournisseur();
     this.fournisseurEditForm.disable();
@@ -355,13 +357,13 @@ async modifierFournisseur() {
     await this.fournisseurService.updateFournisseur(
       this.fournisseur.id,
       updatedFournisseur,
-      this.selectedCompressedFile || undefined
+      this.selectedFile || undefined
     ).toPromise();
 
     this.successMessage = 'Fournisseur mis à jour avec succès!';
     
     // Réinitialiser après succès
-    this.selectedCompressedFile = null;
+    this.selectedFile = null;
     this.newPhotoUrl = null;
     setTimeout(() => {
       // Désactiver le mode édition après 2 secondes
@@ -391,6 +393,59 @@ navigateBack(){
 }
 
   
+
+
+showConfirmationModalF = false;
+isDeletingF = false;
+
+deleteFournisseur() {
+  if (!this.fournisseur && !this.fournisseursId) {
+    console.error("Fournisseur ou ID non disponible.");
+    return;
+  }
+
+  this.showConfirmationModalF = true;
+}
+
+
+async confirmDeleteF(): Promise<void> {
+  this.showConfirmationModalF = false;
+
+  if (!this.fournisseur && !this.fournisseursId) {
+    this.errorMessage = "Fournisseur non disponible pour suppression.";
+    return;
+  }
+
+  this.isDeletingF = true;
+  this.errorMessage = '';
+  this.successMessage = '';
+
+  try {
+    const idToDelete = this.fournisseur?.id || this.fournisseursId;
+
+    const response = await this.fournisseurService.deleteFournisseur(idToDelete).toPromise();
+    this.successMessage = response?.message || 'Fournisseur supprimé avec succès !';
+
+    setTimeout(() => {
+      this.router.navigate(['/fournisseurs']);
+    }, 2000);
+  } catch (err: any) {
+    let message = err?.message || err?.error || 'Erreur lors de la suppression.';
+
+    const prefix = "Une erreur est survenue : ";
+    if (message.startsWith(prefix)) {
+      message = message.substring(prefix.length);
+    }
+    this.errorMessage = message;
+  } finally {
+    this.isDeletingF = false;
+    setTimeout(() => {
+      this.errorMessage = '';
+      this.successMessage = '';
+    }, 5000);
+  }
+}
+
 
 }
  

@@ -28,7 +28,7 @@ export class UsersService {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService,
+    // private authService: AuthService,
      private router: Router,
      private modalService: ModalService
    ) {}

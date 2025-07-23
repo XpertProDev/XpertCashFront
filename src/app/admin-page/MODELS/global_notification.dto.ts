@@ -3,5 +3,5 @@ export interface GlobalNotificationDto {
   message: string;
   createdAt: string;
   senderName: string;
-  read: boolean; // <-- Propriété, pas méthode
+  read: boolean;
 }

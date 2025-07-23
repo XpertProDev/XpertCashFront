@@ -17,7 +17,6 @@ import { EnLettresPipe } from '../../MODELS/number-to-words.pipe';
 import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { MatDialog } from '@angular/material/dialog';
 import { environment } from 'src/environments/environment';
-import { T } from '@angular/cdk/portal-directives.d-BoG39gYN';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 // Ajouter cette interface pour les pièces jointes

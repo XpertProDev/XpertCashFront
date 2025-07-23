@@ -12,6 +12,7 @@ import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ProduitService } from 'src/app/admin-page/SERVICES/produit.service';
 import { UserRequest } from 'src/app/admin-page/MODELS/user-request';
+import { tap } from 'rxjs';
 @Component({
   selector: 'app-dash-analytics',
   standalone: true,
@@ -529,6 +530,7 @@ getBoutiqueName() {
 
 
   showBlockedPopup: boolean = false;
+  isAdmin: boolean = false;
 
  onLogout(): void {
     this.userService.logoutUser();
@@ -536,32 +538,36 @@ getBoutiqueName() {
  
   
 private checkAccountStatus(): void {
-  this.userService.getUserInfo().subscribe((user: UserRequest) => {
-    this.userEmail = user.email;
-    this.isAdmin = user.roleType === 'ADMIN';
-    const now = new Date();
+  this.userService.getUserInfo()
+    .pipe(tap(user => console.log('[checkAccountStatus] user:', user)))
+    .subscribe((user: UserRequest) => {
+      this.userEmail = user.email;
+      this.isAdmin = user.roleType?.toUpperCase() === 'ADMIN';
+      const now = Date.now();
 
-    if (this.isAdmin) {
-      const createdAt = user.createdAt ? new Date(user.createdAt) : null;
-      const diffInHours = createdAt ? (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60) : 0;
+      const createdAt = this.isAdmin
+        ? user.createdAt
+        : user.adminCreatedAt;
 
-      this.showBlockedPopup = !user.userActivated && diffInHours > 24;
-    } else {
-      if (user.adminActivated) {
-        this.showBlockedPopup = false;
-        return;
-      }
+      const parsedCreatedAt = createdAt ? Date.parse(createdAt) : null;
+      const diffInHours = parsedCreatedAt ? (now - parsedCreatedAt) / (1000 * 60 * 60) : 0;
 
-      const adminCreatedAt = user.adminCreatedAt ? new Date(user.adminCreatedAt) : null;
-      const diffAdminInHours = adminCreatedAt ? (now.getTime() - adminCreatedAt.getTime()) / (1000 * 60 * 60) : 0;
+      const adminActivated = this.isAdmin
+        ? user.adminActivated
+        : user.adminActivated;
 
-      this.showBlockedPopup = diffAdminInHours > 24;
-    }
-  });
+      console.log(`[${this.isAdmin ? 'Admin' : 'User'}] adminActivated=${adminActivated}, hours since admin creation=${diffInHours}`);
+
+      this.showBlockedPopup = adminActivated === false && diffInHours > 24;
+
+      console.log('=> showBlockedPopup =', this.showBlockedPopup);
+    });
 }
 
 
-isAdmin: boolean = false;
+
+
+
 
 
 

@@ -65,18 +65,19 @@ registerLocaleData(localeFr);
     MatDialogModule,
     MatButtonModule,
     CodeInputModule,
-    DragDropModule,
+    DragDropModule, 
     MatSelectModule,
     NavGroupComponent,
     NavItemComponent,
     NavCollapseComponent,
-    RouterModule
+    RouterModule,
   ],
   providers: [
     WebSocketService,
     provideHttpClient(),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true, },
     { provide: LOCALE_ID, useValue: 'fr-FR' },
+    
   ],
   bootstrap: [AppComponent]
 })

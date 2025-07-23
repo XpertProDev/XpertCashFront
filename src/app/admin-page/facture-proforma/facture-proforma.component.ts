@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService } from '../SERVICES/client-service';
@@ -13,6 +13,14 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatInputModule } from '@angular/material/input';
 import { EntrepriseService } from '../SERVICES/entreprise-service';
 import { ModuleService } from '../SERVICES/Module-Service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatOptionModule, MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
+import { MatMenuModule } from '@angular/material/menu';
+
 
 @Component({
   selector: 'app-facture-proforma',
@@ -23,6 +31,16 @@ import { ModuleService } from '../SERVICES/Module-Service';
     CustomNumberPipe,
     MatInputModule,
     MatPaginatorModule,
+
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
+    MatDatepickerModule,
+    MatInputModule,
+    MatNativeDateModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
   ],
   templateUrl: './facture-proforma.component.html',
   styleUrl: './facture-proforma.component.scss',
@@ -69,6 +87,8 @@ export class FactureProformaComponent implements OnInit {
     // Pagination
     pageSize = 10;
     currentPage = 0;
+    facturesFiltrees: any[] = [];  // résultats backend filtrés
+    filteredFacturess: any[] = [];
     sortField: string = 'numeroFacture'; // Au lieu de 'any'
     sortDirection: 'asc' | 'desc' = 'asc';
     // Ajouter dans la classe
@@ -85,6 +105,14 @@ export class FactureProformaComponent implements OnInit {
     chargementFini: boolean = false;
     messageErreur: string = "";
     tempsRestantEssai: string | null = null;
+
+     // Trier
+    typeSelectionne: 'jour' | 'mois' | 'annee' | 'personnalise' = 'jour';
+    dateDebut: string = '';
+    dateFin: string = '';
+    factures: any[] = [];
+
+    dropdownOuvert = false;
 
     constructor(
       private router: Router,
@@ -209,9 +237,9 @@ export class FactureProformaComponent implements OnInit {
 
   // Modifier le getter paginatedFactures
   get paginatedFactures(): any[] {
-    const start = this.currentPage * this.pageSize;
-    return this.filteredFactures.slice(start, start + this.pageSize);
-  }
+  const start = this.currentPage * this.pageSize;
+  return this.filteredFactures.slice(start, start + this.pageSize);
+}
 
   getTotalFacture(facture: any): number {
       return facture.ligneFactureProforma?.reduce((acc: number, ligne: any) => acc + ligne.montantTotal, 0) || 0;
@@ -349,4 +377,72 @@ export class FactureProformaComponent implements OnInit {
   }
 
   
+
+
+    typesPeriode = [
+    { value: 'jour', label: 'Par jour' },
+    { value: 'mois', label: 'Par mois' },
+    { value: 'annee', label: 'Par année' },
+    { value: 'personnalise', label: 'Personnalisé' }
+  ];
+
+   get labelTypeSelectionne(): string {
+    return this.typesPeriode.find(t => t.value === this.typeSelectionne)?.label || 'Filtrer';
+  }
+
+   toggleDropdown() {
+    this.dropdownOuvert = !this.dropdownOuvert;
+  }
+
+  choisirType(type: any) {
+    this.typeSelectionne = type;
+    this.dateDebut = '';
+    this.dateFin = '';
+  }
+
+  appliquerFiltre() {
+    if (this.typeSelectionne === 'personnalise' && (!this.dateDebut || !this.dateFin)) {
+      alert("Veuillez sélectionner une date de début et de fin.");
+      return;
+    }
+
+    this.factureProFormaService
+      .getFacturesParPeriode(this.typeSelectionne, this.dateDebut, this.dateFin)
+      .subscribe({
+        next: (data) => {
+          this.facturesproforma = data;
+          this.currentPage = 0;
+          this.dropdownOuvert = false;
+        },
+        error: (err) => {
+          console.error('Erreur de chargement des factures:', err);
+        }
+      });
+  }
+
+  @HostListener('document:click', ['$event.target'])
+onClickOutside(target: HTMLElement) {
+  if (!target.closest('.filter-dropdown-wrapper') && !target.closest('.filter-toggle-icon')) {
+    this.dropdownOuvert = false;
+    this.reinitialiserFiltre();
+  }
+}
+
+reinitialiserFiltre() {
+  this.typeSelectionne = 'annee'; 
+  this.dateDebut = '';
+  this.dateFin = '';
+  this.dropdownOuvert = false;
+
+  this.factureProFormaService.getFacturesParPeriode('annee').subscribe({
+    next: (data) => {
+      this.facturesproforma = data;
+      this.currentPage = 0;
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des factures:', err);
+    }
+  });
+}
+
 }

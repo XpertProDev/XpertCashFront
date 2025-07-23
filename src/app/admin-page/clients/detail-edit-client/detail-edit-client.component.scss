@@ -1532,3 +1532,104 @@ hr {
   
 
 
+.delete-boutique-container {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centre horizontalement */
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.delete-boutique-btn {
+  background-color: transparent;
+  border: none;
+  color: #7a7a7ae7;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 0;
+  transition: color 0.2s;
+  bottom: 10px;
+  position: relative;
+  left: 10px;
+  
+}
+
+.delete-boutique-btn:hover{
+  color: #fa2a2a;
+}
+
+.btn-confirm,
+.btn-cancel {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-confirm {
+  background-color: #0672E4;
+  color: #fff;
+}
+
+.btn-confirm:hover {
+  background-color: #1b83f2;
+  color: #fff;
+}
+
+.btn-cancel {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btn-cancel:hover {
+  background-color: #c8c8c8;
+}
+
+.switch2 {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 15px;
+}
+
+
+.confirmation-modal-averB {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.confirmation-modal-averB .modal-content-averB {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 300px;
+  color: #000; /* pour s'assurer que le texte est visible */
+}
+
+
+.modal-actions-averB {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.btn-confirmB {
+  background-color: #0672E4;
+  color: white;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}

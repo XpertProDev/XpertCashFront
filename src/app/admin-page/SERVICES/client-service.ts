@@ -167,6 +167,39 @@ getFullImageUrl(relativePath: string): string {
 }
   
 
+deleteClient(id: number): Observable<string> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        return throwError(() => new Error('Token manquant'));
+      }
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
+      return this.http.delete(`${this.apiUrl}/clients/${id}`, {
+        headers,
+        responseType: 'text'
+      });
+    }),
+    catchError(error => {
+      let errorMsg = 'Erreur inconnue';
+
+      if (error.error instanceof ErrorEvent) {
+        errorMsg = `Erreur: ${error.error.message}`;
+      } else if (error.status === 404) {
+        errorMsg = 'Client non trouvé';
+      } else if (error.status === 403) {
+        // Le message de refus de suppression (ex : "Ce client ne peut pas être supprimé...")
+        errorMsg = error.error || 'Accès refusé';
+      }
+
+      return throwError(() => new Error(errorMsg));
+    })
+  );
+}
+
+
 
 
 }

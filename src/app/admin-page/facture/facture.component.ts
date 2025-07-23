@@ -470,7 +470,7 @@ blobToBase64(blob: Blob): Promise<string> {
     doc.setTextColor(255, 255, 255);
     doc.rect(10, y, 190, 10, 'F');
     doc.text('Code', 15, y + 7);
-    doc.text('Produit', 50, y + 7);
+    doc.text('Désignation', 50, y + 7);
     doc.text('Prix unitaire', 100, y + 7);
     doc.text('Quantité', 140, y + 7);
     doc.text('Total', 170, y + 7);

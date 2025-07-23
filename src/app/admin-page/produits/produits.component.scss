@@ -75,15 +75,11 @@ tr:hover {
     cursor: pointer;
   }
 
-  img {
-    width: 30px;
-    height: auto;
-    transition: transform 0.2s ease;
-  }
+  i:hover {
+  color: #0672E4;
+}
 
-  &:hover img {
-    transform: rotate(-5deg) scale(1.1);
-  }
+
 }
 
 
