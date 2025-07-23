@@ -46,7 +46,7 @@
                 <!-- Input de nom magasin  -->
                 <div class="champ_input">
                   <input type="text" class="input_focus input_focus_petit"
-                       style="cursor: no-drop; color: #0672E4;" 
+                       style="cursor: no-drop; color: #8d8d8d;"
                        [value]="selectedBoutiqueId ? boutiqueName : allBoutiqueNames.join(', ')" 
                        disabled required 
                        id="nomMagasin" name="nomMagasin"
@@ -248,7 +248,7 @@
                 <!-- Input de produits  -->
                  <div class="double_input">
                   <div class="champ_input champ_input2">
-                      <input [value]="produit.codeGenerique" style="cursor: no-drop; color: red;" [disabled]="true" type="text" class="input_focus " id="codeGenerique" name="codeGenerique" 
+                      <input [value]="produit.codeGenerique" style="cursor: no-drop; color: #9c9c9c; letter-spacing: 0.50px; min-width: 190px;" [disabled]="true" type="text" class="input_focus " id="codeGenerique" name="codeGenerique" 
                       placeholder="Numéro code barre">
                       <label for="codeGenerique" class="label labelColor">Code du produit</label>
                     </div>
