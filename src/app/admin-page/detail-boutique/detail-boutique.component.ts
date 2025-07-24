@@ -8,6 +8,7 @@ import { environment } from 'src/environments/environment';
 import { Produit } from '../MODELS/produit.model';
 import { Users } from '../MODELS/utilisateur.model';
 import { lastValueFrom } from 'rxjs';
+import { UsersService } from '../SERVICES/users.service';
 
 
 
@@ -69,6 +70,9 @@ export class DetailBoutiqueComponent implements OnInit {
   copyErrorMessage: string | null = null;
   selectedCopyBoutique: Boutique | null = null;
 
+  showConfirmationModalB = false;
+  isDeletingB = false;
+
   showDeleteModal = false;
   deleteMessage = '';
   isDeleting = false;
@@ -81,6 +85,10 @@ export class DetailBoutiqueComponent implements OnInit {
   searchText: string = '';
   filteredProducts: Produit[] = [];
 
+  showUserList: boolean = false;
+  allUsers: Users[] = [];
+  selectedUserIds: number[] = [];
+
   
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
@@ -89,7 +97,8 @@ export class DetailBoutiqueComponent implements OnInit {
     private boutiqueService: BoutiqueService,
     private router: Router,
     private fb: FormBuilder,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private usersService: UsersService,
   ) {
 
   }
@@ -813,51 +822,124 @@ async confirmDelete(): Promise<void> {
     this.showFilterDropdown = false;
   }
 
-showConfirmationModalB = false;
-isDeletingB = false;
-
-deleteBoutique() {
-  if (!this.boutique) {
-    console.error("La boutique n'est pas disponible.");
-    return;
-  }
-
-   this.showConfirmationModalB = true;
-}
-
-async confirmDeleteB(): Promise<void> {
-  this.showConfirmationModalB = false
-  if (!this.boutique) return;
-
-  this.showConfirmationModal = false;
-  this.isDeletingB = true;
-
-  this.errorMessage = null;
-  this.successMessage = null;
-
-  try {
-    const response = await lastValueFrom(this.boutiqueService.deleteBoutique(this.boutique.id));
-    this.successMessage = 'Boutique supprimée avec succès.';
-    this.router.navigate(['/boutique']);
-  } catch (err: any) {
-    let message = err?.error?.error || 'Erreur lors de la suppression.';
-    const prefix = "Une erreur est survenue : ";
-    if (message.startsWith(prefix)) {
-      message = message.substring(prefix.length);
+  deleteBoutique() {
+    if (!this.boutique) {
+      console.error("La boutique n'est pas disponible.");
+      return;
     }
-    this.errorMessage = message;
-  } finally {
-    this.isDeletingB = false;
-    setTimeout(() => {
-      this.errorMessage = null;
-      this.successMessage = null;
-    }, 5000);
+
+    this.showConfirmationModalB = true;
   }
-}
 
+  async confirmDeleteB(): Promise<void> {
+    this.showConfirmationModalB = false
+    if (!this.boutique) return;
 
+    this.showConfirmationModal = false;
+    this.isDeletingB = true;
 
+    this.errorMessage = null;
+    this.successMessage = null;
 
+    try {
+      const response = await lastValueFrom(this.boutiqueService.deleteBoutique(this.boutique.id));
+      this.successMessage = 'Boutique supprimée avec succès.';
+      this.router.navigate(['/boutique']);
+    } catch (err: any) {
+      let message = err?.error?.error || 'Erreur lors de la suppression.';
+      const prefix = "Une erreur est survenue : ";
+      if (message.startsWith(prefix)) {
+        message = message.substring(prefix.length);
+      }
+      this.errorMessage = message;
+    } finally {
+      this.isDeletingB = false;
+      setTimeout(() => {
+        this.errorMessage = null;
+        this.successMessage = null;
+      }, 5000);
+    }
+  }
+
+  toggleUserList(): void {
+      this.showUserList = !this.showUserList;
+      if (this.showUserList) {
+          this.loadAllUsersOfEntreprise();
+      }
+  }
+
+  loadAllUsersOfEntreprise(): void {
+    this.usersService.getUserInfo().subscribe({
+        next: (userData) => {
+            if (userData && userData.id) {
+                const entrepriseId = userData.id;
+                const token = this.usersService.getToken();
+                const connectedUserId = token ? this.usersService.extractUserIdFromToken(token) : null;
+
+                this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
+                    next: (data) => {
+                        this.allUsers = data.filter(user => user.id !== connectedUserId)
+                            .map(user => ({
+                                ...user,
+                                photoUrl: user.photo ? `${this.apiUrl}${user.photo}` : 'assets/img/profil.png'
+                            }));
+                    },
+                    error: (err) => {
+                        console.error('Erreur lors du chargement des utilisateurs', err);
+                    }
+                });
+            }
+        },
+        error: (err) => {
+            console.error("Erreur lors de la récupération des informations utilisateur :", err);
+        }
+    });
+  }
+
+  // Méthodes pour gérer la sélection des utilisateurs
+  toggleSelectAllUsers(event: Event): void {
+      const checkbox = event.target as HTMLInputElement;
+      if (checkbox.checked) {
+        this.selectedUserIds = this.allUsers
+          .map(u => u.id)
+          .filter((id): id is number => id !== undefined);
+      } else {
+          this.selectedUserIds = [];
+      }
+  }
+
+  isUserSelected(id: number | undefined): boolean {
+    return id !== undefined && this.selectedUserIds.includes(id);
+  }
+
+  toggleUserSelection(id: number): void {
+      if (id === undefined) return;
+      const index = this.selectedUserIds.indexOf(id);
+      if (index === -1) {
+          this.selectedUserIds.push(id);
+      } else {
+          this.selectedUserIds.splice(index, 1);
+      }
+  }
+
+  // Méthode pour associer un utilisateur à la boutique
+  associateUserToBoutique(userId: number): void {
+    if (!this.boutiqueId) return;
+    if (userId === undefined) return;
+
+    this.boutiqueService.associateUserToBoutique(this.boutiqueId, userId).subscribe({
+        next: () => {
+            this.successMessage = 'Utilisateur associé avec succès!';
+            // Recharger la liste des vendeurs
+            // this.loadAllVendeursBoutique();
+            setTimeout(() => this.successMessage = null, 3000);
+        },
+        error: (err) => {
+            this.errorMessage = "Erreur lors de l'association : " + (err.error?.message || err.message);
+            setTimeout(() => this.errorMessage = null, 5000);
+        }
+    });
+  }
 
 
 }

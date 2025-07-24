@@ -122,16 +122,16 @@
     </div>
 
     <!-- Sélection de la boutique SI rôle == VENDEUR -->
-    <div class="champ_input" *ngIf="showBoutiqueSelect">
-  <select class="input_focus" formControlName="boutiqueId">
-    <option value="" disabled selected>Choisissez une boutique</option>
-    <option *ngFor="let boutique of boutiques" [value]="boutique.id">{{ boutique.nomBoutique }}</option>
-  </select>
-  
-  <div *ngIf="userForm.get('boutiqueId')?.invalid && userForm.get('boutiqueId')?.touched">
-    <small class="error">Veuillez sélectionner une boutique.</small>
-  </div>
-</div>
+    <!-- <div class="champ_input" *ngIf="showBoutiqueSelect">
+        <select class="input_focus" formControlName="boutiqueId">
+          <option value="" disabled selected>Choisissez une boutique</option>
+          <option *ngFor="let boutique of boutiques" [value]="boutique.id">{{ boutique.nomBoutique }}</option>
+        </select>
+        
+        <div *ngIf="userForm.get('boutiqueId')?.invalid && userForm.get('boutiqueId')?.touched">
+          <small class="error">Veuillez sélectionner une boutique.</small>
+        </div>
+   </div> -->
 
 
     <!-- Pays et téléphone -->

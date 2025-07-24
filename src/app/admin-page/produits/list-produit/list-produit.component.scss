@@ -48,8 +48,8 @@
     font-size: 14px;
     //padding-left: 10px;
     background: none;
-    // color: #695c5c;
-    color: #0672E4;
+    color: #000;
+    // color: #0672E4;
   }
   
   .champ_input .label {
@@ -57,7 +57,7 @@
     top: 22px;
     left: 4px;
     pointer-events: none;
-    color: rgb(107, 102, 102);
+    color: #000;
   }
   
   .input_focus:hover {
@@ -108,7 +108,7 @@
     border-radius: 5px;
     padding-top: 10px;
     border-bottom: 1px solid rgb(53, 50, 50);
-    color: #0672E4;
+    color: #000;
   }
   
   .input_focus2:hover {
@@ -123,12 +123,12 @@
     top: 22px;
     left: 0px;
     pointer-events: none;
-    color: rgb(66, 56, 56);
+    color: #000;
   }
   
   
   .champ_input .labelCategory {
-    color: rgb(66, 56, 56);
+    color: #000;
     left: 0;
     font-size: 14px;
   }
@@ -136,7 +136,7 @@
   .input_focus2:not(:placeholder-shown) + .label,
   .input_focus2:focus + .label {
     // color: #0672E4;
-    color: rgb(66, 56, 56);
+    color: #000;
     top: 0;
     left: 0;
     transition: all 0.3s ease-in-out;
