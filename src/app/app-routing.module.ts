@@ -11,6 +11,7 @@ import { ModuleAccessGuard } from './admin-page/guards/ModuleAccessGuard';
 import { PricingCardComponent } from './admin-page/pricing-card/pricing-card.component';
 import { PaymentFormComponent } from './admin-page/payment-form/payment-form.component';
 import { GlobalUrlEncoderSerializer } from './admin-page/guards/GlobalUrlEncoderSerializer';
+import { roleGuard } from './admin-page/guards/roleGuard';
 
 
 
@@ -131,6 +132,7 @@ const routes: Routes = [
         loadComponent: () => import('./admin-page/facture/facture.component').then(m => m.FactureComponent)
       },
       {
+        canActivate: [authGuard, roleGuard],
         path: 'utilisateur',
         loadComponent: () => import('./admin-page/compte/compte.component').then(m => m.CompteComponent)
       },

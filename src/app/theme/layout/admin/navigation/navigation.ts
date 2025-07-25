@@ -5,6 +5,7 @@ export interface NavigationItem {
   translate?: string;
   icon?: string;
   codeModule?: string;
+  codePermission?: string;
   hidden?: boolean;
   url?: string;
   classes?: string;
@@ -49,15 +50,17 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/vente',
         classes: 'nav-item',
-        icon: 'feather icon-shopping-cart'
+        icon: 'feather icon-shopping-cart',
+        codePermission: 'GERER_PRODUITS'
+
       },
       {
         id: 'produit',
         title: 'Produits',
         type: 'item',
         url: '/produit',
-        icon: 'feather icon-tag'
-        //classes: 'nav-item',
+        icon: 'feather icon-tag',
+        codePermission: 'GERER_PRODUITS'
       },
       {
         id: 'boutique',
@@ -65,25 +68,34 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/boutique',
         classes: 'nav-item',
-        icon: 'feather icon-list'
+        icon: 'feather icon-list',
+        codePermission: 'GERER_BOUTIQUE'
       },
       {
         id: 'stock',
         title: '',
         type: 'group',
         icon: 'icon-group',
+        
         children: [
           {
             id: 'stock',
             title: 'Stock',
             type: 'collapse',
             icon: 'feather icon-box',
+            codePermission: 'APPROVISIONNER_STOCK',
+            codeModule: 'STOCK',
+
+            
+
+
             children: [
               {
                 id: 'stocks',
                 title: 'Mes Stocks',
                 type: 'item',
                 url: '/stocks',
+
               },
               {
                 id: 'facture',
@@ -105,7 +117,11 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/clients',
         classes: 'nav-item',
-        icon: 'feather icon-users'
+        icon: 'feather icon-users',
+        codePermission: 'GERER_CLIENTS',
+        codeModule: 'CLIENT',
+
+
       },
       {
         id: 'fournisseurs',
@@ -113,7 +129,9 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/fournisseurs',
         classes: 'nav-item',
-        icon: 'feather icon-user'
+        icon: 'feather icon-user',
+        codePermission: 'GERER_FOURNISSEURS'
+
       },
      
      
@@ -143,12 +161,15 @@ export const NavigationItems: NavigationItem[] = [
             title: 'Facturation',
             type: 'collapse',
             icon: 'feather icon-file',
+            codePermission: 'GESTION_FACTURATION',
+
             children: [
               {
                 id: 'facture-proforma',
                 title: 'Facture proforma',
                 type: 'item',
                 url: '/facture-proforma',
+                
               },
 
               {
@@ -177,7 +198,9 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/comptabilite',
         classes: 'nav-item',
-        icon: 'feather icon-clipboard'
+        icon: 'feather icon-clipboard',
+        codePermission: 'COMPTABILITE',
+
       },
     ]
   },

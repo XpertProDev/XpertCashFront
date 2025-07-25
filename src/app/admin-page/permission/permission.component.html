@@ -295,7 +295,7 @@
                     </div>
 
                     <div class="btn_confirm">
-                        <button class="btn" (click)="savePermissions()">Confirmer</button>
+                        <button class="btn" (click)="savePermissions()" [disabled]="isSaveDisabled">Confirmer</button>
                     </div>
                 </div>
             </div>
