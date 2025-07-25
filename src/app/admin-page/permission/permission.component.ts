@@ -7,6 +7,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UsersService } from '../SERVICES/users.service';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { AuthService } from '../SERVICES/auth.service';
+import { UserRequest } from '../MODELS/user-request';
 
 @Component({
   selector: 'app-permission',
@@ -38,10 +40,16 @@ export class PermissionComponent implements OnInit {
   pendingAction: 'suspend' | 'activate' | null = null;
   private checkboxRef?: HTMLInputElement;
 
+  isAdmin: boolean = false;
+  isTargetManager: boolean = false;
+
+
+
   constructor(
       private usersService: UsersService,
       private route: ActivatedRoute,
       private router: Router,
+      private authService: AuthService
     ) {}
 
   permissions: Permission[] = [
@@ -119,9 +127,18 @@ export class PermissionComponent implements OnInit {
     return this.permissions.filter(p => p.selected);
   }
 
-  ngOnInit() {
-    this.getUserParId();
-  }
+ ngOnInit() {
+  this.usersService.getUserInfo().subscribe({
+    next: (currentUser: UserRequest) => {
+      this.isAdmin = currentUser.roleType === 'ADMIN'; // ou currentUser.role === 'ADMIN', adapte selon structure
+      this.getUserParId(); // 👈 Appelle ça ensuite
+    },
+    error: (err) => {
+      console.error("Erreur récupération user connecté", err);
+      this.getUserParId(); // Appelle quand même si erreur
+    }
+  });
+}
 
   get selectedCount() {
     return this.selectedPermissions.length;
@@ -134,39 +151,48 @@ export class PermissionComponent implements OnInit {
   
 
   // permission.component.ts
-  getUserParId() {
-    const userId = this.route.snapshot.params['userId'];
-    
-    this.usersService.getUserById(userId).subscribe({
-      next: (user: UserNewRequest) => {
-        this.user = user;
-        this.originalSelectedPermissions.clear();
-  
-        this.permissions.forEach(p => p.selected = false);
-        
-        if (user.role?.permissions) {
-          user.role.permissions.forEach(backendPermission => {
-            const frontendId = this.mapBackendToFrontendPermission(backendPermission.type);
-            const permission = this.permissions.find(p => p.id === frontendId);
-            if (permission) {
-              permission.selected = true;
-              this.originalSelectedPermissions.add(permission.id);
-            }
-          });
-        }
-      },
-      error: (err) => console.error('Erreur:', err)
-    });
-  }
+ getUserParId() {
+  const userId = this.route.snapshot.params['userId'];
+
+  this.usersService.getUserById(userId).subscribe({
+    next: (user: UserNewRequest) => {
+      this.user = user;
+      this.originalSelectedPermissions.clear();
+      this.permissions.forEach(p => p.selected = false);
+
+      // ✅ Vérifier si la personne consultée est un Manager
+      this.isTargetManager = user.role?.name === 'MANAGER';
+
+      if (user.role?.permissions) {
+        user.role.permissions.forEach(backendPermission => {
+          const frontendId = this.mapBackendToFrontendPermission(backendPermission.type);
+
+          // 🚫 Ne PAS afficher GERER_UTILISATEURS sauf si Admin connecté ET Manager ciblé
+          if (frontendId === 6 && (!this.isAdmin || !this.isTargetManager)) {
+            return;
+          }
+
+          const permission = this.permissions.find(p => p.id === frontendId);
+          if (permission) {
+            permission.selected = true;
+            this.originalSelectedPermissions.add(permission.id);
+          }
+        });
+      }
+    },
+    error: (err) => console.error('Erreur:', err)
+  });
+}
+
 
   private mapBackendToFrontendPermission(backendType: string): number {
     const mapping: { [key: string]: number } = {
-      'GERER_PRODUITS': 1,        // Gerer produit
-      'VENDRE_PRODUITS': 2,       // Vendre produit
-      'APPROVISIONNER_STOCK': 3,   // Voir Flux Comptable
-      'GESTION_FACTURATION': 4,  // Approvisionner stock
-      'GERER_CLIENTS': 5,        // Gerer magasins
-      'GERER_UTILISATEURS': 6,        // Gerer personnel
+      'GERER_PRODUITS': 1,
+      'VENDRE_PRODUITS': 2,
+      'APPROVISIONNER_STOCK': 3,
+      'GESTION_FACTURATION': 4,
+      'GERER_CLIENTS': 5,
+      'GERER_UTILISATEURS': 6,
       'GERER_BOUTIQUE': 7,
       'ACTIVER_BOUTIQUE': 8,
       'DESACTIVER_BOUTIQUE': 9,

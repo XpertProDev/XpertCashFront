@@ -87,6 +87,8 @@ export class AccountSettingsComponent implements OnInit {
   showPasswordInPersonalForm: boolean = false;
   modules: Module[] = [];
   errorMsg = '';
+  
+  isAdminOrManager = false;
 
   private apiUrl = environment.imgUrl;
   fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
@@ -173,6 +175,10 @@ export class AccountSettingsComponent implements OnInit {
     this.getConnectedUserId();
     this.getUserInfo();
     this.loadModules();
+
+    this.usersService.isAdminOrManager().subscribe(result => {
+    this.isAdminOrManager = result;
+  });
 
     const savedPhoto = localStorage.getItem('photo');
     if (savedPhoto) {

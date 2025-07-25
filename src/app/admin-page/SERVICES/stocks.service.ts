@@ -54,7 +54,6 @@ retirerStock(stockPayload: any): Observable<any> {
 
 
 
-
  getAllStocks(): Observable<any[]> {
   return this.usersService.getValidAccessToken().pipe(
     switchMap((token: string) => {
