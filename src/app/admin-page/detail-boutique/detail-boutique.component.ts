@@ -9,6 +9,7 @@ import { Produit } from '../MODELS/produit.model';
 import { Users } from '../MODELS/utilisateur.model';
 import { lastValueFrom } from 'rxjs';
 import { UsersService } from '../SERVICES/users.service';
+import { AssignerVendeurRequest } from '../MODELS/AssignerVendeurRequest';
 
 
 
@@ -108,6 +109,7 @@ export class DetailBoutiqueComponent implements OnInit {
     this.loadBoutique();
     this.loadAllBoutiques();
     this.boutiqueForm.disable();
+    this.loadAllVendeursBoutique();
   }
 
   private initForm(): void {
@@ -628,7 +630,7 @@ async confirmCopyProducts(): Promise<void> {
 
 
 
-/*
+
 loadAllVendeursBoutique(): void {
   if (!this.boutiqueId) {
     this.errorMessage = "Identifiant boutique manquant";
@@ -636,33 +638,52 @@ loadAllVendeursBoutique(): void {
     return;
   }
 
-  this.boutiqueService.getVendeursByBoutiqueId(this.boutiqueId).subscribe({
-  next: (vendeurs) => {
-    console.log(`Liste des vendeurs récupérée (${vendeurs.length}) :`, vendeurs);
+  this.boutiqueService.getVendeursDeBoutique(this.boutiqueId).subscribe({
+    next: (response) => {
+      // Loguer la réponse brute pour vérifier son format
+      console.log('Réponse brute de l\'API :', response);
 
-    const timestamp = new Date().getTime(); // Pour éviter le cache navigateur
+      const vendeurs = response; // Si la réponse contient déjà un tableau de vendeurs
+      
+      console.log(`Liste des vendeurs récupérée (${vendeurs.length}) :`, vendeurs);
 
-    this.listeVendeurs = vendeurs.map(vendeur => {
-      const fullImageUrl = (vendeur.photo && vendeur.photo !== 'null' && vendeur.photo !== 'undefined')
-        ? `${this.apiUrl}${vendeur.photo}?t=${timestamp}`
-        : 'assets/img/profil.png';
+      const timestamp = new Date().getTime(); 
 
-      return {
-        ...vendeur,
-        photo: fullImageUrl
-      };
-    });
+      // Map des vendeurs pour ajouter l'URL complète de la photo et la date d'affectation
+      this.listeVendeurs = vendeurs.map((vendeur: { 
+        photo: string, 
+        nomComplet: string, 
+        email: string, 
+        phone: string, 
+        pays: string,
+        assignedAt: string // Nouvelle propriété
+      }) => {
+        const fullImageUrl = (vendeur.photo && vendeur.photo !== 'null' && vendeur.photo !== 'undefined')
+          ? `${this.apiUrl}${vendeur.photo}?t=${timestamp}`
+          : 'assets/img/profil.png'; // Photo par défaut si pas d'image
 
-    this.errorMessage = '';
-  },
-  error: (err) => {
-    console.error('Erreur lors du chargement des vendeurs', err);
-    this.listeVendeurs = [];
-  }
-});
+        // Formatage de la date d'affectation si nécessaire (par exemple : "YYYY-MM-DD HH:mm")
+        const assignedAtFormatted = new Date(vendeur.assignedAt).toLocaleString();
 
+        return {
+          ...vendeur,
+          photo: fullImageUrl,
+          assignedAt: assignedAtFormatted // Ajout de la date formatée
+        };
+      });
+
+      // Réinitialiser le message d'erreur
+      this.errorMessage = '';
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des vendeurs', err);
+      this.listeVendeurs = [];
+      this.errorMessage = "Erreur lors du chargement des vendeurs.";
+    }
+  });
 }
-*/
+
+
 
 
 
@@ -923,23 +944,42 @@ async confirmDelete(): Promise<void> {
   }
 
   // Méthode pour associer un utilisateur à la boutique
-  associateUserToBoutique(userId: number): void {
-    if (!this.boutiqueId) return;
-    if (userId === undefined) return;
+associateUserToBoutique(userId: number): void {
+    if (!this.boutiqueId) {
+      console.error("Aucune boutique sélectionnée.");
+      return;
+    }
+    if (userId === undefined || userId === null) {
+      console.error("Aucun utilisateur sélectionné.");
+      return;
+    }
 
-    this.boutiqueService.associateUserToBoutique(this.boutiqueId, userId).subscribe({
-        next: () => {
-            this.successMessage = 'Utilisateur associé avec succès!';
-            // Recharger la liste des vendeurs
-            // this.loadAllVendeursBoutique();
-            setTimeout(() => this.successMessage = null, 3000);
-        },
-        error: (err) => {
-            this.errorMessage = "Erreur lors de l'association : " + (err.error?.message || err.message);
-            setTimeout(() => this.errorMessage = null, 5000);
+    // Préparer l'objet de la requête
+    const request: AssignerVendeurRequest = {
+      userId: userId,
+      boutiqueIds: [this.boutiqueId] 
+    };
+
+    this.boutiqueService.assignerVendeur(request).subscribe({
+      next: (response) => {
+        // Vérifier la réponse et afficher un message de succès
+        if (response.status === 'success') {
+          this.successMessage = 'Utilisateur associé à la boutique avec succès!';
+        } else {
+          this.successMessage = 'Aucune boutique n\'a été affectée.';
         }
+        // Recharger la liste des vendeurs de la boutique si nécessaire
+        // this.loadAllVendeursBoutique();
+
+        // Effacer le message après 3 secondes
+        setTimeout(() => this.successMessage = null, 3000);
+      },
+      error: (err) => {
+        // Gérer les erreurs de l'API
+        this.errorMessage = "Erreur lors de l'association : " + (err.error?.message || err.message);
+        setTimeout(() => this.errorMessage = null, 5000);
+      }
     });
   }
-
 
 }
