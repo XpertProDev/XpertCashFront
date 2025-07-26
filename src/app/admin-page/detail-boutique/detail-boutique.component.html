@@ -76,7 +76,7 @@
         <div class="profil_section">
                 <div class="section_title">
                     <div class="title">
-                        <h6>Action {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'la boutique' }}</h6>
+                        <h6>Action {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'de la boutique' }}</h6>
                     </div>
                 </div>
 
@@ -84,22 +84,32 @@
                     <div class="name_permission">
                         Status : 
                         <span 
-                            class="valueBoutique" style="font-size: 15px;"
-                            [style.color]="boutique?.actif ? '#008000' : '#ff0000'">
-                            <!-- Afficher 'Loading...' pendant la mise à jour -->
-                            <span *ngIf="isUpdating; else statusText">
-                                <span class="spinner-small"></span>
-                            </span>
-                    
-                            <!-- Spinner avec délai de 3 secondes -->
-                            <div *ngIf="isUpdating" class="spinner-border text-primary spinner-small" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
+                                class="valueBoutique" 
+                                style="font-size: 15px;"
+                                *ngIf="boutique; else loading"
+                                [style.color]="boutique.actif ? '#008000' : '#ff0000'"
+                                >
+                                <!-- Si mise à jour en cours -->
+                                <ng-container *ngIf="isUpdating; else statusText">
+                                    <span class="spinner-small"></span>
+                                    <div class="spinner-border text-primary spinner-small" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </ng-container>
 
-                            <ng-template #statusText>
-                                {{ boutique?.actif ? 'Actif' : 'Inactif' }}
-                            </ng-template>
+                                <!-- Texte d’état -->
+                                <ng-template #statusText>
+                                    {{ boutique.actif ? 'Actif' : 'Inactif' }}
+                                </ng-template>
                         </span>
+
+                            <!-- Template pendant chargement initial -->
+                            <ng-template #loading>
+                            <span class="spinner-border text-secondary spinner-small" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </span>
+                            </ng-template>
+
                     </div>
 
                     <label class="switch">

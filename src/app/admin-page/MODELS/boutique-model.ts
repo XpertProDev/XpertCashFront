@@ -9,3 +9,4 @@ export interface Boutique {
     type: string;
     typeBoutique: string
 }
+
