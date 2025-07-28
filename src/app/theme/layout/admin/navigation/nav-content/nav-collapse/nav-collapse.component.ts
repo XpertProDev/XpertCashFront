@@ -1,20 +1,75 @@
 // Angular Import
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 // project import
 import { NavigationItem } from '../../navigation';
 import { NavItemComponent } from '../nav-item/nav-item.component';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { CommonModule } from '@angular/common';
+import { ModuleService } from 'src/app/admin-page/SERVICES/Module-Service';
 
 @Component({
   selector: 'app-nav-collapse',
-  imports: [NavItemComponent, RouterModule],
+  imports: [NavItemComponent, RouterModule, CommonModule],
   templateUrl: './nav-collapse.component.html',
   styleUrls: ['./nav-collapse.component.scss']
 })
-export class NavCollapseComponent {
+export class NavCollapseComponent implements OnInit{
   // public props
   @Input() item!: NavigationItem;
+  canShow = false;
+  private entrepriseModules: string[] = [];
+
+
+   constructor(private usersService: UsersService, private moduleService: ModuleService) {}
+
+    ngOnInit(): void {
+    // Charger les modules actifs de l'entreprise
+    this.moduleService.getModulesEntreprise().subscribe({
+      next: (modules) => {
+        this.entrepriseModules = modules
+          .filter(mod => mod.actif)
+          .map(mod => mod.code);
+        this.evaluateVisibility();
+      },
+      error: () => {
+        this.canShow = false;
+      }
+    });
+  }
+
+ private evaluateVisibility(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: user => {
+        this.canShow = this.hasVisibleItem(this.item, user.permissions);
+      },
+      error: () => {
+        this.canShow = false;
+      }
+    });
+  }
+
+ private hasVisibleItem(item: NavigationItem, permissions: string[]): boolean {
+  const hasPermission = !item.codePermission || permissions.includes(item.codePermission);
+  const hasModule = !item.codeModule || this.entrepriseModules.includes(item.codeModule);
+
+  if (item.children?.length) {
+    // Si le parent a enfants, il faut que parent soit visible (droits + module)
+    // ET qu'au moins un enfant soit visible
+    if (hasPermission && hasModule) {
+      return item.children.some(child => this.hasVisibleItem(child, permissions));
+    } else {
+      // Si parent pas visible, on ne doit pas afficher même si enfants visibles
+      return false;
+    }
+  } else {
+    // Pas d'enfants, juste vérifier droits + module
+    return hasPermission && hasModule;
+  }
+}
+
+
 
   // public method
   navCollapse(e: MouseEvent) {
@@ -42,4 +97,6 @@ export class NavCollapseComponent {
     }
     parent.classList.toggle('pcoded-trigger');
   }
+
+  
 }

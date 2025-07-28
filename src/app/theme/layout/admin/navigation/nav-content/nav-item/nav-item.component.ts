@@ -1,10 +1,12 @@
 // Angular Import
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 // project import
 import { NavigationItem } from '../../navigation';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { ModuleService } from 'src/app/admin-page/SERVICES/Module-Service';
 
 @Component({
   selector: 'app-nav-item',
@@ -12,11 +14,60 @@ import { NavigationItem } from '../../navigation';
   templateUrl: './nav-item.component.html',
   styleUrls: ['./nav-item.component.scss']
 })
-export class NavItemComponent {
-  // public props
+export class NavItemComponent implements OnInit {
   @Input() item!: NavigationItem;
+  canShow = false;
 
-  // public method
+  private entrepriseModules: string[] = [];
+
+  constructor(
+    private usersService: UsersService,
+    private moduleService: ModuleService
+  ) {}
+
+  ngOnInit(): void {
+    this.moduleService.getModulesEntreprise().subscribe({
+      next: (modules) => {
+        this.entrepriseModules = modules
+          .filter(mod => mod.actif)
+          .map(mod => mod.code.trim().toUpperCase());
+        this.evaluateVisibility();
+      },
+      error: () => {
+        this.canShow = false;
+      }
+    });
+  }
+
+   private evaluateVisibility(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        this.canShow = this.hasVisibleItem(this.item, user.permissions);
+      },
+      error: () => {
+        this.canShow = false;
+      }
+    });
+  }
+
+    private hasVisibleItem(item: NavigationItem, permissions: string[]): boolean {
+    // Vérifier permission et module sur l'item courant
+    const hasPermission = !item.codePermission || permissions.includes(item.codePermission);
+    const hasModule = !item.codeModule || this.entrepriseModules.includes(item.codeModule);
+
+    if (hasPermission && hasModule) {
+      return true; // cet item peut s’afficher
+    }
+
+    // Sinon, on vérifie récursivement les enfants
+    if (item.children?.length) {
+      return item.children.some(child => this.hasVisibleItem(child, permissions));
+    }
+
+    return false;
+  }
+
+   // public method
   closeOtherMenu(event: MouseEvent) {
     const ele = event.target as HTMLElement;
     if (ele !== null && ele !== undefined) {
@@ -44,4 +95,5 @@ export class NavItemComponent {
       document.querySelector('app-navigation.pcoded-navbar')?.classList.remove('mob-open');
     }
   }
+
 }

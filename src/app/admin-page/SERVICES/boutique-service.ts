@@ -6,6 +6,7 @@ import { environment } from "src/environments/environment";
 import { Produit } from "../MODELS/produit.model";
 import { Users } from "../MODELS/utilisateur.model";
 import { UsersService } from "./users.service";
+import { AssignerVendeurRequest } from "../MODELS/AssignerVendeurRequest";
 
 @Injectable({
   providedIn: 'root'
@@ -157,34 +158,35 @@ export class BoutiqueService {
     );
   }
 
-  getVendeursByBoutiqueId(id: number): Observable<Users[]> {
-    return this.usersService.getValidAccessToken().pipe(
-      switchMap(token => {
-        if (!token) {
-          console.error('Aucun token trouvé');
-          return throwError(() => new Error('Aucun token trouvé'));
-        }
-        const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-        return this.http.get<Users[]>(`${this.apiUrl}/${id}/vendeurs`, { headers });
-      }),
-      catchError(error => {
-        console.error('Erreur lors de la récupération des vendeurs:', error);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  copierProduits(detailsCopie: {
-    boutiqueSourceId: number;
-    boutiqueDestinationId: number;
-    toutCopier: boolean;
-    produitIds?: number[];
-  }): Observable<any> {
-    return this.usersService.getValidAccessToken().pipe(
-      switchMap(token => {
-        if (!token) {
-          return throwError(() => new Error('Aucun token trouvé'));
-        }
+/*  getVendeursByBoutiqueId(id: number): Observable<Users[]> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+      const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+      return this.http.get<Users[]>(`${this.apiUrl}/${id}/vendeurs`, { headers });
+    }),
+    catchError(error => {
+      console.error('Erreur lors de la récupération des vendeurs:', error);
+      return throwError(() => error);
+    })
+  );
+}
+*/
+  
+ copierProduits(detailsCopie: {
+  boutiqueSourceId: number;
+  boutiqueDestinationId: number;
+  toutCopier: boolean;
+  produitIds?: number[];
+}): Observable<any> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
 
         const headers = new HttpHeaders({
           Authorization: `Bearer ${token}`
@@ -244,6 +246,50 @@ export class BoutiqueService {
   associateUserToBoutique(boutiqueId: number, userId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/boutiques/${boutiqueId}/users/${userId}`, {});
   }
+
+
+  // Assignation des vendeur
+
+  assignerVendeur(request: AssignerVendeurRequest): Observable<any> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+
+      // Appel à l'API backend pour assigner les vendeurs
+      return this.http.post(`${this.apiUrl}/assigner-vendeur`, request, { headers });
+    }),
+    catchError(error => {
+      console.error('Erreur lors de l\'assignation du vendeur:', error);
+      return throwError(() => error);
+    })
+  );
+}
+
+// Get Vendeurs d'une boutique
+getVendeursDeBoutique(boutiqueId: number): Observable<any> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+
+      return this.http.get(`${this.apiUrl}/vendeurs/${boutiqueId}`, { headers }).pipe(
+        catchError(error => {
+          console.error('Erreur lors de la récupération des vendeurs:', error);
+          return throwError(() => error);
+        })
+      );
+    })
+  );
+}
+
 
 
 }

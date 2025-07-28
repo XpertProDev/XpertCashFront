@@ -228,8 +228,9 @@
     <div class="content">
         <!-- // Type de permission  -->
          <div class="permissionPage">
-            <div *ngFor="let permission of permissions" class="div{{permission.id}}">
-                <div class="card_permission">
+             <div *ngFor="let permission of permissions" [ngClass]="'div' + permission.id"
+                [style.display]="permission.id === 6 && (!isAdmin || !isTargetManager) ? 'none' : ''">
+                        <div *ngIf="permission.id !== 6 || (isAdmin && isTargetManager)" class="card_permission">
                     <div class="img_name">
                         <div class="img_permission">
                             <img [src]="permission.imgUrl">
@@ -295,7 +296,7 @@
                     </div>
 
                     <div class="btn_confirm">
-                        <button class="btn" (click)="savePermissions()">Confirmer</button>
+                        <button class="btn" (click)="savePermissions()" [disabled]="isSaveDisabled">Confirmer</button>
                     </div>
                 </div>
             </div>

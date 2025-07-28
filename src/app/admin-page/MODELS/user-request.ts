@@ -16,11 +16,12 @@ export interface UserRequest {
   adminActivated: boolean;
   createdAt: string;
   adminCreatedAt: string;
+  permissions: string[];
   boutiques: {
     id: number;
     nomBoutique: string;
     telephone: string;
     email: string;
-    adresse: string; // Ajout du champ adresse
+    adresse: string;
   }[];
 }

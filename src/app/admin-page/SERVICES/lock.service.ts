@@ -9,8 +9,8 @@ export class LockService {
   private appComponent!: AppComponent;
 
   constructor() {
-  this.lockAudio.volume = 0.5;
-  this.unlockAudio.volume = 0.5;
+  this.lockAudio.volume = 0.3;
+  this.unlockAudio.volume = 0.3;
 }
 
   private lockAudio = new Audio('assets/sounds/lock.mp3');

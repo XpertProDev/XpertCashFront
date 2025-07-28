@@ -256,7 +256,7 @@
                     </div>
                 </mat-tab>
                 <!-- // Factures  -->
-                 <mat-tab label="Factures">
+                 <mat-tab label="Factures" *ngIf="isAdminOrManager">
                     <div class="tab-content">
                         <div class="content_setting_facture">
                             <!-- // Facture de vue edit  -->
@@ -653,7 +653,7 @@
                     </div>
                 </mat-tab>
                 <!-- // Securite  -->
-                <mat-tab label="App">
+                <mat-tab label="App" *ngIf="isAdminOrManager">
                     <div class="tab-content">
                     <!-- Start-->
                      <div class="module-grid">

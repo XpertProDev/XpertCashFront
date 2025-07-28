@@ -1,6 +1,6 @@
 // Angular Import
 import { Component, OnInit, inject, input } from '@angular/core';
-import { Location, LocationStrategy } from '@angular/common';
+import { CommonModule, Location, LocationStrategy } from '@angular/common';
 
 // project import
 import { NavigationItem } from '../../navigation';
@@ -9,7 +9,7 @@ import { NavItemComponent } from '../nav-item/nav-item.component';
 
 @Component({
   selector: 'app-nav-group',
-  imports: [NavCollapseComponent, NavItemComponent],
+  imports: [NavCollapseComponent, NavItemComponent, CommonModule],
   templateUrl: './nav-group.component.html',
   styleUrls: ['./nav-group.component.scss']
 })

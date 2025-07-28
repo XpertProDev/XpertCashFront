@@ -12,7 +12,7 @@ import { Users } from '../MODELS/utilisateur.model';
 import { log } from 'console';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { BoutiqueService } from '../SERVICES/boutique-service';
-import { of, switchMap, throwError } from 'rxjs';
+import { of, switchMap, take, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-compte',
@@ -71,6 +71,7 @@ export class CompteComponent  implements OnInit {
 
   isAscending: boolean = true;
   searchTerm: string = '';
+  currentUserRole: string = '';
 
   constructor(
     private rolesService: RolesService,
@@ -87,7 +88,9 @@ export class CompteComponent  implements OnInit {
     this.initForm();
     this.updatePaginatedUsers();
     this.loadBoutiques();
-    this.handleRoleTypeChanges();
+    // this.handleRoleTypeChanges();
+    this.loadCurrentUserRole();
+    
     
     this.usersService.getUserInfo().subscribe({
     next: (userData) => {
@@ -112,7 +115,7 @@ export class CompteComponent  implements OnInit {
       roleType: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
       pays: ['', Validators.required],
-      boutiqueId: [null],
+      // boutiqueId: [null],
     });
   }
 
@@ -231,7 +234,7 @@ loadRoles() {
       roleType: '',
       phone: '',
       pays: '',
-      boutiqueId: [null],
+      // boutiqueId: [null],
     });
   
     this.userForm.markAsPristine();
@@ -336,6 +339,7 @@ loadRoles() {
   boutiques: any[] = [];
 showBoutiqueSelect = false;
 
+/*
 handleRoleTypeChanges() {
   this.userForm.get('roleType')?.valueChanges.subscribe(role => {
     console.log('Rôle sélectionné :', role);
@@ -352,6 +356,7 @@ handleRoleTypeChanges() {
     this.userForm.get('boutiqueId')?.updateValueAndValidity();
   });
 }
+*/
 
 loadBoutiques() {
   this.boutiqueService.getBoutiquesByEntreprise().subscribe({
@@ -365,8 +370,30 @@ loadBoutiques() {
   });
 }
 
+isRoleVisible(roleName: string): boolean {
+  if (this.currentUserRole === 'ADMIN' && roleName === 'ADMIN') {
+    return false;
+  }
 
+  if (this.currentUserRole === 'MANAGER' && roleName === 'MANAGER'|| roleName === 'ADMIN') {
+    return false;
+  }
 
+  return true;
+}
+
+private loadCurrentUserRole(): void {
+  this.usersService.getUserInfo()
+    .pipe(take(1))
+    .subscribe({
+      next: (user) => {
+        this.currentUserRole = user.roleType;
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération du rôle utilisateur :', err);
+      }
+    });
+}
 
 }
 

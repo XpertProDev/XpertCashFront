@@ -198,7 +198,7 @@
               <i class="feather icon-user"></i> Profile
             </a>
           </li>
-          <li>
+          <li *ngIf="canAccessUserManagement">
             <a style="cursor: pointer;" (click)="goToCompte()" class="dropdown-item">
               <i class="feather icon-users"></i> Utilisateurs
             </a>

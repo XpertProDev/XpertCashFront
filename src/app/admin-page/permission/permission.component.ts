@@ -7,6 +7,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UsersService } from '../SERVICES/users.service';
 import { UserNewRequest } from '../MODELS/user-new-request.model';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { AuthService } from '../SERVICES/auth.service';
+import { UserRequest } from '../MODELS/user-request';
 
 @Component({
   selector: 'app-permission',
@@ -38,10 +40,16 @@ export class PermissionComponent implements OnInit {
   pendingAction: 'suspend' | 'activate' | null = null;
   private checkboxRef?: HTMLInputElement;
 
+  isAdmin: boolean = false;
+  isTargetManager: boolean = false;
+
+
+
   constructor(
       private usersService: UsersService,
       private route: ActivatedRoute,
       private router: Router,
+      private authService: AuthService
     ) {}
 
   permissions: Permission[] = [
@@ -101,15 +109,36 @@ export class PermissionComponent implements OnInit {
       imgUrl: 'assets/img/boutique.png',
       selected: false
     },
+    {
+      id: 10,
+      name: 'Gerer fournisseurs',
+      imgUrl: 'assets/img/fournisseur.png',
+      selected: false
+    },
+    {
+      id: 11,
+      name: 'Gerer la comptabilité',
+      imgUrl: 'assets/img/comptabilite 2.png',
+      selected: false
+    }
   ];
 
   get selectedPermissions() {
     return this.permissions.filter(p => p.selected);
   }
 
-  ngOnInit() {
-    this.getUserParId();
-  }
+ ngOnInit() {
+  this.usersService.getUserInfo().subscribe({
+    next: (currentUser: UserRequest) => {
+      this.isAdmin = currentUser.roleType === 'ADMIN'; // ou currentUser.role === 'ADMIN', adapte selon structure
+      this.getUserParId(); // 👈 Appelle ça ensuite
+    },
+    error: (err) => {
+      console.error("Erreur récupération user connecté", err);
+      this.getUserParId(); // Appelle quand même si erreur
+    }
+  });
+}
 
   get selectedCount() {
     return this.selectedPermissions.length;
@@ -122,42 +151,53 @@ export class PermissionComponent implements OnInit {
   
 
   // permission.component.ts
-  getUserParId() {
-    const userId = this.route.snapshot.params['userId'];
-    
-    this.usersService.getUserById(userId).subscribe({
-      next: (user: UserNewRequest) => {
-        this.user = user;
-        this.originalSelectedPermissions.clear();
-  
-        this.permissions.forEach(p => p.selected = false);
-        
-        if (user.role?.permissions) {
-          user.role.permissions.forEach(backendPermission => {
-            const frontendId = this.mapBackendToFrontendPermission(backendPermission.type);
-            const permission = this.permissions.find(p => p.id === frontendId);
-            if (permission) {
-              permission.selected = true;
-              this.originalSelectedPermissions.add(permission.id);
-            }
-          });
-        }
-      },
-      error: (err) => console.error('Erreur:', err)
-    });
-  }
+ getUserParId() {
+  const userId = this.route.snapshot.params['userId'];
+
+  this.usersService.getUserById(userId).subscribe({
+    next: (user: UserNewRequest) => {
+      this.user = user;
+      this.originalSelectedPermissions.clear();
+      this.permissions.forEach(p => p.selected = false);
+
+      // ✅ Vérifier si la personne consultée est un Manager
+      this.isTargetManager = user.role?.name === 'MANAGER';
+
+      if (user.role?.permissions) {
+        user.role.permissions.forEach(backendPermission => {
+          const frontendId = this.mapBackendToFrontendPermission(backendPermission.type);
+
+          // 🚫 Ne PAS afficher GERER_UTILISATEURS sauf si Admin connecté ET Manager ciblé
+          if (frontendId === 6 && (!this.isAdmin || !this.isTargetManager)) {
+            return;
+          }
+
+          const permission = this.permissions.find(p => p.id === frontendId);
+          if (permission) {
+            permission.selected = true;
+            this.originalSelectedPermissions.add(permission.id);
+          }
+        });
+      }
+    },
+    error: (err) => console.error('Erreur:', err)
+  });
+}
+
 
   private mapBackendToFrontendPermission(backendType: string): number {
     const mapping: { [key: string]: number } = {
-      'GERER_PRODUITS': 1,        // Gerer produit
-      'VENDRE_PRODUITS': 2,       // Vendre produit
-      'APPROVISIONNER_STOCK': 3,   // Voir Flux Comptable
-      'Gestion_Facture': 4,  // Approvisionner stock
-      'GERER_CLIENTS': 5,        // Gerer magasins
-      'GERER_UTILISATEURS': 6,        // Gerer personnel
+      'GERER_PRODUITS': 1,
+      'VENDRE_PRODUITS': 2,
+      'APPROVISIONNER_STOCK': 3,
+      'GESTION_FACTURATION': 4,
+      'GERER_CLIENTS': 5,
+      'GERER_UTILISATEURS': 6,
       'GERER_BOUTIQUE': 7,
       'ACTIVER_BOUTIQUE': 8,
-      'DESACTIVER_BOUTIQUE': 9
+      'DESACTIVER_BOUTIQUE': 9,
+      'GERER_FOURNISSEURS': 10,
+      'COMPTABILITE': 11,
     };
     return mapping[backendType] ?? -1;
   }
@@ -167,12 +207,15 @@ export class PermissionComponent implements OnInit {
       1: 'GERER_PRODUITS',
       2: 'VENDRE_PRODUITS',
       3: 'APPROVISIONNER_STOCK',
-      4: 'Gestion_Facture',
+      4: 'GESTION_FACTURATION',
       5: 'GERER_CLIENTS',
       6: 'GERER_UTILISATEURS',
       7: 'GERER_BOUTIQUE',
       8:'ACTIVER_BOUTIQUE',
-      9:'DESACTIVER_BOUTIQUE'
+      9:'DESACTIVER_BOUTIQUE',
+      10: 'GERER_FOURNISSEURS',
+      11: 'COMPTABILITE'
+
 
     };
     return mapping[frontendId] ?? '';
@@ -181,76 +224,75 @@ export class PermissionComponent implements OnInit {
 
   // Ajouter cette méthode pour gérer l'envoi
   savePermissions() {
-    const userId = this.route.snapshot.params['userId'];
-    const permissionsMap: { [key: string]: boolean } = {};
+  const userId = this.route.snapshot.params['userId'];
+  const permissionsMap: { [key: string]: boolean } = {};
 
-    // Réinitialiser les messages
-    this.successMessage = null;
-    this.errorMessage = null;
-    this.validationError = null;
+  // Réinitialiser les messages
+  this.successMessage = null;
+  this.errorMessage = null;
+  this.validationError = null;
 
-    // Compter les permissions sélectionnées
-    const selectedCount = this.permissions.filter(p => p.selected).length;
-    
-    // Validation personnalisée
-    if (selectedCount === 0) {
-      this.validationError = "Vous devez attribuer au moins une permission à l'utilisateur";
-      
-      // Disparition automatique après 5 secondes
-      setTimeout(() => {
-        this.validationError = null;
-      }, 3500);
-      return;
-    }
-    
-    // Vérifier les changements
-    const hasChanges = this.permissions.some(permission => {
-      const backendType = this.mapFrontendToBackendPermission(permission.id);
-      const wasSelected = this.originalSelectedPermissions.has(permission.id);
-      return permission.selected !== wasSelected;
-    });
+  // Vérifier les changements
+  const hasChanges = this.permissions.some(permission => {
+    const wasSelected = this.originalSelectedPermissions.has(permission.id);
+    return permission.selected !== wasSelected;
+  });
 
-    if (!hasChanges) {
-      this.validationError = "Ces permissions sont déjà attribuées à l'utilisateur";
-      
-      // Disparition automatique après 5 secondes
-      setTimeout(() => {
-        this.validationError = null;
-      }, 3500);
-      return;
-    }
-
-    // Suite de la logique d'envoi...
-    this.permissions.forEach(permission => {
-      const backendType = this.mapFrontendToBackendPermission(permission.id);
-      if (backendType) {
-        permissionsMap[backendType] = permission.selected;
-      }
-    });
-
-    this.usersService.assignPermissionsToUser(userId, permissionsMap).subscribe({
-      next: (updatedUser) => {
-        this.successMessage = 'Permissions sauvegardées avec succès !';
-        console.log('Permissions mises à jour!', updatedUser);
-        
-        // Disparition automatique après 3 secondes
-        setTimeout(() => {
-          this.successMessage = null;
-        }, 15000);
-
-        this.getUserParId();
-      },
-      error: (err) => {
-        this.errorMessage = 'Une erreur est survenue lors de la sauvegarde';
-        console.error('Erreur:', err);
-        
-        // Disparition automatique après 5 secondes
-        setTimeout(() => {
-          this.errorMessage = null;
-        }, 15000);
-      }
-    });
+  if (!hasChanges) {
+    this.validationError = "Ces permissions sont déjà attribuées à l'utilisateur";
+    setTimeout(() => {
+      this.validationError = null;
+    }, 3500);
+    return;
   }
+
+  // Préparer l'objet à envoyer
+  this.permissions.forEach(permission => {
+    const backendType = this.mapFrontendToBackendPermission(permission.id);
+    if (backendType) {
+      permissionsMap[backendType] = permission.selected;
+    }
+  });
+
+  // Compter les permissions sélectionnées après les changements
+  const selectedCount = this.permissions.filter(p => p.selected).length;
+
+  this.usersService.assignPermissionsToUser(userId, permissionsMap).subscribe({
+    next: (updatedUser) => {
+      // Message conditionnel
+      this.successMessage = selectedCount === 0
+        ? "Toutes les permissions ont été retirées de l'utilisateur."
+        : "Permissions sauvegardées avec succès !";
+
+      console.log('Permissions mises à jour!', updatedUser);
+      
+      setTimeout(() => {
+        this.successMessage = null;
+      }, 15000);
+
+      this.getUserParId();
+    },
+    error: (err) => {
+      this.errorMessage = 'Une erreur est survenue lors de la sauvegarde';
+      console.error('Erreur:', err);
+      
+      setTimeout(() => {
+        this.errorMessage = null;
+      }, 15000);
+    }
+  });
+}
+
+
+  // Vérifier si le bouton de sauvegarde doit être désactivé
+get isSaveDisabled(): boolean {
+  // Aucune permission modifiée → désactiver
+  return !this.permissions.some(permission => {
+    const wasSelected = this.originalSelectedPermissions.has(permission.id);
+    return permission.selected !== wasSelected;
+  });
+}
+
 
   // Suspendre user
   onSuspendChange(event: Event) {

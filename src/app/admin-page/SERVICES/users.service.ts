@@ -22,10 +22,6 @@ export class UsersService {
   private apiUrl = environment.apiBaseUrl;
   public isLocked: boolean = false;
 
-  
-  
-  
-
   constructor(
     private http: HttpClient,
     // private authService: AuthService,
@@ -369,4 +365,13 @@ suspendUser(userId: number, suspend: boolean): Observable<any> {
     return this.http.post(`${this.apiUrl}/validate-otp`, { email, code });
   }
   
+
+  // Verification de role
+  isAdminOrManager(): Observable<boolean> {
+  return this.getUserInfo().pipe(
+    map(user => ['ADMIN', 'MANAGER'].includes(user.roleType)),
+    catchError(() => of(false))
+  );
+}
+
 }

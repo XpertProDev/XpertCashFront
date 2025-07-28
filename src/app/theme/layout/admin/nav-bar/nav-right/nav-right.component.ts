@@ -1,7 +1,7 @@
 // angular import
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { filter } from 'rxjs/operators'; // Import manquant ajouté
+import { filter, take } from 'rxjs/operators'; // Import manquant ajouté
 
 // bootstrap import
 import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
@@ -98,6 +98,7 @@ export class NavRightComponent implements OnInit, OnDestroy {
     this.loadInitialNotifications();
     this.initializeWebSocket();
     // this.calculateUnreadCount();
+    this.checkUserAccess();
   }
 
   // Méthode pour marquer une notification comme lue
@@ -297,4 +298,22 @@ private loadInitialNotifications() {
   lockManually() {
     this.lockService.lockNow();
   }
+canAccessUserManagement = false;
+
+  private checkUserAccess(): void {
+  this.userService.getUserInfo().pipe(take(1)).subscribe({
+    next: (user) => {
+      const { roleType, permissions = [] } = user;
+
+      this.canAccessUserManagement =
+        roleType === 'ADMIN' ||
+        roleType === 'MANAGER' ||
+        permissions.includes('GERER_UTILISATEURS');
+    },
+    error: (err) => {
+      console.error('Erreur lors de la récupération des infos utilisateur :', err);
+      this.canAccessUserManagement = false;
+    }
+  });
+}
 }

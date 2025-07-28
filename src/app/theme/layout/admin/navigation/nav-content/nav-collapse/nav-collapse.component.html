@@ -1,4 +1,4 @@
-<li class="nav-item pcoded-hasmenu" [routerLinkActive]="['active']">
+<li class="nav-item pcoded-hasmenu" [routerLinkActive]="['active']" *ngIf="canShow">
   <a [routerLinkActive]="['active']" href="javascript:" class="nav-link" (click)="navCollapse($event)">
     @if (item.icon) {
       <span class="pcoded-micon">
