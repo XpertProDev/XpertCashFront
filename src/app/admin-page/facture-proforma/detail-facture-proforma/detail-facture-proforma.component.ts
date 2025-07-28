@@ -979,29 +979,38 @@ get labelNom(): string {
     return labels[statut];
   }
 
-  loadUsersOfEntreprise(entrepriseId: number) {
-    if (entrepriseId == null) {
-      console.error('ID d’entreprise invalide:', entrepriseId);
-      return;
-    }
+ loadUsersOfEntreprise(entrepriseId: number) {
+  if (entrepriseId == null) {
+    console.error('ID d’entreprise invalide:', entrepriseId);
+    return;
+  }
 
-    this.isLoading = true;
-    this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
-      next: (data) => {
-        this.users = data.map(user => ({
+  this.isLoading = true;
+
+  const token = this.usersService.getToken();
+  const currentUserId = token ? this.usersService.extractUserIdFromToken(token) : null;
+
+  this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
+    next: (data) => {
+      // Filtrer les utilisateurs pour exclure l'utilisateur connecté
+      this.users = data
+        .filter(user => user.id !== currentUserId)
+        .map(user => ({
           ...user,
           selected: false
         }));
-        this.filteredUsers = this.users;
-        this.isLoading = false;
-        console.log('Utilisateurs récupérés:', this.users);
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des utilisateurs', err);
-        this.isLoading = false;
-      }
-    });
-  }
+
+      this.filteredUsers = this.users;
+      this.isLoading = false;
+      console.log('Utilisateurs récupérés (sans le connecté):', this.users);
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des utilisateurs', err);
+      this.isLoading = false;
+    }
+  });
+}
+
 
   // Méthode appelée au changement de <select>
   onProduitChange(produitId: number | null, ligne: any, index: number) {

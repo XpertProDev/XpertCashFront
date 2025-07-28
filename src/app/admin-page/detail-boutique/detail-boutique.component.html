@@ -583,9 +583,10 @@
 
                     
 
-                    <div class="icon_content icon_delete" style="margin-bottom: 8px;">
+                    <div class="icon_content icon_delete" style="margin-bottom: 8px;" (click)="deleteSelectedVendeurs()">
                         <i class="ri-delete-bin-6-line"></i>
                     </div>
+
 
                     <div class="barre" style="margin-bottom: 8px;"></div>
                     
@@ -638,7 +639,7 @@
                             <th>Nom</th>
                             <th>Email</th>
                             <th>Téléphone</th>
-                            <th>Statut</th>
+                            <th>Date d'assignation</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -647,7 +648,12 @@
                         <tr *ngFor="let vendeur of listeVendeurs">
                             <td>
                                 <label class="cyber-checkbox">
-                                    <input type="checkbox">
+                                    <input
+                                        type="checkbox"
+                                        [disabled]="!boutique?.actif"
+                                        [checked]="selectedVendeurs.includes(vendeur.id!)"
+                                        (change)="toggleSelectionCheckbox($event, vendeur.id!)">
+
                                     <span class="cyber-checkbox__mark">
                                         <div class="cyber-checkbox__box">
                                             <svg class="cyber-checkbox__check" viewBox="0 0 12 10">
@@ -667,9 +673,10 @@
                             <td>{{ vendeur.email }}</td>
                             <td>{{ vendeur.phone }}</td>
                             <td>
-                                <span [ngClass]="vendeur.enabledLien ? 'badge-success' : 'badge-danger'">
-                                    {{ vendeur.enabledLien ? 'Actif' : 'Inactif' }}
+                                <span>
+                                     {{ formatDateOnly(vendeur!.assignedAt!) }}
                                 </span>
+
 
                             </td>
                         </tr>

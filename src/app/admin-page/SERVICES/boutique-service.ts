@@ -270,6 +270,25 @@ export class BoutiqueService {
   );
 }
 
+// Retirer vendeur
+retirerVendeur(request: AssignerVendeurRequest): Observable<any>{
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Aucun token trouvé');
+        return throwError(() => new Error('Aucun token trouvé'));
+      }
+      const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+      return this.http.post(`${this.apiUrl}/retirer-vendeur`, request, { headers });
+    }),
+    catchError(error => {
+      console.error('Erreur lors de l\'assignation du vendeur:', error);
+      return throwError(() => error);
+    })
+  );
+
+}
+
 // Get Vendeurs d'une boutique
 getVendeursDeBoutique(boutiqueId: number): Observable<any> {
   return this.usersService.getValidAccessToken().pipe(

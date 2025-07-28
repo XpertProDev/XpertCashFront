@@ -49,7 +49,7 @@ export class PermissionComponent implements OnInit {
       private usersService: UsersService,
       private route: ActivatedRoute,
       private router: Router,
-      private authService: AuthService
+      private authService: AuthService,
     ) {}
 
   permissions: Permission[] = [
@@ -358,31 +358,55 @@ get isSaveDisabled(): boolean {
   }
 });
 
-  }
-  
-  private showSuccessMessage(isChecked: boolean) {
-    this.successMessage = `Utilisateur ${isChecked ? 'suspendu' : 'réactivé'} avec succès`;
-    setTimeout(() => this.successMessage = null, 5000);
-  }
-  
-  private handleError(error: any) {
-    console.error('Erreur:', error);
-    this.errorMessage = error.error?.message || 'Erreur serveur';
-    setTimeout(() => this.errorMessage = null, 5000);
-  }
-  
-  // Ajoutez cette méthode dans la classe :
-  private confirmAction(message: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      resolve(confirm(message)); 
-    });
-  }
+}
+
+
 
   navigateBack() {
     this.router.navigate(['/utilisateur']);
   }
 
-  toggleEditing(): void {}
+  
 
+deleteUser(userId: number | undefined) {
+   if (!userId) {
+    console.warn('ID utilisateur invalide');
+    this.errorMessage = "Impossible de supprimer l'utilisateur : ID invalide";
+    setTimeout(() => this.errorMessage = null, 5000);
+    return;
+  }
+
+  if (!confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) return;
+
+  this.isLoading = true;
+  this.usersService.deleteUserFromEntreprise(userId).subscribe({
+    next: () => {
+      this.successMessage = "Utilisateur supprimé avec succès.";
+      this.isLoading = false;
+      setTimeout(() => {
+        this.successMessage = null;
+        this.router.navigate(['/utilisateur']);
+      }, 2000);
+    },
+    error: (err) => {
+      this.isLoading = false;
+      let errorMsg = "Erreur lors de la suppression de l'utilisateur";
+      
+      if (err.error) {
+        try {
+          const parsed = typeof err.error === 'string' ? JSON.parse(err.error) : err.error;
+          errorMsg = parsed.error || parsed.message || JSON.stringify(parsed);
+        } catch {
+          errorMsg = err.error;
+        }
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      
+      this.errorMessage = errorMsg;
+      setTimeout(() => this.errorMessage = null, 5000);
+    }
+  });
+}
 
 }

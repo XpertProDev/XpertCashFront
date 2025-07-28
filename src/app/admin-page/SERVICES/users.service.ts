@@ -247,6 +247,29 @@ updateUser(id: number, formData: FormData): Observable<any> {
   );
 }
 
+//Delet user
+deleteUserFromEntreprise(userId: number): Observable<any> {
+  return this.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('Token non trouvé');
+        return throwError(() => new Error('Token JWT manquant'));
+      }
+
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      });
+
+      return this.http.delete(`${this.apiUrl}/delete/${userId}`, { headers });
+    }),
+    catchError(error => {
+      console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+      return throwError(() => error);
+    })
+  );
+}
+
+
 
 
   getAllUsersOfEntreprise(entrepriseId: number): Observable<any[]> {

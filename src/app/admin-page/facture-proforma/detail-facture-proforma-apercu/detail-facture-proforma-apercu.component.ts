@@ -404,4 +404,15 @@ export class DetailFactureProformaApercuComponent implements OnInit {
     // 12. Téléchargement
     doc.save(`Facture_Proforma_${this.facture?.numeroFacture}.pdf`);
   }
+
+  formatDateFr(dateString: string): string {
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  };
+  return date.toLocaleDateString('fr-FR', options);
+}
+
 }

@@ -134,6 +134,7 @@
   width: 40px;
   height: 20px;
 }
+
   
 /* Masquer l'input checkbox original */
 .switch input {
@@ -180,6 +181,34 @@ input:checked + .slider:before {
 }
 
 
+.content_delet {
+    position: relative;
+}
+
+.delet {
+    position: absolute;
+    bottom: 0;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 55px;
+}
+
+.delet span {
+    font-weight: bold;
+    letter-spacing: 0.6px;
+}
+
+.ri-delete-bin-6-line {
+    cursor: pointer;
+    font-size: 18px;
+    color: #3b3939;
+}
+.ri-delete-bin-6-line:hover {
+    color: red;
+    transform: scale(1.2); 
+    transition: color 0.3s ease, transform 0.3s ease;
+}
 
 
 
