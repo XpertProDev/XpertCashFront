@@ -40,8 +40,11 @@ export class DetailFactureProformaApercuComponent implements OnInit {
   signataireNom!: string;
   tauxTva!: number;
 
+  signaturNum: string | null = null;
+  cachetNum: string | null = null;
+
   private apiUrl = environment.imgUrl;
- fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
+  fallbackLogo = `${this.apiUrl}/defaultLogo/Votre.png`;
 
 
   constructor(
@@ -94,6 +97,9 @@ export class DetailFactureProformaApercuComponent implements OnInit {
         this.signataire = entreprise.signataire;
         this.signataireNom = entreprise.signataireNom;
         this.tauxTva = entreprise.tauxTva;
+        
+        this.signaturNum = entreprise.signaturNum ? `${this.apiUrl}${entreprise.signaturNum}` : 'assets/img/sinum.png';
+        this.cachetNum = entreprise.cachetNum ? `${this.apiUrl}${entreprise.cachetNum}` : 'assets/img/tampon.png';
       },
       error: (err) => {
         console.error("Erreur lors de la récupération des infos utilisateur :", err);

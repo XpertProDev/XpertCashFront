@@ -91,14 +91,30 @@
                 <div class="contenu_bottom">
                     <p><span style="font-weight: 600;">Arrêté la présente facture à la somme de : </span>{{ f.totalFacture | enLettres }}.</p>
                 </div>
-                <div class="cachet_container">
+                <div class="signature_bloc" style="position: relative; text-align: center; margin-top: 40px; margin-right: 40px;">
+                    <h6>{{signataire}}</h6>
+                    <div class="signaturNum">
+                        <img class="img" 
+                            [src]="signaturNum" 
+                            (error)="signaturNum = 'assets/img/sinum.png'" 
+                            alt="Signature"
+                            style="position: relative; z-index: 1; width: 120px;">
+                        <img class="cachetNum"
+                            [src]="cachetNum" 
+                            (error)="cachetNum = 'assets/img/tampon.png'" 
+                            alt="Cachet"
+                            style="position: absolute; top: 0; left: -30%; transform: translateX(-50%); z-index: 2; width: 200px;">
+                    </div>
+                    <h6 class="name_directeur">{{signataireNom}}</h6>
+                </div>
+                <!-- <div class="cachet_container">
                     <div></div>
                     <div class="cachet">
                         <h6>{{signataire}}</h6>
                         <h4 class="name_directeur">{{signataireNom}}</h4>
                         <span>{{signataireNom}}</span>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
         <div class="container_footer">
