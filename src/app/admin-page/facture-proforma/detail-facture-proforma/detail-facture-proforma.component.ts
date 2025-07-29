@@ -155,6 +155,7 @@ export class DetailFactureProformaComponent implements OnInit {
   selectedSousMethode: string | null = null;
   whatsappNumber: string = '';
 
+  isMiniLoading: boolean = false;
 
   @ViewChild('editableContent', { static: false }) editableContent!: ElementRef;
   @ViewChild('subjectInput', { static: false }) subjectInput!: ElementRef;
@@ -869,6 +870,7 @@ get labelNom(): string {
 
   confirmStatusChange(): void {
     if (!this.pendingStatut) return;
+    this.isMiniLoading = true;
 
     const selectedUsers = this.users.filter(u => u.selected).map(u => u.id); 
   
@@ -925,15 +927,88 @@ get labelNom(): string {
             this.showStatusConfirmation = false;
             this.pendingStatut = null;
             this.dateRelance = undefined;
+
+            this.isMiniLoading = false;
           },
           error: err => {
             console.error('Erreur de mise à jour', err);
             alert('Échec de la mise à jour du statut');
             this.showStatusConfirmation = false;
+            this.isMiniLoading = false;
           }
         });
     }, 3000);
-  }  
+  }
+
+  // confirmStatusChange(): void {
+  //   if (!this.pendingStatut) return;
+
+  //   // Activer le spinner
+  //   this.isMiniLoading = true;
+
+  //   const selectedUsers = this.users.filter(u => u.selected).map(u => u.id);
+
+  //   // Préparez vos valeurs de remise & TVA
+  //   const remisePourKg = this.activeRemise ? this.remisePourcentage : 0;
+  //   const tvaFlag = this.activeTva;
+
+  //   // Construisez votre payload de statut
+  //   const modifications: Partial<FactureProForma> = {
+  //     statut: this.pendingStatut,
+  //     ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
+  //       ? { dateRelance: this.dateRelance }
+  //       : {}),
+  //     ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
+  //       approbateurs: []
+  //     })
+  //   };
+
+  //   this.factureProFormaService.updateFactureProforma(
+  //     this.factureId,
+  //     remisePourKg,
+  //     tvaFlag,
+  //     modifications,
+  //     this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
+  //   ).subscribe({
+  //     next: (updatedFacture) => {
+  //       // Mettre à jour l'historique immédiatement
+  //       const newEvent: HistoricalEvent = {
+  //         date: new Date(),
+  //         montant: this.factureProForma.totalHT,
+  //         user: this.getCurrentUser(),
+  //         type: this.getEventType(this.pendingStatut!),
+  //         description: this.getStatusDescription(this.pendingStatut!),
+  //         status: this.pendingStatut!
+  //       };
+
+  //       this.historicalEvents = this.historicalEvents
+  //         .filter(e => e.status !== newEvent.status);
+  //       this.historicalEvents.unshift(newEvent);
+
+  //       // Mise à jour locale
+  //       this.factureProForma = updatedFacture;
+  //       this.activeRemise = (updatedFacture.remise ?? 0) > 0;
+  //       this.remisePourcentage = this.activeRemise
+  //         ? ((updatedFacture.remise ?? 0) / (updatedFacture.totalHT || 1)) * 100
+  //         : 0;
+  //       this.activeTva = updatedFacture.tva;
+  //       this.showStatusConfirmation = false;
+  //       this.pendingStatut = null;
+  //       this.dateRelance = undefined;
+
+  //       // Désactiver le spinner après la réponse
+  //       this.isMiniLoading = false;
+  //     },
+  //     error: err => {
+  //       console.error('Erreur de mise à jour', err);
+  //       alert('Échec de la mise à jour du statut');
+  //       this.showStatusConfirmation = false;
+
+  //       // Désactiver le spinner en cas d'erreur
+  //       this.isMiniLoading = false;
+  //     }
+  //   });
+  // }
 
   private getStatusDescription(status: StatutFactureProForma): string {
     const descriptions = {

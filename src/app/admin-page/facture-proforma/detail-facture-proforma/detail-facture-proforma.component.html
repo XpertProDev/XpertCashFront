@@ -96,10 +96,10 @@
                                 </div> -->
                                 <!-- Bouton Valider -->
                                 <div class="etat_valider" *ngIf="factureProForma.statut !== statusOptions.VALIDE">
-                                    <button class="btn_etat" 
-                                            [class.active]="factureProForma.statut === statusOptions.VALIDE"
-                                            [disabled]="!canTransitionTo(statusOptions.VALIDE)"
-                                            (click)="openStatusConfirmation(statusOptions.VALIDE)">
+                                    <button class="btn_etat"
+                                        [class.active]="factureProForma.statut === statusOptions.VALIDE"
+                                        [disabled]="!canTransitionTo(statusOptions.VALIDE)"
+                                        (click)="openStatusConfirmation(statusOptions.VALIDE)">
                                         Valider
                                     </button>
                                 </div>
@@ -112,6 +112,21 @@
                             </div>
 
                             <!-- Popup de confirmation -->
+                            <!-- <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
+                                <div class="popup-content">
+                                    <h4>Confirmer le changement de statut</h4>
+                                    <p>Voulez-vous vraiment passer la露
+
+                                    la facture au statut "{{ selectedStatutLabel }}" ?</p>
+                                    <div class="popup-actions">
+                                    <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
+                                    <button class="btn btn-primary" (click)="confirmStatusChange()" [disabled]="isMiniLoading">
+                                        <span *ngIf="!isMiniLoading">Confirmer</span>
+                                        <div *ngIf="isMiniLoading" class="mini-spinner"></div>
+                                    </button>
+                                    </div>
+                                </div>
+                            </div> -->
                             <div *ngIf="showStatusConfirmation" class="status-confirmation-popup">
                                 <div class="popup-content">
                                     <h4>Confirmer le changement de statut</h4>
@@ -731,7 +746,7 @@
     <div class="popup-content">
         <h4>Confirmer le changement de statut</h4>
         <p>
-        Êtes-vous sûr de vouloir 
+        Êtes-vous sûr de vouloir
         <span class="highlighted-status">{{ selectedStatutLabel }}</span> 
         cette facture ?
         </p>
@@ -761,9 +776,16 @@
 
         </div>
 
-        <div class="popup-actions">
+        <!-- <div class="popup-actions">
         <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
         <button class="btn btn-primary" (click)="confirmStatusChange()">Confirmer</button>
+        </div> -->
+        <div class="popup-actions">
+        <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>
+        <button class="btn btn-primary" (click)="confirmStatusChange()" [disabled]="isMiniLoading">
+            <span *ngIf="!isMiniLoading">Confirmer</span>
+            <div *ngIf="isMiniLoading" class="mini-spinner"></div>
+        </button>
         </div>
     </div>
 </div>
