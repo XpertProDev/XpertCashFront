@@ -325,7 +325,24 @@ getFacturesParPeriode(
 }
 
 
- 
+ deletFactureProforma(factureId: number): Observable<any> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      });
+      return this.http.delete<any>(
+        `${this.apiUrl}/deletefactureproforma/${factureId}`,
+        { headers }
+      );
+    }),
+    catchError(error => {
+      console.error('Erreur lors de la suppression de la note:', error);
+      return throwError(() => error);
+    })
+  );
+}
 }
 
 

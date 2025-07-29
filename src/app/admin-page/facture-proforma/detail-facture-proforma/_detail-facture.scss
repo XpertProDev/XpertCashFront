@@ -884,6 +884,48 @@ input.input_focus_type:focus {
   transform: translateY(-20px);
 }
 
+.toast-message-success {
+  background-color: #D4EDDA;
+  border: 1px solid #C3E6CB;
+  color: #155724;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: fadeInOut 4s ease-in-out;
+  transform: translateY(-20px);
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 6px solid #ccc;
+  border-top: 6px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Animation circulaire */
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
 /* Animation pour faire apparaître et disparaître le toast */
 @keyframes fadeInOut {
   0% {
@@ -1107,3 +1149,68 @@ label {
         opacity: 1;
     }
 }
+
+
+//ici
+
+.confirmation-modal-averB {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.confirmation-modal-averB .modal-content-averB {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 300px;
+  color: #000;
+}
+
+.modal-actions-averB {
+  display: flex;
+  justify-content: center;
+  margin-top: 5px;
+  gap: 10px;
+}
+
+.btn-confirm {
+  background-color: #0672E4;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  min-width: 100px;
+  text-align: center;
+}
+
+.btn-cancel {
+  background-color: #ccc;
+  color: #000;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  min-width: 100px;
+  text-align: center;
+}
+
+.btn-confirm:hover {
+  background-color: #055fc0;
+}
+
+.btn-cancel:hover {
+  background-color: #aaa;
+}
+

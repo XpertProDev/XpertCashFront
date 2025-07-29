@@ -171,7 +171,7 @@ export class DetailFactureProformaComponent implements OnInit {
       private renderer: Renderer2,
       private entrepriseService: EntrepriseService,
       private previewService: FacturePreviewService,
-      private dialog: MatDialog
+      private dialog: MatDialog,
     ) {}
 
   ngOnInit(): void {
@@ -184,6 +184,7 @@ export class DetailFactureProformaComponent implements OnInit {
     if (idParam) {
       this.factureId = +idParam;
       this.getUserInfo();
+       this.getFactureProformaById(this.factureId);
       this.loadNotes();
       
 
@@ -2159,6 +2160,73 @@ private saveNewOrder() {
   // Optionnel : Sauvegarder le nouvel ordre dans le backend
   console.log('Nouvel ordre des produits:', this.confirmedLignes);
 }
+
+ showConfirmationModalF = false;
+  isDeleting = false;
+
+  getFactureProformaById(id: number) {
+  this.factureProFormaService.getFactureProformaById(id).subscribe({
+    next: (facture) => {
+      this.facture = facture;
+    },
+    error: (err) => {
+      console.error("Erreur lors du chargement de la facture :", err);
+    }
+  });
+}
+
+ 
+
+   deleteFacture() {
+    if (!this.facture) {
+      console.error("Cette facture n'est pas disponible.");
+      return;
+    }
+
+    this.showConfirmationModalF = true;
+  }
+
+confirmDeleteF(): void {
+  this.showConfirmationModalF = false;
+
+  if (!this.facture) return;
+
+  this.isDeleting = true;
+  this.cdr.detectChanges();
+  this.errorMessage = null;
+  this.successMessage = null;
+
+  this.factureProFormaService.deletFactureProforma(this.facture.id).subscribe({
+    next: () => {
+      setTimeout(() => {
+        this.successMessage = 'Facture supprimée avec succès.';
+
+        setTimeout(() => {
+          this.successMessage = null;
+          this.isDeleting = false;
+          this.router.navigate(['/facture-proforma']);
+        }, 2000);
+
+      }, 3000);
+    },
+    error: (err) => {
+      let message = err?.error?.error || 'Erreur lors de la suppression.';
+      const prefix = "Une erreur est survenue : ";
+      if (message.startsWith(prefix)) {
+        message = message.substring(prefix.length);
+      }
+      this.errorMessage = message;
+
+      this.isDeleting = false; // Arrêt du loader en cas d’erreur
+
+      setTimeout(() => {
+        this.errorMessage = null;
+      }, 5000);
+    }
+  });
+}
+
+
 
 
 }

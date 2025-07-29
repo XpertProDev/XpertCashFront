@@ -182,5 +182,10 @@ export class FactureProformaApercuComponent implements OnInit {
     return '';
   }
 
-  
+formatDescription(desc?: string): string {
+  if (!desc) return '';
+  return desc.replace(/-\s*/g, '<br>- ');
+}
+
+
 }

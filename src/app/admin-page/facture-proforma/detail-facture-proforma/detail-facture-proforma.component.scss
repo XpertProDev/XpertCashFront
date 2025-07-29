@@ -1114,3 +1114,27 @@ th {
   right: -9px;
   cursor: pointer;
 }
+
+
+
+
+.delet {
+   position: absolute;
+    bottom: 48px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+}
+
+
+
+.ri-delete-bin-6-line {
+    cursor: pointer;
+    font-size: 18px;
+    color: #3b3939;
+}
+.ri-delete-bin-6-line:hover {
+    color: red;
+    transform: scale(1.2); 
+    transition: color 0.3s ease, transform 0.3s ease;
+}
