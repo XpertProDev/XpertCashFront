@@ -1,0 +1,257 @@
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.navBar {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+  padding: 0 15px;
+}
+
+.header_left,
+.header_right
+{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header_right {
+  gap: 20px;
+}
+
+.btn_vente_pos .btn,
+.btn_commande_pos .btn
+{
+  gap: 10px;
+}
+
+.btn_vente_pos .btn {
+  background-color: #CDE3FA;
+}
+
+.btn_commande_pos .btn {
+  background-color: #EDEBEB;
+}
+
+.btn_add_commande .btn {
+  background-color: #EDEBEB;
+  padding: 4px 13px;
+}
+
+.btn_add_commande .btn i {
+  font-size: 17px;
+}
+
+li.list_commande_active {
+  background-color: #CDE3FA!important;
+}
+
+ul.list_commande {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+ul.list_commande li {
+  background-color: #EDEBEB;
+  padding: 7px 13px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+ul.list_commande li.list_commande_plus {
+  padding: 5px;
+}
+
+.name_boutique p {
+  margin: 0;
+}
+
+.inputSearch {
+  position: relative;
+  width: 250px;
+  height: 35px;
+  //background-color: red;
+  display: flex;
+  align-items: center;
+}
+
+.inputSearch input {
+  width: 100%;
+  height: 100%;
+  padding-left: 10px;
+  border-radius: 5px;
+  border: 1px solid #000;
+  font-size: 13px;
+}
+
+.inputSearch i {
+  position: absolute;
+  right: 0;
+  margin-right: 15px;
+  font-size: 17px;
+}
+
+.icon_sort {
+  background-color: #EDEBEB;
+  padding: 5px 11px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.icon_sort i {
+  font-size: 17px;
+}
+
+.profil {
+  background-color: #0672E4;
+  padding: 0px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.profil span {
+  font-size: 12px;
+  color: #ffffff;
+}
+
+.menu i {
+  font-size: 17px;
+  cursor: pointer;
+}
+
+////////////////// CONTENUE
+
+.section_contenu_container {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  // grid-template-columns: repeat(1fr, 400px);
+  // grid-template-rows: 1fr;
+  // grid-column-gap: 0px;
+  // grid-row-gap: 0px;
+  // gap: 20px;
+}
+
+.section_favory_produit {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  margin-top: 12px;
+}
+
+.section_favory {
+  border-right: 1px solid #d1d1d1;
+  height: 100vh;
+}
+
+.section_favory .ul_section_favory .li_section_favory {
+  background-color: #CDE3FA;
+  padding: 5px 10px;
+}
+
+.double .icon_favory i {
+  font-size: 20px;
+}
+
+.double {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title_favory {
+  margin: 0;
+}
+
+.titre_categorie {
+  padding-left: 10px;
+}
+
+.titre_categorie p {
+  font-size: 14px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.ul_li_name_categorie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ul_li_name_categorie:hover {
+  background-color: #CDE3FA;
+}
+
+///////////// PRODUIT 
+
+// .section_produit {
+//   display: grid;
+//   grid-template-columns: repeat(4, 1fr);
+//   grid-template-rows: repeat(1, 1fr);
+//   gap: 8px;
+// }
+
+// .cadre_produit {
+//   width: 150px;
+//   height: 150px;
+//   background-color: #ffffff;
+//   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+// }
+
+    
+
+
+
+
+
+
+////////////////////// Calculate page
+
+.li_list_produit_select {
+  background-color: #EDEBEB;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  margin: 6px 8px;
+  border-radius: 5px;
+}
+
+.nombre_select {
+  font-size: 12px;
+}
+
+.name_produit_select p {
+  font-size: 12px;
+}
+
+.price_produit {
+  font-size: 12px;
+}
+
+.icon_close_select {
+  cursor: pointer;
+}
+
+.icon_close_select i {
+  font-size: 14px;
+}
+
+.icon_close_select i:hover {
+  color: #ff0000;
+}
