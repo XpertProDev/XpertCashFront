@@ -41,9 +41,29 @@ const routes: Routes = [
       {
         path: 'auth/signin',
         loadComponent: () => import('./demo/pages/authentication/sign-in/sign-in.component')
-      }
+      },
+      // {
+      //   path: 'pos-accueil',
+      //   loadComponent: () => import('./demo/pages/authentication/pos-accueil/pos-accueil.component')
+      // },
+
     ]
   },
+
+  // … dans AppRoutingModule, en dehors du component: AdminComponent
+  {
+    path: 'pos-accueil',
+    loadComponent: () =>
+      import('./demo/pages/authentication/pos-accueil/pos-accueil.component')
+        .then(m => m.PosAccueilComponent),
+    canActivate: [authGuard],
+    data: {
+      hideHeader: true,
+      hideSidebar: true
+    }
+  },
+  // puis votre bloc AdminComponent { … } sans la route pos-accueil à l’intérieur
+
 
   // Routes privées (authentifiées)
   {
@@ -239,7 +259,7 @@ const routes: Routes = [
       {
         path: 'payment-form/:plan',
         component: PaymentFormComponent
-      }
+      },
       // {
       //   path: 'payment-form',
       //   loadComponent: () => import('./admin-page/payment-form/payment-form.component').then(m => m.PaymentFormComponent)

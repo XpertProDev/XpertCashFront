@@ -151,6 +151,37 @@ th {
   color: #fff;
 }
 
+// .mini-spinner {
+//   width: 20px;
+//   height: 20px;
+//   border: 3px solid #f3f3f3;
+//   border-radius: 50%;
+//   border-top: 3px solid #3498db;
+//   animation: spin 1s linear infinite;
+//   margin: 0 auto;
+//   vertical-align: middle;
+// }
+
+// @keyframes spin {
+//   0% { transform: rotate(0deg); }
+//   100% { transform: rotate(360deg); }
+// }
+
+.mini-spinner {
+  border: 2px solid #f3f3f3; /* Couleur de fond */
+  border-top: 2px solid #3498db; /* Couleur principale */
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
 .info_titre_input {
   padding: 10px 20px 10px; 
