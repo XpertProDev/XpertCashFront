@@ -86,12 +86,21 @@
                                 </div> -->
                                 
                                 <!-- Bouton Valider -->
-                                <div class="etat_valider">
+                                <!-- <div class="etat_valider">
                                     <button class="btn_etat" 
                                             [class.active]="factureProForma.statut === statusOptions.VALIDE"
                                             [disabled]="!canTransitionTo(statusOptions.VALIDE)"
                                             (click)="openStatusConfirmation(statusOptions.VALIDE)">
                                     Valider
+                                    </button>
+                                </div> -->
+                                <!-- Bouton Valider -->
+                                <div class="etat_valider" *ngIf="factureProForma.statut !== statusOptions.VALIDE">
+                                    <button class="btn_etat" 
+                                            [class.active]="factureProForma.statut === statusOptions.VALIDE"
+                                            [disabled]="!canTransitionTo(statusOptions.VALIDE)"
+                                            (click)="openStatusConfirmation(statusOptions.VALIDE)">
+                                        Valider
                                     </button>
                                 </div>
                             </div>

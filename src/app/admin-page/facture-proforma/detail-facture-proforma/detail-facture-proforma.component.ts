@@ -869,6 +869,7 @@ get labelNom(): string {
 
   confirmStatusChange(): void {
     if (!this.pendingStatut) return;
+
     const selectedUsers = this.users.filter(u => u.selected).map(u => u.id); 
   
     // Préparez toujours vos valeurs de remise & tva
@@ -887,49 +888,51 @@ get labelNom(): string {
       })
     };
   
-    this.factureProFormaService.updateFactureProforma(
-      this.factureId,
-      remisePourKg,
-      tvaFlag,
-      modifications,
-      this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
-    ).subscribe({
-      next: (updatedFacture) => {
-         // Mettre à jour l'historique immédiatement
-          const newEvent: HistoricalEvent = {
-            date: new Date(),
-            montant: this.factureProForma.totalHT,
-            user: this.getCurrentUser(),
-            type: this.getEventType(this.pendingStatut!),
-            description: this.getStatusDescription(this.pendingStatut!),
-            status: this.pendingStatut!
-          };
-             // On retire l’éventuel event existant pour ce même statut…
-          this.historicalEvents = this.historicalEvents
-          .filter(e => e.status !== newEvent.status);
+    setTimeout(() => {
+      this.factureProFormaService.updateFactureProforma(
+        this.factureId,
+        remisePourKg,
+        tvaFlag,
+        modifications,
+        this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
+      ).subscribe({
+        next: (updatedFacture) => {
+          // Mettre à jour l'historique immédiatement
+            const newEvent: HistoricalEvent = {
+              date: new Date(),
+              montant: this.factureProForma.totalHT,
+              user: this.getCurrentUser(),
+              type: this.getEventType(this.pendingStatut!),
+              description: this.getStatusDescription(this.pendingStatut!),
+              status: this.pendingStatut!
+            };
+              // On retire l’éventuel event existant pour ce même statut…
+            this.historicalEvents = this.historicalEvents
+            .filter(e => e.status !== newEvent.status);
 
-          // …et on l’ajoute en tête
-          this.historicalEvents.unshift(newEvent);
+            // …et on l’ajoute en tête
+            this.historicalEvents.unshift(newEvent);
 
-             // mise à jour locale
-          this.factureProForma = updatedFacture;
-          // this.loadFactureProforma(this.factureId);
-          // rechargez/remettez vos flags localement
-          this.activeRemise = (updatedFacture.remise ?? 0) > 0;
-          this.remisePourcentage = this.activeRemise
-            ? ((updatedFacture.remise ?? 0) / (updatedFacture.totalHT || 1)) * 100
-            : 0;
-          this.activeTva    = updatedFacture.tva;
-          this.showStatusConfirmation = false;
-          this.pendingStatut = null;
-          this.dateRelance = undefined;
-        },
-        error: err => {
-          console.error('Erreur de mise à jour', err);
-          alert('Échec de la mise à jour du statut');
-          this.showStatusConfirmation = false;
-        }
-      });
+              // mise à jour locale
+            this.factureProForma = updatedFacture;
+            // this.loadFactureProforma(this.factureId);
+            // rechargez/remettez vos flags localement
+            this.activeRemise = (updatedFacture.remise ?? 0) > 0;
+            this.remisePourcentage = this.activeRemise
+              ? ((updatedFacture.remise ?? 0) / (updatedFacture.totalHT || 1)) * 100
+              : 0;
+            this.activeTva    = updatedFacture.tva;
+            this.showStatusConfirmation = false;
+            this.pendingStatut = null;
+            this.dateRelance = undefined;
+          },
+          error: err => {
+            console.error('Erreur de mise à jour', err);
+            alert('Échec de la mise à jour du statut');
+            this.showStatusConfirmation = false;
+          }
+        });
+    }, 3000);
   }  
 
   private getStatusDescription(status: StatutFactureProForma): string {
