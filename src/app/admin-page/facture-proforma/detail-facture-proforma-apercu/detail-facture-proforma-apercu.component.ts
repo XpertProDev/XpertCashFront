@@ -421,4 +421,12 @@ export class DetailFactureProformaApercuComponent implements OnInit {
   return date.toLocaleDateString('fr-FR', options);
 }
 
+transformerLigne(ligne: string): string {
+   return ligne.replace(/-\s*/g, '<br> - <span></span>');
+}
+
+
+
+
+
 }
