@@ -16,7 +16,7 @@ ul {
 .section_contenu_left {
   display: flex;
   flex-direction: column;
-  min-height: 0;    /* encore, pour autoriser le scroll interne */
+  min-height: 0;
 }
 
 .section_favory_produit {
@@ -40,12 +40,6 @@ ul {
 
 .double .icon_favory i {
   font-size: 20px;
-}
-
-.double {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .title_favory {
@@ -270,8 +264,9 @@ ul {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: #fff;
+  // background: #fff;
   box-shadow: rgba(0, 0, 0, 0.04) 0 3px 5px;
+  padding-bottom: 10px;
   /* hauteur gérée par le parent */
 }
 
@@ -351,7 +346,12 @@ ul {
   color: #666;
 }
 
-.name_stock_list p {
+.name_stock_list p,
+.moyen_paiement p,
+.price_du p,
+.moyen_paiement_restant p,
+.paiement_btn p 
+{
   margin: 0;
 }
 
@@ -385,4 +385,328 @@ ul.ul_list {
   border-radius: 5px;
   cursor: pointer;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+}
+
+
+.payment-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  // background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.733);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.payment-popup {
+  background-color: white;
+  width: 85%;
+  // max-width: 800px;
+  height: 90vh;
+  border-radius: 10px;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+  
+  .popup-header {
+    // display: flex;
+    // justify-content: space-between;
+    // align-items: center;
+    // padding: 20px;
+    // background-color: #f8f9fa;
+    // border-bottom: 1px solid #dee2e6;
+    
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #6c757d;
+      cursor: pointer;
+      transition: color 0.2s;
+      
+      &:hover {
+        color: #dc3545;
+      }
+    }
+    
+  }
+  
+}
+
+.section_popup_paiement {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  flex: 1;
+  min-height: 0;
+  margin: 30px 80px;
+}
+
+.btn-payment-pop {
+  width: 100%;
+  padding: 0.75rem;
+  // margin: 0 1rem 1rem;
+  // margin-bottom: 68px;
+  background: #2978f2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* image */
+
+.methode_paiement {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 15px;
+  margin: 20px 10px;
+}
+
+.cadre_paiement {
+  background-color: #ffffff;
+  border-radius: 10px;
+  height: 135px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.cadre_paiement:hover {
+  border: 0.5px solid #0672e4;
+}
+
+.img_paiement {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// .img_paiement_compte {
+//   width: 60px;
+//   height: 60px;
+// }
+
+// .img_paiement_carte {
+//   width: 60px;
+//   height: 60px;
+// }
+
+.img_paiement img {
+  width: 100%;
+  height: 100%;
+}
+
+.title_paiement {
+  margin-top: 22px;
+}
+
+.title_paiement p {
+  margin: 0;
+  text-align: center;
+}
+
+.montant_paiement {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+
+
+
+
+.cadre_section_contenu_left_prise {
+  width: 100%;
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.section_contenu_left_prise {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.montant_paiement {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.montant_paiement h1 {
+  font-size: 48px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.montant_paiement span {
+  font-size: 20px;
+  color: #666;
+}
+
+.moyen_paiement_price {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #CDE3FA;
+  gap: 16px;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+// .moyen_paiement_price {
+//   display: flex;
+//   align-items: center;
+//   padding: 10px;
+// }
+
+.moyen_paiement {
+  // flex: 1;
+  background: #E6F3FF;
+  border: 1px solid #C1E0FF;
+  border-radius: 8px;
+  padding: 8px 16px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.moyen_paiement.selected {
+  background: #D0EBFF;
+  border-color: #90CDF4;
+}
+
+.moyen_paiement p {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.moyen_prise_du .price_du {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #333;
+}
+
+.clear-icon {
+  font-size: 18px;
+  color: #E53E3E;
+  cursor: pointer;
+}
+
+.discount-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
+}
+
+.btn-currency,
+.btn-percent {
+  background: #F0F0F0;
+  border: none;
+  border-radius: 4px;
+  
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-currency {
+  padding: 8px 12px;
+  font-size: 12px!important;
+}
+
+.btn-percent {
+  padding: 3px 15px;
+  background-color: #CDE3FA;
+  border: 1px solid #0672e4;
+}
+
+.input-discount {
+  width: 100px;
+  border: none;
+  outline: none;
+  text-align: right;
+  font-size: 16px;
+  text-align: center;
+}
+
+.discount-unit {
+  font-size: 18px;
+  color: #333;
+}
+
+.discount-label {
+  text-align: center;
+  position: relative;
+  top: -18px;
+}
+
+.discount-label p {
+  margin: 4px 0 0;
+  font-size: 10px;
+  color: #666;
+}
+
+.paiement_restant {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+}
+
+.btn_facture {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn_facture input {
+  cursor: pointer;
+}
+
+.paiement_btn {
+  background-color: #ECECEC;
+  padding: 12px;
+  border-radius: 5px;
+}
+
+.paiement_btn p {
+  font-size: 15px;
+}
+
+.btn_client {
+  cursor: pointer;
+}
+
+.btn_client p {
+  text-align: center;
+}
+
+.double_client_facture {
+  // display: flex;
+  // align-items: center;
+  gap: 5px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 0 10px;
 }

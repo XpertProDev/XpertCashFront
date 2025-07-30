@@ -14,6 +14,7 @@ import { ViewStateService } from '../pos-accueil/view-state.service';
 export class PosVenteComponent {
   isListView = true;
   showDropdown = false;
+  showPaymentPopup = false;
 
   constructor(
     private router: Router,
@@ -31,20 +32,12 @@ export class PosVenteComponent {
     });
   }
 
-  // toggleView(viewType: 'grid' | 'list') {
-  //   this.isListView = viewType === 'grid';
-  //   this.showDropdown = true;
-    
-  //   // Stocker la préférence dans le localStorage
-  //   localStorage.setItem('viewPreference', viewType);
-  // }
+  openPaymentPopup() {
+    this.showPaymentPopup = true;
+  }
 
-  // toggleView(viewType: 'grid' | 'list') {
-  //   this.isListView = viewType === 'grid';
-  //   this.showDropdown = true;
-    
-  //   // Stocker la préférence dans le localStorage
-  //   localStorage.setItem('viewPreference', viewType);
-  // }
+  closePaymentPopup() {
+    this.showPaymentPopup = false;
+  }
 
 }

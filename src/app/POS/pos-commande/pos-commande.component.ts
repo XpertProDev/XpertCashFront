@@ -36,4 +36,8 @@ export class PosCommandeComponent {
     localStorage.setItem('viewPreference', viewType);
   }
 
+  pagePosVente() {
+    // this.router.navigate(['/pos-accueil']);
+  }
+
 }
