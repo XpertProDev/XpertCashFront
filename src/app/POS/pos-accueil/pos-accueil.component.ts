@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 @Component({
   selector: 'app-pos-accueil',
   standalone: true,
-  imports: [ FormsModule, CommonModule, RouterModule,],
+  imports: [ FormsModule, CommonModule, RouterModule, ClickOutsideDirective],
   templateUrl: './pos-accueil.component.html',
   styleUrl: './pos-accueil.component.scss'
 })
@@ -20,6 +20,7 @@ export class PosAccueilComponent {
   showDropdown = false;
   public isListView$: Observable<boolean>;
   activeButton: 'vente' | 'commande' = 'vente';
+  showMenuDropdown = false;
 
   constructor(
     private router: Router,
@@ -46,6 +47,10 @@ export class PosAccueilComponent {
   onClickVente() {
     this.activeButton = 'vente';
     this.router.navigate(['/pos-accueil']);
+  }
+
+  toggleMenuDropdown() {
+    this.showMenuDropdown = !this.showMenuDropdown;
   }
   
 

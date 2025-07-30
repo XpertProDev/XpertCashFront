@@ -67,8 +67,27 @@
             <span>S</span>
           </div>
           <!-- // Menu  -->
-          <div class="menu">
+          <div class="menu" 
+              (click)="toggleMenuDropdown()" 
+              clickOutside 
+              (clickOutside)="showMenuDropdown = false">
             <i class="ri-menu-line"></i>
+            
+            <!-- Dropdown Menu -->
+            <div class="menu-dropdown" *ngIf="showMenuDropdown">
+              <div class="dropdown-item">
+                <i class="ri-download-line"></i>
+                Installer l'application
+              </div>
+              <div class="dropdown-item">
+                <i class="ri-restart-line"></i>
+                Recharger les donnees
+              </div>
+              <div class="dropdown-item">
+                <i class="ri-money-euro-circle-line"></i>
+                Fermer la caisse
+              </div>
+            </div>
           </div>
         </div>
       </nav>
@@ -78,6 +97,8 @@
     <router-outlet></router-outlet>
 
     <!-- // FIN DE CONTENU  -->
+    
 
   </div>
 </div>
+
