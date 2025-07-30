@@ -337,6 +337,19 @@ ul.list_commande li.list_commande_plus {
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: popup-appear 0.3s ease-out;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    // background: transparent;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 @keyframes popup-appear {
@@ -354,7 +367,7 @@ ul.list_commande li.list_commande_plus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 5px 20px;
   border-bottom: 1px solid #eee;
   position: sticky;
   top: 0;
@@ -363,7 +376,7 @@ ul.list_commande li.list_commande_plus {
   
   h3 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 16px;
     font-weight: 600;
     color: #333;
   }
@@ -445,19 +458,6 @@ ul.list_commande li.list_commande_plus {
         border-color: #a0c5f0;
         color: #1a73e8;
         font-weight: bold;
-      }
-
-      &::-webkit-scrollbar {
-        width: 4px;
-        height: 4px;
-      }
-      &::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 0, 0, 0.2);
-        border-radius: 3px;
-        // background: transparent;
-      }
-      &::-webkit-scrollbar-track {
-        background: transparent;
       }
     }
   }
