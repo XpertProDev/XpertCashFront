@@ -25,6 +25,7 @@ export class PosAccueilComponent {
   commandes: string[] = ['001']; // Liste initiale
   activeCommande: string = '001'; // Commande active
   showCommandeDropdown = false;
+  showCommandePopup = false;
 
   constructor(
     private router: Router,
@@ -62,10 +63,12 @@ export class PosAccueilComponent {
     const newId = (this.commandes.length + 1).toString().padStart(3, '0');
     this.commandes.push(newId);
     this.activeCommande = newId;
+    this.showCommandePopup = false;
   }
 
   setActiveCommande(commande: string) {
     this.activeCommande = commande;
+    this.showCommandePopup = false;
   }
 
   get visibleCommandes() {
@@ -79,10 +82,7 @@ export class PosAccueilComponent {
       ? this.commandes.slice(0, this.commandes.length - 4) 
       : [];
   }
-
-  toggleCommandePopup() {
-    
-  }
+  
   
 
 }

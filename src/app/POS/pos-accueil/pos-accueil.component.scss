@@ -250,100 +250,74 @@ ul.list_commande li.list_commande_plus {
   }
 }
 
-/* Styles pour le popup */
-.commande-popup-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-}
-
 .commande-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  position: absolute;
+  top: 100%;
+  left: 0;
   width: 300px;
-  max-height: 80vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: 8px;
 
-.popup-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid #eee;
-  background: #f8fafc;
-  
-  h3 {
-    margin: 0;
-    font-size: 18px;
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    i {
+      cursor: pointer;
+      font-size: 20px;
+      color: #666;
+    }
   }
-  
-  button {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #64748b;
-    
-    &:hover {
-      color: #334155;
+
+  .popup-commandes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #f8f8f8;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #f9f9f9;
+      }
+
+      &.active {
+        background: #e6f4ff;
+        color: #1890ff;
+      }
+
+      i {
+        color: #999;
+      }
     }
   }
 }
 
-.popup-content {
-  padding: 16px;
-  overflow-y: auto;
-  flex-grow: 1;
-}
-
-.popup-item {
-  padding: 12px;
-  cursor: pointer;
-  border-radius: 4px;
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  
-  &:hover {
-    background: #f1f5f9;
-  }
-  
+.list_commande_plus {
+  background-color: rebeccapurple;
   &.active {
-    background: #dbeafe;
-    color: #2563eb;
-    font-weight: 500;
-  }
-}
-
-.btn-add-popup {
-  width: 100%;
-  padding: 12px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  margin-top: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-weight: 500;
-  
-  &:hover {
-    background: #2563eb;
+    background-color: #e6f4ff;
+    border-color: #91caff;
   }
 }

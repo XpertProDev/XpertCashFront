@@ -26,20 +26,32 @@
           </div>
           <!-- // List des commande en onglet  -->
           <ul class="list_commande">
-          <!-- Affiche les 4 dernières commandes -->
-          <li *ngFor="let cmd of visibleCommandes" 
-              [class.list_commande_active]="activeCommande === cmd"
-              (click)="setActiveCommande(cmd)">
-            {{ cmd }}
-          </li>
-          
-          <!-- Bouton "plus" pour ouvrir le popup -->
-          <li *ngIf="commandes.length > 4" 
-              class="list_commande_plus" 
-              (click)="toggleCommandePopup()">
-            <i class="ri-arrow-down-s-line"></i>
-          </li>
-        </ul>
+            <!-- Affiche les 4 dernières commandes -->
+            <li *ngFor="let cmd of visibleCommandes" 
+                [class.list_commande_active]="activeCommande === cmd"
+                (click)="setActiveCommande(cmd)">
+              {{ cmd }}
+            </li>
+            
+            <!-- Bouton "plus" pour les commandes cachées -->
+            <li *ngIf="commandes.length > 4" 
+                class="list_commande_plus" 
+                (click)="showCommandeDropdown = !showCommandeDropdown"
+                clickOutside 
+                (clickOutside)="showCommandeDropdown = false">
+              <i class="ri-arrow-down-s-line"></i>
+              
+              <!-- Menu déroulant des commandes cachées -->
+              <div class="commande-dropdown" *ngIf="showCommandeDropdown">
+                <div *ngFor="let cmd of hiddenCommandes" 
+                    class="dropdown-item"
+                    [class.active]="activeCommande === cmd"
+                    (click)="setActiveCommande(cmd)">
+                  {{ cmd }}
+                </div>
+              </div>
+            </li>
+          </ul>
         </div>
 
         <!-- // COTE RIGHT  -->
