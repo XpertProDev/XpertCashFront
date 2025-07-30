@@ -27,36 +27,17 @@
           <p>Toutes les catégories</p>
         </div>
         <ul class="ul_name_categorie">
-          <li class="ul_li_name_categorie">
+          <!-- Boucle sur les catégories -->
+          <li *ngFor="let categorie of categories" 
+              class="ul_li_name_categorie"
+              [class.selected]="selectedCategoryId === categorie.id"
+              >
             <div class="name_categorie">
-              <span>Alimentation</span>
+              <span>{{ categorie.nom }}</span>
             </div>
             <div class="nombre">
-              04
-            </div>
-          </li>
-          <li class="ul_li_name_categorie">
-            <div class="name_categorie">
-              <span>Électronique</span>
-            </div>
-            <div class="nombre">
-              10
-            </div>
-          </li>
-          <li class="ul_li_name_categorie">
-            <div class="name_categorie">
-              <span>Téléphone</span>
-            </div>
-            <div class="nombre">
-              38
-            </div>
-          </li>
-          <li class="ul_li_name_categorie">
-            <div class="name_categorie">
-              <span>Formation</span>
-            </div>
-            <div class="nombre">
-              23
+              <!-- Vous pouvez ajouter ici le comptage des produits si disponible -->
+              00
             </div>
           </li>
         </ul>

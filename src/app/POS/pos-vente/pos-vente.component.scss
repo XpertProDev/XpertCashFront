@@ -523,7 +523,12 @@ ul.ul_list {
   gap: 10px;
 }
 
-
+.double {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  // padding: 0 10px;
+}
 
 
 
@@ -709,4 +714,14 @@ ul.ul_list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   padding: 0 10px;
+}
+
+.selected {
+  background-color: #0672E4 !important;
+  color: white !important;
+  
+  .name_categorie span,
+  .nombre {
+    color: white !important;
+  }
 }
