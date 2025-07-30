@@ -1,0 +1,83 @@
+<!-- pos-accueil.component.html -->
+<div class="pos_container">
+  <div class="pos_content">
+    <!-- // DEBUT DE HEADER  -->
+    <div class="pos_header">
+      <nav class="navBar">
+        <!-- // COTE LEFT  -->
+        <div class="header_left">
+          <!-- // btn vente pos  -->
+          <div class="btn_vente_pos" (click)="onClickVente()">
+            <button class="btn btn_default" [class.btn_active]="activeButton === 'vente'">
+              Ventes POS
+            </button>
+          </div>
+          <!-- // btn commande pos  -->
+          <div class="btn_commande_pos" (click)="onClickCommandes()">
+            <button class="btn btn_default" [class.btn_active]="activeButton === 'commande'">
+              Commandes
+            </button>
+          </div>
+          <!-- // btn add commande  -->
+          <div class="btn_add_commande">
+            <button class="btn">
+              <i class="ri-add-line"></i>
+            </button>
+          </div>
+          <!-- // List des commande en onglet  -->
+          <ul class="list_commande">
+            <li class="list_commande_active">001</li>
+            <li>002</li>
+            <li>003</li>
+            <li>004</li>
+            <li class="list_commande_plus"><i class="ri-arrow-down-s-line"></i></li>
+          </ul>
+        </div>
+
+        <!-- // COTE RIGHT  -->
+        <div class="header_right">
+          <!-- // Name boutique  -->
+          <div class="name_boutique">
+            <p>Ma boutique</p>
+          </div>
+          <!-- // Input de recherche  -->
+          <div class="inputSearch">
+            <i class="ri-search-2-line"></i>
+            <input 
+              type="text" placeholder="Recherche des produits"/>
+          </div>
+          <!-- // Icon de sort -->
+          <!-- <div class="icon_sort">
+            <i class="ri-sort-asc"></i>
+          </div> -->
+          <div class="icon_sort" (click)="showDropdown = !showDropdown" clickOutside (clickOutside)="showDropdown = false">
+            <i [class]="(isListView$ | async) ? 'ri-apps-fill' : 'ri-list-check'"></i>
+            
+            <div class="view-dropdown" *ngIf="showDropdown">
+              <div class="dropdown-item" (click)="toggleView('grid')">
+                Cadre {{ (isListView$ | async) ? '✓' : '' }}
+              </div>
+              <div class="dropdown-item" (click)="toggleView('list')">
+                Liste {{ !(isListView$ | async) ? '✓' : '' }}
+              </div>
+            </div>
+          </div>
+          <!-- // profil  -->
+          <div class="profil">
+            <span>S</span>
+          </div>
+          <!-- // Menu  -->
+          <div class="menu">
+            <i class="ri-menu-line"></i>
+          </div>
+        </div>
+      </nav>
+    </div>
+    <!-- // FIN DE HEADER  -->
+    <!-- // DEBUT DE CONTENU  -->
+    <router-outlet></router-outlet>
+
+    <!-- // FIN DE CONTENU  -->
+
+  </div>
+</div>

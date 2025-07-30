@@ -51,17 +51,42 @@ const routes: Routes = [
   },
 
   // … dans AppRoutingModule, en dehors du component: AdminComponent
-  {
-    path: 'pos-accueil',
-    loadComponent: () =>
-      import('./demo/pages/authentication/pos-accueil/pos-accueil.component')
-        .then(m => m.PosAccueilComponent),
-    canActivate: [authGuard],
-    data: {
-      hideHeader: true,
-      hideSidebar: true
+  // {
+  //   path: 'pos-accueil',
+  //   loadComponent: () =>
+  //     import('./POS/pos-accueil/pos-accueil.component')
+  //       .then(m => m.PosAccueilComponent),
+  //   canActivate: [authGuard],
+  //   data: {
+  //     hideHeader: true,
+  //     hideSidebar: true
+  //   }
+  // },
+{
+  path: 'pos-accueil',
+  loadComponent: () =>
+    import('./POS/pos-accueil/pos-accueil.component')
+      .then(m => m.PosAccueilComponent),
+  canActivate: [authGuard],
+  data: { hideHeader: true, hideSidebar: true },
+  children: [
+    {
+      path: '',
+      // charge le **contenu par défaut** DANS le même PosAccueilComponent
+      loadComponent: () =>
+        import('./POS/pos-vente/pos-vente.component')
+          .then(m => m.PosVenteComponent),
+    },
+    {
+      path: 'commandes',
+      loadComponent: () =>
+        import('./POS/pos-commande/pos-commande.component')
+          .then(m => m.PosCommandeComponent),
     }
-  },
+  ]
+},
+
+
   // puis votre bloc AdminComponent { … } sans la route pos-accueil à l’intérieur
 
 
