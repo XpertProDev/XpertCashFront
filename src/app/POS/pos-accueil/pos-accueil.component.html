@@ -20,18 +20,26 @@
           </div>
           <!-- // btn add commande  -->
           <div class="btn_add_commande">
-            <button class="btn">
+            <button class="btn" (click)="addCommande()">
               <i class="ri-add-line"></i>
             </button>
           </div>
           <!-- // List des commande en onglet  -->
           <ul class="list_commande">
-            <li class="list_commande_active">001</li>
-            <li>002</li>
-            <li>003</li>
-            <li>004</li>
-            <li class="list_commande_plus"><i class="ri-arrow-down-s-line"></i></li>
-          </ul>
+          <!-- Affiche les 4 dernières commandes -->
+          <li *ngFor="let cmd of visibleCommandes" 
+              [class.list_commande_active]="activeCommande === cmd"
+              (click)="setActiveCommande(cmd)">
+            {{ cmd }}
+          </li>
+          
+          <!-- Bouton "plus" pour ouvrir le popup -->
+          <li *ngIf="commandes.length > 4" 
+              class="list_commande_plus" 
+              (click)="toggleCommandePopup()">
+            <i class="ri-arrow-down-s-line"></i>
+          </li>
+        </ul>
         </div>
 
         <!-- // COTE RIGHT  -->

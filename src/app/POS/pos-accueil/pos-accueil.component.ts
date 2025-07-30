@@ -22,6 +22,10 @@ export class PosAccueilComponent {
   activeButton: 'vente' | 'commande' = 'vente';
   showMenuDropdown = false;
 
+  commandes: string[] = ['001']; // Liste initiale
+  activeCommande: string = '001'; // Commande active
+  showCommandeDropdown = false;
+
   constructor(
     private router: Router,
     private viewState: ViewStateService
@@ -51,6 +55,33 @@ export class PosAccueilComponent {
 
   toggleMenuDropdown() {
     this.showMenuDropdown = !this.showMenuDropdown;
+  }
+
+  addCommande() {
+    // Génère un nouvel ID de commande (ex: 005, 006...)
+    const newId = (this.commandes.length + 1).toString().padStart(3, '0');
+    this.commandes.push(newId);
+    this.activeCommande = newId;
+  }
+
+  setActiveCommande(commande: string) {
+    this.activeCommande = commande;
+  }
+
+  get visibleCommandes() {
+    // Affiche les 4 dernières commandes
+    return this.commandes.slice(-4);
+  }
+
+  get hiddenCommandes() {
+    // Commandes non visibles dans la barre principale
+    return this.commandes.length > 4 
+      ? this.commandes.slice(0, this.commandes.length - 4) 
+      : [];
+  }
+
+  toggleCommandePopup() {
+    
   }
   
 
