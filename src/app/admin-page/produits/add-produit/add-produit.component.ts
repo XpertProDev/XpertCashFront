@@ -178,7 +178,9 @@ export class AddProduitComponent implements OnInit {
     this.messageAPI = '';
   }
 
-  closePopupCategory(): void { this.showPopupCategory = false; }
+  closePopupCategory(): void {
+  this.showPopupCategory = false;
+}
 
   openPopupUnit(): void {
     this.showPopupUnit = true;
@@ -468,51 +470,56 @@ export class AddProduitComponent implements OnInit {
 
   cancelUniteCreation() { this.showUniteCreation = false; }
 
-  submitFormCategory(): void {
-    const categoryData = { nom: this.ajouteCategoryForm.value.categoryName };
-    this.categorieService.ajouterCategorie(categoryData).subscribe({
-      next: (response: any) => {
-        console.log('Catégorie ajoutée avec succès : ', response);
-        if (response && response.id) {
-          // Réinitialiser le formulaire
-          this.ajouteCategoryForm.get('categoryName')!.setValue('');
-          this.closePopupCategory();
-          // Créer le nouvel objet catégorie
-          const newCategory: Categorie = { id: response.id, nom: categoryData.nom };
-          // Ajouter à la liste des options
-          this.options.push(newCategory);
-          this.showCategoryCreation = false;
-          // 1. Mettre à jour l'input d'autocomplete
-          this.myControl.setValue(newCategory);
-          // 2. Mettre à jour la valeur dans le formulaire principal
-          this.ajouteProduitForm.get('categorieId')?.setValue(newCategory.id);
-          // Mettre à jour les options filtrées
-          this.filteredOptions = this.myControl.valueChanges.pipe(
-            startWith(newCategory), // Pré-remplir avec la nouvelle valeur
-            map(value => (typeof value === 'string' ? value : value?.nom)),
-            map(name => (name ? this._filter(name) : this.options.slice()))
-          );
-          // Afficher message
-          this.apiMessageType = 'success';
-          this.messageAPI = response.message || "La catégorie a été créée avec succès.";
-        }
-      },
-      error: (error) => {
-        console.log("Erreur complète :", error);
-        console.log("Réponse API :", error.error);
-        let message = "Une erreur est survenue lors de la création de la catégorie.";
-        if (error.error) {
-          if (typeof error.error === "object" && error.error.error) {
-            message = error.error.error;
-          } else if (typeof error.error === "string") {
-            message = error.error;
-          }
-        }
-        this.apiMessageType = 'error';
-        this.messageAPI = message;
+ submitFormCategory(): void {
+  const categoryData = { nom: this.ajouteCategoryForm.value.categoryName };
+  this.categorieService.ajouterCategorie(categoryData).subscribe({
+    next: (response: any) => {
+      console.log('Catégorie ajoutée avec succès : ', response);
+      if (response && response.message) {
+        // Réinitialiser le formulaire
+        this.ajouteCategoryForm.get('categoryName')!.setValue('');
+        
+        // Fermer le pop-up
+        this.closePopupCategory();
+
+        // Créer le nouvel objet catégorie
+        const newCategory: Categorie = { id: response.id, nom: categoryData.nom };
+
+        // Ajouter à la liste des options
+        this.options.push(newCategory);
+
+        // 1. Mettre à jour l'input d'autocomplete
+        setTimeout(() => {
+          this.myControl.setValue(newCategory);  // Force la mise à jour de la valeur dans le champ autocomplete
+        }, 100);
+
+        // 2. Mettre à jour la valeur dans le formulaire principal
+        this.ajouteProduitForm.get('categorieId')?.setValue(newCategory.id);
+
+        // Mettre à jour les options filtrées
+        this.filteredOptions = this.myControl.valueChanges.pipe(
+          startWith(newCategory), // Pré-remplir avec la nouvelle valeur
+          map(value => (typeof value === 'string' ? value : value?.nom)),
+          map(name => (name ? this._filter(name) : this.options.slice()))
+        );
+
+        // Afficher message
+        this.apiMessageType = 'success';
+        this.messageAPI = response.message || "La catégorie a été créée avec succès.";
       }
-    });
-  }
+    },
+    error: (error) => {
+      console.log("Erreur complète :", error);
+      let message = "Une erreur est survenue lors de la création de la catégorie.";
+      if (error.error && error.error.error) {
+        message = error.error.error;
+      }
+      this.apiMessageType = 'error';
+      this.messageAPI = message;
+    }
+  });
+}
+
 
   submitFormUnity(): void {
     const unityData = { nom: this.ajouteUniteForm.value.unityName };

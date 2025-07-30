@@ -155,6 +155,8 @@ export class DetailFactureProformaComponent implements OnInit {
   selectedSousMethode: string | null = null;
   whatsappNumber: string = '';
 
+   statutFactureProForma = StatutFactureProForma;
+
   isMiniLoading: boolean = false;
 
   @ViewChild('editableContent', { static: false }) editableContent!: ElementRef;

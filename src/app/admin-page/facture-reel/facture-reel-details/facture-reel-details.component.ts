@@ -826,4 +826,8 @@ onSignatureUpload(event: Event) {
   }
 }
 
+transformerLigne(ligne: string): string {
+   return ligne.replace(/-\s*/g, '<br> - <span></span>');
+}
+
 }

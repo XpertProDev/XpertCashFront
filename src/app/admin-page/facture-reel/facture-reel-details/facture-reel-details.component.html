@@ -113,10 +113,10 @@
               <th>Montant (FCFA)</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody> 
             <tr *ngFor="let ligne of f.lignesFacture">
               <td class="td_left">{{ ligne.produitNom }}</td>
-              <td class="td_left">{{ ligne.ligneDescription }}</td>
+              <td class="td_left" [innerHTML]="transformerLigne(ligne.ligneDescription || '')"></td>
               <td>{{ ligne.prixUnitaire | customNumber }}</td>
               <td>{{ ligne.quantite }}</td>
               <td>{{ ligne.montantTotal | customNumber }}</td>

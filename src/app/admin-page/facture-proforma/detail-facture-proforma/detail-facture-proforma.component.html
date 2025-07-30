@@ -159,7 +159,7 @@
                         <h2>FACTURE PRO FORMA : <span> {{ factureProForma.numeroFacture }} </span></h2>
                         <p style="text-align: right;">{{siege}}, le {{ factureProForma.dateCreation | date:'dd-MM-yyyy' }}</p>
 
-                         <div class="delet" >
+                         <div class="delet" *ngIf="factureProForma.statut === statutFactureProForma.BROUILLON">
                             <i class="ri-delete-bin-6-line" (click)="deleteFacture()" 
                             ></i>
                         </div>
