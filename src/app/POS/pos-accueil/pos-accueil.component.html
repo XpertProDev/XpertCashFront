@@ -36,22 +36,29 @@
             <!-- Bouton "plus" pour les commandes cachées -->
             <li *ngIf="commandes.length > 4" 
                 class="list_commande_plus" 
-                (click)="showCommandeDropdown = !showCommandeDropdown"
-                clickOutside 
-                (clickOutside)="showCommandeDropdown = false">
+                (click)="showCommandePopup = true">
               <i class="ri-arrow-down-s-line"></i>
-              
-              <!-- Menu déroulant des commandes cachées -->
-              <div class="commande-dropdown" *ngIf="showCommandeDropdown">
-                <div *ngFor="let cmd of hiddenCommandes" 
-                    class="dropdown-item"
-                    [class.active]="activeCommande === cmd"
-                    (click)="setActiveCommande(cmd)">
-                  {{ cmd }}
-                </div>
-              </div>
             </li>
           </ul>
+
+          <!-- Popup au centre de l'écran -->
+          <div *ngIf="showCommandePopup" class="commande-popup-overlay" (click)="showCommandePopup = false">
+            <div class="commande-popup-content" (click)="$event.stopPropagation()">
+              <div class="popup-header">
+                <h3>Liste des commandes</h3>
+                <i class="ri-close-line" (click)="showCommandePopup = false"></i>
+              </div>
+              <div class="popup-commandes">
+                <ul class="list_commande commandes-grid">
+                  <li *ngFor="let cmd of commandes" 
+                      [class.active]="activeCommande === cmd"
+                      (click)="setActiveCommande(cmd)">
+                    {{ cmd }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- // COTE RIGHT  -->

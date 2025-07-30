@@ -24,7 +24,7 @@ export class PosAccueilComponent {
 
   commandes: string[] = ['001']; // Liste initiale
   activeCommande: string = '001'; // Commande active
-  showCommandeDropdown = false;
+  // showCommandeDropdown = false;
   showCommandePopup = false;
 
   constructor(
