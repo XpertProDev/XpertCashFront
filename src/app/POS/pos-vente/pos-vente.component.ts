@@ -119,9 +119,10 @@ export class PosVenteComponent {
   // Méthode pour ajouter un produit au panier
   addToCart(produit: ProduitDetailsResponseDTO) {
     const currentQty = this.selectedQuantities.get(produit.id) || 0;
+    const availableStock = this.getAvailableStock(produit);
     
-    // Vérifiez que la quantité ne dépasse pas le stock
-    if (currentQty < produit.quantite) {
+    // Vérifiez qu'il reste du stock disponible
+    if (availableStock > 0) {
       this.selectedQuantities.set(produit.id, currentQty + 1);
     } else {
       console.log('Stock insuffisant');
@@ -131,15 +132,10 @@ export class PosVenteComponent {
 
   // Méthode pour diminuer la quantité
   decreaseQuantity(produit: ProduitDetailsResponseDTO) {
-    console.log('Decreasing quantity for product:', produit.id);
-    
     const currentQty = this.selectedQuantities.get(produit.id) || 0;
     
     if (currentQty > 0) {
       this.selectedQuantities.set(produit.id, currentQty - 1);
-      console.log('New quantity:', currentQty - 1);
-    } else {
-      console.log('Quantity already at 0');
     }
   }
 
@@ -162,6 +158,11 @@ export class PosVenteComponent {
     });
     
     return items;
+  }
+
+  getAvailableStock(produit: ProduitDetailsResponseDTO): number {
+    const selectedQty = this.selectedQuantities.get(produit.id) || 0;
+    return produit.quantite - selectedQty;
   }
 
   // Méthode pour supprimer un produit du panier

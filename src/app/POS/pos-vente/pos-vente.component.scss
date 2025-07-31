@@ -166,7 +166,12 @@ ul {
   justify-content: center;
 }
 
-
+.product-card.disabled,
+.li_list.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 
 /* pastille de stock */
 .stock-badge-list {
@@ -726,4 +731,9 @@ ul.ul_list {
   .nombre {
     color: white !important;
   }
+}
+
+.keypad button.btn_keypad_active {
+  border: 1px solid #0672E4;
+  background-color: #C1E0FF;
 }

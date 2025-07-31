@@ -46,9 +46,14 @@
         <!-- on transforme cadre_produit en container de grille -->
         <div class="cadre_produit product-grid" *ngIf="isListView">
           
-          <div class="product-card" *ngFor="let produit of displayedProducts" (click)="addToCart(produit)">
+          <div class="product-card" 
+              *ngFor="let produit of displayedProducts"
+              [class.disabled]="getAvailableStock(produit) <= 0"
+              (click)="getAvailableStock(produit) > 0 ? addToCart(produit) : null">
             <!-- pastille de stock en haut à gauche -->
-            <span class="stock-badge">{{ getSelectedQuantity(produit.id) }}</span>
+            <span class="stock-badge" *ngIf="getSelectedQuantity(produit.id) > 0">
+              {{ getSelectedQuantity(produit.id) }}
+            </span>
 
             <!-- image produit -->
             <img [src]="getProductImage(produit.photo)" alt="" class="product-img">
@@ -59,7 +64,7 @@
             <!-- zone texte -->
             <div class="card-body">
               <p class="product-name">{{ produit.nom }}</p>
-              <p class="product-stock">Stocks : {{ produit.quantite }}</p>
+              <p class="product-stock">Stocks : {{ getAvailableStock(produit) }}</p>
             </div>
 
             <div class="bottom_price_sub">
@@ -81,7 +86,10 @@
         <!-- Mode Liste -->
         <div class="cadre_produit_list product-list" *ngIf="!isListView">
           <ul class="ul_list">
-            <li class="li_list" *ngFor="let produit of displayedProducts" (click)="addToCart(produit)">
+            <li class="li_list" 
+              *ngFor="let produit of displayedProducts"
+              [class.disabled]="getAvailableStock(produit) <= 0"
+              (click)="getAvailableStock(produit) > 0 ? addToCart(produit) : null">
               <div class="list_left">
                 <div class="double">
                   <div class="img_product_list">
@@ -89,7 +97,7 @@
                   </div>
                   <div class="name_stock_list">
                     <p class="product-name-list">{{ produit.nom }}</p>
-                    <p class="product-stock-list">Stocks : {{ produit.quantite }}</p>
+                    <p class="product-stock-list">Stocks : {{ getAvailableStock(produit) }}</p>
                   </div>
                 </div>
               </div>
@@ -100,7 +108,9 @@
                     <p>{{ produit.prixVente | currency:'CFA ':'symbol':'1.0-0' }}</p>
                   </div>
                   <div class="btn_badge">
-                    <span class="stock-badge-list">{{ getSelectedQuantity(produit.id) }}</span>
+                    <span class="stock-badge-list" *ngIf="getSelectedQuantity(produit.id) > 0">
+                      {{ getSelectedQuantity(produit.id) }}
+                    </span>
                   </div>
                   <button class="btn-decrement" (click)="decreaseQuantity(produit); $event.stopPropagation()">
                     <i class="ri-subtract-line"></i>
@@ -168,9 +178,9 @@
 
     <!-- 3. Clavier numérique + actions -->
     <div class="keypad">
-      <button>1</button><button>2</button><button>3</button><button>Qté</button>
-      <button>4</button><button>5</button><button>6</button><button>%</button>
-      <button>7</button><button>8</button><button>9</button><button>Prix</button>
+      <button>1</button><button>2</button><button>3</button><button class="btn_keypad_action btn_keypad_active">Qté</button>
+      <button>4</button><button>5</button><button>6</button><button class="btn_keypad_action">%</button>
+      <button>7</button><button>8</button><button>9</button><button class="btn_keypad_action">Prix</button>
       <button>+/-</button><button>0</button><button>,</button><button class="backspace"><i class="ri-delete-back-2-line"></i></button>
     </div>
 
