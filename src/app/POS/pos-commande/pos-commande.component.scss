@@ -1,5 +1,5 @@
-@import '../pos-vente/pos-vente.component.scss';
-
+// @import '../pos-vente/pos-vente.component.scss';
+@use '../pos-vente/pos-vente.component.scss' as *;
 
 p {
     margin: 0;
