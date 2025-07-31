@@ -5,8 +5,9 @@ import { Router, RouterModule } from '@angular/router';
 import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.directive';
 import { environment } from 'src/environments/environment';
 import { ViewStateService } from './view-state.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { CommandeStateService } from 'src/app/admin-page/SERVICES/commande-state.service';
 
 @Component({
   selector: 'app-pos-accueil',
@@ -32,20 +33,34 @@ export class PosAccueilComponent {
   activeCommande: string = '001'; // Commande active
   // showCommandeDropdown = false;
   showCommandePopup = false;
+  private commandeSubscription: Subscription;
 
   constructor(
     private router: Router,
     private viewState: ViewStateService,
     private userService: UsersService,
     
+    private commandeState: CommandeStateService
   ) {
     this.isListView$ = this.viewState.isListView$;
+    this.commandes = this.commandeState.getAllCommandesIds();
+    
+    this.commandeSubscription = this.commandeState.activeCommandeId$.subscribe(id => {
+      this.activeCommande = id;
+    });
   }
 
   ngOnInit() {
     const currentRoute = this.router.url;
     this.activeButton = currentRoute.includes('/commandes') ? 'commande' : 'vente';
     this.getUserInfo();
+  }
+
+  ngOnDestroy() {
+    // Nettoyer la souscription
+    if (this.commandeSubscription) {
+      this.commandeSubscription.unsubscribe();
+    }
   }
 
   toggleView(viewType: 'grid' | 'list') {
@@ -67,17 +82,28 @@ export class PosAccueilComponent {
     this.showMenuDropdown = !this.showMenuDropdown;
   }
 
+  // addCommande() {
+  //   // Génère un nouvel ID de commande (ex: 005, 006...)
+  //   const newId = (this.commandes.length + 1).toString().padStart(3, '0');
+  //   this.commandes.push(newId);
+  //   this.activeCommande = newId;
+  //   this.showCommandePopup = false;
+  // }
+
+  // setActiveCommande(commande: string) {
+  //   this.activeCommande = commande;
+  //   this.showCommandePopup = false;
+  // }
+
   addCommande() {
-    // Génère un nouvel ID de commande (ex: 005, 006...)
-    const newId = (this.commandes.length + 1).toString().padStart(3, '0');
+    const newId = this.commandeState.addNewCommande();
     this.commandes.push(newId);
-    this.activeCommande = newId;
-    this.showCommandePopup = false;
+    this.setActiveCommande(newId);
   }
 
-  setActiveCommande(commande: string) {
-    this.activeCommande = commande;
-    this.showCommandePopup = false;
+  setActiveCommande(cmd: string) {
+    this.commandeState.setActiveCommande(cmd);
+    this.activeCommande = cmd;
   }
 
   get visibleCommandes() {

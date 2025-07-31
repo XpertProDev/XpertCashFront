@@ -26,14 +26,12 @@
           </div>
           <!-- // List des commande en onglet  -->
           <ul class="list_commande">
-            <!-- Affiche les 4 dernières commandes -->
-            <li *ngFor="let cmd of visibleCommandes" 
+            <li *ngFor="let cmd of commandes" 
                 [class.list_commande_active]="activeCommande === cmd"
                 (click)="setActiveCommande(cmd)">
               {{ cmd }}
             </li>
             
-            <!-- Bouton "plus" pour les commandes cachées -->
             <li *ngIf="commandes.length > 4" 
                 class="list_commande_plus" 
                 (click)="showCommandePopup = true">
