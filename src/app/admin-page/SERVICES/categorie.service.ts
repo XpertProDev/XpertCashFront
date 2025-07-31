@@ -17,28 +17,46 @@ export class CategorieService {
   constructor(private http: HttpClient, private usersService: UsersService) {}
 
   getCategories(): Observable<Categorie[]> {
-  return this.usersService.getValidAccessToken().pipe(
-    switchMap(token => {
-      if (!token) {
-        console.error('⚠️ Token vide ou non défini ! Vérifiez que l\'utilisateur est bien connecté.');
-        return new Observable<Categorie[]>(); // Observable vide
-      }
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) {
+          console.error('⚠️ Token vide ou non défini ! Vérifiez que l\'utilisateur est bien connecté.');
+          return new Observable<Categorie[]>(); // Observable vide
+        }
 
-      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-      console.log("🔹 En-têtes envoyés :", headers);
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+        console.log("🔹 En-têtes envoyés :", headers);
 
-      return this.http.get<Categorie[]>(`${this.apiUrl}/allCategory`, { headers }).pipe(
-        tap((data) => {
-          this.categoriesSubject.next(data);  // Émettre les nouvelles catégories
-        })
-      );
-    }),
-    catchError(error => {
-      console.error('Erreur lors de la récupération des catégories:', error);
-      return throwError(() => error);
-    })
-  );
-}
+        return this.http.get<Categorie[]>(`${this.apiUrl}/allCategory`, { headers }).pipe(
+          tap((data) => {
+            this.categoriesSubject.next(data);  // Émettre les nouvelles catégories
+          })
+        );
+      }),
+      catchError(error => {
+        console.error('Erreur lors de la récupération des catégories:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // SERVICES/categorie.service.ts
+// getCategories(): Observable<Categorie[]> {
+//   return this.usersService.getValidAccessToken().pipe(
+//     switchMap(token => {
+//       const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+//       return this.http.get<Categorie[]>(`${this.apiUrl}/allCategory`, { headers }).pipe(
+//         tap((data) => {
+//           this.categoriesSubject.next(data);
+//         })
+//       );
+//     }),
+//     catchError(error => {
+//       console.error('Erreur lors de la récupération des catégories:', error);
+//       return throwError(() => error);
+//     })
+//   );
+// }
 
 
   // Ajouter une catégorie

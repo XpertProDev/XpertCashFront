@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { ViewStateService } from '../pos-accueil/view-state.service';
 import { Categorie } from 'src/app/admin-page/MODELS/categorie.model';
 import { CategorieService } from 'src/app/admin-page/SERVICES/categorie.service';
+import { ProduitDetailsResponseDTO } from 'src/app/admin-page/MODELS/produit-category.model';
 
 @Component({
   selector: 'app-pos-vente',
@@ -19,6 +20,7 @@ export class PosVenteComponent {
   showPaymentPopup = false;
   categories: Categorie[] = [];
   selectedCategoryId: number | null = null;
+  displayedProducts: ProduitDetailsResponseDTO[] = [];
 
   constructor(
     private router: Router,
@@ -42,11 +44,31 @@ export class PosVenteComponent {
     }
   }
 
+  // loadCategories() {
+  //   this.categorieService.getCategories().subscribe({
+  //     next: (categories) => {
+  //       this.categories = categories;
+  //       console.log('Catégories chargées:', this.categories);
+  //     },
+  //     error: (error) => {
+  //       console.error('Erreur lors du chargement des catégories', error);
+  //     }
+  //   });
+  // }
+
   loadCategories() {
     this.categorieService.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
         console.log('Catégories chargées:', this.categories);
+        
+        // Afficher tous les produits au démarrage
+        this.displayedProducts = [];
+        this.categories.forEach(categorie => {
+          if (categorie.produits) {
+            this.displayedProducts = [...this.displayedProducts, ...categorie.produits];
+          }
+        });
       },
       error: (error) => {
         console.error('Erreur lors du chargement des catégories', error);
@@ -54,9 +76,46 @@ export class PosVenteComponent {
     });
   }
 
-  selectCategory(categoryId: number) {
-    this.selectedCategoryId = categoryId;
-    // Implémentez ici le filtrage des produits
+  showAllProducts() {
+    this.selectedCategoryId = null;
+    this.displayedProducts = [];
+    this.categories.forEach(categorie => {
+      if (categorie.produits) {
+        this.displayedProducts = [...this.displayedProducts, ...categorie.produits];
+      }
+    });
+  }
+
+  selectCategory(categoryId: number | undefined) {
+  if (categoryId === undefined) return;
+  
+  this.selectedCategoryId = categoryId;
+  
+  const selectedCategory = this.categories.find(c => c.id === categoryId);
+  
+  if (selectedCategory && selectedCategory.produits) {
+    this.displayedProducts = selectedCategory.produits;
+  } else {
+    this.displayedProducts = [];
+  }
+}
+
+  getProductImage(photoPath: string): string {
+    if (!photoPath || photoPath === '') {
+      return 'assets/img/default-product.png';
+    }
+    
+    // Si le chemin est absolu
+    if (photoPath.startsWith('http')) {
+      return photoPath;
+    }
+    
+    // Si le chemin commence par /uploads
+    if (photoPath.startsWith('/uploads')) {
+      return environment.imgUrl.replace('/api', '') + photoPath;
+    }
+    
+    return photoPath;
   }
 
   openPaymentPopup() {
