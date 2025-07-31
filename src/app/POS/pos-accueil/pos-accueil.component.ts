@@ -6,6 +6,7 @@ import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.d
 import { environment } from 'src/environments/environment';
 import { ViewStateService } from './view-state.service';
 import { Observable } from 'rxjs';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 
 @Component({
   selector: 'app-pos-accueil',
@@ -22,6 +23,11 @@ export class PosAccueilComponent {
   activeButton: 'vente' | 'commande' = 'vente';
   showMenuDropdown = false;
 
+   userName: string = '';
+  nomEntreprise = '';
+  photo: string | null = null;
+  photoUrl: string | null = null;
+
   commandes: string[] = ['001']; // Liste initiale
   activeCommande: string = '001'; // Commande active
   // showCommandeDropdown = false;
@@ -29,7 +35,9 @@ export class PosAccueilComponent {
 
   constructor(
     private router: Router,
-    private viewState: ViewStateService
+    private viewState: ViewStateService,
+    private userService: UsersService,
+    
   ) {
     this.isListView$ = this.viewState.isListView$;
   }
@@ -37,6 +45,7 @@ export class PosAccueilComponent {
   ngOnInit() {
     const currentRoute = this.router.url;
     this.activeButton = currentRoute.includes('/commandes') ? 'commande' : 'vente';
+    this.getUserInfo();
   }
 
   toggleView(viewType: 'grid' | 'list') {
@@ -83,6 +92,17 @@ export class PosAccueilComponent {
       : [];
   }
   
-  
+getUserInfo(): void {
+  this.userService.getUserInfo().subscribe({
+    next: (user) => {
+     this.userName = user.nomComplet.charAt(0).toUpperCase();
+      this.nomEntreprise = user.nomEntreprise;
+    },
+    error: (err) => {
+      console.error("Erreur lors de la récupération des infos utilisateur :", err);
+    }
+  });
+}
+
 
 }

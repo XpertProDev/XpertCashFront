@@ -129,53 +129,77 @@ export class ConnexionPageComponent {
     this.showPopup = false;
   }
 
-  submitForm(): void {
-    if (this.loginForm.invalid) {
-      this.errorMessage = "Veuillez vérifier les informations saisies.";
-      return;
-    }
-  
-    this.isLoading = true;
-    const credentials = this.loginForm.value;
-  
-    setTimeout(() => { 
-      this.usersService.connexionUser(credentials).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-
-          if (response.accessToken && response.refreshToken) {
-            console.log("Access Token :", response.accessToken);
-            console.log("Refresh Token :", response.refreshToken);
-
-            this.authService.saveTokens(response.accessToken, response.refreshToken);
-            console.log("On va tenter la navigation vers /analytics");
-          this.router.navigate(['/analytics']).then(success => {
-            console.log("Navigation réussie ?", success);
-          });
-                      this.router.navigate(['/analytics']);
-          } else {
-            this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
-            this.openPopup("Erreur de connexion", this.errorMessage, 'error');
-          }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          console.log("Erreur complète :", error);
-          console.log("Réponse API :", error.error);
-  
-          let message = "Une erreur est survenue lors de la connexion.";
-          if (error.status === 400 || error.status === 401) {
-            if (typeof error.error === "string") {
-              message = error.error;
-            } else if (error.error?.error) {
-              message = error.error.error;
-            }
-          }
-          this.openPopup("❌ Oups, une erreur !", message, "error");
-        }
-      });
-    }, 1000);
+submitForm(): void {
+  if (this.loginForm.invalid) {
+    this.errorMessage = "Veuillez vérifier les informations saisies.";
+    return;
   }
+
+  this.isLoading = true;
+  const credentials = this.loginForm.value;
+
+  setTimeout(() => { 
+    this.usersService.connexionUser(credentials).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+
+        if (response.accessToken && response.refreshToken) {
+          console.log("Access Token :", response.accessToken);
+          console.log("Refresh Token :", response.refreshToken);
+
+          // Sauvegarde des tokens
+          this.authService.saveTokens(response.accessToken, response.refreshToken);
+
+          // Requête pour récupérer les infos utilisateur
+          this.usersService.getUserInfo().subscribe({
+            next: (userInfo) => {
+              // Accède directement à roleType ici
+              const userRole = userInfo.roleType; // Utilise 'roleType' pour obtenir le rôle
+
+              console.log('Rôle utilisateur:', userRole);
+
+              if (userRole === 'VENDEUR') {
+                // Rediriger vers 'pos-accueil' si rôle est 'VENDEUR'
+                this.router.navigate(['/pos-accueil']).then(success => {
+                  console.log("Navigation réussie vers pos-accueil ?", success);
+                });
+              } else {
+                // Rediriger vers une autre page si rôle différent
+                this.router.navigate(['/analytics']).then(success => {
+                  console.log("Navigation réussie vers analytics ?", success);
+                });
+              }
+            },
+            error: (err) => {
+              console.error("Erreur lors de la récupération des infos utilisateur :", err);
+              this.openPopup("Erreur", "Impossible de récupérer les informations utilisateur.", 'error');
+            }
+          });
+        } else {
+          this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
+          this.openPopup("Erreur de connexion", this.errorMessage, 'error');
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.log("Erreur complète :", error);
+        console.log("Réponse API :", error.error);
+
+        let message = "Une erreur est survenue lors de la connexion.";
+        if (error.status === 400 || error.status === 401) {
+          if (typeof error.error === "string") {
+            message = error.error;
+          } else if (error.error?.error) {
+            message = error.error.error;
+          }
+        }
+        this.openPopup("❌ Oups, une erreur !", message, "error");
+      }
+    });
+  }, 1000);
+}
+
+
   
   get f() { return this.loginForm.controls; }
 
