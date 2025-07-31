@@ -37,7 +37,9 @@ export class PosVenteComponent {
     });
 
     // Récupérez les catégories
-    this.loadCategories();
+    if (!this.categories.length) {
+        this.loadCategories();
+    }
   }
 
   loadCategories() {
