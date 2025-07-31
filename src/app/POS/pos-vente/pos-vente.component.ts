@@ -21,8 +21,13 @@ export class PosVenteComponent {
   categories: Categorie[] = [];
   selectedCategoryId: number | null = null;
   displayedProducts: ProduitDetailsResponseDTO[] = [];
-  // Ajoutez cette propriété pour suivre les quantités sélectionnées
-  selectedQuantities: Map<number, number> = new Map();
+  
+  // Déclaration des nouvelles propriétés
+  currentQuantityInput: string = '';
+  selectedProduct: ProduitDetailsResponseDTO | null = null;
+  quantityMode: boolean = true;
+  selectedQuantities: Map<number, number> = new Map(); // Ajout de cette ligne
+  showStockWarning = false;
 
   constructor(
     private router: Router,
@@ -31,16 +36,13 @@ export class PosVenteComponent {
   ) {}
 
   ngOnInit() {
-    // Récupérer l'état initial
     const savedView = localStorage.getItem('viewPreference');
     this.isListView = savedView ? savedView === 'list' : true;
     
-    // S'abonner aux changements
     this.viewState.isListView$.subscribe(view => {
       this.isListView = view;
     });
 
-    // Récupérez les catégories
     if (!this.categories.length) {
         this.loadCategories();
     }
@@ -50,9 +52,6 @@ export class PosVenteComponent {
     this.categorieService.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
-        console.log('Catégories chargées:', this.categories);
-        
-        // Afficher tous les produits au démarrage
         this.displayedProducts = [];
         this.categories.forEach(categorie => {
           if (categorie.produits) {
@@ -77,30 +76,27 @@ export class PosVenteComponent {
   }
 
   selectCategory(categoryId: number | undefined) {
-  if (categoryId === undefined) return;
-  
-  this.selectedCategoryId = categoryId;
-  
-  const selectedCategory = this.categories.find(c => c.id === categoryId);
-  
-  if (selectedCategory && selectedCategory.produits) {
-    this.displayedProducts = selectedCategory.produits;
-  } else {
-    this.displayedProducts = [];
+    if (categoryId === undefined) return;
+    
+    this.selectedCategoryId = categoryId;
+    const selectedCategory = this.categories.find(c => c.id === categoryId);
+    
+    if (selectedCategory && selectedCategory.produits) {
+      this.displayedProducts = selectedCategory.produits;
+    } else {
+      this.displayedProducts = [];
+    }
   }
-}
 
   getProductImage(photoPath: string): string {
     if (!photoPath || photoPath === '') {
       return 'assets/img/default-product.png';
     }
     
-    // Si le chemin est absolu
     if (photoPath.startsWith('http')) {
       return photoPath;
     }
     
-    // Si le chemin commence par /uploads
     if (photoPath.startsWith('/uploads')) {
       return environment.imgUrl.replace('/api', '') + photoPath;
     }
@@ -117,16 +113,14 @@ export class PosVenteComponent {
   }
 
   // Méthode pour ajouter un produit au panier
-  addToCart(produit: ProduitDetailsResponseDTO) {
-    const currentQty = this.selectedQuantities.get(produit.id) || 0;
-    const availableStock = this.getAvailableStock(produit);
+  addToCart(produit: ProduitDetailsResponseDTO): void {
+    this.selectProduct(produit);
     
-    // Vérifiez qu'il reste du stock disponible
-    if (availableStock > 0) {
-      this.selectedQuantities.set(produit.id, currentQty + 1);
+    if (this.currentQuantityInput) {
+      this.applyQuantityToProduct();
     } else {
-      console.log('Stock insuffisant');
-      // Vous pouvez ajouter une notification ici
+      const currentQty = this.getSelectedQuantity(produit.id);
+      this.selectedQuantities.set(produit.id, currentQty + 1);
     }
   }
 
@@ -160,9 +154,14 @@ export class PosVenteComponent {
     return items;
   }
 
+  // getAvailableStock(produit: ProduitDetailsResponseDTO): number {
+  //   const selectedQty = this.selectedQuantities.get(produit.id) || 0;
+  //   return produit.quantite - selectedQty;
+  // }
+
   getAvailableStock(produit: ProduitDetailsResponseDTO): number {
-    const selectedQty = this.selectedQuantities.get(produit.id) || 0;
-    return produit.quantite - selectedQty;
+    // Stock total initial (non affecté par les sélections)
+    return produit.quantite;
   }
 
   // Méthode pour supprimer un produit du panier
@@ -182,4 +181,72 @@ export class PosVenteComponent {
     return total;
   }
 
+  // Méthode pour gérer les touches du clavier
+  handleKeyPress(key: string): void {
+    if (!this.selectedProduct || !this.quantityMode) return;
+
+    switch (key) {
+      case 'backspace':
+        this.currentQuantityInput = this.currentQuantityInput.slice(0, -1);
+        break;
+      case '+/-':
+        // Inversion du signe (optionnel)
+        break;
+      default:
+        // Augmentez la limite à 5 chiffres
+        if (this.currentQuantityInput.length < 5) {
+          this.currentQuantityInput += key;
+        }
+    }
+
+    this.applyQuantityToProduct();
+  }
+
+  // Appliquer la quantité au produit sélectionné
+  // applyQuantityToProduct(): void {
+  //   if (!this.selectedProduct || this.currentQuantityInput === '') return;
+
+  //   const quantity = parseInt(this.currentQuantityInput, 10);
+  //   if (isNaN(quantity)) return; // Correction de la syntaxe ici
+
+  //   const availableStock = this.getAvailableStock(this.selectedProduct);
+    
+  //   if (quantity > 0 && quantity <= availableStock) {
+  //     this.selectedQuantities.set(this.selectedProduct.id, quantity);
+  //   }
+  // }
+
+applyQuantityToProduct(): void {
+  if (!this.selectedProduct || this.currentQuantityInput === '') return;
+
+  const quantity = parseInt(this.currentQuantityInput, 10);
+  if (isNaN(quantity)) return;
+
+  // Vérifier le stock disponible
+  const availableStock = this.selectedProduct.quantite; // Stock total initial
+  
+  if (quantity > 0 && quantity <= availableStock) {
+    this.selectedQuantities.set(this.selectedProduct.id, quantity);
+  } else {
+    this.selectedQuantities.set(this.selectedProduct.id, availableStock);
+    this.currentQuantityInput = availableStock.toString();
+    
+    this.showStockWarning = true;
+    setTimeout(() => this.showStockWarning = false, 3000);
+    // Vous pouvez ajouter une notification à l'utilisateur ici
+  }
+}
+
+  // Sélectionner un produit et initialiser la quantité
+  selectProduct(produit: ProduitDetailsResponseDTO): void {
+    if (this.getAvailableStock(produit) <= 0) return;
+
+    this.selectedProduct = produit;
+    const currentQty = this.getSelectedQuantity(produit.id);
+    this.currentQuantityInput = currentQty > 0 ? currentQty.toString() : '';
+  }
+
+  // Suppression des méthodes inutilisées
+  // remove: applyQuantity(), addToCartWithQuantity(), handleProductClick()
+  // et resetQuantityInput() car elles ne sont pas utilisées dans le flux principal
 }

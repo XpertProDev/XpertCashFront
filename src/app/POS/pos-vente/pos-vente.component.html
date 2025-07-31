@@ -176,12 +176,33 @@
       </div>
     </div>
 
+    <div class="quantity-input-display" *ngIf="selectedProduct">
+  Produit: {{ selectedProduct.nom }} - Qté: {{ currentQuantityInput || '0' }}
+</div>
+
     <!-- 3. Clavier numérique + actions -->
     <div class="keypad">
-      <button>1</button><button>2</button><button>3</button><button class="btn_keypad_action btn_keypad_active">Qté</button>
-      <button>4</button><button>5</button><button>6</button><button class="btn_keypad_action">%</button>
-      <button>7</button><button>8</button><button>9</button><button class="btn_keypad_action">Prix</button>
-      <button>+/-</button><button>0</button><button>,</button><button class="backspace"><i class="ri-delete-back-2-line"></i></button>
+      <button (click)="handleKeyPress('1')">1</button>
+      <button (click)="handleKeyPress('2')">2</button>
+      <button (click)="handleKeyPress('3')">3</button>
+      <button class="btn_keypad_action btn_keypad_active">Qté</button>
+      
+      <button (click)="handleKeyPress('4')">4</button>
+      <button (click)="handleKeyPress('5')">5</button>
+      <button (click)="handleKeyPress('6')">6</button>
+      <button class="btn_keypad_action">%</button>
+      
+      <button (click)="handleKeyPress('7')">7</button>
+      <button (click)="handleKeyPress('8')">8</button>
+      <button (click)="handleKeyPress('9')">9</button>
+      <button class="btn_keypad_action">Prix</button>
+      
+      <button (click)="handleKeyPress('+/-')">+/-</button>
+      <button (click)="handleKeyPress('0')">0</button>
+      <button (click)="handleKeyPress(',')">,</button>
+      <button class="backspace" (click)="handleKeyPress('backspace')">
+        <i class="ri-delete-back-2-line"></i>
+      </button>
     </div>
 
     <!-- 4. Bouton de paiement -->
