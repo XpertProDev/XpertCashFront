@@ -176,9 +176,22 @@
       </div>
     </div>
 
-    <div class="quantity-input-display" *ngIf="selectedProduct">
-  Produit: {{ selectedProduct.nom }} - Qté: {{ currentQuantityInput || '0' }}
-</div>
+    <!-- <div class="quantity-input-display" *ngIf="selectedProduct">
+      Produit: {{ selectedProduct.nom }} - Qté: {{ currentQuantityInput || '0' }}
+    </div> -->
+
+    <!-- Client et facture -->
+    <div class="client_facture" style="padding-top: 5px;">
+      <div class="double_client_facture">
+        <div class="paiement_btn btn_client">
+          <p>Client</p>
+        </div>
+        <div class="paiement_btn btn_facture">
+          <p>Facture</p>
+          <input type="checkbox">
+        </div>
+      </div>
+    </div>
 
     <!-- 3. Clavier numérique + actions -->
     <div class="keypad">

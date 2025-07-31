@@ -114,26 +114,17 @@ export class PosVenteComponent {
 
   // Méthode pour ajouter un produit au panier
   addToCart(produit: ProduitDetailsResponseDTO): void {
-    // Vérifier le stock
     if (this.getAvailableStock(produit) <= 0) return;
-
-    // Si c'est un nouveau produit sélectionné
-    if (!this.selectedProduct || this.selectedProduct.id !== produit.id) {
-      this.selectProduct(produit);
-      const currentQty = this.getSelectedQuantity(produit.id);
-      this.selectedQuantities.set(produit.id, currentQty + 1);
-      this.currentQuantityInput = ''; // Réinitialiser la saisie
-    }
-    // Si c'est le même produit
-    else {
-      if (this.currentQuantityInput) {
-        this.applyQuantityToProduct();
-        this.currentQuantityInput = ''; // Réinitialiser après application
-      } else {
-        const currentQty = this.getSelectedQuantity(produit.id);
-        this.selectedQuantities.set(produit.id, currentQty + 1);
-      }
-    }
+    
+    // Réinitialiser toujours la saisie lors d'un nouveau clic
+    this.currentQuantityInput = '';
+    
+    // Toujours incrémenter de 1
+    const currentQty = this.getSelectedQuantity(produit.id);
+    this.selectedQuantities.set(produit.id, currentQty + 1);
+    
+    // Mettre à jour le produit sélectionné
+    this.selectedProduct = produit;
   }
 
   // Méthode pour diminuer la quantité
@@ -239,10 +230,5 @@ applyQuantityToProduct(): void {
   }
 }
 
-  // Sélectionner un produit et initialiser la quantité
-  selectProduct(produit: ProduitDetailsResponseDTO): void {
-  if (this.getAvailableStock(produit) <= 0) return;
-  this.selectedProduct = produit;
-}
 
 }
