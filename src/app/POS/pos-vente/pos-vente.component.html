@@ -46,9 +46,14 @@
         <!-- on transforme cadre_produit en container de grille -->
         <div class="cadre_produit product-grid" *ngIf="isListView">
           
-          <div class="product-card" *ngFor="let produit of displayedProducts">
+          <div class="product-card" 
+              *ngFor="let produit of displayedProducts"
+              [class.disabled]="getAvailableStock(produit) <= 0"
+              (click)="getAvailableStock(produit) > 0 ? addToCart(produit) : null">
             <!-- pastille de stock en haut à gauche -->
-            <span class="stock-badge">00</span>
+            <span class="stock-badge" *ngIf="getSelectedQuantity(produit.id) > 0">
+              {{ getSelectedQuantity(produit.id) }}
+            </span>
 
             <!-- image produit -->
             <img [src]="getProductImage(produit.photo)" alt="" class="product-img">
@@ -59,14 +64,14 @@
             <!-- zone texte -->
             <div class="card-body">
               <p class="product-name">{{ produit.nom }}</p>
-              <p class="product-stock">Stocks : {{ produit.quantite }}</p>
+              <p class="product-stock">Stocks : {{ getAvailableStock(produit) }}</p>
             </div>
 
             <div class="bottom_price_sub">
               <div class="product-price">
                 <p>{{ produit.prixVente | currency:'CFA ':'symbol':'1.0-0' }}</p>
               </div>
-              <button class="btn-decrement">
+              <button class="btn-decrement" (click)="decreaseQuantity(produit); $event.stopPropagation()">
                 <i class="ri-subtract-line"></i>
               </button>
             </div>
@@ -81,7 +86,10 @@
         <!-- Mode Liste -->
         <div class="cadre_produit_list product-list" *ngIf="!isListView">
           <ul class="ul_list">
-            <li class="li_list" *ngFor="let produit of displayedProducts">
+            <li class="li_list" 
+              *ngFor="let produit of displayedProducts"
+              [class.disabled]="getAvailableStock(produit) <= 0"
+              (click)="getAvailableStock(produit) > 0 ? addToCart(produit) : null">
               <div class="list_left">
                 <div class="double">
                   <div class="img_product_list">
@@ -89,20 +97,22 @@
                   </div>
                   <div class="name_stock_list">
                     <p class="product-name-list">{{ produit.nom }}</p>
-                    <p class="product-stock-list">Stocks : {{ produit.quantite }}</p>
+                    <p class="product-stock-list">Stocks : {{ getAvailableStock(produit) }}</p>
                   </div>
                 </div>
               </div>
               
               <div class="list_right">
-                <div class="double">
+                <div class="double" style="gap: 15px;">
                   <div class="product-price">
                     <p>{{ produit.prixVente | currency:'CFA ':'symbol':'1.0-0' }}</p>
                   </div>
                   <div class="btn_badge">
-                    <span class="stock-badge-list">{{ produit.quantite }}</span>
+                    <span class="stock-badge-list" *ngIf="getSelectedQuantity(produit.id) > 0">
+                      {{ getSelectedQuantity(produit.id) }}
+                    </span>
                   </div>
-                  <button class="btn-decrement">
+                  <button class="btn-decrement" (click)="decreaseQuantity(produit); $event.stopPropagation()">
                     <i class="ri-subtract-line"></i>
                   </button>
                   <div class="btn_fovory">
@@ -125,68 +135,24 @@
     <div class="list_produit_select">
       <!-- // Tout les liste de produc select  -->
       <ul class="ul_list_produit_select">
-        <li class="li_list_produit_select">
+        <li class="li_list_produit_select" 
+            *ngFor="let item of getCartItems()">
           <div class="double">
-            <!-- // nombre select  -->
             <div class="nombre_select">
-              10
+              {{ item.quantity }}
             </div>
-            <!-- // name produit select  -->
             <div class="name_produit_select">
-              <p style="margin: 0;">Ordinateur <span>(20 000 CFA)</span></p>
+              <p style="margin: 0;">
+                {{ item.product.nom }}
+                <span>({{ item.product.prixVente | currency:'CFA ':'symbol':'1.0-0' }})</span>
+              </p>
             </div>
           </div>
           <div class="double">
-            <!-- // nombre select  -->
             <div class="price_produit">
-              200 000 CFA
+              {{ (item.quantity * item.product.prixVente) | currency:'CFA ':'symbol':'1.0-0' }}
             </div>
-            <!-- // name produit select  -->
-            <div class="icon_close_select">
-              <i class="ri-close-circle-fill"></i>
-            </div>
-          </div>
-        </li>
-        <li class="li_list_produit_select">
-          <div class="double">
-            <!-- // nombre select  -->
-            <div class="nombre_select">
-              10
-            </div>
-            <!-- // name produit select  -->
-            <div class="name_produit_select">
-              <p style="margin: 0;">Ordinateur <span>(20 000 CFA)</span></p>
-            </div>
-          </div>
-          <div class="double">
-            <!-- // nombre select  -->
-            <div class="price_produit">
-              200 000 CFA
-            </div>
-            <!-- // name produit select  -->
-            <div class="icon_close_select">
-              <i class="ri-close-circle-fill"></i>
-            </div>
-          </div>
-        </li>
-        <li class="li_list_produit_select">
-          <div class="double">
-            <!-- // nombre select  -->
-            <div class="nombre_select">
-              10
-            </div>
-            <!-- // name produit select  -->
-            <div class="name_produit_select">
-              <p style="margin: 0;">Ordinateur <span>(20 000 CFA)</span></p>
-            </div>
-          </div>
-          <div class="double">
-            <!-- // nombre select  -->
-            <div class="price_produit">
-              200 000 CFA
-            </div>
-            <!-- // name produit select  -->
-            <div class="icon_close_select">
+            <div class="icon_close_select" (click)="removeProduct(item.product.id)">
               <i class="ri-close-circle-fill"></i>
             </div>
           </div>
@@ -206,16 +172,50 @@
       </div>
       <div class="double_row total">
         <strong>Total</strong>
-        <strong>00 CFA</strong>
+        <strong>{{ getTotalCart() | currency:'CFA ':'symbol':'1.0-0' }}</strong>
+      </div>
+    </div>
+
+    <!-- <div class="quantity-input-display" *ngIf="selectedProduct">
+      Produit: {{ selectedProduct.nom }} - Qté: {{ currentQuantityInput || '0' }}
+    </div> -->
+
+    <!-- Client et facture -->
+    <div class="client_facture" style="padding-top: 5px;">
+      <div class="double_client_facture">
+        <div class="paiement_btn btn_client">
+          <p>Client</p>
+        </div>
+        <div class="paiement_btn btn_facture">
+          <p>Facture</p>
+          <input type="checkbox">
+        </div>
       </div>
     </div>
 
     <!-- 3. Clavier numérique + actions -->
     <div class="keypad">
-      <button>1</button><button>2</button><button>3</button><button>Qté</button>
-      <button>4</button><button>5</button><button>6</button><button>%</button>
-      <button>7</button><button>8</button><button>9</button><button>Prix</button>
-      <button>+/-</button><button>0</button><button>,</button><button class="backspace"><i class="ri-delete-back-2-line"></i></button>
+      <button (click)="handleKeyPress('1')">1</button>
+      <button (click)="handleKeyPress('2')">2</button>
+      <button (click)="handleKeyPress('3')">3</button>
+      <button class="btn_keypad_action btn_keypad_active">Qté</button>
+      
+      <button (click)="handleKeyPress('4')">4</button>
+      <button (click)="handleKeyPress('5')">5</button>
+      <button (click)="handleKeyPress('6')">6</button>
+      <button class="btn_keypad_action">%</button>
+      
+      <button (click)="handleKeyPress('7')">7</button>
+      <button (click)="handleKeyPress('8')">8</button>
+      <button (click)="handleKeyPress('9')">9</button>
+      <button class="btn_keypad_action">Prix</button>
+      
+      <button (click)="handleKeyPress('+/-')">+/-</button>
+      <button (click)="handleKeyPress('0')">0</button>
+      <button (click)="handleKeyPress(',')">,</button>
+      <button class="backspace" (click)="handleKeyPress('backspace')">
+        <i class="ri-delete-back-2-line"></i>
+      </button>
     </div>
 
     <!-- 4. Bouton de paiement -->

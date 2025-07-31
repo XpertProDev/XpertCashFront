@@ -153,18 +153,29 @@ submitForm(): void {
           // Requête pour récupérer les infos utilisateur
           this.usersService.getUserInfo().subscribe({
             next: (userInfo) => {
-              // Accède directement à roleType ici
-              const userRole = userInfo.roleType; // Utilise 'roleType' pour obtenir le rôle
+              // Accès au rôle et aux permissions
+              const userRole = userInfo.roleType;
+              const userPermissions = userInfo.permissions; // Liste des permissions
 
               console.log('Rôle utilisateur:', userRole);
+              console.log('Permissions utilisateur:', userPermissions);
 
+              // Vérification si l'utilisateur est un "VENDEUR"
               if (userRole === 'VENDEUR') {
-                // Rediriger vers 'pos-accueil' si rôle est 'VENDEUR'
-                this.router.navigate(['/pos-accueil']).then(success => {
-                  console.log("Navigation réussie vers pos-accueil ?", success);
-                });
+                // Vérification s'il a plus de la permission "VENDRE_PRODUITS" en ajout
+                if (userPermissions.length > 1) {
+                  // Si l'utilisateur a d'autres permissions en plus de "VENDRE_PRODUITS"
+                  this.router.navigate(['/analytics']).then(success => {
+                    console.log("Navigation réussie vers analytics ?", success);
+                  });
+                } else {
+                  // Si l'utilisateur n'a que "VENDRE_PRODUITS" (une seule permission)
+                  this.router.navigate(['/pos-accueil']).then(success => {
+                    console.log("Navigation réussie vers pos-accueil ?", success);
+                  });
+                }
               } else {
-                // Rediriger vers une autre page si rôle différent
+                // Si l'utilisateur n'est pas un "VENDEUR"
                 this.router.navigate(['/analytics']).then(success => {
                   console.log("Navigation réussie vers analytics ?", success);
                 });
@@ -198,6 +209,8 @@ submitForm(): void {
     });
   }, 1000);
 }
+
+
 
 
   

@@ -166,7 +166,12 @@ ul {
   justify-content: center;
 }
 
-
+.product-card.disabled,
+.li_list.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 
 /* pastille de stock */
 .stock-badge-list {
@@ -245,6 +250,8 @@ ul {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  pointer-events: auto !important;
+  z-index: 10;
 }
 .btn-decrement i {
   font-size: 1.2rem;
@@ -306,7 +313,7 @@ ul {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 5px;
-  padding: 10px;
+  padding: 5px 10px;
 }
 .keypad button {
   height: 3.5rem;
@@ -724,4 +731,11 @@ ul.ul_list {
   .nombre {
     color: white !important;
   }
+}
+
+.keypad button.btn_keypad_active {
+  // border: 1px solid #0672E4;
+  // background-color: #C1E0FF;
+  border: 1px solid #2f7dd1;
+  background-color: #e0efff;
 }
