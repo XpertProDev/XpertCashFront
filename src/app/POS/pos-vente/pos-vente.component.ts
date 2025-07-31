@@ -114,22 +114,39 @@ export class PosVenteComponent {
 
   // Méthode pour ajouter un produit au panier
   addToCart(produit: ProduitDetailsResponseDTO): void {
-    this.selectProduct(produit);
-    
-    if (this.currentQuantityInput) {
-      this.applyQuantityToProduct();
-    } else {
+    // Vérifier le stock
+    if (this.getAvailableStock(produit) <= 0) return;
+
+    // Si c'est un nouveau produit sélectionné
+    if (!this.selectedProduct || this.selectedProduct.id !== produit.id) {
+      this.selectProduct(produit);
       const currentQty = this.getSelectedQuantity(produit.id);
       this.selectedQuantities.set(produit.id, currentQty + 1);
+      this.currentQuantityInput = ''; // Réinitialiser la saisie
+    }
+    // Si c'est le même produit
+    else {
+      if (this.currentQuantityInput) {
+        this.applyQuantityToProduct();
+        this.currentQuantityInput = ''; // Réinitialiser après application
+      } else {
+        const currentQty = this.getSelectedQuantity(produit.id);
+        this.selectedQuantities.set(produit.id, currentQty + 1);
+      }
     }
   }
 
   // Méthode pour diminuer la quantité
   decreaseQuantity(produit: ProduitDetailsResponseDTO) {
     const currentQty = this.selectedQuantities.get(produit.id) || 0;
-    
     if (currentQty > 0) {
-      this.selectedQuantities.set(produit.id, currentQty - 1);
+      const newQty = currentQty - 1;
+      this.selectedQuantities.set(produit.id, newQty);
+      
+      // Mise à jour du champ de saisie si produit sélectionné
+      if (this.selectedProduct?.id === produit.id) {
+        this.currentQuantityInput = newQty > 0 ? newQty.toString() : '';
+      }
     }
   }
 
@@ -154,19 +171,18 @@ export class PosVenteComponent {
     return items;
   }
 
-  // getAvailableStock(produit: ProduitDetailsResponseDTO): number {
-  //   const selectedQty = this.selectedQuantities.get(produit.id) || 0;
-  //   return produit.quantite - selectedQty;
-  // }
-
+  // Remplacer l'ancienne méthode par :
   getAvailableStock(produit: ProduitDetailsResponseDTO): number {
-    // Stock total initial (non affecté par les sélections)
-    return produit.quantite;
+    const selectedQty = this.getSelectedQuantity(produit.id);
+    return produit.quantite - selectedQty;
   }
 
   // Méthode pour supprimer un produit du panier
   removeProduct(productId: number) {
     this.selectedQuantities.delete(productId);
+    if (this.selectedProduct?.id === productId) {
+      this.currentQuantityInput = '';
+    }
   }
 
   // Méthode pour calculer le total
@@ -202,20 +218,6 @@ export class PosVenteComponent {
     this.applyQuantityToProduct();
   }
 
-  // Appliquer la quantité au produit sélectionné
-  // applyQuantityToProduct(): void {
-  //   if (!this.selectedProduct || this.currentQuantityInput === '') return;
-
-  //   const quantity = parseInt(this.currentQuantityInput, 10);
-  //   if (isNaN(quantity)) return; // Correction de la syntaxe ici
-
-  //   const availableStock = this.getAvailableStock(this.selectedProduct);
-    
-  //   if (quantity > 0 && quantity <= availableStock) {
-  //     this.selectedQuantities.set(this.selectedProduct.id, quantity);
-  //   }
-  // }
-
 applyQuantityToProduct(): void {
   if (!this.selectedProduct || this.currentQuantityInput === '') return;
 
@@ -239,14 +241,8 @@ applyQuantityToProduct(): void {
 
   // Sélectionner un produit et initialiser la quantité
   selectProduct(produit: ProduitDetailsResponseDTO): void {
-    if (this.getAvailableStock(produit) <= 0) return;
+  if (this.getAvailableStock(produit) <= 0) return;
+  this.selectedProduct = produit;
+}
 
-    this.selectedProduct = produit;
-    const currentQty = this.getSelectedQuantity(produit.id);
-    this.currentQuantityInput = currentQty > 0 ? currentQty.toString() : '';
-  }
-
-  // Suppression des méthodes inutilisées
-  // remove: applyQuantity(), addToCartWithQuantity(), handleProductClick()
-  // et resetQuantityInput() car elles ne sont pas utilisées dans le flux principal
 }
