@@ -130,7 +130,7 @@ ul {
 .product-grid {
   display: grid;
   // grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
   // padding: 1rem;
   padding: 0 10px 10px;
@@ -201,7 +201,7 @@ ul {
 .favorite-icon {
   position: absolute;
   top: 2px;
-  right: 6px;
+  right: 3px;
   font-size: 1.2rem;
   color: #0672e4;
   cursor: pointer;

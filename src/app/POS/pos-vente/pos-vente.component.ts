@@ -7,6 +7,7 @@ import { ViewStateService } from '../pos-accueil/view-state.service';
 import { Categorie } from 'src/app/admin-page/MODELS/categorie.model';
 import { CategorieService } from 'src/app/admin-page/SERVICES/categorie.service';
 import { ProduitDetailsResponseDTO } from 'src/app/admin-page/MODELS/produit-category.model';
+import { CommandeStateService } from 'src/app/admin-page/SERVICES/commande-state.service';
 
 @Component({
   selector: 'app-pos-vente',
@@ -26,18 +27,26 @@ export class PosVenteComponent {
   currentQuantityInput: string = '';
   selectedProduct: ProduitDetailsResponseDTO | null = null;
   quantityMode: boolean = true;
-  selectedQuantities: Map<number, number> = new Map(); // Ajout de cette ligne
+  // selectedQuantities: Map<number, number> = new Map(); // Ajout de cette ligne
   showStockWarning = false;
+  cart: Map<number, number> = new Map();
 
   constructor(
     private router: Router,
     private viewState: ViewStateService,
-    private categorieService: CategorieService
-  ) {}
+    private categorieService: CategorieService,
+    private commandeState: CommandeStateService
+  ) {
+    this.commandeState.activeCommandeId$.subscribe(() => {
+      this.loadActiveCart();
+    });
+  }
 
   ngOnInit() {
     const savedView = localStorage.getItem('viewPreference');
     this.isListView = savedView ? savedView === 'list' : true;
+
+    this.loadActiveCart();
     
     this.viewState.isListView$.subscribe(view => {
       this.isListView = view;
@@ -46,6 +55,14 @@ export class PosVenteComponent {
     if (!this.categories.length) {
         this.loadCategories();
     }
+  }
+
+  private loadActiveCart() {
+    this.cart = new Map(this.commandeState.getActiveCart());
+  }
+
+  private saveActiveCart() {
+    this.commandeState.updateActiveCart(this.cart);
   }
 
   loadCategories() {
@@ -113,52 +130,60 @@ export class PosVenteComponent {
   }
 
   // Méthode pour ajouter un produit au panier
-  addToCart(produit: ProduitDetailsResponseDTO): void {
+   addToCart(produit: ProduitDetailsResponseDTO): void {
     if (this.getAvailableStock(produit) <= 0) return;
     
-    // Réinitialiser toujours la saisie lors d'un nouveau clic
+    // Réinitialiser la saisie
     this.currentQuantityInput = '';
     
     // Toujours incrémenter de 1
-    const currentQty = this.getSelectedQuantity(produit.id);
-    this.selectedQuantities.set(produit.id, currentQty + 1);
+    const currentQty = this.cart.get(produit.id) || 0;
+    this.cart.set(produit.id, currentQty + 1);
     
     // Mettre à jour le produit sélectionné
     this.selectedProduct = produit;
+
+    this.saveActiveCart(); // Sauvegarder dans le service
   }
 
   // Méthode pour diminuer la quantité
   decreaseQuantity(produit: ProduitDetailsResponseDTO) {
-    const currentQty = this.selectedQuantities.get(produit.id) || 0;
+    const currentQty = this.cart.get(produit.id) || 0;
     if (currentQty > 0) {
       const newQty = currentQty - 1;
-      this.selectedQuantities.set(produit.id, newQty);
+      this.cart.set(produit.id, newQty);
       
       // Mise à jour du champ de saisie si produit sélectionné
       if (this.selectedProduct?.id === produit.id) {
         this.currentQuantityInput = newQty > 0 ? newQty.toString() : '';
       }
     }
+    this.saveActiveCart();
   }
 
   // Méthode pour obtenir la quantité sélectionnée
   getSelectedQuantity(produitId: number): number {
-    return this.selectedQuantities.get(produitId) || 0;
+    return this.cart.get(produitId) || 0;
+  }
+
+  // Méthode pour supprimer un produit du panier
+  removeProduct(productId: number) {
+    this.cart.delete(productId);
+    this.saveActiveCart();
+    if (this.selectedProduct?.id === productId) {
+      this.currentQuantityInput = '';
+    }
   }
 
   // Méthode pour obtenir les éléments du panier
-  getCartItems(): { product: ProduitDetailsResponseDTO; quantity: number }[] {
-    const items: { product: ProduitDetailsResponseDTO; quantity: number }[] = [];
-    
-    this.selectedQuantities.forEach((quantity, productId) => {
+  getCartItems() {
+    const items = [];
+    for (const [productId, quantity] of this.cart.entries()) {
       if (quantity > 0) {
         const product = this.displayedProducts.find(p => p.id === productId);
-        if (product) {
-          items.push({ product, quantity });
-        }
+        if (product) items.push({ product, quantity });
       }
-    });
-    
+    }
     return items;
   }
 
@@ -168,18 +193,10 @@ export class PosVenteComponent {
     return produit.quantite - selectedQty;
   }
 
-  // Méthode pour supprimer un produit du panier
-  removeProduct(productId: number) {
-    this.selectedQuantities.delete(productId);
-    if (this.selectedProduct?.id === productId) {
-      this.currentQuantityInput = '';
-    }
-  }
-
   // Méthode pour calculer le total
   getTotalCart(): number {
     let total = 0;
-    this.selectedQuantities.forEach((quantity, productId) => {
+    this.cart.forEach((quantity, productId) => {
       const product = this.displayedProducts.find(p => p.id === productId);
       if (product) {
         total += quantity * product.prixVente;
@@ -210,25 +227,25 @@ export class PosVenteComponent {
   }
 
 applyQuantityToProduct(): void {
-  if (!this.selectedProduct || this.currentQuantityInput === '') return;
+    if (!this.selectedProduct || this.currentQuantityInput === '') return;
 
-  const quantity = parseInt(this.currentQuantityInput, 10);
-  if (isNaN(quantity)) return;
+    const quantity = parseInt(this.currentQuantityInput, 10);
+    if (isNaN(quantity)) return;
 
-  // Vérifier le stock disponible
-  const availableStock = this.selectedProduct.quantite; // Stock total initial
-  
-  if (quantity > 0 && quantity <= availableStock) {
-    this.selectedQuantities.set(this.selectedProduct.id, quantity);
-  } else {
-    this.selectedQuantities.set(this.selectedProduct.id, availableStock);
-    this.currentQuantityInput = availableStock.toString();
+    // Vérifier le stock disponible
+    const availableStock = this.selectedProduct.quantite;
     
-    this.showStockWarning = true;
-    setTimeout(() => this.showStockWarning = false, 3000);
-    // Vous pouvez ajouter une notification à l'utilisateur ici
+    if (quantity > 0 && quantity <= availableStock) {
+      this.cart.set(this.selectedProduct.id, quantity);
+    } else {
+      this.cart.set(this.selectedProduct.id, availableStock);
+      this.currentQuantityInput = availableStock.toString();
+      
+      this.showStockWarning = true;
+      setTimeout(() => this.showStockWarning = false, 3000);
+    }
+    this.saveActiveCart(); // Sauvegarder après modification
   }
-}
 
 
 }
