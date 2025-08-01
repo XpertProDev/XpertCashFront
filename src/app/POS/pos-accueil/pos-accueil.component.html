@@ -26,13 +26,13 @@
           </div>
           <!-- // List des commande en onglet  -->
           <ul class="list_commande">
-            <li *ngFor="let cmd of commandes" 
+            <li *ngFor="let cmd of visibleCommandes" 
                 [class.list_commande_active]="activeCommande === cmd"
                 (click)="setActiveCommande(cmd)">
               {{ cmd }}
             </li>
             
-            <li *ngIf="commandes.length > 4" 
+            <li *ngIf="commandes.length > 6" 
                 class="list_commande_plus" 
                 (click)="showCommandePopup = true">
               <i class="ri-arrow-down-s-line"></i>
