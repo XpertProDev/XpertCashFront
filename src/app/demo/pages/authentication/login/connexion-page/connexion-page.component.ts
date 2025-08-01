@@ -147,43 +147,47 @@ submitForm(): void {
           console.log("Access Token :", response.accessToken);
           console.log("Refresh Token :", response.refreshToken);
 
-          // Sauvegarde des tokens
+          // Sauvegarde les tokens dans le service d'authentification
           this.authService.saveTokens(response.accessToken, response.refreshToken);
 
-          // Requête pour récupérer les infos utilisateur
+          // Récupérer les informations de l'utilisateur après la connexion
           this.usersService.getUserInfo().subscribe({
-            next: (userInfo) => {
-              // Accès au rôle et aux permissions
-              const userRole = userInfo.roleType;
-              const userPermissions = userInfo.permissions; // Liste des permissions
+            next: (user) => {
+              const userRoleType = user.roleType;  // Récupérer le roleType de l'utilisateur
+              const userPermissions = user.permissions;  // Récupérer les permissions de l'utilisateur
 
-              console.log('Rôle utilisateur:', userRole);
-              console.log('Permissions utilisateur:', userPermissions);
-
-              // Vérification si l'utilisateur est un "VENDEUR"
-              if (userRole === 'VENDEUR') {
-                // Vérification s'il a plus de la permission "VENDRE_PRODUITS" en ajout
+              // Vérification des permissions
+              if (userPermissions.includes("VENDRE_PRODUITS")) {
+                // Si l'utilisateur a "VENDRE_PRODUITS" + une autre permission
                 if (userPermissions.length > 1) {
-                  // Si l'utilisateur a d'autres permissions en plus de "VENDRE_PRODUITS"
+                  // Redirection vers "analytics" si l'utilisateur a plus qu'une seule permission
                   this.router.navigate(['/analytics']).then(success => {
-                    console.log("Navigation réussie vers analytics ?", success);
+                    console.log("Navigation vers analytics réussie ?", success);
                   });
                 } else {
-                  // Si l'utilisateur n'a que "VENDRE_PRODUITS" (une seule permission)
+                  // Si l'utilisateur n'a que "VENDRE_PRODUITS", redirection vers "pos-accueil"
                   this.router.navigate(['/pos-accueil']).then(success => {
-                    console.log("Navigation réussie vers pos-accueil ?", success);
+                    console.log("Navigation vers pos-accueil réussie ?", success);
                   });
                 }
+              } else if (
+                userPermissions.includes("VENDRE_PRODUITS")
+              ) {
+                // Redirection vers "pos-accueil" pour les permissions liées à la gestion des produits
+                this.router.navigate(['/pos-accueil']).then(success => {
+                  console.log("Navigation vers pos-accueil réussie ?", success);
+                });
               } else {
-                // Si l'utilisateur n'est pas un "VENDEUR"
+                // Redirection par défaut si aucune des conditions ci-dessus n'est remplie
                 this.router.navigate(['/analytics']).then(success => {
-                  console.log("Navigation réussie vers analytics ?", success);
+                  console.log("Navigation vers la page par défaut réussie ?", success);
                 });
               }
             },
             error: (err) => {
               console.error("Erreur lors de la récupération des infos utilisateur :", err);
-              this.openPopup("Erreur", "Impossible de récupérer les informations utilisateur.", 'error');
+              this.errorMessage = "Impossible de récupérer les informations utilisateur.";
+              this.openPopup("Erreur", this.errorMessage, "error");
             }
           });
         } else {
@@ -209,6 +213,7 @@ submitForm(): void {
     });
   }, 1000);
 }
+
 
 
 

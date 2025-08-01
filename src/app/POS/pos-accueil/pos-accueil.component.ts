@@ -82,39 +82,35 @@ export class PosAccueilComponent {
     this.showMenuDropdown = !this.showMenuDropdown;
   }
 
-  // addCommande() {
-  //   // Génère un nouvel ID de commande (ex: 005, 006...)
-  //   const newId = (this.commandes.length + 1).toString().padStart(3, '0');
-  //   this.commandes.push(newId);
-  //   this.activeCommande = newId;
-  //   this.showCommandePopup = false;
-  // }
-
-  // setActiveCommande(commande: string) {
-  //   this.activeCommande = commande;
-  //   this.showCommandePopup = false;
-  // }
-
   addCommande() {
-    const newId = this.commandeState.addNewCommande();
-    this.commandes.push(newId);
-    this.setActiveCommande(newId);
-  }
+  const newId = this.commandeState.addNewCommande();
+  // Récupère la liste mise à jour du service
+  this.commandes = this.commandeState.getAllCommandesIds(); 
+  this.setActiveCommande(newId);
+  this.showCommandePopup = false;
+}
+
+  // addCommande() {
+  //   const newId = this.commandeState.addNewCommande();
+  //   this.commandes.push(newId);
+  //   this.setActiveCommande(newId);
+  // }
 
   setActiveCommande(cmd: string) {
     this.commandeState.setActiveCommande(cmd);
     this.activeCommande = cmd;
+    this.showCommandePopup = false; // Fermer le popup après sélection
   }
 
-  get visibleCommandes() {
-    // Affiche les 4 dernières commandes
-    return this.commandes.slice(-4);
-  }
+get visibleCommandes() {
+  const start = Math.max(0, this.commandes.length - 6);
+  return this.commandes.slice(start);
+}
 
   get hiddenCommandes() {
     // Commandes non visibles dans la barre principale
-    return this.commandes.length > 4 
-      ? this.commandes.slice(0, this.commandes.length - 4) 
+    return this.commandes.length > 6 
+      ? this.commandes.slice(0, this.commandes.length - 6) 
       : [];
   }
   

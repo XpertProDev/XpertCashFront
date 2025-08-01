@@ -50,10 +50,20 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/vente',
         classes: 'nav-item',
-        icon: 'feather icon-shopping-cart',
+        icon: 'feather icon-bar-chart-2',
         codePermission: 'GERER_PRODUITS'
 
       },
+         {
+        id: 'pos',
+        title: 'POS',
+        type: 'item',
+        url: '/pos-accueil',
+        classes: 'nav-item',
+        icon: 'feather icon-shopping-cart',
+        codePermission: 'VENDRE_PRODUITS'
+
+        },
       {
         id: 'produit',
         title: 'Produits',
