@@ -126,5 +126,29 @@ getUserInfo(): void {
   });
 }
 
+ 
+onLogout(): void {
+  // Récupérer les informations de l'utilisateur
+  this.userService.getUserInfo().subscribe({
+    next: (user) => {
+      const userPermissions = user.permissions;  // Récupérer les permissions de l'utilisateur
+
+      // Vérifier si l'utilisateur a uniquement la permission "VENDRE_PRODUITS"
+      if (userPermissions.length === 1 && userPermissions.includes("VENDRE_PRODUITS")) {
+        // Si l'utilisateur a uniquement "VENDRE_PRODUITS", on le déconnecte
+        this.userService.logoutUser();  // Déconnexion de l'utilisateur
+        this.router.navigate(['/connexion']).then(success => {
+          console.log("Déconnexion réussie ?", success);
+        });
+      } else {
+        // Sinon, on redirige vers "analytics"
+        this.router.navigate(['/analytics']).then(success => {
+          console.log("Navigation vers analytics réussie ?", success);
+        });
+      }
+    },
+  });
+}
+
 
 }
