@@ -74,7 +74,7 @@ export const NavigationItems: NavigationItem[] = [
       },
       {
         id: 'boutique',
-        title: 'Boutique',
+        title: 'Boutiques',
         type: 'item',
         url: '/boutique',
         classes: 'nav-item',
@@ -90,7 +90,7 @@ export const NavigationItems: NavigationItem[] = [
         children: [
           {
             id: 'stock',
-            title: 'Stock',
+            title: 'Stocks',
             type: 'collapse',
             icon: 'feather icon-box',
             codePermission: 'APPROVISIONNER_STOCK',

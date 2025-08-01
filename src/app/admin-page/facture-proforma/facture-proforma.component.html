@@ -146,11 +146,11 @@
                   N° Facture
                   <i [class]="sortField === 'numeroFacture' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
               </th>
-              <th class="th">Droit</th>
-              <th class="th" (click)="sort('dateCreation')">
+               <th class="th" (click)="sort('dateCreation')">
                   Date
                   <i [class]="sortField === 'dateCreation' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
               </th>
+              <th class="th">Doit</th>
               <th class="th">Designation</th>
               <th class="th">Statut</th>
               <th class="th">Total</th>
@@ -161,8 +161,8 @@
       <tbody>
           <tr class="tr" *ngFor="let facture of paginatedFactures" (click)="showDetails(facture.id)">
               <td class="td">{{ facture.numeroFacture }}</td>
-              <td class="td">{{ facture.client || facture.entrepriseClient }}</td>
               <td class="td">{{ facture.dateCreation | date: 'dd/MM/yyyy' }}</td>
+              <td class="td">{{ facture.client || facture.entrepriseClient }}</td>
               <td class="td">
                   <div *ngFor="let ligne of facture.ligneFactureProforma?.slice(0,2)">
                       {{ ligne.nomProduit }} (x{{ ligne.quantite }})

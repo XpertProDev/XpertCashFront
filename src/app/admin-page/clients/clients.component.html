@@ -2,7 +2,7 @@
     <!-- En-tête : titre, actions et barre de recherche -->
     <div class="tasks-header">
       <h1 class="title">
-        {{ currentListType === 'clients' ? 'Client physique' : 'Entreprise Cliente' }}
+        {{ currentListType === 'clients' ? 'Client individuel' : 'Client entreprise' }}
       </h1>
       <div class="actions">
         <button class="add-task" (click)="openPopup()">Ajouter un client</button>
@@ -387,13 +387,13 @@
 
       <div class="contentCadreChoix">
         <div class="cadreChoix" routerLink="/ajouter-client">
-          Client physique
+          Client individuel
         </div>
 
         <div class="sizeBox"></div>
 
         <div class="cadreChoix" routerLink="/ajouter-entreprise-client">
-          Entreprise clients
+          Client entreprise
         </div>
       </div>
       
