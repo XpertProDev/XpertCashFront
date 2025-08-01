@@ -16,218 +16,148 @@
                     <button class="btn">Actif <i class="ri-arrow-down-s-fill"></i> </button>
                 </div>
             </div>
+            <!-- Section liste des commandes -->
             <div class="section_list_commande">
-                <!-- // section commande -->
-                <ul class="ul_commande ul_commande_active">
-                    <li class="li_commande">
-                        <div class="commande_date_heure">
-                            <p class="commande_date">Aujourd'hui</p>
-                            <p class="commande_heure">00:00</p>
-                        </div>
-                    </li>
-                    <li class="li_commande">
-                        <div class="num_onglet_commande">
-                            <p>001</p>
-                        </div>
-                    </li>
-                    <li class="li_commande">
-                        <div class="quantite_commande">
-                            <p>Quantité 20</p>
-                        </div>
-                    </li>
-                    <li class="li_commande">
-                        <div class="price_commande">
-                            <p>3 600 000 CFA</p>
-                        </div>
-                    </li>
-                    <li class="li_commande" style="display: flex; align-items: center; gap: 30px;">
-                        <div class="etat_commande">
-                            <p>En cours</p>
-                        </div>
-                        <div class="icon_delete_commande">
-                            <i class="ri-delete-bin-5-line"></i>
-                        </div>
-                        <!-- <div class="icon_favory_commande">
-                            <i class="ri-heart-line"></i>
-                        </div> -->
-                    </li>
-                </ul>
-                <!-- // section commande -->
-                <ul class="ul_commande">
-                    <li class="li_commande">
-                        <div class="commande_date_heure">
-                            <p class="commande_date">Aujourd'hui</p>
-                            <p class="commande_heure">00:00</p>
-                        </div>
-                    </li>
-                    <li class="li_commande">
-                        <div class="num_onglet_commande">
-                            <p>001</p>
-                        </div>
-                    </li>
-                    <li class="li_commande">
-                        <div class="quantite_commande">
-                            <p>Quantité 20</p>
-                        </div>
-                    </li>
-                    <li class="li_commande">
-                        <div class="price_commande">
-                            <p>3 600 000 CFA</p>
-                        </div>
-                    </li>
-                    <li class="li_commande" style="display: flex; align-items: center; gap: 30px;">
-                        <div class="etat_commande">
-                            <p>En cours</p>
-                        </div>
-                        <div class="icon_delete_commande">
-                            <i class="ri-delete-bin-5-line"></i>
-                        </div>
-                        <!-- <div class="icon_favory_commande">
-                            <i class="ri-heart-line"></i>
-                        </div> -->
-                    </li>
-                </ul>
-                <!-- // section commande -->
-                <ul class="ul_commande">
-                    <li class="li_commande">
-                        <div class="commande_date_heure">
-                            <p class="commande_date">Aujourd'hui</p>
-                            <p class="commande_heure">00:00</p>
-                        </div>
-                    </li>
-                    <li class="li_commande">
-                        <div class="num_onglet_commande">
-                            <p>001</p>
-                        </div>
-                    </li>
-                    <li class="li_commande">
-                        <div class="quantite_commande">
-                            <p>Quantité 20</p>
-                        </div>
-                    </li>
-                    <li class="li_commande">
-                        <div class="price_commande">
-                            <p>3 600 000 CFA</p>
-                        </div>
-                    </li>
-                    <li class="li_commande" style="display: flex; align-items: center; gap: 30px;">
-                        <div class="etat_commande">
-                            <p>En cours</p>
-                        </div>
-                        <div class="icon_delete_commande">
-                            <i class="ri-delete-bin-5-line"></i>
-                        </div>
-                        <!-- <div class="icon_favory_commande">
-                            <i class="ri-heart-line"></i>
-                        </div> -->
-                    </li>
-                </ul>
+            <ul *ngFor="let cmd of commandes" 
+                class="ul_commande" 
+                [class.ul_commande_active]="activeCommandeId === cmd.id"
+                (click)="setActiveCommande(cmd.id)">
+                <li class="li_commande">
+                <div class="commande_date_heure">
+                    <p class="commande_date">{{ cmd.createdAt | date:'dd/MM/yyyy' }}</p>
+                    <p class="commande_heure">{{ cmd.createdAt | date:'HH:mm' }}</p>
+                </div>
+                </li>
+                <li class="li_commande">
+                <div class="num_onglet_commande">
+                    <p>{{ cmd.id }}</p>
+                </div>
+                </li>
+                <li class="li_commande">
+                <div class="quantite_commande">
+                    <p>Quantité {{ cmd.totalItems }}</p>
+                </div>
+                </li>
+                <li class="li_commande">
+                <div class="price_commande">
+                    <p>{{ cmd.totalAmount | currency:'CFA ':'symbol':'1.0-0' }}</p>
+                </div>
+                </li>
+                <li class="li_commande" style="display: flex; align-items: center; gap: 30px;">
+                <div class="etat_commande">
+                    <p>En cours</p>
+                </div>
+                <div class="icon_delete_commande" (click)="removeCommande(cmd.id); $event.stopPropagation()">
+                    <i class="ri-delete-bin-5-line"></i>
+                </div>
+                </li>
+            </ul>
             </div>
         </div>
     </div>
     <!-- // section contenu right -->
     <div class="section_contenu_right" style="background-color: #ffffff; height: 100vh; box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;">
-    <div class="list_produit_select">
-        <!-- // Tout les liste de produc select  -->
-        <ul class="ul_list_produit_select">
-        <li class="li_list_produit_select">
-            <div class="double">
-            <!-- // nombre select  -->
-            <div class="nombre_select">
-                10
-            </div>
-            <!-- // name produit select  -->
-            <div class="name_produit_select">
-                <p style="margin: 0;">Ordinateur <span>(20 000 CFA)</span></p>
-            </div>
-            </div>
-            <div class="double">
-            <!-- // nombre select  -->
-            <div class="price_produit">
-                200 000 CFA
-            </div>
-            <!-- // name produit select  -->
-            <div class="icon_close_select">
-                <i class="ri-close-circle-fill"></i>
-            </div>
-            </div>
-        </li>
-        <li class="li_list_produit_select">
-            <div class="double">
-            <!-- // nombre select  -->
-            <div class="nombre_select">
-                10
-            </div>
-            <!-- // name produit select  -->
-            <div class="name_produit_select">
-                <p style="margin: 0;">Ordinateur <span>(20 000 CFA)</span></p>
-            </div>
-            </div>
-            <div class="double">
-            <!-- // nombre select  -->
-            <div class="price_produit">
-                200 000 CFA
-            </div>
-            <!-- // name produit select  -->
-            <div class="icon_close_select">
-                <i class="ri-close-circle-fill"></i>
-            </div>
-            </div>
-        </li>
-        <li class="li_list_produit_select">
-            <div class="double">
-            <!-- // nombre select  -->
-            <div class="nombre_select">
-                10
-            </div>
-            <!-- // name produit select  -->
-            <div class="name_produit_select">
-                <p style="margin: 0;">Ordinateur <span>(20 000 CFA)</span></p>
-            </div>
-            </div>
-            <div class="double">
-            <!-- // nombre select  -->
-            <div class="price_produit">
-                200 000 CFA
-            </div>
-            <!-- // name produit select  -->
-            <div class="icon_close_select">
-                <i class="ri-close-circle-fill"></i>
-            </div>
-            </div>
-        </li>
-        </ul>
-    </div>
-    
-    <!-- 2. Récapitulatif : Remise / Taxes / Total -->
-    <div class="summary_panel">
-        <!-- <div class="double_row">
-        <span>Remise</span>
-        <span>00 CFA</span>
-        </div> -->
-        <div class="double_row">
-        <span>Taxes</span>
-        <span>00 CFA</span>
+        <div class="list_produit_select">
+            <!-- // Tout les liste de produc select  -->
+            <ul class="ul_list_produit_select">
+            <li class="li_list_produit_select">
+                <div class="double">
+                <!-- // nombre select  -->
+                <div class="nombre_select">
+                    10
+                </div>
+                <!-- // name produit select  -->
+                <div class="name_produit_select">
+                    <p style="margin: 0;">Ordinateur <span>(20 000 CFA)</span></p>
+                </div>
+                </div>
+                <div class="double">
+                <!-- // nombre select  -->
+                <div class="price_produit">
+                    200 000 CFA
+                </div>
+                <!-- // name produit select  -->
+                <div class="icon_close_select">
+                    <i class="ri-close-circle-fill"></i>
+                </div>
+                </div>
+            </li>
+            <li class="li_list_produit_select">
+                <div class="double">
+                <!-- // nombre select  -->
+                <div class="nombre_select">
+                    10
+                </div>
+                <!-- // name produit select  -->
+                <div class="name_produit_select">
+                    <p style="margin: 0;">Ordinateur <span>(20 000 CFA)</span></p>
+                </div>
+                </div>
+                <div class="double">
+                <!-- // nombre select  -->
+                <div class="price_produit">
+                    200 000 CFA
+                </div>
+                <!-- // name produit select  -->
+                <div class="icon_close_select">
+                    <i class="ri-close-circle-fill"></i>
+                </div>
+                </div>
+            </li>
+            <li class="li_list_produit_select">
+                <div class="double">
+                <!-- // nombre select  -->
+                <div class="nombre_select">
+                    10
+                </div>
+                <!-- // name produit select  -->
+                <div class="name_produit_select">
+                    <p style="margin: 0;">Ordinateur <span>(20 000 CFA)</span></p>
+                </div>
+                </div>
+                <div class="double">
+                <!-- // nombre select  -->
+                <div class="price_produit">
+                    200 000 CFA
+                </div>
+                <!-- // name produit select  -->
+                <div class="icon_close_select">
+                    <i class="ri-close-circle-fill"></i>
+                </div>
+                </div>
+            </li>
+            </ul>
         </div>
-        <div class="double_row total">
-        <strong>Total</strong>
-        <strong>00 CFA</strong>
+        
+        <!-- 2. Récapitulatif : Remise / Taxes / Total -->
+        <div class="summary_panel">
+            <!-- <div class="double_row">
+            <span>Remise</span>
+            <span>00 CFA</span>
+            </div> -->
+            <div class="double_row">
+            <span>Taxes</span>
+            <span>00 CFA</span>
+            </div>
+            <div class="double_row total">
+            <strong>Total</strong>
+            <strong>00 CFA</strong>
+            </div>
         </div>
-    </div>
 
-    <!-- Bouton de paiement -->
-    <div class="btn_container" >
-        <!-- // btn return  -->
-        <div class="btn_action_commande">
-            <button class="btn_retourn"><i class="ri-arrow-left-s-line"></i></button>
+        <!-- Bouton de paiement -->
+        <div class="btn_container" >
+            <!-- // btn return  -->
+            <div class="btn_action_commande">
+                <button class="btn_retourn"><i class="ri-arrow-left-s-line"></i></button>
+            </div>
+            <div class="btn_content">
+                <button class="btn-payment" (click)="pagePosVente()">Paiement</button>
+            </div>
+            <!-- // btn delete  -->
+            <div class="btn_action_commande">
+                <button class="btn_delete"><i class="ri-delete-bin-5-line"></i></button>
+            </div>
         </div>
-        <div class="btn_content">
-            <button class="btn-payment" (click)="pagePosVente()">Paiement</button>
-        </div>
-        <!-- // btn delete  -->
-        <div class="btn_action_commande">
-            <button class="btn_delete"><i class="ri-delete-bin-5-line"></i></button>
-        </div>
-    </div>
     </div>
 </div>
