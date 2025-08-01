@@ -92,7 +92,9 @@ p {
     padding: 6px 10px;
     margin-bottom: 10px;
     margin-top: 10px;
-    background-color: #EDEBEB;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+    // background-color: #EDEBEB;
+    background-color: #ffffff;
 }
 
 .ul_commande_active {
