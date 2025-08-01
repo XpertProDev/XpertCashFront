@@ -21,8 +21,9 @@
           </li>
         </ul> -->
         <!-- // categorie -->
-        <div class="titre_categorie">
-          <p (click)="showAllProducts()">Toutes les catégories</p> <!-- Ajoutez ce click -->
+        <div class="titre_categorie" [class.selected]="selectedCategoryId === null">
+          <p (click)="showAllProducts()" class="allCate">
+           Toutes les catégories</p>
         </div>
         <ul class="ul_name_categorie" *ngIf="categories.length">
           <!-- Boucle sur les catégories -->
