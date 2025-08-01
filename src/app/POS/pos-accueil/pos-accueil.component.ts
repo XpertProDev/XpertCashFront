@@ -40,6 +40,10 @@ export class PosAccueilComponent {
     this.commandeSubscription = this.commandeState.activeCommandeId$.subscribe(id => {
       this.activeCommande = id;
     });
+
+    this.commandeState.commandesIds$.subscribe(ids => {
+      this.commandes = ids;
+    });
   }
 
   ngOnInit() {

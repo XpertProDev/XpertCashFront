@@ -18,40 +18,43 @@
             </div>
             <!-- Section liste des commandes -->
             <div class="section_list_commande">
-            <ul *ngFor="let cmd of commandes" 
-                class="ul_commande" 
-                [class.ul_commande_active]="activeCommandeId === cmd.id"
-                (click)="setActiveCommande(cmd.id)">
-                <li class="li_commande">
-                <div class="commande_date_heure">
-                    <p class="commande_date">{{ cmd.createdAt | date:'dd/MM/yyyy' }}</p>
-                    <p class="commande_heure">{{ cmd.createdAt | date:'HH:mm' }}</p>
+                <ul *ngFor="let cmd of commandes" 
+                    class="ul_commande" 
+                    [class.ul_commande_active]="activeCommandeId === cmd.id"
+                    (click)="setActiveCommande(cmd.id)">
+                    <li class="li_commande">
+                    <div class="commande_date_heure">
+                        <p class="commande_date">{{ cmd.createdAt | date:'dd/MM/yyyy' }}</p>
+                        <p class="commande_heure">{{ cmd.createdAt | date:'HH:mm' }}</p>
+                    </div>
+                    </li>
+                    <li class="li_commande">
+                    <div class="num_onglet_commande">
+                        <p>{{ cmd.id }}</p>
+                    </div>
+                    </li>
+                    <li class="li_commande">
+                    <div class="quantite_commande">
+                        <p>Quantité {{ cmd.totalItems }}</p>
+                    </div>
+                    </li>
+                    <li class="li_commande">
+                    <div class="price_commande">
+                        <p>{{ cmd.totalAmount | currency:'CFA ':'symbol':'1.0-0' }}</p>
+                    </div>
+                    </li>
+                    <li class="li_commande" style="display: flex; align-items: center; gap: 30px;">
+                    <div class="etat_commande">
+                        <p>En cours</p>
+                    </div>
+                    <div class="icon_delete_commande" (click)="removeCommande(cmd.id); $event.stopPropagation()">
+                        <i class="ri-delete-bin-5-line"></i>
+                    </div>
+                    </li>
+                </ul>
+                <div *ngIf="!products.length" class="loading_commande">
+                    Chargement des produits en cours...
                 </div>
-                </li>
-                <li class="li_commande">
-                <div class="num_onglet_commande">
-                    <p>{{ cmd.id }}</p>
-                </div>
-                </li>
-                <li class="li_commande">
-                <div class="quantite_commande">
-                    <p>Quantité {{ cmd.totalItems }}</p>
-                </div>
-                </li>
-                <li class="li_commande">
-                <div class="price_commande">
-                    <p>{{ cmd.totalAmount | currency:'CFA ':'symbol':'1.0-0' }}</p>
-                </div>
-                </li>
-                <li class="li_commande" style="display: flex; align-items: center; gap: 30px;">
-                <div class="etat_commande">
-                    <p>En cours</p>
-                </div>
-                <div class="icon_delete_commande" (click)="removeCommande(cmd.id); $event.stopPropagation()">
-                    <i class="ri-delete-bin-5-line"></i>
-                </div>
-                </li>
-            </ul>
             </div>
         </div>
     </div>

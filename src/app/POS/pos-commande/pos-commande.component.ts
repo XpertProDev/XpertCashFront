@@ -39,17 +39,11 @@ export class PosCommandeComponent {
       this.isListView = view;
     });
 
-    this.commandeState.activeCommandeId$.subscribe(id => {
-      this.activeCommandeId = id;
-      this.loadCommandes();
-    });
-    
     this.loadProducts();
 
     this.commandeState.activeCommandeId$.subscribe(id => {
       this.activeCommandeId = id;
-      this.loadCommandes();
-      this.loadActiveCommandeDetails(); // Charger les détails de la commande active
+      this.loadActiveCommandeDetails();
     });
   }
 

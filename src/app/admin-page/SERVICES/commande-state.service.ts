@@ -19,6 +19,9 @@ export class CommandeStateService {
   
   activeCommandeId$ = this.activeCommandeId.asObservable();
 
+  private commandesIdsSubject = new BehaviorSubject<string[]>(this.commandesIds);
+  commandesIds$ = this.commandesIdsSubject.asObservable();
+
   constructor() {
     this.commandesMap.set('001', { 
       id: '001', 
@@ -81,6 +84,7 @@ export class CommandeStateService {
     };
     this.commandesMap.set(newId, newCommande);
     this.commandesIds.push(newId);
+    this.commandesIdsSubject.next([...this.commandesIds]); // Notifier du changement
     return newId;
   }
 
@@ -99,6 +103,7 @@ export class CommandeStateService {
     if (this.activeCommandeId.getValue() === id) {
       this.activeCommandeId.next(this.commandesIds[0] || '001');
     }
+    this.commandesIdsSubject.next([...this.commandesIds]);
   }
   
   // Ajout d'une méthode pour obtenir l'ID actif
