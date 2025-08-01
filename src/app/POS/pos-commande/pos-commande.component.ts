@@ -23,8 +23,12 @@ export class PosCommandeComponent {
   products: ProduitDetailsResponseDTO[] = [];
   activeCommandeId: string = '';
 
+  activeCommandeCart: Map<number, number> = new Map();
+  activeCommandeTotal = 0;
+  activeCommandeItems: { product: ProduitDetailsResponseDTO, quantity: number }[] = [];
+
   constructor(
-    private router: Router,
+    public router: Router,
     private viewState: ViewStateService,
     private commandeState: CommandeStateService,
     private categorieService: CategorieService
@@ -41,6 +45,33 @@ export class PosCommandeComponent {
     });
     
     this.loadProducts();
+
+    this.commandeState.activeCommandeId$.subscribe(id => {
+      this.activeCommandeId = id;
+      this.loadCommandes();
+      this.loadActiveCommandeDetails(); // Charger les détails de la commande active
+    });
+  }
+
+  loadActiveCommandeDetails() {
+    const commande = this.commandeState.getCommandeDetails(this.activeCommandeId);
+    if (commande) {
+      this.activeCommandeCart = commande.cart;
+      this.activeCommandeTotal = commande.totalAmount || 0;
+      this.updateActiveCommandeItems();
+    }
+  }
+
+  updateActiveCommandeItems() {
+    this.activeCommandeItems = [];
+    this.activeCommandeCart.forEach((quantity, productId) => {
+      if (quantity > 0) {
+        const product = this.products.find(p => p.id === productId);
+        if (product) {
+          this.activeCommandeItems.push({ product, quantity });
+        }
+      }
+    });
   }
 
   loadProducts() {
@@ -94,6 +125,38 @@ export class PosCommandeComponent {
 
   setActiveCommande(id: string) {
     this.commandeState.setActiveCommande(id);
+    this.loadActiveCommandeDetails(); // Recharger les détails quand on change de commande
+  }
+
+  removeProductFromCommande(productId: number) {
+    const commande = this.commandeState.getCommandeDetails(this.activeCommandeId);
+    if (commande) {
+      commande.cart.delete(productId);
+      // Mettre à jour les totaux
+      const totalItems = this.calculateTotalItems(commande.cart);
+      const totalAmount = this.calculateTotalAmount(commande.cart);
+      this.commandeState.updateCommandeTotals(this.activeCommandeId, totalItems, totalAmount);
+      
+      // Mettre à jour l'affichage local
+      this.loadActiveCommandeDetails();
+    }
+  }
+
+  private calculateTotalItems(cart: Map<number, number>): number {
+    let total = 0;
+    cart.forEach(quantity => total += quantity);
+    return total;
+  }
+
+  private calculateTotalAmount(cart: Map<number, number>): number {
+    let total = 0;
+    cart.forEach((quantity, productId) => {
+      const product = this.products.find(p => p.id === productId);
+      if (product) {
+        total += quantity * product.prixVente;
+      }
+    });
+    return total;
   }
 
   toggleView(viewType: 'grid' | 'list') {
