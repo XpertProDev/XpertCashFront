@@ -144,6 +144,7 @@ export class PosVenteComponent {
     this.selectedProduct = produit;
 
     this.saveActiveCart(); // Sauvegarder dans le service
+    this.updateCommandeTotals();
   }
 
   // Méthode pour diminuer la quantité
@@ -159,6 +160,7 @@ export class PosVenteComponent {
       }
     }
     this.saveActiveCart();
+    this.updateCommandeTotals();
   }
 
   // Méthode pour obtenir la quantité sélectionnée
@@ -173,6 +175,27 @@ export class PosVenteComponent {
     if (this.selectedProduct?.id === productId) {
       this.currentQuantityInput = '';
     }
+    this.updateCommandeTotals();
+  }
+
+  updateCommandeTotals() {
+    const totalItems = this.getTotalItems();
+    const totalAmount = this.getTotalCart();
+    
+    // Correction: Utiliser la nouvelle méthode getActiveCommandeId()
+    const activeId = this.commandeState.getActiveCommandeId();
+    
+    this.commandeState.updateCommandeTotals(
+      activeId,
+      totalItems,
+      totalAmount
+    );
+  }
+
+  getTotalItems(): number {
+    let total = 0;
+    this.cart.forEach(quantity => total += quantity);
+    return total;
   }
 
   // Méthode pour obtenir les éléments du panier
