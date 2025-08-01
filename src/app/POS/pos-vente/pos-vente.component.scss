@@ -8,7 +8,7 @@ ul {
 
 .section_contenu_container {
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 1fr 380px;
   flex: 1;          /* prend l’espace restant */
   min-height: 0;    /* permet à la colonne de gauche de rétrécir */
 }
@@ -21,7 +21,7 @@ ul {
 
 .section_favory_produit {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 220px 1fr;
   margin-top: 12px;
   flex: 1;          /* occupe toute la hauteur dispo */
   min-height: 0;    /* permet la rétraction sur l’axe vertical */
