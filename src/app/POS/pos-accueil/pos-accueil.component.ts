@@ -35,14 +35,21 @@ export class PosAccueilComponent {
     private commandeState: CommandeStateService
   ) {
     this.isListView$ = this.viewState.isListView$;
+    
+    // Initialiser avec les commandes actuelles
     this.commandes = this.commandeState.getAllCommandesIds();
+    
+    // S'abonner aux mises à jour des commandes
+    this.commandeState.commandeUpdated$.subscribe(() => {
+      this.commandes = this.commandeState.getAllCommandesIds();
+    });
+
+    this.commandeState.activeCommandeId$.subscribe(id => {
+      this.activeCommande = id;
+    });
     
     this.commandeSubscription = this.commandeState.activeCommandeId$.subscribe(id => {
       this.activeCommande = id;
-    });
-
-    this.commandeState.commandesIds$.subscribe(ids => {
-      this.commandes = ids;
     });
   }
 

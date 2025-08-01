@@ -39,33 +39,25 @@ export class PosCommandeComponent {
       this.isListView = view;
     });
 
+    // Charger les produits d'abord
     this.loadProducts();
 
+    // S'abonner aux mises à jour des commandes
+    this.commandeState.commandeUpdated$.subscribe(() => {
+      this.loadCommandes();
+      this.loadActiveCommandeDetails();
+    });
+
+    // S'abonner aux changements de commande active
     this.commandeState.activeCommandeId$.subscribe(id => {
       this.activeCommandeId = id;
       this.loadActiveCommandeDetails();
     });
   }
 
-  loadActiveCommandeDetails() {
-    const commande = this.commandeState.getCommandeDetails(this.activeCommandeId);
-    if (commande) {
-      this.activeCommandeCart = commande.cart;
-      this.activeCommandeTotal = commande.totalAmount || 0;
-      this.updateActiveCommandeItems();
-    }
-  }
-
-  updateActiveCommandeItems() {
-    this.activeCommandeItems = [];
-    this.activeCommandeCart.forEach((quantity, productId) => {
-      if (quantity > 0) {
-        const product = this.products.find(p => p.id === productId);
-        if (product) {
-          this.activeCommandeItems.push({ product, quantity });
-        }
-      }
-    });
+  setActiveCommande(id: string) {
+    this.commandeState.setActiveCommande(id);
+    this.loadActiveCommandeDetails(); // Recharger les détails quand on change de commande
   }
 
   loadProducts() {
@@ -77,9 +69,37 @@ export class PosCommandeComponent {
             this.products = [...this.products, ...categorie.produits];
           }
         });
+        // Charger les détails après avoir les produits
         this.loadCommandes();
+        this.loadActiveCommandeDetails();
       },
       error: (error) => console.error('Erreur chargement produits', error)
+    });
+  }
+
+  loadActiveCommandeDetails() {
+    if (!this.activeCommandeId) return;
+    
+    const commande = this.commandeState.getCommandeDetails(this.activeCommandeId);
+    if (commande) {
+      this.activeCommandeCart = commande.cart;
+      this.activeCommandeTotal = commande.totalAmount || 0;
+      this.updateActiveCommandeItems();
+    }
+  }
+
+  updateActiveCommandeItems() {
+    this.activeCommandeItems = [];
+    
+    if (!this.activeCommandeCart || !this.products.length) return;
+    
+    this.activeCommandeCart.forEach((quantity, productId) => {
+      if (quantity > 0) {
+        const product = this.products.find(p => p.id === productId);
+        if (product) {
+          this.activeCommandeItems.push({ product, quantity });
+        }
+      }
     });
   }
 
@@ -115,11 +135,6 @@ export class PosCommandeComponent {
   removeCommande(id: string) {
     this.commandeState.removeCommande(id);
     this.loadCommandes();
-  }
-
-  setActiveCommande(id: string) {
-    this.commandeState.setActiveCommande(id);
-    this.loadActiveCommandeDetails(); // Recharger les détails quand on change de commande
   }
 
   removeProductFromCommande(productId: number) {

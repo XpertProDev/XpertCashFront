@@ -1,6 +1,6 @@
 // commande-state.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 interface Commande {
   id: string;
@@ -21,6 +21,10 @@ export class CommandeStateService {
 
   private commandesIdsSubject = new BehaviorSubject<string[]>(this.commandesIds);
   commandesIds$ = this.commandesIdsSubject.asObservable();
+
+  private commandeUpdated = new Subject<void>();
+  commandeUpdated$ = this.commandeUpdated.asObservable();
+
 
   constructor() {
     this.commandesMap.set('001', { 
@@ -95,6 +99,7 @@ export class CommandeStateService {
       return;
     }
     this.commandesMap.delete(id);
+    this.commandeUpdated.next();
     const index = this.commandesIds.indexOf(id);
     if (index !== -1) {
       this.commandesIds.splice(index, 1);

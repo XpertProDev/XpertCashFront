@@ -89,6 +89,9 @@
                     </div>
                 </li>
             </ul>
+            <div *ngIf="activeCommandeItems.length === 0" class="empty-cart-message">
+                <p>Aucun produit dans cette commande</p>
+            </div>
         </div>
         
         <!-- Récapitulatif : Taxes / Total -->
