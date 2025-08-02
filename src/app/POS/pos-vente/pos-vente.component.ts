@@ -45,6 +45,8 @@ export class PosVenteComponent {
   lastTap: number = 0;
   tapDelay: number = 300;
 
+  allProducts: ProduitDetailsResponseDTO[] = [];
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -86,12 +88,17 @@ export class PosVenteComponent {
     this.categorieService.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
-        this.displayedProducts = [];
+
+        // 1. Reconstruire la liste complète
+        this.allProducts = [];
         this.categories.forEach(categorie => {
           if (categorie.produits) {
-            this.displayedProducts = [...this.displayedProducts, ...categorie.produits];
+            this.allProducts.push(...categorie.produits);
           }
         });
+
+        // 2. Initialiser displayedProducts avec tous les produits
+        this.showAllProducts();
       },
       error: (error) => {
         console.error('Erreur lors du chargement des catégories', error);
@@ -279,11 +286,13 @@ export class PosVenteComponent {
 
   // Méthode pour obtenir les éléments du panier
   getCartItems() {
-    const items = [];
+    const items: { product: ProduitDetailsResponseDTO, quantity: number }[] = [];
     for (const [productId, quantity] of this.cart.entries()) {
       if (quantity > 0) {
-        const product = this.displayedProducts.find(p => p.id === productId);
-        if (product) items.push({ product, quantity });
+        const product = this.allProducts.find(p => p.id === productId);
+        if (product) {
+          items.push({ product, quantity });
+        }
       }
     }
     return items;
@@ -299,7 +308,7 @@ export class PosVenteComponent {
   getTotalCart(): number {
     let total = 0;
     this.cart.forEach((quantity, productId) => {
-      const product = this.displayedProducts.find(p => p.id === productId);
+      const product = this.allProducts.find(p => p.id === productId);
       if (product) {
         total += quantity * product.prixVente;
       }
