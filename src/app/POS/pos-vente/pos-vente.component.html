@@ -239,33 +239,34 @@
 
           <!-- 1. Montant du paiement -->
           <div class="montant_paiement">
-            <h1>140 0000</h1>
+            <h1>{{ totalAmount | currency:'CFA ':'symbol':'1.0-0' }}</h1>
             <span>CFA</span>
           </div>
 
           <!-- 2. Moyens de paiement -->
           <div class="moyen_paiement_price">
-            <div
-              class="moyen_paiement">
-              <p>Espèces</p>
+            <div class="moyen_paiement">
+              <p>{{ selectedPaymentMethod }}</p>
             </div>
             <div class="moyen_prise_du">
               <div class="price_du">
-                <p>0000 CFA</p>
-                <i class="ri-close-line clear-icon"></i>
+                <p>{{ paymentAmount | currency:'CFA ':'symbol':'1.0-0' }}</p>
+                <i class="ri-close-line clear-icon" (click)="enteredAmount = ''; calculatePayment()"></i>
               </div>
             </div>
           </div>
 
-
           <div class="paiement_restant">
-            <div
-              class="moyen_paiement_restant">
-              <p style="color: #008000;">Restant</p>
+            <div class="moyen_paiement_restant">
+              <p [style.color]="paymentAmount >= totalAmount ? '#008000' : '#ff0000'">
+                {{ paymentAmount >= totalAmount ? 'Monnaie' : 'Restant' }}
+              </p>
             </div>
             <div class="moyen_prise_du">
               <div class="price_du">
-                <p style="color: #008000;">0 CFA</p>
+                <p [style.color]="paymentAmount >= totalAmount ? '#008000' : '#ff0000'">
+                  {{ changeDue | currency:'CFA ':'symbol':'1.0-0' }}
+                </p>
               </div>
             </div>
           </div>
@@ -295,37 +296,38 @@
 
       <div class="section_contenu_right" style="background-color: #ffffff; height: 80vh; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
         <div class="list_produit_select">
-          <!-- // Tout les methode paiement  -->
+          <!-- Moyens de paiement avec sélection -->
           <div class="methode_paiement">
-            <div class="cadre_paiement">
-              <!-- // img_paiement  -->
+            <div class="cadre_paiement" 
+                [class.selected_mode_pay]="selectedPaymentMethod === 'Espèces'"
+                (click)="selectPaymentMethod('Espèces')">
               <div class="img_paiement">
                 <img src="assets/img/payer.png" alt="">
               </div>
-              <!-- // titre paiement -->
               <div class="title_paiement">
                 <p>Espèces</p>
               </div>
             </div>
-            <div class="cadre_paiement">
-              <!-- // img_paiement  -->
+            
+            <div class="cadre_paiement" 
+                [class.selected_mode_pay]="selectedPaymentMethod === 'card'"
+                (click)="selectPaymentMethod('Carte')">
               <div class="img_paiement img_paiement_carte">
                 <img src="assets/img/carte-de-credit.png" alt="">
               </div>
-              <!-- // titre paiement -->
               <div class="title_paiement">
                 <p>Carte</p>
               </div>
             </div>
-            <div class="cadre_paiement">
-              <!-- // img_paiement  -->
+            
+            <div class="cadre_paiement" 
+                [class.selected_mode_pay]="selectedPaymentMethod === 'account'"
+                (click)="selectPaymentMethod('Compte client')">
               <div class="img_paiement img_paiement_compte">
                 <img src="assets/img/compte-rendu.png" alt="">
               </div>
-              <!-- // titre paiement -->
               <div class="title_paiement">
-                <!-- <p>Compte</p> -->
-                <p>Compte <br>client</p>
+                <p>Compte client</p>
               </div>
             </div>
           </div>
@@ -344,17 +346,38 @@
           </div>
         </div>
 
-        <!-- 3. Clavier numérique + actions -->
+        <!-- Clavier numérique -->
         <div class="keypad" style="padding-top: 5px;">
-          <button>1</button><button>2</button><button>3</button><button>Qté</button>
-          <button>4</button><button>5</button><button>6</button><button>%</button>
-          <button>7</button><button>8</button><button>9</button><button>Prix</button>
-          <button>+/-</button><button>0</button><button>,</button><button class="backspace"><i class="ri-delete-back-2-line"></i></button>
+          <button (click)="handlePaymentKeyPress('1')">1</button>
+          <button (click)="handlePaymentKeyPress('2')">2</button>
+          <button (click)="handlePaymentKeyPress('3')">3</button>
+          <button>Qté</button>
+          
+          <button (click)="handlePaymentKeyPress('4')">4</button>
+          <button (click)="handlePaymentKeyPress('5')">5</button>
+          <button (click)="handlePaymentKeyPress('6')">6</button>
+          <button>%</button>
+          
+          <button (click)="handlePaymentKeyPress('7')">7</button>
+          <button (click)="handlePaymentKeyPress('8')">8</button>
+          <button (click)="handlePaymentKeyPress('9')">9</button>
+          <button>Prix</button>
+          
+          <button (click)="handlePaymentKeyPress('+/-')">+/-</button>
+          <button (click)="handlePaymentKeyPress('0')">0</button>
+          <button (click)="handlePaymentKeyPress(',')">,</button>
+          <button class="backspace" (click)="handlePaymentKeyPress('backspace')">
+            <i class="ri-delete-back-2-line"></i>
+          </button>
         </div>
 
         <!-- 4. Bouton de paiement -->
         <div class="btn_content">
-          <button class="btn-payment-pop" (click)="openPaymentPopup()">Paiement</button>
+          <button class="btn-payment-pop" 
+                  [disabled]="!isAmountEntered"
+                  (click)="completePayment()">
+            Valider Paiement
+          </button>
         </div>
       </div>
     </div>

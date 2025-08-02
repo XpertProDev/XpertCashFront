@@ -31,6 +31,14 @@ export class PosVenteComponent {
   showStockWarning = false;
   cart: Map<number, number> = new Map();
 
+  totalAmount: number = 0;
+
+  selectedPaymentMethod: string = 'Espèces'; // 'cash', 'card', 'account'
+  enteredAmount: string = '';
+  paymentAmount: number = 0;
+  changeDue: number = 0;
+  isAmountEntered: boolean = false;
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -123,6 +131,68 @@ export class PosVenteComponent {
 
   openPaymentPopup() {
     this.showPaymentPopup = true;
+    this.totalAmount = this.getTotalCart(); // S'assurer que totalAmount est défini
+    this.enteredAmount = '';
+    this.paymentAmount = 0;
+    this.changeDue = 0;
+    this.isAmountEntered = false;
+    this.selectedPaymentMethod = 'Espèces';
+  }
+
+  handlePaymentKeyPress(key: string): void {
+    switch (key) {
+      case 'backspace':
+        this.enteredAmount = this.enteredAmount.slice(0, -1);
+        break;
+      case ',':
+        if (!this.enteredAmount.includes(',')) {
+          this.enteredAmount += ',';
+        }
+        break;
+      case '+/-':
+        // Optionnel: inverser le signe si nécessaire
+        break;
+      default:
+        if (this.enteredAmount.length < 10) {
+          this.enteredAmount += key;
+        }
+    }
+    
+    this.calculatePayment();
+  }
+
+  calculatePayment(): void {
+    // Convertir l'entrée en nombre (gérer la virgule)
+    const enteredValue = parseFloat(this.enteredAmount.replace(',', '.')) || 0;
+    
+    this.paymentAmount = enteredValue;
+    this.isAmountEntered = enteredValue > 0;
+    
+    // Calculer la monnaie ou le restant
+    if (this.paymentAmount >= this.totalAmount) {
+      this.changeDue = this.paymentAmount - this.totalAmount;
+    } else {
+      this.changeDue = this.totalAmount - this.paymentAmount;
+    }
+  }
+
+  selectPaymentMethod(method: string): void {
+    this.selectedPaymentMethod = method;
+  }
+
+  // Ajouter complete Payment()
+  completePayment(): void {
+    // Logique pour finaliser le paiement
+    console.log('Paiement complété:', {
+      method: this.selectedPaymentMethod,
+      amount: this.paymentAmount,
+      change: this.changeDue
+    });
+    
+    // Fermer le popup et réinitialiser le panier
+    this.closePaymentPopup();
+    this.cart.clear();
+    this.saveActiveCart();
   }
 
   closePaymentPopup() {
@@ -249,7 +319,7 @@ export class PosVenteComponent {
     this.applyQuantityToProduct();
   }
 
-applyQuantityToProduct(): void {
+  applyQuantityToProduct(): void {
     if (!this.selectedProduct || this.currentQuantityInput === '') return;
 
     const quantity = parseInt(this.currentQuantityInput, 10);
