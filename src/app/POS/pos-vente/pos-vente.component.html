@@ -46,9 +46,12 @@
         <div class="cadre_produit product-grid" *ngIf="isListView">
           
           <div class="product-card" 
-              *ngFor="let produit of displayedProducts"
-              [class.disabled]="getAvailableStock(produit) <= 0"
-              (click)="getAvailableStock(produit) > 0 ? addToCart(produit) : null">
+               *ngFor="let produit of displayedProducts"
+  [class.disabled]="getAvailableStock(produit) <= 0"
+  (click)="addToCart(produit)"
+  (pointerdown)="startPress($event, produit)"
+  (pointerup)="endPress()"
+  (pointerleave)="endPress()">
             <!-- pastille de stock en haut à gauche -->
             <span class="stock-badge" *ngIf="getSelectedQuantity(produit.id) > 0">
               {{ getSelectedQuantity(produit.id) }}
@@ -86,9 +89,12 @@
         <div class="cadre_produit_list product-list" *ngIf="!isListView">
           <ul class="ul_list">
             <li class="li_list" 
-              *ngFor="let produit of displayedProducts"
-              [class.disabled]="getAvailableStock(produit) <= 0"
-              (click)="getAvailableStock(produit) > 0 ? addToCart(produit) : null">
+                 *ngFor="let produit of displayedProducts"
+  [class.disabled]="getAvailableStock(produit) <= 0"
+  (click)="addToCart(produit)"
+  (pointerdown)="startPress($event, produit)"
+  (pointerup)="endPress()"
+  (pointerleave)="endPress()">
               <div class="list_left">
                 <div class="double">
                   <div class="img_product_list">
@@ -382,5 +388,45 @@
       </div>
     </div>
     
+  </div>
+</div>
+
+
+<!-- Popup de détail produit -->
+<div *ngIf="showDetailPopup" class="detail-popup-overlay">
+  <div class="detail-popup">
+    <div class="popup-header">
+      <button (click)="closeDetailPopup()" class="close-btn">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    
+    <div class="popup-content">
+      <img [src]="selectedProductForDetail ? getProductImage(selectedProductForDetail.photo) : ''" 
+           alt="Product image"
+           class="popup-img">
+      
+      <div class="product-info">
+        <h2>{{ selectedProductForDetail?.nom || 'Nom du produit' }}</h2>
+        
+        <div class="details-grid">
+          <div class="detail-item">
+            <span>Prix:</span>
+            <strong>{{ selectedProductForDetail?.prixVente || '0 CFA' }}</strong>
+          </div>
+          
+          <div class="detail-item">
+            <span>Stock disponible:</span>
+            <strong>{{ selectedProductForDetail ? getAvailableStock(selectedProductForDetail) : 0 }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="popup-actions">
+      <button class="btn-add" (click)="selectedProductForDetail && addToCart(selectedProductForDetail); closeDetailPopup()">
+        Ajouter au panier
+      </button>
+    </div>
   </div>
 </div>

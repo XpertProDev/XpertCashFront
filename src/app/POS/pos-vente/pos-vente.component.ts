@@ -39,6 +39,12 @@ export class PosVenteComponent {
   changeDue: number = 0;
   isAmountEntered: boolean = false;
 
+  longPressTimer: any = null;
+  selectedProductForDetail: ProduitDetailsResponseDTO | null = null;
+  showDetailPopup: boolean = false;
+  lastTap: number = 0;
+  tapDelay: number = 300;
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -49,6 +55,9 @@ export class PosVenteComponent {
       this.loadActiveCart();
     });
   }
+
+  // Gestion du clic/tape sur un produit
+
 
   ngOnInit() {
     const savedView = localStorage.getItem('viewPreference');
@@ -338,6 +347,30 @@ export class PosVenteComponent {
       setTimeout(() => this.showStockWarning = false, 3000);
     }
     this.saveActiveCart(); // Sauvegarder après modification
+  }
+
+  // Début de l'appui
+  startPress(event: Event, produit: ProduitDetailsResponseDTO): void {
+    // même logique, pas besoin de différencier TouchEvent / MouseEvent
+    if (this.getAvailableStock(produit) <= 0) return;
+    this.selectedProductForDetail = produit;
+    this.longPressTimer = setTimeout(() => {
+      this.showDetailPopup = true;
+      this.longPressTimer = null;
+    }, 500);
+  }
+
+  endPress(): void {
+    if (this.longPressTimer) {
+      clearTimeout(this.longPressTimer);
+      this.longPressTimer = null;
+    }
+  }
+
+  // Fermer le popup
+  closeDetailPopup(): void {
+    this.showDetailPopup = false;
+    this.selectedProductForDetail = null;
   }
 
 
