@@ -708,7 +708,7 @@ ul.ul_list {
 }
 
 .paiement_btn {
-  background-color: #ECECEC;
+  background-color: #f4f4f4;
   padding: 12px;
   border-radius: 5px;
 }
@@ -744,9 +744,31 @@ ul.ul_list {
   }
 }
 
+.selected_mode_pay {
+  border: 1px solid #2f7dd1;
+}
+
 .keypad button.btn_keypad_active {
   // border: 1px solid #0672E4;
   // background-color: #C1E0FF;
   border: 1px solid #2f7dd1;
   background-color: #e0efff;
+}
+
+/* Style pour les méthodes de paiement sélectionnées */
+.cadre_paiement.selected {
+  border: 2px solid #4CAF50;
+  background-color: #f0fff4;
+}
+
+/* Désactiver le bouton quand le montant est insuffisant */
+.btn-payment-pop:disabled {
+  background-color: #f4f4f4;
+  cursor: not-allowed;
+  color: #acacac;
+}
+
+.price_du p {
+  font-weight: bold;
+  font-size: 1.2em;
 }
