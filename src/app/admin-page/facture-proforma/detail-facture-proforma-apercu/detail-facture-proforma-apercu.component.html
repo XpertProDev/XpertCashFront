@@ -32,7 +32,8 @@
                     <h2>Facture proforma {{ f.numeroFacture }}</h2>
                 </div>
                 <div class="date">
-                    <p>{{siege}}, le {{ f.dateCreation | date:'dd MMMM yyyy' }}</p>
+                    <p>{{ siege }}, le {{ formatDateFr(f.dateCreation) }}</p>
+
                 </div>
                 <div class="droit" *ngIf="f.client">
                     <h4>Doit :</h4> 
@@ -59,7 +60,7 @@
                     <tbody>
                         <tr *ngFor="let ligne of f.lignesFacture">
                             <td class="td_left">{{ ligne.produit.nom }}</td>
-                            <td class="td_left">{{ ligne.ligneDescription }}</td>
+                            <td class="td_left" [innerHTML]="transformerLigne(ligne.ligneDescription || '')"></td>
                             <td>{{ ligne.prixUnitaire | customNumber }}</td>
                             <td>{{ ligne.quantite }}</td>
                             <td>{{ (ligne.prixUnitaire * ligne.quantite) | customNumber }}</td>

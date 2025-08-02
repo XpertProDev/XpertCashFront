@@ -84,7 +84,7 @@
                   </div>
                 </div>
 
-                <div class="champ_grid">
+                <div class="champ_grid_triple">
                    <!-- Input de nom produits  -->
                    <div class="champ_input">
                     <input  type="text" class="input_focus" value="{{ user?.personalCode }}" id="codePin" name="codePin" readonly style="cursor: no-drop;">
@@ -102,6 +102,14 @@
                         <span class="slider round"></span>
                     </label>
                   </div>
+
+                    <div class="content_delet">
+                        <div class="delet" *ngIf="user?.id">
+                            <span>Supprimer</span>
+                            <i class="ri-delete-bin-6-line" (click)="deleteUser(user?.id)"></i>
+                        </div>
+                    </div>
+
                 </div>
 
               </div>

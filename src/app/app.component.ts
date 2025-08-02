@@ -8,6 +8,8 @@ import { UsersService } from './admin-page/SERVICES/users.service';
 import { SessionExpiredModalComponent } from './theme/shared/session-expired-modal/session-expired-modal.component';
 import { ModalService } from './admin-page/SERVICES/modalService';
 import { LockService } from './admin-page/SERVICES/lock.service';
+import { tap } from 'rxjs';
+import { UserRequest } from './admin-page/MODELS/user-request';
 
 @Component({
   selector: 'app-root',
@@ -142,6 +144,8 @@ get isLoggedIn(): boolean {
 ngOnInit() {
   this.lockService.registerApp(this);
   this.checkLockStatus();
+    this.checkAccountStatus();
+
 
   this.router.events.subscribe((evt) => {
     if (evt instanceof NavigationEnd) {
@@ -157,8 +161,45 @@ ngOnInit() {
 
 showSessionModal = false;
 
-handleSessionConfirm() {
-  this.usersService.logoutUser();
-  this.showSessionModal = false;
-}
+  handleSessionConfirm() {
+    this.usersService.logoutUser();
+    this.showSessionModal = false;
+  }
+
+  showBlockedPopup: boolean = false;
+  isAdmin: boolean = false;
+  userEmail: string = '';
+
+
+   onLogout(): void {
+    this.usersService.logoutUser();
+  }
+
+  private checkAccountStatus(): void {
+    this.usersService.getUserInfo()
+      .pipe(tap(user => console.log('[checkAccountStatus] user:', user)))
+      .subscribe((user: UserRequest) => {
+        this.userEmail = user.email;
+        this.isAdmin = user.roleType?.toUpperCase() === 'ADMIN';
+        const now = Date.now();
+  
+        const createdAt = this.isAdmin
+          ? user.createdAt
+          : user.adminCreatedAt;
+  
+        const parsedCreatedAt = createdAt ? Date.parse(createdAt) : null;
+        const diffInHours = parsedCreatedAt ? (now - parsedCreatedAt) / (1000 * 60 * 60) : 0;
+  
+        const adminActivated = this.isAdmin
+          ? user.adminActivated
+          : user.adminActivated;
+  
+        console.log(`[${this.isAdmin ? 'Admin' : 'User'}] adminActivated=${adminActivated}, hours since admin creation=${diffInHours}`);
+  
+        this.showBlockedPopup = adminActivated === false && diffInHours > 24;
+  
+        console.log('=> showBlockedPopup =', this.showBlockedPopup);
+      });
+  }
+
 }

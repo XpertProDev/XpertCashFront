@@ -129,53 +129,95 @@ export class ConnexionPageComponent {
     this.showPopup = false;
   }
 
-  submitForm(): void {
-    if (this.loginForm.invalid) {
-      this.errorMessage = "Veuillez vérifier les informations saisies.";
-      return;
-    }
-  
-    this.isLoading = true;
-    const credentials = this.loginForm.value;
-  
-    setTimeout(() => { 
-      this.usersService.connexionUser(credentials).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-
-          if (response.accessToken && response.refreshToken) {
-            console.log("Access Token :", response.accessToken);
-            console.log("Refresh Token :", response.refreshToken);
-
-            this.authService.saveTokens(response.accessToken, response.refreshToken);
-            console.log("On va tenter la navigation vers /analytics");
-          this.router.navigate(['/analytics']).then(success => {
-            console.log("Navigation réussie ?", success);
-          });
-                      this.router.navigate(['/analytics']);
-          } else {
-            this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
-            this.openPopup("Erreur de connexion", this.errorMessage, 'error');
-          }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          console.log("Erreur complète :", error);
-          console.log("Réponse API :", error.error);
-  
-          let message = "Une erreur est survenue lors de la connexion.";
-          if (error.status === 400 || error.status === 401) {
-            if (typeof error.error === "string") {
-              message = error.error;
-            } else if (error.error?.error) {
-              message = error.error.error;
-            }
-          }
-          this.openPopup("❌ Oups, une erreur !", message, "error");
-        }
-      });
-    }, 1000);
+submitForm(): void {
+  if (this.loginForm.invalid) {
+    this.errorMessage = "Veuillez vérifier les informations saisies.";
+    return;
   }
+
+  this.isLoading = true;
+  const credentials = this.loginForm.value;
+
+  setTimeout(() => { 
+    this.usersService.connexionUser(credentials).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+
+        if (response.accessToken && response.refreshToken) {
+          console.log("Access Token :", response.accessToken);
+          console.log("Refresh Token :", response.refreshToken);
+
+          // Sauvegarde les tokens dans le service d'authentification
+          this.authService.saveTokens(response.accessToken, response.refreshToken);
+
+          // Récupérer les informations de l'utilisateur après la connexion
+          this.usersService.getUserInfo().subscribe({
+            next: (user) => {
+              const userRoleType = user.roleType;  // Récupérer le roleType de l'utilisateur
+              const userPermissions = user.permissions;  // Récupérer les permissions de l'utilisateur
+
+              // Vérification des permissions
+              if (userPermissions.includes("VENDRE_PRODUITS")) {
+                // Si l'utilisateur a "VENDRE_PRODUITS" + une autre permission
+                if (userPermissions.length > 1) {
+                  // Redirection vers "analytics" si l'utilisateur a plus qu'une seule permission
+                  this.router.navigate(['/analytics']).then(success => {
+                    console.log("Navigation vers analytics réussie ?", success);
+                  });
+                } else {
+                  // Si l'utilisateur n'a que "VENDRE_PRODUITS", redirection vers "pos-accueil"
+                  this.router.navigate(['/pos-accueil']).then(success => {
+                    console.log("Navigation vers pos-accueil réussie ?", success);
+                  });
+                }
+              } else if (
+                userPermissions.includes("VENDRE_PRODUITS")
+              ) {
+                // Redirection vers "pos-accueil" pour les permissions liées à la gestion des produits
+                this.router.navigate(['/pos-accueil']).then(success => {
+                  console.log("Navigation vers pos-accueil réussie ?", success);
+                });
+              } else {
+                // Redirection par défaut si aucune des conditions ci-dessus n'est remplie
+                this.router.navigate(['/analytics']).then(success => {
+                  console.log("Navigation vers la page par défaut réussie ?", success);
+                });
+              }
+            },
+            error: (err) => {
+              console.error("Erreur lors de la récupération des infos utilisateur :", err);
+              this.errorMessage = "Impossible de récupérer les informations utilisateur.";
+              this.openPopup("Erreur", this.errorMessage, "error");
+            }
+          });
+        } else {
+          this.errorMessage = response.error || "Erreur de connexion, veuillez réessayer.";
+          this.openPopup("Erreur de connexion", this.errorMessage, 'error');
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.log("Erreur complète :", error);
+        console.log("Réponse API :", error.error);
+
+        let message = "Une erreur est survenue lors de la connexion.";
+        if (error.status === 400 || error.status === 401) {
+          if (typeof error.error === "string") {
+            message = error.error;
+          } else if (error.error?.error) {
+            message = error.error.error;
+          }
+        }
+        this.openPopup("❌ Oups, une erreur !", message, "error");
+      }
+    });
+  }, 1000);
+}
+
+
+
+
+
   
   get f() { return this.loginForm.controls; }
 

@@ -371,11 +371,11 @@ loadBoutiques() {
 }
 
 isRoleVisible(roleName: string): boolean {
-  if (this.currentUserRole === 'ADMIN' && roleName === 'ADMIN') {
+  if (this.currentUserRole === 'ADMIN' && roleName === 'ADMIN' || roleName === 'VENDEUR') {
     return false;
   }
 
-  if (this.currentUserRole === 'MANAGER' && roleName === 'MANAGER'|| roleName === 'ADMIN') {
+  if (this.currentUserRole === 'MANAGER' && roleName === 'MANAGER'|| roleName === 'ADMIN' || roleName === 'VENDEUR') {
     return false;
   }
 

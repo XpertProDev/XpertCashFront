@@ -973,6 +973,7 @@ associateUserToBoutique(userId: number): void {
 
         // Effacer le message après 3 secondes
         setTimeout(() => this.successMessage = null, 3000);
+        this.loadAllVendeursBoutique()
       },
       error: (err) => {
         // Gérer les erreurs de l'API
@@ -981,5 +982,104 @@ associateUserToBoutique(userId: number): void {
       }
     });
   }
+
+selectedVendeurs: number[] = [];
+toggleSelectionCheckbox(event: Event, id: number | undefined): void {
+  if (id === undefined) {
+    console.warn("ID vendeur manquant.");
+    return;
+  }
+
+  const checked = (event.target as HTMLInputElement).checked;
+
+  if (checked) {
+    this.selectedVendeurs.push(id);
+  } else {
+    this.selectedVendeurs = this.selectedVendeurs.filter(v => v !== id);
+  }
+
+  console.log('Vendeurs sélectionnés:', this.selectedVendeurs);
+}
+
+
+
+deleteSelectedVendeurs(): void {
+  if (this.selectedVendeurs.length === 0) {
+    console.warn("Aucun vendeur sélectionné.");
+    return;
+  }
+
+  this.selectedVendeurs.forEach(userId => {
+    this.dissociateUserFromBoutique(userId);
+  });
+
+  this.selectedVendeurs = []; // Réinitialise après suppression
+}
+
+  // Methode pour retirer vendeur
+  dissociateUserFromBoutique(userId: number): void{
+        if (!this.boutiqueId) {
+      console.error("Aucune boutique sélectionnée.");
+      return;
+    }
+    if (userId === undefined || userId === null) {
+      console.error("Aucun utilisateur sélectionné.");
+      return;
+    }
+
+    // Préparer l'objet de la requête
+    const request: AssignerVendeurRequest = {
+      userId: userId,
+      boutiqueIds: [this.boutiqueId] 
+    };
+
+    this.boutiqueService.retirerVendeur(request).subscribe({
+      next: (response) => {
+        // Vérifier la réponse et afficher un message de succès
+        if (response.status === 'success') {
+          this.successMessage = 'Utilisateur retiré de la boutique!';
+        } else {
+          this.successMessage = 'Aucune Utilisateur n\'a été retiré.';
+        }
+        // Recharger la liste des vendeurs de la boutique si nécessaire
+        // this.loadAllVendeursBoutique();
+
+        // Effacer le message après 3 secondes
+        setTimeout(() => this.successMessage = null, 3000);
+        this.loadAllVendeursBoutique()
+      },
+      error: (err) => {
+        // Gérer les erreurs de l'API
+        this.errorMessage = "Erreur lors de retrait : " + (err.error?.message || err.message);
+        setTimeout(() => this.errorMessage = null, 5000);
+      }
+    });
+
+  }
+
+formatDateOnly(dateString?: string): string {
+  if (!dateString) return '';
+
+  // Supposons format : "28/07/2025 10:48:52"
+  const parts = dateString.split(' ')[0].split('/'); // ["28", "07", "2025"]
+
+  if (parts.length !== 3) return '';
+
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // JS month index commence à 0
+  const year = parseInt(parts[2], 10);
+
+  const date = new Date(year, month, day);
+
+  if (isNaN(date.getTime())) return '';
+
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+}
+
+
 
 }

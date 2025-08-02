@@ -4,7 +4,19 @@
     {{ errorMessage }}
   </div>
 
+  <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+    {{ successMessage }}
+  </div>
+
 </div>
+
+<div *ngIf="isDeleting" class="loading-overlay">
+  <div class="spinner"></div>
+</div>
+
+
+
+
 
 
 <!-- Icon return  -->
@@ -146,8 +158,28 @@
                     <div class="info_titre_input info_titre_input_proforma">
                         <h2>FACTURE PRO FORMA : <span> {{ factureProForma.numeroFacture }} </span></h2>
                         <p style="text-align: right;">{{siege}}, le {{ factureProForma.dateCreation | date:'dd-MM-yyyy' }}</p>
+
+                         <div class="delet" *ngIf="factureProForma.statut === statutFactureProForma.BROUILLON">
+                            <i class="ri-delete-bin-6-line" (click)="deleteFacture()" 
+                            ></i>
+                        </div>
                     </div>
+                    
                 </div>
+
+                        <!-- Modal de confirmation personnalisée -->
+                    <div class="confirmation-modal-averB" *ngIf="showConfirmationModalF">
+                        <div class="modal-content-averB">
+                            <h4 style="font-size: 16px; margin-bottom: 10px;">Confirmation</h4>
+                            <p style="margin: 0; font-size: 12px;">Êtes-vous sûr de vouloir supprimer la facture 
+                                 <span> {{ factureProForma.numeroFacture }} </span>?</p>
+                            
+                            <div class="modal-actions-averB">
+                                <button class="btn-confirm" style="font-size: 12px;" (click)="confirmDeleteF()">OUI</button>
+                                <button class="btn-cancel" style="font-size: 12px;" (click)="showConfirmationModalF = false">NON</button>
+                            </div>
+                        </div>
+                    </div>
 
                 <!-- Les informations de facture  -->
                 <div class="information_cadre">

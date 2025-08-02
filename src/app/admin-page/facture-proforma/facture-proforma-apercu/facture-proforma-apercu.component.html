@@ -84,7 +84,7 @@
                     <tbody>
                         <tr *ngFor="let ligne of facture.lignesFacture">
                             <td class="td_left">{{ ligne.produit.nom }}</td>
-                            <td class="td_left">{{ ligne.ligneDescription }}</td>
+                            <td class="td_left" [innerHTML]="formatDescription(ligne.ligneDescription || '')"></td>
                             <td>{{ ligne.prixUnitaire | customNumber }}</td>
                             <td>{{ ligne.quantite }}</td>
                             <!-- <td>15 000</td> -->

@@ -50,10 +50,20 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/vente',
         classes: 'nav-item',
-        icon: 'feather icon-shopping-cart',
+        icon: 'feather icon-bar-chart-2',
         codePermission: 'GERER_PRODUITS'
 
       },
+         {
+        id: 'pos',
+        title: 'POS',
+        type: 'item',
+        url: '/pos-accueil',
+        classes: 'nav-item',
+        icon: 'feather icon-shopping-cart',
+        codePermission: 'VENDRE_PRODUITS'
+
+        },
       {
         id: 'produit',
         title: 'Produits',
@@ -64,7 +74,7 @@ export const NavigationItems: NavigationItem[] = [
       },
       {
         id: 'boutique',
-        title: 'Boutique',
+        title: 'Boutiques',
         type: 'item',
         url: '/boutique',
         classes: 'nav-item',
@@ -80,7 +90,7 @@ export const NavigationItems: NavigationItem[] = [
         children: [
           {
             id: 'stock',
-            title: 'Stock',
+            title: 'Stocks',
             type: 'collapse',
             icon: 'feather icon-box',
             codePermission: 'APPROVISIONNER_STOCK',

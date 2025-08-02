@@ -283,12 +283,12 @@ private updatePhoneValidator(longueur: number): void {
 
     this.entrepriseService.getListEntreprise().subscribe(
         (list: Entreprise[]) => {
-            this.optionsEntreprise$.next(list); // Mettre à jour le BehaviorSubject
+            this.optionsEntreprise$.next(list);
             this.setupAutocomplete();
         },
         err => {
-            console.error('Erreur lors de la récupération des entreprises :', err);
-            this.errorMessage = err.error?.error || 'Client physiques';
+            // console.error('Erreur lors de la récupération des entreprises :', err);
+            // this.errorMessage = err.error?.error || 'Client physiques';
         }
     );
   }
@@ -329,7 +329,7 @@ getListEntreprise() {
       );
     },
     error: (error) => {
-      console.error('Erreur lors de la récupération des entreprises :', error);
+      // console.error('Erreur lors de la récupération des entreprises :', error);
     }
   });
 }

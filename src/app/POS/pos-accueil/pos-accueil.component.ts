@@ -6,6 +6,7 @@ import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.d
 import { environment } from 'src/environments/environment';
 import { ViewStateService } from './view-state.service';
 import { Observable, Subscription } from 'rxjs';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { CommandeStateService } from 'src/app/admin-page/SERVICES/commande-state.service';
 
 @Component({
@@ -23,15 +24,22 @@ export class PosAccueilComponent {
   activeButton: 'vente' | 'commande' = 'vente';
   showMenuDropdown = false;
 
-  activeCommande: string = '001';
+   userName: string = '';
+  nomEntreprise = '';
+  photo: string | null = null;
+  photoUrl: string | null = null;
+
+  commandes: string[] = ['001']; // Liste initiale
+  activeCommande: string = '001'; // Commande active
   // showCommandeDropdown = false;
   showCommandePopup = false;
-  commandes: string[] = [];
   private commandeSubscription: Subscription;
 
   constructor(
     private router: Router,
     private viewState: ViewStateService,
+    private userService: UsersService,
+    
     private commandeState: CommandeStateService
   ) {
     this.isListView$ = this.viewState.isListView$;
@@ -56,6 +64,7 @@ export class PosAccueilComponent {
   ngOnInit() {
     const currentRoute = this.router.url;
     this.activeButton = currentRoute.includes('/commandes') ? 'commande' : 'vente';
+    this.getUserInfo();
   }
 
   ngOnDestroy() {
@@ -116,6 +125,41 @@ get visibleCommandes() {
       : [];
   }
   
-  
+getUserInfo(): void {
+  this.userService.getUserInfo().subscribe({
+    next: (user) => {
+     this.userName = user.nomComplet.charAt(0).toUpperCase();
+      this.nomEntreprise = user.nomEntreprise;
+    },
+    error: (err) => {
+      console.error("Erreur lors de la récupération des infos utilisateur :", err);
+    }
+  });
+}
+
+ 
+onLogout(): void {
+  // Récupérer les informations de l'utilisateur
+  this.userService.getUserInfo().subscribe({
+    next: (user) => {
+      const userPermissions = user.permissions;  // Récupérer les permissions de l'utilisateur
+
+      // Vérifier si l'utilisateur a uniquement la permission "VENDRE_PRODUITS"
+      if (userPermissions.length === 1 && userPermissions.includes("VENDRE_PRODUITS")) {
+        // Si l'utilisateur a uniquement "VENDRE_PRODUITS", on le déconnecte
+        this.userService.logoutUser();  // Déconnexion de l'utilisateur
+        this.router.navigate(['/connexion']).then(success => {
+          console.log("Déconnexion réussie ?", success);
+        });
+      } else {
+        // Sinon, on redirige vers "analytics"
+        this.router.navigate(['/analytics']).then(success => {
+          console.log("Navigation vers analytics réussie ?", success);
+        });
+      }
+    },
+  });
+}
+
 
 }

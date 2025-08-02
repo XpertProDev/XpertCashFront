@@ -147,9 +147,9 @@
 
             <div class="champ_input">
               <input class="input_focus" type="text" formControlName="nomBoutique" placeholder="Saisis le nom de boutique">
-              <label class="label">Nom boutque</label>
+              <label class="label">Nom de la boutique</label>
               <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
-                <small class="error">Le nom boutique complet est vide.</small>
+                <small class="error">Le nom de la boutique est vide.</small>
               </div>
             </div> 
 
@@ -170,7 +170,7 @@
             <!-- // Input de telephone Boutique  -->
             <div class="champ_input ">
               <input class="input_focus" type="number" formControlName="telephone" placeholder="00 00 00 00">
-              <label class="label">Phone</label>
+              <label class="label">Téléphone</label>
               <div *ngIf="boutiqueForm.get('telephoneBoutique')?.invalid && boutiqueForm.get('telephoneBoutique')?.touched">
                 <small class="error">Le numéro de téléphone est requis.</small>
               </div>
