@@ -204,6 +204,7 @@ export class PosVenteComponent {
       amount: this.paymentAmount,
       change: this.changeDue
     });
+    this.goTopaiement()
     
     // Fermer le popup et réinitialiser le panier
     this.closePaymentPopup();
@@ -374,6 +375,10 @@ export class PosVenteComponent {
       clearTimeout(this.longPressTimer);
       this.longPressTimer = null;
     }
+  }
+
+  goTopaiement() {
+    this.router.navigate(['/pos-accueil/paiement'])
   }
 
   // Fermer le popup

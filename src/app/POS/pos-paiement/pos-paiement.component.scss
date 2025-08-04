@@ -1,0 +1,233 @@
+/* paiement.component.css */
+.container_paiement {
+  width: 100%;
+}
+
+.content_paiement {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100vh;
+  background: #fff;
+}
+
+/* === Left pane === */
+.paiement_left {
+  width: 100%;
+//   padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content_paiement_left {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 15px;
+  width: 60%;
+  position: relative;
+  top: -10%;
+}
+
+.card {
+  border: 1px solid #A5D6A7;
+  border-radius: 4px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.status-card {
+  background: #E8F5E9;
+  margin-bottom: 0;
+  padding: 30px 20px;
+}
+
+.status-icon {
+  width: 24px;
+  height: 24px;
+  background: #4CAF50;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 16px;
+}
+
+.status-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #2E7D32;
+}
+
+.amount-card {
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.amount {
+  font-size: 18px;
+  color: #2E7D32;
+}
+
+.method {
+  font-size: 18px;
+  color: #2E7D32;
+}
+
+.btn {
+  padding: 14px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #f9f9f9;
+  color: #333;
+}
+
+.email-send {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.email-send input {
+  flex: 1;
+  border: none;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.email-send input:focus {
+  outline: none;
+}
+
+.btn-send {
+  background: #1976D2;
+  color: #fff;
+  font-size: 20px;
+  border-radius: 0;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 22px;
+}
+
+.btn-primary {
+  background: #1976D2;
+  color: #fff;
+//   padding: 10px 25px;
+}
+
+.btn-new-order {
+  margin-top: auto;
+}
+
+/* === Right pane (receipt) === */
+.paiement_right {
+  padding: 40px;
+  background: #ECECEC;
+  overflow-y: auto;
+  margin-bottom: 8%;
+}
+
+.receipt {
+  max-width: 350px;
+  min-height: 80vh;
+  margin: 0 auto;
+  background: #fff;
+  padding: 24px 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.receipt-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.receipt-header .logo {
+  max-width: 160px;
+  margin-bottom: 12px;
+}
+
+.ticket-info div {
+  font-size: 12px;
+  color: #555;
+  line-height: 2px;
+  margin-top: 20px;
+}
+
+.items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.item .qty {
+  width: 14px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.desc {
+  flex: 1;
+  margin: -2px 12px 0;
+}
+
+.name {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.unit-price {
+  font-size: 10px;
+  color: #777;
+}
+
+.total {
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.divider {
+  border-top: 1px dotted #bbb;
+  margin: 12px 0;
+}
+
+.totals .line,
+.payments-breakdown .line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.total-line {
+  font-weight: 600;
+}
+
+.receipt-footer {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+}
+
