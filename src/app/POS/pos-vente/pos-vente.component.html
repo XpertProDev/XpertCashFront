@@ -188,7 +188,7 @@
     <!-- Client et facture -->
     <div class="client_facture" style="padding-top: 5px;">
       <div class="double_client_facture">
-        <div class="paiement_btn btn_client">
+        <div class="paiement_btn btn_client" (click)="openListClientPopup()">
           <p>Client</p>
         </div>
         <div class="paiement_btn btn_facture">
@@ -469,3 +469,93 @@
   </div>
 </div>
 
+<!-- Popup de client -->
+<div *ngIf="showClientPopup" class="list-client-popup-overlay">
+  <div class="list-client-popup">
+    <div class="popup-header">
+      <div class="btnAddClient">
+        <button (click)="openAddClient()">
+          Ajouter Client
+        </button>
+      </div>
+
+      <!-- Barre de recherche -->
+      <div class="double" style="gap: 10px;">
+        <div class="inputSearch">
+          <i class="ri-search-2-line"></i>
+          <input type="text" placeholder="Recherche un client" [(ngModel)]="searchText"/>
+        </div>
+
+        <button (click)="closeListClientPopup()" class="close-btn">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tableau -->
+    <table>
+      <thead>
+        <!-- <th>Photo</th>
+        <th (click)="sort('nomComplet')">
+          Nom & prénom 
+          <i [class]="sortField === 'nomComplet' ? (sortDirection === 'asc' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line') : 'ri-arrow-up-down-line'"></i>
+        </th>
+        <th> Email </th>
+        <th> Adresse </th>
+        <th> Téléphone </th>
+        <th> Entreprise </th>
+        <th> Date de Creation </th>
+      </thead> -->
+      <tbody>
+          <tr *ngFor="let client of filteredClients" (click)="selectClient(client)">
+              <td>
+                <div class="imgClient">
+                  <img [src]="client.photo" alt="Photo client">
+                </div>
+              </td>
+              <td>
+                <span *ngIf="client.nomComplet; else noNomComplet" 
+                      [innerHTML]="highlightMatch(client.nomComplet)"></span>
+                <ng-template #noNomComplet>
+                  <span class="no-phone-text">Nom est vide</span>
+                </ng-template>
+              </td>
+              <td>
+                <span *ngIf="client.email; else noEmail" [innerHTML]="highlightMatch(client.email)">{{ client.email }}</span>
+                <ng-template #noEmail>
+                  <span class="no-phone-text">Non email</span>
+                </ng-template>
+              </td>
+              <td>
+                <span *ngIf="client.adresse; else noAdresse">{{ client.adresse }}</span>
+                <ng-template #noAdresse>
+                  <span class="no-phone-text">Non adresse</span>
+                </ng-template>
+              </td>
+              <td>
+                <span *ngIf="client.telephone; else noPhone">{{ client.telephone }}</span>
+                <ng-template #noPhone>
+                  <span class="no-phone-text">Non numéro de téléphone</span>
+                </ng-template>
+              </td>
+              <td>
+                <div *ngIf="client.entrepriseClient; else noEntreprise" class="iconEntrepriseList">
+                  <i class="ri-git-branch-fill" title="Affiliation d'Entreprise"></i>
+                </div>
+                <ng-template #noEntreprise>
+                  <!-- Vide si pas d'entreprise -->
+                </ng-template>
+              </td>
+              <td>
+                <span *ngIf="client.createdAt; else noDate">{{ client.createdAt | date: 'dd/MM/yyyy' }}</span>
+                <ng-template #noDate>
+                  <span class="no-phone-text">Non date</span>
+                </ng-template>
+          </tr>
+          <tr *ngIf="filteredClients.length === 0">
+            <td colspan="7" class="no-client-message">Aucun client trouvé</td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

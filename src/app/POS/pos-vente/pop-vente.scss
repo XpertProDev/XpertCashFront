@@ -1,0 +1,320 @@
+// payment popup overlay
+.payment-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  // background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.733);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.payment-popup {
+  background-color: white;
+  width: 85%;
+  // max-width: 800px;
+  height: 90vh;
+  border-radius: 10px;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+  
+  .popup-header {
+    // display: flex;
+    // justify-content: space-between;
+    // align-items: center;
+    // padding: 20px;
+    // background-color: #f8f9fa;
+    // border-bottom: 1px solid #dee2e6;
+    
+    .close-btn {
+      // position: absolute;
+      // top: 10px;
+      // right: 10px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #6c757d;
+      cursor: pointer;
+      transition: color 0.2s;
+      
+      &:hover {
+        color: #dc3545;
+      }
+    }
+    
+  }
+  
+}
+
+// list client popup overlay
+.list-client-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  // background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.733);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.list-client-popup {
+  background-color: white;
+  width: 90%;
+  // max-width: 800px;
+  height: 90vh;
+  border-radius: 10px;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+  
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    
+    .close-btn {
+      // position: absolute;
+      // top: 10px;
+      // right: 10px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #6c757d;
+      cursor: pointer;
+      transition: color 0.2s;
+      
+      &:hover {
+        color: #dc3545;
+      }
+    }
+    
+  }
+  
+}
+
+.detail-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 0;
+  z-index: 1000;
+}
+
+.detail-image {
+  height: 100px;
+  width: 100px;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+}
+
+.detail-popup {
+  background: #fff;
+  width: 90%;
+  max-width: 900px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e5e5;
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+  }
+
+  .popup-body {
+    padding: 1.5rem;
+
+    .shop-name {
+      margin: 0 0 1rem;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-info {
+        display: grid;
+        grid-template-columns: 250px 250px 1fr;
+        row-gap: 0.75rem;
+        column-gap: 4rem;
+        margin-top: 15px;
+        margin-bottom: 15px;
+
+        .info-row {
+          display: flex;
+          justify-content: space-between;
+          line-height: 25px;
+          span {
+            font-size: 12px;
+          }
+          .label {
+            font-weight: 500;
+            color: #555;
+          }
+          .value {
+            font-weight: 600;
+            color: #222;
+          }
+        }
+      }
+
+    .detail-description {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 0;
+      border-top: 1px solid #e5e5e5;
+      .label {
+        font-weight: 500;
+        color: #555;
+      }
+      .value {
+        font-style: italic;
+        color: #333;
+      }
+    }
+  }
+
+  .popup-actions {
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    text-align: right;
+
+    .btn-add {
+      background: #0672e4;
+      border: none;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #45a049;
+      }
+    }
+  }
+}
+
+/* Désactiver le bouton quand le montant est insuffisant */
+.btn-payment-pop:disabled {
+  background-color: #f4f4f4;
+  cursor: not-allowed;
+  color: #acacac;
+}
+
+////////////// Pop Up client pour les list
+
+.btnAddClient button {
+  border: none;
+  background-color: #0672e4;
+  padding: 8px 20px;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 12px;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+tr {
+    font-size: 13px;
+}
+
+td {
+  padding: 18px 8px;
+  border-bottom: 1px solid #dddddd94;
+}
+  
+th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #dddddd94;
+    padding: 12px 8px;
+}
+  
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+  
+tr:hover {
+    background-color: #ddd;
+}
+
+.imgClient img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.no-client-message {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}
+
+.inputSearch {
+  position: relative;
+  width: 250px;
+  height: 35px;
+  //background-color: red;
+  display: flex;
+  align-items: center;
+}
+
+.inputSearch input {
+  width: 100%;
+  height: 100%;
+  padding-left: 10px;
+  border-radius: 5px;
+  border: 1px solid #000;
+  font-size: 13px;
+}
+
+.inputSearch i {
+  position: absolute;
+  right: 0;
+  margin-right: 15px;
+  font-size: 17px;
+}

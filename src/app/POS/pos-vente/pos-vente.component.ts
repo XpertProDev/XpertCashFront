@@ -8,6 +8,11 @@ import { Categorie } from 'src/app/admin-page/MODELS/categorie.model';
 import { CategorieService } from 'src/app/admin-page/SERVICES/categorie.service';
 import { ProduitDetailsResponseDTO } from 'src/app/admin-page/MODELS/produit-category.model';
 import { CommandeStateService } from 'src/app/admin-page/SERVICES/commande-state.service';
+import { Clients } from 'src/app/admin-page/MODELS/clients-model';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ClientService } from 'src/app/admin-page/SERVICES/client-service';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { switchMap, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-pos-vente',
@@ -42,16 +47,27 @@ export class PosVenteComponent {
   longPressTimer: any = null;
   selectedProductForDetail: ProduitDetailsResponseDTO | null = null;
   showDetailPopup: boolean = false;
+  showClientPopup: boolean = false;
   lastTap: number = 0;
   tapDelay: number = 300;
 
   allProducts: ProduitDetailsResponseDTO[] = [];
 
+  // Propriétés ajoutées
+  clients: Clients[] = [];
+  searchText = '';
+  sortField = 'nomComplet';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
     private categorieService: CategorieService,
-    private commandeState: CommandeStateService
+    private commandeState: CommandeStateService,
+    private clientService: ClientService,
+    private usersService: UsersService,
+    private sanitizer: DomSanitizer
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
@@ -59,8 +75,6 @@ export class PosVenteComponent {
   }
 
   // Gestion du clic/tape sur un produit
-
-
   ngOnInit() {
     const savedView = localStorage.getItem('viewPreference');
     this.isListView = savedView ? savedView === 'list' : true;
@@ -386,6 +400,96 @@ export class PosVenteComponent {
     this.showDetailPopup = false;
     this.selectedProductForDetail = null;
   }
+
+  // ouvrir le popup client list
+  openListClientPopup(): void {
+    this.showClientPopup = true;
+    this.loadClients();
+  }
+
+  loadClients() {
+    this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) {
+          console.error('Aucun token valide trouvé !');
+          return throwError(() => new Error('Aucun token trouvé'));
+        }
+        return this.clientService.getListClients();
+      })
+    ).subscribe({
+      next: (data) => {
+        this.clients = data.map(client => {
+          return {
+            ...client,
+            photo: client.photo 
+              ? `${environment.imgUrl}${client.photo}` 
+              : `/assets/img/profil.png`,
+            entrepriseClient: client.entrepriseClient 
+              ? { id: client.entrepriseClient.id } 
+              : null
+          };
+        });
+        // Trier initialement
+        this.sort('nomComplet');
+      },
+      error: (err) => {
+        console.error('Erreur récupération clients :', err);
+      }
+    });
+  }
+
+  // Fermer le popup client list
+  closeListClientPopup(): void {
+    this.showClientPopup = false;
+  }
+
+  highlightMatch(text: string | null | undefined): SafeHtml {
+    if (!text) return '';
+    if (!this.searchText.trim()) return text;
+    
+    const escapedSearch = this.searchText.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedSearch})`, 'gi');
+    
+    return this.sanitizer.bypassSecurityTrustHtml(
+      text.replace(regex, '<mark>$1</mark>')
+    );
+  }
+
+  get filteredClients(): Clients[] {
+    if (!this.searchText.trim()) return this.clients;
+    
+    const searchLower = this.searchText.toLowerCase().trim();
+    return this.clients.filter(client => 
+      (client.nomComplet?.toLowerCase().includes(searchLower)) ||
+      (client.email?.toLowerCase().includes(searchLower)) ||
+      (client.adresse?.toLowerCase().includes(searchLower)) ||
+      (client.telephone?.includes(searchLower))
+    );
+  }
+
+  sort(field: string) {
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+
+    this.clients.sort((a: any, b: any) => {
+      const modifier = this.sortDirection === 'asc' ? 1 : -1;
+      const valueA = a[field]?.toString().toLowerCase() ?? '';
+      const valueB = b[field]?.toString().toLowerCase() ?? '';
+      return valueA.localeCompare(valueB) * modifier;
+    });
+  }
+
+  selectClient(client: Clients) {
+    // Logique pour sélectionner le client
+    console.log('Client sélectionné:', client);
+    this.closeListClientPopup();
+  }
+
+  openAddClient() {}
 
 
 }
