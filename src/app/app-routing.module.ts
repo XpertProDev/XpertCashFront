@@ -81,6 +81,12 @@ const routes: Routes = [
           loadComponent: () =>
             import('./POS/pos-commande/pos-commande.component')
               .then(m => m.PosCommandeComponent),
+        },
+        {
+          path: 'paiement',
+          loadComponent: () =>
+            import('./POS/pos-paiement/pos-paiement.component')
+              .then(m => m.PosPaiementComponent),
         }
       ]
 },

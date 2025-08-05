@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { ViewStateService } from '../pos-accueil/view-state.service';
@@ -8,10 +8,19 @@ import { Categorie } from 'src/app/admin-page/MODELS/categorie.model';
 import { CategorieService } from 'src/app/admin-page/SERVICES/categorie.service';
 import { ProduitDetailsResponseDTO } from 'src/app/admin-page/MODELS/produit-category.model';
 import { CommandeStateService } from 'src/app/admin-page/SERVICES/commande-state.service';
+import { Clients } from 'src/app/admin-page/MODELS/clients-model';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ClientService } from 'src/app/admin-page/SERVICES/client-service';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { BehaviorSubject, combineLatest, map, Observable, of, startWith, switchMap, throwError } from 'rxjs';
+import { Entreprise } from 'src/app/admin-page/MODELS/entreprise-model';
+import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-service';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { EntrepriseClient } from 'src/app/admin-page/MODELS/entreprise-clients-model';
 
 @Component({
   selector: 'app-pos-vente',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, MatAutocompleteModule],
   templateUrl: './pos-vente.component.html',
   styleUrl: './pos-vente.component.scss'
 })
@@ -42,25 +51,128 @@ export class PosVenteComponent {
   longPressTimer: any = null;
   selectedProductForDetail: ProduitDetailsResponseDTO | null = null;
   showDetailPopup: boolean = false;
+  showClientPopup: boolean = false;
   lastTap: number = 0;
   tapDelay: number = 300;
 
   allProducts: ProduitDetailsResponseDTO[] = [];
 
+  clientType: 'individuel' | 'entreprise' = 'individuel';
+  entrepriseForm!: FormGroup;
+  entrepriseIndicatif: string = '';
+  entrepriseMaxPhoneLength: number = 0;
+
+  // Propriétés ajoutées
+  clients: Clients[] = [];
+  searchText = '';
+  sortField = 'nomComplet';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  currentListTypePopup: 'clients' | 'entreprises' = 'clients';
+  entreprisesPopup: EntrepriseClient[] = [];
+  // filteredEntreprisesPopup: EntrepriseClient[] = [];
+
+  clientForm!: FormGroup;
+  isEntrepriseSelected = false;
+  showAddClientPopup = false;
+  paysIndicatifs: { [key: string]: { indicatif: string, longueur: number } } = {
+    'Mali': { indicatif: '+223', longueur: 8 },
+    'Sénégal': { indicatif: '+221', longueur: 9 },
+    'Côte d\'Ivoire': { indicatif: '+225', longueur: 10 },
+    'Burkina Faso': { indicatif: '+226', longueur: 8 },
+    'Niger': { indicatif: '+227', longueur: 8 },
+    'France': { indicatif: '+33', longueur: 9 },
+    'Belgique': { indicatif: '+32', longueur: 9 },
+    'Suisse': { indicatif: '+41', longueur: 9 },
+    'Canada': { indicatif: '+1', longueur: 10 },
+    'États-Unis': { indicatif: '+1', longueur: 10 },
+    'Maroc': { indicatif: '+212', longueur: 9 },
+    'Algérie': { indicatif: '+213', longueur: 9 },
+    'Tunisie': { indicatif: '+216', longueur: 8 },
+    'Togo': { indicatif: '+228', longueur: 8 },
+    'Bénin': { indicatif: '+229', longueur: 8 },
+    'Guinée': { indicatif: '+224', longueur: 9 },
+    'Tchad': { indicatif: '+235', longueur: 8 },
+    'Cameroun': { indicatif: '+237', longueur: 9 },
+    'RDC': { indicatif: '+243', longueur: 9 },
+    'Gabon': { indicatif: '+241', longueur: 9 },
+    'Afrique du Sud': { indicatif: '+27', longueur: 9 },
+    'Rwanda': { indicatif: '+250', longueur: 9 },
+    'Kenya': { indicatif: '+254', longueur: 9 },
+    'Nigéria': { indicatif: '+234', longueur: 10 },
+    'Ghana': { indicatif: '+233', longueur: 9 },
+    'Éthiopie': { indicatif: '+251', longueur: 9 },
+    'Égypte': { indicatif: '+20', longueur: 10 },
+    'Inde': { indicatif: '+91', longueur: 10 },
+    'Chine': { indicatif: '+86', longueur: 11 },
+    'Mexique': { indicatif: '+52', longueur: 10 },
+    'Allemagne': { indicatif: '+49', longueur: 10 },
+    'Espagne': { indicatif: '+34', longueur: 9 },
+    'Italie': { indicatif: '+39', longueur: 10 },
+    'Royaume-Uni': { indicatif: '+44', longueur: 10 },
+    'Pays-Bas': { indicatif: '+31', longueur: 9 },
+    'Portugal': { indicatif: '+351', longueur: 9 }
+  };
+  paysKeys: string[] = Object.keys(this.paysIndicatifs);
+  indicatif: string = '';
+  maxPhoneLength: number = 0;
+
+  control = new FormControl();
+  filteredOptions: Observable<Entreprise[]> = of([]);
+  optionsEntreprise$ = new BehaviorSubject<Entreprise[]>([]);
+
+  currentListType: 'clients' | 'entreprises' = 'clients';
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
     private categorieService: CategorieService,
-    private commandeState: CommandeStateService
+    private commandeState: CommandeStateService,
+    private clientService: ClientService,
+    private usersService: UsersService,
+    private sanitizer: DomSanitizer,
+    private fb: FormBuilder,
+    private entrepriseService: EntrepriseService,
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
     });
+
+    this.initClientForm();
+    this.initForms();
+  }
+
+  private initForms() {
+    this.initClientForm();
+    this.initEntrepriseForm();
+  }
+
+  // Initialiser le formulaire client
+  initClientForm() {
+    this.clientForm = this.fb.group({
+      nomComplet: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.email]],
+      telephone: ['', Validators.required],
+      adresse: [''],
+      poste: [''],
+      pays: [''],
+      ville: ['']
+    });
+  }
+
+  initEntrepriseForm() {
+    this.entrepriseForm = this.fb.group({
+        nom: ['', [Validators.required, Validators.minLength(2)]],
+        adresse: [''],
+        email: ['', [Validators.email]],
+        telephone: ['', Validators.required],
+        pays: [''],
+        siege: [''],
+        secteur: ['']
+    });
   }
 
   // Gestion du clic/tape sur un produit
-
-
   ngOnInit() {
     const savedView = localStorage.getItem('viewPreference');
     this.isListView = savedView ? savedView === 'list' : true;
@@ -204,6 +316,7 @@ export class PosVenteComponent {
       amount: this.paymentAmount,
       change: this.changeDue
     });
+    this.goTopaiement()
     
     // Fermer le popup et réinitialiser le panier
     this.closePaymentPopup();
@@ -376,10 +489,407 @@ export class PosVenteComponent {
     }
   }
 
+  goTopaiement() {
+    this.router.navigate(['/pos-accueil/paiement'])
+  }
+
   // Fermer le popup
   closeDetailPopup(): void {
     this.showDetailPopup = false;
     this.selectedProductForDetail = null;
+  }
+
+  loadClients() {
+    this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) return throwError(() => new Error('Aucun token trouvé'));
+        return this.clientService.getListClients();
+      })
+    ).subscribe({
+      next: (data) => {
+        this.clients = data.map(client => ({
+          ...client,
+          photo: client.photo 
+            ? `${environment.imgUrl}${client.photo}` 
+            : `assets/img/profil.png`,
+          entrepriseClient: client.entrepriseClient 
+            ? { id: client.entrepriseClient.id } 
+            : null
+        })).sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+      },
+      error: (err) => {
+        console.error('Erreur récupération clients :', err);
+      }
+    });
+  }
+
+  // Fermer le popup client list
+  closeListClientPopup(): void {
+    this.showClientPopup = false;
+  }
+
+  highlightMatch(text: string | null | undefined): SafeHtml {
+    if (!text) return '';
+    if (!this.searchText.trim()) return text;
+    
+    const escapedSearch = this.searchText.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedSearch})`, 'gi');
+    
+    return this.sanitizer.bypassSecurityTrustHtml(
+      text.replace(regex, '<mark>$1</mark>')
+    );
+  }
+
+  get filteredClients(): Clients[] {
+    let clients = this.clients;
+    
+    if (this.searchText.trim()) {
+      const searchLower = this.searchText.toLowerCase().trim();
+      clients = clients.filter(client => 
+        (client.nomComplet?.toLowerCase().includes(searchLower)) ||
+        (client.email?.toLowerCase().includes(searchLower)) ||
+        (client.adresse?.toLowerCase().includes(searchLower)) ||
+        (client.telephone?.includes(searchLower))
+      );
+    }
+    
+    return clients.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA; // Tri décroissant
+    });
+  }
+
+  sort(field: string) {
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+
+    this.clients.sort((a: any, b: any) => {
+      const modifier = this.sortDirection === 'asc' ? 1 : -1;
+      const valueA = a[field]?.toString().toLowerCase() ?? '';
+      const valueB = b[field]?.toString().toLowerCase() ?? '';
+      return valueA.localeCompare(valueB) * modifier;
+    });
+  }
+
+  selectClient(client: Clients) {
+    // Logique pour sélectionner le client
+    console.log('Client sélectionné:', client);
+    this.closeListClientPopup();
+  }
+
+  // Gestion du changement de pays
+  onPaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+    
+    if (!paysInfo) return;
+    
+    this.indicatif = paysInfo.indicatif;
+    this.maxPhoneLength = paysInfo.longueur;
+    
+    const ctrl = this.clientForm.get('telephone');
+    let currentValue = ctrl?.value ?? '';
+    
+    const prefix = this.indicatif.replace(/\D/g, '');
+    const valueNumerique = currentValue.replace(/\D/g, '');
+    
+    if (!valueNumerique.startsWith(prefix)) {
+      ctrl?.setValue(this.indicatif);
+    } else {
+      const reste = valueNumerique.slice(prefix.length, prefix.length + this.maxPhoneLength);
+      ctrl?.setValue(this.indicatif + reste);
+    }
+    
+    this.updatePhoneValidator(paysInfo.longueur);
+  }
+
+  private updatePhoneValidator(longueur: number): void {
+    const ctrl = this.clientForm.get('telephone');
+    const regex = new RegExp(`^\\${this.indicatif}\\s?\\d{${longueur}}$`);
+    ctrl?.setValidators([Validators.required, Validators.pattern(regex)]);
+    ctrl?.updateValueAndValidity();
+  }
+
+  // Formatage du numéro de téléphone
+  formatPhoneNumber(): void {
+    let valeur = this.clientForm.get('telephone')?.value;
+    
+    if (!valeur.startsWith(this.indicatif)) {
+      this.clientForm.get('telephone')?.setValue(this.indicatif);
+      return;
+    }
+    
+    const chiffres = valeur.replace(this.indicatif, '').replace(/\D/g, '');
+    const numeroFormate = this.indicatif + chiffres;
+    this.clientForm.get('telephone')?.setValue(numeroFormate.slice(0, this.indicatif.length + this.maxPhoneLength));
+  }
+
+  // Charger les entreprises pour l'autocomplete
+  loadEntreprises() {
+    this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) {
+          console.error('Aucun token valide trouvé !');
+          return throwError(() => new Error('Aucun token trouvé'));
+        }
+        return this.entrepriseService.getListEntreprise();
+      })
+    ).subscribe({
+      next: (entreprises) => {
+        this.optionsEntreprise$.next(entreprises);
+        this.setupAutocomplete();
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des entreprises :', error);
+      }
+    });
+  }
+
+  // Configurer l'autocomplete
+  private setupAutocomplete() {
+    this.filteredOptions = combineLatest([
+      this.control.valueChanges.pipe(
+        startWith(''),
+        map(value => typeof value === 'string' ? value : value?.nom)
+      ),
+      this.optionsEntreprise$
+    ]).pipe(
+      map(([name, entreprises]) => 
+        name ? this._filter(name, entreprises) : entreprises
+      )
+    );
+  }
+
+  private _filter(name: string, entreprises: Entreprise[]): Entreprise[] {
+    const filterValue = name.toLowerCase();
+    return entreprises.filter(e =>
+        e.nom.toLowerCase().includes(filterValue)
+    );
+  }
+
+  // Affichage du nom de l'entreprise dans l'autocomplete
+  displayFnEntreprise(e?: Entreprise): string {
+    return e ? e.nom : '';
+  }
+
+  // Sélection d'une entreprise dans l'autocomplete
+  onEntrepriseSelected(event: any): void {
+    // Logique pour gérer la sélection
+  }
+
+  // Ouvrir/fermer le popup d'ajout de client
+  openAddClient() {
+    this.showAddClientPopup = true;
+    this.loadEntreprises();
+  }
+
+  closeAddClientPopup() {
+    this.showAddClientPopup = false;
+    this.clientForm.reset();
+  }
+
+  // Ajouter un nouveau client
+  ajouterClientDansPopup() {
+    if (this.clientForm.invalid) return;
+
+    const client: Clients = this.clientForm.value;
+    
+    if (this.isEntrepriseSelected) {
+      const selected = this.control.value as Entreprise;
+      if (selected && selected.id) {
+        client.entrepriseClient = { id: selected.id } as Entreprise;
+      }
+    }
+    
+    this.clientService.addClient(client).subscribe({
+      next: (res: any) => {
+        const newClient: Clients = {
+          ...client,
+          id: res.id,
+          createdAt: new Date() // Utilisez un objet Date directement
+        };
+        
+        this.closeAddClientPopup();
+        this.clients = [newClient, ...this.clients];
+        this.currentListTypePopup = 'clients';
+        this.searchText = '';
+      },
+      error: err => {
+        console.error('Erreur lors de l\'ajout du client:', err);
+      }
+    });
+  }
+
+  setClientType(type: 'individuel' | 'entreprise') {
+    this.clientType = type;
+  }
+
+  onEntreprisePaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+    
+    if (!paysInfo) return;
+    
+    this.entrepriseIndicatif = paysInfo.indicatif;
+    this.entrepriseMaxPhoneLength = paysInfo.longueur;
+    
+    const ctrl = this.entrepriseForm.get('telephone');
+    let currentValue = ctrl?.value ?? '';
+    
+    const prefix = this.entrepriseIndicatif.replace(/\D/g, '');
+    const valueNumerique = currentValue.replace(/\D/g, '');
+    
+    if (!valueNumerique.startsWith(prefix)) {
+        ctrl?.setValue(this.entrepriseIndicatif);
+    } else {
+        const reste = valueNumerique.slice(prefix.length, prefix.length + this.entrepriseMaxPhoneLength);
+        ctrl?.setValue(this.entrepriseIndicatif + reste);
+    }
+    
+    this.updateEntreprisePhoneValidator(paysInfo.longueur);
+  }
+
+  private updateEntreprisePhoneValidator(longueur: number): void {
+    const ctrl = this.entrepriseForm.get('telephone');
+    const regex = new RegExp(`^\\${this.entrepriseIndicatif}\\s?\\d{${longueur}}$`);
+    ctrl?.setValidators([Validators.required, Validators.pattern(regex)]);
+    ctrl?.updateValueAndValidity();
+  }
+
+  // Formatage du numéro pour les entreprises
+  formatEntreprisePhoneNumber(): void {
+    let valeur = this.entrepriseForm.get('telephone')?.value;
+    
+    if (!valeur.startsWith(this.entrepriseIndicatif)) {
+        this.entrepriseForm.get('telephone')?.setValue(this.entrepriseIndicatif);
+        return;
+    }
+    
+    const chiffres = valeur.replace(this.entrepriseIndicatif, '').replace(/\D/g, '');
+    const numeroFormate = this.entrepriseIndicatif + chiffres;
+    this.entrepriseForm.get('telephone')?.setValue(numeroFormate.slice(0, this.entrepriseIndicatif.length + this.entrepriseMaxPhoneLength));
+  }
+
+  ajouterEntrepriseDansPopup() {
+    if (this.entrepriseForm.invalid) {
+      return;
+    }
+
+    const entreprise = this.entrepriseForm.value;
+    
+    this.entrepriseService.addEntreprise(entreprise).subscribe({
+      next: (res: EntrepriseClient) => {
+        // Fermer le popup d'ajout
+        this.closeAddClientPopup();
+        
+        // Ajouter la nouvelle entreprise à la liste
+        this.entreprisesPopup = [res, ...this.entreprisesPopup];
+        
+        // Basculer sur l'onglet des entreprises
+        this.currentListTypePopup = 'entreprises';
+        
+        // Réinitialiser le champ de recherche
+        this.searchText = '';
+      },
+      error: (err) => {
+        console.error('Erreur lors de l\'ajout de l\'entreprise:', err);
+      }
+    });
+  }
+
+  // loadEntreprisesForPopup() {
+  //   this.usersService.getValidAccessToken().pipe(
+  //     switchMap(token => {
+  //       if (!token) {
+  //         console.error('Aucun token valide trouvé !');
+  //         return throwError(() => new Error('Aucun token trouvé'));
+  //       }
+  //       return this.entrepriseService.getListEntreprises();
+  //     })
+  //   ).subscribe({
+  //     next: (data: EntrepriseClient[]) => {
+  //       this.entreprisesPopup = data;
+  //       // Pas besoin d'initialiser filteredEntreprisesPopup ici
+  //       // car le getter s'en chargera dynamiquement
+  //     },
+  //     error: (err) => {
+  //       console.error('Erreur récupération entreprises :', err);
+  //     }
+  //   });
+  // }
+
+  loadEntreprisesForPopup() {
+    this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) {
+          console.error('Aucun token valide trouvé !');
+          return throwError(() => new Error('Aucun token trouvé'));
+        }
+        return this.entrepriseService.getListEntreprises();
+      })
+    ).subscribe({
+      next: (data: EntrepriseClient[]) => {
+        // Trier par date de création descendante
+        this.entreprisesPopup = data.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+      },
+      error: (err) => {
+        console.error('Erreur récupération entreprises :', err);
+      }
+    });
+  }
+
+  // Basculer entre clients/entreprises dans le popup
+  setListTypePopup(type: 'clients' | 'entreprises') {
+    this.currentListTypePopup = type;
+    this.searchText = ''; // Réinitialiser la recherche
+  }
+
+  // Filtrer les entreprises
+  get filteredEntreprisesPopup(): EntrepriseClient[] {
+    let entreprises = this.entreprisesPopup;
+    
+    if (this.searchText.trim()) {
+      const searchLower = this.searchText.toLowerCase().trim();
+      entreprises = entreprises.filter(entreprise => 
+        (entreprise.nom?.toLowerCase().includes(searchLower)) ||
+        (entreprise.email?.toLowerCase().includes(searchLower)) ||
+        (entreprise.adresse?.toLowerCase().includes(searchLower)) ||
+        (entreprise.telephone?.includes(searchLower))
+      );
+    }
+    
+    // Trier par date de création descendante (le plus récent en premier)
+    return entreprises.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+  }
+
+  // Ouvrir le popup
+  openListClientPopup(): void {
+    this.showClientPopup = true;
+    this.loadClients();
+    this.loadEntreprisesForPopup(); // Charger les entreprises
+  }
+
+  // Sélectionner une entreprise
+  selectEntreprise(entreprise: EntrepriseClient) {
+    console.log('Entreprise sélectionnée:', entreprise);
+    this.closeListClientPopup();
   }
 
 
