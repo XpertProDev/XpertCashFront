@@ -16,6 +16,7 @@ import { BehaviorSubject, combineLatest, map, Observable, of, startWith, switchM
 import { Entreprise } from 'src/app/admin-page/MODELS/entreprise-model';
 import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-service';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { EntrepriseClient } from 'src/app/admin-page/MODELS/entreprise-clients-model';
 
 @Component({
   selector: 'app-pos-vente',
@@ -56,11 +57,20 @@ export class PosVenteComponent {
 
   allProducts: ProduitDetailsResponseDTO[] = [];
 
+  clientType: 'individuel' | 'entreprise' = 'individuel';
+  entrepriseForm!: FormGroup;
+  entrepriseIndicatif: string = '';
+  entrepriseMaxPhoneLength: number = 0;
+
   // Propriétés ajoutées
   clients: Clients[] = [];
   searchText = '';
   sortField = 'nomComplet';
   sortDirection: 'asc' | 'desc' = 'asc';
+
+  currentListTypePopup: 'clients' | 'entreprises' = 'clients';
+  entreprisesPopup: EntrepriseClient[] = [];
+  // filteredEntreprisesPopup: EntrepriseClient[] = [];
 
   clientForm!: FormGroup;
   isEntrepriseSelected = false;
@@ -111,6 +121,8 @@ export class PosVenteComponent {
   filteredOptions: Observable<Entreprise[]> = of([]);
   optionsEntreprise$ = new BehaviorSubject<Entreprise[]>([]);
 
+  currentListType: 'clients' | 'entreprises' = 'clients';
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -120,13 +132,19 @@ export class PosVenteComponent {
     private usersService: UsersService,
     private sanitizer: DomSanitizer,
     private fb: FormBuilder,
-    private entrepriseService: EntrepriseService
+    private entrepriseService: EntrepriseService,
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
     });
 
     this.initClientForm();
+    this.initForms();
+  }
+
+  private initForms() {
+    this.initClientForm();
+    this.initEntrepriseForm();
   }
 
   // Initialiser le formulaire client
@@ -139,6 +157,18 @@ export class PosVenteComponent {
       poste: [''],
       pays: [''],
       ville: ['']
+    });
+  }
+
+  initEntrepriseForm() {
+    this.entrepriseForm = this.fb.group({
+        nom: ['', [Validators.required, Validators.minLength(2)]],
+        adresse: [''],
+        email: ['', [Validators.email]],
+        telephone: ['', Validators.required],
+        pays: [''],
+        siege: [''],
+        secteur: ['']
     });
   }
 
@@ -469,36 +499,27 @@ export class PosVenteComponent {
     this.selectedProductForDetail = null;
   }
 
-  // ouvrir le popup client list
-  openListClientPopup(): void {
-    this.showClientPopup = true;
-    this.loadClients();
-  }
-
   loadClients() {
     this.usersService.getValidAccessToken().pipe(
       switchMap(token => {
-        if (!token) {
-          console.error('Aucun token valide trouvé !');
-          return throwError(() => new Error('Aucun token trouvé'));
-        }
+        if (!token) return throwError(() => new Error('Aucun token trouvé'));
         return this.clientService.getListClients();
       })
     ).subscribe({
       next: (data) => {
-        this.clients = data.map(client => {
-          return {
-            ...client,
-            photo: client.photo 
-              ? `${environment.imgUrl}${client.photo}` 
-              : `/assets/img/profil.png`,
-            entrepriseClient: client.entrepriseClient 
-              ? { id: client.entrepriseClient.id } 
-              : null
-          };
+        this.clients = data.map(client => ({
+          ...client,
+          photo: client.photo 
+            ? `${environment.imgUrl}${client.photo}` 
+            : `assets/img/profil.png`,
+          entrepriseClient: client.entrepriseClient 
+            ? { id: client.entrepriseClient.id } 
+            : null
+        })).sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
         });
-        // Trier initialement
-        this.sort('nomComplet');
       },
       error: (err) => {
         console.error('Erreur récupération clients :', err);
@@ -524,15 +545,23 @@ export class PosVenteComponent {
   }
 
   get filteredClients(): Clients[] {
-    if (!this.searchText.trim()) return this.clients;
+    let clients = this.clients;
     
-    const searchLower = this.searchText.toLowerCase().trim();
-    return this.clients.filter(client => 
-      (client.nomComplet?.toLowerCase().includes(searchLower)) ||
-      (client.email?.toLowerCase().includes(searchLower)) ||
-      (client.adresse?.toLowerCase().includes(searchLower)) ||
-      (client.telephone?.includes(searchLower))
-    );
+    if (this.searchText.trim()) {
+      const searchLower = this.searchText.toLowerCase().trim();
+      clients = clients.filter(client => 
+        (client.nomComplet?.toLowerCase().includes(searchLower)) ||
+        (client.email?.toLowerCase().includes(searchLower)) ||
+        (client.adresse?.toLowerCase().includes(searchLower)) ||
+        (client.telephone?.includes(searchLower))
+      );
+    }
+    
+    return clients.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA; // Tri décroissant
+    });
   }
 
   sort(field: string) {
@@ -670,14 +699,10 @@ export class PosVenteComponent {
 
   // Ajouter un nouveau client
   ajouterClientDansPopup() {
-    if (this.clientForm.invalid) {
-      // Gérer les erreurs
-      return;
-    }
+    if (this.clientForm.invalid) return;
 
     const client: Clients = this.clientForm.value;
     
-    // Gérer l'entreprise sélectionnée si nécessaire
     if (this.isEntrepriseSelected) {
       const selected = this.control.value as Entreprise;
       if (selected && selected.id) {
@@ -686,15 +711,185 @@ export class PosVenteComponent {
     }
     
     this.clientService.addClient(client).subscribe({
-      next: res => {
-        // Fermer le popup et recharger la liste des clients
+      next: (res: any) => {
+        const newClient: Clients = {
+          ...client,
+          id: res.id,
+          createdAt: new Date() // Utilisez un objet Date directement
+        };
+        
         this.closeAddClientPopup();
-        this.loadClients();
+        this.clients = [newClient, ...this.clients];
+        this.currentListTypePopup = 'clients';
+        this.searchText = '';
       },
       error: err => {
         console.error('Erreur lors de l\'ajout du client:', err);
       }
     });
+  }
+
+  setClientType(type: 'individuel' | 'entreprise') {
+    this.clientType = type;
+  }
+
+  onEntreprisePaysChange(event: any): void {
+    const paysSelectionne = event.target.value;
+    const paysInfo = this.paysIndicatifs[paysSelectionne];
+    
+    if (!paysInfo) return;
+    
+    this.entrepriseIndicatif = paysInfo.indicatif;
+    this.entrepriseMaxPhoneLength = paysInfo.longueur;
+    
+    const ctrl = this.entrepriseForm.get('telephone');
+    let currentValue = ctrl?.value ?? '';
+    
+    const prefix = this.entrepriseIndicatif.replace(/\D/g, '');
+    const valueNumerique = currentValue.replace(/\D/g, '');
+    
+    if (!valueNumerique.startsWith(prefix)) {
+        ctrl?.setValue(this.entrepriseIndicatif);
+    } else {
+        const reste = valueNumerique.slice(prefix.length, prefix.length + this.entrepriseMaxPhoneLength);
+        ctrl?.setValue(this.entrepriseIndicatif + reste);
+    }
+    
+    this.updateEntreprisePhoneValidator(paysInfo.longueur);
+  }
+
+  private updateEntreprisePhoneValidator(longueur: number): void {
+    const ctrl = this.entrepriseForm.get('telephone');
+    const regex = new RegExp(`^\\${this.entrepriseIndicatif}\\s?\\d{${longueur}}$`);
+    ctrl?.setValidators([Validators.required, Validators.pattern(regex)]);
+    ctrl?.updateValueAndValidity();
+  }
+
+  // Formatage du numéro pour les entreprises
+  formatEntreprisePhoneNumber(): void {
+    let valeur = this.entrepriseForm.get('telephone')?.value;
+    
+    if (!valeur.startsWith(this.entrepriseIndicatif)) {
+        this.entrepriseForm.get('telephone')?.setValue(this.entrepriseIndicatif);
+        return;
+    }
+    
+    const chiffres = valeur.replace(this.entrepriseIndicatif, '').replace(/\D/g, '');
+    const numeroFormate = this.entrepriseIndicatif + chiffres;
+    this.entrepriseForm.get('telephone')?.setValue(numeroFormate.slice(0, this.entrepriseIndicatif.length + this.entrepriseMaxPhoneLength));
+  }
+
+  ajouterEntrepriseDansPopup() {
+    if (this.entrepriseForm.invalid) {
+      return;
+    }
+
+    const entreprise = this.entrepriseForm.value;
+    
+    this.entrepriseService.addEntreprise(entreprise).subscribe({
+      next: (res: EntrepriseClient) => {
+        // Fermer le popup d'ajout
+        this.closeAddClientPopup();
+        
+        // Ajouter la nouvelle entreprise à la liste
+        this.entreprisesPopup = [res, ...this.entreprisesPopup];
+        
+        // Basculer sur l'onglet des entreprises
+        this.currentListTypePopup = 'entreprises';
+        
+        // Réinitialiser le champ de recherche
+        this.searchText = '';
+      },
+      error: (err) => {
+        console.error('Erreur lors de l\'ajout de l\'entreprise:', err);
+      }
+    });
+  }
+
+  // loadEntreprisesForPopup() {
+  //   this.usersService.getValidAccessToken().pipe(
+  //     switchMap(token => {
+  //       if (!token) {
+  //         console.error('Aucun token valide trouvé !');
+  //         return throwError(() => new Error('Aucun token trouvé'));
+  //       }
+  //       return this.entrepriseService.getListEntreprises();
+  //     })
+  //   ).subscribe({
+  //     next: (data: EntrepriseClient[]) => {
+  //       this.entreprisesPopup = data;
+  //       // Pas besoin d'initialiser filteredEntreprisesPopup ici
+  //       // car le getter s'en chargera dynamiquement
+  //     },
+  //     error: (err) => {
+  //       console.error('Erreur récupération entreprises :', err);
+  //     }
+  //   });
+  // }
+
+  loadEntreprisesForPopup() {
+    this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) {
+          console.error('Aucun token valide trouvé !');
+          return throwError(() => new Error('Aucun token trouvé'));
+        }
+        return this.entrepriseService.getListEntreprises();
+      })
+    ).subscribe({
+      next: (data: EntrepriseClient[]) => {
+        // Trier par date de création descendante
+        this.entreprisesPopup = data.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+      },
+      error: (err) => {
+        console.error('Erreur récupération entreprises :', err);
+      }
+    });
+  }
+
+  // Basculer entre clients/entreprises dans le popup
+  setListTypePopup(type: 'clients' | 'entreprises') {
+    this.currentListTypePopup = type;
+    this.searchText = ''; // Réinitialiser la recherche
+  }
+
+  // Filtrer les entreprises
+  get filteredEntreprisesPopup(): EntrepriseClient[] {
+    let entreprises = this.entreprisesPopup;
+    
+    if (this.searchText.trim()) {
+      const searchLower = this.searchText.toLowerCase().trim();
+      entreprises = entreprises.filter(entreprise => 
+        (entreprise.nom?.toLowerCase().includes(searchLower)) ||
+        (entreprise.email?.toLowerCase().includes(searchLower)) ||
+        (entreprise.adresse?.toLowerCase().includes(searchLower)) ||
+        (entreprise.telephone?.includes(searchLower))
+      );
+    }
+    
+    // Trier par date de création descendante (le plus récent en premier)
+    return entreprises.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+  }
+
+  // Ouvrir le popup
+  openListClientPopup(): void {
+    this.showClientPopup = true;
+    this.loadClients();
+    this.loadEntreprisesForPopup(); // Charger les entreprises
+  }
+
+  // Sélectionner une entreprise
+  selectEntreprise(entreprise: EntrepriseClient) {
+    console.log('Entreprise sélectionnée:', entreprise);
+    this.closeListClientPopup();
   }
 
 

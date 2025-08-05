@@ -472,14 +472,46 @@
 <div *ngIf="showClientPopup" class="list-client-popup-overlay">
   <div class="list-client-popup">
     <div class="popup-header">
-      <div class="btnAddClient">
-        <button (click)="openAddClient()">
-          Ajouter Client
-        </button>
-      </div>
+
+    <h6 class="title" style="margin-bottom: 0; font-size: 16px; letter-spacing: 0.65px;">
+      {{ currentListTypePopup === 'clients' ? 'Client individuel' : 'Client entreprise' }}
+    </h6>
 
       <!-- Barre de recherche -->
       <div class="double" style="gap: 10px;">
+
+        <div class="btnAddClient">
+          <button (click)="openAddClient()">
+            Ajouter Client
+          </button>
+        </div>
+
+        <div class="barre"></div>
+
+        <!-- Compteur Clients Individuels -->
+        <div class="contentIcon" 
+            [class.active]="currentListTypePopup === 'clients'"
+            (click)="setListTypePopup('clients')">
+          <i class="ri-folder-user-line"></i>
+          <div class="nombreCount">
+            <span>{{ clients.length }}</span>
+          </div>
+        </div>
+
+        <div class="barre"></div>
+
+        <!-- Compteur Entreprises -->
+        <div class="contentIcon" 
+            [class.active]="currentListTypePopup === 'entreprises'"
+            (click)="setListTypePopup('entreprises')">
+          <i class="ri-building-line"></i>
+          <div class="nombreCount">
+            <span>{{ entreprisesPopup.length }}</span>
+          </div>
+        </div>
+
+        <div class="barre"></div>
+
         <div class="inputSearch">
           <i class="ri-search-2-line"></i>
           <input type="text" placeholder="Recherche un client" [(ngModel)]="searchText"/>
@@ -492,7 +524,7 @@
     </div>
 
     <!-- Tableau -->
-    <table>
+    <table *ngIf="currentListTypePopup === 'clients'">
       <thead>
         <!-- <th>Photo</th>
         <th (click)="sort('nomComplet')">
@@ -556,6 +588,52 @@
           </tr>
       </tbody>
     </table>
+
+    <!-- Tableau pour Entreprises -->
+    <table *ngIf="currentListTypePopup === 'entreprises'">
+      <tbody>
+        <tr *ngFor="let entreprise of filteredEntreprisesPopup" (click)="selectEntreprise(entreprise)">
+         <td>
+          <div class="imgClient">
+            <img src="assets/img/office_building.png" alt="Logo entreprise">
+          </div>
+        </td>
+        <td>
+          <span *ngIf="entreprise.nom; else noNom" [innerHTML]="highlightMatch(entreprise.nom)">{{ entreprise.nom }}</span>
+          <ng-template #noNom>
+            <span class="no-phone-text">Nom vide</span>
+          </ng-template>
+        </td>
+        <td>
+          <span *ngIf="entreprise.email; else noEmail" [innerHTML]="highlightMatch(entreprise.email)">{{ entreprise.email }}</span>
+          <ng-template #noEmail>
+            <span class="no-phone-text">Non email</span>
+          </ng-template>
+        </td>
+        <td>
+          <span *ngIf="entreprise.adresse; else noAdresse">{{ entreprise.adresse }}</span>
+          <ng-template #noAdresse>
+            <span class="no-phone-text">Non adresse</span>
+          </ng-template>
+        </td>
+        <td>
+          <span *ngIf="entreprise.telephone; else noPhone">{{ entreprise.telephone }}</span>
+          <ng-template #noPhone>
+            <span class="no-phone-text">Non téléphone</span>
+          </ng-template>
+        </td>
+        <td>{{ entreprise.pays || '--' }}</td>
+        <td>{{ entreprise.siege || '--' }}</td>
+        <td>{{ entreprise.secteur || '--' }}</td>
+        <td>
+          <span *ngIf="entreprise.createdAt; else noDate">{{ entreprise.createdAt | date: 'dd/MM/yyyy' }}</span>
+          <ng-template #noDate>
+            <span class="no-phone-text">Non date</span>
+          </ng-template>
+        </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -570,164 +648,270 @@
     </div>
 
     <div class="popup-body">
-      <form [formGroup]="clientForm" class="add-client-form">
+      <div class="add-client-form">
         <div class="form-group">
           <label>Type de client</label>
           <div class="client-type-selector">
-            <button type="button" class="client-type-btn active">Individuel</button>
-            <button type="button" class="client-type-btn">Entreprise</button>
+            <button type="button" 
+                    class="client-type-btn" 
+                    [class.active]="clientType === 'individuel'"
+                    (click)="setClientType('individuel')">
+              Individuel
+            </button>
+            <button type="button" 
+                    class="client-type-btn" 
+                    [class.active]="clientType === 'entreprise'"
+                    (click)="setClientType('entreprise')">
+              Entreprise
+            </button>
           </div>
         </div>
-                  
-        <div class="double_input">
-          <!-- Nom et prenom -->
-          <div class="champ_input">
-            <input type="text" class="input_focus"
-                      id="nomComplet" formControlName="nomComplet"
-                      name="nomComplet"
-                      placeholder="Saisis le nom et prénom">
-            <label for="nomComplet" class="label">Nom et prénom</label>
-            <div *ngIf="clientForm.get('nomComplet')?.touched && clientForm.get('nomComplet')?.invalid" class="error">
-              <small *ngIf="clientForm.get('nomComplet')?.errors?.['required']">Champ requis.</small>
-              <small *ngIf="clientForm.get('nomComplet')?.errors?.['minlength']">Au moins 2 caractères.</small>
+
+        <!-- Formulaire client individuel -->
+        <form *ngIf="clientType === 'individuel'" [formGroup]="clientForm" class="add-client-form">
+          <div class="double_input">
+            <!-- Nom et prenom -->
+            <div class="champ_input">
+              <input type="text" class="input_focus"
+                        id="nomComplet" formControlName="nomComplet"
+                        name="nomComplet"
+                        placeholder="Saisis le nom et prénom">
+              <label for="nomComplet" class="label">Nom et prénom</label>
+              <div *ngIf="clientForm.get('nomComplet')?.touched && clientForm.get('nomComplet')?.invalid" class="error">
+                <small *ngIf="clientForm.get('nomComplet')?.errors?.['required']">Champ requis.</small>
+                <small *ngIf="clientForm.get('nomComplet')?.errors?.['minlength']">Au moins 2 caractères.</small>
+              </div>
+            </div>
+            <!-- Email -->
+            <div class="champ_input">
+              <input type="email" class="input_focus"
+                        id="email" formControlName="email"
+                        name="email"
+                        placeholder="Saisis l'email">
+              <label for="email" class="label">Email</label>
+              <div *ngIf="clientForm.get('email')?.touched && clientForm.get('email')?.invalid" class="error">
+                <small *ngIf="clientForm.get('email')?.errors?.['email']">Format invalide.</small>
+              </div>
+            </div>
+
+          </div>
+          <div class="double_input">
+            <!-- Adresse -->
+            <div class="champ_input">
+              <input class="input_focus"
+                        id="adresse" formControlName="adresse"
+                        name="adresse"
+                        placeholder="Saisis l'adresse">
+              <label for="adresse" class="label">Adresse</label>
+            </div>
+
+            <!-- Poste -->
+            <div class="champ_input">
+              <input class="input_focus"
+                        id="poste" formControlName="poste"
+                        name="poste"
+                        placeholder="Saisissez votre poste ">
+              <label for="poste" class="label">Poste</label>
+            </div>
+
+          </div>
+
+          <!-- Modifiez le sélecteur de pays et le champ téléphone -->
+          <div class="grid_colonne">
+            <!-- Pays -->
+                <div class="champ_input div1">
+          <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
+            <option value="" disabled selected>Pays</option>
+            <option *ngFor="let nomPays of paysKeys" [value]="nomPays">
+              {{ nomPays }} ({{ paysIndicatifs[nomPays].indicatif }})
+            </option>
+          </select>
+          <label for="pays" class="label">Pays</label>
+          <div *ngIf="clientForm.get('pays')?.invalid && clientForm.get('pays')?.touched" class="error">
+            <small>Ce champ est requis</small>
+          </div>
+        </div>
+
+            <!-- Téléphone -->
+            <div class="champ_input div2">
+              <input type="tel" class="input_focus"
+                      id="telephone" formControlName="telephone"
+                      name="telephone"
+                      placeholder="Saisis le numéro de téléphone"
+                      (input)="formatPhoneNumber()">
+              <label for="telephone" class="label">Téléphone</label>
+            
+              <!-- Message d'erreur si pattern invalide -->
+              <div *ngIf="
+                    clientForm.get('telephone')?.touched &&
+                    clientForm.get('telephone')?.errors?.['pattern'] &&
+                    clientForm.get('pays')?.value as pays
+                  " class="error">
+                <small>
+                  Le numéro doit contenir
+                  {{ paysIndicatifs[pays].longueur }}
+                  chiffres après l’indicatif {{ paysIndicatifs[pays].indicatif.trim() }}.
+                </small>
+              </div>
+            
+              <!-- Éventuellement, message pour champ requis -->
+              <div *ngIf="
+                    clientForm.get('telephone')?.touched &&
+                    clientForm.get('telephone')?.errors?.['required']
+                  " class="error">
+                <small>Le téléphone est requis.</small>
+              </div>
+            </div>                    
+
+            <!-- Ville -->
+            <div class="champ_input div3">
+              <input class="input_focus"
+                        id="ville" formControlName="ville"
+                        name="ville"
+                        placeholder="Saisis la ville">
+              <label for="ville" class="label">Ville</label>
             </div>
           </div>
-          <!-- Email -->
-          <div class="champ_input">
-            <input type="email" class="input_focus"
-                      id="email" formControlName="email"
-                      name="email"
-                      placeholder="Saisis l'email">
-            <label for="email" class="label">Email</label>
-            <div *ngIf="clientForm.get('email')?.touched && clientForm.get('email')?.invalid" class="error">
-              <small *ngIf="clientForm.get('email')?.errors?.['email']">Format invalide.</small>
+
+          <div class="info_titre_input" style="margin-top: 20px;">
+            <h5>Entreprise</h5>
+        
+            <!-- Input de produits inventaire -->
+            <div class="champ_input_inventaire">
+              <p>J'appartient à une entreprise</p>
+        
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="isEntrepriseSelected" [ngModelOptions]="{standalone: true}"/>
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Autocomplete pour les entreprises -->
+          <div *ngIf="isEntrepriseSelected" class="champ_input">
+            <input type="text"
+                  placeholder="Selectionner une entreprise"
+                  [formControl]="control"
+                  [matAutocomplete]="auto"
+                  class="input_focus input_cursor">
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onEntrepriseSelected($event)" [displayWith]="displayFnEntreprise">
+              <!-- <mat-option class="select-option" (click)="openAddEntreprisePopup()">
+                <div style="display: flex; align-items: center; color: #0672E4;">
+                  <i class="ri-community-line"></i>
+                  <span style="margin-left: 8px;">Créer une entreprise</span>
+                </div>
+              </mat-option> -->
+              <mat-option *ngFor="let ent of filteredOptions | async" [value]="ent">
+                <div class="option-content">
+                  {{ ent.nom }}
+                </div>
+              </mat-option>
+            </mat-autocomplete>
+          </div>
+        </form>
+
+        <!-- Formulaire client entreprise -->
+        <form *ngIf="clientType === 'entreprise'" [formGroup]="entrepriseForm" class="add-client-form">
+          <div class="double_input">
+            <div class="champ_input">
+              <input type="text" class="input_focus"
+                    id="nom" formControlName="nom"
+                    name="nom"
+                    placeholder="Saisis le nom d'entreprise">
+              <label for="nom" class="label">Nom d'entreprise</label>
+              <div *ngIf="entrepriseForm.get('nom')?.touched && entrepriseForm.get('nom')?.invalid" class="error">
+                <small *ngIf="entrepriseForm.get('nom')?.errors?.['required']">Champ requis.</small>
+                <small *ngIf="entrepriseForm.get('nom')?.errors?.['minlength']">Au moins 2 caractères.</small>
+              </div>
+            </div>
+            <div class="champ_input">
+              <input type="email" class="input_focus"
+                    id="email" formControlName="email"
+                    name="email"
+                    placeholder="Saisis l'email">
+              <label for="email" class="label">Email</label>
+              <div *ngIf="entrepriseForm.get('email')?.touched && entrepriseForm.get('email')?.invalid" class="error">
+                <small *ngIf="entrepriseForm.get('email')?.errors?.['email']">Format invalide.</small>
+              </div>
             </div>
           </div>
 
-        </div>
-        <div class="double_input">
-          <!-- Adresse -->
-          <div class="champ_input">
-            <input class="input_focus"
-                      id="adresse" formControlName="adresse"
-                      name="adresse"
-                      placeholder="Saisis l'adresse">
-            <label for="adresse" class="label">Adresse</label>
+          <div class="double_input">
+            <div class="champ_input">
+              <input class="input_focus"
+                    id="adresse" formControlName="adresse"
+                    name="adresse"
+                    placeholder="Saisis l'adresse">
+              <label for="adresse" class="label">Adresse</label>
+            </div>
+            <div class="champ_input">
+              <input class="input_focus"
+                    id="siege" formControlName="siege"
+                    name="siege"
+                    placeholder="Saisis le siège">
+              <label for="siege" class="label">Siège</label>
+            </div>
           </div>
 
-          <!-- Poste -->
-          <div class="champ_input">
-            <input class="input_focus"
-                      id="poste" formControlName="poste"
-                      name="poste"
-                      placeholder="Saisissez votre poste ">
-            <label for="poste" class="label">Poste</label>
-          </div>
+          <div class="grid_colonne">
+            <div class="champ_input div1">
+              <select class="input_focus" formControlName="pays" (change)="onEntreprisePaysChange($event)">
+                <option value="" disabled selected>Pays</option>
+                <option *ngFor="let nomPays of paysKeys" [value]="nomPays">
+                  {{ nomPays }} ({{ paysIndicatifs[nomPays].indicatif }})
+                </option>
+              </select>
+              <label for="pays" class="label">Pays</label>
+            </div>
 
-        </div>
-
-        <!-- Modifiez le sélecteur de pays et le champ téléphone -->
-        <div class="grid_colonne">
-          <!-- Pays -->
-              <div class="champ_input div1">
-        <select class="input_focus" formControlName="pays" (change)="onPaysChange($event)">
-          <option value="" disabled selected>Pays</option>
-          <option *ngFor="let nomPays of paysKeys" [value]="nomPays">
-            {{ nomPays }} ({{ paysIndicatifs[nomPays].indicatif }})
-          </option>
-        </select>
-        <label for="pays" class="label">Pays</label>
-        <div *ngIf="clientForm.get('pays')?.invalid && clientForm.get('pays')?.touched" class="error">
-          <small>Ce champ est requis</small>
-        </div>
-      </div>
-
-          <!-- Téléphone -->
-          <div class="champ_input div2">
-            <input type="tel" class="input_focus"
+            <div class="champ_input div2">
+              <input type="tel" class="input_focus"
                     id="telephone" formControlName="telephone"
                     name="telephone"
                     placeholder="Saisis le numéro de téléphone"
-                    (input)="formatPhoneNumber()">
-            <label for="telephone" class="label">Téléphone</label>
-          
-            <!-- Message d'erreur si pattern invalide -->
-            <div *ngIf="
-                  clientForm.get('telephone')?.touched &&
-                  clientForm.get('telephone')?.errors?.['pattern'] &&
-                  clientForm.get('pays')?.value as pays
-                " class="error">
-              <small>
-                Le numéro doit contenir
-                {{ paysIndicatifs[pays].longueur }}
-                chiffres après l’indicatif {{ paysIndicatifs[pays].indicatif.trim() }}.
-              </small>
-            </div>
-          
-            <!-- Éventuellement, message pour champ requis -->
-            <div *ngIf="
-                  clientForm.get('telephone')?.touched &&
-                  clientForm.get('telephone')?.errors?.['required']
-                " class="error">
-              <small>Le téléphone est requis.</small>
-            </div>
-          </div>                    
-
-          <!-- Ville -->
-          <div class="champ_input div3">
-            <input class="input_focus"
-                      id="ville" formControlName="ville"
-                      name="ville"
-                      placeholder="Saisis la ville">
-            <label for="ville" class="label">Ville</label>
-          </div>
-        </div>
-
-        <div class="info_titre_input" style="margin-top: 20px;">
-          <h5>Entreprise</h5>
-      
-          <!-- Input de produits inventaire -->
-          <div class="champ_input_inventaire">
-            <p>J'appartient à une entreprise</p>
-      
-            <label class="switch">
-              <input type="checkbox" [(ngModel)]="isEntrepriseSelected" [ngModelOptions]="{standalone: true}"/>
-              <span class="slider round"></span>
-            </label>
-          </div>
-        </div>
-        
-        <!-- Autocomplete pour les entreprises -->
-        <div *ngIf="isEntrepriseSelected" class="champ_input">
-          <input type="text"
-                placeholder="Selectionner une entreprise"
-                [formControl]="control"
-                [matAutocomplete]="auto"
-                class="input_focus input_cursor">
-          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onEntrepriseSelected($event)" [displayWith]="displayFnEntreprise">
-            <!-- <mat-option class="select-option" (click)="openAddEntreprisePopup()">
-              <div style="display: flex; align-items: center; color: #0672E4;">
-                <i class="ri-community-line"></i>
-                <span style="margin-left: 8px;">Créer une entreprise</span>
+                    (input)="formatEntreprisePhoneNumber()">
+              <label for="telephone" class="label">Téléphone</label>
+            
+              <div *ngIf="
+                    entrepriseForm.get('telephone')?.touched &&
+                    entrepriseForm.get('telephone')?.errors?.['pattern'] &&
+                    entrepriseForm.get('pays')?.value as pays
+                  " class="error">
+                <small>
+                  Le numéro doit contenir
+                  {{ paysIndicatifs[pays].longueur }}
+                  chiffres après l'indicatif {{ paysIndicatifs[pays].indicatif.trim() }}.
+                </small>
               </div>
-            </mat-option> -->
-            <mat-option *ngFor="let ent of filteredOptions | async" [value]="ent">
-              <div class="option-content">
-                {{ ent.nom }}
+            
+              <div *ngIf="
+                    entrepriseForm.get('telephone')?.touched &&
+                    entrepriseForm.get('telephone')?.errors?.['required']
+                  " class="error">
+                <small>Le téléphone est requis.</small>
               </div>
-            </mat-option>
-          </mat-autocomplete>
-        </div>
-      </form>
+            </div>
+
+            <div class="champ_input div3">
+              <input class="input_focus"
+                    id="secteur" formControlName="secteur"
+                    name="secteur"
+                    placeholder="Saisis le secteur">
+              <label for="secteur" class="label">Secteur</label>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
 
     <div class="popup-actions">
       <button class="btn-cancel" (click)="closeAddClientPopup()">Annuler</button>
-      <button class="btn-save" (click)="ajouterClientDansPopup()"
-        [disabled]="clientForm.invalid"
-        [style.backgroundColor]="clientForm.valid ? '#0672E4' : '#0671e434'"
-        [style.color]="clientForm.valid ? '#ffffff' : '#00000073'"
-        [style.cursor]="clientForm.valid ? 'pointer' : 'no-drop'">
+      <button class="btn-save" 
+              (click)="clientType === 'individuel' ? ajouterClientDansPopup() : ajouterEntrepriseDansPopup()"
+              [disabled]="clientType === 'individuel' ? clientForm.invalid : entrepriseForm.invalid"
+              [style.backgroundColor]="(clientType === 'individuel' ? clientForm.valid : entrepriseForm.valid) ? '#0672E4' : '#0671e434'"
+              [style.color]="(clientType === 'individuel' ? clientForm.valid : entrepriseForm.valid) ? '#ffffff' : '#00000073'"
+              [style.cursor]="(clientType === 'individuel' ? clientForm.valid : entrepriseForm.valid) ? 'pointer' : 'no-drop'">
         Enregistrer
       </button>
     </div>
