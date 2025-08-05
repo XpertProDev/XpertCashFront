@@ -141,12 +141,13 @@ export class PosCommandeComponent {
     const commande = this.commandeState.getCommandeDetails(this.activeCommandeId);
     if (commande) {
       commande.cart.delete(productId);
-      // Mettre à jour les totaux
       const totalItems = this.calculateTotalItems(commande.cart);
       const totalAmount = this.calculateTotalAmount(commande.cart);
       this.commandeState.updateCommandeTotals(this.activeCommandeId, totalItems, totalAmount);
       
-      // Mettre à jour l'affichage local
+      // Ajouter cette ligne pour actualiser la liste
+      this.loadCommandes();
+      
       this.loadActiveCommandeDetails();
     }
   }

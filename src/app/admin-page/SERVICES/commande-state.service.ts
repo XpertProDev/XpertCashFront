@@ -44,6 +44,7 @@ export class CommandeStateService {
       commande.totalItems = totalItems;
       commande.totalAmount = totalAmount;
       this.commandesMap.set(id, commande);
+      
     }
   }
 
