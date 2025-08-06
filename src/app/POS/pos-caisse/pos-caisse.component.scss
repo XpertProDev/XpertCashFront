@@ -1,0 +1,144 @@
+.content_pos_caisse { position: relative; }
+.header_pos_caisse { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; height: 60px; background-color: #fff; box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px; padding: 0 15px; position: sticky; top: 0; z-index: 999;}
+.content_header_pos_caisse_right {display: flex; align-items: center; gap: 10px}
+ul { list-style: none; margin: 0; padding: 0;}
+p { margin: 0; }
+.double { display: flex; align-items: center; gap: 10px;}
+.icon_retour i { font-size: 20px; }
+.inputSearch { position: relative; width: 250px; height: 40px; display: flex; align-items: center;}
+.inputSearch input { width: 100%; height: 100%; padding-left: 10px; border-radius: 5px; border: 1px solid #000;}
+.inputSearch i { position: absolute; right: 0; margin-right: 15px; font-size: 17px;}
+.barre { height: 25px; width: 1px; background-color: #0000003f; margin: 8px 10px;}
+.add-task { padding: 10px 30px; background-color: #0672E4; color: #ffffff; border-radius: 5px; border: none;}
+.add-task:hover { background-color: #0361c6 }
+.caisse-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px;}
+.caisse-card { border: 1px solid #ddd; padding: 20px; border-radius: 4px; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between;}
+.caisse-nom { font-weight: bold; font-size: 18px; color: #1a1a1a;}
+.caisse-btn { background-color: #0672E4; color: white; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; align-self: flex-start; transition: background-color 0.2s ease;}
+.caisse-btn:hover { background-color: #0361c6;}
+.profil { background-color: #E9D421; padding: 0px 12px; border-radius: 4px; cursor: pointer;}
+.profil span { font-size: 12px; color: #000000;}
+.icon_more { cursor: pointer; display: none; position: absolute; top: -11px; right: -12px;}
+.icon_more i { font-size: 18px; }
+.block { display: flex; align-items: center; justify-content: space-between; position: relative;}
+.caisse-card:hover .icon_more { display: block;}
+
+/* Styles pour le popup */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+  }
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+  
+  &:hover {
+    color: #ff0000;
+  }
+}
+
+.modal-body {
+  padding: 24px;
+  
+  .form-group {
+    margin-bottom: 20px;
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #555;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 15px;
+      
+      &:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+    }
+  }
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  
+  .btn-cancel, .btn-submit {
+    padding: 10px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  
+  .btn-cancel {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    color: #444;
+    
+    &:hover {
+      background-color: #eaeaea;
+    }
+  }
+  
+  .btn-submit {
+    background-color: #0672E4;
+    color: white;
+    border: none;
+    
+    &:hover {
+      background-color: #0361c6;
+    }
+  }
+}

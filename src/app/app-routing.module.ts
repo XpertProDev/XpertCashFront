@@ -62,6 +62,15 @@ const routes: Routes = [
   //     hideSidebar: true
   //   }
   // },
+
+{
+  path: 'pos-caisse',
+  loadComponent: () => import('./POS/pos-caisse/pos-caisse.component')
+    .then(m => m.PosCaisseComponent),
+  canActivate: [authGuard],
+  data: { hideHeader: true, hideSidebar: true }
+},
+
 {
   path: 'pos-accueil',
   loadComponent: () =>

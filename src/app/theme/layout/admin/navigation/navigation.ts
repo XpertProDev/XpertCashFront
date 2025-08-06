@@ -58,7 +58,7 @@ export const NavigationItems: NavigationItem[] = [
         id: 'pos',
         title: 'POS',
         type: 'item',
-        url: '/pos-accueil',
+        url: '/pos-caisse',
         classes: 'nav-item',
         icon: 'feather icon-shopping-cart',
         codePermission: 'VENDRE_PRODUITS'
