@@ -55,4 +55,33 @@ export class PosCaisseService {
         })
     );
   }
+
+  getCaissesByBoutique(boutiqueId: number): Observable<CaisseResponse[]> {
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) throw new Error('Aucun token trouvé');
+
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        });
+
+        return this.http.get<CaisseResponse[]>(
+          `${this.apiUrl}/boutique/${boutiqueId}/caisses`, 
+          { headers }
+        );
+      }),
+      catchError(error => {
+        // Gestion d'erreur détaillée
+        let errorMsg = 'Erreur lors du chargement des caisses';
+        if (error?.error?.error) errorMsg = error.error.error;
+        else if (error?.error?.message) errorMsg = error.error.message;
+        else if (error.message) errorMsg = error.message;
+        
+        return throwError(() => ({ 
+          message: errorMsg,
+          originalError: error 
+        }));
+      })
+    );
+  }
 }

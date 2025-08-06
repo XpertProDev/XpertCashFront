@@ -12,8 +12,12 @@
                             <div class="name_pos">
                                 <p style="font-size: 16px;">Point de vente</p>
                             </div>
-                            <select class="content_select" name="boutique">
+                            <select class="content_select" name="boutique" 
+                                    [(ngModel)]="selectedBoutiqueIdForList"
+                                    (ngModelChange)="onBoutiqueChange()">
+                                <!-- Option désactivée pour sélection explicite -->
                                 <!-- <option [value]="null">Sélectionnez une boutique</option> -->
+                                
                                 <option *ngFor="let boutique of boutiques" [value]="boutique.id">
                                     {{ boutique.nomBoutique }}
                                 </option>
@@ -48,116 +52,43 @@
         </nav>
 
         <div class="caisse-container">
-            <div class="caisse-card">
-                <div class="block">
-                    <div class="double">
-                        <div class="profil">
-                            <span>L</span>
-                        </div>
-                        <div class="caisse-nom">Lamine Kone</div>
-                    </div>
-
-                    <div class="icon_more">
-                        <i class="ri-more-2-fill"></i>
-                    </div>
-                </div>
-                <button class="caisse-btn">Ouvrir la caisse</button>
+            <!-- Loading State -->
+            <div *ngIf="isLoadingCaisses" class="loading-indicator">
+                <i class="ri-loader-4-line spin"></i> Chargement des caisses...
             </div>
-            <!-- // 22222  -->
-            <div class="caisse-card">
-                <div class="block">
-                    <div class="double">
-                        <div class="profil">
-                            <span>D</span>
-                        </div>
-                        <div class="caisse-nom">Diakaridia SY</div>
-                    </div>
 
-                    <div class="icon_more">
-                        <i class="ri-more-2-fill"></i>
-                    </div>
-                </div>
-                <button class="caisse-btn">Continuer la vente</button>
+            <!-- Empty State -->
+            <div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
+                <i class="ri-information-line"></i>
+                <p>Aucune caisse disponible pour cette boutique</p>
             </div>
-            <!-- // 33333  -->
-            <div class="caisse-card">
+
+            <!-- Liste des caisses -->
+            <div *ngFor="let caisse of caisses" class="caisse-card">
                 <div class="block">
                     <div class="double">
                         <div class="profil">
-                            <span>H</span>
+                            <span>{{ caisse.nomVendeur ? caisse.nomVendeur[0] : '?' }}</span>
                         </div>
-                        <div class="caisse-nom">Hady Fofana</div>
+                        <div class="caisse-info">
+                            <div class="caisse-nom">{{ caisse.nomVendeur || 'Non assigné' }}</div>
+                            <div class="caisse-status" [class.open]="caisse.statut === 'OUVERTE'"
+                                                    [class.closed]="caisse.statut === 'FERMEE'">
+                                {{ caisse.statut === 'OUVERTE' ? 'Ouverte' : 'Fermée' }}
+                            </div>
+                        </div>
                     </div>
 
                     <div class="icon_more">
                         <i class="ri-more-2-fill"></i>
                     </div>
                 </div>
-                <button class="caisse-btn">Ouvrir la caisse</button>
-            </div>
-            <!-- // 4444  -->
-            <div class="caisse-card">
-                <div class="block">
-                    <div class="double">
-                        <div class="profil">
-                            <span>G</span>
-                        </div>
-                        <div class="caisse-nom">Guindo Mahamadoun</div>
-                    </div>
-
-                    <div class="icon_more">
-                        <i class="ri-more-2-fill"></i>
-                    </div>
-                </div>
-                <button class="caisse-btn">Ouvrir la caisse</button>
-            </div>
-            <!-- // 555555  -->
-            <div class="caisse-card">
-                <div class="block">
-                    <div class="double">
-                        <div class="profil">
-                            <span>A</span>
-                        </div>
-                        <div class="caisse-nom">Aminata Diallo</div>
-                    </div>
-
-                    <div class="icon_more">
-                        <i class="ri-more-2-fill"></i>
-                    </div>
-                </div>
-                <button class="caisse-btn">Ouvrir la caisse</button>
-            </div>
-            <!-- // 666666  -->
-            <div class="caisse-card">
-                <div class="block">
-                    <div class="double">
-                        <div class="profil">
-                            <span>C</span>
-                        </div>
-                        <div class="caisse-nom">Cheick Tirera</div>
-                    </div>
-
-                    <div class="icon_more">
-                        <i class="ri-more-2-fill"></i>
-                    </div>
-                </div>
-                <button class="caisse-btn">Ouvrir la caisse</button>
-            </div>
-            <!-- // 77777  -->
-            <div class="caisse-card">
-                <div class="block">
-                    <div class="double">
-                        <div class="profil">
-                            <span>M</span>
-                        </div>
-                        <div class="caisse-nom">Mohamed Traoré</div>
-                    </div>
-
-                    <div class="icon_more">
-                        <i class="ri-more-2-fill"></i>
-                    </div>
-                </div>
-                <button class="caisse-btn">Ouvrir la caisse</button>
+                
+                <button class="caisse-btn" 
+                        [disabled]="caisse.statut !== 'OUVERTE'"
+                        (click)="onCaisseButtonClick(caisse)">
+                {{ caisse.statut === 'OUVERTE' ? 'Continuer la vente' : 'Caisse fermée' }}
+                </button>
             </div>
         </div>
     </div>
