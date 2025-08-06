@@ -1,0 +1,204 @@
+<div class="container_pos_caisse">
+    <div class="content_pos_caisse">
+
+        <nav class="header_pos_caisse">
+            <div class="content_header_pos_caisse_left">
+                <ul>
+                    <li>
+                        <div class="double">
+                            <div class="icon_retour">
+                                <i class="ri-arrow-left-s-line"></i>
+                            </div>
+                            <div class="name_pos">
+                                <p style="font-size: 16px;">Point de vente</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="content_header_pos_caisse_right">
+
+                <button class="add-task" (click)="openModal()">Nouveau caisse</button>
+  
+                <div class="barre"></div>
+                
+                <div class="inputSearch">
+                    <i class="ri-search-2-line"></i>
+                    <input 
+                        type="text"
+                        placeholder="Recherche...."
+                    />
+                </div>
+            </div>
+        </nav>
+
+        <div class="caisse-container">
+            <div class="caisse-card">
+                <div class="block">
+                    <div class="double">
+                        <div class="profil">
+                            <span>L</span>
+                        </div>
+                        <div class="caisse-nom">Lamine Kone</div>
+                    </div>
+
+                    <div class="icon_more">
+                        <i class="ri-more-2-fill"></i>
+                    </div>
+                </div>
+                <button class="caisse-btn">Ouvrir la caisse</button>
+            </div>
+            <!-- // 22222  -->
+            <div class="caisse-card">
+                <div class="block">
+                    <div class="double">
+                        <div class="profil">
+                            <span>D</span>
+                        </div>
+                        <div class="caisse-nom">Diakaridia SY</div>
+                    </div>
+
+                    <div class="icon_more">
+                        <i class="ri-more-2-fill"></i>
+                    </div>
+                </div>
+                <button class="caisse-btn">Continuer la vente</button>
+            </div>
+            <!-- // 33333  -->
+            <div class="caisse-card">
+                <div class="block">
+                    <div class="double">
+                        <div class="profil">
+                            <span>H</span>
+                        </div>
+                        <div class="caisse-nom">Hady Fofana</div>
+                    </div>
+
+                    <div class="icon_more">
+                        <i class="ri-more-2-fill"></i>
+                    </div>
+                </div>
+                <button class="caisse-btn">Ouvrir la caisse</button>
+            </div>
+            <!-- // 4444  -->
+            <div class="caisse-card">
+                <div class="block">
+                    <div class="double">
+                        <div class="profil">
+                            <span>G</span>
+                        </div>
+                        <div class="caisse-nom">Guindo Mahamadoun</div>
+                    </div>
+
+                    <div class="icon_more">
+                        <i class="ri-more-2-fill"></i>
+                    </div>
+                </div>
+                <button class="caisse-btn">Ouvrir la caisse</button>
+            </div>
+            <!-- // 555555  -->
+            <div class="caisse-card">
+                <div class="block">
+                    <div class="double">
+                        <div class="profil">
+                            <span>A</span>
+                        </div>
+                        <div class="caisse-nom">Aminata Diallo</div>
+                    </div>
+
+                    <div class="icon_more">
+                        <i class="ri-more-2-fill"></i>
+                    </div>
+                </div>
+                <button class="caisse-btn">Ouvrir la caisse</button>
+            </div>
+            <!-- // 666666  -->
+            <div class="caisse-card">
+                <div class="block">
+                    <div class="double">
+                        <div class="profil">
+                            <span>C</span>
+                        </div>
+                        <div class="caisse-nom">Cheick Tirera</div>
+                    </div>
+
+                    <div class="icon_more">
+                        <i class="ri-more-2-fill"></i>
+                    </div>
+                </div>
+                <button class="caisse-btn">Ouvrir la caisse</button>
+            </div>
+            <!-- // 77777  -->
+            <div class="caisse-card">
+                <div class="block">
+                    <div class="double">
+                        <div class="profil">
+                            <span>M</span>
+                        </div>
+                        <div class="caisse-nom">Mohamed Traoré</div>
+                    </div>
+
+                    <div class="icon_more">
+                        <i class="ri-more-2-fill"></i>
+                    </div>
+                </div>
+                <button class="caisse-btn">Ouvrir la caisse</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Popup Modal -->
+<div class="modal-backdrop" *ngIf="showModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>Ouvrir une nouvelle caisse</h3>
+            <button (click)="closeModal()" class="close-button">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <form (ngSubmit)="submitForm()">
+                <div class="form-group">
+                    <label>Boutique assignée</label>
+                    <select [(ngModel)]="selectedBoutiqueId" name="boutique" [disabled]="isLoading">
+                        <option [value]="null">Sélectionnez une boutique</option>
+                        <option *ngFor="let boutique of boutiques" [value]="boutique.id">
+                            {{ boutique.nomBoutique }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Espèces à l'ouverture</label>
+                    <input 
+                        type="number" 
+                        [(ngModel)]="montantOuverture" 
+                        name="montant"
+                        placeholder="Entrez le montant" 
+                        required
+                        min="0"
+                        step="0.01"
+                        [disabled]="isLoading"
+                    >
+                </div>
+                
+                <!-- Affichage des erreurs -->
+                <div *ngIf="errorMessage" class="error-message">
+                    <i class="ri-error-warning-line"></i> 
+                    <span [innerHTML]="errorMessage | safeHtml"></span>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button (click)="closeModal()" class="btn-cancel" [disabled]="isLoading">Annuler</button>
+            <button (click)="submitForm()" class="btn-submit" [disabled]="isLoading">
+                <span *ngIf="!isLoading">Ouvrir la caisse</span>
+                <span *ngIf="isLoading" class="loading-spinner"></span>
+            </button>
+        </div>
+    </div>
+</div>
