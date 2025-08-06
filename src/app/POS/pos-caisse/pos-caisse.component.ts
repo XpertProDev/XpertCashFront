@@ -4,12 +4,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CaisseResponse, OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/CaisseModel/caisse.model';
 import { SafeHtmlPipe } from 'src/app/admin-page/MODELS/CaisseModel/safe-html.pipe';
+import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.directive';
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 
 @Component({
   selector: 'app-pos-caisse',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule, SafeHtmlPipe],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule,],
   templateUrl: './pos-caisse.component.html',
   styleUrl: './pos-caisse.component.scss'
 })
@@ -24,6 +25,8 @@ export class PosCaisseComponent {
   selectedBoutiqueIdForList: number | null = null;
   caisses: CaisseResponse[] = [];
   isLoadingCaisses = false;
+
+  openMenuId: number | null = null;
 
   constructor(
     private boutiqueService: BoutiqueService,
@@ -96,55 +99,7 @@ export class PosCaisseComponent {
     }
   }
 
-  submitForm() {
-    if (!this.selectedBoutiqueId) {
-      this.errorMessage = 'Veuillez sélectionner une boutique';
-      return;
-    }
-
-    if (this.montantOuverture < 0) {
-      this.errorMessage = 'Le montant ne peut pas être négatif';
-      return;
-    }
-
-    this.isLoading = true;
-    this.errorMessage = null;
-
-    const request: OuvrirCaisseRequest = {
-      boutiqueId: this.selectedBoutiqueId,
-      montantInitial: this.montantOuverture
-    };
-
-    this.posCaisseService.ouvrirCaisse(request).subscribe({
-      next: (response) => {
-        console.log('Caisse ouverte avec succès', response);
-        this.isLoading = false;
-        this.closeModal();
-        
-        // Rediriger vers l'interface de vente
-        // this.router.navigate(['/pos/vente'], {
-        //   state: { caisse: response }
-        // });
-      },
-      error: (error) => {
-      console.error('Erreur lors de l\'ouverture de la caisse', error);
-      this.isLoading = false;
-      
-      let rawError = '';
-      
-      if (error.error?.error) rawError = error.error.error;
-      else if (error.error?.message) rawError = error.error.message;
-      else if (error.message) rawError = error.message;
-      else rawError = 'Erreur inconnue lors de l\'ouverture de la caisse';
-      
-      // Supprime le préfixe avant " : "
-      const prefixIndex = rawError.indexOf(': ');
-      this.errorMessage = prefixIndex > 0 
-        ? rawError.substring(prefixIndex + 2) 
-        : rawError;
-    }
-    });
-  }
+  
 
   onCaisseButtonClick(caisse: CaisseResponse): void {
     if (caisse.statut === 'OUVERTE') {
@@ -152,6 +107,20 @@ export class PosCaisseComponent {
         state: { caisse: caisse }
       });
     }
+  }
+
+  toggleMenu(caisseId: number): void {
+    // si on reclique sur la même, on referme
+    this.openMenuId = this.openMenuId === caisseId ? null : caisseId;
+  }
+
+  allCaisseClose(caisse: CaisseResponse) {
+    console.log('Btn 1 clicked pour', caisse);
+    // … votre logique
+  }
+
+  goToPosJournalCaisse() {
+    this.router.navigate(['/pos-caisse/pos-journal-caisse'])
   }
 
   

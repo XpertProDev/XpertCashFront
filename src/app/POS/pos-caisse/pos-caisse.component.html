@@ -1,55 +1,7 @@
 <div class="container_pos_caisse">
     <div class="content_pos_caisse">
 
-        <nav class="header_pos_caisse">
-            <div class="content_header_pos_caisse_left">
-                <ul>
-                    <li>
-                        <div class="double">
-                            <div class="icon_retour">
-                                <i class="ri-arrow-left-s-line"></i>
-                            </div>
-                            <div class="name_pos">
-                                <p style="font-size: 16px;">Point de vente</p>
-                            </div>
-                            <select class="content_select" name="boutique" 
-                                    [(ngModel)]="selectedBoutiqueIdForList"
-                                    (ngModelChange)="onBoutiqueChange()">
-                                <!-- Option désactivée pour sélection explicite -->
-                                <!-- <option [value]="null">Sélectionnez une boutique</option> -->
-                                
-                                <option *ngFor="let boutique of boutiques" [value]="boutique.id">
-                                    {{ boutique.nomBoutique }}
-                                </option>
-                            </select>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            <div class="content_header_pos_caisse_right">
-
-                <button class="add-task" (click)="openModal()">Nouveau caisse</button>
-  
-                <div class="barre"></div>
-
-                <span class="o_pager_counter"><span class="">1-1</span><span> / </span><span class="o_pager_limit">1</span></span>
-                
-                <span class="btn-group d-print-none" aria-atomic="true">
-                    <button type="button" class="o_pager_previous" aria-label="Précédent" data-tooltip="Précédent" ><i class="ri-arrow-left-s-line"></i></button>
-                    <button type="button" class="o_pager_next" aria-label="Suivant" data-tooltip="Suivant"><i class="ri-arrow-right-s-line"></i></button>
-                </span>
-  
-                <div class="barre"></div>
-                
-                <div class="inputSearch">
-                    <i class="ri-search-2-line"></i>
-                    <input 
-                        type="text"
-                        placeholder="Recherche...."
-                    />
-                </div>
-            </div>
-        </nav>
+        
 
         <div class="caisse-container">
             <!-- Loading State -->
@@ -66,7 +18,7 @@
             <!-- Liste des caisses -->
             <div *ngFor="let caisse of caisses" class="caisse-card">
                 <div class="block">
-                    <div class="double">
+                    <div class="double" style="align-items: baseline;">
                         <div class="profil">
                             <span>{{ caisse.nomVendeur ? caisse.nomVendeur[0] : '?' }}</span>
                         </div>
@@ -79,8 +31,17 @@
                         </div>
                     </div>
 
-                    <div class="icon_more">
+                    <!-- zone "more" cliquable -->
+                    <div class="icon_more" (click)="toggleMenu(caisse.id)">
                         <i class="ri-more-2-fill"></i>
+                        <!-- dropdown -->
+                        <div 
+                            class="dropdown-menu" 
+                            *ngIf="openMenuId === caisse.id"
+                            (click)="$event.stopPropagation()">
+                            <button (click)="allCaisseClose(caisse)" (click)="goToPosJournalCaisse()">Journal des caisses</button>
+                            <button (click)="allCaisseClose(caisse)">Autres</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -94,57 +55,3 @@
     </div>
 </div>
 
-
-<!-- Popup Modal -->
-<div class="modal-backdrop" *ngIf="showModal">
-    <div class="modal-container">
-        <div class="modal-header">
-            <h3>Ouvrir une nouvelle caisse</h3>
-            <button (click)="closeModal()" class="close-button">
-                <i class="ri-close-line"></i>
-            </button>
-        </div>
-        
-        <div class="modal-body">
-            <form (ngSubmit)="submitForm()">
-                <div class="form-group">
-                    <label>Boutique assignée</label>
-                    <select [(ngModel)]="selectedBoutiqueId" name="boutique" [disabled]="isLoading">
-                        <option [value]="null">Sélectionnez une boutique</option>
-                        <option *ngFor="let boutique of boutiques" [value]="boutique.id">
-                            {{ boutique.nomBoutique }}
-                        </option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Espèces à l'ouverture</label>
-                    <input 
-                        type="number" 
-                        [(ngModel)]="montantOuverture" 
-                        name="montant"
-                        placeholder="Entrez le montant" 
-                        required
-                        min="0"
-                        step="0.01"
-                        [disabled]="isLoading"
-                    >
-                </div>
-                
-                <!-- Affichage des erreurs -->
-                <div *ngIf="errorMessage" class="error-message">
-                    <i class="ri-error-warning-line"></i> 
-                    <span [innerHTML]="errorMessage | safeHtml"></span>
-                </div>
-            </form>
-        </div>
-        
-        <div class="modal-footer">
-            <button (click)="closeModal()" class="btn-cancel" [disabled]="isLoading">Annuler</button>
-            <button (click)="submitForm()" class="btn-submit" [disabled]="isLoading">
-                <span *ngIf="!isLoading">Ouvrir la caisse</span>
-                <span *ngIf="isLoading" class="loading-spinner"></span>
-            </button>
-        </div>
-    </div>
-</div>

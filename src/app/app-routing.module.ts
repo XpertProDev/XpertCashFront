@@ -65,10 +65,24 @@ const routes: Routes = [
 
 {
   path: 'pos-caisse',
-  loadComponent: () => import('./POS/pos-caisse/pos-caisse.component')
-    .then(m => m.PosCaisseComponent),
+  loadComponent: () => import('./POS/pos-caisse-header/pos-caisse-header.component')
+    .then(m => m.PosCaisseHeaderComponent),
   canActivate: [authGuard],
-  data: { hideHeader: true, hideSidebar: true }
+  data: { hideHeader: true, hideSidebar: true },
+  children: [
+    {
+      path: '',
+      loadComponent: () =>
+        import('./POS/pos-caisse/pos-caisse.component')
+          .then(m => m.PosCaisseComponent),
+    },
+    {
+      path: 'pos-journal-caisse',
+      loadComponent: () =>
+        import('./POS/pos-journal-caisse/pos-journal-caisse.component')
+          .then(m => m.PosJournalCaisseComponent),
+    },
+  ]
 },
 
 {
