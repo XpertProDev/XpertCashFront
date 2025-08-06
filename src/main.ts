@@ -8,8 +8,16 @@ import { AppComponent } from './app/app.component';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
+// Supprimer console.log en production
 if (environment.production) {
   enableProdMode();
+  
+  // Redéfinir console.log pour qu'il ne fasse rien en production
+  console.log = () => {};
+  console.debug = () => {};
+  console.info = () => {};
+  console.warn = () => {};
+  // Garder console.error pour les erreurs importantes
 }
 
 bootstrapApplication(AppComponent, {

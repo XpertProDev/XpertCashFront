@@ -397,4 +397,18 @@ suspendUser(userId: number, suspend: boolean): Observable<any> {
   );
 }
 
+
+getCurrentUser(): UserRequest | null {
+  const userString = localStorage.getItem('user');
+  if (!userString) return null;
+
+  try {
+    return JSON.parse(userString) as UserRequest;
+  } catch (e) {
+    console.error('Erreur lors du parsing du user du localStorage :', e);
+    return null;
+  }
+}
+
+
 }

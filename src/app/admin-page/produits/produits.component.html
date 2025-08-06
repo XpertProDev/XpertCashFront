@@ -1,3 +1,15 @@
+  <!-- Message d'erreur principal -->
+   <div class="toast-container">
+        <div *ngIf="errorMessageApi" class="alert alert-danger toast-message-danger">
+          {{ errorMessageApi }}
+        </div>
+        
+        <!-- Message de succès -->
+        <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+          {{ successMessage }}
+        </div>
+    </div>
+  
 <div class="containerTable">
   <!-- En-tête : titre, actions et barre de recherche -->
   <div class="tasks-header">
@@ -9,12 +21,42 @@
        <i class="fa fa-download" aria-hidden="true"></i>
       </button>
       
-
+ 
        <div class="bare"></div>
 
       <div class="contentIcon">
         <i class="ri-refresh-line" (click)="rafraichirProduits()" *ngIf="!isLoading"></i>
         <i *ngIf="isLoading" class="ri-loader-line ri-spin"></i>
+        <div class="bare"></div>
+
+        <div class="export-container" #popupContainer> 
+
+            <i (click)="togglePopup()">
+              <img src="assets/icon/category.png" alt="Category Icon" style="width: 20px; height: 20px;" />
+            </i>
+              <!-- Popup -->
+          <div *ngIf="isPopupVisible" class="popup show">
+            <div class="checkbox-list">
+             <label *ngFor="let cat of categories">
+                 <input type="checkbox" [(ngModel)]="cat.selected" (change)="onCheckboxChange()" />
+                {{ cat.nom }}
+              </label>
+            </div>
+
+            <!-- Si au moins une case est cochée, afficher les boutons -->
+            <div *ngIf="isAnySelected" class="action-buttons">
+              <button class="cancel-btn" (click)="cancelSelection()">Annuler</button>
+              <button class="delete-btn" (click)="deleteSelection()">Supprimer</button>
+            </div>
+          </div>
+        </div>
+
+         
+
+
+        
+     
+
         <div class="bare"></div>
         <div class="export-container">
           <div class="iconDrop">
@@ -26,6 +68,7 @@
             <div class="export-option" (click)="downloadCSV()">Télécharger en CSV</div>
           </div>
         </div>
+        
       </div>
 
     <!-- Nouvelle barre de recherche avec filtres -->

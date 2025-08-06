@@ -9,7 +9,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { CategorieService } from '../SERVICES/categorie.service';
 import { ProduitService } from '../SERVICES/produit.service';
-import { Boutique, Produit } from '../MODELS/produit.model';
+import { Boutique, Categorie, Produit } from '../MODELS/produit.model';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
@@ -20,6 +20,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { SuspendedBoutiqueDialogComponent } from './suspended-boutique-dialog.component';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { environment } from 'src/environments/environment';
+import { catchError } from 'rxjs';
 
 @Component({
   selector: 'app-produits',
@@ -84,6 +85,9 @@ export class ProduitsComponent implements OnInit {
 
   showBoutiqueSelectionPanel: boolean = false;
 
+  isPopupVisible = false;
+categories: (Categorie & { selected?: boolean })[] = [];
+
   // HostListener pour fermer les dropdowns
   @HostListener('document:click', ['$event'])
   onClick(event: MouseEvent): void {
@@ -127,6 +131,7 @@ export class ProduitsComponent implements OnInit {
   ngOnInit(): void {
     // this.getUserBoutiqueId();
     this.getUserInfo();
+    this.fetchCategories();
     // this.selectBoutique(null);
 
     // this.loadProduits();
@@ -1107,5 +1112,115 @@ get boutiquesActivesSansEntrepots(): Boutique[] {
     .map(b => this.productCounts[b.id] || 0)
     .reduce((acc, curr) => acc + curr, 0);
 }
+
+  fetchCategories(): void {
+    this.categorieService.getCategories().pipe(
+      catchError(err => {
+        console.error("Erreur de chargement des catégories", err);
+        return [];
+      })
+    ).subscribe(data => {
+  this.categories = data.map(cat => ({
+    ...(cat as Categorie),
+    selected: false
+  }));
+});
+
+  }
+
+  get isAnySelected(): boolean {
+    return this.categories.some(cat => cat.selected);
+  }
+  onCheckboxChange(): void {
+    // Juste pour déclencher la détection de changement
+  }
+  cancelSelection(): void {
+  if (this.isAnySelected) {
+    // Si y a des cochés, décocher tout
+    this.categories.forEach(cat => cat.selected = false);
+  } else {
+    // Sinon fermer popup
+    this.isPopupVisible = false;
+  }
+}
+
+  @ViewChild('popupContainer') popupContainer!: ElementRef;
+  // Masque le dropdown si l'utilisateur clique en dehors
+ @HostListener('document:click', ['$event'])
+  _onClickOutside(event: MouseEvent) {
+    if (this.isPopupVisible && this.popupContainer && !this.popupContainer.nativeElement.contains(event.target)) {
+      this.isPopupVisible = false;
+    }
+  }
+
+successMessage: string | null = null;
+errorMessageApi: string | null = null;
+
+togglePopup(): void {
+  this.successMessage = null;
+  this.errorMessageApi = null;
+  this.isPopupVisible = !this.isPopupVisible;
+}
+
+deleteSelection(): void {
+  // Réinitialiser les messages avant chaque action
+  this.successMessage = null;
+  this.errorMessageApi = null;
+
+  const selectedIds = this.categories.filter(c => c.selected).map(c => c.id);
+  console.log("🔴 À supprimer :", selectedIds);
+
+  if (selectedIds.length === 0) {
+    this.errorMessageApi = "Veuillez sélectionner au moins une catégorie.";
+    this.clearMessagesAfterDelay();
+    return;
+  }
+
+  if (selectedIds.length > 1) {
+    this.errorMessageApi = "Vous ne pouvez supprimer qu'une seule catégorie à la fois.";
+    this.clearMessagesAfterDelay();
+    return;
+  }
+
+  const idToDelete = selectedIds[0];
+
+  this.categorieService.deleteCategorie(idToDelete).subscribe({
+    next: (message: string) => {
+      this.successMessage = message || "Catégorie supprimée avec succès.";
+      this.errorMessageApi = null;
+
+      this.categories = this.categories.filter(c => c.id !== idToDelete);
+      this.isPopupVisible = false;
+
+      this.clearMessagesAfterDelay();
+    },
+    error: (error) => {
+      this.successMessage = null;
+
+      if (error.error && typeof error.error === 'string') {
+        this.errorMessageApi = error.error;
+      } else if (error.status === 403) {
+        this.errorMessageApi = "Accès refusé. Seuls les administrateurs ou managers peuvent supprimer une catégorie.";
+      } else if (error.status === 409) {
+        this.errorMessageApi = "Cette catégorie contient des produits. Veuillez d'abord les supprimer.";
+      } else {
+        this.errorMessageApi = "Erreur inattendue lors de la suppression.";
+      }
+
+      this.clearMessagesAfterDelay();
+    }
+  });
+}
+
+private clearMessagesAfterDelay(): void {
+  setTimeout(() => {
+    this.successMessage = null;
+    this.errorMessageApi = null;
+  }, 4000); // 4 secondes
+}
+
+
+
+
 
 }

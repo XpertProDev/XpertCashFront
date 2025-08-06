@@ -122,9 +122,9 @@ export class PosCaisseComponent {
         this.closeModal();
         
         // Rediriger vers l'interface de vente
-        this.router.navigate(['/pos/vente'], {
-          state: { caisse: response }
-        });
+        // this.router.navigate(['/pos/vente'], {
+        //   state: { caisse: response }
+        // });
       },
       error: (error) => {
       console.error('Erreur lors de l\'ouverture de la caisse', error);

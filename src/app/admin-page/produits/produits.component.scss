@@ -97,10 +97,23 @@ tr:hover {
   cursor: pointer;
 }
 
-.contentIcon i:hover {
+.contentIcon  i:hover {
   color: #0672E4;
   transition: all 0.5s ease;
 }
+
+
+.contentIcon img {
+  transition: all 0.5s ease;
+}
+
+.contentIcon i:hover img {
+  filter: hue-rotate(180deg) saturate(200%) brightness(0.8);
+}
+
+
+
+
 
 .bare {
   width: 2px;
@@ -1553,3 +1566,196 @@ img.roudel_detail{
   vertical-align: middle;
   font-size: 1.2em;
 }
+
+.popup {
+  position: absolute;
+  top: 37px;
+  right: 0%;
+  width: 240px;
+  padding: 12px 14px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-in-out;
+  z-index: 1000;
+}
+
+.popup.show {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.popup::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 2%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid #ffffff;
+  filter: drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.1));
+}
+
+.checkbox-list {
+  max-height: 150px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  padding-right: 4px;
+}
+
+/* Scrollbar minimal */
+.checkbox-list::-webkit-scrollbar {
+  width: 6px;
+}
+.checkbox-list::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 3px;
+}
+
+.checkbox-list label {
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.checkbox-list label:hover {
+  background-color: #f5f5f5;
+}
+
+.checkbox-list input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.action-buttons button {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.cancel-btn {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.delete-btn {
+  background-color: #ff5252;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #e53935;
+}
+
+
+
+//Toast
+
+ /* Conteneur du toast */
+.toast-container {
+  position: fixed;
+  top: 60px;
+  right: 35px;
+  z-index: 9999;
+}
+
+/* Ajoutez dans votre fichier CSS */
+.toast-message-warning {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px;
+  border-radius: 5px;
+  // background-color: #fff3cd;
+  // border: 1px solid #ffeeba;
+  background-color: #77eb87;
+  border: 1px solid #ACCEBC;
+  color: #856404;
+  z-index: 1000;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+  animation: fadeInOut 4s ease-in-out;
+}
+
+.toast-message-success {
+  background-color: #77eb87;
+  border: 1px solid #ACCEBC;
+  color: #000000;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: fadeInOut 4s ease-in-out;
+  transform: translateY(-20px);
+}
+  
+//toast success
+.toast-message-danger {
+  background-color: #F3D8DA;
+  border: 1px solid #E7B1B6;
+  color: #000;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: fadeInOut 4s ease-in-out;
+  transform: translateY(-20px);
+}
+
+
+  // Ajouter l'animation pour tous les types d'alertes
+  .alert {
+    // ... styles existants
+    
+    &-warning {
+      @extend .alert;
+      // ... styles spécifiques
+    }
+  }
+  
+  /* Animation pour faire apparaître et disparaître le toast */
+  @keyframes fadeInOut {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    20% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(2px); /* Le toast disparaît avec un léger mouvement vers le bas */
+    }
+  }  
