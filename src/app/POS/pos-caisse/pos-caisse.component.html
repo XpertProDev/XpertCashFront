@@ -163,17 +163,25 @@
         <form (ngSubmit)="submitForm()">
             <div class="form-group">
                 <label>Boutique assigné</label>
-                <select>
-                    <option>Sélectionnez une boutique</option>
-                    <option>Boutique 1</option>
-                    <option>Boutique 2</option>
-                    <option>Boutique 3</option>
+                <select [(ngModel)]="selectedBoutiqueId" name="boutique">
+                    <option [value]="null">Sélectionnez une boutique</option>
+                    <option *ngFor="let boutique of boutiques" [value]="boutique.id">
+                        {{ boutique.nomBoutique }}
+                    </option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label>Espèces à l'ouverture</label>
-                <input type="text" value="0" placeholder="Entrez le nom" required>
+                <input 
+                    type="number" 
+                    [(ngModel)]="montantOuverture" 
+                    name="montant"
+                    placeholder="Entrez le montant" 
+                    required
+                    min="0"
+                    step="0.01"
+                >
             </div>
         </form>
         </div>
