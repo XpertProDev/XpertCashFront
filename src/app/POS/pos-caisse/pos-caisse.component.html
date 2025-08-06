@@ -12,11 +12,11 @@
                             <div class="name_pos">
                                 <p style="font-size: 16px;">Point de vente</p>
                             </div>
-                            <select class="content_select">
-                                <option value="">Boutique 1</option>
-                                <option value="">Boutique 2</option>
-                                <option value="">Boutique 3</option>
-                                <option value="">Boutique 4</option>
+                            <select class="content_select" name="boutique">
+                                <!-- <option [value]="null">Sélectionnez une boutique</option> -->
+                                <option *ngFor="let boutique of boutiques" [value]="boutique.id">
+                                    {{ boutique.nomBoutique }}
+                                </option>
                             </select>
                         </div>
                     </li>
