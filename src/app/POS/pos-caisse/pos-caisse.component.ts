@@ -1,30 +1,36 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/CaisseModel/caisse.model';
+import { SafeHtmlPipe } from 'src/app/admin-page/MODELS/CaisseModel/safe-html.pipe';
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
-import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 
 @Component({
   selector: 'app-pos-caisse',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, SafeHtmlPipe],
   templateUrl: './pos-caisse.component.html',
   styleUrl: './pos-caisse.component.scss'
 })
 export class PosCaisseComponent {
   showModal = false;
-  boutiques: any[] = []; // Liste des boutiques
-  selectedBoutiqueId: number | null = null; // Boutique sélectionnée
-  montantOuverture: number = 0; // Montant à l'ouverture
+  boutiques: any[] = [];
+  selectedBoutiqueId: number | null = null;
+  montantOuverture: number = 0;
+  isLoading = false;
+  errorMessage: string | null = null;
 
   constructor(
     private boutiqueService: BoutiqueService,
+    private posCaisseService: PosCaisseService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadBoutiques();
   }
 
-  // Charge les boutiques depuis l'API
   loadBoutiques(): void {
     this.boutiqueService.getBoutiquesByEntreprise().subscribe({
       next: (boutiques) => {
@@ -32,34 +38,69 @@ export class PosCaisseComponent {
       },
       error: (error) => {
         console.error('Erreur lors du chargement des boutiques', error);
+        this.errorMessage = 'Erreur lors du chargement des boutiques';
       }
     });
   }
 
-  // Ouvre le popup
   openModal() {
     this.showModal = true;
   }
 
   closeModal() {
     this.showModal = false;
-    // Réinitialise les valeurs
     this.selectedBoutiqueId = null;
     this.montantOuverture = 0;
+    this.errorMessage = null;
   }
 
   submitForm() {
     if (!this.selectedBoutiqueId) {
-      alert('Veuillez sélectionner une boutique');
+      this.errorMessage = 'Veuillez sélectionner une boutique';
       return;
     }
 
-    console.log("Caisse créée !", {
+    if (this.montantOuverture < 0) {
+      this.errorMessage = 'Le montant ne peut pas être négatif';
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = null;
+
+    const request: OuvrirCaisseRequest = {
       boutiqueId: this.selectedBoutiqueId,
-      montant: this.montantOuverture
+      montantInitial: this.montantOuverture
+    };
+
+    this.posCaisseService.ouvrirCaisse(request).subscribe({
+      next: (response) => {
+        console.log('Caisse ouverte avec succès', response);
+        this.isLoading = false;
+        this.closeModal();
+        
+        // Rediriger vers l'interface de vente
+        this.router.navigate(['/pos/vente'], {
+          state: { caisse: response }
+        });
+      },
+      error: (error) => {
+      console.error('Erreur lors de l\'ouverture de la caisse', error);
+      this.isLoading = false;
+      
+      let rawError = '';
+      
+      if (error.error?.error) rawError = error.error.error;
+      else if (error.error?.message) rawError = error.error.message;
+      else if (error.message) rawError = error.message;
+      else rawError = 'Erreur inconnue lors de l\'ouverture de la caisse';
+      
+      // Supprime le préfixe avant " : "
+      const prefixIndex = rawError.indexOf(': ');
+      this.errorMessage = prefixIndex > 0 
+        ? rawError.substring(prefixIndex + 2) 
+        : rawError;
+    }
     });
-    
-    this.closeModal();
   }
-  
 }

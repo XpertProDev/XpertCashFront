@@ -142,3 +142,40 @@ p { margin: 0; }
     }
   }
 }
+
+/* Styles pour les erreurs */
+.error-message {
+  background-color: #ffebee;
+  color: #b71c1c;
+  padding: 12px;
+  border-radius: 4px;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  i {
+    font-size: 20px;
+  }
+}
+
+/* Spinner de chargement */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Désactiver les boutons pendant le chargement */
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
