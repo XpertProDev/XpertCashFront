@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
@@ -890,6 +890,81 @@ export class PosVenteComponent {
   selectEntreprise(entreprise: EntrepriseClient) {
     console.log('Entreprise sélectionnée:', entreprise);
     this.closeListClientPopup();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (this.showPaymentPopup) {
+      this.handlePaymentKeyPressPhysical(event);
+    } else {
+      this.handleKeyPressPhysical(event);
+    }
+  }
+
+  handleKeyPressPhysical(event: KeyboardEvent) {
+    // Ignorer si un popup est ouvert ou si on est dans un champ de saisie
+    if (this.showDetailPopup || this.showClientPopup || this.showAddClientPopup) return;
+    
+    const key = event.key;
+    switch (key) {
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        this.handleKeyPress(key);
+        break;
+      case ',':
+      case '.':
+        this.handleKeyPress(',');
+        break;
+      case 'Backspace':
+        this.handleKeyPress('backspace');
+        break;
+      case '-':
+      case '+':
+        this.handleKeyPress('+/-');
+        break;
+    }
+  }
+
+  handlePaymentKeyPressPhysical(event: KeyboardEvent) {
+    const key = event.key;
+    switch (key) {
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        this.handlePaymentKeyPress(key);
+        break;
+      case ',':
+      case '.':
+        this.handlePaymentKeyPress(',');
+        break;
+      case 'Backspace':
+        this.handlePaymentKeyPress('backspace');
+        break;
+      case '-':
+      case '+':
+        this.handlePaymentKeyPress('+/-');
+        break;
+      case 'Enter':
+        if (this.isAmountEntered) {
+          this.completePayment();
+        }
+        break;
+    }
   }
 
 
