@@ -27,7 +27,6 @@
                 </ul>
             </div>
             <div class="content_header_pos_caisse_right">
-
                 <button class="add-task" (click)="openModal()">Nouveau caisse</button>
   
                 <div class="barre"></div>
@@ -111,7 +110,7 @@
     </div>
 </div>
 
-<div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
+<!-- <div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
     <i class="ri-information-line"></i>
     <p>{{ errorMessage || 'Aucune caisse disponible pour cette boutique' }}</p>
-  </div>
+  </div> -->

@@ -7,6 +7,7 @@ import { Router, RouterModule } from '@angular/router';
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 import { CaisseResponse, OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/CaisseModel/caisse.model';
+import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/boutique-state.service';
 
 @Component({
   selector: 'app-pos-caisse-header',
@@ -32,6 +33,7 @@ export class PosCaisseHeaderComponent {
     constructor(
       private boutiqueService: BoutiqueService,
       private posCaisseService: PosCaisseService,
+      private boutiqueState: BoutiqueStateService,
       private router: Router
     ) {}
   
@@ -46,6 +48,7 @@ export class PosCaisseHeaderComponent {
         
         if (this.boutiques.length > 0) {
           this.selectedBoutiqueIdForList = this.boutiques[0].id;
+          this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
           
           if (this.selectedBoutiqueIdForList !== null) {
             this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
@@ -117,6 +120,7 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
 }
 
 onBoutiqueChange(): void {
+  this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
   // Réinitialiser avant de charger de nouvelles données
   this.caisses = [];
   this.errorMessage = null;
