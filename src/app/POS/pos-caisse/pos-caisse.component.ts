@@ -250,11 +250,11 @@ export class PosCaisseComponent {
             console.log('Caisse ouverte avec succès', response);
             this.isLoading = false;
             this.closeModal();
-            
-            // Recharger la liste des caisses après ouverture
-            // if (this.selectedBoutiqueIdForList !== null) {
-            //     this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-            // }
+
+            this.loadDerniereCaisseVendeur(request.boutiqueId);
+
+            // Si vous préférez charger toutes les caisses (pas seulement la dernière), appelez plutôt :
+            // this.loadCaisses(request.boutiqueId);
         },
         error: (error) => {
             console.error('Erreur lors de l\'ouverture de la caisse', error);
