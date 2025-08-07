@@ -39,40 +39,39 @@ export class PosJournalCaisseComponent {
     });
   }
 
-  loadCaisses(): void {
-    this.isLoading = true;
-    this.errorMessage = null;
-    
-    // Obtenir l'utilisateur actuel
-    const currentUser = this.usersService.getCurrentUser();
-    
-    if (!currentUser || !currentUser.id) {
-      this.errorMessage = 'Utilisateur non identifié';
-      this.isLoading = false;
-      return;
-    }
-
-    // Utiliser l'ID de l'utilisateur connecté
-    const userId = currentUser.id;
-
-    this.posCaisseService.getHistoriqueCaissesByVendeur(userId).subscribe({
-      next: (caisses) => {
-        // Filtrer par boutique actuelle
-        this.caisses = caisses.filter(c => 
-          c.boutiqueId === this.currentBoutiqueId
-        );
-        
-        // Trier par date d'ouverture par défaut
-        this.sortCaisses();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Erreur', error);
-        this.isLoading = false;
-        this.errorMessage = error.message || 'Erreur lors du chargement des caisses';
-      }
-    });
+loadCaisses(): void {
+  this.isLoading = true;
+  this.errorMessage = null;
+  
+  const currentUser = this.usersService.getCurrentUser();
+  console.log('Utilisateur courant:', currentUser);
+  
+  if (!currentUser || !currentUser.id) {
+    this.errorMessage = 'Utilisateur non identifié';
+    this.isLoading = false;
+    return;
   }
+
+  const userId = currentUser.id;
+  console.log('ID utilisateur:', userId);
+  console.log('Boutique sélectionnée:', this.currentBoutiqueId);
+
+  this.posCaisseService.getHistoriqueCaissesByVendeur(userId).subscribe({
+    next: (caisses) => {
+      console.log('Caisses récupérées:', caisses);
+      // this.caisses = caisses.filter(c => c.boutiqueId === this.currentBoutiqueId);
+      this.caisses = caisses.filter(c => c.boutiqueId == Number(this.currentBoutiqueId));
+      console.log('Caisses après filtrage:', this.caisses);
+      this.sortCaisses();
+      this.isLoading = false;
+    },
+    error: (error) => {
+      console.error('Erreur', error);
+      this.isLoading = false;
+      this.errorMessage = error.message || 'Erreur lors du chargement des caisses';
+    }
+  });
+}
 
   sortCaisses(field: keyof CaisseResponse = this.sortField): void {
     if (this.sortField === field) {
