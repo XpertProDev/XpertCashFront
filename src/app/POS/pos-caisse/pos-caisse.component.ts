@@ -6,7 +6,7 @@ import { CaisseResponse, OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/C
 import { SafeHtmlPipe } from 'src/app/admin-page/MODELS/CaisseModel/safe-html.pipe';
 import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.directive';
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
-import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/boutique-state.service';
+import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 
 @Component({

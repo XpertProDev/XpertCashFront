@@ -1,1 +1,81 @@
-<p>pos-journal-caisse works!</p>
+<div class="journal-container">
+  <!-- Header -->
+  <div class="journal-header">
+    <button class="back-button" (click)="goBack()">
+      <i class="ri-arrow-left-line"></i> Retour
+    </button>
+    <h2>Journal des Caisses</h2>
+    <div class="header-actions">
+      <div class="search-box">
+        <i class="ri-search-line"></i>
+        <input 
+          type="text" 
+          placeholder="Rechercher..." 
+          [(ngModel)]="searchTerm"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-section">
+    <i class="ri-loader-4-line spin"></i>
+    <p>Chargement de l'historique...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && errorMessage" class="error-section">
+    <i class="ri-error-warning-line"></i>
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && !errorMessage && filteredCaisses.length === 0" class="empty-section">
+    <i class="ri-file-list-2-line"></i>
+    <p>Aucune opération de caisse trouvée</p>
+  </div>
+
+  <!-- Tableau des caisses -->
+  <div *ngIf="!isLoading && !errorMessage && filteredCaisses.length > 0" class="caisse-table">
+    <table>
+      <thead>
+        <tr>
+          <th (click)="sortCaisses('dateOuverture')">
+            Date Ouverture
+            <i class="ri-arrow-up-s-line" *ngIf="sortField === 'dateOuverture' && sortDirection === 'asc'"></i>
+            <i class="ri-arrow-down-s-line" *ngIf="sortField === 'dateOuverture' && sortDirection === 'desc'"></i>
+          </th>
+          <th (click)="sortCaisses('dateFermeture')">
+            Date Fermeture
+            <i class="ri-arrow-up-s-line" *ngIf="sortField === 'dateFermeture' && sortDirection === 'asc'"></i>
+            <i class="ri-arrow-down-s-line" *ngIf="sortField === 'dateFermeture' && sortDirection === 'desc'"></i>
+          </th>
+          <th>Statut</th>
+          <th (click)="sortCaisses('montantInitial')">
+            Montant Initial
+            <i class="ri-arrow-up-s-line" *ngIf="sortField === 'montantInitial' && sortDirection === 'asc'"></i>
+            <i class="ri-arrow-down-s-line" *ngIf="sortField === 'montantInitial' && sortDirection === 'desc'"></i>
+          </th>
+          <th (click)="sortCaisses('montantCourant')">
+            Montant Final
+            <i class="ri-arrow-up-s-line" *ngIf="sortField === 'montantCourant' && sortDirection === 'asc'"></i>
+            <i class="ri-arrow-down-s-line" *ngIf="sortField === 'montantCourant' && sortDirection === 'desc'"></i>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let caisse of filteredCaisses">
+          <td>{{ formatDate(caisse.dateOuverture) }}</td>
+          <td>{{ caisse.dateFermeture ? formatDate(caisse.dateFermeture) : '-' }}</td>
+          <td>
+            <span class="status-badge" [class.open]="caisse.statut === 'OUVERTE'" [class.closed]="caisse.statut === 'FERMEE'">
+              {{ caisse.statut === 'OUVERTE' ? 'Ouverte' : 'Fermée' }}
+            </span>
+          </td>
+          <td>{{ caisse.montantInitial | currency:'XOF':'symbol':'1.0-0' }}</td>
+          <td>{{ caisse.montantCourant | currency:'XOF':'symbol':'1.0-0' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

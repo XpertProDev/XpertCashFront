@@ -7,7 +7,7 @@ import { Router, RouterModule } from '@angular/router';
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 import { CaisseResponse, OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/CaisseModel/caisse.model';
-import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/boutique-state.service';
+import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 
 @Component({
   selector: 'app-pos-caisse-header',

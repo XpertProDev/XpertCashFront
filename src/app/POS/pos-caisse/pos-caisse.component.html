@@ -40,7 +40,7 @@
                             class="dropdown-menu" 
                             *ngIf="openMenuId === caisse.id"
                             (click)="$event.stopPropagation()">
-                            <button (click)="allCaisseClose(caisse)" (click)="goToPosJournalCaisse()">Journal des caisses</button>
+                           <button (click)="goToPosJournalCaisse()">Journal des caisses</button>
                             <button (click)="allCaisseClose(caisse)">Autres</button>
                         </div>
                     </div>

@@ -125,4 +125,34 @@ export class PosCaisseService {
       })
     );
   }
+
+  getHistoriqueCaissesByVendeur(vendeurId: number): Observable<CaisseResponse[]> {
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) throw new Error('Aucun token trouvé');
+
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        });
+
+        return this.http.get<CaisseResponse[]>(
+          `${this.apiUrl}/vendeur/${vendeurId}`, 
+          { headers }
+        );
+      }),
+      catchError(error => {
+        let errorMsg = 'Erreur lors du chargement de l\'historique des caisses';
+        if (error?.error?.error) errorMsg = error.error.error;
+        else if (error?.error?.message) errorMsg = error.error.message;
+        else if (error.message) errorMsg = error.message;
+        
+        return throwError(() => ({ 
+          message: errorMsg,
+          originalError: error 
+        }));
+      })
+    );
+  }
+  
+
 }
