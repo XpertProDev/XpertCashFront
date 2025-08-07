@@ -10,7 +10,7 @@ import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-
 
 @Component({
   selector: 'app-pos-caisse',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule,],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, SafeHtmlPipe],
   templateUrl: './pos-caisse.component.html',
   styleUrl: './pos-caisse.component.scss'
 })
@@ -42,20 +42,43 @@ export class PosCaisseComponent {
     this.boutiqueService.getBoutiquesByEntreprise().subscribe({
       next: (boutiques) => {
         this.boutiques = boutiques;
-        
-        // Sélection automatique de la première boutique si elle existe
         if (this.boutiques.length > 0) {
           this.selectedBoutiqueIdForList = this.boutiques[0].id;
-          
-          // Vérification de type avant l'appel
           if (this.selectedBoutiqueIdForList !== null) {
-            this.loadCaisses(this.selectedBoutiqueIdForList);
+            // Utiliser la nouvelle méthode ici
+            this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
           }
         }
       },
       error: (error) => {
         console.error('Erreur lors du chargement des boutiques', error);
         this.errorMessage = 'Erreur lors du chargement des boutiques';
+      }
+    });
+  }
+
+  // Ajoutez cette méthode dans la classe PosCaisseComponent
+  loadDerniereCaisseVendeur(boutiqueId: number): void {
+    this.isLoadingCaisses = true;
+    this.caisses = []; // Réinitialiser la liste
+    
+    this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
+      next: (response) => {
+        // Gérer les différents types de réponse
+        if (typeof response === 'string') {
+          // Cas où le backend retourne un message texte
+          this.caisses = [];
+          this.errorMessage = response;
+        } else {
+          // Cas normal où on reçoit un objet CaisseResponse
+          this.caisses = [response]; // Mettre dans un tableau pour l'affichage
+        }
+        this.isLoadingCaisses = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement de la dernière caisse', error);
+        this.isLoadingCaisses = false;
+        this.errorMessage = error.message || 'Erreur lors du chargement de la dernière caisse';
       }
     });
   }
@@ -90,23 +113,58 @@ export class PosCaisseComponent {
   }
 
   // Gestion du changement de boutique
+  // onBoutiqueChange(): void {
+  //   // Vérification de type avant l'appel
+  //   if (this.selectedBoutiqueIdForList !== null) {
+  //     this.loadCaisses(this.selectedBoutiqueIdForList);
+  //   } else {
+  //     this.caisses = []; // Réinitialiser la liste si aucune boutique sélectionnée
+  //   }
+  // }
+
   onBoutiqueChange(): void {
-    // Vérification de type avant l'appel
     if (this.selectedBoutiqueIdForList !== null) {
-      this.loadCaisses(this.selectedBoutiqueIdForList);
+      this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
     } else {
-      this.caisses = []; // Réinitialiser la liste si aucune boutique sélectionnée
+      this.caisses = [];
     }
   }
-
   
+  // onCaisseButtonClick(caisse: CaisseResponse): void {
+  //   if (caisse.statut === 'OUVERTE') {
+  //       // Continuer la vente
+  //       this.router.navigate(['/pos-accueil'], {
+  //           state: { caisse: caisse }
+  //       });
+  //   } else if (caisse.statut === 'FERMEE') {
+  //       // Ouvrir une nouvelle caisse pour la même boutique
+  //       this.selectedBoutiqueId = caisse.boutiqueId;
+  //       this.montantOuverture = 0;
+  //       this.openModal();
+  //   }
+  // }
 
   onCaisseButtonClick(caisse: CaisseResponse): void {
     if (caisse.statut === 'OUVERTE') {
-      this.router.navigate(['/pos-accueil'], {
-        state: { caisse: caisse }
-      });
+        this.router.navigate(['/pos-accueil'], {
+            state: { caisse: caisse }
+        });
+    } else if (caisse.statut === 'FERMEE') {
+        this.openModalWithBoutique(caisse.boutiqueId);
     }
+  }
+
+  getBoutiqueName(boutiqueId: number | null): string {
+    if (!boutiqueId) return 'Boutique non spécifiée';
+    const boutique = this.boutiques.find(b => b.id === boutiqueId);
+    return boutique ? boutique.nomBoutique : 'Boutique inconnue';
+  }
+
+  openModalWithBoutique(boutiqueId: number | null): void {
+    this.showModal = true;
+    this.selectedBoutiqueId = boutiqueId;
+    this.montantOuverture = 0;
+    this.errorMessage = null;
   }
 
   toggleMenu(caisseId: number): void {
@@ -121,6 +179,87 @@ export class PosCaisseComponent {
 
   goToPosJournalCaisse() {
     this.router.navigate(['/pos-caisse/pos-journal-caisse'])
+  }
+
+  getButtonText(caisse: CaisseResponse): string {
+    if (caisse.statut === 'OUVERTE') {
+        return 'Continuer la vente';
+    } else if (caisse.statut === 'FERMEE') {
+        return 'Ouvrir la caisse';
+    }
+    return 'Action inconnue';
+  }
+
+  getStatusText(caisse: CaisseResponse): string {
+    if (caisse.statut === 'OUVERTE') {
+        return 'Ouverte';
+    } else if (caisse.statut === 'FERMEE') {
+        // Vérifiez si la date de fermeture est présente
+        if (caisse.dateFermeture) {
+            const fermetureDate = new Date(caisse.dateFermeture);
+            const options: Intl.DateTimeFormatOptions = { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            const formattedDate = fermetureDate.toLocaleString('fr-FR', options);
+            return `Fermée le ${formattedDate}`;
+        } else {
+            return 'Fermée';
+        }
+    }
+    return 'Statut inconnu';
+  }
+
+  submitForm() {
+    // Vérification du montant
+    if (this.montantOuverture < 0) {
+        this.errorMessage = 'Le montant ne peut pas être négatif';
+        return;
+    }
+
+    if (!this.selectedBoutiqueId) {
+        this.errorMessage = 'Veuillez sélectionner une boutique';
+        return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = null;
+
+    const request: OuvrirCaisseRequest = {
+        boutiqueId: this.selectedBoutiqueId,
+        montantInitial: this.montantOuverture
+    };
+
+    this.posCaisseService.ouvrirCaisse(request).subscribe({
+        next: (response) => {
+            console.log('Caisse ouverte avec succès', response);
+            this.isLoading = false;
+            this.closeModal();
+            
+            // Recharger la liste des caisses après ouverture
+            if (this.selectedBoutiqueIdForList !== null) {
+                this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+            }
+        },
+        error: (error) => {
+            console.error('Erreur lors de l\'ouverture de la caisse', error);
+            this.isLoading = false;
+            
+            let rawError = '';
+            if (error.error?.error) rawError = error.error.error;
+            else if (error.error?.message) rawError = error.error.message;
+            else if (error.message) rawError = error.message;
+            else rawError = 'Erreur inconnue lors de l\'ouverture de la caisse';
+            
+            const prefixIndex = rawError.indexOf(': ');
+            this.errorMessage = prefixIndex > 0 
+                ? rawError.substring(prefixIndex + 2) 
+                : rawError;
+        }
+    });
   }
 
   

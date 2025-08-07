@@ -39,29 +39,27 @@ export class PosCaisseHeaderComponent {
       this.loadBoutiques();
     }
   
-    loadBoutiques(): void {
-      this.boutiqueService.getBoutiquesByEntreprise().subscribe({
-        next: (boutiques) => {
-          this.boutiques = boutiques;
+  loadBoutiques(): void {
+    this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+      next: (boutiques) => {
+        this.boutiques = boutiques;
+        
+        if (this.boutiques.length > 0) {
+          this.selectedBoutiqueIdForList = this.boutiques[0].id;
           
-          // Sélection automatique de la première boutique si elle existe
-          if (this.boutiques.length > 0) {
-            this.selectedBoutiqueIdForList = this.boutiques[0].id;
-            
-            // Vérification de type avant l'appel
-            if (this.selectedBoutiqueIdForList !== null) {
-              this.loadCaisses(this.selectedBoutiqueIdForList);
-            }
+          if (this.selectedBoutiqueIdForList !== null) {
+            this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
           }
-        },
-        error: (error) => {
-          console.error('Erreur lors du chargement des boutiques', error);
-          this.errorMessage = 'Erreur lors du chargement des boutiques';
         }
-      });
-    }
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des boutiques', error);
+        this.errorMessage = 'Erreur lors du chargement des boutiques';
+      }
+    });
+  }
 
-     // Nouvelle méthode pour charger les caisses
+  // Nouvelle méthode pour charger les caisses
   loadCaisses(boutiqueId: number): void {
     this.isLoadingCaisses = true;
     this.caisses = [];
@@ -79,32 +77,59 @@ export class PosCaisseHeaderComponent {
     });
   }
 
-    onBoutiqueChange(): void {
-      // Vérification de type avant l'appel
-      if (this.selectedBoutiqueIdForList !== null) {
-        this.loadCaisses(this.selectedBoutiqueIdForList);
-      } else {
-        this.caisses = []; // Réinitialiser la liste si aucune boutique sélectionnée
+  // Ajouter cette nouvelle méthode dans PosCaisseComponent
+  loadDerniereCaisseVendeur(boutiqueId: number): void {
+    this.isLoadingCaisses = true;
+    this.caisses = [];
+    this.errorMessage = null;
+    
+    this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
+      next: (response) => {
+        if (typeof response === 'string') {
+          // Cas où le backend retourne un message texte
+          this.errorMessage = response;
+        } else if (response && 'id' in response) {
+          // Cas normal où on reçoit un objet CaisseResponse
+          this.caisses = [response];
+        } else {
+          // Cas inattendu
+          this.errorMessage = 'Réponse inattendue du serveur';
+        }
+        this.isLoadingCaisses = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement de la dernière caisse', error);
+        this.isLoadingCaisses = false;
+        this.errorMessage = error.message || 'Erreur lors du chargement de la dernière caisse';
       }
+    });
+  }
+
+  onBoutiqueChange(): void {
+    if (this.selectedBoutiqueIdForList !== null) {
+      this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+    } else {
+      this.caisses = [];
+    }
   }
   
-    openModal() {
-      this.showModal = true;
-    }
-  
-    closeModal() {
-      this.showModal = false;
-      this.selectedBoutiqueId = null;
-      this.montantOuverture = 0;
-      this.errorMessage = null;
-    }
-  
-  
-    goToPosJournalCaisse() {
-      this.router.navigate(['/pos-caisse/pos-journal-caisse'])
-    }
+  openModal() {
+    this.showModal = true;
+  }
 
-    submitForm() {
+  closeModal() {
+    this.showModal = false;
+    this.selectedBoutiqueId = null;
+    this.montantOuverture = 0;
+    this.errorMessage = null;
+  }
+
+
+  goToPosJournalCaisse() {
+    this.router.navigate(['/pos-caisse/pos-journal-caisse'])
+  }
+
+  submitForm() {
     if (!this.selectedBoutiqueId) {
       this.errorMessage = 'Veuillez sélectionner une boutique';
       return;

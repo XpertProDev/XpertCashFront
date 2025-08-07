@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { environment } from "src/environments/environment";
 import { Observable, throwError } from "rxjs";
-import { switchMap, catchError } from "rxjs/operators";
+import { switchMap, catchError, map } from "rxjs/operators";
 import { OuvrirCaisseRequest, CaisseResponse } from "../../MODELS/CaisseModel/caisse.model";
 import { UsersService } from "../users.service";
 
@@ -53,6 +53,47 @@ export class PosCaisseService {
                 originalError: error 
             }));
         })
+    );
+  }
+
+  getDerniereCaisseVendeur(boutiqueId: number): Observable<CaisseResponse | string> {
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) throw new Error('Aucun token trouvé');
+
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        });
+
+        // Utilisez 'text' comme responseType pour permettre les réponses texte
+        return this.http.get(
+          `${this.apiUrl}/caisse/derniere/${boutiqueId}`, 
+          { 
+            headers, 
+            responseType: 'text' as 'json' // Permet de gérer les réponses texte
+          }
+        );
+      }),
+      map(response => {
+        // Tente de parser la réponse comme JSON
+        try {
+          return JSON.parse(response as string) as CaisseResponse;
+        } catch (e) {
+          // Si le parsing échoue, retourne la réponse texte
+          return response as string;
+        }
+      }),
+      catchError(error => {
+        let errorMsg = 'Erreur lors du chargement de la dernière caisse';
+        if (error?.error?.error) errorMsg = error.error.error;
+        else if (error?.error?.message) errorMsg = error.error.message;
+        else if (error.message) errorMsg = error.message;
+        
+        return throwError(() => ({ 
+          message: errorMsg,
+          originalError: error 
+        }));
+      })
     );
   }
 

@@ -10,10 +10,15 @@
             </div>
 
             <!-- Empty State -->
-            <div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
+            <!-- <div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
                 <i class="ri-information-line"></i>
                 <p>Aucune caisse disponible pour cette boutique</p>
-            </div>
+            </div> -->
+
+            <!-- <div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
+                <i class="ri-information-line"></i>
+                <p>{{ errorMessage || 'Aucune caisse disponible pour cette boutique' }}</p>
+            </div> -->
 
             <!-- Liste des caisses -->
             <div *ngFor="let caisse of caisses" class="caisse-card">
@@ -24,9 +29,10 @@
                         </div>
                         <div class="caisse-info">
                             <div class="caisse-nom">{{ caisse.nomVendeur || 'Non assigné' }}</div>
-                            <div class="caisse-status" [class.open]="caisse.statut === 'OUVERTE'"
-                                                    [class.closed]="caisse.statut === 'FERMEE'">
-                                {{ caisse.statut === 'OUVERTE' ? 'Ouverte' : 'Fermée' }}
+                            <div class="caisse-status" 
+                                [class.open]="caisse.statut === 'OUVERTE'"
+                                [class.closed]="caisse.statut === 'FERMEE'">
+                                {{ getStatusText(caisse) }}
                             </div>
                         </div>
                     </div>
@@ -45,13 +51,73 @@
                     </div>
                 </div>
                 
-                <button class="caisse-btn" 
-                        [disabled]="caisse.statut !== 'OUVERTE'"
-                        (click)="onCaisseButtonClick(caisse)">
-                {{ caisse.statut === 'OUVERTE' ? 'Continuer la vente' : 'Caisse fermée' }}
+                <button class="caisse-btn" (click)="onCaisseButtonClick(caisse)">
+                    {{ getButtonText(caisse) }}
                 </button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal-backdrop" *ngIf="showModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>Ouvrir une nouvelle caisse</h3>
+            <button (click)="closeModal()" class="close-button">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <form (ngSubmit)="submitForm()">
+                <div class="form-group">
+                    <label>Boutique assignée</label>
+                    
+                    <!-- Affichage différent selon si une boutique est présélectionnée -->
+                    <div *ngIf="selectedBoutiqueId" class="selected-boutique">
+                        {{ getBoutiqueName(selectedBoutiqueId) }}
+                    </div>
+                    
+                    <select *ngIf="!selectedBoutiqueId" 
+                            [(ngModel)]="selectedBoutiqueId" 
+                            name="boutique" 
+                            [disabled]="isLoading">
+                        <option [value]="null">Sélectionnez une boutique</option>
+                        <option *ngFor="let boutique of boutiques" [value]="boutique.id">
+                            {{ boutique.nomBoutique }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Espèces à l'ouverture</label>
+                    <input 
+                        type="number" 
+                        [(ngModel)]="montantOuverture" 
+                        name="montant"
+                        placeholder="Entrez le montant" 
+                        required
+                        min="0"
+                        step="0.01"
+                        [disabled]="isLoading"
+                    >
+                </div>
+                
+                <!-- Affichage des erreurs -->
+                <div *ngIf="errorMessage" class="error-message">
+                    <i class="ri-error-warning-line"></i> 
+                    <span [innerHTML]="errorMessage | safeHtml"></span>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button (click)="closeModal()" class="btn-cancel" [disabled]="isLoading">Annuler</button>
+            <button (click)="submitForm()" class="btn-submit" [disabled]="isLoading">
+                <span *ngIf="!isLoading">Ouvrir la caisse</span>
+                <span *ngIf="isLoading" class="loading-spinner"></span>
+            </button>
+        </div>
+    </div>
+</div>
