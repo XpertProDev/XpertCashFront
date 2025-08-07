@@ -219,15 +219,20 @@ button:disabled {
 /* Ajoutez dans pos-caisse.component.scss */
 
 .loading-indicator {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 20px;
-  color: #666;
+  color: #64748b;
   
   .spin {
-    display: inline-block;
     animation: spin 1s linear infinite;
     margin-right: 10px;
   }
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
 }
 
 .no-caisses {

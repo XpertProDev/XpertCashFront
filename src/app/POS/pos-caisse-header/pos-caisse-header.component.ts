@@ -78,40 +78,55 @@ export class PosCaisseHeaderComponent {
   }
 
   // Ajouter cette nouvelle méthode dans PosCaisseComponent
-  loadDerniereCaisseVendeur(boutiqueId: number): void {
-    this.isLoadingCaisses = true;
-    this.caisses = [];
-    this.errorMessage = null;
-    
-    this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
-      next: (response) => {
-        if (typeof response === 'string') {
-          // Cas où le backend retourne un message texte
-          this.errorMessage = response;
-        } else if (response && 'id' in response) {
-          // Cas normal où on reçoit un objet CaisseResponse
-          this.caisses = [response];
-        } else {
-          // Cas inattendu
-          this.errorMessage = 'Réponse inattendue du serveur';
-        }
-        this.isLoadingCaisses = false;
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement de la dernière caisse', error);
-        this.isLoadingCaisses = false;
-        this.errorMessage = error.message || 'Erreur lors du chargement de la dernière caisse';
-      }
-    });
-  }
+loadDerniereCaisseVendeur(boutiqueId: number): void {
+  this.isLoadingCaisses = true;
+  this.caisses = [];
+  this.errorMessage = null;
+  
+  const currentBoutiqueId = boutiqueId; // Sauvegarder l'ID actuel
 
-  onBoutiqueChange(): void {
-    if (this.selectedBoutiqueIdForList !== null) {
-      this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-    } else {
-      this.caisses = [];
+  this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
+    next: (response) => {
+      // Vérifier si la sélection n'a pas changé pendant la requête
+      if (this.selectedBoutiqueIdForList !== currentBoutiqueId) {
+        this.isLoadingCaisses = false;
+        return;
+      }
+
+      if (typeof response === 'string') {
+        this.errorMessage = response;
+      } else if (response && response.boutiqueId === boutiqueId) { // Filtrer par boutique
+        this.caisses = [response];
+      } else {
+        this.errorMessage = 'Aucune caisse disponible pour cette boutique';
+      }
+      this.isLoadingCaisses = false;
+    },
+    error: (error) => {
+      // Vérifier si la sélection n'a pas changé pendant la requête
+      if (this.selectedBoutiqueIdForList !== currentBoutiqueId) {
+        this.isLoadingCaisses = false;
+        return;
+      }
+      
+      console.error('Erreur lors du chargement de la dernière caisse', error);
+      this.isLoadingCaisses = false;
+      this.errorMessage = error.message || 'Erreur lors du chargement de la dernière caisse';
     }
+  });
+}
+
+onBoutiqueChange(): void {
+  // Réinitialiser avant de charger de nouvelles données
+  this.caisses = [];
+  this.errorMessage = null;
+  
+  if (this.selectedBoutiqueIdForList !== null) {
+    this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+  } else {
+    this.isLoadingCaisses = false;
   }
+}
   
   openModal() {
     this.showModal = true;
@@ -158,6 +173,10 @@ export class PosCaisseHeaderComponent {
         // this.router.navigate(['/pos/vente'], {
         //   state: { caisse: response }
         // });
+        // Recharger les caisses pour la boutique actuellement sélectionnée
+        if (this.selectedBoutiqueIdForList !== null) {
+          this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+        }
       },
       error: (error) => {
       console.error('Erreur lors de l\'ouverture de la caisse', error);

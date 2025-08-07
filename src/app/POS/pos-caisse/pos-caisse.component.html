@@ -10,15 +10,10 @@
             </div>
 
             <!-- Empty State -->
-            <!-- <div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
-                <i class="ri-information-line"></i>
-                <p>Aucune caisse disponible pour cette boutique</p>
-            </div> -->
-
-            <!-- <div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
+            <div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
                 <i class="ri-information-line"></i>
                 <p>{{ errorMessage || 'Aucune caisse disponible pour cette boutique' }}</p>
-            </div> -->
+            </div>
 
             <!-- Liste des caisses -->
             <div *ngFor="let caisse of caisses" class="caisse-card">
