@@ -8,7 +8,7 @@ export interface CaisseResponse {
   montantInitial: number;
   montantCourant: number;
   statut: string;
-  dateOuverture: Date;
+  dateOuverture: string;
   dateFermeture: Date | null;
   vendeurId: number | null;
   nomVendeur: string | null;

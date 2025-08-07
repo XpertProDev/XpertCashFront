@@ -19,7 +19,8 @@
   }
 
   .back-button {
-    background: #3498db;
+    // background: #3498db;
+    background: #0672E4;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -31,7 +32,7 @@
     transition: background 0.3s;
 
     &:hover {
-      background: #2980b9;
+      background: #0361c6;
     }
   }
 
