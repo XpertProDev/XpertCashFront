@@ -143,7 +143,7 @@
       <tbody>
           <tr class="tr" *ngFor="let facture of paginatedFacturesReel" (click)="showDetails(facture.id)">
               <td class="td">{{ facture.numeroFacture }}</td>
-              <td class="td">{{ facture.client?.nom || facture.entrepriseClient?.nom }}</td>
+              <td class="td">{{ facture.client?.nomComplet || facture.entrepriseClient?.nom }}</td>
               <td class="td">{{ facture.dateCreation | date: 'dd/MM/yyyy' }}</td>
               <td class="td">
                   <div *ngFor="let ligne of facture.lignesFacture?.slice(0,2)">
@@ -164,6 +164,7 @@
     </table>
   
     <!-- Vue Grille -->
+     
     <div class="parent" *ngIf="!isListView">
       <div class="cadre_cahier" *ngFor="let facture of paginatedFacturesReel" (click)="showDetails(facture.id)">
         <div class="title_facture">
@@ -175,10 +176,12 @@
             <span>{{ facture.numeroFacture }}</span>
           </div>
           
+          
+
           <div class="double_info">
             <span class="left_name">Client :</span>
             <span class="right_name">
-              {{ facture.client?.nom || facture.entrepriseClient?.nom }}
+              {{ facture.client?.nomComplet || facture.entrepriseClient?.nom}}
             </span>
           </div>
   

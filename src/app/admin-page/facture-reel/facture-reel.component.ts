@@ -113,6 +113,7 @@ export class FactureReelComponent implements OnInit {
     this.facturesLoaded = false;
     this.factureReelService.getAlFactproreelOfEntreprise(entrepriseId).subscribe(
       (response: any[]) => {
+        console.log("lollll",response);
         this.factureReel = response;
         this.errorMessage = "";
         this.facturesLoaded = true;

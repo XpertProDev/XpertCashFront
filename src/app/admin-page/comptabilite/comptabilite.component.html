@@ -1,1 +1,116 @@
-<p>comptabilite works!</p>
+<div class="col-md-12">
+  <app-card cardTitle="Comptabilité" cardClass="tab-card tab-content" blockClass="nav-fill" [options]="false">
+    <ul ngbNav #nav="ngbNav" class="nav-pills">
+      <!-- Onglet Versements -->
+      <li [ngbNavItem]="1" class="flex">
+        <a ngbNavLink (click)="setActiveTab('versements')">
+          <i class="fa fa-university m-r-10"></i> Versements
+        </a>
+        <ng-template ngbNavContent>
+          <div *ngIf="activeTab === 'versements'" class="table-responsive">
+            <table *ngIf="versements.length > 0" class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nom Boutique</th>
+                  <th>Vendeur</th>
+                  <th>Montant Initial</th>
+                  <th>Montant Courant</th>
+                  <th>Montant Versé</th>
+                  <th>Date Versement</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let versement of versements">
+                  <td>{{ versement.id }}</td>
+                  <td>{{ versement.nomBoutique }}</td>
+                  <td>{{ versement.nomVendeur }}</td>
+                  <td>{{ versement.montantInitialCaisse | number: '1.0-0' }} XOF</td>
+                  <td>{{ versement.montantCourantCaisse | number: '1.0-0' }} XOF</td>
+                  <td>{{ versement.montantVerse | number: '1.0-0' }} XOF</td>
+                  <td>{{ versement.dateVersement | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ versement.statut }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div *ngIf="versements.length === 0">
+              <p>Aucun versement disponible.</p>
+            </div>
+          </div>
+        </ng-template>
+      </li>
+
+      <!-- Onglet Mouvements -->
+      <li [ngbNavItem]="2" class="flex">
+        <a ngbNavLink (click)="setActiveTab('mouvements')">
+          <i class="fa fa-exchange-alt m-r-10"></i> Mouvements de Caisse
+        </a>
+        <ng-template ngbNavContent>
+          <div *ngIf="activeTab === 'mouvements'" class="table-responsive">
+            <table *ngIf="mouvements.length > 0; else noData" class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nom Boutique</th>
+                  <th>Nom Vendeur</th>
+                  <th>Montant</th>
+                  <th>Date</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let versement of mouvements">
+                  <td>{{ versement.id }}</td>
+                  <td>{{ versement.nomBoutique }}</td>
+                  <td>{{ versement.nomVendeur }}</td>
+                  <td>{{ versement.montantVerse | number: '1.0-0' }} XOF</td>
+                  <td>{{ versement.dateVersement | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ versement.statut }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #noData>
+              <p>Aucun mouvement de caisse disponible.</p>
+            </ng-template>
+          </div>
+        </ng-template>
+      </li>
+
+      <!-- Onglet Factures -->
+      <li [ngbNavItem]="3" class="flex">
+        <a ngbNavLink (click)="setActiveTab('factures')">
+          <i class="fa fa-file-invoice m-r-10"></i> Factures
+        </a>
+        <ng-template ngbNavContent>
+          <div *ngIf="activeTab === 'factures'" class="table-responsive">
+            <table *ngIf="factures.length > 0" class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nom Client</th>
+                  <th>Montant Facture</th>
+                  <th>Date Facture</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let facture of factures">
+                  <td>{{ facture.id }}</td>
+                  <td>{{ facture.nomClient }}</td>
+                  <td>{{ facture.montant | number: '1.0-0' }} XOF</td>
+                  <td>{{ facture.dateFacture | date: 'dd/MM/yyyy' }}</td>
+                  <td>{{ facture.status }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div *ngIf="factures.length === 0">
+              <p>Aucune facture disponible.</p>
+            </div>
+          </div>
+        </ng-template>
+      </li>
+    </ul>
+    <div [ngbNavOutlet]="nav" class="mt-2"></div>
+  </app-card>
+</div>

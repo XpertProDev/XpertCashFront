@@ -56,7 +56,7 @@ export const NavigationItems: NavigationItem[] = [
       },
          {
         id: 'pos',
-        title: 'POS',
+        title: 'Point de vente',
         type: 'item',
         url: '/pos-caisse',
         classes: 'nav-item',

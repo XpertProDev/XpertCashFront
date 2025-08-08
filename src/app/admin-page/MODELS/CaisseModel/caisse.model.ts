@@ -3,12 +3,17 @@ export interface OuvrirCaisseRequest {
   montantInitial: number;
 }
 
+export interface FermerCaisseRequest {
+  caisseId: number;
+}
+
+
 export interface CaisseResponse {
   id: number;
   montantInitial: number;
   montantCourant: number;
   statut: string;
-  dateOuverture: Date;
+  dateOuverture: string;
   dateFermeture: Date | null;
   vendeurId: number | null;
   nomVendeur: string | null;

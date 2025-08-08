@@ -6,6 +6,7 @@ import { CaisseResponse, OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/C
 import { SafeHtmlPipe } from 'src/app/admin-page/MODELS/CaisseModel/safe-html.pipe';
 import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.directive';
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
+import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 
 @Component({
@@ -22,7 +23,7 @@ export class PosCaisseComponent {
   isLoading = false;
   errorMessage: string | null = null;
 
-  selectedBoutiqueIdForList: number | null = null;
+  // selectedBoutiqueIdForList: number | null = null;
   caisses: CaisseResponse[] = [];
   isLoadingCaisses = false;
 
@@ -31,11 +32,22 @@ export class PosCaisseComponent {
   constructor(
     private boutiqueService: BoutiqueService,
     private posCaisseService: PosCaisseService,
-    private router: Router
+    private boutiqueState: BoutiqueStateService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.loadBoutiques();
+
+    // Écoute les changements de boutique
+    this.boutiqueState.selectedBoutique$.subscribe(boutiqueId => {
+      // this.selectedBoutiqueIdForList = boutiqueId;
+      if (boutiqueId !== null) {
+        this.loadDerniereCaisseVendeur(boutiqueId);
+      } else {
+        this.caisses = [];
+      }
+    });
   }
 
   loadBoutiques(): void {
@@ -43,11 +55,11 @@ export class PosCaisseComponent {
       next: (boutiques) => {
         this.boutiques = boutiques;
         if (this.boutiques.length > 0) {
-          this.selectedBoutiqueIdForList = this.boutiques[0].id;
-          if (this.selectedBoutiqueIdForList !== null) {
-            // Utiliser la nouvelle méthode ici
-            this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-          }
+          // this.selectedBoutiqueIdForList = this.boutiques[0].id;
+          // if (this.selectedBoutiqueIdForList !== null) {
+          //   // Utiliser la nouvelle méthode ici
+          //   this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+          // }
         }
       },
       error: (error) => {
@@ -122,13 +134,13 @@ export class PosCaisseComponent {
   //   }
   // }
 
-  onBoutiqueChange(): void {
-    if (this.selectedBoutiqueIdForList !== null) {
-      this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-    } else {
-      this.caisses = [];
-    }
-  }
+  // onBoutiqueChange(): void {
+  //   if (this.selectedBoutiqueIdForList !== null) {
+  //     this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+  //   } else {
+  //     this.caisses = [];
+  //   }
+  // }
   
   // onCaisseButtonClick(caisse: CaisseResponse): void {
   //   if (caisse.statut === 'OUVERTE') {
@@ -238,11 +250,11 @@ export class PosCaisseComponent {
             console.log('Caisse ouverte avec succès', response);
             this.isLoading = false;
             this.closeModal();
-            
-            // Recharger la liste des caisses après ouverture
-            if (this.selectedBoutiqueIdForList !== null) {
-                this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-            }
+
+            this.loadDerniereCaisseVendeur(request.boutiqueId);
+
+            // Si vous préférez charger toutes les caisses (pas seulement la dernière), appelez plutôt :
+            // this.loadCaisses(request.boutiqueId);
         },
         error: (error) => {
             console.error('Erreur lors de l\'ouverture de la caisse', error);
