@@ -1,3 +1,4 @@
+// pos-journal-caisse.component.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -19,10 +20,10 @@ export class PosJournalCaisseComponent {
   isLoading = true;
   errorMessage: string | null = null;
   currentBoutiqueId: number | null = null;
-  currentBoutiqueName = '';
   sortField: keyof CaisseResponse = 'dateOuverture';
   sortDirection: 'asc' | 'desc' = 'desc';
   searchTerm = '';
+  statusFilter = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -39,48 +40,38 @@ export class PosJournalCaisseComponent {
     });
   }
 
-loadCaisses(): void {
-  this.isLoading = true;
-  this.errorMessage = null;
-  
-  const currentUser = this.usersService.getCurrentUser();
-  console.log('Utilisateur courant:', currentUser);
-  
-  if (!currentUser || !currentUser.id) {
-    this.errorMessage = 'Utilisateur non identifié';
-    this.isLoading = false;
-    return;
+  loadCaisses(): void {
+    this.isLoading = true;
+    this.errorMessage = null;
+    
+    const currentUser = this.usersService.getCurrentUser();
+    
+    if (!currentUser || !currentUser.id) {
+      this.errorMessage = 'Utilisateur non identifié';
+      this.isLoading = false;
+      return;
+    }
+
+    this.posCaisseService.getHistoriqueCaissesByVendeur(currentUser.id).subscribe({
+      next: (caisses) => {
+        this.caisses = caisses.filter(c => c.boutiqueId == Number(this.currentBoutiqueId));
+        this.sortCaisses();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Erreur lors du chargement des caisses';
+      }
+    });
   }
 
-  const userId = currentUser.id;
-  console.log('ID utilisateur:', userId);
-  console.log('Boutique sélectionnée:', this.currentBoutiqueId);
-
-  this.posCaisseService.getHistoriqueCaissesByVendeur(userId).subscribe({
-    next: (caisses) => {
-      console.log('Caisses récupérées:', caisses);
-      // this.caisses = caisses.filter(c => c.boutiqueId === this.currentBoutiqueId);
-      this.caisses = caisses.filter(c => c.boutiqueId == Number(this.currentBoutiqueId));
-      console.log('Caisses après filtrage:', this.caisses);
-      this.sortCaisses();
-      this.isLoading = false;
-    },
-    error: (error) => {
-      console.error('Erreur', error);
-      this.isLoading = false;
-      this.errorMessage = error.message || 'Erreur lors du chargement des caisses';
-    }
-  });
-}
+  toggleSortDirection(): void {
+    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.sortCaisses();
+  }
 
   sortCaisses(field: keyof CaisseResponse = this.sortField): void {
-    if (this.sortField === field) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortField = field;
-      this.sortDirection = 'desc';
-    }
-
+    this.sortField = field;
     this.caisses.sort((a, b) => {
       const valueA = a[this.sortField];
       const valueB = b[this.sortField];
@@ -111,15 +102,23 @@ loadCaisses(): void {
   }
 
   get filteredCaisses(): CaisseResponse[] {
-    if (!this.searchTerm) return this.caisses;
+    let filtered = this.caisses;
     
-    const term = this.searchTerm.toLowerCase();
-    return this.caisses.filter(c => 
-      (c.nomVendeur?.toLowerCase().includes(term)) ||
-      (c.statut?.toLowerCase().includes(term)) ||
-      (c.montantCourant?.toString().includes(term)) ||
-      (c.dateOuverture?.toString().includes(term))
-    );
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(c => 
+        (c.nomVendeur?.toLowerCase().includes(term)) ||
+        (c.statut?.toLowerCase().includes(term)) ||
+        (c.montantCourant?.toString().includes(term)) ||
+        (c.dateOuverture?.toString().includes(term))
+      );
+    }
+    
+    if (this.statusFilter) {
+      filtered = filtered.filter(c => c.statut === this.statusFilter);
+    }
+    
+    return filtered;
   }
 
   goBack(): void {
@@ -127,7 +126,6 @@ loadCaisses(): void {
   }
 
   formatDate(dateInput: Date | string): string {
-    // Si c'est déjà un objet Date, utilisez-le directement
     const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     
     return date.toLocaleDateString('fr-FR', {

@@ -1,81 +1,110 @@
+<!-- pos-journal-caisse.component.html -->
 <div class="journal-container">
-  <!-- Header -->
+  <!-- Header amélioré -->
   <div class="journal-header">
-    <button class="back-button" (click)="goBack()">
-      <i class="ri-arrow-left-line"></i> Retour
-    </button>
-    <h2>Journal des Caisses</h2>
+    <div class="header-left">
+      <button class="back-button" (click)="goBack()">
+        <i class="ri-arrow-left-line"></i>
+      </button>
+      <h2>Journal des Caisses</h2>
+    </div>
+    
     <div class="header-actions">
-      <div class="search-box">
+      <div class="search-container">
         <i class="ri-search-line"></i>
         <input 
           type="text" 
           placeholder="Rechercher..." 
           [(ngModel)]="searchTerm"
         />
+        <select [(ngModel)]="statusFilter" class="filter-select">
+          <option value="">Tous les statuts</option>
+          <option value="OUVERTE">Ouvertes</option>
+          <option value="FERMEE">Fermées</option>
+        </select>
       </div>
+      <button class="sort-button" (click)="toggleSortDirection()">
+        <i class="ri-sort-desc" *ngIf="sortDirection === 'desc'"></i>
+        <i class="ri-sort-asc" *ngIf="sortDirection === 'asc'"></i>
+      </button>
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-section">
-    <i class="ri-loader-4-line spin"></i>
-    <p>Chargement de l'historique...</p>
+  <!-- Section de filtres améliorée -->
+  <div class="filters-section">
+    <div class="filter-tags">
+      <span class="filter-tag" *ngIf="statusFilter">
+        Statut: {{ statusFilter === 'OUVERTE' ? 'Ouvertes' : 'Fermées' }}
+        <i class="ri-close-line" (click)="statusFilter = ''"></i>
+      </span>
+    </div>
+    <div class="summary">
+      <span>{{ filteredCaisses.length }} opération(s)</span>
+    </div>
   </div>
 
-  <!-- Error State -->
-  <div *ngIf="!isLoading && errorMessage" class="error-section">
-    <i class="ri-error-warning-line"></i>
-    <p>{{ errorMessage }}</p>
+  <!-- États améliorés -->
+  <div *ngIf="isLoading" class="state-container">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Chargement de l'historique...</p>
+    </div>
   </div>
 
-  <!-- Empty State -->
-  <div *ngIf="!isLoading && !errorMessage && filteredCaisses.length === 0" class="empty-section">
-    <i class="ri-file-list-2-line"></i>
-    <p>Aucune opération de caisse trouvée</p>
+  <div *ngIf="!isLoading && errorMessage" class="state-container">
+    <div class="error-content">
+      <i class="ri-error-warning-fill"></i>
+      <p>{{ errorMessage }}</p>
+      <button (click)="loadCaisses()">Réessayer</button>
+    </div>
   </div>
 
-  <!-- Tableau des caisses -->
-  <div *ngIf="!isLoading && !errorMessage && filteredCaisses.length > 0" class="caisse-table">
-    <table>
-      <thead>
-        <tr>
-          <th (click)="sortCaisses('dateOuverture')">
-            Date Ouverture
-            <i class="ri-arrow-up-s-line" *ngIf="sortField === 'dateOuverture' && sortDirection === 'asc'"></i>
-            <i class="ri-arrow-down-s-line" *ngIf="sortField === 'dateOuverture' && sortDirection === 'desc'"></i>
-          </th>
-          <th (click)="sortCaisses('dateFermeture')">
-            Date Fermeture
-            <i class="ri-arrow-up-s-line" *ngIf="sortField === 'dateFermeture' && sortDirection === 'asc'"></i>
-            <i class="ri-arrow-down-s-line" *ngIf="sortField === 'dateFermeture' && sortDirection === 'desc'"></i>
-          </th>
-          <th>Statut</th>
-          <th (click)="sortCaisses('montantInitial')">
-            Montant Initial
-            <i class="ri-arrow-up-s-line" *ngIf="sortField === 'montantInitial' && sortDirection === 'asc'"></i>
-            <i class="ri-arrow-down-s-line" *ngIf="sortField === 'montantInitial' && sortDirection === 'desc'"></i>
-          </th>
-          <th (click)="sortCaisses('montantCourant')">
-            Montant Final
-            <i class="ri-arrow-up-s-line" *ngIf="sortField === 'montantCourant' && sortDirection === 'asc'"></i>
-            <i class="ri-arrow-down-s-line" *ngIf="sortField === 'montantCourant' && sortDirection === 'desc'"></i>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let caisse of filteredCaisses">
-          <td>{{ formatDate(caisse.dateOuverture) }}</td>
-          <td>{{ caisse.dateFermeture ? formatDate(caisse.dateFermeture) : '-' }}</td>
-          <td>
-            <span class="status-badge" [class.open]="caisse.statut === 'OUVERTE'" [class.closed]="caisse.statut === 'FERMEE'">
-              {{ caisse.statut === 'OUVERTE' ? 'Ouverte' : 'Fermée' }}
-            </span>
-          </td>
-          <td>{{ caisse.montantInitial | currency:'XOF ':'symbol':'1.0-0' }}</td>
-          <td>{{ caisse.montantCourant | currency:'XOF ':'symbol':'1.0-0' }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <div *ngIf="!isLoading && !errorMessage && filteredCaisses.length === 0" class="state-container">
+    <div class="empty-content">
+      <i class="ri-file-list-3-line"></i>
+      <p>Aucune opération de caisse trouvée</p>
+      <button (click)="loadCaisses()">Actualiser</button>
+    </div>
+  </div>
+
+  <!-- Nouveau design en cartes -->
+  <div *ngIf="!isLoading && !errorMessage && filteredCaisses.length > 0" class="caisse-cards">
+    <div class="card" *ngFor="let caisse of filteredCaisses">
+      <div class="card-header">
+        <!-- <span class="card-id">#{{caisse.id}}</span> -->
+        <span class="status-badge" [class.open]="caisse.statut === 'OUVERTE'" [class.closed]="caisse.statut === 'FERMEE'">
+          {{ caisse.statut === 'OUVERTE' ? 'Ouverte' : 'Fermée' }}
+        </span>
+      </div>
+      
+      <div class="card-body">
+        <div class="info-row">
+          <i class="ri-calendar-event-line"></i>
+          <div>
+            <label>Ouverture</label>
+            <p>{{ formatDate(caisse.dateOuverture) }}</p>
+          </div>
+        </div>
+        
+        <div class="info-row">
+          <i class="ri-calendar-check-line"></i>
+          <div>
+            <label>Fermeture</label>
+            <p>{{ caisse.dateFermeture ? formatDate(caisse.dateFermeture) : 'En cours' }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-footer">
+        <div class="amount">
+          <label>Initial</label>
+          <p>{{ caisse.montantInitial | currency:'XOF ':'symbol':'1.0-0' }}</p>
+        </div>
+        <div class="amount">
+          <label>Final</label>
+          <p>{{ caisse.montantCourant | currency:'XOF ':'symbol':'1.0-0' }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
