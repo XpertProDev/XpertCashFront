@@ -14,7 +14,7 @@
         </div>
 
         <button class="btn btn-secondary" (click)="modifyPayment()">Modifier le paiement</button>
-        <button class="btn btn-secondary" (click)="printReceipt()">Imprimer le reçu</button>
+        <button class="btn btn-secondary" (click)="impressionReceipt()">Imprimer le reçu</button>
 
         <div class="email-send">
             <input type="email" placeholder="example@gmail.com" />
@@ -54,10 +54,10 @@
 
         <div class="totals">
           <div class="line">
-            <span>Sous-total</span><span>{{ vente?.montantTotal | currency:'CFA ':'symbol':'1.0-0' }}</span>
+            <span>Sous-total</span><span class="paleft">{{ vente?.montantTotal | currency:'CFA ':'symbol':'1.0-0' }}</span>
           </div>
           <div class="line total-line">
-            <span>Total</span><span>{{ vente?.montantTotal | currency:'CFA ':'symbol':'1.0-0' }}</span>
+            <span>Total</span><span class="paleft">{{ vente?.montantTotal | currency:'CFA ':'symbol':'1.0-0' }}</span>
           </div>
         </div>
 
@@ -65,10 +65,14 @@
 
         <div class="payments-breakdown">
           <div class="line">
-            <span>{{ paymentMethod }}</span><span>{{ paymentAmount | currency:'CFA ':'symbol':'1.0-0' }}</span>
+            <span>{{ paymentMethod }}</span><span class="paleft">{{ paymentAmount | currency:'CFA ':'symbol':'1.0-0' }}</span>
           </div>
-          <div class="line" *ngIf="changeDue >= 0">
-            <span>Monnaie</span><span>{{ changeDue | currency:'CFA ':'symbol':'1.0-0' }}</span>
+          <div class="line" *ngIf="paymentAmount >= (vente?.montantTotal ?? 0)">
+            <span>Monnaie</span><span class="paleft">{{ changeDue | currency:'CFA ':'symbol':'1.0-0' }}</span>
+          </div>
+
+          <div class="line" *ngIf="paymentAmount < (vente?.montantTotal ?? 0)">
+            <span>Reste à payer</span><span class="paleft">{{ changeDue | currency:'CFA ':'symbol':'1.0-0' }}</span>
           </div>
         </div>
 

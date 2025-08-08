@@ -70,50 +70,137 @@ export class PosPaiementComponent {
   }
 
   // Impression : cloner le contenu et ouvrir une nouvelle fenêtre propre
-  printReceipt() {
-    if (!this.receiptEl) {
-      window.print();
-      return;
-    }
+  impressionReceipt() {
+    if (!this.receiptEl) return;
 
-    const receiptHtml = this.receiptEl.nativeElement.innerHTML;
-    const win = window.open('', '_blank', 'width=800,height=900');
-    if (!win) {
-      alert('Impossible d\'ouvrir la fenêtre d\'impression — autorisez les popups.');
-      return;
-    }
+    // Récupérer la base URL pour les chemins absolus
+    const baseUrl = window.location.origin;
+    let printContent = this.receiptEl.nativeElement.innerHTML;
+    
+    // Corriger les chemins relatifs des assets
+    printContent = printContent.replace(/src="assets\//g, `src="${baseUrl}/assets/`);
 
-    // Basic inline styles — adapte si tu veux exporter ton CSS complet
-    const styles = `
-      <style>
-        body { font-family: Arial, sans-serif; padding: 16px; color: #111; }
-        .receipt { max-width: 720px; margin: 0 auto; }
-        .receipt-header { display:flex; align-items:center; gap:12px; }
-        .receipt-header .logo { width:80px; height:auto; }
-        .items-list { list-style:none; padding:0; margin:12px 0; }
-        .items-list .item { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom: 1px dashed #e0e0e0; }
-        .items-list .desc { flex:1; margin-left:8px; }
-        .totals .line { display:flex; justify-content:space-between; padding:6px 0; }
-        .totals .total-line { font-weight:700; font-size:1.05rem; }
-        .payments-breakdown .line { display:flex; justify-content:space-between; padding:4px 0; }
-      </style>
-    `;
-
-    win.document.open();
-    win.document.write('<html><head><title>Reçu</title>' + styles + '</head><body>');
-    win.document.write('<div class="receipt">');
-    win.document.write(receiptHtml);
-    win.document.write('</div>');
-    win.document.write('</body></html>');
-    win.document.close();
-
-    // Delay un petit peu pour laisser le newWindow render les styles
-    setTimeout(() => {
-      win.focus();
-      win.print();
-      // Optionnel : fermer la fenêtre après impression
-      // win.close();
-    }, 300);
+    const printWindow = window.open('', '_blank', 'left=0,top=0,width=380,height=500,toolbar=0,scrollbars=0,status=0');
+    
+    printWindow?.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Reçu de paiement</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          body { 
+            padding: 10px; 
+            background: white;
+          }
+          .paiement_right {
+            width: 100%
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center;
+          }
+          .receipt {
+            width: 100% !important;
+            min-width: 350px !important; /* Largeur augmentée */
+            min-height: 0 !important;
+            margin: 0 auto;
+            padding: 15px !important;
+            box-shadow: none !important;
+          }
+          .no-print { display: none !important; }
+          .paleft { padding-left: 5px !important; }
+          /* Centrage du header */
+          .receipt-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 5px !important;
+          }
+          .receipt-header .logo {
+            max-width: 100px !important; /* Taille originale */
+          }
+          .ticket-info div {
+            font-size: 10px !important;
+            line-height: 1.4 !important; 
+            margin-top: 4px !important; /* Espacement réduit */
+          }
+          
+          .items-list { 
+            margin-bottom: 10px !important; 
+            width: 100%;
+          }
+          .item .qty {
+              width: 14px !important;
+            }
+          .item {
+            display: flex !important;
+            align-items: flex-start !important;
+            margin-bottom: 8px !important;
+          }
+          .divider {
+            border-top: 1px dotted #000 !important;
+            margin: 8px 0 !important;
+          }
+          .line span {
+            font-size: 11px !important; /* Taille de police augmentée */
+          }
+          
+          /* Centrage du footer */
+          .receipt-footer { 
+            position: relative !important; 
+            bottom: 0 !important;
+            margin-top: 20px !important;
+            font-size: 10px !important;
+            text-align: center !important;
+            width: 100%;
+          }
+          
+          .qty, .name, .total {
+            font-size: 10px !important; /* Taille de police augmentée */
+          }
+          .unit-price {
+            font-size: 10px !important; /* Taille de police augmentée */
+          }
+          
+          @page { 
+            size: auto; 
+            margin: 0; 
+          }
+          @media print {
+            body { padding: 0 !important; }
+          }
+        </style>
+      </head>
+      <body>
+        ${printContent}
+        <div class="no-print" style="text-align:center;margin-top:20px;">
+          <button onclick="window.print()" style="padding:8px 16px;background:#1976D2;color:white;border:none;border-radius:4px;cursor:pointer;">
+            Imprimer
+          </button>
+          <button onclick="window.close()" style="padding:8px 16px;margin-left:10px;background:#f44336;color:white;border:none;border-radius:4px;cursor:pointer;">
+            Fermer
+          </button>
+        </div>
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() {
+              window.close();
+            }, 1000);
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow?.document.close();
   }
 
   // Retourner à l'accueil POS / nouvelle commande
@@ -132,4 +219,9 @@ export class PosPaiementComponent {
   getLignes() {
     return this.vente?.lignes ?? [];
   }
+
+  // getPaymentStatus(): string {
+  //   if (!this.vente) return '';
+  //   return this.paymentAmount >= this.vente.montantTotal ? 'Monnaie' : 'Reste à payer';
+  // }
 }

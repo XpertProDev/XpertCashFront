@@ -234,3 +234,52 @@
   font-style: italic;
 }
 
+// @media screen {
+//   .paiement_right {
+//     background: #f0f0f0;
+//     display: flex;
+//     justify-content: center;
+//   }
+  
+//   .receipt {
+//     transform: scale(0.95);
+//     transition: transform 0.2s;
+//   }
+  
+//   .receipt:hover {
+//     transform: scale(1);
+//     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+//   }
+// }
+
+
+// .paiement_right {
+//   display: flex;
+//   justify-content: center;
+//   align-items: flex-start;
+//   padding-top: 40px;
+  
+//   .receipt {
+//     transform: scale(0.95);
+//     transition: transform 0.2s;
+    
+//     &:hover {
+//       transform: scale(1);
+//       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+//     }
+//   }
+// }
+
+// .receipt-header {
+//   text-align: center;
+  
+//   .logo {
+//     display: block;
+//     margin: 0 auto 10px;
+//   }
+// }
+
+// .receipt-footer {
+//   text-align: center;
+//   width: 100%;
+// }

@@ -308,18 +308,13 @@ export class PosVenteComponent {
   }
 
   calculatePayment(): void {
-    // Convertir l'entrée en nombre (gérer la virgule)
     const enteredValue = parseFloat(this.enteredAmount.replace(',', '.')) || 0;
     
     this.paymentAmount = enteredValue;
     this.isAmountEntered = enteredValue > 0;
     
-    // Calculer la monnaie ou le restant
-    if (this.paymentAmount >= this.totalAmount) {
-      this.changeDue = this.paymentAmount - this.totalAmount;
-    } else {
-      this.changeDue = this.totalAmount - this.paymentAmount;
-    }
+    // Toujours calculer la différence
+    this.changeDue = Math.abs(this.totalAmount - this.paymentAmount);
   }
 
   selectPaymentMethod(method: string): void {
