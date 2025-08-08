@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
 import { VenteService } from 'src/app/admin-page/SERVICES/VenteService/vente-service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-pos-paiement',
@@ -12,6 +13,7 @@ import { VenteService } from 'src/app/admin-page/SERVICES/VenteService/vente-ser
   styleUrl: './pos-paiement.component.scss'
 })
 export class PosPaiementComponent {
+  private imgUrl = environment.imgUrl;
   vente?: VenteResponse | null = null;
   paymentAmount: number = 0;
   changeDue: number = 0;
