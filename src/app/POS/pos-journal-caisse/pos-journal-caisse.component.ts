@@ -24,6 +24,7 @@ export class PosJournalCaisseComponent {
   sortDirection: 'asc' | 'desc' = 'desc';
   searchTerm = '';
   statusFilter = '';
+  viewMode: 'card' | 'list' = 'card'; // Nouvelle propriété pour le mode de vue
 
   constructor(
     private route: ActivatedRoute,

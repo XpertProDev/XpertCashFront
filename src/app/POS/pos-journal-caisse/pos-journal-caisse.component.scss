@@ -48,7 +48,7 @@
     transition: all 0.3s;
 
     &:hover {
-      background: #0284c7;
+      background: #0361c6;
       transform: translateX(-2px);
     }
   }
@@ -97,6 +97,43 @@
       }
     }
 
+    .view-toggle {
+      display: flex;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      
+      .view-btn {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        background: transparent;
+        border: none;
+        transition: all 0.2s;
+        
+        i {
+          font-size: 1.2rem;
+          color: #64748b;
+        }
+        
+        &:hover {
+          background: #e2e8f0;
+        }
+        
+        &.active {
+          background: #0672E4;
+          
+          i {
+            color: white;
+          }
+        }
+      }
+    }
+
     .sort-button {
       background: #f1f5f9;
       border: 1px solid #e2e8f0;
@@ -124,12 +161,13 @@
 .filters-section {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
+  padding: 1rem 0;
   align-items: center;
 
   .filter-tags {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
 
     .filter-tag {
       background: #e0f2fe;
@@ -200,7 +238,7 @@
 
   .loading-content {
     i {
-      color: #0361c6;
+      color: #0672E4;
     }
   }
 
@@ -230,7 +268,6 @@
 .caisse-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.25rem;
   padding-top: 0.5rem;
 
@@ -244,7 +281,7 @@
     margin-bottom: 10px;
 
     &:hover {
-      transform: translateY(-1px);
+      transform: translateY(-5px);
       box-shadow: 0 10px 15px rgba(0,0,0,0.05);
     }
 
@@ -293,7 +330,7 @@
 
           p {
             margin: 0;
-            font-size: 1rem;
+            font-size: 14px;
             color: #1e293b;
             font-weight: 500;
           }
@@ -320,7 +357,7 @@
 
         p {
           margin: 0;
-          font-size: 1.1rem;
+          font-size: 14px;
           font-weight: 600;
           color: #1e293b;
         }
@@ -333,11 +370,68 @@
   }
 }
 
+.caisse-table {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+  overflow: hidden;
+  margin-top: 1rem;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: #64748b;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+      font-size: 0.9rem;
+
+      &:hover {
+        background-color: #f1f5f9;
+      }
+
+      .th-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+
+    tbody tr {
+      transition: background 0.2s;
+
+      &:hover {
+        background-color: #f8fafc;
+      }
+
+      td {
+        color: #334155;
+        font-size: 0.95rem;
+      }
+    }
+  }
+}
+
 .status-badge {
   padding: 0.35rem 0.8rem;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 600;
+  display: inline-block;
 
   &.open {
     background-color: #dcfce7;
@@ -377,5 +471,13 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+  
+  .caisse-table {
+    overflow-x: auto;
+    
+    table {
+      min-width: 700px;
+    }
   }
 }
