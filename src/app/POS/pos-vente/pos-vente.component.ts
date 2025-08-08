@@ -12,7 +12,7 @@ import { Clients } from 'src/app/admin-page/MODELS/clients-model';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ClientService } from 'src/app/admin-page/SERVICES/client-service';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
-import { BehaviorSubject, combineLatest, map, Observable, of, startWith, switchMap, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, finalize, map, Observable, of, startWith, switchMap, take, throwError } from 'rxjs';
 import { Entreprise } from 'src/app/admin-page/MODELS/entreprise-model';
 import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-service';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -20,6 +20,9 @@ import { EntrepriseClient } from 'src/app/admin-page/MODELS/entreprise-clients-m
 import { ProduitService } from 'src/app/admin-page/SERVICES/produit.service';
 import { Produit } from 'src/app/admin-page/MODELS/produit.model';
 import { NgxBarcode6Module } from 'ngx-barcode6';
+import { VenteService } from 'src/app/admin-page/SERVICES/VenteService/vente-service';
+import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
+import { VenteRequest, VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
 
 @Component({
   selector: 'app-pos-vente',
@@ -126,6 +129,10 @@ export class PosVenteComponent {
 
   currentListType: 'clients' | 'entreprises' = 'clients';
 
+  selectedBoutiqueId: number | null = null;
+  isSubmittingVente = false;
+  venteErrorMessage: string | null = null;
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -137,6 +144,8 @@ export class PosVenteComponent {
     private fb: FormBuilder,
     private entrepriseService: EntrepriseService,
     private produitService: ProduitService,
+    private venteService: VenteService, 
+    private boutiqueState: BoutiqueStateService
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
@@ -190,6 +199,15 @@ export class PosVenteComponent {
     if (!this.categories.length) {
         this.loadCategories();
     }
+
+    this.boutiqueState.selectedBoutique$.pipe(take(1)).subscribe(id => {
+      // take(1) prend la valeur initiale ; si tu veux updates continues, retire take(1)
+      this.selectedBoutiqueId = id;
+    });
+
+  // Si tu veux suivre à tout moment :
+  this.boutiqueState.selectedBoutique$.subscribe(id => this.selectedBoutiqueId = id);
+
   }
 
   private loadActiveCart() {
@@ -294,18 +312,13 @@ export class PosVenteComponent {
   }
 
   calculatePayment(): void {
-    // Convertir l'entrée en nombre (gérer la virgule)
     const enteredValue = parseFloat(this.enteredAmount.replace(',', '.')) || 0;
     
     this.paymentAmount = enteredValue;
     this.isAmountEntered = enteredValue > 0;
     
-    // Calculer la monnaie ou le restant
-    if (this.paymentAmount >= this.totalAmount) {
-      this.changeDue = this.paymentAmount - this.totalAmount;
-    } else {
-      this.changeDue = this.totalAmount - this.paymentAmount;
-    }
+    // Toujours calculer la différence
+    this.changeDue = Math.abs(this.totalAmount - this.paymentAmount);
   }
 
   selectPaymentMethod(method: string): void {
@@ -313,6 +326,21 @@ export class PosVenteComponent {
   }
 
   // Ajouter complete Payment()
+  // completePayment(): void {
+  //   // Logique pour finaliser le paiement
+  //   console.log('Paiement complété:', {
+  //     method: this.selectedPaymentMethod,
+  //     amount: this.paymentAmount,
+  //     change: this.changeDue
+  //   });
+  //   this.goTopaiement()
+    
+  //   // Fermer le popup et réinitialiser le panier
+  //   this.closePaymentPopup();
+  //   this.cart.clear();
+  //   this.saveActiveCart();
+  // }
+
   completePayment(): void {
     // Logique pour finaliser le paiement
     console.log('Paiement complété:', {
@@ -320,13 +348,15 @@ export class PosVenteComponent {
       amount: this.paymentAmount,
       change: this.changeDue
     });
-    this.goTopaiement()
+    this.submitVente()
+    // this.goTopaiement()
     
     // Fermer le popup et réinitialiser le panier
     this.closePaymentPopup();
     this.cart.clear();
     this.saveActiveCart();
   } 
+
 
   closePaymentPopup() {
     this.showPaymentPopup = false;
@@ -1026,6 +1056,129 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
         break;
     }
   }
+
+  private buildVenteRequestFromCart(): VenteRequest | null {
+    if (!this.selectedBoutiqueId) {
+      this.venteErrorMessage = 'Aucune boutique sélectionnée.';
+      return null;
+    }
+
+    const produitsQuantites: { [k: string]: number } = {};
+    this.cart.forEach((qty, productId) => {
+      if (qty > 0) produitsQuantites[String(productId)] = qty;
+    });
+
+    if (Object.keys(produitsQuantites).length === 0) {
+      this.venteErrorMessage = 'Le panier est vide.';
+      return null;
+    }
+
+    const modePaiementEnum = this.mapPaymentMethodToEnum(this.selectedPaymentMethod);
+
+    const request: VenteRequest = {
+      boutiqueId: this.selectedBoutiqueId,
+      produitsQuantites,
+      description: 'Vente POS',
+      nomClient: undefined, // remplir si tu as un client sélectionné
+      telClient: undefined,
+      modePaiement: modePaiementEnum ?? undefined,
+      // montantPaye: this.paymentAmount > 0 ? this.paymentAmount : undefined
+    };
+
+    return request;
+  }
+
+  submitVente() {
+    this.venteErrorMessage = null;
+
+    const request = this.buildVenteRequestFromCart();
+    if (!request) return;
+
+    // Affiche clairement la requête qui sera envoyée
+    console.log('→ Envoi de la requête vente:', request);
+    // Also show boutique id and cart for extra confidence
+    console.log('selectedBoutiqueId=', this.selectedBoutiqueId, 'cart=', Array.from(this.cart.entries()));
+
+    this.isSubmittingVente = true;
+
+    this.venteService.enregistrerVente(request).pipe(
+      finalize(() => this.isSubmittingVente = false)
+    ).subscribe({
+      next: (res: VenteResponse) => {
+        console.log('Vente enregistrée', res);
+        // UX : succès
+        // alert('Vente enregistrée avec succès (ID: ' + res.venteId + ')');
+
+        // Réinitialiser l'UI : vider cart, sauvegarder état
+        this.cart.clear();
+        this.saveActiveCart();
+        this.updateCommandeTotals();
+
+        // Naviguer / afficher reçu (optionnel)
+        this.router.navigate(['/pos-accueil/paiement'], {
+          state: {
+            vente: res,
+            paymentAmount: this.paymentAmount,
+            changeDue: this.changeDue,
+            paymentMethod: this.selectedPaymentMethod
+          }
+        });
+
+        // fermer popup de paiement si ouvert
+        this.showPaymentPopup = false;
+      },
+      error: (err: any) => {
+        // Affiche tout pour debug
+        console.error('Erreur enregistrement vente (subscribe) :', err);
+
+        // Si err est un HttpErrorResponse (erreur réseau / serveur), extraire message du serveur
+        const original = err?.original ?? err;
+        let serverMsg = null;
+
+        // Cas : on reçoit HttpErrorResponse avec original.error = { exception, error: "..." }
+        if (original?.error) {
+          // Many backends return either { error: "..."} or { message: "..."} or {exception:.., error:..}
+          serverMsg = original.error.error || original.error.message || original.message;
+        }
+
+        // Sinon on prend err.message
+        this.venteErrorMessage = serverMsg || err?.message || 'Erreur inconnue lors de l\'enregistrement de la vente';
+
+        // Affiche à l'utilisateur
+        alert('Erreur : ' + this.venteErrorMessage);
+
+        // NE PAS vider le panier : laisser l'utilisateur réessayer
+      }
+    });
+  }
+
+  private mapPaymentMethodToEnum(uiMethod: string | null | undefined): string | null {
+    if (!uiMethod) return null;
+
+    const m = uiMethod.trim().toLowerCase();
+
+    if (m === 'espèces' || m === 'espèces ' || m === 'especes' || m === 'especes' || m === 'espèces') {
+      return 'ESPECES';
+    }
+    if (m === 'carte' || m === 'card') {
+      return 'CARTE';
+    }
+    if (m === 'mobile money' || m === 'mobile_money' || m.includes('mobile')) {
+      return 'MOBILE_MONEY';
+    }
+    if (m === 'chèque' || m === 'cheque' || m === 'cheque') {
+      return 'CHEQUE';
+    }
+    // 'Compte client' / 'Compte' -> on n'a pas d'enum spécifique -> AUTRE
+    if (m.includes('compte') || m.includes('client') || m.includes('compte client')) {
+      return 'AUTRE';
+    }
+
+    // fallback conservative
+    return 'AUTRE';
+  }
+
+
 
 
 }

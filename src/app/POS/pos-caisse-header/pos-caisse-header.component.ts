@@ -18,28 +18,35 @@ import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/
 export class PosCaisseHeaderComponent {
 
   showModal = false;
-    boutiques: any[] = [];
-    selectedBoutiqueId: number | null = null;
-    montantOuverture: number = 0;
-    isLoading = false;
-    errorMessage: string | null = null;
-    caisses: CaisseResponse[] = [];
-  
-    selectedBoutiqueIdForList: number | null = null;
-    isLoadingCaisses = false;
-  
-    openMenuId: number | null = null;
-  
-    constructor(
-      private boutiqueService: BoutiqueService,
-      private posCaisseService: PosCaisseService,
-      private boutiqueState: BoutiqueStateService,
-      private router: Router
-    ) {}
-  
-    ngOnInit(): void {
-      this.loadBoutiques();
+  boutiques: any[] = [];
+  selectedBoutiqueId: number | null = null;
+  montantOuverture: number = 0;
+  isLoading = false;
+  errorMessage: string | null = null;
+  caisses: CaisseResponse[] = [];
+
+  // selectedBoutiqueIdForList: number | null = null;
+    selectedBoutiqueIdForList: number = 0; 
+  isLoadingCaisses = false;
+
+  openMenuId: number | null = null;
+
+  constructor(
+    private boutiqueService: BoutiqueService,
+    private posCaisseService: PosCaisseService,
+    private boutiqueState: BoutiqueStateService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.loadBoutiques();
+
+    // Initialiser avec la boutique sauvegardée
+    const savedBoutiqueId = this.boutiqueState.getCurrentValue();
+    if (savedBoutiqueId) {
+      this.selectedBoutiqueIdForList = savedBoutiqueId;
     }
+  }
   
   loadBoutiques(): void {
     this.boutiqueService.getBoutiquesByEntreprise().subscribe({
@@ -47,9 +54,11 @@ export class PosCaisseHeaderComponent {
         this.boutiques = boutiques;
         
         if (this.boutiques.length > 0) {
-          this.selectedBoutiqueIdForList = this.boutiques[0].id;
+          // Utiliser la boutique sauvegardée ou la première
+          this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
           this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
           
+          // Vérifier que l'ID n'est pas null avant d'appeler
           if (this.selectedBoutiqueIdForList !== null) {
             this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
           }
@@ -61,6 +70,12 @@ export class PosCaisseHeaderComponent {
       }
     });
   }
+
+  private getValidBoutiqueId(): number {
+    return this.boutiqueState.getCurrentValue() || 
+          (this.boutiques.length > 0 ? this.boutiques[0].id : 0);
+  }
+
 
   // Nouvelle méthode pour charger les caisses
   loadCaisses(boutiqueId: number): void {
@@ -119,18 +134,15 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
   });
 }
 
-onBoutiqueChange(): void {
-  this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
-  // Réinitialiser avant de charger de nouvelles données
-  this.caisses = [];
-  this.errorMessage = null;
-  
-  if (this.selectedBoutiqueIdForList !== null) {
+// Modifier onBoutiqueChange
+  onBoutiqueChange(): void {
+    if (this.selectedBoutiqueIdForList === null) return;
+    
+    this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
+    this.caisses = [];
+    this.errorMessage = null;
     this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-  } else {
-    this.isLoadingCaisses = false;
   }
-}
   
   openModal() {
     this.showModal = true;

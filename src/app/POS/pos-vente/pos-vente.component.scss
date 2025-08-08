@@ -358,6 +358,7 @@ ul {
 
 .name_stock_list {
   line-height: 1.5;
+  padding: 10px;
 }
 
 .product-stock-list {
@@ -711,10 +712,10 @@ ul.ul_list {
   font-size: 1.2em;
 }
 
-.keypad button:focus {
-  outline: 2px solid #0672E4;
-  outline-offset: 2px;
-}
+// .keypad button:focus {
+//   outline: 2px solid #0672E4;
+//   outline-offset: 2px;
+// }
 
 /* Dans ton fichier .component.css ou global */
 .alert-low-stock {
