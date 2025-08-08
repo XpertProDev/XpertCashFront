@@ -1,10 +1,45 @@
-import { Injectable } from "@angular/core";
-import { environment } from "src/environments/environment";
+// vente.service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+import { Observable, throwError } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { VenteRequest, VenteResponse } from '../../MODELS/VenteModel/vente-model';
 
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class VenteService {
   private apiUrl = environment.apiBaseUrl;
+
+  constructor(
+    private http: HttpClient,
+    private usersService: UsersService
+  ) {}
+
+  enregistrerVente(request: VenteRequest): Observable<VenteResponse> {
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) return throwError(() => new Error('Aucun token trouvé'));
+        const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+        return this.http.post<VenteResponse>(`${this.apiUrl}/vente/enregistrer`, request, { headers });
+      }),
+      catchError(err => {
+        // rethrow the original HttpErrorResponse so subscriber can inspect err.error etc.
+        return throwError(() => err);
+      })
+    );
+  }
+
+  getVenteById(id: number): Observable<VenteResponse> {
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) return throwError(() => new Error('Aucun token trouvé'));
+        const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+        return this.http.get<VenteResponse>(`${this.apiUrl}/vente/${id}`, { headers });
+      }),
+      catchError(err => throwError(() => err))
+    );
+  }
+
+
 }
