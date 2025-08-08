@@ -131,37 +131,43 @@ export class FactureReelDetailsComponent implements OnInit {
     
   }
 
-  loadFactureReelle(id: number): void {
-    this.factureService.getFactureReelleById(id).subscribe({
-      next: (data: FactureReelle) => {
-        console.log('les donner de facture :', data);
-        // sum est un nombre, ligne est une LigneFacture
-        data.totalHT = data.lignesFacture
-          .reduce((sum: number, ligne: LigneFactureDTO) => sum + ligne.montantTotal, 0);
+ loadFactureReelle(id: number): void {
+  this.factureService.getFactureReelleById(id).subscribe({
+    next: (data: FactureReelle) => {
+      console.log('Les données de la facture :', data);
 
-        data.tauxRemise = data.remise > 0
-          ? (data.remise / data.totalHT!) * 100
-          : 0;
+      // Calcul du total HT et autres informations
+      data.totalHT = data.lignesFacture
+        .reduce((sum: number, ligne: LigneFactureDTO) => sum + ligne.montantTotal, 0);
 
-        if (data.tva) {
-          this.totalTVA = (data.totalHT! - data.remise) * (this.tauxTva ?? 0);
-          this.montantCommercial = data.totalHT! - data.remise;
-        }
+      data.tauxRemise = data.remise > 0
+        ? (data.remise / data.totalHT!) * 100
+        : 0;
 
-        this.facture = data;
-
-        this.loadMontantRestant();
-        this.loadHistoriquePaiements();
-      
-        // Ajouter le calcul du statut
-        this.updatePaymentStatus();
-      },
-      error: (err) => {
-        console.error('Erreur', err);
-        this.router.navigate(['/facture-reel']);
+      if (data.tva) {
+        this.totalTVA = (data.totalHT! - data.remise) * (this.tauxTva ?? 0);
+        this.montantCommercial = data.totalHT! - data.remise;
       }
-    });
-  }
+
+      // Ici, tu as directement accès à produit.nom
+      data.lignesFacture.forEach((ligne: LigneFactureDTO) => {
+        ligne.produit.nom = ligne.produit.nom;  // Assignation directe du nom du produit
+      });
+
+      this.facture = data;
+      this.loadMontantRestant();
+      this.loadHistoriquePaiements();
+    
+      // Ajouter le calcul du statut
+      this.updatePaymentStatus();
+    },
+    error: (err) => {
+      console.error('Erreur', err);
+      this.router.navigate(['/facture-reel']);
+    }
+  });
+}
+
 
   // Nouvelle méthode pour mettre à jour le statut
   private updatePaymentStatus() {
@@ -510,7 +516,7 @@ async download() {
   // Client
   const clientY = 56;
   if (this.facture) {
-    const clientName = this.facture.client?.nom || 
+    const clientName = this.facture.client?.nomComplet || 
                       this.facture.entrepriseClient?.nom || 
                       'Non spécifié';
     doc.setFont('helvetica', 'bold');
@@ -529,7 +535,7 @@ async download() {
   const tableStartY = clientY + 17;
   const customNumberPipe = new CustomNumberPipe();
   const tableData = this.facture?.lignesFacture.map(ligne => [
-    ligne.produitNom,
+    ligne.produit.nom,
     ligne.ligneDescription,
     customNumberPipe.transform(ligne.prixUnitaire),
     ligne.quantite.toString(),

@@ -73,7 +73,14 @@ export class DetailFactureProformaComponent implements OnInit {
   inputLignes: { produitId: number | null; quantite: number; ligneDescription: string | null; isDuplicate: boolean }[] = [{
     produitId: null, quantite: 1, ligneDescription: null, isDuplicate: false
   }];
-  confirmedLignes: {produitId: number | null;quantite: number;ligneDescription: string | null;}[] = [];
+confirmedLignes: {
+  produitId: number | null;
+  produitNom?: string;
+  quantite: number;
+  ligneDescription: string | null;
+}[] = [];
+
+
   factureId!: number;
   showDuplicatePopup: boolean = false;
   showStatusConfirmation = false;
@@ -308,18 +315,19 @@ export class DetailFactureProformaComponent implements OnInit {
     };
     return statusMap[action];
   }
-
   loadFactureProforma(id: number): void {
     this.factureProFormaService.getFactureProformaById(id).subscribe({
       next: (data) => {
+        console.log('Facture reçue du backend :', data);
         this.factureProForma = data;
         this.loadHistoricalEvents();
 
          // Initialise les lignes confirmées avec les données existantes
         this.confirmedLignes = data.lignesFacture.map(l => ({
-          produitId: l.produit.id,
+          produitId: l.produit?.id ?? null, 
           quantite: l.quantite,
-          ligneDescription: l.ligneDescription ?? ''
+          ligneDescription: l.ligneDescription ?? '',
+          
         }));
       
         // Correction 1 : Utilisez l'opérateur de coalescence null

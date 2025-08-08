@@ -147,7 +147,7 @@
               <td class="td">{{ facture.dateCreation | date: 'dd/MM/yyyy' }}</td>
               <td class="td">
                   <div *ngFor="let ligne of facture.lignesFacture?.slice(0,2)">
-                      {{ ligne.produitNom }} (x{{ ligne.quantite }})
+                      {{ ligne.produit.nom }} (x{{ ligne.quantite }})
                   </div>
                   <div *ngIf="facture.lignesFacture?.length > 2">...</div>
               </td>
@@ -201,7 +201,7 @@
           <tbody>
             <ng-container *ngIf="facture.lignesFacture?.length; else noLines">
               <tr *ngFor="let ligne of facture.lignesFacture.slice(0, 2)">
-                <td>{{ ligne.produitNom }}</td>
+                <td>{{ ligne.produit.nom }}</td>
                 <td>{{ ligne.quantite }}</td>
                 <td class="tb_total">{{ ligne.montantTotal | customNumber }}</td>
               </tr>

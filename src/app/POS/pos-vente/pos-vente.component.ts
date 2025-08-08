@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
@@ -17,10 +17,13 @@ import { Entreprise } from 'src/app/admin-page/MODELS/entreprise-model';
 import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-service';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { EntrepriseClient } from 'src/app/admin-page/MODELS/entreprise-clients-model';
+import { ProduitService } from 'src/app/admin-page/SERVICES/produit.service';
+import { Produit } from 'src/app/admin-page/MODELS/produit.model';
+import { NgxBarcode6Module } from 'ngx-barcode6';
 
 @Component({
   selector: 'app-pos-vente',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule, MatAutocompleteModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, MatAutocompleteModule, NgxBarcode6Module],
   templateUrl: './pos-vente.component.html',
   styleUrl: './pos-vente.component.scss'
 })
@@ -133,6 +136,7 @@ export class PosVenteComponent {
     private sanitizer: DomSanitizer,
     private fb: FormBuilder,
     private entrepriseService: EntrepriseService,
+    private produitService: ProduitService,
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
@@ -322,7 +326,7 @@ export class PosVenteComponent {
     this.closePaymentPopup();
     this.cart.clear();
     this.saveActiveCart();
-  }
+  } 
 
   closePaymentPopup() {
     this.showPaymentPopup = false;
@@ -472,15 +476,71 @@ export class PosVenteComponent {
   }
 
   // Début de l'appui
-  startPress(event: Event, produit: ProduitDetailsResponseDTO): void {
-    // même logique, pas besoin de différencier TouchEvent / MouseEvent
-    if (this.getAvailableStock(produit) <= 0) return;
-    this.selectedProductForDetail = produit;
-    this.longPressTimer = setTimeout(() => {
-      this.showDetailPopup = true;
-      this.longPressTimer = null;
-    }, 500);
+startPress(event: Event, produit: ProduitDetailsResponseDTO): void {
+  if (this.getAvailableStock(produit) <= 0) return;
+
+  this.longPressTimer = setTimeout(() => {
+    // Appel au service pour récupérer les données à jour
+    this.produitService.getProduitById(produit.id).subscribe({
+      next: (result: Produit) => {
+        // Mapping Produit => ProduitDetailsResponseDTO
+        const mappedProduct = new ProduitDetailsResponseDTO({
+          ...result,
+          categorieId: result.categorieId ?? 0,
+          seuilAlert: result.seuilAlert ?? 0,
+          nomCategorie: result.nomCategorie ?? '',
+          nomUnite: result.nomUnite ?? '',
+          typeProduit: result.typeProduit ?? '',
+          createdAt: result.createdAt ?? '',
+          lastUpdated: result.lastUpdated ?? '',
+          datePreemption: result.datePreemption ?? null,
+          boutiqueId: result.boutiqueId ?? null,
+          description: result.description ?? '',
+          codeBare: result.codeBare ?? '',
+          codeGenerique: result.codeGenerique ?? ''
+        });
+
+        this.selectedProductForDetail = mappedProduct;
+        this.showDetailPopup = true;
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération du produit :', err);
+      }
+    });
+
+    this.longPressTimer = null;
+  }, 500);
+}
+
+getNomBoutiqueCourante(produit: ProduitDetailsResponseDTO): string {
+  const boutique = produit.boutiques?.find(b => b.id === produit.boutiqueId);
+  return boutique?.nom || 'Boutique inconnue';
+}
+
+isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
+  const quantite = this.getQuantiteDansBoutiqueCourante(produit);
+
+  if (produit.seuilAlert == null || produit.seuilAlert === 0) {
+    return true;
   }
+  return quantite <= produit.seuilAlert;
+}
+
+getQuantiteClass(produit: ProduitDetailsResponseDTO): string {
+  return this.isQuantiteCritique(produit) ? 'alert-low-stock' : 'safe-stock';
+}
+
+
+
+getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
+  const boutique = produit.boutiques?.find(b => b.id === produit.boutiqueId);
+  return boutique?.quantite ?? 0;
+}
+
+
+
+
+
 
   endPress(): void {
     if (this.longPressTimer) {
@@ -890,6 +950,81 @@ export class PosVenteComponent {
   selectEntreprise(entreprise: EntrepriseClient) {
     console.log('Entreprise sélectionnée:', entreprise);
     this.closeListClientPopup();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (this.showPaymentPopup) {
+      this.handlePaymentKeyPressPhysical(event);
+    } else {
+      this.handleKeyPressPhysical(event);
+    }
+  }
+
+  handleKeyPressPhysical(event: KeyboardEvent) {
+    // Ignorer si un popup est ouvert ou si on est dans un champ de saisie
+    if (this.showDetailPopup || this.showClientPopup || this.showAddClientPopup) return;
+    
+    const key = event.key;
+    switch (key) {
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        this.handleKeyPress(key);
+        break;
+      case ',':
+      case '.':
+        this.handleKeyPress(',');
+        break;
+      case 'Backspace':
+        this.handleKeyPress('backspace');
+        break;
+      case '-':
+      case '+':
+        this.handleKeyPress('+/-');
+        break;
+    }
+  }
+
+  handlePaymentKeyPressPhysical(event: KeyboardEvent) {
+    const key = event.key;
+    switch (key) {
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        this.handlePaymentKeyPress(key);
+        break;
+      case ',':
+      case '.':
+        this.handlePaymentKeyPress(',');
+        break;
+      case 'Backspace':
+        this.handlePaymentKeyPress('backspace');
+        break;
+      case '-':
+      case '+':
+        this.handlePaymentKeyPress('+/-');
+        break;
+      case 'Enter':
+        if (this.isAmountEntered) {
+          this.completePayment();
+        }
+        break;
+    }
   }
 
 

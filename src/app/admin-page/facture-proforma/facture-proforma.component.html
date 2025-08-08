@@ -165,7 +165,7 @@
               <td class="td">{{ facture.client || facture.entrepriseClient }}</td>
               <td class="td">
                   <div *ngFor="let ligne of facture.ligneFactureProforma?.slice(0,2)">
-                      {{ ligne.nomProduit }} (x{{ ligne.quantite }})
+                      {{ ligne.produit.nom }} (x{{ ligne.quantite }})
                   </div>
                   <div *ngIf="facture.ligneFactureProforma?.length > 2">...</div>
               </td>

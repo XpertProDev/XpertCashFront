@@ -1,55 +1,7 @@
 <div class="container_pos_caisse">
     <div class="content_pos_caisse">
 
-        <nav class="header_pos_caisse">
-            <div class="content_header_pos_caisse_left">
-                <ul>
-                    <li>
-                        <div class="double">
-                            <div class="icon_retour">
-                                <i class="ri-arrow-left-s-line"></i>
-                            </div>
-                            <div class="name_pos">
-                                <p style="font-size: 16px;">Point de vente</p>
-                            </div>
-                            <select class="content_select" name="boutique" 
-                                    [(ngModel)]="selectedBoutiqueIdForList"
-                                    (ngModelChange)="onBoutiqueChange()">
-                                <!-- Option désactivée pour sélection explicite -->
-                                <!-- <option [value]="null">Sélectionnez une boutique</option> -->
-                                
-                                <option *ngFor="let boutique of boutiques" [value]="boutique.id">
-                                    {{ boutique.nomBoutique }}
-                                </option>
-                            </select>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            <div class="content_header_pos_caisse_right">
-
-                <button class="add-task" (click)="openModal()">Nouveau caisse</button>
-  
-                <div class="barre"></div>
-
-                <span class="o_pager_counter"><span class="">1-1</span><span> / </span><span class="o_pager_limit">1</span></span>
-                
-                <span class="btn-group d-print-none" aria-atomic="true">
-                    <button type="button" class="o_pager_previous" aria-label="Précédent" data-tooltip="Précédent" ><i class="ri-arrow-left-s-line"></i></button>
-                    <button type="button" class="o_pager_next" aria-label="Suivant" data-tooltip="Suivant"><i class="ri-arrow-right-s-line"></i></button>
-                </span>
-  
-                <div class="barre"></div>
-                
-                <div class="inputSearch">
-                    <i class="ri-search-2-line"></i>
-                    <input 
-                        type="text"
-                        placeholder="Recherche...."
-                    />
-                </div>
-            </div>
-        </nav>
+        
 
         <div class="caisse-container">
             <!-- Loading State -->
@@ -60,42 +12,49 @@
             <!-- Empty State -->
             <div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
                 <i class="ri-information-line"></i>
-                <p>Aucune caisse disponible pour cette boutique</p>
+                <p>{{ errorMessage || 'Aucune caisse disponible pour cette boutique' }}</p>
             </div>
 
             <!-- Liste des caisses -->
             <div *ngFor="let caisse of caisses" class="caisse-card">
                 <div class="block">
-                    <div class="double">
+                    <div class="double" style="align-items: baseline;">
                         <div class="profil">
                             <span>{{ caisse.nomVendeur ? caisse.nomVendeur[0] : '?' }}</span>
                         </div>
                         <div class="caisse-info">
                             <div class="caisse-nom">{{ caisse.nomVendeur || 'Non assigné' }}</div>
-                            <div class="caisse-status" [class.open]="caisse.statut === 'OUVERTE'"
-                                                    [class.closed]="caisse.statut === 'FERMEE'">
-                                {{ caisse.statut === 'OUVERTE' ? 'Ouverte' : 'Fermée' }}
+                            <div class="caisse-status" 
+                                [class.open]="caisse.statut === 'OUVERTE'"
+                                [class.closed]="caisse.statut === 'FERMEE'">
+                                {{ getStatusText(caisse) }}
                             </div>
                         </div>
                     </div>
 
-                    <div class="icon_more">
+                    <!-- zone "more" cliquable -->
+                    <div class="icon_more" (click)="toggleMenu(caisse.id)">
                         <i class="ri-more-2-fill"></i>
+                        <!-- dropdown -->
+                        <div 
+                            class="dropdown-menu" 
+                            *ngIf="openMenuId === caisse.id"
+                            (click)="$event.stopPropagation()">
+                            <button (click)="allCaisseClose(caisse)" (click)="goToPosJournalCaisse()">Journal des caisses</button>
+                            <button (click)="allCaisseClose(caisse)">Autres</button>
+                        </div>
                     </div>
                 </div>
                 
-                <button class="caisse-btn" 
-                        [disabled]="caisse.statut !== 'OUVERTE'"
-                        (click)="onCaisseButtonClick(caisse)">
-                {{ caisse.statut === 'OUVERTE' ? 'Continuer la vente' : 'Caisse fermée' }}
+                <button class="caisse-btn" (click)="onCaisseButtonClick(caisse)">
+                    {{ getButtonText(caisse) }}
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- Popup Modal -->
+<!-- Modal -->
 <div class="modal-backdrop" *ngIf="showModal">
     <div class="modal-container">
         <div class="modal-header">
@@ -109,7 +68,16 @@
             <form (ngSubmit)="submitForm()">
                 <div class="form-group">
                     <label>Boutique assignée</label>
-                    <select [(ngModel)]="selectedBoutiqueId" name="boutique" [disabled]="isLoading">
+                    
+                    <!-- Affichage différent selon si une boutique est présélectionnée -->
+                    <div *ngIf="selectedBoutiqueId" class="selected-boutique">
+                        {{ getBoutiqueName(selectedBoutiqueId) }}
+                    </div>
+                    
+                    <select *ngIf="!selectedBoutiqueId" 
+                            [(ngModel)]="selectedBoutiqueId" 
+                            name="boutique" 
+                            [disabled]="isLoading">
                         <option [value]="null">Sélectionnez une boutique</option>
                         <option *ngFor="let boutique of boutiques" [value]="boutique.id">
                             {{ boutique.nomBoutique }}

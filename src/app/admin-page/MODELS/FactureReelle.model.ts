@@ -13,12 +13,37 @@ export interface EntrepriseClientDTO {
 
 export interface ClientDTO {
   id: number;
-  nom: string;
+  nomComplet: string;
 }
+
+
+export interface ProduitDTO {
+  id: number;
+  nom: string;
+  prixVente: number;
+  prixAchat: number;
+  quantite: number;
+  seuilAlert: number;
+  categorieId: number;
+  uniteId: number;
+  codeBare: string;
+  codeGenerique: string;
+  description: string;
+  photo: string;
+  enStock: boolean;
+  nomCategorie: string;
+  nomUnite: string;
+  typeProduit: string;
+  createdAt: string;
+  lastUpdated: string;
+  datePreemption: string | null;
+  boutiqueId: number;
+}
+
 
 export interface LigneFactureDTO {
   id: number;
-  produitNom: string;
+  produit: ProduitDTO; 
   ligneDescription: string;
   prixUnitaire: number;
   quantite: number;
