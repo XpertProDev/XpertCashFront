@@ -124,45 +124,19 @@ export class PosCaisseComponent {
     });
   }
 
-  // Gestion du changement de boutique
-  // onBoutiqueChange(): void {
-  //   // Vérification de type avant l'appel
-  //   if (this.selectedBoutiqueIdForList !== null) {
-  //     this.loadCaisses(this.selectedBoutiqueIdForList);
-  //   } else {
-  //     this.caisses = []; // Réinitialiser la liste si aucune boutique sélectionnée
-  //   }
-  // }
-
-  // onBoutiqueChange(): void {
-  //   if (this.selectedBoutiqueIdForList !== null) {
-  //     this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-  //   } else {
-  //     this.caisses = [];
-  //   }
-  // }
-  
-  // onCaisseButtonClick(caisse: CaisseResponse): void {
-  //   if (caisse.statut === 'OUVERTE') {
-  //       // Continuer la vente
-  //       this.router.navigate(['/pos-accueil'], {
-  //           state: { caisse: caisse }
-  //       });
-  //   } else if (caisse.statut === 'FERMEE') {
-  //       // Ouvrir une nouvelle caisse pour la même boutique
-  //       this.selectedBoutiqueId = caisse.boutiqueId;
-  //       this.montantOuverture = 0;
-  //       this.openModal();
-  //   }
-  // }
-
   onCaisseButtonClick(caisse: CaisseResponse): void {
     if (caisse.statut === 'OUVERTE') {
+        // Mettre à jour la boutique sélectionnée globalement
+        this.boutiqueState.setSelectedBoutique(caisse.boutiqueId);
+
+        // Puis naviguer vers l'accueil POS en passant la caisse (si tu veux)
         this.router.navigate(['/pos-accueil'], {
             state: { caisse: caisse }
         });
     } else if (caisse.statut === 'FERMEE') {
         this.openModalWithBoutique(caisse.boutiqueId);
+        // Optionnel : définir la boutique aussi quand on ouvre le modal
+        this.boutiqueState.setSelectedBoutique(caisse.boutiqueId);
     }
   }
 

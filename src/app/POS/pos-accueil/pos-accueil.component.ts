@@ -8,6 +8,8 @@ import { ViewStateService } from './view-state.service';
 import { Observable, Subscription } from 'rxjs';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { CommandeStateService } from 'src/app/admin-page/SERVICES/commande-state.service';
+import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
+import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 
 @Component({
   selector: 'app-pos-accueil',
@@ -23,24 +25,29 @@ export class PosAccueilComponent {
   public isListView$: Observable<boolean>;
   activeButton: 'vente' | 'commande' = 'vente';
   showMenuDropdown = false;
-
-   userName: string = '';
+  userName: string = '';
   nomEntreprise = '';
   photo: string | null = null;
   photoUrl: string | null = null;
-
   commandes: string[] = ['001']; // Liste initiale
   activeCommande: string = '001'; // Commande active
   // showCommandeDropdown = false;
   showCommandePopup = false;
   private commandeSubscription: Subscription;
 
+  selectedBoutiqueId: number | null = null;
+  selectedBoutiqueName: string = 'Ma boutique name';
+  private boutiqueSub?: Subscription;
+  private boutiques: any[] = [];
+  private boutiquesLoaded = false;
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
     private userService: UsersService,
-    
-    private commandeState: CommandeStateService
+    private commandeState: CommandeStateService,
+    private boutiqueState: BoutiqueStateService,
+    private boutiqueService: BoutiqueService
   ) {
     this.isListView$ = this.viewState.isListView$;
     
@@ -62,17 +69,70 @@ export class PosAccueilComponent {
   }
 
   ngOnInit() {
+
     const currentRoute = this.router.url;
     this.activeButton = currentRoute.includes('/commandes') ? 'commande' : 'vente';
     this.getUserInfo();
+
+    // Charger toutes les boutiques une fois (pour résoudre id -> nom)
+    this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+      next: (list) => {
+        this.boutiques = list || [];
+        this.boutiquesLoaded = true;
+        // si on avait déjà un id, mettre à jour le nom
+        if (this.selectedBoutiqueId !== null) {
+          this.updateBoutiqueName(this.selectedBoutiqueId);
+        }
+      },
+      error: (err) => console.error('Erreur chargement boutiques', err)
+    });
+
+    // S'abonner aux changements de boutique globale
+    this.boutiqueSub = this.boutiqueState.selectedBoutique$.subscribe(id => {
+      this.selectedBoutiqueId = id;
+      if (id === null) {
+        this.selectedBoutiqueName = 'Ma boutique name';
+      } else {
+        this.updateBoutiqueName(id);
+      }
+    });
+
+    // Si on arrive par navigation avec une caisse passée en state, on peut setter aussi
+    const nav = this.router.getCurrentNavigation()?.extras?.state as any;
+    if (nav?.caisse?.boutiqueId) {
+      this.boutiqueState.setSelectedBoutique(nav.caisse.boutiqueId);
+    }
+  }
+
+  private updateBoutiqueName(id: number) {
+    // Si la liste est chargée, trouver le nom localement
+    const found = this.boutiques.find(b => b.id === id);
+    if (found) {
+      this.selectedBoutiqueName = found.nomBoutique;
+      return;
+    }
+
+    // Sinon, si ton BoutiqueService a getBoutiqueById, l'appeler (optionnel)
+    if ((this.boutiqueService as any).getBoutiqueById) {
+      (this.boutiqueService as any).getBoutiqueById(id).subscribe({
+        next: (b: any) => this.selectedBoutiqueName = b?.nomBoutique ?? 'Boutique inconnue',
+        error: () => this.selectedBoutiqueName = 'Boutique inconnue'
+      });
+    } else {
+      this.selectedBoutiqueName = 'Boutique inconnue';
+    }
   }
 
   ngOnDestroy() {
-    // Nettoyer la souscription
-    if (this.commandeSubscription) {
-      this.commandeSubscription.unsubscribe();
-    }
+    this.boutiqueSub?.unsubscribe();
   }
+
+  // ngOnDestroy() {
+  //   // Nettoyer la souscription
+  //   if (this.commandeSubscription) {
+  //     this.commandeSubscription.unsubscribe();
+  //   }
+  // }
 
   toggleView(viewType: 'grid' | 'list') {
     this.viewState.setViewPreference(viewType === 'grid');
