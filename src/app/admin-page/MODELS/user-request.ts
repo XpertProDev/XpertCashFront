@@ -1,6 +1,7 @@
 export interface UserRequest {
   id: number;
   caisseId: number;
+  boutiqueId: number;
   personalCode: string;
   entrepriseId: number;
   nomComplet: string;
@@ -24,5 +25,6 @@ export interface UserRequest {
     telephone: string; 
     email: string;
     adresse: string;
+    caisseId: number;
   }[];
 }
