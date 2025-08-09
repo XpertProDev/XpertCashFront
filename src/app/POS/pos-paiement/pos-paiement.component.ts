@@ -122,10 +122,11 @@ export class PosPaiementComponent {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            margin-bottom: 5px !important;
+            margin-bottom: 15px !important;
           }
           .receipt-header .logo {
             max-width: 100px !important; /* Taille originale */
+            margin-bottom: 0px !important;
           }
           .ticket-info div {
             font-size: 10px !important;
@@ -138,7 +139,7 @@ export class PosPaiementComponent {
             width: 100%;
           }
           .item .qty {
-              width: 14px !important;
+              width: 8px !important;
             }
           .item {
             display: flex !important;

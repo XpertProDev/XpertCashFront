@@ -74,6 +74,8 @@ export class PosAccueilComponent {
     this.activeButton = currentRoute.includes('/commandes') ? 'commande' : 'vente';
     this.getUserInfo();
 
+    this.loadBoutiques();
+
     // Charger toutes les boutiques une fois (pour résoudre id -> nom)
     this.boutiqueService.getBoutiquesByEntreprise().subscribe({
       next: (list) => {
@@ -87,11 +89,11 @@ export class PosAccueilComponent {
       error: (err) => console.error('Erreur chargement boutiques', err)
     });
 
-    // S'abonner aux changements de boutique globale
+    // S'abonner aux changements de boutique
     this.boutiqueSub = this.boutiqueState.selectedBoutique$.subscribe(id => {
       this.selectedBoutiqueId = id;
       if (id === null) {
-        this.selectedBoutiqueName = 'Ma boutique name';
+        this.selectedBoutiqueName = 'Sélectionnez une boutique';
       } else {
         this.updateBoutiqueName(id);
       }
@@ -104,22 +106,32 @@ export class PosAccueilComponent {
     }
   }
 
-  private updateBoutiqueName(id: number) {
-    // Si la liste est chargée, trouver le nom localement
+  private loadBoutiques(): void {
+    this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+      next: (list) => {
+        this.boutiques = list || [];
+        this.boutiquesLoaded = true;
+        
+        // Vérifier si une boutique est déjà sélectionnée dans le state
+        const currentBoutiqueId = this.boutiqueState.getCurrentValue();
+        if (currentBoutiqueId) {
+          this.updateBoutiqueName(currentBoutiqueId);
+        }
+      },
+      error: (err) => console.error('Erreur chargement boutiques', err)
+    });
+  }
+
+  private updateBoutiqueName(id: number): void {
     const found = this.boutiques.find(b => b.id === id);
     if (found) {
       this.selectedBoutiqueName = found.nomBoutique;
-      return;
-    }
-
-    // Sinon, si ton BoutiqueService a getBoutiqueById, l'appeler (optionnel)
-    if ((this.boutiqueService as any).getBoutiqueById) {
-      (this.boutiqueService as any).getBoutiqueById(id).subscribe({
-        next: (b: any) => this.selectedBoutiqueName = b?.nomBoutique ?? 'Boutique inconnue',
+    } else {
+      // Si non trouvée, tenter une requête directe
+      this.boutiqueService.getBoutiqueById(id).subscribe({
+        next: (boutique) => this.selectedBoutiqueName = boutique.nomBoutique,
         error: () => this.selectedBoutiqueName = 'Boutique inconnue'
       });
-    } else {
-      this.selectedBoutiqueName = 'Boutique inconnue';
     }
   }
 
