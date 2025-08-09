@@ -135,7 +135,7 @@ getFacturesParPeriode(
         params = params.set('dateDebut', dateDebut).set('dateFin', dateFin);
       }
 
-      return this.http.get<any[]>(`${this.apiUrl}/par-periode`, { headers, params });
+      return this.http.get<any[]>(`${this.apiUrl}/filtrer-facturesReelles`, { headers, params });
     })
   );
 }

@@ -716,3 +716,18 @@ ul.ul_list {
 //   outline: 2px solid #0672E4;
 //   outline-offset: 2px;
 // }
+
+/* Dans ton fichier .component.css ou global */
+.alert-low-stock {
+  color: red !important;
+  font-weight: bold;
+}
+
+.safe-stock {
+  color: green !important;
+  font-weight: bold;
+}
+.barcode-shifted {
+  left: 11px;
+  position: relative;
+}

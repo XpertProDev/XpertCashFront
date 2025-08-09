@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { environment } from "src/environments/environment";
 import { Observable, throwError } from "rxjs";
 import { switchMap, catchError, map } from "rxjs/operators";
-import { OuvrirCaisseRequest, CaisseResponse } from "../../MODELS/CaisseModel/caisse.model";
+import { OuvrirCaisseRequest, CaisseResponse, FermerCaisseRequest } from "../../MODELS/CaisseModel/caisse.model";
 import { UsersService } from "../users.service";
 
 @Injectable({
@@ -55,6 +55,53 @@ export class PosCaisseService {
         })
     );
   }
+
+fermerCaisse(): Observable<any> {
+    console.log('Tentative de récupération du token...'); // Log avant de récupérer le token
+
+    return this.usersService.getValidAccessToken().pipe( // On récupère le token valide de l'utilisateur
+      switchMap(token => {
+        if (!token) {
+          console.error('Aucun token trouvé');
+          throw new Error('Aucun token trouvé');
+        }
+
+        console.log('Token récupéré :', token); // Log du token récupéré
+
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}` // Envoi du token d'authentification
+        });
+
+        console.log('Envoi de la requête POST pour fermer la caisse...'); // Log avant de faire la requête
+
+        return this.http.post<any>(`${this.apiUrl}/fermer`, {}, { headers }).pipe(
+          catchError(error => {
+            console.error('Erreur lors de la requête pour fermer la caisse:', error);
+            return throwError(() => error);
+          })
+        ); // Appel à l'API sans payload (pas besoin de caisseId ici)
+      }),
+      catchError(error => {
+        console.error('Erreur détaillée dans le service:', error);
+        
+        // Gestion des erreurs
+        let errorMsg = 'Erreur lors de la fermeture de la caisse';
+        if (error.error && error.error.error) {
+          errorMsg = error.error.error;
+        } else if (error.error && error.error.message) {
+          errorMsg = error.error.message;
+        } else if (error.message) {
+          errorMsg = error.message;
+        }
+
+        return throwError(() => ({ 
+          message: errorMsg,
+          originalError: error 
+        }));
+      })
+    );
+  }
+
 
   getDerniereCaisseVendeur(boutiqueId: number): Observable<CaisseResponse | string> {
     return this.usersService.getValidAccessToken().pipe(

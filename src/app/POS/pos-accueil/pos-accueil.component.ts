@@ -8,6 +8,8 @@ import { ViewStateService } from './view-state.service';
 import { Observable, Subscription } from 'rxjs';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { CommandeStateService } from 'src/app/admin-page/SERVICES/commande-state.service';
+import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
+import { FermerCaisseRequest } from 'src/app/admin-page/MODELS/CaisseModel/caisse.model';
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 
@@ -45,6 +47,7 @@ export class PosAccueilComponent {
     private router: Router,
     private viewState: ViewStateService,
     private userService: UsersService,
+    private posCaisseService: PosCaisseService,
     private commandeState: CommandeStateService,
     private boutiqueState: BoutiqueStateService,
     private boutiqueService: BoutiqueService
@@ -211,27 +214,66 @@ getUserInfo(): void {
 
  
 onLogout(): void {
+  console.log("Début de la procédure de déconnexion...");
+
   // Récupérer les informations de l'utilisateur
   this.userService.getUserInfo().subscribe({
     next: (user) => {
+      console.log('Utilisateur récupéré:', user);
       const userPermissions = user.permissions;  // Récupérer les permissions de l'utilisateur
 
       // Vérifier si l'utilisateur a uniquement la permission "VENDRE_PRODUITS"
       if (userPermissions.length === 1 && userPermissions.includes("VENDRE_PRODUITS")) {
-        // Si l'utilisateur a uniquement "VENDRE_PRODUITS", on le déconnecte
-        this.userService.logoutUser();  // Déconnexion de l'utilisateur
-        this.router.navigate(['/connexion']).then(success => {
-          console.log("Déconnexion réussie ?", success);
+        console.log('L\'utilisateur a uniquement la permission "VENDRE_PRODUITS". Tentative de fermeture de la caisse...');
+        // Si l'utilisateur a uniquement "VENDRE_PRODUITS", on ferme la caisse avant de le déconnecter
+        const caisseRequest = { caisseId: user.caisseId };  // Supposons que l'ID de la caisse soit dans les infos utilisateur
+        this.posCaisseService.fermerCaisse().subscribe({
+          next: (response) => {
+            console.log('Caisse fermée avec succès:', response);
+            // Déconnexion de l'utilisateur
+            this.userService.logoutUser();  
+            console.log('Déconnexion de l\'utilisateur...');
+            this.router.navigate(['/connexion']).then(success => {
+              console.log("Déconnexion réussie ?", success);
+            });
+          },
+          error: (err) => {
+            console.error('Erreur lors de la fermeture de la caisse:', err.message);
+            // Si une erreur se produit lors de la fermeture de la caisse, rediriger vers la page d'analytics.
+            this.router.navigate(['/analytics']).then(success => {
+              console.log("Navigation vers analytics réussie ?", success);
+            });
+          }
         });
       } else {
-        // Sinon, on redirige vers "analytics"
-        this.router.navigate(['/analytics']).then(success => {
-          console.log("Navigation vers analytics réussie ?", success);
+        console.log('L\'utilisateur n\'a pas uniquement la permission "VENDRE_PRODUITS", fermeture de la caisse et redirection vers analytics...');
+        // Sinon, on ferme la caisse et redirige vers "analytics"
+        const caisseRequest = { caisseId: user.caisseId };  // Supposons que l'ID de la caisse soit dans les infos utilisateur
+        this.posCaisseService.fermerCaisse().subscribe({
+          next: (response) => {
+            console.log('Caisse fermée avec succès:', response);
+            // Redirection vers analytics après fermeture de la caisse
+            this.router.navigate(['/analytics']).then(success => {
+              console.log("Navigation vers analytics réussie ?", success);
+            });
+          },
+          error: (err) => {
+            console.error('Erreur lors de la fermeture de la caisse:', err.message);
+            // Si une erreur se produit lors de la fermeture de la caisse, rediriger vers la page d'analytics.
+            this.router.navigate(['/analytics']).then(success => {
+              console.log("Navigation vers analytics réussie ?", success);
+            });
+          }
         });
       }
     },
+    error: (err) => {
+      console.error('Erreur lors de la récupération des informations utilisateur:', err);
+      // Gestion des erreurs de récupération des infos utilisateur
+    }
   });
 }
+
 
 
 }

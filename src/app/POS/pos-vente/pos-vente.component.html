@@ -395,17 +395,17 @@
 <div *ngIf="showDetailPopup" class="detail-popup-overlay">
   <div class="detail-popup">
     <!-- En-tête -->
-    <div class="popup-header">
-      <h3>Information des produits</h3>
+    <div class="popup-header" *ngIf="showDetailPopup && selectedProductForDetail">
+      <h3>Information [{{ selectedProductForDetail.codeGenerique }}]</h3>
       <button (click)="closeDetailPopup()" class="close-btn">
         <i class="ri-close-line"></i>
       </button>
     </div>
 
     <!-- Corps principal -->
-    <div class="popup-body">
+    <div class="popup-body" *ngIf="showDetailPopup && selectedProductForDetail">
       <!-- Titre de la boutique -->
-      <h4 class="shop-name">Ma Boutique Orix</h4>
+      <!-- <h4 class="shop-name">Ma Boutique Orix</h4> -->
 
 
         <!-- Colonne gauche : image -->
@@ -421,41 +421,63 @@
             <div class="detail_info_left">
               <div class="info-row">
               <span class="label">Nom produit</span>
-              <span class="value">Oridinateur HP</span>
+              <span class="value">{{ selectedProductForDetail.nom }}</span>
             </div>
             <div class="info-row">
               <span class="label">Prix de vente</span>
-              <span class="value">23 000 CFA</span>
+              <span class="value">{{ selectedProductForDetail.prixVente | number }} CFA</span>
             </div>
             <div class="info-row">
               <span class="label">Catégorie</span>
-              <span class="value">Formation X</span>
+               <span class="value">{{ selectedProductForDetail.nomCategorie }}</span>
             </div>
             <div class="info-row">
               <span class="label">Unité de mesure</span>
-              <span class="value">Carton</span>
+              <span class="value">{{ selectedProductForDetail.nomUnite }}</span>
             </div>
           </div>
           <div class="detail_info_right">
-            <div class="info-row">
+
+           <div class="info-row">
               <span class="label">Stocks actuel</span>
-              <span class="value">300</span>
+              <span class="value" [ngClass]="getQuantiteClass(selectedProductForDetail)">
+                {{ getQuantiteDansBoutiqueCourante(selectedProductForDetail) }}
+                <ng-container *ngIf="isQuantiteCritique(selectedProductForDetail)">⚠️</ng-container>
+              </span>
+           </div>
+
+            <div class="info-row">
+              <span class="label">Boutique</span>
+              <span class="value">{{ getNomBoutiqueCourante(selectedProductForDetail) }}</span>
             </div>
             <div class="info-row">
               <span class="label">Code</span>
-              <span class="value">P-12345</span>
+              <span class="value">{{ selectedProductForDetail.codeGenerique }}</span>
             </div>
-            <div class="info-row">
+
+            <div class="info-row" *ngIf="selectedProductForDetail.codeBare">
               <span class="label">Code barre</span>
-              <span class="value">001234567890</span>
+              <span class="value">
+                <ngx-barcode6
+                  class="barcode-shifted"
+                  [bc-value]="selectedProductForDetail.codeBare"
+                  bc-format="CODE128"
+                  [bc-line-color]="'#000000'"
+                  [bc-width]="1"
+                  [bc-height]="30"
+                  [bc-font-size]="10"
+                  [bc-display-value]="true">
+                </ngx-barcode6>
+              </span>
             </div>
+
           </div>
         </div>
 
       <!-- Description en bas -->
       <div class="detail-description">
-        <span class="label">Description</span>
-        <span class="value">Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem, deleniti.</span>
+        <span class="label">Description:</span> <br>
+        {{ selectedProductForDetail.description || 'Pas de description' }}
       </div>
     </div>
 

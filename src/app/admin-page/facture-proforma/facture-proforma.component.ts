@@ -410,6 +410,7 @@ export class FactureProformaComponent implements OnInit {
       .getFacturesParPeriode(this.typeSelectionne, this.dateDebut, this.dateFin)
       .subscribe({
         next: (data) => {
+          console.log("lhhhhhh",data);
           this.facturesproforma = data;
           this.currentPage = 0;
           this.dropdownOuvert = false;
@@ -421,7 +422,7 @@ export class FactureProformaComponent implements OnInit {
   }
 
   @HostListener('document:click', ['$event.target'])
-onClickOutside(target: HTMLElement) {
+  onClickOutside(target: HTMLElement) {
   if (!target.closest('.filter-dropdown-wrapper') && !target.closest('.filter-toggle-icon')) {
     this.dropdownOuvert = false;
     this.reinitialiserFiltre();

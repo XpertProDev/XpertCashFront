@@ -18,6 +18,16 @@ export class ProduitDetailsResponseDTO {
     datePreemption!: string | null; // Ou Date
     boutiqueId!: number | null;
     nomBoutique!: string | null;
+    description!: string;
+    codeGenerique!: string;
+
+    boutiques!: {
+    id: number;
+    nom: string;
+    quantite: number;
+    }[];
+
+
 
     constructor(data: Partial<ProduitDetailsResponseDTO> = {}) {
         Object.assign(this, data);
