@@ -216,18 +216,26 @@ getUserInfo(): void {
 onLogout(): void {
   console.log("Début de la procédure de déconnexion...");
 
-  // Récupérer les informations de l'utilisateur
+  // Récupérer l'ID de la boutique active depuis le service BoutiqueStateService
+  const boutiqueId = this.boutiqueState.getCurrentValue();
+
+  if (!boutiqueId) {
+    console.error("Aucune boutique active détectée.");
+    this.router.navigate(['/analytics']);
+    return;
+  }
+
   this.userService.getUserInfo().subscribe({
     next: (user) => {
       console.log('Utilisateur récupéré:', user);
-      const userPermissions = user.permissions;  // Récupérer les permissions de l'utilisateur
+      const userPermissions = user.permissions; 
 
       // Vérifier si l'utilisateur a uniquement la permission "VENDRE_PRODUITS"
       if (userPermissions.length === 1 && userPermissions.includes("VENDRE_PRODUITS")) {
         console.log('L\'utilisateur a uniquement la permission "VENDRE_PRODUITS". Tentative de fermeture de la caisse...');
-        // Si l'utilisateur a uniquement "VENDRE_PRODUITS", on ferme la caisse avant de le déconnecter
-        const caisseRequest = { caisseId: user.caisseId };  // Supposons que l'ID de la caisse soit dans les infos utilisateur
-        this.posCaisseService.fermerCaisse().subscribe({
+        
+        // Fermer la caisse pour la boutique active
+        this.posCaisseService.fermerCaisse(boutiqueId).subscribe({
           next: (response) => {
             console.log('Caisse fermée avec succès:', response);
             // Déconnexion de l'utilisateur
@@ -247,9 +255,9 @@ onLogout(): void {
         });
       } else {
         console.log('L\'utilisateur n\'a pas uniquement la permission "VENDRE_PRODUITS", fermeture de la caisse et redirection vers analytics...');
-        // Sinon, on ferme la caisse et redirige vers "analytics"
-        const caisseRequest = { caisseId: user.caisseId };  // Supposons que l'ID de la caisse soit dans les infos utilisateur
-        this.posCaisseService.fermerCaisse().subscribe({
+        
+        // Fermer la caisse pour la boutique active
+        this.posCaisseService.fermerCaisse(boutiqueId).subscribe({
           next: (response) => {
             console.log('Caisse fermée avec succès:', response);
             // Redirection vers analytics après fermeture de la caisse
@@ -270,9 +278,11 @@ onLogout(): void {
     error: (err) => {
       console.error('Erreur lors de la récupération des informations utilisateur:', err);
       // Gestion des erreurs de récupération des infos utilisateur
+      this.router.navigate(['/analytics']);
     }
   });
 }
+
 
 
 
