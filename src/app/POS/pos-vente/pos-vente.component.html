@@ -188,8 +188,27 @@
     <!-- Client et facture -->
     <div class="client_facture" style="padding-top: 5px;">
       <div class="double_client_facture">
+        <!-- <div class="paiement_btn btn_client" (click)="openListClientPopup()">
+          <p>{{ getSelectedCustomerName() }}</p>
+        </div> -->
         <div class="paiement_btn btn_client" (click)="openListClientPopup()">
-          <p>Client</p>
+          <p *ngIf="!selectedClient && !selectedEntreprise">Client</p>
+          
+          <div *ngIf="selectedClient" class="selected-client-info">
+            <span>{{ selectedClient.nomComplet || 'Client' }}</span>
+            <!-- <small *ngIf="selectedClient.telephone">{{ selectedClient.telephone }}</small> -->
+          </div>
+          
+          <div *ngIf="selectedEntreprise" class="selected-client-info">
+            <span>{{ selectedEntreprise.nom || 'Entreprise' }}</span>
+            <!-- <small *ngIf="selectedEntreprise.telephone">{{ selectedEntreprise.telephone }}</small> -->
+          </div>
+
+          <span *ngIf="selectedClient || selectedEntreprise" 
+                class="clear-customer"
+                (click)="clearCustomerSelection($event)">
+            <i class="ri-close-line"></i>
+          </span>
         </div>
         <div class="paiement_btn btn_facture">
           <p>Facture</p>

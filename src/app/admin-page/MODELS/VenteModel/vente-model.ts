@@ -1,10 +1,9 @@
-
 export interface VenteRequest {
   boutiqueId: number;
   produitsQuantites: { [produitId: string]: number };
   description?: string;
-  nomClient?: string;
-  telClient?: string;
+  clientNom?: string;    // Changé de nomClient à clientNom
+  clientNumero?: string; // Changé de telClient à clientNumero
   modePaiement?: string;
   montantPaye?: number;
 }

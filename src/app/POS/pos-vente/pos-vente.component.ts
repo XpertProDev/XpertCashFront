@@ -133,6 +133,9 @@ export class PosVenteComponent {
   isSubmittingVente = false;
   venteErrorMessage: string | null = null;
 
+  selectedClient: Clients | null = null;
+  selectedEntreprise: EntrepriseClient | null = null;
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -670,8 +673,15 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     });
   }
 
+  // selectClient(client: Clients) {
+  //   // Logique pour sélectionner le client
+  //   console.log('Client sélectionné:', client);
+  //   this.closeListClientPopup();
+  // }
+
   selectClient(client: Clients) {
-    // Logique pour sélectionner le client
+    this.selectedClient = client;
+    this.selectedEntreprise = null; // Réinitialiser l'entreprise sélectionnée
     console.log('Client sélectionné:', client);
     this.closeListClientPopup();
   }
@@ -977,9 +987,26 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
   }
 
   // Sélectionner une entreprise
+  // selectEntreprise(entreprise: EntrepriseClient) {
+  //   console.log('Entreprise sélectionnée:', entreprise);
+  //   this.closeListClientPopup();
+  // }
+
   selectEntreprise(entreprise: EntrepriseClient) {
+    this.selectedEntreprise = entreprise;
+    this.selectedClient = null; // Réinitialiser le client sélectionné
     console.log('Entreprise sélectionnée:', entreprise);
     this.closeListClientPopup();
+  }
+
+  getSelectedCustomerName(): string {
+    if (this.selectedClient) {
+      return this.selectedClient.nomComplet || 'Client sans nom';
+    }
+    if (this.selectedEntreprise) {
+      return this.selectedEntreprise.nom || 'Entreprise sans nom';
+    }
+    return 'Client';
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -1075,14 +1102,25 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
 
     const modePaiementEnum = this.mapPaymentMethodToEnum(this.selectedPaymentMethod);
 
+    // Récupérer les informations du client/entreprise
+    let clientNom = undefined;
+    let clientNumero = undefined;
+
+    if (this.selectedClient) {
+      clientNom = this.selectedClient.nomComplet || undefined;
+      clientNumero = this.selectedClient.telephone || undefined;
+    } else if (this.selectedEntreprise) {
+      clientNom = this.selectedEntreprise.nom || undefined;
+      clientNumero = this.selectedEntreprise.telephone || undefined;
+    }
+
     const request: VenteRequest = {
       boutiqueId: this.selectedBoutiqueId,
       produitsQuantites,
       description: 'Vente POS',
-      nomClient: undefined, // remplir si tu as un client sélectionné
-      telClient: undefined,
+      clientNom: clientNom,     // Utilisez le bon nom de champ
+      clientNumero: clientNumero, // Utilisez le bon nom de champ
       modePaiement: modePaiementEnum ?? undefined,
-      // montantPaye: this.paymentAmount > 0 ? this.paymentAmount : undefined
     };
 
     return request;
@@ -1178,6 +1216,11 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     return 'AUTRE';
   }
 
+  clearCustomerSelection(event: MouseEvent) {
+    event.stopPropagation();
+    this.selectedClient = null;
+    this.selectedEntreprise = null;
+  }
 
 
 
