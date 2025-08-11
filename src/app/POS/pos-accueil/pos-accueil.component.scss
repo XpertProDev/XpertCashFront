@@ -336,7 +336,7 @@ ul.list_commande li.list_commande_plus {
   max-height: 40vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  animation: popup-appear 0.3s ease-out;
+  // animation: popup-appear 0.3s ease-out;
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -352,16 +352,16 @@ ul.list_commande li.list_commande_plus {
   }
 }
 
-@keyframes popup-appear {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+// @keyframes popup-appear {
+//   from {
+//     opacity: 0;
+//     transform: translateY(20px);
+//   }
+//   to {
+//     opacity: 1;
+//     transform: translateY(0);
+//   }
+// }
 
 .popup-header {
   display: flex;
@@ -461,4 +461,14 @@ ul.list_commande li.list_commande_plus {
       }
     }
   }
+}
+
+/* Permettre le déplacement sans sélection de texte */
+[draggable] {
+  user-select: none;
+}
+
+/* Curseur pour les zones déplaçables */
+.popup-header{
+  cursor: move;
 }

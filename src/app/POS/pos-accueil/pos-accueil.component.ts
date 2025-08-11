@@ -43,6 +43,13 @@ export class PosAccueilComponent {
   private boutiques: any[] = [];
   private boutiquesLoaded = false;
 
+  isDraggingPopup = false;
+  startXPopup = 0;
+  startYPopup = 0;
+  initialXPopup = 0;
+  initialYPopup = 0;
+  popupOffsetPopup = { x: 0, y: 0 };
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -188,10 +195,10 @@ export class PosAccueilComponent {
     this.showCommandePopup = false; // Fermer le popup après sélection
   }
 
-get visibleCommandes() {
-  const start = Math.max(0, this.commandes.length - 6);
-  return this.commandes.slice(start);
-}
+  get visibleCommandes() {
+    const start = Math.max(0, this.commandes.length - 6);
+    return this.commandes.slice(start);
+  }
 
   get hiddenCommandes() {
     // Commandes non visibles dans la barre principale
@@ -199,89 +206,124 @@ get visibleCommandes() {
       ? this.commandes.slice(0, this.commandes.length - 6) 
       : [];
   }
-  
-getUserInfo(): void {
-  this.userService.getUserInfo().subscribe({
-    next: (user) => {
-     this.userName = user.nomComplet.charAt(0).toUpperCase();
-      this.nomEntreprise = user.nomEntreprise;
-    },
-    error: (err) => {
-      console.error("Erreur lors de la récupération des infos utilisateur :", err);
-    }
-  });
-}
-
+    
+  getUserInfo(): void {
+    this.userService.getUserInfo().subscribe({
+      next: (user) => {
+      this.userName = user.nomComplet.charAt(0).toUpperCase();
+        this.nomEntreprise = user.nomEntreprise;
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération des infos utilisateur :", err);
+      }
+    });
+  }
  
-onLogout(): void {
-  console.log("Début de la procédure de déconnexion...");
+  onLogout(): void {
+    console.log("Début de la procédure de déconnexion...");
 
-  // Récupérer l'ID de la boutique active depuis le service BoutiqueStateService
-  const boutiqueId = this.boutiqueState.getCurrentValue();
+    // Récupérer l'ID de la boutique active depuis le service BoutiqueStateService
+    const boutiqueId = this.boutiqueState.getCurrentValue();
 
-  if (!boutiqueId) {
-    console.error("Aucune boutique active détectée.");
-    this.router.navigate(['/analytics']);
-    return;
+    if (!boutiqueId) {
+      console.error("Aucune boutique active détectée.");
+      this.router.navigate(['/analytics']);
+      return;
+    }
+
+    this.userService.getUserInfo().subscribe({
+      next: (user) => {
+        console.log('Utilisateur récupéré:', user);
+        const userPermissions = user.permissions; 
+
+        // Vérifier si l'utilisateur a uniquement la permission "VENDRE_PRODUITS"
+        if (userPermissions.length === 1 && userPermissions.includes("VENDRE_PRODUITS")) {
+          console.log('L\'utilisateur a uniquement la permission "VENDRE_PRODUITS". Tentative de fermeture de la caisse...');
+          
+          // Fermer la caisse pour la boutique active
+          this.posCaisseService.fermerCaisse(boutiqueId).subscribe({
+            next: (response) => {
+              console.log('Caisse fermée avec succès:', response);
+              // Déconnexion de l'utilisateur
+              this.userService.logoutUser();  
+              console.log('Déconnexion de l\'utilisateur...');
+              this.router.navigate(['/connexion']).then(success => {
+                console.log("Déconnexion réussie ?", success);
+              });
+            },
+            error: (err) => {
+              console.error('Erreur lors de la fermeture de la caisse:', err.message);
+              // Si une erreur se produit lors de la fermeture de la caisse, rediriger vers la page d'analytics.
+              this.router.navigate(['/analytics']).then(success => {
+                console.log("Navigation vers analytics réussie ?", success);
+              });
+            }
+          });
+        } else {
+          console.log('L\'utilisateur n\'a pas uniquement la permission "VENDRE_PRODUITS", fermeture de la caisse et redirection vers analytics...');
+          
+          // Fermer la caisse pour la boutique active
+          this.posCaisseService.fermerCaisse(boutiqueId).subscribe({
+            next: (response) => {
+              console.log('Caisse fermée avec succès:', response);
+              // Redirection vers analytics après fermeture de la caisse
+              this.router.navigate(['/analytics']).then(success => {
+                console.log("Navigation vers analytics réussie ?", success);
+              });
+            },
+            error: (err) => {
+              console.error('Erreur lors de la fermeture de la caisse:', err.message);
+              // Si une erreur se produit lors de la fermeture de la caisse, rediriger vers la page d'analytics.
+              this.router.navigate(['/analytics']).then(success => {
+                console.log("Navigation vers analytics réussie ?", success);
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération des informations utilisateur:', err);
+        // Gestion des erreurs de récupération des infos utilisateur
+        this.router.navigate(['/analytics']);
+      }
+    });
   }
 
-  this.userService.getUserInfo().subscribe({
-    next: (user) => {
-      console.log('Utilisateur récupéré:', user);
-      const userPermissions = user.permissions; 
+  startDragPopup(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation(); // Empêche la propagation à l'overlay
+    
+    this.isDraggingPopup = true;
+    this.startXPopup = event.clientX;
+    this.startYPopup = event.clientY;
+    this.initialXPopup = this.popupOffsetPopup.x;
+    this.initialYPopup = this.popupOffsetPopup.y;
 
-      // Vérifier si l'utilisateur a uniquement la permission "VENDRE_PRODUITS"
-      if (userPermissions.length === 1 && userPermissions.includes("VENDRE_PRODUITS")) {
-        console.log('L\'utilisateur a uniquement la permission "VENDRE_PRODUITS". Tentative de fermeture de la caisse...');
-        
-        // Fermer la caisse pour la boutique active
-        this.posCaisseService.fermerCaisse(boutiqueId).subscribe({
-          next: (response) => {
-            console.log('Caisse fermée avec succès:', response);
-            // Déconnexion de l'utilisateur
-            this.userService.logoutUser();  
-            console.log('Déconnexion de l\'utilisateur...');
-            this.router.navigate(['/connexion']).then(success => {
-              console.log("Déconnexion réussie ?", success);
-            });
-          },
-          error: (err) => {
-            console.error('Erreur lors de la fermeture de la caisse:', err.message);
-            // Si une erreur se produit lors de la fermeture de la caisse, rediriger vers la page d'analytics.
-            this.router.navigate(['/analytics']).then(success => {
-              console.log("Navigation vers analytics réussie ?", success);
-            });
-          }
-        });
-      } else {
-        console.log('L\'utilisateur n\'a pas uniquement la permission "VENDRE_PRODUITS", fermeture de la caisse et redirection vers analytics...');
-        
-        // Fermer la caisse pour la boutique active
-        this.posCaisseService.fermerCaisse(boutiqueId).subscribe({
-          next: (response) => {
-            console.log('Caisse fermée avec succès:', response);
-            // Redirection vers analytics après fermeture de la caisse
-            this.router.navigate(['/analytics']).then(success => {
-              console.log("Navigation vers analytics réussie ?", success);
-            });
-          },
-          error: (err) => {
-            console.error('Erreur lors de la fermeture de la caisse:', err.message);
-            // Si une erreur se produit lors de la fermeture de la caisse, rediriger vers la page d'analytics.
-            this.router.navigate(['/analytics']).then(success => {
-              console.log("Navigation vers analytics réussie ?", success);
-            });
-          }
-        });
-      }
-    },
-    error: (err) => {
-      console.error('Erreur lors de la récupération des informations utilisateur:', err);
-      // Gestion des erreurs de récupération des infos utilisateur
-      this.router.navigate(['/analytics']);
-    }
-  });
-}
+    document.addEventListener('mousemove', this.onMouseMovePopup);
+    document.addEventListener('mouseup', this.onMouseUpPopup);
+  }
+
+  onMouseMovePopup = (event: MouseEvent): void => {
+    if (!this.isDraggingPopup) return;
+    
+    requestAnimationFrame(() => {
+      const deltaX = event.clientX - this.startXPopup;
+      const deltaY = event.clientY - this.startYPopup;
+      this.popupOffsetPopup.x = this.initialXPopup + deltaX;
+      this.popupOffsetPopup.y = this.initialYPopup + deltaY;
+    });
+  }
+
+  onMouseUpPopup = (): void => {
+    this.isDraggingPopup = false;
+    document.removeEventListener('mousemove', this.onMouseMovePopup);
+    document.removeEventListener('mouseup', this.onMouseUpPopup);
+  }
+
+  closePopup(event?: MouseEvent) {
+    if (event) event.stopPropagation();
+    this.showCommandePopup = false;
+  }
 
 
 

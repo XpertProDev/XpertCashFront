@@ -136,6 +136,13 @@ export class PosVenteComponent {
   selectedClient: Clients | null = null;
   selectedEntreprise: EntrepriseClient | null = null;
 
+  isDragging = false;
+  startX = 0;
+  startY = 0;
+  initialX = 0;
+  initialY = 0;
+  popupOffset = { x: 0, y: 0 };
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -1220,6 +1227,36 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     event.stopPropagation();
     this.selectedClient = null;
     this.selectedEntreprise = null;
+  }
+
+  // Méthodes pour le déplacement
+  startDrag(event: MouseEvent): void {
+    event.preventDefault();
+    this.isDragging = true;
+    this.startX = event.clientX;
+    this.startY = event.clientY;
+    this.initialX = this.popupOffset.x;
+    this.initialY = this.popupOffset.y;
+
+    document.addEventListener('mousemove', this.onMouseMove);
+    document.addEventListener('mouseup', this.onMouseUp);
+  }
+
+  onMouseMove = (event: MouseEvent): void => {
+    if (!this.isDragging) return;
+    
+    requestAnimationFrame(() => {
+      const deltaX = event.clientX - this.startX;
+      const deltaY = event.clientY - this.startY;
+      this.popupOffset.x = this.initialX + deltaX;
+      this.popupOffset.y = this.initialY + deltaY;
+    });
+  }
+
+  onMouseUp = (): void => {
+    this.isDragging = false;
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('mouseup', this.onMouseUp);
   }
 
 

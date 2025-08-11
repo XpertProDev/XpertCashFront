@@ -64,7 +64,7 @@
             <!-- Liste des produits de la commande active -->
             <ul class="ul_list_produit_select">
                 <li class="li_list_produit_select" *ngFor="let item of activeCommandeItems">
-                    <div class="double">
+                    <div class="double_commande">
                         <!-- Quantité sélectionnée -->
                         <div class="nombre_select">
                             {{ item.quantity }}
@@ -77,7 +77,7 @@
                             </p>
                         </div>
                     </div>
-                    <div class="double">
+                    <div class="double_commande">
                         <!-- Prix total pour ce produit -->
                         <div class="price_produit">
                             {{ (item.quantity * item.product.prixVente) | currency:'CFA ':'symbol':'1.0-0' }}

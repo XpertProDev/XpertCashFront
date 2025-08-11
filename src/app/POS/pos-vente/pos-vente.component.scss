@@ -781,3 +781,13 @@ ul.ul_list {
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
   cursor: pointer;
 }
+
+/* Permettre le déplacement sans sélection de texte */
+[draggable] {
+  user-select: none;
+}
+
+/* Curseur pour les zones déplaçables */
+.popup-header {
+  cursor: move;
+}
