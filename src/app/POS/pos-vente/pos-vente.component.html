@@ -412,11 +412,13 @@
 
         <!-- 4. Bouton de paiement -->
         <div class="btn_content">
-          <button class="btn-payment-pop" 
-                  [disabled]="!isAmountEntered"
+          <button class="btn-payment-pop"
+                  [disabled]="!isAmountEntered || isSubmittingVente"
                   (click)="completePayment()">
-            Valider Paiement
+            <span *ngIf="!isSubmittingVente">Valider Paiement</span>
+            <span *ngIf="isSubmittingVente">En cours…</span>
           </button>
+
         </div>
       </div>
     </div>

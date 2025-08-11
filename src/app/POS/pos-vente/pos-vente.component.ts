@@ -335,7 +335,6 @@ export class PosVenteComponent {
     this.selectedPaymentMethod = method;
   }
 
-  // Ajouter complete Payment()
   // completePayment(): void {
   //   // Logique pour finaliser le paiement
   //   console.log('Paiement complété:', {
@@ -343,30 +342,23 @@ export class PosVenteComponent {
   //     amount: this.paymentAmount,
   //     change: this.changeDue
   //   });
-  //   this.goTopaiement()
+  //   this.submitVente()
+  //   // this.goTopaiement()
     
   //   // Fermer le popup et réinitialiser le panier
   //   this.closePaymentPopup();
   //   this.cart.clear();
   //   this.saveActiveCart();
-  // }
+  // } 
 
   completePayment(): void {
-    // Logique pour finaliser le paiement
-    console.log('Paiement complété:', {
-      method: this.selectedPaymentMethod,
-      amount: this.paymentAmount,
-      change: this.changeDue
-    });
-    this.submitVente()
-    // this.goTopaiement()
-    
-    // Fermer le popup et réinitialiser le panier
-    this.closePaymentPopup();
-    this.cart.clear();
-    this.saveActiveCart();
-  } 
+    // protection double-click / UI feedback
+    if (this.isSubmittingVente) return;
 
+    this.isSubmittingVente = true;
+    // Lance l'enregistrement : submitVente() gère la navigation et la réinitialisation au next/error
+    this.submitVente();
+  }
 
   closePaymentPopup() {
     this.showPaymentPopup = false;
