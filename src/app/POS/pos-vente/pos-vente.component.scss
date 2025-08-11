@@ -777,6 +777,7 @@ ul.ul_list {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
   cursor: pointer;
 }
