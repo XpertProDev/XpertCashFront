@@ -233,7 +233,7 @@ export class FactureReelComponent implements OnInit {
       const term = this.searchTerm.toLowerCase();
       result = result.filter(f => 
         (f.numeroFacture?.toLowerCase().includes(term)) ||
-        (f.client?.nom?.toLowerCase().includes(term)) ||
+        (f.client?.nomComplet?.toLowerCase().includes(term)) ||
         (f.entrepriseClient?.nom?.toLowerCase().includes(term))
       );
     }
