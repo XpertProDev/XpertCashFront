@@ -157,7 +157,7 @@
               </p>
             </div>
           </div>
-          <div class="double">
+          <div class="double" style="gap: 5px;">
             <div class="price_produit">
               {{ calculateItemTotal(item) | cfaCurrency }}
             </div>
@@ -172,7 +172,7 @@
         </li>
       </ul>
 
-      <div class="double_row">
+      <!-- <div class="double_row">
         <span>Sous-total</span>
         <span>{{ getSubtotal() | cfaCurrency }}</span>
       </div>
@@ -183,7 +183,7 @@
       <div class="double_row total">
         <strong>Total</strong>
         <strong>{{ getTotalCart() | cfaCurrency }}</strong>
-      </div>
+      </div> -->
     </div>
     
     <!-- 2. Récapitulatif : Remise / Taxes / Total -->
