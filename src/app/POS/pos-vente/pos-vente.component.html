@@ -140,7 +140,7 @@
     <div class="list_produit_select">
       <!-- // Tout les liste de produc select  -->
       <ul class="ul_list_produit_select">
-        <li class="li_list_produit_select" 
+        <li class="li_list_produit_select" (click)="selectProductForDiscount(item.product)"
             *ngFor="let item of getCartItems()">
           <div class="double">
             <div class="nombre_select">
@@ -208,12 +208,7 @@
           CFA
         </button>
         
-        <input type="number" 
-              placeholder="0" 
-              class="input-discount"
-              [(ngModel)]="discountMode.value"
-              (input)="onDiscountInputChange()"
-              min="0">
+        <input type="number" placeholder="0" class="input-discount"[(ngModel)]="discountMode.value"(input)="onDiscountInputChange()"min="0">
         
         <button class="btn-percent" 
                 [class.active]="discountMode.type === '%'"

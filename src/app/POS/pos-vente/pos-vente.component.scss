@@ -592,22 +592,19 @@ ul.ul_list {
 .btn-currency,
 .btn-percent {
   background: #F0F0F0;
-  border: none;
+  border: 1px solid #b2b2b2;
   border-radius: 4px;
-  
   font-size: 16px;
   cursor: pointer;
 }
 
-.btn-currency {
-  padding: 8px 12px;
-  font-size: 12px!important;
+.btn-percent {
+  padding: 2px 15px;
 }
 
-.btn-percent {
-  padding: 3px 15px;
-  background-color: #CDE3FA;
-  border: 1px solid #0672e4;
+.btn-currency {
+  padding: 5px 12px;
+  font-size: 12px!important;
 }
 
 .input-discount {
@@ -821,6 +818,7 @@ ul.ul_list {
 
 /* Style actif pour les boutons CFA/% */
 .btn-currency.active, .btn-percent.active {
-  background-color: #0672E4;
-  color: white;
+  color: #000;
+  background-color: #CDE3FA;
+  border: 1px solid #0672e4;
 }
