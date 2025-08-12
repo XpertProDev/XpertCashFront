@@ -25,6 +25,13 @@ import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/
 import { VenteRequest, VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
 import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
 
+interface DiscountMode {
+  active: boolean;
+  type: 'CFA' | '%';
+  value: number;
+  productId?: number; // Produit en cours de modification
+}
+
 @Component({
   selector: 'app-pos-vente',
   imports: [FormsModule, CommonModule, ReactiveFormsModule, MatAutocompleteModule, NgxBarcode6Module, CfaCurrencyPipe],
@@ -149,6 +156,15 @@ export class PosVenteComponent {
   discountType: 'CFA' | '%' = 'CFA';
   discountButtonText = 'Remise';
   selectedProductForDiscount: ProduitDetailsResponseDTO | null = null;
+
+  discountMode: DiscountMode = {
+    active: false,
+    type: 'CFA',
+    value: 0
+  };
+
+  // Liste des remises par produit
+  productDiscounts: Map<number, number> = new Map();
 
   constructor(
     private router: Router,
@@ -371,31 +387,62 @@ export class PosVenteComponent {
     this.showPaymentPopup = false;
   }
 
-  // Méthode pour ajouter un produit au panier
-   addToCart(produit: ProduitDetailsResponseDTO): void {
-
-    if (this.showDiscountInput && this.discountValue > 0) {
-      // Stocker le produit pour appliquer la remise
-      this.selectedProductForDiscount = produit;
-      this.applyDiscount();
-      return;
-    }
-
-    if (this.getAvailableStock(produit) <= 0) return;
-    
-    // Réinitialiser la saisie
-    this.currentQuantityInput = '';
-    
-    // Toujours incrémenter de 1
-    const currentQty = this.cart.get(produit.id) || 0;
-    this.cart.set(produit.id, currentQty + 1);
-    
-    // Mettre à jour le produit sélectionné
-    this.selectedProduct = produit;
-
-    this.saveActiveCart(); // Sauvegarder dans le service
-    this.updateCommandeTotals();
+  // Mettre à jour addToCart pour gérer la remise
+addToCart(produit: ProduitDetailsResponseDTO): void {
+  if (this.getAvailableStock(produit) <= 0) return;
+  
+  // Gestion de la remise
+  if (this.discountMode.active) {
+    this.applyDiscount(produit);
+    return;
   }
+
+  // Ajout normal au panier
+  const currentQty = this.cart.get(produit.id) || 0;
+  this.cart.set(produit.id, currentQty + 1);
+  this.saveActiveCart();
+}
+
+// Calculer le total par produit
+calculateItemTotal(item: { product: ProduitDetailsResponseDTO, quantity: number }): number {
+  const basePrice = item.product.prixVente * item.quantity;
+  const discount = this.productDiscounts.get(item.product.id) || 0;
+  return basePrice - discount;
+}
+
+// Obtenir le sous-total (sans remise)
+getSubtotal(): number {
+  let total = 0;
+  this.cart.forEach((quantity, productId) => {
+    const product = this.allProducts.find(p => p.id === productId);
+    if (product) {
+      total += quantity * product.prixVente;
+    }
+  });
+  return total;
+}
+
+// Obtenir le total des remises
+getTotalDiscount(): number {
+  let total = 0;
+  this.productDiscounts.forEach(discount => {
+    total += discount;
+  });
+  return total;
+}
+
+// Mettre à jour le total général
+getTotalCart(): number {
+  return this.getSubtotal() - this.getTotalDiscount();
+}
+
+// Supprimer aussi la remise quand on retire un produit
+removeProduct(productId: number) {
+  this.cart.delete(productId);
+  this.productDiscounts.delete(productId); // Supprimer la remise associée
+  this.saveActiveCart();
+  this.updateCommandeTotals();
+}
 
   // Méthode pour diminuer la quantité
   decreaseQuantity(produit: ProduitDetailsResponseDTO) {
@@ -416,16 +463,6 @@ export class PosVenteComponent {
   // Méthode pour obtenir la quantité sélectionnée
   getSelectedQuantity(produitId: number): number {
     return this.cart.get(produitId) || 0;
-  }
-
-  // Méthode pour supprimer un produit du panier
-  removeProduct(productId: number) {
-    this.cart.delete(productId);
-    this.saveActiveCart();
-    if (this.selectedProduct?.id === productId) {
-      this.currentQuantityInput = '';
-    }
-    this.updateCommandeTotals();
   }
 
   updateCommandeTotals() {
@@ -466,18 +503,6 @@ export class PosVenteComponent {
   getAvailableStock(produit: ProduitDetailsResponseDTO): number {
     const selectedQty = this.getSelectedQuantity(produit.id);
     return produit.quantite - selectedQty;
-  }
-
-  // Méthode pour calculer le total
-  getTotalCart(): number {
-    let total = 0;
-    this.cart.forEach((quantity, productId) => {
-      const product = this.allProducts.find(p => p.id === productId);
-      if (product) {
-        total += quantity * product.prixVente;
-      }
-    });
-    return total;
   }
 
   // Méthode pour gérer les touches du clavier
@@ -1284,41 +1309,25 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
   }
 
   // Changer le type de remise
-  setDiscountType(type: 'CFA' | '%') {
-    this.discountType = type;
-    this.applyDiscount();
-  }
+  // setDiscountType(type: 'CFA' | '%') {
+  //   this.discountType = type;
+  //   this.applyDiscount();
+  // }
 
   // Gérer les changements de valeur
-  onDiscountInputChange() {
-    if (this.discountValue < 0) {
-      this.discountValue = 0;
-    }
+  // onDiscountInputChange() {
+  //   if (this.discountValue < 0) {
+  //     this.discountValue = 0;
+  //   }
     
-    if (this.discountValue > 0) {
-      this.discountButtonText = 'Confirmer';
-    } else {
-      this.discountButtonText = 'Annuler';
-    }
-  }
+  //   if (this.discountValue > 0) {
+  //     this.discountButtonText = 'Confirmer';
+  //   } else {
+  //     this.discountButtonText = 'Annuler';
+  //   }
+  // }
 
   // Appliquer la remise au produit
-  applyDiscount() {
-    if (!this.selectedProductForDiscount || this.discountValue <= 0) return;
-
-    // Calculer la remise selon le type
-    if (this.discountType === 'CFA') {
-      // Remise fixe en CFA
-      this.selectedProductForDiscount.remise = this.discountValue;
-    } else {
-      // Remise en pourcentage
-      const percentage = this.discountValue / 100;
-      this.selectedProductForDiscount.remise = 
-        this.selectedProductForDiscount.prixVente * percentage;
-    }
-
-    this.resetDiscount();
-  }
 
   // Réinitialiser l'état de remise
   resetDiscount() {
@@ -1329,5 +1338,86 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     this.selectedProductForDiscount = null;
   }
 
+  // Basculer le mode remise
+  toggleDiscountMode() {
+    this.discountMode.active = !this.discountMode.active;
+    
+    if (!this.discountMode.active) {
+      this.resetDiscountMode();
+    }
+  }
+
+  // Changer le type de remise (CFA ou %)
+  setDiscountType(type: 'CFA' | '%') {
+    this.discountMode.type = type;
+  }
+
+  // Gérer les changements de valeur
+  onDiscountInputChange() {
+    if (this.discountMode.value < 0) {
+      this.discountMode.value = 0;
+    }
+  }
+
+  // Appliquer la remise au produit sélectionné
+  applyDiscount(produit: ProduitDetailsResponseDTO) {
+    if (this.discountMode.value <= 0) return;
+
+    let discountAmount = this.discountMode.value;
+
+    // Calculer la remise selon le type
+    if (this.discountMode.type === '%') {
+      const maxDiscount = produit.prixVente * this.getSelectedQuantity(produit.id);
+      discountAmount = (produit.prixVente * this.discountMode.value) / 100;
+      
+      // Limiter la remise au prix du produit
+      if (discountAmount > maxDiscount) {
+        discountAmount = maxDiscount;
+      }
+    }
+
+    // Appliquer la remise (en CFA)
+    this.productDiscounts.set(produit.id, discountAmount);
+    this.resetDiscountMode();
+    
+    // Mettre à jour les totaux
+    this.updateCommandeTotals();
+  }
+
+  resetDiscountMode() {
+    this.discountMode = {
+      active: false,
+      type: 'CFA',
+      value: 0
+    };
+  }
+
+    // Modifier une remise existante
+  editDiscount(produit: ProduitDetailsResponseDTO) {
+    const currentDiscount = this.productDiscounts.get(produit.id) || 0;
+    
+    // Convertir en pourcentage si nécessaire
+    let displayValue = currentDiscount;
+    let type: 'CFA' | '%' = 'CFA';
+    
+    if (currentDiscount > 0) {
+      const percentage = Math.round((currentDiscount / produit.prixVente) * 100);
+      if (percentage > 0 && percentage <= 100) {
+        displayValue = percentage;
+        type = '%';
+      }
+    }
+    
+    this.discountMode = {
+      active: true,
+      type: type,
+      value: displayValue,
+      productId: produit.id
+    };
+  }
+
+  getProductDiscount(productId: number): number {
+  return this.productDiscounts.get(productId) || 0;
+}
 
 }

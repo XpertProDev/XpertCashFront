@@ -21,15 +21,13 @@ export class ProduitDetailsResponseDTO {
     description!: string;
     codeGenerique!: string;
     remise?: number;
+    discount?: number;
 
     boutiques!: {
     id: number;
     nom: string;
     quantite: number;
     }[];
-
-
-
     constructor(data: Partial<ProduitDetailsResponseDTO> = {}) {
         Object.assign(this, data);
     }

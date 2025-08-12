@@ -150,19 +150,40 @@
               <p style="margin: 0;">
                 {{ item.product.nom }}
                 <span>({{ item.product.prixVente | cfaCurrency }})</span>
+                <!-- Indicateur de remise -->
+                <span *ngIf="getProductDiscount(item.product.id) > 0" class="discount-badge">
+                  -{{ getProductDiscount(item.product.id) | cfaCurrency }}
+                </span>
               </p>
             </div>
           </div>
           <div class="double">
             <div class="price_produit">
-              {{ calculateDiscountedPrice(item) | cfaCurrency }}
+              {{ calculateItemTotal(item) | cfaCurrency }}
             </div>
             <div class="icon_close_select" (click)="removeProduct(item.product.id)">
               <i class="ri-close-circle-fill"></i>
             </div>
+            <!-- Bouton pour modifier la remise -->
+            <div class="edit-discount" (click)="editDiscount(item.product)">
+              <i class="ri-edit-2-line"></i>
+            </div>
           </div>
         </li>
       </ul>
+
+      <div class="double_row">
+        <span>Sous-total</span>
+        <span>{{ getSubtotal() | cfaCurrency }}</span>
+      </div>
+      <div class="double_row">
+        <span>Remise totale</span>
+        <span>-{{ getTotalDiscount() | cfaCurrency }}</span>
+      </div>
+      <div class="double_row total">
+        <strong>Total</strong>
+        <strong>{{ getTotalCart() | cfaCurrency }}</strong>
+      </div>
     </div>
     
     <!-- 2. Récapitulatif : Remise / Taxes / Total -->
@@ -180,9 +201,9 @@
         <strong>{{ getTotalCart() | cfaCurrency }}</strong>
       </div>
 
-      <div class="discount-input" *ngIf="showDiscountInput">
+      <div class="discount-input" *ngIf="discountMode.active">
         <button class="btn-currency" 
-                [class.active]="discountType === 'CFA'"
+                [class.active]="discountMode.type === 'CFA'"
                 (click)="setDiscountType('CFA')">
           CFA
         </button>
@@ -190,11 +211,12 @@
         <input type="number" 
               placeholder="0" 
               class="input-discount"
-              [(ngModel)]="discountValue"
-              (input)="onDiscountInputChange()">
+              [(ngModel)]="discountMode.value"
+              (input)="onDiscountInputChange()"
+              min="0">
         
         <button class="btn-percent" 
-                [class.active]="discountType === '%'"
+                [class.active]="discountMode.type === '%'"
                 (click)="setDiscountType('%')">
           %
         </button>
@@ -233,10 +255,12 @@
         </div>
 
         <div class="double_remise_facture container_facture">
-          <button style="border: none;" class="paiement_btn remise_produit" (click)="toggleDiscountInput()">
-            {{ discountButtonText }}
+          <button style="border: none;" 
+                  class="paiement_btn remise_produit"
+                  (click)="toggleDiscountMode()">
+            {{ discountMode.active ? 'Annuler' : 'Remise' }}
           </button>
-          
+
           <div class="paiement_btn btn_facture">
             <p>Facture</p>
             <input type="checkbox">
