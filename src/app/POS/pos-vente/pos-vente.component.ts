@@ -144,6 +144,12 @@ export class PosVenteComponent {
   initialY = 0;
   popupOffset = { x: 0, y: 0 };
 
+  showDiscountInput = false;
+  discountValue: number = 0;
+  discountType: 'CFA' | '%' = 'CFA';
+  discountButtonText = 'Remise';
+  selectedProductForDiscount: ProduitDetailsResponseDTO | null = null;
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -367,6 +373,14 @@ export class PosVenteComponent {
 
   // Méthode pour ajouter un produit au panier
    addToCart(produit: ProduitDetailsResponseDTO): void {
+
+    if (this.showDiscountInput && this.discountValue > 0) {
+      // Stocker le produit pour appliquer la remise
+      this.selectedProductForDiscount = produit;
+      this.applyDiscount();
+      return;
+    }
+
     if (this.getAvailableStock(produit) <= 0) return;
     
     // Réinitialiser la saisie
@@ -485,6 +499,12 @@ export class PosVenteComponent {
     }
 
     this.applyQuantityToProduct();
+  }
+
+  calculateDiscountedPrice(item: { product: ProduitDetailsResponseDTO, quantity: number }): number {
+    const basePrice = item.product.prixVente * item.quantity;
+    const discount = item.product.remise || 0;
+    return basePrice - discount;
   }
 
   applyQuantityToProduct(): void {
@@ -1252,6 +1272,62 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     document.removeEventListener('mouseup', this.onMouseUp);
   }
 
+  // Basculer l'affichage du champ remise
+  toggleDiscountInput() {
+    this.showDiscountInput = !this.showDiscountInput;
+    
+    if (this.showDiscountInput) {
+      this.discountButtonText = 'Annuler';
+    } else {
+      this.resetDiscount();
+    }
+  }
+
+  // Changer le type de remise
+  setDiscountType(type: 'CFA' | '%') {
+    this.discountType = type;
+    this.applyDiscount();
+  }
+
+  // Gérer les changements de valeur
+  onDiscountInputChange() {
+    if (this.discountValue < 0) {
+      this.discountValue = 0;
+    }
+    
+    if (this.discountValue > 0) {
+      this.discountButtonText = 'Confirmer';
+    } else {
+      this.discountButtonText = 'Annuler';
+    }
+  }
+
+  // Appliquer la remise au produit
+  applyDiscount() {
+    if (!this.selectedProductForDiscount || this.discountValue <= 0) return;
+
+    // Calculer la remise selon le type
+    if (this.discountType === 'CFA') {
+      // Remise fixe en CFA
+      this.selectedProductForDiscount.remise = this.discountValue;
+    } else {
+      // Remise en pourcentage
+      const percentage = this.discountValue / 100;
+      this.selectedProductForDiscount.remise = 
+        this.selectedProductForDiscount.prixVente * percentage;
+    }
+
+    this.resetDiscount();
+  }
+
+  // Réinitialiser l'état de remise
+  resetDiscount() {
+    this.showDiscountInput = false;
+    this.discountValue = 0;
+    this.discountType = 'CFA';
+    this.discountButtonText = 'Remise';
+    this.selectedProductForDiscount = null;
+  }
 
 
 }

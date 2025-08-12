@@ -20,6 +20,7 @@ export class ProduitDetailsResponseDTO {
     nomBoutique!: string | null;
     description!: string;
     codeGenerique!: string;
+    remise?: number;
 
     boutiques!: {
     id: number;
