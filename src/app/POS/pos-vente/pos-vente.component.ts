@@ -23,10 +23,11 @@ import { NgxBarcode6Module } from 'ngx-barcode6';
 import { VenteService } from 'src/app/admin-page/SERVICES/VenteService/vente-service';
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { VenteRequest, VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
+import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
 
 @Component({
   selector: 'app-pos-vente',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule, MatAutocompleteModule, NgxBarcode6Module],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, MatAutocompleteModule, NgxBarcode6Module, CfaCurrencyPipe],
   templateUrl: './pos-vente.component.html',
   styleUrl: './pos-vente.component.scss'
 })

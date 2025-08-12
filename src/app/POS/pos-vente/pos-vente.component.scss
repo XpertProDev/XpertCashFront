@@ -680,6 +680,12 @@ ul.ul_list {
   padding: 0 10px;
 }
 
+.double_remise_facture {
+  gap: 3px;
+  display: grid;
+  grid-template-columns: 75px 1fr;
+}
+
 .selected {
   background-color: #0672E4 !important;
   color: white !important;
