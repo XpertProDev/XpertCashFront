@@ -188,8 +188,27 @@
     <!-- Client et facture -->
     <div class="client_facture" style="padding-top: 5px;">
       <div class="double_client_facture">
+        <!-- <div class="paiement_btn btn_client" (click)="openListClientPopup()">
+          <p>{{ getSelectedCustomerName() }}</p>
+        </div> -->
         <div class="paiement_btn btn_client" (click)="openListClientPopup()">
-          <p>Client</p>
+          <p *ngIf="!selectedClient && !selectedEntreprise">Client</p>
+          
+          <div *ngIf="selectedClient" class="selected-client-info">
+            <span>{{ selectedClient.nomComplet || 'Client' }}</span>
+            <!-- <small *ngIf="selectedClient.telephone">{{ selectedClient.telephone }}</small> -->
+          </div>
+          
+          <div *ngIf="selectedEntreprise" class="selected-client-info">
+            <span>{{ selectedEntreprise.nom || 'Entreprise' }}</span>
+            <!-- <small *ngIf="selectedEntreprise.telephone">{{ selectedEntreprise.telephone }}</small> -->
+          </div>
+
+          <span *ngIf="selectedClient || selectedEntreprise" 
+                class="clear-customer"
+                (click)="clearCustomerSelection($event)">
+            <i class="ri-close-line"></i>
+          </span>
         </div>
         <div class="paiement_btn btn_facture">
           <p>Facture</p>
@@ -232,8 +251,8 @@
 
 <!-- Popup de paiement -->
 <div *ngIf="showPaymentPopup" class="payment-popup-overlay">
-  <div class="payment-popup">
-    <div class="popup-header">
+  <div class="payment-popup" [ngStyle]="{ 'transform': 'translate3d(' + popupOffset.x + 'px, ' + popupOffset.y + 'px, 0)' }" (click)="$event.stopPropagation()">
+    <div class="popup-header" (mousedown)="startDrag($event)">
       <button (click)="closePaymentPopup()" class="close-btn">
         <i class="ri-close-line"></i>
       </button>
@@ -342,8 +361,22 @@
         <!-- 2. Récapitulatif : Client et facture -->
         <div class="client_facture">
           <div class="double_client_facture">
-            <div class="paiement_btn btn_client">
-              <p>Client</p>
+            <div class="paiement_btn btn_client" (click)="openListClientPopup()">
+              <p *ngIf="!selectedClient && !selectedEntreprise">Client</p>
+              
+              <div *ngIf="selectedClient" class="selected-client-info">
+                <span>{{ selectedClient.nomComplet || 'Client' }}</span>
+              </div>
+              
+              <div *ngIf="selectedEntreprise" class="selected-client-info">
+                <span>{{ selectedEntreprise.nom || 'Entreprise' }}</span>
+              </div>
+
+              <span *ngIf="selectedClient || selectedEntreprise" 
+                    class="clear-customer"
+                    (click)="clearCustomerSelection($event)">
+                <i class="ri-close-line"></i>
+              </span>
             </div>
             <div class="paiement_btn btn_facture">
               <p>Facture</p>
@@ -379,11 +412,13 @@
 
         <!-- 4. Bouton de paiement -->
         <div class="btn_content">
-          <button class="btn-payment-pop" 
-                  [disabled]="!isAmountEntered"
+          <button class="btn-payment-pop"
+                  [disabled]="!isAmountEntered || isSubmittingVente"
                   (click)="completePayment()">
-            Valider Paiement
+            <span *ngIf="!isSubmittingVente">Valider Paiement</span>
+            <span *ngIf="isSubmittingVente">En cours…</span>
           </button>
+
         </div>
       </div>
     </div>
@@ -393,9 +428,9 @@
 
 <!-- Popup de détail produit -->
 <div *ngIf="showDetailPopup" class="detail-popup-overlay">
-  <div class="detail-popup">
+  <div class="detail-popup" [ngStyle]="{ 'transform': 'translate3d(' + popupOffset.x + 'px, ' + popupOffset.y + 'px, 0)' }" (click)="$event.stopPropagation()">
     <!-- En-tête -->
-    <div class="popup-header" *ngIf="showDetailPopup && selectedProductForDetail">
+    <div class="popup-header" *ngIf="showDetailPopup && selectedProductForDetail" (mousedown)="startDrag($event)">
       <h3>Information [{{ selectedProductForDetail.codeGenerique }}]</h3>
       <button (click)="closeDetailPopup()" class="close-btn">
         <i class="ri-close-line"></i>
@@ -492,8 +527,8 @@
 
 <!-- Popup de client -->
 <div *ngIf="showClientPopup" class="list-client-popup-overlay">
-  <div class="list-client-popup">
-    <div class="popup-header">
+  <div class="list-client-popup" [ngStyle]="{ 'transform': 'translate3d(' + popupOffset.x + 'px, ' + popupOffset.y + 'px, 0)' }" (click)="$event.stopPropagation()">
+    <div class="popup-header" (mousedown)="startDrag($event)">
 
     <h6 class="title" style="margin-bottom: 0; font-size: 16px; letter-spacing: 0.65px;">
       {{ currentListTypePopup === 'clients' ? 'Client individuel' : 'Client entreprise' }}
@@ -661,8 +696,8 @@
 
 <!-- Popup d'ajout de client -->
 <div *ngIf="showAddClientPopup" class="add-client-popup-overlay">
-  <div class="add-client-popup">
-    <div class="popup-header">
+  <div class="add-client-popup" [ngStyle]="{ 'transform': 'translate3d(' + popupOffset.x + 'px, ' + popupOffset.y + 'px, 0)' }" (click)="$event.stopPropagation()">
+    <div class="popup-header" (mousedown)="startDrag($event)">
       <h3>Ajouter un nouveau client</h3>
       <button (click)="closeAddClientPopup()" class="close-btn">
         <i class="ri-close-line"></i>

@@ -178,3 +178,10 @@ p {
   text-align: center;
   color: #666;
 }
+
+.double_commande {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  // padding: 0 10px;
+}

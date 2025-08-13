@@ -133,6 +133,16 @@ export class PosVenteComponent {
   isSubmittingVente = false;
   venteErrorMessage: string | null = null;
 
+  selectedClient: Clients | null = null;
+  selectedEntreprise: EntrepriseClient | null = null;
+
+  isDragging = false;
+  startX = 0;
+  startY = 0;
+  initialX = 0;
+  initialY = 0;
+  popupOffset = { x: 0, y: 0 };
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -325,7 +335,6 @@ export class PosVenteComponent {
     this.selectedPaymentMethod = method;
   }
 
-  // Ajouter complete Payment()
   // completePayment(): void {
   //   // Logique pour finaliser le paiement
   //   console.log('Paiement complété:', {
@@ -333,30 +342,23 @@ export class PosVenteComponent {
   //     amount: this.paymentAmount,
   //     change: this.changeDue
   //   });
-  //   this.goTopaiement()
+  //   this.submitVente()
+  //   // this.goTopaiement()
     
   //   // Fermer le popup et réinitialiser le panier
   //   this.closePaymentPopup();
   //   this.cart.clear();
   //   this.saveActiveCart();
-  // }
+  // } 
 
   completePayment(): void {
-    // Logique pour finaliser le paiement
-    console.log('Paiement complété:', {
-      method: this.selectedPaymentMethod,
-      amount: this.paymentAmount,
-      change: this.changeDue
-    });
-    this.submitVente()
-    // this.goTopaiement()
-    
-    // Fermer le popup et réinitialiser le panier
-    this.closePaymentPopup();
-    this.cart.clear();
-    this.saveActiveCart();
-  } 
+    // protection double-click / UI feedback
+    if (this.isSubmittingVente) return;
 
+    this.isSubmittingVente = true;
+    // Lance l'enregistrement : submitVente() gère la navigation et la réinitialisation au next/error
+    this.submitVente();
+  }
 
   closePaymentPopup() {
     this.showPaymentPopup = false;
@@ -670,8 +672,15 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     });
   }
 
+  // selectClient(client: Clients) {
+  //   // Logique pour sélectionner le client
+  //   console.log('Client sélectionné:', client);
+  //   this.closeListClientPopup();
+  // }
+
   selectClient(client: Clients) {
-    // Logique pour sélectionner le client
+    this.selectedClient = client;
+    this.selectedEntreprise = null; // Réinitialiser l'entreprise sélectionnée
     console.log('Client sélectionné:', client);
     this.closeListClientPopup();
   }
@@ -977,9 +986,26 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
   }
 
   // Sélectionner une entreprise
+  // selectEntreprise(entreprise: EntrepriseClient) {
+  //   console.log('Entreprise sélectionnée:', entreprise);
+  //   this.closeListClientPopup();
+  // }
+
   selectEntreprise(entreprise: EntrepriseClient) {
+    this.selectedEntreprise = entreprise;
+    this.selectedClient = null; // Réinitialiser le client sélectionné
     console.log('Entreprise sélectionnée:', entreprise);
     this.closeListClientPopup();
+  }
+
+  getSelectedCustomerName(): string {
+    if (this.selectedClient) {
+      return this.selectedClient.nomComplet || 'Client sans nom';
+    }
+    if (this.selectedEntreprise) {
+      return this.selectedEntreprise.nom || 'Entreprise sans nom';
+    }
+    return 'Client';
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -1075,14 +1101,25 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
 
     const modePaiementEnum = this.mapPaymentMethodToEnum(this.selectedPaymentMethod);
 
+    // Récupérer les informations du client/entreprise
+    let clientNom = undefined;
+    let clientNumero = undefined;
+
+    if (this.selectedClient) {
+      clientNom = this.selectedClient.nomComplet || undefined;
+      clientNumero = this.selectedClient.telephone || undefined;
+    } else if (this.selectedEntreprise) {
+      clientNom = this.selectedEntreprise.nom || undefined;
+      clientNumero = this.selectedEntreprise.telephone || undefined;
+    }
+
     const request: VenteRequest = {
       boutiqueId: this.selectedBoutiqueId,
       produitsQuantites,
       description: 'Vente POS',
-      nomClient: undefined, // remplir si tu as un client sélectionné
-      telClient: undefined,
+      clientNom: clientNom,     // Utilisez le bon nom de champ
+      clientNumero: clientNumero, // Utilisez le bon nom de champ
       modePaiement: modePaiementEnum ?? undefined,
-      // montantPaye: this.paymentAmount > 0 ? this.paymentAmount : undefined
     };
 
     return request;
@@ -1178,6 +1215,41 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     return 'AUTRE';
   }
 
+  clearCustomerSelection(event: MouseEvent) {
+    event.stopPropagation();
+    this.selectedClient = null;
+    this.selectedEntreprise = null;
+  }
+
+  // Méthodes pour le déplacement
+  startDrag(event: MouseEvent): void {
+    event.preventDefault();
+    this.isDragging = true;
+    this.startX = event.clientX;
+    this.startY = event.clientY;
+    this.initialX = this.popupOffset.x;
+    this.initialY = this.popupOffset.y;
+
+    document.addEventListener('mousemove', this.onMouseMove);
+    document.addEventListener('mouseup', this.onMouseUp);
+  }
+
+  onMouseMove = (event: MouseEvent): void => {
+    if (!this.isDragging) return;
+    
+    requestAnimationFrame(() => {
+      const deltaX = event.clientX - this.startX;
+      const deltaY = event.clientY - this.startY;
+      this.popupOffset.x = this.initialX + deltaX;
+      this.popupOffset.y = this.initialY + deltaY;
+    });
+  }
+
+  onMouseUp = (): void => {
+    this.isDragging = false;
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('mouseup', this.onMouseUp);
+  }
 
 
 

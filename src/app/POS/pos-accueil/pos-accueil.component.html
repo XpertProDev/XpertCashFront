@@ -40,11 +40,13 @@
           </ul>
 
           <!-- Popup au centre de l'écran -->
-          <div *ngIf="showCommandePopup" class="commande-popup-overlay" (click)="showCommandePopup = false">
-            <div class="commande-popup-content" (click)="$event.stopPropagation()">
-              <div class="popup-header">
+          <div *ngIf="showCommandePopup" class="commande-popup-overlay">
+            <div class="commande-popup-content" 
+                [ngStyle]="{ 'transform': 'translate3d(' + popupOffsetPopup.x + 'px, ' + popupOffsetPopup.y + 'px, 0)' }" (click)="$event.stopPropagation()">
+              <!-- Déplacer l'événement startDragPopup uniquement sur le header -->
+              <div class="popup-header" (mousedown)="startDragPopup($event)">
                 <h3>Liste des commandes</h3>
-                <i class="ri-close-line" (click)="showCommandePopup = false"></i>
+                <i class="ri-close-line" (click)="closePopup($event)"></i>
               </div>
               <div class="popup-commandes">
                 <ul class="list_commande commandes-grid">
@@ -108,7 +110,7 @@
                 <i class="ri-restart-line"></i>
                 Recharger les donnees
               </div>
-              <div class="dropdown-item" (click)="onLogout()">
+              <div class="dropdown-item" (click)="prepareFermerCaisse()">
                 <i class="ri-money-euro-circle-line"></i>
                 Fermer la caisse
               </div> 
@@ -127,3 +129,95 @@
   </div>
 </div>
 
+<!-- Popup de fermeture de caisse -->
+<div *ngIf="showFermerCaissePopup" class="commande-popup-overlay">
+  <div class="commande-popup-content" [ngStyle]="{ 'transform': 'translate3d(' + popupOffsetPopup.x + 'px, ' + popupOffsetPopup.y + 'px, 0)' }" (click)="$event.stopPropagation()">
+    <div class="popup-header" (mousedown)="startDragPopup($event)">
+      <h3>Fermer la caisse</h3>
+      <i class="ri-close-line" (click)="showFermerCaissePopup = false"></i>
+    </div>
+    
+    <div class="popup-body">
+      <!-- État de chargement -->
+      <div *ngIf="isLoadingCaisseDetails" class="loading-indicator">
+        <i class="ri-loader-4-line spin"></i> Chargement des détails...
+      </div>
+      
+      <!-- Détails de la caisse -->
+      <div *ngIf="caisseDetails && !isLoadingCaisseDetails" class="caisse-details-container">
+        <div class="caisse-info-header">
+          <div class="profil">
+            <span>{{ caisseDetails.nomVendeur ? caisseDetails.nomVendeur[0] : '?' }}</span>
+          </div>
+          <div>
+            <div class="caisse-info-title">{{ caisseDetails.nomVendeur || 'Vendeur non spécifié' }}</div>
+            <div class="caisse-info-subtitle">{{ caisseDetails.nomBoutique || 'Boutique non spécifiée' }}</div>
+          </div>
+        </div>
+        
+        <div class="caisse-details-grid">
+          <div class="detail-item">
+            <span class="detail-label">Statut:</span>
+            <span class="detail-value" [class.text-success]="caisseDetails.statut === 'OUVERTE'"
+                                 [class.text-danger]="caisseDetails.statut === 'FERMEE'">
+              {{ caisseDetails.statut === 'OUVERTE' ? 'Ouverte' : 'Fermée' }}
+            </span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Montant initial :</span>
+            <span class="detail-value">{{ caisseDetails.montantInitial | cfaCurrency }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Montant courant :</span>
+            <span class="detail-value">{{ caisseDetails.montantCourant | cfaCurrency }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Ouverte le :</span>
+            <span class="detail-value">{{ formatDate(caisseDetails.dateOuverture) }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="caisseDetails.dateFermeture">
+            <span class="detail-label">Fermée le :</span>
+            <span class="detail-value">{{ formatDate(caisseDetails.dateFermeture) }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Montant obtenu :</span>
+            <span class="detail-value">{{ getMontantObtenu() | cfaCurrency }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Nom Vendeur :</span>
+            <span class="detail-value">{{ caisseDetails.nomVendeur || 'N/A' }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Nom Boutique :</span>
+            <span class="detail-value">{{ caisseDetails.nomBoutique || 'N/A' }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Messages d'erreur -->
+      <div *ngIf="fermetureErrorMessage" class="error-message">
+        <i class="ri-error-warning-line"></i> {{ fermetureErrorMessage }}
+      </div>
+    </div>
+    
+    <div class="popup-footer">
+      <button class="btn btn-cancel" 
+              (click)="showFermerCaissePopup = false"
+              [disabled]="isLoadingCaisseDetails">
+        Annuler
+      </button>
+      <button class="btn btn-confirm" 
+              (click)="confirmFermerCaisse()"
+              [disabled]="isLoadingCaisseDetails || !caisseDetails">
+        Confirmer la fermeture
+      </button>
+    </div>
+  </div>
+</div>
