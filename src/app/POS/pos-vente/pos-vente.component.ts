@@ -351,15 +351,31 @@ export class PosVenteComponent {
     this.calculatePayment();
   }
 
-  calculatePayment(): void {
-    const enteredValue = parseFloat(this.enteredAmount.replace(',', '.')) || 0;
+  // calculatePayment(): void {
+  //   const enteredValue = parseFloat(this.enteredAmount.replace(',', '.')) || 0;
     
+  //   this.paymentAmount = enteredValue;
+  //   this.isAmountEntered = enteredValue > 0;
+    
+  //   // Toujours calculer la différence
+  //   this.changeDue = Math.abs(this.totalAmount - this.paymentAmount);
+  // }
+
+  calculatePayment(): void {
+    // recalculer le total courant (au cas où remises ont changé)
+    this.totalAmount = this.getTotalCart();
+
+    const enteredValue = parseFloat(this.enteredAmount.replace(',', '.')) || 0;
     this.paymentAmount = enteredValue;
     this.isAmountEntered = enteredValue > 0;
-    
-    // Toujours calculer la différence
-    this.changeDue = Math.abs(this.totalAmount - this.paymentAmount);
+
+    // différence signée : positive = monnaie à rendre, négative = restant à payer
+    this.changeDue = +(this.paymentAmount - this.totalAmount);
+
+    // si tu préfères toujours conserver valeur positive pour l'affichage, 
+    // fais Math.abs ici, mais laisse aussi un flag pour savoir si c'est "monnaie" ou "restant"
   }
+
 
   selectPaymentMethod(method: string): void {
     this.selectedPaymentMethod = method;
@@ -443,22 +459,24 @@ getTotalDiscount(): number {
 
 // Mettre à jour le total général
 getTotalCart(): number {
-  const subtotal = this.getSubtotal();
-  const productDiscount = this.getTotalDiscount();
-  
-  let total = subtotal - productDiscount;
-  
+  const subtotal = this.getSubtotal();               // total sans remises
+  const productDiscount = this.getTotalDiscount();   // somme des remises de lignes
+  const baseAfterProductDiscounts = subtotal - productDiscount;
+
+  let total = baseAfterProductDiscounts;
+
   if (this.globalDiscount.active && this.globalDiscount.value > 0) {
     if (this.globalDiscount.type === 'CFA') {
       total -= this.globalDiscount.value;
     } else {
-      // Calculer le pourcentage sur le sous-total après remises produits
-      total -= subtotal * (this.globalDiscount.value / 100);
+      // appliquer le pourcentage SUR la base après remises produits
+      total -= baseAfterProductDiscounts * (this.globalDiscount.value / 100);
     }
   }
-  
+
   return Math.max(0, total);
 }
+
 
   // Supprimer aussi la remise quand on retire un produit
   removeProduct(productId: number) {
@@ -1193,18 +1211,38 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     };
 
     // Ajouter les remises par produit
+    // --- construction des remises pour la requête (mettre à jour pour inclure remise en cours) ---
     const remises: { [id: string]: number } = {};
     this.getCartItems().forEach(item => {
-      const discount = this.productDiscounts.get(item.product.id);
-      if (discount && discount > 0) {
+      // remise persistée en CFA (montant total sur la ligne)
+      let discountAmount = this.productDiscounts.get(item.product.id) || 0;
+
+      // si aucune remise persistée mais l'utilisateur est en train d'éditer cette remise,
+      // calculer la remise temporaire depuis discountMode et l'utiliser
+      if ((!discountAmount || discountAmount === 0)
+          && this.discountMode.active
+          && this.discountMode.productId === item.product.id) {
+
+        if (this.discountMode.type === 'CFA') {
+          // on considère que discountMode.value est le montant TOTAL de remise pour la ligne
+          discountAmount = Math.max(0, this.discountMode.value || 0);
+        } else {
+          // pourcentage -> convertir en montant
+          const pct = Math.max(0, this.discountMode.value || 0) / 100;
+          discountAmount = Math.round(item.product.prixVente * item.quantity * pct);
+        }
+      }
+
+      if (discountAmount > 0) {
         const totalSansRemise = item.product.prixVente * item.quantity;
-        remises[item.product.id] = (discount / totalSansRemise) * 100;
+        // envoyer la remise en pourcentage comme attendu par l'API
+        remises[item.product.id] = (discountAmount / totalSansRemise) * 100;
       }
     });
-
     if (Object.keys(remises).length > 0) {
       request.remises = remises;
     }
+
 
     // Ajouter la remise globale
     if (this.globalDiscount.active && this.globalDiscount.value > 0) {
@@ -1569,8 +1607,13 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
 
   onGlobalDiscountInputChange() {
     if (this.globalDiscount.value < 0) this.globalDiscount.value = 0;
-    this.updateCommandeTotals(); // Ajoutez cette ligne
+    this.updateCommandeTotals();
+    // si le popup de paiement est ouvert, recalculer la monnaie / restant
+    if (this.showPaymentPopup) {
+      this.calculatePayment();
+    }
   }
+
 
   getGlobalDiscountAmount(): number {
     if (!this.globalDiscount.active || this.globalDiscount.value <= 0) {
