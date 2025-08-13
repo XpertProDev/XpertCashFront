@@ -822,3 +822,49 @@ ul.ul_list {
   background-color: #CDE3FA;
   border: 1px solid #0672e4;
 }
+
+// pos-vente.component.scss
+.global-discount {
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+
+  .discount-input {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    
+    button {
+      padding: 4px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f8f8f8;
+      cursor: pointer;
+      
+      &.active {
+        background: #0672E4;
+        color: white;
+        border-color: #0672E4;
+      }
+    }
+    
+    input {
+      width: 70px;
+      text-align: center;
+      padding: 6px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  }
+}
+
+.double_row.total {
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+// Indicateur visuel
+.global-active {
+  background-color: #e6f7ff !important;
+  border: 1px solid #91d5ff !important;
+}

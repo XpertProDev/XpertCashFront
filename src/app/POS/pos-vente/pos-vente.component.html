@@ -312,8 +312,14 @@
 
           <!-- 1. Montant du paiement -->
           <div class="montant_paiement">
-            <h1>{{ totalAmount | cfaCurrency }}</h1>
+            <h1>{{ getTotalCart() | cfaCurrency }}</h1>
             <span>CFA</span>
+            
+            <!-- Afficher le montant original si remise -->
+            <div *ngIf="getTotalDiscount() > 0 || globalDiscount.active" 
+                class="original-price">
+              {{ getSubtotal() | cfaCurrency }}
+            </div>
           </div>
 
           <!-- 2. Moyens de paiement -->
@@ -345,21 +351,42 @@
           </div>
 
           <!-- 3. Remise par produit -->
-          <div class="discount-input">
-            <button class="btn-currency">
-              <!-- $ -->
-              CFA
-            </button>
-            <input
-              type="text"
-              placeholder="0"
-              class="input-discount"
-            />
-            <!-- <span class="discount-unit">CFA</span> -->
-            <button class="btn-percent">
-              %
-            </button>
+          <div class="summary_panel">
+            <div class="double_row" *ngIf="getTotalDiscount() > 0">
+              <span>Remise(s) produit</span>
+              <span>-{{ getTotalDiscount() | cfaCurrency }}</span>
+            </div>
+            
+            <!-- Nouveau: Champ remise globale -->
+            <div class="global-discount" *ngIf="globalDiscount.active">
+              <div class="double_row">
+                <span>Remise globale</span>
+                <div class="discount-input">
+                  <button class="btn-currency" 
+                          [class.active]="globalDiscount.type === 'CFA'"
+                          (click)="setGlobalDiscountType('CFA')">
+                    CFA
+                  </button>
+                  <input type="number" placeholder="0" 
+                        class="input-discount"
+                        [(ngModel)]="globalDiscount.value"
+                        (input)="onGlobalDiscountInputChange()"
+                        min="0">
+                  <button class="btn-percent" 
+                          [class.active]="globalDiscount.type === '%'"
+                          (click)="setGlobalDiscountType('%')">
+                    %
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="double_row total">
+              <strong>Total</strong>
+              <strong>{{ getTotalCart() | cfaCurrency }}</strong>
+            </div>
           </div>
+
           <div class="discount-label">
             <p>Remise par produit</p>
           </div>
@@ -426,10 +453,19 @@
                 <i class="ri-close-line"></i>
               </span>
             </div>
-            <div class="paiement_btn btn_facture">
-              <p>Facture</p>
-              <input type="checkbox">
+
+            <div class="double_remise_facture container_facture">
+              <button style="border: none;" [class.global-active]="globalDiscount.active"
+                    class="paiement_btn remise_produit"
+                    (click)="toggleGlobalDiscount()">
+                {{ globalDiscount.active ? 'Annuler Globale' : 'Remise Globale' }}
+              </button>
+              <div class="paiement_btn btn_facture">
+                <p>Facture</p>
+                <input type="checkbox">
+              </div>
             </div>
+            
           </div>
         </div>
 

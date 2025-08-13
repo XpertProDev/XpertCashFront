@@ -163,6 +163,12 @@ export class PosVenteComponent {
     value: 0
   };
 
+  globalDiscount = {
+    active: false,
+    type: 'CFA' as 'CFA' | '%',
+    value: 0
+  };
+
   // Liste des remises par produit
   productDiscounts: Map<number, number> = new Map();
   lastSelectedForDiscount: number | null = null;
@@ -407,7 +413,7 @@ addToCart(produit: ProduitDetailsResponseDTO): void {
 // --- mettre à jour calculateItemTotal pour tenir compte de la remise live ---
 calculateItemTotal(item: { product: ProduitDetailsResponseDTO, quantity: number }): number {
   const basePrice = item.product.prixVente * item.quantity;
-  const discount = this.computeDiscountForItem(item.product, item.quantity);
+  const discount = this.productDiscounts.get(item.product.id) || 0;
   return basePrice - discount;
 }
 
@@ -437,16 +443,30 @@ getTotalDiscount(): number {
 
 // Mettre à jour le total général
 getTotalCart(): number {
-  return this.getSubtotal() - this.getTotalDiscount();
+  const subtotal = this.getSubtotal();
+  const productDiscount = this.getTotalDiscount();
+  
+  let total = subtotal - productDiscount;
+  
+  if (this.globalDiscount.active && this.globalDiscount.value > 0) {
+    if (this.globalDiscount.type === 'CFA') {
+      total -= this.globalDiscount.value;
+    } else {
+      // Calculer le pourcentage sur le sous-total après remises produits
+      total -= subtotal * (this.globalDiscount.value / 100);
+    }
+  }
+  
+  return Math.max(0, total);
 }
 
-// Supprimer aussi la remise quand on retire un produit
-removeProduct(productId: number) {
-  this.cart.delete(productId);
-  this.productDiscounts.delete(productId); // Supprimer la remise associée
-  this.saveActiveCart();
-  this.updateCommandeTotals();
-}
+  // Supprimer aussi la remise quand on retire un produit
+  removeProduct(productId: number) {
+    this.cart.delete(productId);
+    this.productDiscounts.delete(productId);
+    this.saveActiveCart();
+    this.updateCommandeTotals();
+  }
 
   // Méthode pour diminuer la quantité
   decreaseQuantity(produit: ProduitDetailsResponseDTO) {
@@ -1172,6 +1192,32 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
       modePaiement: modePaiementEnum ?? undefined,
     };
 
+    // Ajouter les remises par produit
+    const remises: { [id: string]: number } = {};
+    this.getCartItems().forEach(item => {
+      const discount = this.productDiscounts.get(item.product.id);
+      if (discount && discount > 0) {
+        const totalSansRemise = item.product.prixVente * item.quantity;
+        remises[item.product.id] = (discount / totalSansRemise) * 100;
+      }
+    });
+
+    if (Object.keys(remises).length > 0) {
+      request.remises = remises;
+    }
+
+    // Ajouter la remise globale
+    if (this.globalDiscount.active && this.globalDiscount.value > 0) {
+      if (this.globalDiscount.type === 'CFA') {
+        const subtotal = this.getSubtotal();
+        if (subtotal > 0) {
+          request.remiseGlobale = (this.globalDiscount.value / subtotal) * 100;
+        }
+      } else {
+        request.remiseGlobale = this.globalDiscount.value;
+      }
+    }
+
     return request;
   }
 
@@ -1398,27 +1444,37 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     this.updateCommandeTotals();
   }
 
-  // --- applyDiscount : corriger pour stocker la remise en CFA *totale par ligne* (et pas seulement par unité) ---
+  // --- apply discount : corriger pour stocker la remise en CFA *totale par ligne* (et pas seulement par unité) ---
   applyDiscount(produit: ProduitDetailsResponseDTO) {
-    if (this.discountMode.value <= 0) return;
+    // Autoriser la valeur 0 pour supprimer la remise
+    if (this.discountMode.value < 0) return;
 
     const qty = this.getSelectedQuantity(produit.id) || 0;
-    if (qty <= 0) return; // pas de ligne sélectionnée
+    if (qty <= 0) return;
 
     let discountAmount = 0;
 
-    if (this.discountMode.type === '%') {
-      discountAmount = Math.round(produit.prixVente * qty * (this.discountMode.value / 100));
-    } else {
-      // CFA : on considère la valeur comme montant total pour la ligne
-      discountAmount = Math.round(this.discountMode.value);
+    if (this.discountMode.value > 0) {
+      if (this.discountMode.type === '%') {
+        // Calculer le montant de remise en pourcentage
+        discountAmount = produit.prixVente * qty * (this.discountMode.value / 100);
+      } else {
+        // CFA : montant fixe
+        discountAmount = this.discountMode.value;
+      }
     }
 
-    // garantir qu'on ne dépasse pas le total de la ligne
+    // Limiter la remise au montant maximum possible
     const maxDiscount = produit.prixVente * qty;
     if (discountAmount > maxDiscount) discountAmount = maxDiscount;
 
-    this.productDiscounts.set(produit.id, discountAmount);
+    // Stocker la remise (0 effacera la remise existante)
+    if (discountAmount > 0) {
+      this.productDiscounts.set(produit.id, discountAmount);
+    } else {
+      this.productDiscounts.delete(produit.id);
+    }
+
     this.resetDiscountMode();
     this.updateCommandeTotals();
   }
@@ -1495,6 +1551,38 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     return this.productDiscounts.get(product.id) || 0;
   }
 
+  // Méthodes pour la remise globale
+  toggleGlobalDiscount() {
+    this.globalDiscount.active = !this.globalDiscount.active;
+    if (this.globalDiscount.active) {
+      // Désactiver les remises par produit
+      this.discountMode.active = false;
+      this.productDiscounts.clear();
+    }
+    this.updateCommandeTotals();
+  }
+
+  setGlobalDiscountType(type: 'CFA' | '%') {
+    this.globalDiscount.type = type;
+    this.updateCommandeTotals();
+  }
+
+  onGlobalDiscountInputChange() {
+    if (this.globalDiscount.value < 0) this.globalDiscount.value = 0;
+    this.updateCommandeTotals(); // Ajoutez cette ligne
+  }
+
+  getGlobalDiscountAmount(): number {
+    if (!this.globalDiscount.active || this.globalDiscount.value <= 0) {
+      return 0;
+    }
+
+    if (this.globalDiscount.type === 'CFA') {
+      return this.globalDiscount.value;
+    } else {
+      return this.getSubtotal() * (this.globalDiscount.value / 100);
+    }
+  }
 
 
 }
