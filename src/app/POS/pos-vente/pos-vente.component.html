@@ -358,7 +358,7 @@
             </div>
             
             <!-- Nouveau: Champ remise globale -->
-            <div class="global-discount" *ngIf="globalDiscount.active">
+            <!-- <div class="discount-input">
               <div class="double_row">
                 <span>Remise globale</span>
                 <div class="discount-input">
@@ -379,6 +379,27 @@
                   </button>
                 </div>
               </div>
+            </div> -->
+
+              <div>
+                <div class="discount-input" *ngIf="globalDiscount.active">
+                  <button class="btn-currency" 
+                          [class.active]="globalDiscount.type === 'CFA'"
+                          (click)="setGlobalDiscountType('CFA')">
+                    CFA
+                  </button>
+                  <input type="number" placeholder="0" 
+                        class="input-discount"
+                        [(ngModel)]="globalDiscount.value"
+                        (input)="onGlobalDiscountInputChange()"
+                        min="0">
+                  <button class="btn-percent" 
+                          [class.active]="globalDiscount.type === '%'"
+                          (click)="setGlobalDiscountType('%')">
+                    %
+                  </button>
+              </div>
+                <p style="padding: 10px 10px 5px; text-align: center;">Remise globale</p>
             </div>
 
             <div class="double_row total">
@@ -388,7 +409,7 @@
           </div>
 
           <div class="discount-label">
-            <p>Remise par produit</p>
+            <p>Remise sur produit</p>
           </div>
 
         </div>
@@ -454,17 +475,17 @@
               </span>
             </div>
 
-            <div class="double_remise_facture container_facture">
+            <!-- <div class="double_remise_facture container_facture"> -->
               <button style="border: none;" [class.global-active]="globalDiscount.active"
                     class="paiement_btn remise_produit"
                     (click)="toggleGlobalDiscount()">
                 {{ globalDiscount.active ? 'Annuler Globale' : 'Remise Globale' }}
               </button>
-              <div class="paiement_btn btn_facture">
+              <!-- <div class="paiement_btn btn_facture">
                 <p>Facture</p>
                 <input type="checkbox">
               </div>
-            </div>
+            </div> -->
             
           </div>
         </div>
