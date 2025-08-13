@@ -3,6 +3,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
+import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-service';
 import { VenteService } from 'src/app/admin-page/SERVICES/VenteService/vente-service';
 import { environment } from 'src/environments/environment';
 
@@ -14,6 +15,8 @@ import { environment } from 'src/environments/environment';
 })
 export class PosPaiementComponent {
   private imgUrl = environment.imgUrl;
+  logo?: string | null = null;
+  fallbackLogo = 'assets/img/TCHAKEDA.png';
   vente?: VenteResponse | null = null;
   paymentAmount: number = 0;
   changeDue: number = 0;
@@ -25,11 +28,39 @@ export class PosPaiementComponent {
 
   constructor(
     private router: Router,
-    private venteService: VenteService
+    private venteService: VenteService,
+    private entrepriseService: EntrepriseService
   ) {}
 
   ngOnInit(): void {
-    // 1) Try to get the sale from navigation state
+    // 1) Lecture rapide depuis localStorage si tu as déjà stocké l'entreprise
+    const stored = localStorage.getItem('entreprise');
+    if (stored) {
+      try {
+        const ent = JSON.parse(stored);
+        // si ent.logo contient le path relatif côté backend, on le préfixe par imgUrl
+        this.logo = ent.logo ? this.ensureAbsoluteLogoUrl(ent.logo) : null;
+      } catch (e) {
+        this.logo = null;
+      }
+    }
+
+    // 2) Option robuste : demander l'info à l'API si non trouvée localement
+    if (!this.logo) {
+      this.entrepriseService.getEntrepriseInfo().subscribe({
+        next: ent => {
+          this.logo = ent.logo ? this.ensureAbsoluteLogoUrl(ent.logo) : null;
+          // optional: sauvegarder pour réutiliser plus tard
+          try { localStorage.setItem('entreprise', JSON.stringify(ent)); } catch {}
+        },
+        error: err => {
+          console.warn('Impossible de charger info entreprise pour logo', err);
+          this.logo = null;
+        }
+      });
+    }
+
+    // ton code existant: récupérer state vente, etc.
     const state = (history && history.state) ? history.state : {};
     if (state && state.vente) {
       this.vente = state.vente as VenteResponse;
@@ -38,17 +69,29 @@ export class PosPaiementComponent {
       this.paymentMethod = state.paymentMethod ?? (this.vente?.modePaiement ?? this.paymentMethod);
       return;
     }
-
-    // 2) Fallback: if no vente object in state but maybe venteId passed
     if (state && state.venteId) {
       this.loadVenteById(state.venteId);
       return;
     }
+  }
 
-    // 3) Nothing in history state — redirect to accueil vente
-    // (préserve l'expérience au cas où l'utilisateur a ouvert la page directement)
-    // tu peux aussi afficher un message
-    // this.router.navigate(['/pos-accueil']);
+  // transforme un path relatif en url absolue si nécessaire
+  private ensureAbsoluteLogoUrl(path: string): string {
+    if (!path) return this.fallbackLogo;
+    if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) {
+      return path;
+    }
+    // si path contient déjà la base, évite la double concaténation
+    if (this.imgUrl && path.startsWith(this.imgUrl)) return path;
+    // s'assurer qu'il y a bien un slash
+    const prefix = this.imgUrl.endsWith('/') ? this.imgUrl.slice(0, -1) : this.imgUrl;
+    const suffix = path.startsWith('/') ? path : `/${path}`;
+    return prefix + suffix;
+  }
+
+  // handler pour fallback si image ne se charge pas
+  onLogoError() {
+    this.logo = this.fallbackLogo;
   }
 
   private loadVenteById(id: number) {
@@ -126,7 +169,7 @@ export class PosPaiementComponent {
           }
           .receipt-header .logo {
             max-width: 100px !important; /* Taille originale */
-            margin-bottom: 0px !important;
+            margin-bottom: 10px !important;
           }
           .ticket-info div {
             font-size: 10px !important;

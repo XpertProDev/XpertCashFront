@@ -29,7 +29,10 @@
     <div class="paiement_right">
       <div class="receipt" #receipt>
         <div class="receipt-header">
-          <img src="assets/img/TCHAKEDA.png" alt="Logo XpertPro" class="logo" />
+          <img [src]="logo || 'assets/img/TCHAKEDA.png'"
+            (error)="onLogoError()"
+            alt="Logo XpertPro"
+            class="logo" />
           <div class="ticket-info">
             <div>Ticket : {{ vente?.venteId ?? '—' }}</div>
             <div>{{ vente?.dateVente | date:'dd/MM/yyyy HH:mm' }}</div>
