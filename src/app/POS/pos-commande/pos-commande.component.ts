@@ -8,10 +8,14 @@ import { ViewStateService } from '../pos-accueil/view-state.service';
 import { ProduitDetailsResponseDTO } from 'src/app/admin-page/MODELS/produit-category.model';
 import { CategorieService } from 'src/app/admin-page/SERVICES/categorie.service';
 import { CommandeStateService } from 'src/app/admin-page/SERVICES/commande-state.service';
+import { VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { PosCommandeService } from 'src/app/admin-page/SERVICES/VenteService/pos-commande-service';
+import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
 
 @Component({
   selector: 'app-pos-commande',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, CfaCurrencyPipe],
   templateUrl: './pos-commande.component.html',
   styleUrl: './pos-commande.component.scss'
 })
@@ -27,11 +31,19 @@ export class PosCommandeComponent {
   activeCommandeTotal = 0;
   activeCommandeItems: { product: ProduitDetailsResponseDTO, quantity: number }[] = [];
 
+  ventes: VenteResponse[] = [];
+  activeVenteId: number | null = null;
+  activeVenteItems: any[] = [];
+
+  activeVente: VenteResponse | null = null;
+
   constructor(
     public router: Router,
     private viewState: ViewStateService,
     private commandeState: CommandeStateService,
-    private categorieService: CategorieService
+    private categorieService: CategorieService,
+    private posCommandeService: PosCommandeService,
+    private usersService: UsersService
   ) {}
 
   ngOnInit() {
@@ -53,6 +65,49 @@ export class PosCommandeComponent {
       this.activeCommandeId = id;
       this.loadActiveCommandeDetails();
     });
+
+    this.loadVentes();
+  }
+
+  loadVentes() {
+    const vendeurId = this.usersService.getCurrentUser()?.id;
+    if (vendeurId) {
+      this.posCommandeService.getVentesByVendeur(vendeurId).subscribe({
+        next: (ventes) => {
+          this.ventes = ventes;
+          if (ventes.length > 0) {
+            this.setActiveVente(ventes[0].venteId);
+          }
+        },
+        error: (error) => console.error('Erreur chargement ventes', error)
+      });
+    }
+  }
+
+  setActiveVente(venteId: number) {
+    this.activeVenteId = venteId;
+    this.activeVente = this.ventes.find(v => v.venteId === venteId) || null;
+    this.loadActiveVenteDetails();
+  }
+
+  loadActiveVenteDetails() {
+    if (!this.activeVente) {
+      this.activeVenteItems = [];
+      return;
+    }
+    
+    this.activeVenteItems = (this.activeVente.lignes || []).map(ligne => ({
+      product: {
+        id: ligne.produitId,
+        nom: ligne.nomProduit,
+        prixVente: ligne.prixUnitaire
+      },
+      quantity: ligne.quantite
+    }));
+  }
+
+  getTotalItems(vente: VenteResponse): number {
+    return vente.lignes?.reduce((sum, ligne) => sum + ligne.quantite, 0) || 0;
   }
 
   setActiveCommande(id: string) {
