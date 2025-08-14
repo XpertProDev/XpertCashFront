@@ -608,7 +608,6 @@ export class AddProduitComponent implements OnInit {
       }
     }
 
-
     // Si le prix d'achat n'est pas fourni, mettez-le à null ou 0
     if (produit.prixAchat === '' || produit.prixAchat === null) {
       produit.prixAchat = null; // ou 0 selon vos besoins

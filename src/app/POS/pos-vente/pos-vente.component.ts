@@ -641,7 +641,7 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   const quantite = this.getQuantiteDansBoutiqueCourante(produit);
 
   if (produit.seuilAlert == null || produit.seuilAlert === 0) {
-    return true;
+    return quantite <= 10;
   }
   return quantite <= produit.seuilAlert;
 }

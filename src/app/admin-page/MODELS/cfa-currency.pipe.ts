@@ -9,13 +9,11 @@ export class CfaCurrencyPipe implements PipeTransform {
     if (value === null || value === undefined || isNaN(value)) {
       return 'N/A';
     }
-    
-    // Formater le nombre avec séparateurs de milliers
-    const formattedValue = new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
-    
+    const hasDecimals = value % 1 !== 0;
+      const formattedValue = value
+      .toFixed(hasDecimals ? 2 : 0)
+      .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
     return `${formattedValue} FCFA`;
   }
 }
