@@ -1685,8 +1685,12 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   }
 
   saveDiscount(produit: ProduitDetailsResponseDTO) {
-    this.applyDiscount(produit);
-    this.updateCommandeTotals();
-  }
+  this.applyDiscount(produit);
+  this.updateCommandeTotals();
+  
+  // Réinitialiser le champ de remise
+  this.currentDiscountInput = '';
+  this.discountMode.value = 0;
+}
 
 }

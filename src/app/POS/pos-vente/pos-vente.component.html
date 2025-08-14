@@ -162,10 +162,10 @@
               {{ calculateItemTotal(item) | cfaCurrency }}
             </div>
             <div class="icon_close_select" 
-                  *ngIf="!isEditingDiscount(item.product.id)" 
-                  (click)="removeProduct(item.product.id)">
-                <i class="ri-close-circle-fill"></i>
-              </div>
+              *ngIf="inputMode !== 'discount' && !isEditingDiscount(item.product.id)" 
+              (click)="removeProduct(item.product.id)">
+            <i class="ri-close-circle-fill"></i>
+          </div>
             <!-- Bouton pour modifier la remise -->
            <div class="edit-discount" 
                 *ngIf="inputMode === 'discount'"
