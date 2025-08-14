@@ -1115,13 +1115,6 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
     });
   }
 
-  // Ouvrir le popup
-  openListClientPopup(): void {
-    this.showClientPopup = true;
-    this.loadClients();
-    this.loadEntreprisesForPopup(); // Charger les entreprises
-  }
-
   // Sélectionner une entreprise
   // selectEntreprise(entreprise: EntrepriseClient) {
   //   console.log('Entreprise sélectionnée:', entreprise);
@@ -1676,5 +1669,21 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
     }
   }
 
+
+  // Ouvrir le popup
+  openListClientPopup(): void {
+    this.showClientPopup = true;
+    this.loadClients();
+    this.loadEntreprisesForPopup(); // Charger les entreprises
+  }
+
+  isEditingDiscount(productId: number): boolean {
+    return this.discountMode.active && this.discountMode.productId === productId;
+  }
+
+  saveDiscount(produit: ProduitDetailsResponseDTO) {
+    this.applyDiscount(produit);
+    this.updateCommandeTotals();
+  }
 
 }

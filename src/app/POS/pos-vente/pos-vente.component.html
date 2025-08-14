@@ -165,8 +165,8 @@
               <i class="ri-close-circle-fill"></i>
             </div>
             <!-- Bouton pour modifier la remise -->
-            <div class="edit-discount" (click)="editDiscount(item.product)">
-              <i class="ri-edit-2-line"></i>
+            <div class="edit-discount" (click)="isEditingDiscount(item.product.id) ? saveDiscount(item.product) : editDiscount(item.product)">
+              <i [class]="isEditingDiscount(item.product.id) ? 'ri-check-fill' : 'ri-edit-2-line'"></i>
             </div>
           </div>
         </li>
@@ -256,18 +256,18 @@
           </span>
         </div>
 
-        <div class="double_remise_facture container_facture">
+        <!-- <div class="double_remise_facture container_facture">
           <button style="border: none;" 
                   class="paiement_btn remise_produit"
                   (click)="toggleDiscountMode()">
             {{ discountMode.active ? 'Annuler' : 'Remise' }}
-          </button>
+          </button> -->
 
           <div class="paiement_btn btn_facture">
             <p>Facture</p>
             <input type="checkbox">
           </div>
-        </div>
+        <!-- </div> -->
 
       </div>
     </div>
