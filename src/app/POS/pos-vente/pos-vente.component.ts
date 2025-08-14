@@ -143,6 +143,7 @@ export class PosVenteComponent {
 
   selectedClient: Clients | null = null;
   selectedEntreprise: EntrepriseClient | null = null;
+  isComposingNewQuantity: boolean = false;
 
   isDragging = false;
   startX = 0;
@@ -425,9 +426,10 @@ addToCart(produit: ProduitDetailsResponseDTO): void {
   this.cart.set(produit.id, currentQty + 1);
   this.saveActiveCart();
   this.selectedProduct = produit;
+  this.isComposingNewQuantity = false;
 
-  this.quantityMode = true;
-  this.currentQuantityInput = (this.cart.get(produit.id) || 0).toString();
+  // this.quantityMode = true;
+  // this.currentQuantityInput = (this.cart.get(produit.id) || 0).toString();
 }
 
 // --- mettre à jour calculateItemTotal pour tenir compte de la remise live ---
@@ -461,25 +463,25 @@ getTotalDiscount(): number {
   return total;
 }
 
-// Mettre à jour le total général
-getTotalCart(): number {
-  const subtotal = this.getSubtotal();               // total sans remises
-  const productDiscount = this.getTotalDiscount();   // somme des remises de lignes
-  const baseAfterProductDiscounts = subtotal - productDiscount;
+  // Mettre à jour le total général
+  getTotalCart(): number {
+    const subtotal = this.getSubtotal();               // total sans remises
+    const productDiscount = this.getTotalDiscount();   // somme des remises de lignes
+    const baseAfterProductDiscounts = subtotal - productDiscount;
 
-  let total = baseAfterProductDiscounts;
+    let total = baseAfterProductDiscounts;
 
-  if (this.globalDiscount.active && this.globalDiscount.value > 0) {
-    if (this.globalDiscount.type === 'CFA') {
-      total -= this.globalDiscount.value;
-    } else {
-      // appliquer le pourcentage SUR la base après remises produits
-      total -= baseAfterProductDiscounts * (this.globalDiscount.value / 100);
+    if (this.globalDiscount.active && this.globalDiscount.value > 0) {
+      if (this.globalDiscount.type === 'CFA') {
+        total -= this.globalDiscount.value;
+      } else {
+        // appliquer le pourcentage SUR la base après remises produits
+        total -= baseAfterProductDiscounts * (this.globalDiscount.value / 100);
+      }
     }
-  }
 
-  return Math.max(0, total);
-}
+    return Math.max(0, total);
+  }
 
 
   // Supprimer aussi la remise quand on retire un produit
@@ -574,6 +576,12 @@ getTotalCart(): number {
 
   handleKeyPress(key: string): void {
     if (!this.selectedProduct) return; // Vérifiez si un produit est sélectionné
+
+    // Réinitialiser le champ si c'est le premier chiffre d'une nouvelle saisie
+    if (!this.isComposingNewQuantity) {
+      this.currentQuantityInput = '';
+      this.isComposingNewQuantity = true;
+    }
 
     switch (key) {
       case 'backspace':
