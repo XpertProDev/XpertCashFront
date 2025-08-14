@@ -45,7 +45,7 @@
         <!-- on transforme cadre_produit en container de grille -->
         <div class="cadre_produit product-grid" *ngIf="isListView">
           
-          <div class="product-card" 
+          <div class="product-card"
                *ngFor="let produit of displayedProducts"
                   [class.disabled]="getAvailableStock(produit) <= 0"
                   (click)="addToCart(produit)"
@@ -270,7 +270,8 @@
       <button tabindex="-1" (click)="handleKeyPress('1')">1</button>
       <button tabindex="-1" (click)="handleKeyPress('2')">2</button>
       <button tabindex="-1" (click)="handleKeyPress('3')">3</button>
-      <button tabindex="-1" class="btn_keypad_action btn_keypad_active">Qté</button>
+      <!-- <button tabindex="-1" class="btn_keypad_action btn_keypad_active">Qté</button> -->
+      <button tabindex="-1" class="btn_keypad_action btn_keypad_active" (click)="activateQuantityMode()">Qté</button>
       
       <button tabindex="-1" (click)="handleKeyPress('4')">4</button>
       <button tabindex="-1" (click)="handleKeyPress('5')">5</button>

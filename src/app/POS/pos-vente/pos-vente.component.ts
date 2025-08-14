@@ -424,6 +424,10 @@ addToCart(produit: ProduitDetailsResponseDTO): void {
   const currentQty = this.cart.get(produit.id) || 0;
   this.cart.set(produit.id, currentQty + 1);
   this.saveActiveCart();
+  this.selectedProduct = produit;
+
+  this.quantityMode = true;
+  this.currentQuantityInput = (this.cart.get(produit.id) || 0).toString();
 }
 
 // --- mettre à jour calculateItemTotal pour tenir compte de la remise live ---
@@ -548,18 +552,37 @@ getTotalCart(): number {
   }
 
   // Méthode pour gérer les touches du clavier
+  // handleKeyPress(key: string): void {
+  //   if (!this.selectedProduct || !this.quantityMode) return;
+
+  //   switch (key) {
+  //     case 'backspace':
+  //       this.currentQuantityInput = this.currentQuantityInput.slice(0, -1);
+  //       break;
+  //     case '+/-':
+  //       // Inversion du signe (optionnel)
+  //       break;
+  //     default:
+  //       // Augmentez la limite à 5 chiffres
+  //       if (this.currentQuantityInput.length < 5) {
+  //         this.currentQuantityInput += key;
+  //       }
+  //   }
+
+  //   this.applyQuantityToProduct();
+  // }
+
   handleKeyPress(key: string): void {
-    if (!this.selectedProduct || !this.quantityMode) return;
+    if (!this.selectedProduct) return; // Vérifiez si un produit est sélectionné
 
     switch (key) {
       case 'backspace':
         this.currentQuantityInput = this.currentQuantityInput.slice(0, -1);
         break;
       case '+/-':
-        // Inversion du signe (optionnel)
+        // Inversion du signe
         break;
       default:
-        // Augmentez la limite à 5 chiffres
         if (this.currentQuantityInput.length < 5) {
           this.currentQuantityInput += key;
         }
@@ -646,21 +669,21 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   return quantite <= produit.seuilAlert;
 }
 
-getQuantiteClass(produit: ProduitDetailsResponseDTO): string {
-  return this.isQuantiteCritique(produit) ? 'alert-low-stock' : 'safe-stock';
-}
+  getQuantiteClass(produit: ProduitDetailsResponseDTO): string {
+    return this.isQuantiteCritique(produit) ? 'alert-low-stock' : 'safe-stock';
+  }
 
+  getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
+    const boutique = produit.boutiques?.find(b => b.id === produit.boutiqueId);
+    return boutique?.quantite ?? 0;
+  }
 
-
-getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
-  const boutique = produit.boutiques?.find(b => b.id === produit.boutiqueId);
-  return boutique?.quantite ?? 0;
-}
-
-
-
-
-
+  activateQuantityMode() {
+    if (this.selectedProduct) {
+      this.quantityMode = true;
+      this.currentQuantityInput = (this.cart.get(this.selectedProduct.id) || 0).toString();
+    }
+  }
 
   endPress(): void {
     if (this.longPressTimer) {
