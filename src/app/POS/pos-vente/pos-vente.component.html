@@ -142,7 +142,7 @@
       <ul class="ul_list_produit_select">
         <li class="li_list_produit_select" (click)="selectProductForDiscount(item.product)"
             *ngFor="let item of getCartItems()">
-          <div class="double">
+          <div class="double" style="gap: 5px;">
             <div class="nombre_select">
               {{ item.quantity }}
             </div>
@@ -161,11 +161,15 @@
             <div class="price_produit">
               {{ calculateItemTotal(item) | cfaCurrency }}
             </div>
-            <div class="icon_close_select" (click)="removeProduct(item.product.id)">
-              <i class="ri-close-circle-fill"></i>
-            </div>
+            <div class="icon_close_select" 
+                  *ngIf="!isEditingDiscount(item.product.id)" 
+                  (click)="removeProduct(item.product.id)">
+                <i class="ri-close-circle-fill"></i>
+              </div>
             <!-- Bouton pour modifier la remise -->
-            <div class="edit-discount" (click)="isEditingDiscount(item.product.id) ? saveDiscount(item.product) : editDiscount(item.product)">
+           <div class="edit-discount" 
+                *ngIf="inputMode === 'discount'"
+                (click)="isEditingDiscount(item.product.id) ? saveDiscount(item.product) : editDiscount(item.product)">
               <i [class]="isEditingDiscount(item.product.id) ? 'ri-check-fill' : 'ri-edit-2-line'"></i>
             </div>
           </div>
