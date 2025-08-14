@@ -174,6 +174,15 @@ export class PosVenteComponent {
   productDiscounts: Map<number, number> = new Map();
   lastSelectedForDiscount: number | null = null;
 
+  inputMode: 'quantity' | 'discount' = 'quantity'; // Nouveau flag
+
+  // Méthode pour basculer entre les modes
+  setInputMode(mode: 'quantity' | 'discount') {
+    this.inputMode = mode;
+  }
+
+  currentDiscountInput: string = '';
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -318,6 +327,32 @@ export class PosVenteComponent {
     }
     
     return photoPath;
+  }
+
+  onDiscountInputChange(event: any) {
+    this.currentDiscountInput = event.target.value;
+    // Convertir en nombre et mettre à jour discountMode.value
+    this.discountMode.value = parseInt(this.currentDiscountInput, 10) || 0;
+    this.updateCommandeTotals();
+  }
+
+  // Méthode pour gérer les touches du keypad en mode remise
+  handleDiscountKeyPress(key: string) {
+    switch (key) {
+      case 'backspace':
+        this.currentDiscountInput = this.currentDiscountInput.slice(0, -1);
+        break;
+      case ',':
+        // Ignorer pour les remises
+        break;
+      default:
+        if (this.currentDiscountInput.length < 5) {
+          this.currentDiscountInput += key;
+        }
+    }
+    // Mettre à jour la valeur numérique
+    this.discountMode.value = parseInt(this.currentDiscountInput, 10) || 0;
+    this.updateCommandeTotals();
   }
 
   openPaymentPopup() {
@@ -552,30 +587,12 @@ getTotalDiscount(): number {
     const selectedQty = this.getSelectedQuantity(produit.id);
     return produit.quantite - selectedQty;
   }
-
-  // Méthode pour gérer les touches du clavier
-  // handleKeyPress(key: string): void {
-  //   if (!this.selectedProduct || !this.quantityMode) return;
-
-  //   switch (key) {
-  //     case 'backspace':
-  //       this.currentQuantityInput = this.currentQuantityInput.slice(0, -1);
-  //       break;
-  //     case '+/-':
-  //       // Inversion du signe (optionnel)
-  //       break;
-  //     default:
-  //       // Augmentez la limite à 5 chiffres
-  //       if (this.currentQuantityInput.length < 5) {
-  //         this.currentQuantityInput += key;
-  //       }
-  //   }
-
-  //   this.applyQuantityToProduct();
-  // }
-
+  
   handleKeyPress(key: string): void {
-    if (!this.selectedProduct) return; // Vérifiez si un produit est sélectionné
+    if (this.inputMode === 'discount') {
+      this.handleDiscountKeyPress(key); // Gestion remise
+    } else {
+      if (!this.selectedProduct) return; // Vérifiez si un produit est sélectionné
 
     // Réinitialiser le champ si c'est le premier chiffre d'une nouvelle saisie
     if (!this.isComposingNewQuantity) {
@@ -597,6 +614,7 @@ getTotalDiscount(): number {
     }
 
     this.applyQuantityToProduct();
+    }
   }
 
   calculateDiscountedPrice(item: { product: ProduitDetailsResponseDTO, quantity: number }): number {
@@ -1469,27 +1487,27 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   }
 
   // --- on discount input change : appeler updateCommandeTotals() pour que l'UI rafraîchisse en temps réel ---
-  onDiscountInputChange() {
-    if (this.discountMode.value < 0) {
-      this.discountMode.value = 0;
-    }
+  // onDiscountInputChange() {
+  //   if (this.discountMode.value < 0) {
+  //     this.discountMode.value = 0;
+  //   }
 
-    // Si l'utilisateur saisit une valeur sans avoir ciblé de produit,
-    // tenter d'auto-cibler (dernier sélectionné ou la seule ligne du panier)
-    if (!this.discountMode.productId) {
-      if (this.lastSelectedForDiscount) {
-        this.discountMode.productId = this.lastSelectedForDiscount;
-      } else {
-        const items = this.getCartItems();
-        if (items.length === 1) {
-          this.discountMode.productId = items[0].product.id;
-        }
-      }
-    }
+  //   // Si l'utilisateur saisit une valeur sans avoir ciblé de produit,
+  //   // tenter d'auto-cibler (dernier sélectionné ou la seule ligne du panier)
+  //   if (!this.discountMode.productId) {
+  //     if (this.lastSelectedForDiscount) {
+  //       this.discountMode.productId = this.lastSelectedForDiscount;
+  //     } else {
+  //       const items = this.getCartItems();
+  //       if (items.length === 1) {
+  //         this.discountMode.productId = items[0].product.id;
+  //       }
+  //     }
+  //   }
 
-    // recalculer immédiatement l'UI
-    this.updateCommandeTotals();
-  }
+  //   // recalculer immédiatement l'UI
+  //   this.updateCommandeTotals();
+  // }
 
   selectProductForDiscount(product: ProduitDetailsResponseDTO) {
     this.lastSelectedForDiscount = product.id;

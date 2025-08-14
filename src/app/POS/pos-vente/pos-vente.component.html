@@ -201,6 +201,7 @@
         <strong>{{ getTotalCart() | cfaCurrency }}</strong>
       </div>
 
+      <!-- Dans la section remise -->
       <div class="discount-input" *ngIf="discountMode.active">
         <button class="btn-currency" 
                 [class.active]="discountMode.type === 'CFA'"
@@ -208,7 +209,13 @@
           CFA
         </button>
         
-        <input type="number" placeholder="0" class="input-discount"[(ngModel)]="discountMode.value"(input)="onDiscountInputChange()"min="0">
+        <!-- Modifier ici : utiliser currentDiscountInput -->
+        <input type="number" 
+              placeholder="0" 
+              class="input-discount"
+              [value]="currentDiscountInput"
+              (input)="onDiscountInputChange($event)"
+              min="0">
         
         <button class="btn-percent" 
                 [class.active]="discountMode.type === '%'"
@@ -271,12 +278,19 @@
       <button tabindex="-1" (click)="handleKeyPress('2')">2</button>
       <button tabindex="-1" (click)="handleKeyPress('3')">3</button>
       <!-- <button tabindex="-1" class="btn_keypad_action btn_keypad_active">Qté</button> -->
-      <button tabindex="-1" class="btn_keypad_action btn_keypad_active" (click)="activateQuantityMode()">Qté</button>
+      <!-- <button tabindex="-1" class="btn_keypad_action btn_keypad_active" (click)="activateQuantityMode()">Qté</button> -->
+      <button [class.btn_keypad_active]="inputMode === 'quantity'" 
+          (click)="setInputMode('quantity')">
+    Qté
+  </button>
       
       <button tabindex="-1" (click)="handleKeyPress('4')">4</button>
       <button tabindex="-1" (click)="handleKeyPress('5')">5</button>
       <button tabindex="-1" (click)="handleKeyPress('6')">6</button>
-      <button class="btn_keypad_action">%</button>
+      <button [class.btn_keypad_active]="inputMode === 'discount'" 
+          (click)="setInputMode('discount')">
+    Remise
+  </button>
       
       <button tabindex="-1" (click)="handleKeyPress('7')">7</button>
       <button tabindex="-1" (click)="handleKeyPress('8')">8</button>
