@@ -182,6 +182,7 @@ export class PosVenteComponent {
   }
 
   currentDiscountInput: string = '';
+  disablePhysicalKeyboard = false;
 
   constructor(
     private router: Router,
@@ -330,11 +331,11 @@ export class PosVenteComponent {
   }
 
   onDiscountInputChange(event: any) {
-    this.currentDiscountInput = event.target.value;
-    // Convertir en nombre et mettre à jour discountMode.value
-    this.discountMode.value = parseInt(this.currentDiscountInput, 10) || 0;
-    this.updateCommandeTotals();
-  }
+  this.currentDiscountInput = event.target.value;
+  // Utilisez parseFloat pour gérer les grands nombres
+  this.discountMode.value = parseFloat(this.currentDiscountInput) || 0;
+  this.updateCommandeTotals();
+}
 
   // Méthode pour gérer les touches du keypad en mode remise
   handleDiscountKeyPress(key: string) {
@@ -343,14 +344,13 @@ export class PosVenteComponent {
         this.currentDiscountInput = this.currentDiscountInput.slice(0, -1);
         break;
       case ',':
-        // Ignorer pour les remises
         break;
       default:
-        if (this.currentDiscountInput.length < 5) {
+        // Augmentez la limite de 5 à 10
+        if (this.currentDiscountInput.length < 10) {
           this.currentDiscountInput += key;
         }
     }
-    // Mettre à jour la valeur numérique
     this.discountMode.value = parseInt(this.currentDiscountInput, 10) || 0;
     this.updateCommandeTotals();
   }
@@ -1148,6 +1148,9 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   }
 
   handleKeyPressPhysical(event: KeyboardEvent) {
+    if (this.disablePhysicalKeyboard || this.discountMode.active) return;
+    // condition pour ignorer si le champ de remise est actif
+    if (this.discountMode.active) return;
     // Ignorer si un popup est ouvert ou si on est dans un champ de saisie
     if (this.showDetailPopup || this.showClientPopup || this.showAddClientPopup) return;
     

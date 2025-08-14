@@ -152,7 +152,7 @@
                 <span>({{ item.product.prixVente | cfaCurrency }})</span>
                 <!-- Indicateur de remise -->
                 <span *ngIf="getProductDiscount(item.product.id) > 0" class="discount-badge">
-                  -{{ getProductDiscount(item.product.id) | cfaCurrency }}
+                  {{ getProductDiscount(item.product.id) | cfaCurrency }}
                 </span>
               </p>
             </div>
@@ -214,12 +214,15 @@
         </button>
         
         <!-- Modifier ici : utiliser currentDiscountInput -->
-        <input type="number" 
-              placeholder="0" 
-              class="input-discount"
-              [value]="currentDiscountInput"
-              (input)="onDiscountInputChange($event)"
-              min="0">
+        <input 
+          type="number" 
+          placeholder="0" 
+          class="input-discount"
+          [value]="currentDiscountInput"
+          (input)="onDiscountInputChange($event)"
+          (focus)="disablePhysicalKeyboard = true"
+          (blur)="disablePhysicalKeyboard = false"
+          min="0">
         
         <button class="btn-percent" 
                 [class.active]="discountMode.type === '%'"
