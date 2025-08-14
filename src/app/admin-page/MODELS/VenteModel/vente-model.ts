@@ -5,7 +5,9 @@ export interface VenteRequest {
   clientNom?: string;    // Changé de nomClient à clientNom
   clientNumero?: string; // Changé de telClient à clientNumero
   modePaiement?: string;
-  montantPaye?: number;
+  // montantPaye?: number;
+  remises?: { [produitId: string]: number }; // Nouveau: remises par produit (%)
+  remiseGlobale?: number; // Nouveau: remise globale (%)
 }
 
 export interface VenteResponse {

@@ -9,7 +9,7 @@ ul {
 
 .section_contenu_container {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr 400px;
   flex: 1;          /* prend l’espace restant */
   min-height: 0;    /* permet à la colonne de gauche de rétrécir */
 }
@@ -306,7 +306,7 @@ ul {
   display: flex;
   justify-content: space-between;
   padding: 0.25rem 0;
-  border-bottom: 1px solid #e2e8f0;
+  // border-bottom: 1px solid #e2e8f0;
 }
 .summary_panel .double_row.total {
   font-size: 1.1rem;
@@ -592,22 +592,19 @@ ul.ul_list {
 .btn-currency,
 .btn-percent {
   background: #F0F0F0;
-  border: none;
+  border: 1px solid #b2b2b2;
   border-radius: 4px;
-  
   font-size: 16px;
   cursor: pointer;
 }
 
-.btn-currency {
-  padding: 8px 12px;
-  font-size: 12px!important;
+.btn-percent {
+  padding: 2px 15px;
 }
 
-.btn-percent {
-  padding: 3px 15px;
-  background-color: #CDE3FA;
-  border: 1px solid #0672e4;
+.btn-currency {
+  padding: 5px 12px;
+  font-size: 12px!important;
 }
 
 .input-discount {
@@ -678,6 +675,12 @@ ul.ul_list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   padding: 0 10px;
+}
+
+.double_remise_facture {
+  gap: 3px;
+  display: grid;
+  grid-template-columns: 75px 1fr;
 }
 
 .selected {
@@ -790,4 +793,78 @@ ul.ul_list {
 /* Curseur pour les zones déplaçables */
 .popup-header {
   cursor: move;
+}
+
+/* Styles pour les badges de remise */
+.discount-badge {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 2px 6px 2px 0;
+  border-radius: 4px;
+  font-size: 9px;
+  margin-left: 5px;
+}
+
+/* Bouton d'édition de remise */
+.edit-discount {
+  // margin-left: 10px;
+  cursor: pointer;
+  color: #0672E4;
+  
+  &:hover {
+    color: darken(#0672E4, 15%);
+  }
+}
+
+/* Style actif pour les boutons CFA/% */
+.btn-currency.active, .btn-percent.active {
+  color: #000;
+  background-color: #CDE3FA;
+  border: 1px solid #0672e4;
+}
+
+// pos-vente.component.scss
+.global-discount {
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+
+  .discount-input {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    
+    button {
+      padding: 4px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f8f8f8;
+      cursor: pointer;
+      
+      &.active {
+        background: #0672E4;
+        color: white;
+        border-color: #0672E4;
+      }
+    }
+    
+    input {
+      width: 70px;
+      text-align: center;
+      padding: 6px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  }
+}
+
+.double_row.total {
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+// Indicateur visuel
+.global-active {
+  background-color: #e6f7ff !important;
+  border: 1px solid #91d5ff !important;
 }
