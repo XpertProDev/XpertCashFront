@@ -143,6 +143,7 @@ export class PosVenteComponent {
 
   selectedClient: Clients | null = null;
   selectedEntreprise: EntrepriseClient | null = null;
+  isComposingNewQuantity: boolean = false;
 
   isDragging = false;
   startX = 0;
@@ -172,6 +173,16 @@ export class PosVenteComponent {
   // Liste des remises par produit
   productDiscounts: Map<number, number> = new Map();
   lastSelectedForDiscount: number | null = null;
+
+  inputMode: 'quantity' | 'discount' = 'quantity'; // Nouveau flag
+
+  // Méthode pour basculer entre les modes
+  setInputMode(mode: 'quantity' | 'discount') {
+    this.inputMode = mode;
+  }
+
+  currentDiscountInput: string = '';
+  disablePhysicalKeyboard = false;
 
   constructor(
     private router: Router,
@@ -319,6 +330,31 @@ export class PosVenteComponent {
     return photoPath;
   }
 
+  onDiscountInputChange(event: any) {
+  this.currentDiscountInput = event.target.value;
+  // Utilisez parseFloat pour gérer les grands nombres
+  this.discountMode.value = parseFloat(this.currentDiscountInput) || 0;
+  this.updateCommandeTotals();
+}
+
+  // Méthode pour gérer les touches du keypad en mode remise
+  handleDiscountKeyPress(key: string) {
+    switch (key) {
+      case 'backspace':
+        this.currentDiscountInput = this.currentDiscountInput.slice(0, -1);
+        break;
+      case ',':
+        break;
+      default:
+        // Augmentez la limite de 5 à 10
+        if (this.currentDiscountInput.length < 10) {
+          this.currentDiscountInput += key;
+        }
+    }
+    this.discountMode.value = parseInt(this.currentDiscountInput, 10) || 0;
+    this.updateCommandeTotals();
+  }
+
   openPaymentPopup() {
     this.showPaymentPopup = true;
     this.totalAmount = this.getTotalCart(); // S'assurer que totalAmount est défini
@@ -424,6 +460,11 @@ addToCart(produit: ProduitDetailsResponseDTO): void {
   const currentQty = this.cart.get(produit.id) || 0;
   this.cart.set(produit.id, currentQty + 1);
   this.saveActiveCart();
+  this.selectedProduct = produit;
+  this.isComposingNewQuantity = false;
+
+  // this.quantityMode = true;
+  // this.currentQuantityInput = (this.cart.get(produit.id) || 0).toString();
 }
 
 // --- mettre à jour calculateItemTotal pour tenir compte de la remise live ---
@@ -457,25 +498,25 @@ getTotalDiscount(): number {
   return total;
 }
 
-// Mettre à jour le total général
-getTotalCart(): number {
-  const subtotal = this.getSubtotal();               // total sans remises
-  const productDiscount = this.getTotalDiscount();   // somme des remises de lignes
-  const baseAfterProductDiscounts = subtotal - productDiscount;
+  // Mettre à jour le total général
+  getTotalCart(): number {
+    const subtotal = this.getSubtotal();               // total sans remises
+    const productDiscount = this.getTotalDiscount();   // somme des remises de lignes
+    const baseAfterProductDiscounts = subtotal - productDiscount;
 
-  let total = baseAfterProductDiscounts;
+    let total = baseAfterProductDiscounts;
 
-  if (this.globalDiscount.active && this.globalDiscount.value > 0) {
-    if (this.globalDiscount.type === 'CFA') {
-      total -= this.globalDiscount.value;
-    } else {
-      // appliquer le pourcentage SUR la base après remises produits
-      total -= baseAfterProductDiscounts * (this.globalDiscount.value / 100);
+    if (this.globalDiscount.active && this.globalDiscount.value > 0) {
+      if (this.globalDiscount.type === 'CFA') {
+        total -= this.globalDiscount.value;
+      } else {
+        // appliquer le pourcentage SUR la base après remises produits
+        total -= baseAfterProductDiscounts * (this.globalDiscount.value / 100);
+      }
     }
-  }
 
-  return Math.max(0, total);
-}
+    return Math.max(0, total);
+  }
 
 
   // Supprimer aussi la remise quand on retire un produit
@@ -546,26 +587,34 @@ getTotalCart(): number {
     const selectedQty = this.getSelectedQuantity(produit.id);
     return produit.quantite - selectedQty;
   }
-
-  // Méthode pour gérer les touches du clavier
+  
   handleKeyPress(key: string): void {
-    if (!this.selectedProduct || !this.quantityMode) return;
+    if (this.inputMode === 'discount') {
+      this.handleDiscountKeyPress(key); // Gestion remise
+    } else {
+      if (!this.selectedProduct) return; // Vérifiez si un produit est sélectionné
+
+    // Réinitialiser le champ si c'est le premier chiffre d'une nouvelle saisie
+    if (!this.isComposingNewQuantity) {
+      this.currentQuantityInput = '';
+      this.isComposingNewQuantity = true;
+    }
 
     switch (key) {
       case 'backspace':
         this.currentQuantityInput = this.currentQuantityInput.slice(0, -1);
         break;
       case '+/-':
-        // Inversion du signe (optionnel)
+        // Inversion du signe
         break;
       default:
-        // Augmentez la limite à 5 chiffres
         if (this.currentQuantityInput.length < 5) {
           this.currentQuantityInput += key;
         }
     }
 
     this.applyQuantityToProduct();
+    }
   }
 
   calculateDiscountedPrice(item: { product: ProduitDetailsResponseDTO, quantity: number }): number {
@@ -646,21 +695,21 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   return quantite <= produit.seuilAlert;
 }
 
-getQuantiteClass(produit: ProduitDetailsResponseDTO): string {
-  return this.isQuantiteCritique(produit) ? 'alert-low-stock' : 'safe-stock';
-}
+  getQuantiteClass(produit: ProduitDetailsResponseDTO): string {
+    return this.isQuantiteCritique(produit) ? 'alert-low-stock' : 'safe-stock';
+  }
 
+  getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
+    const boutique = produit.boutiques?.find(b => b.id === produit.boutiqueId);
+    return boutique?.quantite ?? 0;
+  }
 
-
-getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
-  const boutique = produit.boutiques?.find(b => b.id === produit.boutiqueId);
-  return boutique?.quantite ?? 0;
-}
-
-
-
-
-
+  activateQuantityMode() {
+    if (this.selectedProduct) {
+      this.quantityMode = true;
+      this.currentQuantityInput = (this.cart.get(this.selectedProduct.id) || 0).toString();
+    }
+  }
 
   endPress(): void {
     if (this.longPressTimer) {
@@ -1066,13 +1115,6 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     });
   }
 
-  // Ouvrir le popup
-  openListClientPopup(): void {
-    this.showClientPopup = true;
-    this.loadClients();
-    this.loadEntreprisesForPopup(); // Charger les entreprises
-  }
-
   // Sélectionner une entreprise
   // selectEntreprise(entreprise: EntrepriseClient) {
   //   console.log('Entreprise sélectionnée:', entreprise);
@@ -1106,6 +1148,9 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
   }
 
   handleKeyPressPhysical(event: KeyboardEvent) {
+    if (this.disablePhysicalKeyboard || this.discountMode.active) return;
+    // condition pour ignorer si le champ de remise est actif
+    if (this.discountMode.active) return;
     // Ignorer si un popup est ouvert ou si on est dans un champ de saisie
     if (this.showDetailPopup || this.showClientPopup || this.showAddClientPopup) return;
     
@@ -1438,27 +1483,27 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
   }
 
   // --- on discount input change : appeler updateCommandeTotals() pour que l'UI rafraîchisse en temps réel ---
-  onDiscountInputChange() {
-    if (this.discountMode.value < 0) {
-      this.discountMode.value = 0;
-    }
+  // onDiscountInputChange() {
+  //   if (this.discountMode.value < 0) {
+  //     this.discountMode.value = 0;
+  //   }
 
-    // Si l'utilisateur saisit une valeur sans avoir ciblé de produit,
-    // tenter d'auto-cibler (dernier sélectionné ou la seule ligne du panier)
-    if (!this.discountMode.productId) {
-      if (this.lastSelectedForDiscount) {
-        this.discountMode.productId = this.lastSelectedForDiscount;
-      } else {
-        const items = this.getCartItems();
-        if (items.length === 1) {
-          this.discountMode.productId = items[0].product.id;
-        }
-      }
-    }
+  //   // Si l'utilisateur saisit une valeur sans avoir ciblé de produit,
+  //   // tenter d'auto-cibler (dernier sélectionné ou la seule ligne du panier)
+  //   if (!this.discountMode.productId) {
+  //     if (this.lastSelectedForDiscount) {
+  //       this.discountMode.productId = this.lastSelectedForDiscount;
+  //     } else {
+  //       const items = this.getCartItems();
+  //       if (items.length === 1) {
+  //         this.discountMode.productId = items[0].product.id;
+  //       }
+  //     }
+  //   }
 
-    // recalculer immédiatement l'UI
-    this.updateCommandeTotals();
-  }
+  //   // recalculer immédiatement l'UI
+  //   this.updateCommandeTotals();
+  // }
 
   selectProductForDiscount(product: ProduitDetailsResponseDTO) {
     this.lastSelectedForDiscount = product.id;
@@ -1627,5 +1672,25 @@ getQuantiteDansBoutiqueCourante(produit: ProduitDetailsResponseDTO): number {
     }
   }
 
+
+  // Ouvrir le popup
+  openListClientPopup(): void {
+    this.showClientPopup = true;
+    this.loadClients();
+    this.loadEntreprisesForPopup(); // Charger les entreprises
+  }
+
+  isEditingDiscount(productId: number): boolean {
+    return this.discountMode.active && this.discountMode.productId === productId;
+  }
+
+  saveDiscount(produit: ProduitDetailsResponseDTO) {
+  this.applyDiscount(produit);
+  this.updateCommandeTotals();
+  
+  // Réinitialiser le champ de remise
+  this.currentDiscountInput = '';
+  this.discountMode.value = 0;
+}
 
 }

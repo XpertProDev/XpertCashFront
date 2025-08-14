@@ -225,75 +225,75 @@ export class PosAccueilComponent {
     });
   }
  
-  // onLogout(): void {
-  //   console.log("Début de la procédure de déconnexion...");
+  onLogout(): void {
+    console.log("Début de la procédure de déconnexion...");
 
-  //   // Récupérer l'ID de la boutique active depuis le service BoutiqueStateService
-  //   const boutiqueId = this.boutiqueState.getCurrentValue();
+    // Récupérer l'ID de la boutique active depuis le service BoutiqueStateService
+    const boutiqueId = this.boutiqueState.getCurrentValue();
 
-  //   if (!boutiqueId) {
-  //     console.error("Aucune boutique active détectée.");
-  //     this.router.navigate(['/analytics']);
-  //     return;
-  //   }
+    if (!boutiqueId) {
+      console.error("Aucune boutique active détectée.");
+      this.router.navigate(['/analytics']);
+      return;
+    }
 
-  //   this.userService.getUserInfo().subscribe({
-  //     next: (user) => {
-  //       console.log('Utilisateur récupéré:', user);
-  //       const userPermissions = user.permissions; 
+    this.userService.getUserInfo().subscribe({
+      next: (user) => {
+        console.log('Utilisateur récupéré:', user);
+        const userPermissions = user.permissions; 
 
-  //       // Vérifier si l'utilisateur a uniquement la permission "VENDRE_PRODUITS"
-  //       if (userPermissions.length === 1 && userPermissions.includes("VENDRE_PRODUITS")) {
-  //         console.log('L\'utilisateur a uniquement la permission "VENDRE_PRODUITS". Tentative de fermeture de la caisse...');
+        // Vérifier si l'utilisateur a uniquement la permission "VENDRE_PRODUITS"
+        if (userPermissions.length === 1 && userPermissions.includes("VENDRE_PRODUITS")) {
+          console.log('L\'utilisateur a uniquement la permission "VENDRE_PRODUITS". Tentative de fermeture de la caisse...');
           
-  //         // Fermer la caisse pour la boutique active
-  //         this.posCaisseService.fermerCaisse(boutiqueId).subscribe({
-  //           next: (response) => {
-  //             console.log('Caisse fermée avec succès:', response);
-  //             // Déconnexion de l'utilisateur
-  //             this.userService.logoutUser();  
-  //             console.log('Déconnexion de l\'utilisateur...');
-  //             this.router.navigate(['/connexion']).then(success => {
-  //               console.log("Déconnexion réussie ?", success);
-  //             });
-  //           },
-  //           error: (err) => {
-  //             console.error('Erreur lors de la fermeture de la caisse:', err.message);
-  //             // Si une erreur se produit lors de la fermeture de la caisse, rediriger vers la page d'analytics.
-  //             this.router.navigate(['/analytics']).then(success => {
-  //               console.log("Navigation vers analytics réussie ?", success);
-  //             });
-  //           }
-  //         });
-  //       } else {
-  //         console.log('L\'utilisateur n\'a pas uniquement la permission "VENDRE_PRODUITS", fermeture de la caisse et redirection vers analytics...');
+          // Fermer la caisse pour la boutique active
+          this.posCaisseService.fermerCaisse(boutiqueId).subscribe({
+            next: (response) => {
+              console.log('Caisse fermée avec succès:', response);
+              // Déconnexion de l'utilisateur
+              this.userService.logoutUser();  
+              console.log('Déconnexion de l\'utilisateur...');
+              this.router.navigate(['/connexion']).then(success => {
+                console.log("Déconnexion réussie ?", success);
+              });
+            },
+            error: (err) => {
+              console.error('Erreur lors de la fermeture de la caisse:', err.message);
+              // Si une erreur se produit lors de la fermeture de la caisse, rediriger vers la page d'analytics.
+              this.router.navigate(['/analytics']).then(success => {
+                console.log("Navigation vers analytics réussie ?", success);
+              });
+            }
+          });
+        } else {
+          console.log('L\'utilisateur n\'a pas uniquement la permission "VENDRE_PRODUITS", fermeture de la caisse et redirection vers analytics...');
           
-  //         // Fermer la caisse pour la boutique active
-  //         this.posCaisseService.fermerCaisse(boutiqueId).subscribe({
-  //           next: (response) => {
-  //             console.log('Caisse fermée avec succès:', response);
-  //             // Redirection vers analytics après fermeture de la caisse
-  //             this.router.navigate(['/analytics']).then(success => {
-  //               console.log("Navigation vers analytics réussie ?", success);
-  //             });
-  //           },
-  //           error: (err) => {
-  //             console.error('Erreur lors de la fermeture de la caisse:', err.message);
-  //             // Si une erreur se produit lors de la fermeture de la caisse, rediriger vers la page d'analytics.
-  //             this.router.navigate(['/analytics']).then(success => {
-  //               console.log("Navigation vers analytics réussie ?", success);
-  //             });
-  //           }
-  //         });
-  //       }
-  //     },
-  //     error: (err) => {
-  //       console.error('Erreur lors de la récupération des informations utilisateur:', err);
-  //       // Gestion des erreurs de récupération des infos utilisateur
-  //       this.router.navigate(['/analytics']);
-  //     }
-  //   });
-  // }
+          // Fermer la caisse pour la boutique active
+          this.posCaisseService.fermerCaisse(boutiqueId).subscribe({
+            next: (response) => {
+              console.log('Caisse fermée avec succès:', response);
+              // Redirection vers analytics après fermeture de la caisse
+              this.router.navigate(['/analytics']).then(success => {
+                console.log("Navigation vers analytics réussie ?", success);
+              });
+            },
+            error: (err) => {
+              console.error('Erreur lors de la fermeture de la caisse:', err.message);
+              // Si une erreur se produit lors de la fermeture de la caisse, rediriger vers la page d'analytics.
+              this.router.navigate(['/analytics']).then(success => {
+                console.log("Navigation vers analytics réussie ?", success);
+              });
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération des informations utilisateur:', err);
+        // Gestion des erreurs de récupération des infos utilisateur
+        this.router.navigate(['/analytics']);
+      }
+    });
+  }
 
   prepareFermerCaisse(): void {
     this.isLoadingCaisseDetails = true;

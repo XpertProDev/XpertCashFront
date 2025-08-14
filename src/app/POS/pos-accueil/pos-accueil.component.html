@@ -162,7 +162,7 @@
         <div class="caisse-details-grid">
           <div class="detail-item">
             <span class="detail-label">Statut:</span>
-            <span class="detail-value" [class.text-success]="caisseDetails.statut === 'OUVERTE'"
+            <span class="detail-value" [class.text-success-status]="caisseDetails.statut === 'OUVERTE'"
                                  [class.text-danger]="caisseDetails.statut === 'FERMEE'">
               {{ caisseDetails.statut === 'OUVERTE' ? 'Ouverte' : 'Fermée' }}
             </span>
@@ -218,7 +218,7 @@
         Annuler
       </button>
       <button class="btn btn-confirm" 
-              (click)="confirmFermerCaisse()"
+              (click)="onLogout()"
               [disabled]="isLoadingCaisseDetails || !caisseDetails">
         Confirmer la fermeture
       </button>

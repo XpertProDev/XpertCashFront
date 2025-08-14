@@ -142,7 +142,7 @@
       <ul class="ul_list_produit_select">
         <li class="li_list_produit_select" (click)="selectProductForDiscount(item.product)"
             *ngFor="let item of getCartItems()">
-          <div class="double">
+          <div class="double" style="gap: 5px;">
             <div class="nombre_select">
               {{ item.quantity }}
             </div>
@@ -152,7 +152,7 @@
                 <span>({{ item.product.prixVente | cfaCurrency }})</span>
                 <!-- Indicateur de remise -->
                 <span *ngIf="getProductDiscount(item.product.id) > 0" class="discount-badge">
-                  -{{ getProductDiscount(item.product.id) | cfaCurrency }}
+                  {{ getProductDiscount(item.product.id) | cfaCurrency }}
                 </span>
               </p>
             </div>
@@ -161,12 +161,16 @@
             <div class="price_produit">
               {{ calculateItemTotal(item) | cfaCurrency }}
             </div>
-            <div class="icon_close_select" (click)="removeProduct(item.product.id)">
-              <i class="ri-close-circle-fill"></i>
-            </div>
+            <div class="icon_close_select" 
+              *ngIf="inputMode !== 'discount' && !isEditingDiscount(item.product.id)" 
+              (click)="removeProduct(item.product.id)">
+            <i class="ri-close-circle-fill"></i>
+          </div>
             <!-- Bouton pour modifier la remise -->
-            <div class="edit-discount" (click)="editDiscount(item.product)">
-              <i class="ri-edit-2-line"></i>
+           <div class="edit-discount" 
+                *ngIf="inputMode === 'discount'"
+                (click)="isEditingDiscount(item.product.id) ? saveDiscount(item.product) : editDiscount(item.product)">
+              <i [class]="isEditingDiscount(item.product.id) ? 'ri-check-fill' : 'ri-edit-2-line'"></i>
             </div>
           </div>
         </li>
@@ -201,6 +205,7 @@
         <strong>{{ getTotalCart() | cfaCurrency }}</strong>
       </div>
 
+      <!-- Dans la section remise -->
       <div class="discount-input" *ngIf="discountMode.active">
         <button class="btn-currency" 
                 [class.active]="discountMode.type === 'CFA'"
@@ -208,7 +213,16 @@
           CFA
         </button>
         
-        <input type="number" placeholder="0" class="input-discount"[(ngModel)]="discountMode.value"(input)="onDiscountInputChange()"min="0">
+        <!-- Modifier ici : utiliser currentDiscountInput -->
+        <input 
+          type="number" 
+          placeholder="0" 
+          class="input-discount"
+          [value]="currentDiscountInput"
+          (input)="onDiscountInputChange($event)"
+          (focus)="disablePhysicalKeyboard = true"
+          (blur)="disablePhysicalKeyboard = false"
+          min="0">
         
         <button class="btn-percent" 
                 [class.active]="discountMode.type === '%'"
@@ -249,18 +263,18 @@
           </span>
         </div>
 
-        <div class="double_remise_facture container_facture">
+        <!-- <div class="double_remise_facture container_facture">
           <button style="border: none;" 
                   class="paiement_btn remise_produit"
                   (click)="toggleDiscountMode()">
             {{ discountMode.active ? 'Annuler' : 'Remise' }}
-          </button>
+          </button> -->
 
           <div class="paiement_btn btn_facture">
             <p>Facture</p>
             <input type="checkbox">
           </div>
-        </div>
+        <!-- </div> -->
 
       </div>
     </div>
@@ -270,12 +284,20 @@
       <button tabindex="-1" (click)="handleKeyPress('1')">1</button>
       <button tabindex="-1" (click)="handleKeyPress('2')">2</button>
       <button tabindex="-1" (click)="handleKeyPress('3')">3</button>
-      <button tabindex="-1" class="btn_keypad_action btn_keypad_active">Qté</button>
+      <!-- <button tabindex="-1" class="btn_keypad_action btn_keypad_active">Qté</button> -->
+      <!-- <button tabindex="-1" class="btn_keypad_action btn_keypad_active" (click)="activateQuantityMode()">Qté</button> -->
+      <button [class.btn_keypad_active]="inputMode === 'quantity'" 
+          (click)="setInputMode('quantity')">
+    Qté
+  </button>
       
       <button tabindex="-1" (click)="handleKeyPress('4')">4</button>
       <button tabindex="-1" (click)="handleKeyPress('5')">5</button>
       <button tabindex="-1" (click)="handleKeyPress('6')">6</button>
-      <button class="btn_keypad_action">%</button>
+      <button [class.btn_keypad_active]="inputMode === 'discount'" 
+          (click)="setInputMode('discount')">
+    Remise
+  </button>
       
       <button tabindex="-1" (click)="handleKeyPress('7')">7</button>
       <button tabindex="-1" (click)="handleKeyPress('8')">8</button>
