@@ -210,6 +210,7 @@ export class PosCommandeComponent implements OnDestroy {
     // on récupère toujours les ventes du backend (on peut cacher cache si nécessaire)
     this.posCommandeService.getVentesByVendeur(vendeurId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (ventes) => {
+        console.debug('Ventes API raw:', ventes);
         this.allVentes = ventes || [];
         this.applyVentesFilter(key);
         // si on vient d'activer la vue ventes, positionne la première vente active
@@ -231,35 +232,24 @@ export class PosCommandeComponent implements OnDestroy {
   }
 
   private matchesVenteStatus(v: VenteResponse, key: FilterKey): boolean {
-    // normalize keys/values to lowercase for comparaison
-    const possible = [
-      (v as any).statut,
-      (v as any).etat,
-      (v as any).status,
-      (v as any).paymentStatus,
-      (v as any).isPaid ? 'payer' : undefined,
-      (v as any).paye ? 'payer' : undefined
-    ].filter(Boolean).map(x => String(x).toLowerCase());
+  const cat = this.determineVenteCategory(v);
 
-    const mapKeyToTerms: Record<FilterKey, string[]> = {
-      'en-cours': ['en cours', 'pending', 'in_progress', 'ongoing', 'draft'],
-      'payer': ['payer', 'paid', 'payed', 'completed', 'settled'],
-      'terminee': ['terminee', 'finished', 'done', 'completed'],
-      'annuler': ['annuler', 'cancelled', 'canceled', 'void']
-    };
-
-    const targetTerms = mapKeyToTerms[key];
-
-    // if vente has no status-like fields, assume:
-    if (!possible.length) {
-      // consider 'payer' as vente where montantTotal > 0 and maybe un champ payé — fallback: show all for non-en-cours
-      if (key === 'en-cours') return false;
-      return true;
-    }
-
-    // check any of possible values contains any of targetTerms
-    return possible.some(pVal => targetTerms.some(term => pVal.includes(term)));
+  if (key === 'en-cours') {
+    return cat === 'en-cours';
   }
+  if (key === 'payer') {
+    return cat === 'payer';
+  }
+  if (key === 'terminee') {
+    return cat === 'terminee';
+  }
+  if (key === 'annuler') {
+    return cat === 'annuler';
+  }
+
+  // fallback : si filtre inconnu, ne rien montrer
+  return false;
+}
 
   loadVentes() {
     const vendeurId = this.usersService.getCurrentUser()?.id;
@@ -392,25 +382,76 @@ onSearch(term: string) {
 // }
 
   getVenteStatus(vente: VenteResponse): string {
-    const v = vente as any; // Assertion pour accéder dynamiquement aux propriétés
-    
-    // Vérification du statut de paiement
-    if (v.paymentStatus?.toLowerCase() === 'paid' || v.isPaid || v.paye) {
-      return 'Payer';
-    }
-    
-    // Logique pour les autres statuts
-    const candidates = [
-      v.statut,
-      v.etat,
-      v.status,
-      v.paymentStatus,
-      v.isPaid ? 'Payer' : undefined,
-      v.paye ? 'Payer' : undefined
-    ].filter(Boolean).map(x => String(x));
+  const cat = this.determineVenteCategory(vente);
 
-    return candidates.length ? candidates[0] : '—';
+  switch (cat) {
+    case 'payer': return 'Payer';
+    case 'annuler': return 'Annuler';
+    case 'terminee': return 'Terminée';
+    case 'en-cours': return 'En cours';
+    default: return '—';
   }
+}
+
+  private normalizeStr(val: any): string {
+    if (val === null || val === undefined) return '';
+    const s = String(val).toLowerCase();
+    // enlever accents pour meilleure robustesse (ex : 'annulé' -> 'annule')
+    try {
+      return s.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+    } catch {
+      // fallback si l'environnement ne supporte pas \p{Diacritic}
+      return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+  }
+
+  /**
+ * Détermine la catégorie générique d'une vente : 'payer' | 'annuler' | 'en-cours' | 'terminee' | 'unknown'
+ */
+private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cours' | 'terminee' | 'unknown' {
+  const vAny = v as any;
+
+  // champs candidats (convertis en string normalisé)
+  const candidates = [
+    vAny.paymentStatus,
+    vAny.statut,
+    vAny.etat,
+    vAny.status,
+    // si isPaid/paye sont booléens -> les forçons en string 'payer'
+    vAny.isPaid ? 'payer' : undefined,
+    vAny.paye ? 'payer' : undefined
+  ].filter(Boolean).map(x => this.normalizeStr(x));
+
+  // helpers pour tester la présence de mots-clés
+  const has = (terms: string[]) => candidates.some(c => terms.some(t => c.includes(t)));
+
+  // vérifier 'payer' / 'paid' / variantes
+  if (has(['payer', 'paid', 'paye', 'payed', 'settled', 'completed', 'completed'])) {
+    return 'payer';
+  }
+
+  // vérifier 'annuler' / cancelled
+  if (has(['annul', 'cancel', 'void'])) {
+    return 'annuler';
+  }
+
+  // vérifier terminé/finished/done
+  if (has(['termine', 'terminé', 'finished', 'done', 'completed'])) {
+    return 'terminee';
+  }
+
+  // vérifier en cours / pending / draft / in_progress
+  if (has(['en cours', 'encours', 'pending', 'in_progress', 'ongoing', 'draft'])) {
+    return 'en-cours';
+  }
+
+  // si aucun champ textuel mais montant payé > 0 ou montantPaye present, on peut déduire
+  if ((vAny.isPaid === true) || (typeof vAny.montantPaye === 'number' && vAny.montantPaye > 0)) {
+    return 'payer';
+  }
+
+  return 'unknown';
+}
 
 
   /* ---------------- Helpers UI ---------------- */
