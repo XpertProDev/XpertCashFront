@@ -148,7 +148,9 @@
                 <div class="icon_check">
                   <label class="cyber-checkbox">
                     <input 
-                        type="checkbox">
+                        type="checkbox"
+                        [(ngModel)]="item.selected"
+                        (change)="updateSelectedItems()">
                         
                         <span class="cyber-checkbox__mark">
                           <div class="cyber-checkbox__box">
@@ -251,5 +253,22 @@
              (keydown)="handleBackspace($event, 3, pin3, pin2)" />
     </div>
     <button (click)="verifyCode()">Valider</button>
+  </div>
+</div>
+
+<!-- Popup pour le motif -->
+<div *ngIf="showMotifPopup" class="popup-overlay">
+  <div class="popup">
+    <button class="close-btn" (click)="closeAllPopups()">
+      <i class="ri-close-line"></i>
+    </button>
+
+    <h2>Motif du remboursement</h2>
+    <textarea [(ngModel)]="motifRemboursement" placeholder="Raison du remboursement" rows="4"></textarea>
+    
+    <div class="btn-container">
+      <button class="btn-cancel" (click)="closeAllPopups()">Annuler</button>
+      <button class="btn-confirm" (click)="confirmRemboursement()">Confirmer</button>
+    </div>
   </div>
 </div>

@@ -9,7 +9,7 @@ import { ViewStateService } from '../pos-accueil/view-state.service';
 import { ProduitDetailsResponseDTO } from 'src/app/admin-page/MODELS/produit-category.model';
 import { CategorieService } from 'src/app/admin-page/SERVICES/categorie.service';
 import { CommandeStateService } from 'src/app/admin-page/SERVICES/commande-state.service';
-import { VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
+import { RemboursementRequest, VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { PosCommandeService } from 'src/app/admin-page/SERVICES/VenteService/pos-commande-service';
 import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
@@ -46,6 +46,11 @@ export class PosCommandeComponent implements OnDestroy {
   activeVenteId: number | null = null;
   activeVenteItems: any[] = [];
   activeVente: VenteResponse | null = null;
+
+  selectedItems: any[] = [];
+  motifRemboursement: string = '';
+  showMotifPopup: boolean = false;
+  isProcessing: boolean = false;
 
   // filtre
   filterOptions = [
@@ -419,12 +424,6 @@ onSearch(term: string) {
     // this.router.navigate(['/pos-accueil']);
   }
 
-  openCancelPopup(): void {
-    this.showCancelPopup = true;
-    this.pin = ['', '', '', ''];
-    this.isCodeWrong = false;
-  }
-
   closeCancelPopup(): void {
     this.showCancelPopup = false;
   }
@@ -441,15 +440,97 @@ onSearch(term: string) {
     }
   }
 
+  // Méthode pour mettre à jour les éléments sélectionnés
+  updateSelectedItems(): void {
+    this.selectedItems = this.activeVenteItems.filter(item => item.selected);
+  }
+
+  // Ouvrir la popup d'annulation
+  openCancelPopup(): void {
+    if (this.selectedItems.length === 0) {
+      alert('Veuillez sélectionner au moins un produit à rembourser');
+      return;
+    }
+    
+    this.showCancelPopup = true;
+    this.pin = ['', '', '', ''];
+    this.isCodeWrong = false;
+  }
+
+  // Vérifier le code PIN
   verifyCode(): void {
     const enteredPin = this.pin.join('');
-    // Remplacer par votre logique de vérification réelle
-    if (enteredPin === '1234') {
-      this.removeCommande(this.activeCommandeId);
-      this.closeCancelPopup();
-    } else {
-      this.isCodeWrong = true;
-      setTimeout(() => this.isCodeWrong = false, 500);
-    }
+    
+    this.usersService.verifyCode(enteredPin, ['ADMIN', 'MANAGER']).subscribe({
+      next: (isValid: boolean) => { // Ajout du type explicitement
+        if (isValid) {
+          this.showCancelPopup = false;
+          this.showMotifPopup = true;
+        } else {
+          this.handleInvalidPin();
+        }
+      },
+      error: () => this.handleInvalidPin()
+    });
   }
+
+  private handleInvalidPin(): void {
+    this.isCodeWrong = true;
+    setTimeout(() => this.isCodeWrong = false, 500);
+  }
+
+  // Confirmer le remboursement
+  confirmRemboursement(): void {
+    if (!this.motifRemboursement.trim()) {
+      alert('Veuillez saisir un motif');
+      return;
+    }
+
+    this.isProcessing = true;
+    
+    // Construire la requête
+    const request: RemboursementRequest = {
+      venteId: this.activeVenteId!,
+      produitsQuantites: this.getProduitsQuantites(),
+      motif: this.motifRemboursement,
+      rescodePin: this.pin.join('')
+    };
+
+    // Appel au service
+    this.posCommandeService.rembourserVente(request).subscribe({
+      next: (response) => {
+        this.closeAllPopups();
+        this.loadVentesAndFilter(this.currentFilterKey);
+        alert('Remboursement effectué avec succès');
+      },
+      error: (error) => {
+        console.error('Erreur remboursement', error);
+        alert('Erreur lors du remboursement: ' + error.error?.message || error.message);
+      },
+      complete: () => this.isProcessing = false
+    });
+  }
+
+  // Helper pour construire produitsQuantites
+  private getProduitsQuantites(): { [key: number]: number } {
+    const quantites: { [key: number]: number } = {};
+    
+    this.selectedItems.forEach(item => {
+      quantites[item.product.id] = item.quantity;
+    });
+    
+    return quantites;
+  }
+
+  // Fermer toutes les popups
+  closeAllPopups(): void {
+    this.showCancelPopup = false;
+    this.showMotifPopup = false;
+    this.motifRemboursement = '';
+    this.selectedItems = [];
+    
+    // Réinitialiser les sélections
+    this.activeVenteItems.forEach(item => item.selected = false);
+  }
+
 }

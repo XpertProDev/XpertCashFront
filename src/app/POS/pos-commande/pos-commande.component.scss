@@ -341,6 +341,32 @@ button {
   }
 }
 
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.btn-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-cancel {
+  background: #f44336;
+  color: white;
+}
+
+.btn-confirm {
+  background: #4CAF50;
+  color: white;
+}
+
 /* From Svg */ 
 .cyber-checkbox {
     --checkbox-size: 15px;
