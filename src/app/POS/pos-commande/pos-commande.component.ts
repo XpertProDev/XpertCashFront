@@ -521,6 +521,28 @@ private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cour
 
     this.posCommandeService.rembourserVente(request).subscribe({
       next: (response) => {
+        // Mettre à jour les quantités locales après remboursement
+        this.selectedItems.forEach(selectedItem => {
+          const venteItem = this.activeVenteItems.find(item => 
+            item.product.id === selectedItem.product.id);
+          
+          if (venteItem) {
+            venteItem.quantity -= selectedItem.quantity;
+            
+            // Si quantité devient 0, retirer l'item
+            if (venteItem.quantity <= 0) {
+              this.activeVenteItems = this.activeVenteItems.filter(
+                item => item.product.id !== selectedItem.product.id
+              );
+            }
+          }
+        });
+
+        // Mettre à jour le montant total de la vente
+        if (this.activeVente) {
+          this.activeVente.montantTotal = this.getUpdatedTotalAmount(this.activeVente);
+        }
+
         // Vérifier si tous les produits ont été remboursés
         const allProductsRefunded = this.activeVenteItems.length > 0 && 
                                   this.activeVenteItems.every(item => item.selected);
@@ -576,6 +598,40 @@ private updateVenteStatus(venteId: number, newStatus: string) {
     
     // Réinitialiser les sélections
     this.activeVenteItems.forEach(item => item.selected = false);
+  }
+
+  // Calculer le montant total sélectionné
+  getSelectedAmount(): number {
+    return this.selectedItems.reduce((total, item) => {
+      return total + (item.quantity * item.product.prixVente);
+    }, 0);
+  }
+
+  // Calculer le total des items sélectionnés
+  getSelectedItemsCount(): number {
+    return this.selectedItems.reduce((total, item) => total + item.quantity, 0);
+  }
+
+  // Calculer la nouvelle quantité totale après remboursement
+  getUpdatedTotalItems(vente: VenteResponse | null): number {
+    if (!vente) return 0;
+    
+    if (!this.activeVenteId || vente.venteId !== this.activeVenteId) {
+      return this.getTotalItems(vente);
+    }
+    
+    return this.getTotalItems(vente) - this.getSelectedItemsCount();
+  }
+
+  // Calculer le nouveau montant total après remboursement
+  getUpdatedTotalAmount(vente: VenteResponse | null): number {
+    if (!vente) return 0;
+    
+    if (!this.activeVenteId || vente.venteId !== this.activeVenteId) {
+      return vente.montantTotal || 0;
+    }
+    
+    return (vente.montantTotal || 0) - this.getSelectedAmount();
   }
 
 }

@@ -786,3 +786,8 @@ textarea {
       opacity: 0;
     }
   }
+
+.li_list_produit_select.selected-item {
+  background-color: rgba(255, 0, 0, 0.1);
+  border-left: 3px solid #ff0000;
+}

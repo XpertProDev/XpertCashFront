@@ -62,38 +62,38 @@
             </ng-container>
 
             <!-- Si on est en mode ventes (payer/terminee/annuler), on affiche les ventes -->
-            <ng-container *ngIf="currentFilterKey !== 'en-cours'">
-                <ul *ngFor="let vente of ventes" class="ul_commande"
-                    [class.ul_commande_active]="activeVenteId === vente.venteId"
-                    (click)="setActiveVente(vente.venteId)">
-                <li class="li_commande">
-                    <div class="commande_date_heure">
-                    <p class="commande_date">{{ vente.dateVente | date:'dd/MM/yyyy' }}</p>
-                    <p class="commande_heure">{{ vente.dateVente | date:'HH:mm' }}</p>
-                    </div>
-                </li>
-                <li class="li_commande">
-                    <div class="num_onglet_commande"><p>{{ vente.venteId }}</p></div>
-                </li>
-                <li class="li_commande">
-                    <div class="quantite_commande"><p>Quantité {{ getTotalItems(vente) }}</p></div>
-                </li>
-                <li class="li_commande">
-                    <div class="price_commande"><p>{{ vente.montantTotal | cfaCurrency }}</p></div>
-                </li>
-                <li class="li_commande" style="display:flex;align-items:center;gap:30px;">
-                    <div class="etat_commande">
-                        <p [class.status-paid]="getVenteStatus(vente) === 'Payer'">
-                            {{ getVenteStatus(vente) }}
-                        </p>
-                    </div>
-                </li>
-                </ul>
+              <ng-container *ngIf="currentFilterKey !== 'en-cours'">
+                  <ul *ngFor="let vente of ventes" class="ul_commande"
+                      [class.ul_commande_active]="activeVenteId === vente.venteId"
+                      (click)="setActiveVente(vente.venteId)">
+                  <li class="li_commande">
+                      <div class="commande_date_heure">
+                      <p class="commande_date">{{ vente.dateVente | date:'dd/MM/yyyy' }}</p>
+                      <p class="commande_heure">{{ vente.dateVente | date:'HH:mm' }}</p>
+                      </div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="num_onglet_commande"><p>{{ vente.venteId }}</p></div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="quantite_commande"><p>Quantité {{ getUpdatedTotalItems(vente) }}</p></div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="price_commande"><p>{{ getUpdatedTotalAmount(vente) | cfaCurrency }}</p></div>
+                  </li>
+                  <li class="li_commande" style="display:flex;align-items:center;gap:30px;">
+                      <div class="etat_commande">
+                          <p [class.status-paid]="getVenteStatus(vente) === 'Payer'">
+                              {{ getVenteStatus(vente) }}
+                          </p>
+                      </div>
+                  </li>
+                  </ul>
 
-                <div *ngIf="!ventes.length" class="loading_commande">
-                Pas de ventes pour ce filtre
-                </div>
-            </ng-container>
+                  <div *ngIf="!ventes.length" class="loading_commande">
+                  Pas de ventes pour ce filtre
+                  </div>
+              </ng-container>
             </div>
         </div>
     </div>
@@ -130,7 +130,7 @@
           <!-- Sinon : afficher les produits de la vente (backend) -->
           <ng-container *ngIf="currentFilterKey !== 'en-cours'">
             <ul class="ul_list_produit_select">
-              <li class="li_list_produit_select" *ngFor="let item of activeVenteItems">
+              <li class="li_list_produit_select" *ngFor="let item of activeVenteItems" [class.selected-item]="item.selected">
                 <div class="double_commande">
                   <div class="nombre_select">{{ item.quantity }}</div>
                   <div class="name_produit_select">
@@ -198,8 +198,13 @@
                 <span>00 CFA</span>
             </div>
             <div class="double_row total">
-                <strong>Total</strong>
-                <strong>{{ activeVente?.montantTotal | cfaCurrency }}</strong>
+              <strong>Total</strong>
+              <strong>
+                <span *ngIf="selectedItems.length > 0 && activeVente" style="text-decoration: line-through; opacity: 0.6;">
+                  {{ activeVente.montantTotal | cfaCurrency }}
+                </span>
+                {{ getUpdatedTotalAmount(activeVente) | cfaCurrency }}
+              </strong>
             </div>
         </div>
 
