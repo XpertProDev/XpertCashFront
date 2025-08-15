@@ -280,7 +280,7 @@ private loadInitialNotifications() {
   onLogout(): void {
     this.userService.logoutUser();
   }
-
+ 
   private base64ToObjectUrl(base64: string): string {
     const byteString = atob(base64.split(',')[1]);
     const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];

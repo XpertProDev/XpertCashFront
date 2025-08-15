@@ -18,13 +18,13 @@
 
                 <div class="btn_search_filtre">
                     <button class="btn" (click)="toggleFilterDropdown()">
-                    {{ currentFilterLabel }} <i class="ri-arrow-down-s-fill"></i>
+                      {{ currentFilterLabel }} <i class="ri-arrow-down-s-fill"></i>
                     </button>
 
                     <ul *ngIf="showFilterDropdown" class="dropdown_filter">
-                    <li *ngFor="let opt of filterOptions" (click)="selectFilter(opt.key)">
-                        {{ opt.label }}
-                    </li>
+                      <li *ngFor="let opt of filterOptions" (click)="selectFilter(opt.key)">
+                          {{ opt.label }}
+                      </li>
                     </ul>
                 </div>
             </div>
@@ -101,61 +101,60 @@
     <div class="section_contenu_right" style="background-color: #ffffff; height: 100vh; box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;">
         <div class="list_produit_select">
 
-  <!-- Si on est sur "En cours" : montrer les produits de la commande locale active -->
-  <ng-container *ngIf="currentFilterKey === 'en-cours'">
-    <ul class="ul_list_produit_select">
-      <li class="li_list_produit_select" *ngFor="let item of activeCommandeItems">
-        <div class="double_commande">
-          <div class="nombre_select">{{ item.quantity }}</div>
-          <div class="name_produit_select">
-            <p style="margin:0;">
-              {{ item.product.nom }}
-              <span>({{ item.product.prixVente | cfaCurrency }})</span>
-            </p>
-          </div>
+          <!-- Si on est sur "En cours" : montrer les produits de la commande locale active -->
+          <ng-container *ngIf="currentFilterKey === 'en-cours'">
+            <ul class="ul_list_produit_select">
+              <li class="li_list_produit_select" *ngFor="let item of activeCommandeItems">
+                <div class="double_commande">
+                  <div class="nombre_select">{{ item.quantity }}</div>
+                  <div class="name_produit_select">
+                    <p style="margin:0;">
+                      {{ item.product.nom }}
+                      <span>({{ item.product.prixVente | cfaCurrency }})</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="double_commande">
+                  <div class="price_produit">
+                    {{ (item.quantity * item.product.prixVente) | cfaCurrency }}
+                  </div>
+                </div>
+              </li>
+            </ul>
+
+            <div *ngIf="activeCommandeItems.length === 0" class="empty-cart-message">
+              <p>Aucun produit dans cette commande</p>
+            </div>
+          </ng-container>
+
+          <!-- Sinon : afficher les produits de la vente (backend) -->
+          <ng-container *ngIf="currentFilterKey !== 'en-cours'">
+            <ul class="ul_list_produit_select">
+              <li class="li_list_produit_select" *ngFor="let item of activeVenteItems">
+                <div class="double_commande">
+                  <div class="nombre_select">{{ item.quantity }}</div>
+                  <div class="name_produit_select">
+                    <p style="margin:0;">
+                      {{ item.product.nom }}
+                      <span>({{ item.product.prixVente | cfaCurrency }})</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="double_commande">
+                  <div class="price_produit">
+                    {{ (item.quantity * item.product.prixVente) | cfaCurrency }}
+                  </div>
+                </div>
+              </li>
+            </ul>
+
+            <div *ngIf="activeVenteItems.length === 0" class="empty-cart-message">
+              <p>Aucun produit dans cette vente</p>
+            </div>
+          </ng-container>
+
         </div>
-        <div class="double_commande">
-          <div class="price_produit">
-            {{ (item.quantity * item.product.prixVente) | cfaCurrency }}
-          </div>
-        </div>
-      </li>
-    </ul>
 
-    <div *ngIf="activeCommandeItems.length === 0" class="empty-cart-message">
-      <p>Aucun produit dans cette commande</p>
-    </div>
-  </ng-container>
-
-  <!-- Sinon : afficher les produits de la vente (backend) -->
-  <ng-container *ngIf="currentFilterKey !== 'en-cours'">
-    <ul class="ul_list_produit_select">
-      <li class="li_list_produit_select" *ngFor="let item of activeVenteItems">
-        <div class="double_commande">
-          <div class="nombre_select">{{ item.quantity }}</div>
-          <div class="name_produit_select">
-            <p style="margin:0;">
-              {{ item.product.nom }}
-              <span>({{ item.product.prixVente | cfaCurrency }})</span>
-            </p>
-          </div>
-        </div>
-        <div class="double_commande">
-          <div class="price_produit">
-            {{ (item.quantity * item.product.prixVente) | cfaCurrency }}
-          </div>
-        </div>
-      </li>
-    </ul>
-
-    <div *ngIf="activeVenteItems.length === 0" class="empty-cart-message">
-      <p>Aucun produit dans cette vente</p>
-    </div>
-  </ng-container>
-
-</div>
-
-        
         <!-- Récapitulatif : Taxes / Total -->
         <div class="summary_panel">
             <div class="double_row">
@@ -179,7 +178,7 @@
             
             <!-- Bouton paiement -->
             <div class="btn_content">
-                <button class="btn-payment">Annuler la commande</button>
+              <button class="btn-payment" (click)="openCancelPopup()">Annuler la commande</button>
             </div>
             
             <!-- Bouton supprimer la commande -->
@@ -190,4 +189,37 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Ajoutez ceci à la fin de votre template -->
+<div *ngIf="showCancelPopup" class="popup-overlay">
+  <div class="popup">
+
+    <!-- Bouton de fermeture en haut à droite -->
+    <button class="close-btn" (click)="closeCancelPopup()">
+      <i class="ri-close-line"></i>
+    </button>
+    
+    <h2>Confirmation d'annulation</h2>
+    <p>Veuillez entrer le Code PIN pour annuler la commande.</p>
+    
+    <div class="pin-container" [class.shake]="isCodeWrong">
+      <input type="password" maxlength="1" [(ngModel)]="pin[0]" #pin0 id="0"
+             (input)="goToNext(pin0, pin1)" 
+             (keydown)="handleBackspace($event, 0, pin0, pin1)" />
+
+      <input type="password" maxlength="1" [(ngModel)]="pin[1]" #pin1 id="1"
+             (input)="goToNext(pin1, pin2)" 
+             (keydown)="handleBackspace($event, 1, pin1, pin0)" />
+
+      <input type="password" maxlength="1" [(ngModel)]="pin[2]" #pin2 id="2"
+             (input)="goToNext(pin2, pin3)" 
+             (keydown)="handleBackspace($event, 2, pin2, pin1)" />
+
+      <input type="password" maxlength="1" [(ngModel)]="pin[3]" #pin3 id="3"
+             (input)="verifyCode()" 
+             (keydown)="handleBackspace($event, 3, pin3, pin2)" />
+    </div>
+    <button (click)="verifyCode()">Valider</button>
+  </div>
 </div>

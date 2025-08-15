@@ -60,6 +60,10 @@ filterOptions = [
   // recherche
   searchTerm = '';
 
+  showCancelPopup = false;
+  pin: string[] = ['', '', '', ''];
+  isCodeWrong = false;
+
   constructor(
     public router: Router,
     private viewState: ViewStateService,
@@ -413,5 +417,39 @@ onSearch(term: string) {
 
   pagePosVente() {
     // this.router.navigate(['/pos-accueil']);
+  }
+
+  openCancelPopup(): void {
+    this.showCancelPopup = true;
+    this.pin = ['', '', '', ''];
+    this.isCodeWrong = false;
+  }
+
+  closeCancelPopup(): void {
+    this.showCancelPopup = false;
+  }
+
+  goToNext(currentInput: HTMLInputElement, nextInput?: HTMLInputElement): void {
+    if (currentInput.value && nextInput) {
+      nextInput.focus();
+    }
+  }
+
+  handleBackspace(event: KeyboardEvent, index: number, currentInput: HTMLInputElement, prevInput?: HTMLInputElement): void {
+    if (event.key === 'Backspace' && !currentInput.value && prevInput) {
+      prevInput.focus();
+    }
+  }
+
+  verifyCode(): void {
+    const enteredPin = this.pin.join('');
+    // Remplacer par votre logique de vérification réelle
+    if (enteredPin === '1234') {
+      this.removeCommande(this.activeCommandeId);
+      this.closeCancelPopup();
+    } else {
+      this.isCodeWrong = true;
+      setTimeout(() => this.isCodeWrong = false, 500);
+    }
   }
 }
