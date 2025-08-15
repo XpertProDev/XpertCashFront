@@ -48,12 +48,12 @@ export class PosCommandeComponent implements OnDestroy {
   activeVente: VenteResponse | null = null;
 
   // filtre
-filterOptions = [
-  { key: 'en-cours' as FilterKey, label: 'En cours' },
-  { key: 'payer' as FilterKey, label: 'Payer' },
-  // { key: 'terminee' as FilterKey, label: 'Terminer' }, // <-- retiré
-  { key: 'annuler' as FilterKey, label: 'Annuler' }
-];
+  filterOptions = [
+    { key: 'en-cours' as FilterKey, label: 'En cours' },
+    { key: 'payer' as FilterKey, label: 'Payer' },
+    // { key: 'terminee' as FilterKey, label: 'Terminer' }, // <-- retiré
+    { key: 'annuler' as FilterKey, label: 'Annuler' }
+  ];
   currentFilterKey: FilterKey = 'en-cours';
   currentFilterLabel = 'En cours';
 
