@@ -183,6 +183,10 @@
             <div *ngIf="activeVenteItems.length === 0" class="empty-cart-message">
               <p>Aucun produit dans cette vente</p>
             </div>
+            <div *ngIf="selectedItems.length === activeVenteItems.length && activeVenteItems.length > 0" 
+                class="full-refund-warning">
+              Tous les produits sélectionnés - la vente sera annulée
+            </div>
           </ng-container>
 
         </div>

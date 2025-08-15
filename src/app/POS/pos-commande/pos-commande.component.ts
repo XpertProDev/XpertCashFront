@@ -51,6 +51,7 @@ export class PosCommandeComponent implements OnDestroy {
   motifRemboursement: string = '';
   showMotifPopup: boolean = false;
   isProcessing: boolean = false;
+  
 
   // filtre
   filterOptions = [
@@ -357,41 +358,23 @@ onSearch(term: string) {
   }
 }
 
-/**
- * Récupère un label de statut pour une vente de façon robuste.
- * Utilise des champs potentiels (statut, etat, status, paymentStatus...) sans casser le typage.
- */
-// getVenteStatus(vente: VenteResponse): string {
-//   const v = vente as any;
-//   const candidates = [
-//     v.statut,
-//     v.etat,
-//     v.status,
-//     v.paymentStatus,
-//     v.isPaid ? (v.isPaid === true ? 'Payer' : undefined) : undefined,
-//     v.paye ? (v.paye === true ? 'Payer' : undefined) : undefined
-//   ].filter(Boolean).map((x: any) => String(x));
-
-//   if (candidates.length) {
-//     // renvoie la première correspondance lisible
-//     return candidates[0];
-//   }
-
-//   // fallback lisible
-//   return '—';
-// }
-
   getVenteStatus(vente: VenteResponse): string {
-  const cat = this.determineVenteCategory(vente);
+    // Utiliser paymentStatus comme propriété principale
+    if (vente.paymentStatus) {
+      return vente.paymentStatus;
+    }
+    
+    // Fallback pour l'ancienne logique
+    const cat = this.determineVenteCategory(vente);
 
-  switch (cat) {
-    case 'payer': return 'Payer';
-    case 'annuler': return 'Annuler';
-    case 'terminee': return 'Terminée';
-    case 'en-cours': return 'En cours';
-    default: return '—';
+    switch (cat) {
+      case 'payer': return 'Payer';
+      case 'annuler': return 'Annuler';
+      case 'terminee': return 'Terminée';
+      case 'en-cours': return 'En cours';
+      default: return '—';
+    }
   }
-}
 
   private normalizeStr(val: any): string {
     if (val === null || val === undefined) return '';
@@ -529,7 +512,6 @@ private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cour
 
     this.isProcessing = true;
     
-    // Construire la requête
     const request: RemboursementRequest = {
       venteId: this.activeVenteId!,
       produitsQuantites: this.getProduitsQuantites(),
@@ -537,12 +519,18 @@ private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cour
       rescodePin: this.pin.join('')
     };
 
-    // Appel au service
     this.posCommandeService.rembourserVente(request).subscribe({
       next: (response) => {
+        // Vérifier si tous les produits ont été remboursés
+        const allProductsRefunded = this.activeVenteItems.length > 0 && 
+                                  this.activeVenteItems.every(item => item.selected);
+        
+        if (allProductsRefunded) {
+          // Mettre à jour le statut localement
+          this.updateVenteStatus(this.activeVenteId!, 'ANNULER');
+        }
+
         this.closeAllPopups();
-        this.loadVentesAndFilter(this.currentFilterKey);
-        alert('Remboursement effectué avec succès');
       },
       error: (error) => {
         console.error('Erreur remboursement', error);
@@ -551,6 +539,22 @@ private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cour
       complete: () => this.isProcessing = false
     });
   }
+
+  // Nouvelle méthode pour mettre à jour le statut localement
+private updateVenteStatus(venteId: number, newStatus: string) {
+  const vente = this.allVentes.find(v => v.venteId === venteId);
+  if (vente) {
+    // Utiliser les propriétés existantes
+    vente.paymentStatus = newStatus;
+    
+    if (newStatus === 'ANNULER') {
+      vente.isPaid = false;
+      vente.paye = false;
+    }
+    
+    this.applyVentesFilter(this.currentFilterKey);
+  }
+}
 
   // Helper pour construire produitsQuantites
   private getProduitsQuantites(): { [key: number]: number } {

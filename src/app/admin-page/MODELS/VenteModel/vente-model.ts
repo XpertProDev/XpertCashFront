@@ -23,10 +23,12 @@ export interface VenteResponse {
   clientNumero?: string;
   modePaiement?: string;
   montantPaye?: number;
-  
-  paymentStatus?: string;
+
+  statut?: string;
   isPaid?: boolean;
   paye?: boolean;
+  
+  paymentStatus?: string;
   lignes?: Array<{
     produitId: number;
     nomProduit: string;
