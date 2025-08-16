@@ -271,15 +271,18 @@ private matchesVenteStatus(v: VenteResponse, key: FilterKey): boolean {
       return;
     }
 
-    this.activeVenteItems = (this.activeVente.lignes || []).map(ligne => ({
-      product: {
-        id: ligne.produitId,
-        nom: ligne.nomProduit,
-        prixVente: ligne.prixUnitaire
-      },
-      quantity: ligne.quantite
-    }));
-  }
+    this.activeVenteItems = (this.activeVente.lignes || [])
+      .filter(l => l.quantite && l.quantite > 0)
+      .map(ligne => ({
+        product: {
+          id: ligne.produitId,
+          nom: ligne.nomProduit,
+          prixVente: ligne.prixUnitaire
+        },
+        quantity: ligne.quantite,
+        selected: false
+      }));
+    }
 
   getTotalItems(vente: VenteResponse): number {
     return vente.lignes?.reduce((sum, ligne) => sum + ligne.quantite, 0) || 0;
@@ -357,8 +360,8 @@ getVenteStatus(vente: VenteResponse): string {
   if (vente.status) {
     switch (vente.status.toUpperCase()) {
       case 'EN_COURS': return 'En cours';
-      case 'PARTIELLEMENT_REMBOURSEE': return 'Partiellement payée';
-      case 'REMBOURSEE': return 'Payée'; // REMBOURSEE est affiché comme "Payée"
+      case 'PARTIELLEMENT_REMBOURSEE': return 'Partiellement remboursée';
+      case 'REMBOURSEE': return 'Remboursée'; // <-- avant: 'Payée' (corrigé)
       case 'ANNULEE': return 'Annulée';
       default: return vente.status;
     }
@@ -514,14 +517,20 @@ private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cour
 
     this.posCommandeService.rembourserVente(request).subscribe({
       next: (response) => {
-        // Recharger les ventes pour le filtre actuel
+        // mettre à jour la liste locale et l'actif
+        this.allVentes = this.allVentes.map(v => v.venteId === response.venteId ? response : v);
+        // si vous rechargez depuis l'API, faites-le aussi :
         this.loadVentesAndFilter(this.currentFilterKey);
-        
-        // Mettre à jour la vente active
+
+        // mettre à jour la vente active et ses lignes 
         this.activeVente = response;
         this.loadActiveVenteDetails();
-        
+
+        // reset selections & popups
         this.closeAllPopups();
+        // forcer recalcul des totaux UI
+        this.selectedItems = [];
+        this.updateSelectedItems();
       },
       error: (error) => {
         console.error('Erreur remboursement', error);
