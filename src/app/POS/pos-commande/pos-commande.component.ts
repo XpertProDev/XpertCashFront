@@ -52,14 +52,13 @@ export class PosCommandeComponent implements OnDestroy {
   showMotifPopup: boolean = false;
   isProcessing: boolean = false;
   
-
   // filtre
-  filterOptions = [
-    { key: 'en-cours' as FilterKey, label: 'En cours' },
-    { key: 'payer' as FilterKey, label: 'Payées' },
-    // { key: 'terminee' as FilterKey, label: 'Terminer' }, // <-- retiré
-    { key: 'annuler' as FilterKey, label: 'Annuler' }
-  ];
+filterOptions = [
+  { key: 'en-cours' as FilterKey, label: 'En cours' },
+  { key: 'payer' as FilterKey, label: 'Payées' },
+  { key: 'annuler' as FilterKey, label: 'Annuler' }
+];
+
   currentFilterKey: FilterKey = 'en-cours';
   currentFilterLabel = 'En cours';
 
@@ -232,7 +231,7 @@ export class PosCommandeComponent implements OnDestroy {
     this.ventes = this.allVentes.filter(v => this.matchesVenteStatus(v, key));
   }
 
-  private matchesVenteStatus(v: VenteResponse, key: FilterKey): boolean {
+private matchesVenteStatus(v: VenteResponse, key: FilterKey): boolean {
   const cat = this.determineVenteCategory(v);
 
   if (key === 'en-cours') {
@@ -241,14 +240,10 @@ export class PosCommandeComponent implements OnDestroy {
   if (key === 'payer') {
     return cat === 'payer';
   }
-  if (key === 'terminee') {
-    return cat === 'terminee';
-  }
   if (key === 'annuler') {
     return cat === 'annuler';
   }
 
-  // fallback : si filtre inconnu, ne rien montrer
   return false;
 }
 
@@ -331,50 +326,52 @@ export class PosCommandeComponent implements OnDestroy {
     return total;
   }
 
-// signature de onSearch — attend une chaîne (template ref fournit une string)
-onSearch(term: string) {
-  this.searchTerm = (term || '').trim().toLowerCase();
+  // signature de onSearch — attend une chaîne (template ref fournit une string)
+  onSearch(term: string) {
+    this.searchTerm = (term || '').trim().toLowerCase();
 
-  if (this.currentFilterKey === 'en-cours') {
-    // recharger les commandes originales avant filter pour ne pas écraser la source
-    this.loadCommandes();
-    if (this.searchTerm) {
-      this.commandes = this.commandes.filter(c =>
-        String(c.id).toLowerCase().includes(this.searchTerm) ||
-        String(c.totalAmount).toLowerCase().includes(this.searchTerm) ||
-        String(c.totalItems).toLowerCase().includes(this.searchTerm)
-      );
+    if (this.currentFilterKey === 'en-cours') {
+      // recharger les commandes originales avant filter pour ne pas écraser la source
+      this.loadCommandes();
+      if (this.searchTerm) {
+        this.commandes = this.commandes.filter(c =>
+          String(c.id).toLowerCase().includes(this.searchTerm) ||
+          String(c.totalAmount).toLowerCase().includes(this.searchTerm) ||
+          String(c.totalItems).toLowerCase().includes(this.searchTerm)
+        );
+      }
+    } else {
+      // recharge la liste complète depuis allVentes puis filtre
+      this.applyVentesFilter(this.currentFilterKey);
+      if (this.searchTerm) {
+        this.ventes = this.ventes.filter(v =>
+          String(v.venteId).toLowerCase().includes(this.searchTerm) ||
+          String(v.montantTotal).toLowerCase().includes(this.searchTerm) ||
+          (v.clientNom && String(v.clientNom).toLowerCase().includes(this.searchTerm))
+        );
+      }
     }
-  } else {
-    // recharge la liste complète depuis allVentes puis filtre
-    this.applyVentesFilter(this.currentFilterKey);
-    if (this.searchTerm) {
-      this.ventes = this.ventes.filter(v =>
-        String(v.venteId).toLowerCase().includes(this.searchTerm) ||
-        String(v.montantTotal).toLowerCase().includes(this.searchTerm) ||
-        (v.clientNom && String(v.clientNom).toLowerCase().includes(this.searchTerm))
-      );
+  }
+
+getVenteStatus(vente: VenteResponse): string {
+  if (vente.status) {
+    switch (vente.status.toUpperCase()) {
+      case 'EN_COURS': return 'En cours';
+      case 'PARTIELLEMENT_REMBOURSEE': return 'Partiellement payée';
+      case 'REMBOURSEE': return 'Payée'; // REMBOURSEE est affiché comme "Payée"
+      case 'ANNULEE': return 'Annulée';
+      default: return vente.status;
     }
+  }
+  
+  const cat = this.determineVenteCategory(vente);
+  switch (cat) {
+    case 'payer': return 'Payée';
+    case 'annuler': return 'Annulée';
+    case 'en-cours': return 'En cours';
+    default: return '—';
   }
 }
-
-  getVenteStatus(vente: VenteResponse): string {
-    // Utiliser paymentStatus comme propriété principale
-    if (vente.paymentStatus) {
-      return vente.paymentStatus;
-    }
-    
-    // Fallback pour l'ancienne logique
-    const cat = this.determineVenteCategory(vente);
-
-    switch (cat) {
-      case 'payer': return 'Payer';
-      case 'annuler': return 'Annuler';
-      case 'terminee': return 'Terminée';
-      case 'en-cours': return 'En cours';
-      default: return '—';
-    }
-  }
 
   private normalizeStr(val: any): string {
     if (val === null || val === undefined) return '';
@@ -388,54 +385,50 @@ onSearch(term: string) {
     }
   }
 
-  /**
- * Détermine la catégorie générique d'une vente : 'payer' | 'annuler' | 'en-cours' | 'terminee' | 'unknown'
- */
-private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cours' | 'terminee' | 'unknown' {
+private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cours' | 'unknown' {
+  // Priorité au nouveau champ 'status'
+  if (v.status) {
+    switch (v.status.toUpperCase()) {
+      case 'EN_COURS': 
+        return 'en-cours';
+      case 'PARTIELLEMENT_REMBOURSEE':
+      case 'REMBOURSEE': // REMBOURSEE est considéré comme "payer"
+        return 'payer';
+      case 'ANNULEE': 
+        return 'annuler';
+    }
+  }
+  
+  // Fallback pour l'ancienne logique
   const vAny = v as any;
-
-  // champs candidats (convertis en string normalisé)
   const candidates = [
     vAny.paymentStatus,
     vAny.statut,
     vAny.etat,
     vAny.status,
-    // si isPaid/paye sont booléens -> les forçons en string 'payer'
     vAny.isPaid ? 'payer' : undefined,
     vAny.paye ? 'payer' : undefined
   ].filter(Boolean).map(x => this.normalizeStr(x));
 
-  // helpers pour tester la présence de mots-clés
   const has = (terms: string[]) => candidates.some(c => terms.some(t => c.includes(t)));
-
-  // vérifier 'payer' / 'paid' / variantes
-  if (has(['payer', 'paid', 'paye', 'payed', 'settled', 'completed', 'completed'])) {
+  
+  if (has(['payer', 'paid', 'paye', 'payed', 'settled', 'remboursee', 'partiellement_remboursee'])) {
     return 'payer';
   }
-
-  // vérifier 'annuler' / cancelled
-  if (has(['annul', 'cancel', 'void'])) {
+  if (has(['annul', 'cancel', 'void', 'annulee'])) {
     return 'annuler';
   }
-
-  // vérifier terminé/finished/done
-  if (has(['termine', 'terminé', 'finished', 'done', 'completed'])) {
-    return 'terminee';
-  }
-
-  // vérifier en cours / pending / draft / in_progress
   if (has(['en cours', 'encours', 'pending', 'in_progress', 'ongoing', 'draft'])) {
     return 'en-cours';
   }
-
-  // si aucun champ textuel mais montant payé > 0 ou montantPaye present, on peut déduire
-  if ((vAny.isPaid === true) || (typeof vAny.montantPaye === 'number' && vAny.montantPaye > 0)) {
+  
+  // Fallback: vérifier les montants
+  if (typeof v.montantPaye === 'number' && v.montantPaye > 0) {
     return 'payer';
   }
-
+  
   return 'unknown';
 }
-
 
   /* ---------------- Helpers UI ---------------- */
   toggleView(viewType: 'grid' | 'list') {
@@ -521,37 +514,13 @@ private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cour
 
     this.posCommandeService.rembourserVente(request).subscribe({
       next: (response) => {
-        // Mettre à jour les quantités locales après remboursement
-        this.selectedItems.forEach(selectedItem => {
-          const venteItem = this.activeVenteItems.find(item => 
-            item.product.id === selectedItem.product.id);
-          
-          if (venteItem) {
-            venteItem.quantity -= selectedItem.quantity;
-            
-            // Si quantité devient 0, retirer l'item
-            if (venteItem.quantity <= 0) {
-              this.activeVenteItems = this.activeVenteItems.filter(
-                item => item.product.id !== selectedItem.product.id
-              );
-            }
-          }
-        });
-
-        // Mettre à jour le montant total de la vente
-        if (this.activeVente) {
-          this.activeVente.montantTotal = this.getUpdatedTotalAmount(this.activeVente);
-        }
-
-        // Vérifier si tous les produits ont été remboursés
-        const allProductsRefunded = this.activeVenteItems.length > 0 && 
-                                  this.activeVenteItems.every(item => item.selected);
+        // Recharger les ventes pour le filtre actuel
+        this.loadVentesAndFilter(this.currentFilterKey);
         
-        if (allProductsRefunded) {
-          // Mettre à jour le statut localement
-          this.updateVenteStatus(this.activeVenteId!, 'ANNULER');
-        }
-
+        // Mettre à jour la vente active
+        this.activeVente = response;
+        this.loadActiveVenteDetails();
+        
         this.closeAllPopups();
       },
       error: (error) => {
@@ -563,20 +532,17 @@ private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cour
   }
 
   // Nouvelle méthode pour mettre à jour le statut localement
-private updateVenteStatus(venteId: number, newStatus: string) {
-  const vente = this.allVentes.find(v => v.venteId === venteId);
-  if (vente) {
-    // Utiliser les propriétés existantes
-    vente.paymentStatus = newStatus;
-    
-    if (newStatus === 'ANNULER') {
-      vente.isPaid = false;
-      vente.paye = false;
+  private updateVenteStatus(venteId: number, newStatus: string) {
+    const vente = this.allVentes.find(v => v.venteId === venteId);
+    if (vente) {
+      vente.status = newStatus;
+      this.applyVentesFilter(this.currentFilterKey);
     }
     
-    this.applyVentesFilter(this.currentFilterKey);
+    if (this.activeVenteId === venteId) {
+      this.activeVente!.status = newStatus;
+    }
   }
-}
 
   // Helper pour construire produitsQuantites
   private getProduitsQuantites(): { [key: number]: number } {
@@ -627,11 +593,16 @@ private updateVenteStatus(venteId: number, newStatus: string) {
   getUpdatedTotalAmount(vente: VenteResponse | null): number {
     if (!vente) return 0;
     
-    if (!this.activeVenteId || vente.venteId !== this.activeVenteId) {
-      return vente.montantTotal || 0;
+    // Si c'est la vente active, calculer à partir des items locaux
+    if (this.activeVenteId && vente.venteId === this.activeVenteId) {
+      return this.activeVenteItems.reduce(
+        (total, item) => total + (item.quantity * item.product.prixVente),
+        0
+      );
     }
     
-    return (vente.montantTotal || 0) - this.getSelectedAmount();
+    // Sinon utiliser le montant du backend
+    return vente.montantTotal || 0;
   }
 
 }

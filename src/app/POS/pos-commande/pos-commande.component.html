@@ -82,11 +82,11 @@
                       <div class="price_commande"><p>{{ getUpdatedTotalAmount(vente) | cfaCurrency }}</p></div>
                   </li>
                   <li class="li_commande" style="display:flex;align-items:center;gap:30px;">
-                      <div class="etat_commande">
-                          <p [class.status-paid]="getVenteStatus(vente) === 'Payer'">
-                              {{ getVenteStatus(vente) }}
-                          </p>
-                      </div>
+                    <div class="etat_commande">
+                      <p [class.status-paid]="getVenteStatus(vente) === 'Payer'">
+                        {{ getVenteStatus(vente) }}
+                      </p>
+                    </div>
                   </li>
                   </ul>
 

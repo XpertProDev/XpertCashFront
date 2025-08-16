@@ -23,12 +23,7 @@ export interface VenteResponse {
   clientNumero?: string;
   modePaiement?: string;
   montantPaye?: number;
-
-  statut?: string;
-  isPaid?: boolean;
-  paye?: boolean;
-  
-  paymentStatus?: string;
+  status?: string; // Nouveau champ correspondant à VenteStatus
   lignes?: Array<{
     produitId: number;
     nomProduit: string;
