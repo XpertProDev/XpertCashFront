@@ -109,46 +109,42 @@ fermerCaisse(boutiqueId: number): Observable<any> {
 
 
 
-  getDerniereCaisseVendeur(boutiqueId: number): Observable<CaisseResponse | string> {
-    return this.usersService.getValidAccessToken().pipe(
-      switchMap(token => {
-        if (!token) throw new Error('Aucun token trouvé');
+getDerniereCaisseVendeur(boutiqueId: number): Observable<CaisseResponse> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) throw new Error('Aucun token trouvé');
 
-        const headers = new HttpHeaders({
-          'Authorization': `Bearer ${token}`
-        });
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      });
 
-        // Utilisez 'text' comme responseType pour permettre les réponses texte
-        return this.http.get(
-          `${this.apiUrl}/caisse/derniere/${boutiqueId}`, 
-          { 
-            headers, 
-            responseType: 'text' as 'json' // Permet de gérer les réponses texte
-          }
-        );
-      }),
-      map(response => {
-        // Tente de parser la réponse comme JSON
-        try {
-          return JSON.parse(response as string) as CaisseResponse;
-        } catch (e) {
-          // Si le parsing échoue, retourne la réponse texte
-          return response as string;
+      return this.http.get(
+        `${this.apiUrl}/caisse/derniere/${boutiqueId}`, 
+        { 
+          headers, 
+          responseType: 'text'  // Accepter tout type de réponse
         }
-      }),
-      catchError(error => {
-        let errorMsg = 'Erreur lors du chargement de la dernière caisse';
-        if (error?.error?.error) errorMsg = error.error.error;
-        else if (error?.error?.message) errorMsg = error.error.message;
-        else if (error.message) errorMsg = error.message;
-        
-        return throwError(() => ({ 
-          message: errorMsg,
-          originalError: error 
-        }));
-      })
-    );
-  }
+      ).pipe(
+        map(response => {
+          // Essayer de parser en JSON
+          try {
+            return JSON.parse(response) as CaisseResponse;
+          } catch (e) {
+            // Si le parsing échoue, créer un objet d'erreur
+            throw new Error(response || 'Réponse serveur invalide');
+          }
+        })
+      );
+    }),
+    catchError(error => {
+      let errorMsg = 'Erreur lors du chargement de la dernière caisse';
+      if (error instanceof Error) errorMsg = error.message;
+      else if (error?.error) errorMsg = error.error;
+      
+      return throwError(() => new Error(errorMsg));
+    })
+  );
+}
 
   getCaissesByBoutique(boutiqueId: number): Observable<CaisseResponse[]> {
     return this.usersService.getValidAccessToken().pipe(

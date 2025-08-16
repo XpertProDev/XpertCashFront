@@ -8,6 +8,7 @@ import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 import { CaisseResponse, OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/CaisseModel/caisse.model';
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
+import { CaisseStateService } from 'src/app/admin-page/SERVICES/CaisseService/caisse-state.service';
 
 @Component({
   selector: 'app-pos-caisse-header',
@@ -26,13 +27,14 @@ export class PosCaisseHeaderComponent {
   caisses: CaisseResponse[] = [];
 
   // selectedBoutiqueIdForList: number | null = null;
-    selectedBoutiqueIdForList: number = 0; 
+  selectedBoutiqueIdForList: number = 0; 
   isLoadingCaisses = false;
 
   openMenuId: number | null = null;
 
   constructor(
     private boutiqueService: BoutiqueService,
+    private caisseState: CaisseStateService,
     private posCaisseService: PosCaisseService,
     private boutiqueState: BoutiqueStateService,
     private router: Router
@@ -184,6 +186,10 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
         console.log('Caisse ouverte avec succès', response);
         this.isLoading = false;
         this.closeModal();
+
+        // CORRECTION : Utiliser triggerRefresh() au lieu de notifyCaissesUpdated()
+        this.caisseState.notifyCaisseCreated(response);
+        this.caisseState.triggerRefresh();
         
         // Rediriger vers l'interface de vente
         // this.router.navigate(['/pos/vente'], {

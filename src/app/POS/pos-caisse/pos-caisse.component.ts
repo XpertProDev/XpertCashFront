@@ -2,11 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { CaisseResponse, OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/CaisseModel/caisse.model';
 import { SafeHtmlPipe } from 'src/app/admin-page/MODELS/CaisseModel/safe-html.pipe';
 import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.directive';
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
+import { CaisseStateService } from 'src/app/admin-page/SERVICES/CaisseService/caisse-state.service';
 import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 
 @Component({
@@ -16,6 +18,10 @@ import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-
   styleUrl: './pos-caisse.component.scss'
 })
 export class PosCaisseComponent {
+  private destroy$ = new Subject<void>();
+  currentBoutiqueId: number | null = null;
+
+  
   showModal = false;
   boutiques: any[] = [];
   selectedBoutiqueId: number | null = null;
@@ -31,6 +37,7 @@ export class PosCaisseComponent {
 
   constructor(
     private boutiqueService: BoutiqueService,
+    private caisseState: CaisseStateService,
     private posCaisseService: PosCaisseService,
     private boutiqueState: BoutiqueStateService,
     private router: Router,
@@ -39,8 +46,38 @@ export class PosCaisseComponent {
   ngOnInit(): void {
     this.loadBoutiques();
 
+    // Écouter les changements de boutique
+    this.boutiqueState.selectedBoutique$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(boutiqueId => {
+      this.currentBoutiqueId = boutiqueId;
+      if (boutiqueId) {
+        this.loadDerniereCaisseVendeur(boutiqueId);
+      }
+    });
+
+    // Écouter les nouvelles caisses créées
+    this.caisseState.caisseCreated$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(newCaisse => {
+      if (newCaisse && this.currentBoutiqueId === newCaisse.boutiqueId) {
+        this.caisses = [newCaisse];
+        this.errorMessage = null;
+      }
+    });
+
+    // Écouter les demandes de rafraîchissement
+    this.caisseState.refreshCaisses$.pipe(
+        takeUntil(this.destroy$)
+      ).subscribe(() => {
+        if (this.currentBoutiqueId) {
+          this.loadDerniereCaisseVendeur(this.currentBoutiqueId);
+        }
+      });
+
     // Écoute les changements de boutique
     this.boutiqueState.selectedBoutique$.subscribe(boutiqueId => {
+      this.currentBoutiqueId = boutiqueId;
       // this.selectedBoutiqueIdForList = boutiqueId;
       if (boutiqueId !== null) {
         this.loadDerniereCaisseVendeur(boutiqueId);
@@ -48,6 +85,11 @@ export class PosCaisseComponent {
         this.caisses = [];
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadBoutiques(): void {
@@ -70,30 +112,28 @@ export class PosCaisseComponent {
   }
 
   // Ajoutez cette méthode dans la classe PosCaisseComponent
-  loadDerniereCaisseVendeur(boutiqueId: number): void {
-    this.isLoadingCaisses = true;
-    this.caisses = []; // Réinitialiser la liste
-    
-    this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
-      next: (response) => {
-        // Gérer les différents types de réponse
-        if (typeof response === 'string') {
-          // Cas où le backend retourne un message texte
-          this.caisses = [];
-          this.errorMessage = response;
-        } else {
-          // Cas normal où on reçoit un objet CaisseResponse
-          this.caisses = [response]; // Mettre dans un tableau pour l'affichage
-        }
-        this.isLoadingCaisses = false;
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement de la dernière caisse', error);
-        this.isLoadingCaisses = false;
-        this.errorMessage = error.message || 'Erreur lors du chargement de la dernière caisse';
+loadDerniereCaisseVendeur(boutiqueId: number): void {
+  this.isLoadingCaisses = true;
+  this.caisses = [];
+  this.errorMessage = null;
+
+  this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
+    next: (response) => {
+      this.caisses = [response];
+      this.isLoadingCaisses = false;
+    },
+    error: (error) => {
+      this.isLoadingCaisses = false;
+      
+      // Gestion spécifique des messages d'erreur
+      if (error.message.includes('Aucune caisse trouvée')) {
+        this.errorMessage = 'Aucune caisse disponible pour cette boutique';
+      } else {
+        this.errorMessage = error.message || 'Erreur de communication avec le serveur';
       }
-    });
-  }
+    }
+  });
+}
 
   openModal() {
     this.showModal = true;
@@ -221,6 +261,11 @@ export class PosCaisseComponent {
 
     this.posCaisseService.ouvrirCaisse(request).subscribe({
         next: (response) => {
+          // Notifier la création de la caisse
+          this.caisseState.notifyCaisseCreated(response);
+          // Demander un rafraîchissement des données
+          this.caisseState.triggerRefresh();
+        
             console.log('Caisse ouverte avec succès', response);
             this.isLoading = false;
             this.closeModal();
