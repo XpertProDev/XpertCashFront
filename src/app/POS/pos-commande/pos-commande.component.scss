@@ -792,3 +792,8 @@ textarea {
   border-left: 3px solid #ff0000;
 }
 
+.double_commande .nombre_select span {
+  opacity: 0.7;
+  text-decoration: line-through;
+  margin-right: 5px;
+}
