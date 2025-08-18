@@ -262,6 +262,7 @@ filterOptions = [
   loadActiveVenteDetails() {
     if (!this.activeVente) {
       this.activeVenteItems = [];
+      this.updateSelectedItems();
       return;
     }
 
@@ -274,9 +275,12 @@ filterOptions = [
           prixVente: ligne.prixUnitaire
         },
         quantity: ligne.quantite,
-        selected: false
+        selected: false // <-- réinitialiser ici
       }));
-    }
+
+    // s'assurer que selectedItems reflète l'état initial
+    this.updateSelectedItems();
+  }
 
   getTotalItems(vente: VenteResponse): number {
     return vente.lignes?.reduce((sum, ligne) => sum + ligne.quantite, 0) || 0;
@@ -593,9 +597,7 @@ filterOptions = [
 
   // Calculer le montant total sélectionné
   getSelectedAmount(): number {
-    return this.selectedItems.reduce((total, item) => {
-      return total + (item.quantity * item.product.prixVente);
-    }, 0);
+    return this.selectedItems.reduce((total, item) => total + (item.quantity * item.product.prixVente), 0);
   }
 
   // Calculer le total des items sélectionnés
@@ -617,17 +619,18 @@ filterOptions = [
   // Calculer le nouveau montant total après remboursement
   getUpdatedTotalAmount(vente: VenteResponse | null): number {
     if (!vente) return 0;
-    
-    // Si c'est la vente active, calculer à partir des items locaux
+
+    // Si on affiche la vente active, calculer à partir de activeVenteItems
     if (this.activeVenteId && vente.venteId === this.activeVenteId) {
-      return this.activeVenteItems.reduce(
-        (total, item) => total + (item.quantity * item.product.prixVente),
-        0
-      );
+      return this.activeVenteItems.reduce((total, item) => {
+        const qty = item.selected ? 0 : item.quantity; // on ignore les items sélectionnés
+        return total + (qty * item.product.prixVente);
+      }, 0);
     }
-    
+
     // Sinon utiliser le montant du backend
     return vente.montantTotal || 0;
   }
+
 
 }

@@ -34,26 +34,26 @@
             <!-- Si on est en mode "en-cours" on affiche les commandes locales -->
             <ng-container *ngIf="currentFilterKey === 'en-cours'">
                 <ul *ngFor="let commande of commandes" class="ul_commande"
-                    [class.ul_commande_active]="activeCommandeId === commande.id"
-                    (click)="setActiveCommande(commande.id)">
-                <li class="li_commande">
-                    <div class="commande_date_heure">
-                    <p class="commande_date">{{ commande.createdAt | date:'dd/MM/yyyy' }}</p>
-                    <p class="commande_heure">{{ commande.createdAt | date:'HH:mm' }}</p>
-                    </div>
-                </li>
-                <li class="li_commande">
-                    <div class="num_onglet_commande"><p>{{ commande.id }}</p></div>
-                </li>
-                <li class="li_commande">
-                    <div class="quantite_commande"><p>Quantité {{ commande.totalItems }}</p></div>
-                </li>
-                <li class="li_commande">
-                    <div class="price_commande"><p>{{ commande.totalAmount | cfaCurrency }}</p></div>
-                </li>
-                <li class="li_commande" style="display:flex;align-items:center;gap:30px;">
-                    <div class="etat_commande"><p>En cours</p></div>
-                </li>
+                      [class.ul_commande_active]="activeCommandeId === commande.id"
+                      (click)="setActiveCommande(commande.id)">
+                  <li class="li_commande">
+                      <div class="commande_date_heure">
+                      <p class="commande_date">{{ commande.createdAt | date:'dd/MM/yyyy' }}</p>
+                      <p class="commande_heure">{{ commande.createdAt | date:'HH:mm' }}</p>
+                      </div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="num_onglet_commande"><p>{{ commande.id }}</p></div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="quantite_commande"><p>Quantité {{ commande.totalItems }}</p></div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="price_commande"><p>{{ commande.totalAmount | cfaCurrency }}</p></div>
+                  </li>
+                  <li class="li_commande" style="display:flex;align-items:center;gap:30px;">
+                      <div class="etat_commande"><p>En cours</p></div>
+                  </li>
                 </ul>
 
                 <div *ngIf="!commandes.length" class="loading_commande">
@@ -150,7 +150,7 @@
                     <input 
                         type="checkbox"
                         [(ngModel)]="item.selected"
-                        (change)="updateSelectedItems()">
+                        (ngModelChange)="updateSelectedItems()">
                         
                         <span class="cyber-checkbox__mark">
                           <div class="cyber-checkbox__box">
