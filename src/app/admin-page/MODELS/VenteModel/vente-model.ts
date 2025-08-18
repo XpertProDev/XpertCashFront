@@ -23,10 +23,7 @@ export interface VenteResponse {
   clientNumero?: string;
   modePaiement?: string;
   montantPaye?: number;
-  
-  paymentStatus?: string;
-  isPaid?: boolean;
-  paye?: boolean;
+  status?: string; // Nouveau champ correspondant à VenteStatus
   lignes?: Array<{
     produitId: number;
     nomProduit: string;
@@ -34,4 +31,22 @@ export interface VenteResponse {
     prixUnitaire: number;
     montantLigne: number;
   }>;
+}
+
+export interface RemboursementRequest {
+  venteId: number;
+  produitsQuantites: { [produitId: number]: number };
+  motif: string;
+  rescodePin: string;
+}
+
+// Ajoutez la propriété 'selected' aux items
+interface VenteItem {
+  product: {
+    id: number;
+    nom: string;
+    prixVente: number;
+  };
+  quantity: number;
+  selected: boolean; // Nouvelle propriété
 }

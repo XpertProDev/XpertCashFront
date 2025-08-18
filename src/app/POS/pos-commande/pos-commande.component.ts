@@ -2,14 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { firstValueFrom, Subject, takeUntil } from 'rxjs';
 import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.directive';
 import { environment } from 'src/environments/environment';
 import { ViewStateService } from '../pos-accueil/view-state.service';
 import { ProduitDetailsResponseDTO } from 'src/app/admin-page/MODELS/produit-category.model';
 import { CategorieService } from 'src/app/admin-page/SERVICES/categorie.service';
 import { CommandeStateService } from 'src/app/admin-page/SERVICES/commande-state.service';
-import { VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
+import { RemboursementRequest, VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { PosCommandeService } from 'src/app/admin-page/SERVICES/VenteService/pos-commande-service';
 import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
@@ -47,13 +47,18 @@ export class PosCommandeComponent implements OnDestroy {
   activeVenteItems: any[] = [];
   activeVente: VenteResponse | null = null;
 
+  selectedItems: any[] = [];
+  motifRemboursement: string = '';
+  showMotifPopup: boolean = false;
+  isProcessing: boolean = false;
+  
   // filtre
 filterOptions = [
   { key: 'en-cours' as FilterKey, label: 'En cours' },
-  { key: 'payer' as FilterKey, label: 'Payer' },
-  // { key: 'terminee' as FilterKey, label: 'Terminer' }, // <-- retiré
+  { key: 'payer' as FilterKey, label: 'Payées' },
   { key: 'annuler' as FilterKey, label: 'Annuler' }
 ];
+
   currentFilterKey: FilterKey = 'en-cours';
   currentFilterLabel = 'En cours';
 
@@ -205,6 +210,7 @@ filterOptions = [
     // on récupère toujours les ventes du backend (on peut cacher cache si nécessaire)
     this.posCommandeService.getVentesByVendeur(vendeurId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (ventes) => {
+        console.debug('Ventes API raw:', ventes);
         this.allVentes = ventes || [];
         this.applyVentesFilter(key);
         // si on vient d'activer la vue ventes, positionne la première vente active
@@ -226,34 +232,13 @@ filterOptions = [
   }
 
   private matchesVenteStatus(v: VenteResponse, key: FilterKey): boolean {
-    // normalize keys/values to lowercase for comparaison
-    const possible = [
-      (v as any).statut,
-      (v as any).etat,
-      (v as any).status,
-      (v as any).paymentStatus,
-      (v as any).isPaid ? 'payer' : undefined,
-      (v as any).paye ? 'payer' : undefined
-    ].filter(Boolean).map(x => String(x).toLowerCase());
+    const cat = this.determineVenteCategory(v);
 
-    const mapKeyToTerms: Record<FilterKey, string[]> = {
-      'en-cours': ['en cours', 'pending', 'in_progress', 'ongoing', 'draft'],
-      'payer': ['payer', 'paid', 'payed', 'completed', 'settled'],
-      'terminee': ['terminee', 'finished', 'done', 'completed'],
-      'annuler': ['annuler', 'cancelled', 'canceled', 'void']
-    };
+    if (key === 'en-cours') return cat === 'en-cours';
+    if (key === 'payer') return cat === 'payer';
+    if (key === 'annuler') return cat === 'annuler';
 
-    const targetTerms = mapKeyToTerms[key];
-
-    // if vente has no status-like fields, assume:
-    if (!possible.length) {
-      // consider 'payer' as vente where montantTotal > 0 and maybe un champ payé — fallback: show all for non-en-cours
-      if (key === 'en-cours') return false;
-      return true;
-    }
-
-    // check any of possible values contains any of targetTerms
-    return possible.some(pVal => targetTerms.some(term => pVal.includes(term)));
+    return false;
   }
 
   loadVentes() {
@@ -268,26 +253,117 @@ filterOptions = [
     });
   }
 
+  // Version corrigée et typée — coller à la place de l'ancienne
+  async loadActiveVenteDetails(): Promise<void> {
+    if (!this.activeVenteId) {
+      this.activeVenteItems = [];
+      this.updateSelectedItems();
+      return;
+    }
+
+    console.debug('loadActiveVenteDetails - activeVente (initial):', this.activeVente);
+
+    // Helper pour récupérer la vente complète si possible
+    const ensureFullVente = async (): Promise<any> => {
+      try {
+        // si le service expose getVenteById, utilise-le
+        const svcAny = this.posCommandeService as any;
+        if (typeof svcAny.getVenteById === 'function') {
+          return await firstValueFrom(svcAny.getVenteById(this.activeVenteId));
+        }
+
+        // fallback : recharger toutes les ventes et retrouver celle-ci
+        if (typeof this.posCommandeService.getVentesByVendeur === 'function') {
+          const vendeurId = this.usersService.getCurrentUser()?.id;
+          if (!vendeurId) return this.activeVente;
+          const all = await firstValueFrom(this.posCommandeService.getVentesByVendeur(vendeurId) as any);
+          if (Array.isArray(all)) {
+            return all.find((v: any) => v.venteId === this.activeVenteId) || this.activeVente;
+          }
+        }
+      } catch (err) {
+        console.warn('ensureFullVente fallback error', err);
+      }
+      return this.activeVente;
+    };
+
+    const fullVente = await ensureFullVente();
+    if (fullVente && fullVente !== this.activeVente) {
+      console.debug('Fetched fullVente from API for id', this.activeVenteId, fullVente);
+      this.activeVente = fullVente;
+      const idx = this.allVentes.findIndex(v => v.venteId === this.activeVenteId);
+      if (idx >= 0) this.allVentes[idx] = fullVente;
+    } else {
+      console.debug('No full fetch needed or nothing returned; using existing activeVente');
+    }
+
+    // safe raw any pour éviter erreurs de type TS
+    const raw: any = this.activeVente || {};
+    const lignes: any[] = raw.lignes ?? raw.lines ?? raw.items ?? raw.lignesVente ?? [];
+
+    console.debug('lines used:', lignes);
+
+    const resolveNumberFrom = (obj: any, keys: string[]): number | null => {
+      if (!obj) return null;
+      for (const k of keys) {
+        if (Object.prototype.hasOwnProperty.call(obj, k) && obj[k] !== undefined && obj[k] !== null) {
+          const v = obj[k];
+          const n = (typeof v === 'number') ? v : Number(String(v).replace(',', '.'));
+          if (!Number.isNaN(n)) return n;
+        }
+      }
+      return null;
+    };
+
+    const qtyKeysOriginal = ['quantiteOriginale','quantiteInitiale','initialQuantity','originalQuantity','quantiteAvantRemboursement','qtyOriginal','original_qty','qty_initial'];
+    const qtyKeysCurrent  = ['quantite','quantity','qty','quantite_actuelle','currentQuantity','current_qty'];
+    const priceKeysOriginal = ['prixOriginal','prixAvantRemboursement','unitPriceOriginal','prixUnitaireOriginal','originalPrice'];
+    const priceKeysCurrent  = ['prixUnitaire','prix','price','unitPrice','prix_unitaire'];
+
+    const isCancelledSale = this.activeVente ? this.determineVenteCategory(this.activeVente) === 'annuler' : false;
+    console.debug('isCancelledSale:', isCancelledSale, 'status:', this.activeVente?.status);
+
+    this.activeVenteItems = lignes.map((ligne: any) => {
+      const originalQty = resolveNumberFrom(ligne, qtyKeysOriginal) ?? resolveNumberFrom(ligne, qtyKeysCurrent) ?? null;
+      const currentQty  = resolveNumberFrom(ligne, qtyKeysCurrent)  ?? resolveNumberFrom(ligne, qtyKeysOriginal) ?? 0;
+
+      const originalPrice = resolveNumberFrom(ligne, priceKeysOriginal) ?? resolveNumberFrom(ligne, priceKeysCurrent) ?? (ligne.prixUnitaire ?? null);
+      const currentPrice  = resolveNumberFrom(ligne, priceKeysCurrent)  ?? resolveNumberFrom(ligne, priceKeysOriginal) ?? (ligne.prixUnitaire ?? 0);
+
+      const displayQty   = (isCancelledSale && originalQty !== null) ? originalQty : currentQty;
+      const displayPrice = (isCancelledSale && originalPrice !== null) ? originalPrice : currentPrice;
+
+      return {
+        product: {
+          id: ligne.produitId ?? ligne.productId ?? ligne.idProduit ?? null,
+          nom: ligne.nomProduit ?? ligne.productName ?? ligne.name ?? 'Produit',
+          prixVente: displayPrice ?? 0
+        },
+        quantity: displayQty ?? 0,
+
+        originalQuantity: originalQty,
+        currentQuantity: currentQty,
+        originalPrice: originalPrice,
+        currentPrice: currentPrice,
+
+        selected: false,
+        __rawLine: ligne
+      } as any;
+    });
+
+    // filtrage : si vente annulée afficher toutes les lignes, sinon garder uniquement qty>0
+    if (!isCancelledSale) {
+      this.activeVenteItems = this.activeVenteItems.filter(it => (it.quantity ?? 0) > 0);
+    }
+
+    console.debug('activeVenteItems built:', this.activeVenteItems);
+    this.updateSelectedItems();
+  }
+
   setActiveVente(venteId: number) {
     this.activeVenteId = venteId;
     this.activeVente = this.ventes.find(v => v.venteId === venteId) || null;
     this.loadActiveVenteDetails();
-  }
-
-  loadActiveVenteDetails() {
-    if (!this.activeVente) {
-      this.activeVenteItems = [];
-      return;
-    }
-
-    this.activeVenteItems = (this.activeVente.lignes || []).map(ligne => ({
-      product: {
-        id: ligne.produitId,
-        nom: ligne.nomProduit,
-        prixVente: ligne.prixUnitaire
-      },
-      quantity: ligne.quantite
-    }));
   }
 
   getTotalItems(vente: VenteResponse): number {
@@ -335,78 +411,131 @@ filterOptions = [
     return total;
   }
 
-// signature de onSearch — attend une chaîne (template ref fournit une string)
-onSearch(term: string) {
-  this.searchTerm = (term || '').trim().toLowerCase();
+  // signature de onSearch — attend une chaîne (template ref fournit une string)
+  onSearch(term: string) {
+    this.searchTerm = (term || '').trim().toLowerCase();
 
-  if (this.currentFilterKey === 'en-cours') {
-    // recharger les commandes originales avant filter pour ne pas écraser la source
-    this.loadCommandes();
-    if (this.searchTerm) {
-      this.commandes = this.commandes.filter(c =>
-        String(c.id).toLowerCase().includes(this.searchTerm) ||
-        String(c.totalAmount).toLowerCase().includes(this.searchTerm) ||
-        String(c.totalItems).toLowerCase().includes(this.searchTerm)
-      );
-    }
-  } else {
-    // recharge la liste complète depuis allVentes puis filtre
-    this.applyVentesFilter(this.currentFilterKey);
-    if (this.searchTerm) {
-      this.ventes = this.ventes.filter(v =>
-        String(v.venteId).toLowerCase().includes(this.searchTerm) ||
-        String(v.montantTotal).toLowerCase().includes(this.searchTerm) ||
-        (v.clientNom && String(v.clientNom).toLowerCase().includes(this.searchTerm))
-      );
+    if (this.currentFilterKey === 'en-cours') {
+      // recharger les commandes originales avant filter pour ne pas écraser la source
+      this.loadCommandes();
+      if (this.searchTerm) {
+        this.commandes = this.commandes.filter(c =>
+          String(c.id).toLowerCase().includes(this.searchTerm) ||
+          String(c.totalAmount).toLowerCase().includes(this.searchTerm) ||
+          String(c.totalItems).toLowerCase().includes(this.searchTerm)
+        );
+      }
+    } else {
+      // recharge la liste complète depuis allVentes puis filtre
+      this.applyVentesFilter(this.currentFilterKey);
+      if (this.searchTerm) {
+        this.ventes = this.ventes.filter(v =>
+          String(v.venteId).toLowerCase().includes(this.searchTerm) ||
+          String(v.montantTotal).toLowerCase().includes(this.searchTerm) ||
+          (v.clientNom && String(v.clientNom).toLowerCase().includes(this.searchTerm))
+        );
+      }
     }
   }
-}
-
-/**
- * Récupère un label de statut pour une vente de façon robuste.
- * Utilise des champs potentiels (statut, etat, status, paymentStatus...) sans casser le typage.
- */
-// getVenteStatus(vente: VenteResponse): string {
-//   const v = vente as any;
-//   const candidates = [
-//     v.statut,
-//     v.etat,
-//     v.status,
-//     v.paymentStatus,
-//     v.isPaid ? (v.isPaid === true ? 'Payer' : undefined) : undefined,
-//     v.paye ? (v.paye === true ? 'Payer' : undefined) : undefined
-//   ].filter(Boolean).map((x: any) => String(x));
-
-//   if (candidates.length) {
-//     // renvoie la première correspondance lisible
-//     return candidates[0];
-//   }
-
-//   // fallback lisible
-//   return '—';
-// }
 
   getVenteStatus(vente: VenteResponse): string {
-    const v = vente as any; // Assertion pour accéder dynamiquement aux propriétés
-    
-    // Vérification du statut de paiement
-    if (v.paymentStatus?.toLowerCase() === 'paid' || v.isPaid || v.paye) {
-      return 'Payer';
+    if (vente.status) {
+      switch (vente.status.toUpperCase()) {
+        case 'EN_COURS': return 'En cours';
+        case 'PARTIELLEMENT_REMBOURSEE': return 'Partiellement remboursée';
+        case 'REMBOURSEE': return 'Annulée'; // afficher "Annulée" si backend dit REMBOURSEE
+        case 'ANNULEE': return 'Annulée';
+        case 'PAYEE':
+        case 'PAYER':
+          return 'Payée';
+        default:
+          // si status inconnu, retombe sur la catégorie
+          break;
+      }
     }
-    
-    // Logique pour les autres statuts
-    const candidates = [
-      v.statut,
-      v.etat,
-      v.status,
-      v.paymentStatus,
-      v.isPaid ? 'Payer' : undefined,
-      v.paye ? 'Payer' : undefined
-    ].filter(Boolean).map(x => String(x));
 
-    return candidates.length ? candidates[0] : '—';
+    const cat = this.determineVenteCategory(vente);
+    switch (cat) {
+      case 'payer': return 'Payée';
+      case 'annuler': return 'Annulée';
+      case 'en-cours': return 'En cours';
+      default: return '—';
+    }
   }
 
+  private normalizeStr(val: any): string {
+    if (val === null || val === undefined) return '';
+    const s = String(val).toLowerCase();
+    // enlever accents pour meilleure robustesse (ex : 'annulé' -> 'annule')
+    try {
+      return s.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+    } catch {
+      // fallback si l'environnement ne supporte pas \p{Diacritic}
+      return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+  }
+
+  // remplace entirely determineVenteCategory
+  private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cours' | 'unknown' {
+    // 1) Si le backend fournit un status, on s'en sert (priorité)
+    if (v.status) {
+      switch (v.status.toUpperCase()) {
+        case 'EN_COURS':
+          return 'en-cours';
+        case 'PARTIELLEMENT_REMBOURSEE':
+          // encore considéré comme "payer" côté filtre (partiel = pas totalement annulée)
+          return 'payer';
+        case 'REMBOURSEE':
+          // Vente entièrement remboursée -> la considérer comme "annuler" pour le filtrage
+          return 'annuler';
+        case 'ANNULEE':
+          return 'annuler';
+        case 'PAYEE':
+        case 'PAYER': // possible variantes
+          return 'payer';
+        default:
+          // laisser continuer au fallback
+          break;
+      }
+    }
+
+    // 2) Fallback : si on a les lignes, et que toutes les quantités = 0 => annuler
+    const lignes = (v.lignes || []) as Array<any>;
+    if (lignes.length > 0) {
+      const totalQuantites = lignes.reduce((sum, l) => sum + (l.quantite || 0), 0);
+      if (totalQuantites === 0) return 'annuler';
+    }
+
+    // 3) Ancienne logique heuristique (texte, champs alternatifs)
+    const vAny = v as any;
+    const candidates = [
+      vAny.paymentStatus,
+      vAny.statut,
+      vAny.etat,
+      vAny.status,
+      vAny.isPaid ? 'payer' : undefined,
+      vAny.paye ? 'payer' : undefined
+    ].filter(Boolean).map(x => this.normalizeStr(x));
+
+    const has = (terms: string[]) => candidates.some(c => terms.some(t => c.includes(t)));
+
+    if (has(['payer', 'paid', 'paye', 'payed', 'settled'])) {
+      return 'payer';
+    }
+    if (has(['annul', 'cancel', 'void', 'annulee', 'rembourse'])) {
+      return 'annuler';
+    }
+    if (has(['en cours', 'encours', 'pending', 'in_progress', 'ongoing', 'draft'])) {
+      return 'en-cours';
+    }
+
+    // 4) Fallback sur montants
+    if (typeof v.montantPaye === 'number' && v.montantPaye > 0) {
+      return 'payer';
+    }
+
+    return 'unknown';
+  }
 
   /* ---------------- Helpers UI ---------------- */
   toggleView(viewType: 'grid' | 'list') {
@@ -417,12 +546,6 @@ onSearch(term: string) {
 
   pagePosVente() {
     // this.router.navigate(['/pos-accueil']);
-  }
-
-  openCancelPopup(): void {
-    this.showCancelPopup = true;
-    this.pin = ['', '', '', ''];
-    this.isCodeWrong = false;
   }
 
   closeCancelPopup(): void {
@@ -441,15 +564,171 @@ onSearch(term: string) {
     }
   }
 
+  // Méthode pour mettre à jour les éléments sélectionnés
+  updateSelectedItems(): void {
+    this.selectedItems = this.activeVenteItems.filter(item => item.selected);
+  }
+
+  // Ouvrir la popup d'annulation
+  openCancelPopup(): void {
+    if (this.selectedItems.length === 0) {
+      alert('Veuillez sélectionner au moins un produit à rembourser');
+      return;
+    }
+    
+    this.showCancelPopup = true;
+    this.pin = ['', '', '', ''];
+    this.isCodeWrong = false;
+  }
+
+  // Vérifier le code PIN
   verifyCode(): void {
     const enteredPin = this.pin.join('');
-    // Remplacer par votre logique de vérification réelle
-    if (enteredPin === '1234') {
-      this.removeCommande(this.activeCommandeId);
-      this.closeCancelPopup();
-    } else {
-      this.isCodeWrong = true;
-      setTimeout(() => this.isCodeWrong = false, 500);
+    
+    this.usersService.verifyCode(enteredPin, ['ADMIN', 'MANAGER']).subscribe({
+      next: (isValid: boolean) => { // Ajout du type explicitement
+        if (isValid) {
+          this.showCancelPopup = false;
+          this.showMotifPopup = true;
+        } else {
+          this.handleInvalidPin();
+        }
+      },
+      error: () => this.handleInvalidPin()
+    });
+  }
+
+  private handleInvalidPin(): void {
+    this.isCodeWrong = true;
+    setTimeout(() => this.isCodeWrong = false, 500);
+  }
+
+  // Confirmer le remboursement
+  confirmRemboursement(): void {
+    if (!this.motifRemboursement.trim()) {
+      alert('Veuillez saisir un motif');
+      return;
+    }
+
+    this.isProcessing = true;
+    
+    const request: RemboursementRequest = {
+      venteId: this.activeVenteId!,
+      produitsQuantites: this.getProduitsQuantites(),
+      motif: this.motifRemboursement,
+      rescodePin: this.pin.join('')
+    };
+
+    this.posCommandeService.rembourserVente(request).subscribe({
+      next: (response) => {
+        // mettre à jour la liste locale et l'actif
+        this.allVentes = this.allVentes.map(v => v.venteId === response.venteId ? response : v);
+        // si vous rechargez depuis l'API, faites-le aussi :
+        this.loadVentesAndFilter(this.currentFilterKey);
+
+        // mettre à jour la vente active et ses lignes 
+        this.activeVente = response;
+        this.loadActiveVenteDetails();
+
+        // reset selections & popups
+        this.closeAllPopups();
+        // forcer recalcul des totaux UI
+        this.selectedItems = [];
+        this.updateSelectedItems();
+      },
+      error: (error) => {
+        console.error('Erreur remboursement', error);
+        alert('Erreur lors du remboursement: ' + error.error?.message || error.message);
+      },
+      complete: () => this.isProcessing = false
+    });
+  }
+
+  // Nouvelle méthode pour mettre à jour le statut localement
+  private updateVenteStatus(venteId: number, newStatus: string) {
+    const vente = this.allVentes.find(v => v.venteId === venteId);
+    if (vente) {
+      vente.status = newStatus;
+      this.applyVentesFilter(this.currentFilterKey);
+    }
+    
+    if (this.activeVenteId === venteId) {
+      this.activeVente!.status = newStatus;
     }
   }
+
+  // Helper pour construire produitsQuantites
+  private getProduitsQuantites(): { [key: number]: number } {
+    const quantites: { [key: number]: number } = {};
+
+    this.selectedItems.forEach(item => {
+      // quantité effectivement remboursable (currentQuantity) — fallback à item.quantity
+      const qtyToRefund = item.currentQuantity ?? item.quantity ?? 0;
+      quantites[item.product.id] = qtyToRefund;
+    });
+
+    return quantites;
+  }
+
+  // Fermer toutes les popups
+  closeAllPopups(): void {
+    this.showCancelPopup = false;
+    this.showMotifPopup = false;
+    this.motifRemboursement = '';
+    this.selectedItems = [];
+    
+    // Réinitialiser les sélections
+    this.activeVenteItems.forEach(item => item.selected = false);
+  }
+
+  // Calculer le montant total sélectionné
+  getSelectedAmount(): number {
+    return this.selectedItems.reduce((total, item) => {
+      const qtyToRefund = item.currentQuantity ?? item.quantity ?? 0;
+      const price = item.currentPrice ?? item.product.prixVente ?? 0;
+      return total + (qtyToRefund * price);
+    }, 0);
+  }
+
+  // Calculer le total des items sélectionnés
+  getSelectedItemsCount(): number {
+    return this.selectedItems.reduce((total, item) => {
+      const qtyToRefund = item.currentQuantity ?? item.quantity ?? 0;
+      return total + qtyToRefund;
+    }, 0);
+  }
+
+  // Calculer la nouvelle quantité totale après remboursement
+  getUpdatedTotalItems(vente: VenteResponse | null): number {
+    if (!vente) return 0;
+
+    if (!this.activeVenteId || vente.venteId !== this.activeVenteId) {
+      return this.getTotalItems(vente);
+    }
+
+    // pour la vente active, on calcule avec currentQuantity (quantité réellement payée/présente après remboursements)
+    return this.activeVenteItems.reduce((sum, item) => {
+      const qty = item.selected ? 0 : (item.currentQuantity ?? item.quantity ?? 0);
+      return sum + qty;
+    }, 0);
+  }
+
+  // Calculer le nouveau montant total après remboursement
+  getUpdatedTotalAmount(vente: VenteResponse | null): number {
+    if (!vente) return 0;
+
+    // si on affiche une vente qui n'est pas active, retourner juste le montant backend
+    if (!this.activeVenteId || vente.venteId !== this.activeVenteId) {
+      return vente.montantTotal ?? 0;
+    }
+
+    // pour la vente active, calculer à partir des currentQuantity/currentPrice
+    return this.activeVenteItems.reduce((total, item) => {
+      const qty = item.selected ? 0 : (item.currentQuantity ?? item.quantity ?? 0);
+      const price = item.currentPrice ?? item.product.prixVente ?? 0;
+      return total + (qty * price);
+    }, 0);
+  }
+
+
 }

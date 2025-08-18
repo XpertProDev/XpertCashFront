@@ -34,26 +34,26 @@
             <!-- Si on est en mode "en-cours" on affiche les commandes locales -->
             <ng-container *ngIf="currentFilterKey === 'en-cours'">
                 <ul *ngFor="let commande of commandes" class="ul_commande"
-                    [class.ul_commande_active]="activeCommandeId === commande.id"
-                    (click)="setActiveCommande(commande.id)">
-                <li class="li_commande">
-                    <div class="commande_date_heure">
-                    <p class="commande_date">{{ commande.createdAt | date:'dd/MM/yyyy' }}</p>
-                    <p class="commande_heure">{{ commande.createdAt | date:'HH:mm' }}</p>
-                    </div>
-                </li>
-                <li class="li_commande">
-                    <div class="num_onglet_commande"><p>{{ commande.id }}</p></div>
-                </li>
-                <li class="li_commande">
-                    <div class="quantite_commande"><p>Quantité {{ commande.totalItems }}</p></div>
-                </li>
-                <li class="li_commande">
-                    <div class="price_commande"><p>{{ commande.totalAmount | cfaCurrency }}</p></div>
-                </li>
-                <li class="li_commande" style="display:flex;align-items:center;gap:30px;">
-                    <div class="etat_commande"><p>En cours</p></div>
-                </li>
+                      [class.ul_commande_active]="activeCommandeId === commande.id"
+                      (click)="setActiveCommande(commande.id)">
+                  <li class="li_commande">
+                      <div class="commande_date_heure">
+                      <p class="commande_date">{{ commande.createdAt | date:'dd/MM/yyyy' }}</p>
+                      <p class="commande_heure">{{ commande.createdAt | date:'HH:mm' }}</p>
+                      </div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="num_onglet_commande"><p>{{ commande.id }}</p></div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="quantite_commande"><p>Quantité {{ commande.totalItems }}</p></div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="price_commande"><p>{{ commande.totalAmount | cfaCurrency }}</p></div>
+                  </li>
+                  <li class="li_commande" style="display:flex;align-items:center;gap:30px;">
+                      <div class="etat_commande"><p>En cours</p></div>
+                  </li>
                 </ul>
 
                 <div *ngIf="!commandes.length" class="loading_commande">
@@ -62,38 +62,38 @@
             </ng-container>
 
             <!-- Si on est en mode ventes (payer/terminee/annuler), on affiche les ventes -->
-            <ng-container *ngIf="currentFilterKey !== 'en-cours'">
-                <ul *ngFor="let vente of ventes" class="ul_commande"
-                    [class.ul_commande_active]="activeVenteId === vente.venteId"
-                    (click)="setActiveVente(vente.venteId)">
-                <li class="li_commande">
-                    <div class="commande_date_heure">
-                    <p class="commande_date">{{ vente.dateVente | date:'dd/MM/yyyy' }}</p>
-                    <p class="commande_heure">{{ vente.dateVente | date:'HH:mm' }}</p>
-                    </div>
-                </li>
-                <li class="li_commande">
-                    <div class="num_onglet_commande"><p>{{ vente.venteId }}</p></div>
-                </li>
-                <li class="li_commande">
-                    <div class="quantite_commande"><p>Quantité {{ getTotalItems(vente) }}</p></div>
-                </li>
-                <li class="li_commande">
-                    <div class="price_commande"><p>{{ vente.montantTotal | cfaCurrency }}</p></div>
-                </li>
-                <li class="li_commande" style="display:flex;align-items:center;gap:30px;">
+              <ng-container *ngIf="currentFilterKey !== 'en-cours'">
+                  <ul *ngFor="let vente of ventes" class="ul_commande"
+                      [class.ul_commande_active]="activeVenteId === vente.venteId"
+                      (click)="setActiveVente(vente.venteId)">
+                  <li class="li_commande">
+                      <div class="commande_date_heure">
+                      <p class="commande_date">{{ vente.dateVente | date:'dd/MM/yyyy' }}</p>
+                      <p class="commande_heure">{{ vente.dateVente | date:'HH:mm' }}</p>
+                      </div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="num_onglet_commande"><p>{{ vente.venteId }}</p></div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="quantite_commande"><p>Quantité {{ getUpdatedTotalItems(vente) }}</p></div>
+                  </li>
+                  <li class="li_commande">
+                      <div class="price_commande"><p>{{ getUpdatedTotalAmount(vente) | cfaCurrency }}</p></div>
+                  </li>
+                  <li class="li_commande" style="display:flex;align-items:center;gap:30px;">
                     <div class="etat_commande">
-                        <p [class.status-paid]="getVenteStatus(vente) === 'Payer'">
-                            {{ getVenteStatus(vente) }}
-                        </p>
+                      <p [class.status-paid]="getVenteStatus(vente) === 'Payer'">
+                        {{ getVenteStatus(vente) }}
+                      </p>
                     </div>
-                </li>
-                </ul>
+                  </li>
+                  </ul>
 
-                <div *ngIf="!ventes.length" class="loading_commande">
-                Pas de ventes pour ce filtre
-                </div>
-            </ng-container>
+                  <div *ngIf="!ventes.length" class="loading_commande">
+                  Pas de ventes pour ce filtre
+                  </div>
+              </ng-container>
             </div>
         </div>
     </div>
@@ -130,7 +130,7 @@
           <!-- Sinon : afficher les produits de la vente (backend) -->
           <ng-container *ngIf="currentFilterKey !== 'en-cours'">
             <ul class="ul_list_produit_select">
-              <li class="li_list_produit_select" *ngFor="let item of activeVenteItems">
+              <li class="li_list_produit_select" *ngFor="let item of activeVenteItems" [class.selected-item]="item.selected">
                 <div class="double_commande">
                   <div class="nombre_select">{{ item.quantity }}</div>
                   <div class="name_produit_select">
@@ -145,11 +145,47 @@
                     {{ (item.quantity * item.product.prixVente) | cfaCurrency }}
                   </div>
                 </div>
+                <div class="icon_check">
+                  <label class="cyber-checkbox">
+                    <input 
+                        type="checkbox"
+                        [(ngModel)]="item.selected"
+                        (ngModelChange)="updateSelectedItems()">
+                        
+                        <span class="cyber-checkbox__mark">
+                          <div class="cyber-checkbox__box">
+                              <svg class="cyber-checkbox__check" viewBox="0 0 12 10">
+                              <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                              </svg>
+                          </div>
+                          <div class="cyber-checkbox__effects">
+                              <div class="cyber-checkbox__spark"></div>
+                              <div class="cyber-checkbox__spark"></div>
+                              <div class="cyber-checkbox__spark"></div>
+                              <div class="cyber-checkbox__spark"></div>
+                          </div>
+                          <div class="cyber-checkbox__particles">
+                              <div class="particle-1"></div>
+                              <div class="particle-2"></div>
+                              <div class="particle-3"></div>
+                              <div class="particle-4"></div>
+                              <div class="particle-5"></div>
+                              <div class="particle-6"></div>
+                              <div class="particle-7"></div>
+                              <div class="particle-8"></div>
+                          </div>
+                        </span>
+                    </label>
+                </div>
               </li>
             </ul>
 
             <div *ngIf="activeVenteItems.length === 0" class="empty-cart-message">
               <p>Aucun produit dans cette vente</p>
+            </div>
+            <div *ngIf="selectedItems.length === activeVenteItems.length && activeVenteItems.length > 0" 
+                class="full-refund-warning">
+              Tous les produits sélectionnés - la vente sera annulée
             </div>
           </ng-container>
 
@@ -162,8 +198,13 @@
                 <span>00 CFA</span>
             </div>
             <div class="double_row total">
-                <strong>Total</strong>
-                <strong>{{ activeVente?.montantTotal | cfaCurrency }}</strong>
+              <strong>Total</strong>
+              <strong>
+                <span *ngIf="selectedItems.length > 0 && activeVente" style="text-decoration: line-through; opacity: 0.6;">
+                  {{ activeVente.montantTotal | cfaCurrency }}
+                </span>
+                {{ getUpdatedTotalAmount(activeVente) | cfaCurrency }}
+              </strong>
             </div>
         </div>
 
@@ -199,7 +240,7 @@
     <button class="close-btn" (click)="closeCancelPopup()">
       <i class="ri-close-line"></i>
     </button>
-    
+
     <h2>Confirmation d'annulation</h2>
     <p>Veuillez entrer le Code PIN pour annuler la commande.</p>
     
@@ -221,5 +262,22 @@
              (keydown)="handleBackspace($event, 3, pin3, pin2)" />
     </div>
     <button (click)="verifyCode()">Valider</button>
+  </div>
+</div>
+
+<!-- Popup pour le motif -->
+<div *ngIf="showMotifPopup" class="popup-overlay">
+  <div class="popup">
+    <button class="close-btn" (click)="closeAllPopups()">
+      <i class="ri-close-line"></i>
+    </button>
+
+    <h2>Motif du remboursement</h2>
+    <textarea [(ngModel)]="motifRemboursement" placeholder="Raison du remboursement" rows="4"></textarea>
+    
+    <div class="btn-container">
+      <button class="btn-cancel" (click)="closeAllPopups()">Annuler</button>
+      <button class="btn-confirm" (click)="confirmRemboursement()">Confirmer</button>
+    </div>
   </div>
 </div>

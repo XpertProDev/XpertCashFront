@@ -398,17 +398,57 @@ suspendUser(userId: number, suspend: boolean): Observable<any> {
 }
 
 
-getCurrentUser(): UserRequest | null {
-  const userString = localStorage.getItem('user');
-  if (!userString) return null;
+  getCurrentUser(): UserRequest | null {
+    const userString = localStorage.getItem('user');
+    if (!userString) return null;
 
-  try {
-    return JSON.parse(userString) as UserRequest;
-  } catch (e) {
-    console.error('Erreur lors du parsing du user du localStorage :', e);
-    return null;
+    try {
+      return JSON.parse(userString) as UserRequest;
+    } catch (e) {
+      console.error('Erreur lors du parsing du user du localStorage :', e);
+      return null;
+    }
   }
-}
+
+  // Dans UsersService
+  // verifyCode(pin: string): Observable<boolean> {
+  //   const currentUser = this.getCurrentUser();
+    
+  //   if (!currentUser) {
+  //     console.error('Aucun utilisateur connecté');
+  //     return of(false);
+  //   }
+
+  //   // Vérifier que l'utilisateur est admin ou manager
+  //   const isAdminOrManager = ['ADMIN', 'MANAGER'].includes(currentUser.roleType);
+    
+  //   if (!isAdminOrManager) {
+  //     console.warn('L\'utilisateur n\'est pas admin/manager');
+  //     return of(false);
+  //   }
+
+  //   // Comparer le PIN saisi avec le personalCode
+  //   const isValid = currentUser.personalCode === pin;
+  //   return of(isValid);
+  // }
+
+  verifyCode(pin: string, allowedRoles: string[] = ['ADMIN', 'MANAGER']): Observable<boolean> {
+    const currentUser = this.getCurrentUser();
+    
+    if (!currentUser) {
+      return of(false);
+    }
+
+    // Vérifier le rôle
+    const hasRequiredRole = allowedRoles.includes(currentUser.roleType);
+    
+    if (!hasRequiredRole) {
+      return of(false);
+    }
+
+    // Vérifier le code
+    return of(currentUser.personalCode === pin);
+  }
 
 
 }
