@@ -213,9 +213,19 @@ filterOptions = [
         console.debug('Ventes API raw:', ventes);
         this.allVentes = ventes || [];
         this.applyVentesFilter(key);
-        // si on vient d'activer la vue ventes, positionne la première vente active
-        if (this.ventes.length > 0 && !this.activeVente) {
-          this.setActiveVente(this.ventes[0].venteId);
+
+        // si on a des ventes filtrées, s'assurer que la première soit active
+        if (this.ventes.length > 0) {
+          const first = this.ventes[0];
+          if (!this.activeVente || this.activeVente.venteId !== first.venteId) {
+            this.setActiveVente(first.venteId);
+          }
+        } else {
+          // aucune vente pour ce filtre : nettoyer l'état actif
+          this.activeVenteId = null;
+          this.activeVente = null;
+          this.activeVenteItems = [];
+          this.updateSelectedItems();
         }
       },
       error: (err) => {
@@ -256,23 +266,24 @@ filterOptions = [
   // Version corrigée et typée — coller à la place de l'ancienne
   async loadActiveVenteDetails(): Promise<void> {
     if (!this.activeVenteId) {
+      // rien d'actif -> réinitialiser l'affichage
       this.activeVenteItems = [];
       this.updateSelectedItems();
       return;
     }
 
-    console.debug('loadActiveVenteDetails - activeVente (initial):', this.activeVente);
+    console.debug('loadActiveVenteDetails - starting for id', this.activeVenteId);
 
-    // Helper pour récupérer la vente complète si possible
+    // Helper : tenter de récupérer la vente "complète" depuis l'API
     const ensureFullVente = async (): Promise<any> => {
       try {
-        // si le service expose getVenteById, utilise-le
         const svcAny = this.posCommandeService as any;
+        // si le service a un getVenteById, l'utiliser
         if (typeof svcAny.getVenteById === 'function') {
           return await firstValueFrom(svcAny.getVenteById(this.activeVenteId));
         }
 
-        // fallback : recharger toutes les ventes et retrouver celle-ci
+        // fallback : recharger les ventes du vendeur et retrouver la vente
         if (typeof this.posCommandeService.getVentesByVendeur === 'function') {
           const vendeurId = this.usersService.getCurrentUser()?.id;
           if (!vendeurId) return this.activeVente;
@@ -282,11 +293,12 @@ filterOptions = [
           }
         }
       } catch (err) {
-        console.warn('ensureFullVente fallback error', err);
+        console.warn('ensureFullVente error', err);
       }
       return this.activeVente;
     };
 
+    // essayer de fetch la vente complète
     const fullVente = await ensureFullVente();
     if (fullVente && fullVente !== this.activeVente) {
       console.debug('Fetched fullVente from API for id', this.activeVenteId, fullVente);
@@ -294,15 +306,17 @@ filterOptions = [
       const idx = this.allVentes.findIndex(v => v.venteId === this.activeVenteId);
       if (idx >= 0) this.allVentes[idx] = fullVente;
     } else {
-      console.debug('No full fetch needed or nothing returned; using existing activeVente');
+      console.debug('Using existing activeVente (no fetch or unchanged)');
     }
 
-    // safe raw any pour éviter erreurs de type TS
+    // Raw safe object
     const raw: any = this.activeVente || {};
+    // supporter plusieurs noms possibles pour les lignes
     const lignes: any[] = raw.lignes ?? raw.lines ?? raw.items ?? raw.lignesVente ?? [];
 
-    console.debug('lines used:', lignes);
+    console.debug('lines used for building items:', lignes);
 
+    // utilitaire pour resolver des nombres depuis différentes clés
     const resolveNumberFrom = (obj: any, keys: string[]): number | null => {
       if (!obj) return null;
       for (const k of keys) {
@@ -321,8 +335,9 @@ filterOptions = [
     const priceKeysCurrent  = ['prixUnitaire','prix','price','unitPrice','prix_unitaire'];
 
     const isCancelledSale = this.activeVente ? this.determineVenteCategory(this.activeVente) === 'annuler' : false;
-    console.debug('isCancelledSale:', isCancelledSale, 'status:', this.activeVente?.status);
+    console.debug('isCancelledSale:', isCancelledSale, 'activeVente.status:', this.activeVente?.status);
 
+    // construire les activeVenteItems avec tous les champs utiles
     this.activeVenteItems = lignes.map((ligne: any) => {
       const originalQty = resolveNumberFrom(ligne, qtyKeysOriginal) ?? resolveNumberFrom(ligne, qtyKeysCurrent) ?? null;
       const currentQty  = resolveNumberFrom(ligne, qtyKeysCurrent)  ?? resolveNumberFrom(ligne, qtyKeysOriginal) ?? 0;
@@ -341,6 +356,7 @@ filterOptions = [
         },
         quantity: displayQty ?? 0,
 
+        // conserver les valeurs brutes pour décisions futures
         originalQuantity: originalQty,
         currentQuantity: currentQty,
         originalPrice: originalPrice,
@@ -356,7 +372,24 @@ filterOptions = [
       this.activeVenteItems = this.activeVenteItems.filter(it => (it.quantity ?? 0) > 0);
     }
 
+    // --- Sélection par défaut selon le filtre courant ---
+    if (this.currentFilterKey === 'annuler') {
+      // Option A (actuelle) : sélectionner tous les produits par défaut quand on est dans l'onglet "Annuler"
+      this.activeVenteItems.forEach(it => it.selected = true);
+
+      // Option B (alternative, commentée) : sélectionner seulement les lignes qui montrent une différence
+      // (ex : originalQuantity > currentQuantity) -> décommenter si tu veux ce comportement
+      // this.activeVenteItems.forEach(it => {
+      //   it.selected = (it.originalQuantity != null && (it.originalQuantity > (it.currentQuantity ?? it.quantity ?? 0)));
+      // });
+    } else {
+      // désélectionner par défaut dans les autres états (ex : Payées)
+      this.activeVenteItems.forEach(it => it.selected = false);
+    }
+
     console.debug('activeVenteItems built:', this.activeVenteItems);
+
+    // Mettre à jour la liste des éléments sélectionnés (selectedItems)
     this.updateSelectedItems();
   }
 
