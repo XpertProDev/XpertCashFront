@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { firstValueFrom, Subject, takeUntil } from 'rxjs';
 import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.directive';
 import { environment } from 'src/environments/environment';
 import { ViewStateService } from '../pos-accueil/view-state.service';
@@ -253,33 +253,117 @@ filterOptions = [
     });
   }
 
-  setActiveVente(venteId: number) {
-    this.activeVenteId = venteId;
-    this.activeVente = this.ventes.find(v => v.venteId === venteId) || null;
-    this.loadActiveVenteDetails();
-  }
-
-  loadActiveVenteDetails() {
-    if (!this.activeVente) {
+  // Version corrigée et typée — coller à la place de l'ancienne
+  async loadActiveVenteDetails(): Promise<void> {
+    if (!this.activeVenteId) {
       this.activeVenteItems = [];
       this.updateSelectedItems();
       return;
     }
 
-    this.activeVenteItems = (this.activeVente.lignes || [])
-      .filter(l => l.quantite && l.quantite > 0)
-      .map(ligne => ({
-        product: {
-          id: ligne.produitId,
-          nom: ligne.nomProduit,
-          prixVente: ligne.prixUnitaire
-        },
-        quantity: ligne.quantite,
-        selected: false // <-- réinitialiser ici
-      }));
+    console.debug('loadActiveVenteDetails - activeVente (initial):', this.activeVente);
 
-    // s'assurer que selectedItems reflète l'état initial
+    // Helper pour récupérer la vente complète si possible
+    const ensureFullVente = async (): Promise<any> => {
+      try {
+        // si le service expose getVenteById, utilise-le
+        const svcAny = this.posCommandeService as any;
+        if (typeof svcAny.getVenteById === 'function') {
+          return await firstValueFrom(svcAny.getVenteById(this.activeVenteId));
+        }
+
+        // fallback : recharger toutes les ventes et retrouver celle-ci
+        if (typeof this.posCommandeService.getVentesByVendeur === 'function') {
+          const vendeurId = this.usersService.getCurrentUser()?.id;
+          if (!vendeurId) return this.activeVente;
+          const all = await firstValueFrom(this.posCommandeService.getVentesByVendeur(vendeurId) as any);
+          if (Array.isArray(all)) {
+            return all.find((v: any) => v.venteId === this.activeVenteId) || this.activeVente;
+          }
+        }
+      } catch (err) {
+        console.warn('ensureFullVente fallback error', err);
+      }
+      return this.activeVente;
+    };
+
+    const fullVente = await ensureFullVente();
+    if (fullVente && fullVente !== this.activeVente) {
+      console.debug('Fetched fullVente from API for id', this.activeVenteId, fullVente);
+      this.activeVente = fullVente;
+      const idx = this.allVentes.findIndex(v => v.venteId === this.activeVenteId);
+      if (idx >= 0) this.allVentes[idx] = fullVente;
+    } else {
+      console.debug('No full fetch needed or nothing returned; using existing activeVente');
+    }
+
+    // safe raw any pour éviter erreurs de type TS
+    const raw: any = this.activeVente || {};
+    const lignes: any[] = raw.lignes ?? raw.lines ?? raw.items ?? raw.lignesVente ?? [];
+
+    console.debug('lines used:', lignes);
+
+    const resolveNumberFrom = (obj: any, keys: string[]): number | null => {
+      if (!obj) return null;
+      for (const k of keys) {
+        if (Object.prototype.hasOwnProperty.call(obj, k) && obj[k] !== undefined && obj[k] !== null) {
+          const v = obj[k];
+          const n = (typeof v === 'number') ? v : Number(String(v).replace(',', '.'));
+          if (!Number.isNaN(n)) return n;
+        }
+      }
+      return null;
+    };
+
+    const qtyKeysOriginal = ['quantiteOriginale','quantiteInitiale','initialQuantity','originalQuantity','quantiteAvantRemboursement','qtyOriginal','original_qty','qty_initial'];
+    const qtyKeysCurrent  = ['quantite','quantity','qty','quantite_actuelle','currentQuantity','current_qty'];
+    const priceKeysOriginal = ['prixOriginal','prixAvantRemboursement','unitPriceOriginal','prixUnitaireOriginal','originalPrice'];
+    const priceKeysCurrent  = ['prixUnitaire','prix','price','unitPrice','prix_unitaire'];
+
+    const isCancelledSale = this.activeVente ? this.determineVenteCategory(this.activeVente) === 'annuler' : false;
+    console.debug('isCancelledSale:', isCancelledSale, 'status:', this.activeVente?.status);
+
+    this.activeVenteItems = lignes.map((ligne: any) => {
+      const originalQty = resolveNumberFrom(ligne, qtyKeysOriginal) ?? resolveNumberFrom(ligne, qtyKeysCurrent) ?? null;
+      const currentQty  = resolveNumberFrom(ligne, qtyKeysCurrent)  ?? resolveNumberFrom(ligne, qtyKeysOriginal) ?? 0;
+
+      const originalPrice = resolveNumberFrom(ligne, priceKeysOriginal) ?? resolveNumberFrom(ligne, priceKeysCurrent) ?? (ligne.prixUnitaire ?? null);
+      const currentPrice  = resolveNumberFrom(ligne, priceKeysCurrent)  ?? resolveNumberFrom(ligne, priceKeysOriginal) ?? (ligne.prixUnitaire ?? 0);
+
+      const displayQty   = (isCancelledSale && originalQty !== null) ? originalQty : currentQty;
+      const displayPrice = (isCancelledSale && originalPrice !== null) ? originalPrice : currentPrice;
+
+      return {
+        product: {
+          id: ligne.produitId ?? ligne.productId ?? ligne.idProduit ?? null,
+          nom: ligne.nomProduit ?? ligne.productName ?? ligne.name ?? 'Produit',
+          prixVente: displayPrice ?? 0
+        },
+        quantity: displayQty ?? 0,
+
+        originalQuantity: originalQty,
+        currentQuantity: currentQty,
+        originalPrice: originalPrice,
+        currentPrice: currentPrice,
+
+        selected: false,
+        __rawLine: ligne
+      } as any;
+    });
+
+    // filtrage : si vente annulée afficher toutes les lignes, sinon garder uniquement qty>0
+    if (!isCancelledSale) {
+      this.activeVenteItems = this.activeVenteItems.filter(it => (it.quantity ?? 0) > 0);
+    }
+
+    console.debug('activeVenteItems built:', this.activeVenteItems);
     this.updateSelectedItems();
+  }
+
+  setActiveVente(venteId: number) {
+    this.activeVenteId = venteId;
+    this.activeVente = this.ventes.find(v => v.venteId === venteId) || null;
+    this.loadActiveVenteDetails();
   }
 
   getTotalItems(vente: VenteResponse): number {
@@ -576,11 +660,13 @@ filterOptions = [
   // Helper pour construire produitsQuantites
   private getProduitsQuantites(): { [key: number]: number } {
     const quantites: { [key: number]: number } = {};
-    
+
     this.selectedItems.forEach(item => {
-      quantites[item.product.id] = item.quantity;
+      // quantité effectivement remboursable (currentQuantity) — fallback à item.quantity
+      const qtyToRefund = item.currentQuantity ?? item.quantity ?? 0;
+      quantites[item.product.id] = qtyToRefund;
     });
-    
+
     return quantites;
   }
 
@@ -597,39 +683,51 @@ filterOptions = [
 
   // Calculer le montant total sélectionné
   getSelectedAmount(): number {
-    return this.selectedItems.reduce((total, item) => total + (item.quantity * item.product.prixVente), 0);
+    return this.selectedItems.reduce((total, item) => {
+      const qtyToRefund = item.currentQuantity ?? item.quantity ?? 0;
+      const price = item.currentPrice ?? item.product.prixVente ?? 0;
+      return total + (qtyToRefund * price);
+    }, 0);
   }
 
   // Calculer le total des items sélectionnés
   getSelectedItemsCount(): number {
-    return this.selectedItems.reduce((total, item) => total + item.quantity, 0);
+    return this.selectedItems.reduce((total, item) => {
+      const qtyToRefund = item.currentQuantity ?? item.quantity ?? 0;
+      return total + qtyToRefund;
+    }, 0);
   }
 
   // Calculer la nouvelle quantité totale après remboursement
   getUpdatedTotalItems(vente: VenteResponse | null): number {
     if (!vente) return 0;
-    
+
     if (!this.activeVenteId || vente.venteId !== this.activeVenteId) {
       return this.getTotalItems(vente);
     }
-    
-    return this.getTotalItems(vente) - this.getSelectedItemsCount();
+
+    // pour la vente active, on calcule avec currentQuantity (quantité réellement payée/présente après remboursements)
+    return this.activeVenteItems.reduce((sum, item) => {
+      const qty = item.selected ? 0 : (item.currentQuantity ?? item.quantity ?? 0);
+      return sum + qty;
+    }, 0);
   }
 
   // Calculer le nouveau montant total après remboursement
   getUpdatedTotalAmount(vente: VenteResponse | null): number {
     if (!vente) return 0;
 
-    // Si on affiche la vente active, calculer à partir de activeVenteItems
-    if (this.activeVenteId && vente.venteId === this.activeVenteId) {
-      return this.activeVenteItems.reduce((total, item) => {
-        const qty = item.selected ? 0 : item.quantity; // on ignore les items sélectionnés
-        return total + (qty * item.product.prixVente);
-      }, 0);
+    // si on affiche une vente qui n'est pas active, retourner juste le montant backend
+    if (!this.activeVenteId || vente.venteId !== this.activeVenteId) {
+      return vente.montantTotal ?? 0;
     }
 
-    // Sinon utiliser le montant du backend
-    return vente.montantTotal || 0;
+    // pour la vente active, calculer à partir des currentQuantity/currentPrice
+    return this.activeVenteItems.reduce((total, item) => {
+      const qty = item.selected ? 0 : (item.currentQuantity ?? item.quantity ?? 0);
+      const price = item.currentPrice ?? item.product.prixVente ?? 0;
+      return total + (qty * price);
+    }, 0);
   }
 
 
