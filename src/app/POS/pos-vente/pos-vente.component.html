@@ -597,6 +597,16 @@
               <span class="label">Unité de mesure</span>
               <span class="value">{{ selectedProductForDetail.nomUnite }}</span>
             </div>
+
+            <div class="info-row" *ngIf="selectedProductForDetail.datePreemption">
+            <span class="label">Date d'expiration</span>
+            <span 
+              class="value" 
+              [ngClass]="{'date-red': isNearExpiry(selectedProductForDetail.datePreemption)}">
+              {{ formatDate(selectedProductForDetail.datePreemption || '') }}
+            </span>
+          </div>
+
           </div>
           <div class="detail_info_right">
 
