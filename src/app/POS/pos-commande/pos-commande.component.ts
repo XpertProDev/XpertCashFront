@@ -231,21 +231,15 @@ filterOptions = [
     this.ventes = this.allVentes.filter(v => this.matchesVenteStatus(v, key));
   }
 
-private matchesVenteStatus(v: VenteResponse, key: FilterKey): boolean {
-  const cat = this.determineVenteCategory(v);
+  private matchesVenteStatus(v: VenteResponse, key: FilterKey): boolean {
+    const cat = this.determineVenteCategory(v);
 
-  if (key === 'en-cours') {
-    return cat === 'en-cours';
-  }
-  if (key === 'payer') {
-    return cat === 'payer';
-  }
-  if (key === 'annuler') {
-    return cat === 'annuler';
-  }
+    if (key === 'en-cours') return cat === 'en-cours';
+    if (key === 'payer') return cat === 'payer';
+    if (key === 'annuler') return cat === 'annuler';
 
-  return false;
-}
+    return false;
+  }
 
   loadVentes() {
     const vendeurId = this.usersService.getCurrentUser()?.id;
@@ -356,25 +350,30 @@ private matchesVenteStatus(v: VenteResponse, key: FilterKey): boolean {
     }
   }
 
-getVenteStatus(vente: VenteResponse): string {
-  if (vente.status) {
-    switch (vente.status.toUpperCase()) {
-      case 'EN_COURS': return 'En cours';
-      case 'PARTIELLEMENT_REMBOURSEE': return 'Partiellement remboursée';
-      case 'REMBOURSEE': return 'Remboursée'; // <-- avant: 'Payée' (corrigé)
-      case 'ANNULEE': return 'Annulée';
-      default: return vente.status;
+  getVenteStatus(vente: VenteResponse): string {
+    if (vente.status) {
+      switch (vente.status.toUpperCase()) {
+        case 'EN_COURS': return 'En cours';
+        case 'PARTIELLEMENT_REMBOURSEE': return 'Partiellement remboursée';
+        case 'REMBOURSEE': return 'Annulée'; // afficher "Annulée" si backend dit REMBOURSEE
+        case 'ANNULEE': return 'Annulée';
+        case 'PAYEE':
+        case 'PAYER':
+          return 'Payée';
+        default:
+          // si status inconnu, retombe sur la catégorie
+          break;
+      }
+    }
+
+    const cat = this.determineVenteCategory(vente);
+    switch (cat) {
+      case 'payer': return 'Payée';
+      case 'annuler': return 'Annulée';
+      case 'en-cours': return 'En cours';
+      default: return '—';
     }
   }
-  
-  const cat = this.determineVenteCategory(vente);
-  switch (cat) {
-    case 'payer': return 'Payée';
-    case 'annuler': return 'Annulée';
-    case 'en-cours': return 'En cours';
-    default: return '—';
-  }
-}
 
   private normalizeStr(val: any): string {
     if (val === null || val === undefined) return '';
@@ -388,50 +387,67 @@ getVenteStatus(vente: VenteResponse): string {
     }
   }
 
-private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cours' | 'unknown' {
-  // Priorité au nouveau champ 'status'
-  if (v.status) {
-    switch (v.status.toUpperCase()) {
-      case 'EN_COURS': 
-        return 'en-cours';
-      case 'PARTIELLEMENT_REMBOURSEE':
-      case 'REMBOURSEE': // REMBOURSEE est considéré comme "payer"
-        return 'payer';
-      case 'ANNULEE': 
-        return 'annuler';
+  // remplace entirely determineVenteCategory
+  private determineVenteCategory(v: VenteResponse): 'payer' | 'annuler' | 'en-cours' | 'unknown' {
+    // 1) Si le backend fournit un status, on s'en sert (priorité)
+    if (v.status) {
+      switch (v.status.toUpperCase()) {
+        case 'EN_COURS':
+          return 'en-cours';
+        case 'PARTIELLEMENT_REMBOURSEE':
+          // encore considéré comme "payer" côté filtre (partiel = pas totalement annulée)
+          return 'payer';
+        case 'REMBOURSEE':
+          // Vente entièrement remboursée -> la considérer comme "annuler" pour le filtrage
+          return 'annuler';
+        case 'ANNULEE':
+          return 'annuler';
+        case 'PAYEE':
+        case 'PAYER': // possible variantes
+          return 'payer';
+        default:
+          // laisser continuer au fallback
+          break;
+      }
     }
-  }
-  
-  // Fallback pour l'ancienne logique
-  const vAny = v as any;
-  const candidates = [
-    vAny.paymentStatus,
-    vAny.statut,
-    vAny.etat,
-    vAny.status,
-    vAny.isPaid ? 'payer' : undefined,
-    vAny.paye ? 'payer' : undefined
-  ].filter(Boolean).map(x => this.normalizeStr(x));
 
-  const has = (terms: string[]) => candidates.some(c => terms.some(t => c.includes(t)));
-  
-  if (has(['payer', 'paid', 'paye', 'payed', 'settled', 'remboursee', 'partiellement_remboursee'])) {
-    return 'payer';
+    // 2) Fallback : si on a les lignes, et que toutes les quantités = 0 => annuler
+    const lignes = (v.lignes || []) as Array<any>;
+    if (lignes.length > 0) {
+      const totalQuantites = lignes.reduce((sum, l) => sum + (l.quantite || 0), 0);
+      if (totalQuantites === 0) return 'annuler';
+    }
+
+    // 3) Ancienne logique heuristique (texte, champs alternatifs)
+    const vAny = v as any;
+    const candidates = [
+      vAny.paymentStatus,
+      vAny.statut,
+      vAny.etat,
+      vAny.status,
+      vAny.isPaid ? 'payer' : undefined,
+      vAny.paye ? 'payer' : undefined
+    ].filter(Boolean).map(x => this.normalizeStr(x));
+
+    const has = (terms: string[]) => candidates.some(c => terms.some(t => c.includes(t)));
+
+    if (has(['payer', 'paid', 'paye', 'payed', 'settled'])) {
+      return 'payer';
+    }
+    if (has(['annul', 'cancel', 'void', 'annulee', 'rembourse'])) {
+      return 'annuler';
+    }
+    if (has(['en cours', 'encours', 'pending', 'in_progress', 'ongoing', 'draft'])) {
+      return 'en-cours';
+    }
+
+    // 4) Fallback sur montants
+    if (typeof v.montantPaye === 'number' && v.montantPaye > 0) {
+      return 'payer';
+    }
+
+    return 'unknown';
   }
-  if (has(['annul', 'cancel', 'void', 'annulee'])) {
-    return 'annuler';
-  }
-  if (has(['en cours', 'encours', 'pending', 'in_progress', 'ongoing', 'draft'])) {
-    return 'en-cours';
-  }
-  
-  // Fallback: vérifier les montants
-  if (typeof v.montantPaye === 'number' && v.montantPaye > 0) {
-    return 'payer';
-  }
-  
-  return 'unknown';
-}
 
   /* ---------------- Helpers UI ---------------- */
   toggleView(viewType: 'grid' | 'list') {
