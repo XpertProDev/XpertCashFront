@@ -15,14 +15,8 @@
                             <select class="content_select" name="boutique" 
                                     [(ngModel)]="selectedBoutiqueIdForList"
                                     (ngModelChange)="onBoutiqueChange()">
-                                <!-- Option désactivée pour sélection explicite -->
-                                <!-- <option [value]="null">Sélectionnez une boutique</option> -->
-                                
-                                <!-- <option *ngFor="let boutique of boutiques" [value]="boutique.id">
+                                <option *ngFor="let boutique of boutiques" [ngValue]="boutique.id" [disabled]="!boutique.actif">
                                     {{ boutique.nomBoutique }}
-                                </option> -->
-                                <option *ngFor="let boutique of boutiques" [value]="boutique.id" [disabled]="!boutique.actif">
-                                {{ boutique.nomBoutique }}
                                 </option>
                             </select>
                         </div>
@@ -72,8 +66,8 @@
                 <div class="form-group">
                     <label>Boutique assignée</label>
                     <select [(ngModel)]="selectedBoutiqueId" name="boutique" [disabled]="isLoading">
-                        <option [value]="null">Sélectionnez une boutique</option>
-                        <option *ngFor="let boutique of boutiques" [value]="boutique.id">
+                        <option [ngValue]="null">Sélectionnez une boutique</option>
+                        <option *ngFor="let boutique of boutiques" [ngValue]="boutique.id">
                             {{ boutique.nomBoutique }}
                         </option>
                     </select>

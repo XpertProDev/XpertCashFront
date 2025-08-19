@@ -21,14 +21,14 @@ export class PosCaisseHeaderComponent {
 
   showModal = false;
   boutiques: any[] = [];
-  selectedBoutiqueId: number | null = null;
   montantOuverture: number = 0;
   isLoading = false;
   errorMessage: string | null = null;
   caisses: CaisseResponse[] = [];
-
-  // selectedBoutiqueIdForList: number | null = null;
-  selectedBoutiqueIdForList: number = 0; 
+  
+  selectedBoutiqueIdForList: number | null = null;
+  selectedBoutiqueId: number | null = null;
+  // selectedBoutiqueIdForList: number = 0; 
   isLoadingCaisses = false;
 
   openMenuId: number | null = null;
@@ -56,6 +56,8 @@ export class PosCaisseHeaderComponent {
     // On récupère d'abord l'utilisateur courant
     this.usersService.getUserInfo().subscribe({
       next: (user) => {
+        console.log('Boutiques chargées:', this.boutiques.map(b => ({id: b.id, nom: b.nomBoutique, actif: b.actif})));
+
         if (user && user.roleType === 'VENDEUR') {
           // Vendeur : ne récupérer que les boutiques qui lui sont assignées
           this.boutiques = user.boutiques || [];
@@ -166,10 +168,58 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
     this.errorMessage = null;
     this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
   }
-  
-  openModal() {
-    this.showModal = true;
+
+/**
+ * Ouvre le modal et initialise `selectedBoutiqueId`.
+ * @param preferDifferent si true -> sélectionne la première boutique différente de la sélection d'en-tête (comportement "autre boutique")
+ *                         si false (par défaut) -> sélectionne la même boutique que l'en-tête si disponible, sinon la première disponible.
+ */
+openModal(preferDifferent: boolean = false) {
+  console.log('openModal() called. headerSelected=', this.selectedBoutiqueIdForList, 'boutiques length=', this.boutiques?.length);
+
+  // Forcer le type number si la valeur vient en string
+  if (this.selectedBoutiqueIdForList != null) {
+    this.selectedBoutiqueIdForList = Number(this.selectedBoutiqueIdForList);
   }
+
+  // Si les boutiques ne sont pas encore chargées, ouvrir modal sans sélection
+  if (!this.boutiques || this.boutiques.length === 0) {
+    console.warn('Boutiques non chargées au moment de openModal(). Ouvrir modal sans sélection.');
+    this.selectedBoutiqueId = null;
+    this.errorMessage = null;
+    this.showModal = true;
+    return;
+  }
+
+  // Filtrer boutiques actives (adapter si tu veux inclure les inactives)
+  const available = (this.boutiques || [])
+    .filter(b => b && b.actif !== false)
+    .map(b => ({ ...b, id: Number(b.id) })); // forcer id en number
+
+  // Trier pour comportement déterministe (optionnel)
+  available.sort((a, b) => a.id - b.id);
+
+  if (available.length === 0) {
+    // Aucune boutique disponible après filtre
+    this.selectedBoutiqueId = null;
+  } else if (preferDifferent) {
+    // Option : sélectionner la première boutique différente de l'en-tête
+    const firstDifferent = available.find(b => b.id !== this.selectedBoutiqueIdForList);
+    this.selectedBoutiqueId = firstDifferent ? firstDifferent.id : available[0].id;
+  } else {
+    // Option par défaut : sélectionner la même boutique que l'en-tête si possible, sinon la première disponible
+    this.selectedBoutiqueId = (this.selectedBoutiqueIdForList != null && available.some(b => b.id === this.selectedBoutiqueIdForList))
+      ? this.selectedBoutiqueIdForList
+      : available[0].id;
+  }
+
+  console.log('Modal selection computed -> header:', this.selectedBoutiqueIdForList, 'modal:', this.selectedBoutiqueId, 'available:', available.map(x => ({id: x.id, nom: x.nomBoutique})));
+
+  this.errorMessage = null;
+  this.showModal = true;
+}
+
+
 
   closeModal() {
     this.showModal = false;
