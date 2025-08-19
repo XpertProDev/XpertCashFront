@@ -244,7 +244,10 @@
           <p>{{ getSelectedCustomerName() }}</p>
         </div> -->
         <div class="paiement_btn btn_client" (click)="openListClientPopup()">
-          <p *ngIf="!selectedClient && !selectedEntreprise">Client</p>
+          <p *ngIf="!selectedClient && !selectedEntreprise">
+            <img src="assets/img/profil.png" alt="client" width="16" height="16" style="vertical-align: middle; margin-right: 5px;">
+            Client
+          </p>
           
           <div *ngIf="selectedClient" class="selected-client-info">
             <span>{{ selectedClient.nomComplet || 'Client' }}</span>
