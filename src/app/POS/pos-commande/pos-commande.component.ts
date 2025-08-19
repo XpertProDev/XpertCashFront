@@ -71,6 +71,8 @@ export class PosCommandeComponent implements OnDestroy {
 
   // snapshot map pour garder une copie initiale des lignes par venteId
   private venteLineSnapshots: Map<number, any[]> = new Map<number, any[]>();
+  // clé pour localStorage (changer version si tu modifies le format)
+  private readonly SNAPSHOT_KEY = 'vente_line_snapshots_v1';
 
   constructor(
     public router: Router,
@@ -82,6 +84,9 @@ export class PosCommandeComponent implements OnDestroy {
   ) {}
 
   ngOnInit() {
+
+    this.loadSnapshotsFromStorage();
+
     this.viewState.isListView$.pipe(takeUntil(this.destroy$)).subscribe(view => {
       this.isListView = view;
     });
@@ -104,6 +109,48 @@ export class PosCommandeComponent implements OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /** Charger snapshots depuis localStorage au démarrage */
+  private loadSnapshotsFromStorage(): void {
+    try {
+      const raw = localStorage.getItem(this.SNAPSHOT_KEY);
+      if (!raw) return;
+      const obj = JSON.parse(raw) as Record<string, any[]>;
+      Object.keys(obj).forEach(k => {
+        const id = Number(k);
+        if (!Number.isNaN(id)) {
+          this.venteLineSnapshots.set(id, obj[k]);
+        }
+      });
+      console.debug('Loaded vente snapshots from storage', this.venteLineSnapshots);
+    } catch (e) {
+      console.warn('Failed to load vente snapshots from storage', e);
+    }
+  }
+
+  /** Sauvegarder snapshots en localStorage */
+  private saveSnapshotsToStorage(): void {
+    try {
+      const obj: Record<string, any[]> = {};
+      this.venteLineSnapshots.forEach((v, k) => obj[String(k)] = v);
+      localStorage.setItem(this.SNAPSHOT_KEY, JSON.stringify(obj));
+      console.debug('Saved vente snapshots to storage');
+    } catch (e) {
+      console.warn('Failed to save vente snapshots to storage', e);
+    }
+  }
+
+  /** Mise à jour pratique du snapshot pour une vente (appelée après fetch initial ou remboursement) */
+  private ensureSnapshotForVente(venteId: number, lignes: any[] | null): void {
+    if (this.venteLineSnapshots.has(venteId)) return;
+    if (!lignes || !Array.isArray(lignes)) return;
+    try {
+      this.venteLineSnapshots.set(venteId, JSON.parse(JSON.stringify(lignes)));
+    } catch {
+      this.venteLineSnapshots.set(venteId, lignes.map(l => ({ ...l })));
+    }
+    this.saveSnapshotsToStorage();
   }
 
   /* ---------------- Filter / UI ---------------- */
@@ -230,6 +277,8 @@ export class PosCommandeComponent implements OnDestroy {
           }
         });
 
+        // persister après avoir initialisé les snapshots
+        this.saveSnapshotsToStorage();
         this.applyVentesFilter(key);
 
         // si on a des ventes filtrées, s'assurer que la première soit active
@@ -694,18 +743,29 @@ export class PosCommandeComponent implements OnDestroy {
 
     this.posCommandeService.rembourserVente(request).subscribe({
       next: (response) => {
-        // mettre à jour la liste locale et l'actif
-        this.allVentes = this.allVentes.map(v => v.venteId === response.venteId ? response : v);
-        // si vous rechargez depuis l'API, faites-le aussi :
-        this.loadVentesAndFilter(this.currentFilterKey);
+        const venteId = response.venteId ?? this.activeVenteId!;
+        const responseAny = response as any;
 
-        // mettre à jour la vente active et ses lignes 
+        // fallback robustes sans erreur de typage TS
+        const responseLines = responseAny.lignes ?? responseAny.lines ?? responseAny.items ?? null;
+
+        // s'assurer d'avoir un snapshot avant d'écraser la vente
+        if (!this.venteLineSnapshots.has(venteId)) {
+          const old = this.allVentes.find(v => v.venteId === venteId) as any;
+          const oldLines = old?.lignes ?? old?.lines ?? null;
+          this.ensureSnapshotForVente(venteId, oldLines ?? responseLines);
+        }
+
+        // remplacer la vente dans la liste locale
+        this.allVentes = this.allVentes.map(v => v.venteId === venteId ? response : v);
+        this.saveSnapshotsToStorage();
+
+        // recharger / mettre à jour UI
+        this.loadVentesAndFilter(this.currentFilterKey);
         this.activeVente = response;
         this.loadActiveVenteDetails();
 
-        // reset selections & popups
         this.closeAllPopups();
-        // forcer recalcul des totaux UI
         this.selectedItems = [];
         this.updateSelectedItems();
       },
