@@ -450,5 +450,10 @@ suspendUser(userId: number, suspend: boolean): Observable<any> {
     return of(currentUser.personalCode === pin);
   }
 
+  getAssignedBoutiques(): any[] {
+    const user = this.getCurrentUser();
+    return (user && user.boutiques) ? user.boutiques : [];
+  }
+
 
 }

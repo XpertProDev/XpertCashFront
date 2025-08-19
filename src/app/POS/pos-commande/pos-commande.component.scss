@@ -200,7 +200,7 @@ p {
 .double_commande {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
   // padding: 0 10px;
 }
 
@@ -363,7 +363,7 @@ textarea {
 }
 
 .btn-confirm {
-  background: #4CAF50;
+  background: #0672E4;
   color: white;
 }
 
@@ -792,3 +792,8 @@ textarea {
   border-left: 3px solid #ff0000;
 }
 
+.double_commande .nombre_select span {
+  opacity: 0.7;
+  text-decoration: line-through;
+  margin-right: 5px;
+}

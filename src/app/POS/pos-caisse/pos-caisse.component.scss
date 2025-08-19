@@ -4,7 +4,7 @@
 ul { list-style: none; margin: 0; padding: 0;}
 p { margin: 0; }
 .double { display: flex; align-items: center; gap: 10px;}
-.icon_retour i { font-size: 20px; }
+.icon_retour i { font-size: 20px; cursor: pointer;}
 .inputSearch { position: relative; width: 250px; height: 40px; display: flex; align-items: center;}
 .inputSearch input { width: 100%; height: 100%; padding-left: 10px; border-radius: 5px; border: 1px solid #000;}
 .inputSearch i { position: absolute; right: 0; margin-right: 15px; font-size: 17px;}

@@ -165,17 +165,17 @@ submitForm(): void {
                     console.log("Navigation vers analytics réussie ?", success);
                   });
                 } else {
-                  // Si l'utilisateur n'a que "VENDRE_PRODUITS", redirection vers "pos-accueil"
-                  this.router.navigate(['/pos-accueil']).then(success => {
-                    console.log("Navigation vers pos-accueil réussie ?", success);
+                  // Si l'utilisateur n'a que "VENDRE_PRODUITS", redirection vers "pos-caisse"
+                  this.router.navigate(['/pos-caisse']).then(success => {
+                    console.log("Navigation vers pos-caisse réussie ?", success);
                   });
                 }
               } else if (
                 userPermissions.includes("VENDRE_PRODUITS")
               ) {
-                // Redirection vers "pos-accueil" pour les permissions liées à la gestion des produits
-                this.router.navigate(['/pos-accueil']).then(success => {
-                  console.log("Navigation vers pos-accueil réussie ?", success);
+                // Redirection vers "pos-caisse" pour les permissions liées à la gestion des produits
+                this.router.navigate(['/pos-caisse']).then(success => {
+                  console.log("Navigation vers pos-caisse réussie ?", success);
                 });
               } else {
                 // Redirection par défaut si aucune des conditions ci-dessus n'est remplie

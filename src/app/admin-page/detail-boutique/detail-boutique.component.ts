@@ -7,7 +7,7 @@ import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, 
 import { environment } from 'src/environments/environment';
 import { Produit } from '../MODELS/produit.model';
 import { Users } from '../MODELS/utilisateur.model';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, take } from 'rxjs';
 import { UsersService } from '../SERVICES/users.service';
 import { AssignerVendeurRequest } from '../MODELS/AssignerVendeurRequest';
 
@@ -483,7 +483,70 @@ async confirmCopyProducts(): Promise<void> {
     this.searchTerm = '';
   }
 
+  // Ajoute ça dans DetailBoutiqueComponent (private helper)
+  // private normalizeBoutique(b: any): Boutique {
+  //   return {
+  //     id: b.id,
+  //     nomBoutique: b.nomBoutique ?? '',
+  //     telephone: b.telephone ?? '',
+  //     email: b.email ?? '',
+  //     adresse: b.adresse ?? '',
+  //     caisseId: b.caisseId ?? null,
+  //     // propriétés manquantes : on fournit des valeurs par défaut
+  //     actif: typeof b.actif === 'boolean' ? b.actif : false,
+  //     type: b.type ?? 'BOUTIQUE',
+  //     typeBoutique: b.typeBoutique ?? 'BOUTIQUE',
+  //     // si ton interface Boutique contient d'autres champs, les ajouter ici aussi
+  //   } as Boutique;
+  // }
+
   // Charger toutes les boutiques (sauf la boutique actuelle)
+  // loadAllBoutiques(): void {
+  //   this.usersService.getUserInfo().pipe(take(1)).subscribe({
+  //     next: (user) => {
+  //       const mapAndFilter = (list: any[]) => {
+  //         const arr = (list || []).map(b => this.normalizeBoutique(b));
+  //         // Exclure la boutique courante si nécessaire
+  //         this.allBoutiques = arr.filter(b => b.id !== this.boutique?.id);
+  //         this.filteredCopyBoutiques = [...this.allBoutiques];
+  //         this.filteredBoutiques = [...this.allBoutiques];
+  //       };
+
+  //       if (user && user.roleType === 'VENDEUR') {
+  //         // vendeur : ne charger que ses boutiques (depuis user.boutiques)
+  //         mapAndFilter(user.boutiques || []);
+  //       } else {
+  //         // admin/manager : charger toutes les boutiques de l'entreprise
+  //         this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+  //           next: (boutiques) => mapAndFilter(boutiques),
+  //           error: (err) => {
+  //             console.error('Erreur lors du chargement des boutiques', err);
+  //             this.allBoutiques = [];
+  //             this.filteredCopyBoutiques = [];
+  //             this.filteredBoutiques = [];
+  //           }
+  //         });
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error('Erreur récupération user', err);
+  //       // fallback : charger toutes les boutiques
+  //       this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+  //         next: (boutiques) => {
+  //           this.allBoutiques = (boutiques || []).map(b => this.normalizeBoutique(b));
+  //           this.filteredCopyBoutiques = [...this.allBoutiques];
+  //           this.filteredBoutiques = [...this.allBoutiques];
+  //         },
+  //         error: () => {
+  //           this.allBoutiques = [];
+  //           this.filteredCopyBoutiques = [];
+  //           this.filteredBoutiques = [];
+  //         }
+  //       });
+  //     }
+  //   });
+  // }
+
   loadAllBoutiques(): void {
     this.boutiqueService.getBoutiquesByEntreprise().subscribe({
         next: (boutiques) => {
@@ -499,7 +562,6 @@ async confirmCopyProducts(): Promise<void> {
     });
   }
 
-  // Filtrer les boutiques selon la recherche
   filterBoutiques(): void {
     if (!this.searchTerm) {
         this.filteredBoutiques = [...this.allBoutiques];
