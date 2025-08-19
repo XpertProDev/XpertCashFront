@@ -53,11 +53,11 @@ export class PosCommandeComponent implements OnDestroy {
   isProcessing: boolean = false;
   
   // filtre
-filterOptions = [
-  { key: 'en-cours' as FilterKey, label: 'En cours' },
-  { key: 'payer' as FilterKey, label: 'Payées' },
-  { key: 'annuler' as FilterKey, label: 'Annuler' }
-];
+  filterOptions = [
+    { key: 'en-cours' as FilterKey, label: 'En cours' },
+    { key: 'payer' as FilterKey, label: 'Payées' },
+    { key: 'annuler' as FilterKey, label: 'Annuler' }
+  ];
 
   currentFilterKey: FilterKey = 'en-cours';
   currentFilterLabel = 'En cours';
@@ -68,6 +68,9 @@ filterOptions = [
   showCancelPopup = false;
   pin: string[] = ['', '', '', ''];
   isCodeWrong = false;
+
+  // snapshot map pour garder une copie initiale des lignes par venteId
+  private venteLineSnapshots: Map<number, any[]> = new Map<number, any[]>();
 
   constructor(
     public router: Router,
@@ -211,7 +214,22 @@ filterOptions = [
     this.posCommandeService.getVentesByVendeur(vendeurId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (ventes) => {
         console.debug('Ventes API raw:', ventes);
+        // assigner d'abord les ventes reçues
         this.allVentes = ventes || [];
+
+        // --- conserver un snapshot initial des lignes pour chaque vente (si pas déjà présent) ---
+        // utiliser uniquement 'lignes' (conforme à ton model)
+        this.allVentes.forEach(v => {
+          const rawLines = (v.lignes ?? []) as any[];
+          if (!this.venteLineSnapshots.has(v.venteId)) {
+            try {
+              this.venteLineSnapshots.set(v.venteId, JSON.parse(JSON.stringify(rawLines)));
+            } catch {
+              this.venteLineSnapshots.set(v.venteId, rawLines.map(l => ({ ...l })));
+            }
+          }
+        });
+
         this.applyVentesFilter(key);
 
         // si on a des ventes filtrées, s'assurer que la première soit active
@@ -266,7 +284,6 @@ filterOptions = [
   // Version corrigée et typée — coller à la place de l'ancienne
   async loadActiveVenteDetails(): Promise<void> {
     if (!this.activeVenteId) {
-      // rien d'actif -> réinitialiser l'affichage
       this.activeVenteItems = [];
       this.updateSelectedItems();
       return;
@@ -274,16 +291,12 @@ filterOptions = [
 
     console.debug('loadActiveVenteDetails - starting for id', this.activeVenteId);
 
-    // Helper : tenter de récupérer la vente "complète" depuis l'API
     const ensureFullVente = async (): Promise<any> => {
       try {
         const svcAny = this.posCommandeService as any;
-        // si le service a un getVenteById, l'utiliser
         if (typeof svcAny.getVenteById === 'function') {
           return await firstValueFrom(svcAny.getVenteById(this.activeVenteId));
         }
-
-        // fallback : recharger les ventes du vendeur et retrouver la vente
         if (typeof this.posCommandeService.getVentesByVendeur === 'function') {
           const vendeurId = this.usersService.getCurrentUser()?.id;
           if (!vendeurId) return this.activeVente;
@@ -298,7 +311,6 @@ filterOptions = [
       return this.activeVente;
     };
 
-    // essayer de fetch la vente complète
     const fullVente = await ensureFullVente();
     if (fullVente && fullVente !== this.activeVente) {
       console.debug('Fetched fullVente from API for id', this.activeVenteId, fullVente);
@@ -309,14 +321,11 @@ filterOptions = [
       console.debug('Using existing activeVente (no fetch or unchanged)');
     }
 
-    // Raw safe object
     const raw: any = this.activeVente || {};
-    // supporter plusieurs noms possibles pour les lignes
     const lignes: any[] = raw.lignes ?? raw.lines ?? raw.items ?? raw.lignesVente ?? [];
 
     console.debug('lines used for building items:', lignes);
 
-    // utilitaire pour resolver des nombres depuis différentes clés
     const resolveNumberFrom = (obj: any, keys: string[]): number | null => {
       if (!obj) return null;
       for (const k of keys) {
@@ -334,31 +343,68 @@ filterOptions = [
     const priceKeysOriginal = ['prixOriginal','prixAvantRemboursement','unitPriceOriginal','prixUnitaireOriginal','originalPrice'];
     const priceKeysCurrent  = ['prixUnitaire','prix','price','unitPrice','prix_unitaire'];
 
+    // helper pour retrouver dans le snapshot (si existant)
+    const snapshot = this.venteLineSnapshots.get(this.activeVenteId!) ?? [];
+
+    const findInSnapshot = (ligne: any) => {
+      if (!snapshot || snapshot.length === 0) return null;
+      // essayer de matcher par id produit si possible, sinon par nom
+      const prodId = ligne.produitId ?? ligne.productId ?? ligne.idProduit ?? null;
+      if (prodId != null) {
+        const found = snapshot.find((s: any) =>
+          (s.produitId ?? s.productId ?? s.idProduit) === prodId
+        );
+        if (found) return found;
+      }
+      // fallback par nom (comparaison simple)
+      const name = (ligne.nomProduit ?? ligne.productName ?? ligne.name ?? '').toString().toLowerCase();
+      if (name) {
+        return snapshot.find((s: any) => {
+          const sname = (s.nomProduit ?? s.productName ?? s.name ?? '').toString().toLowerCase();
+          return sname && sname === name;
+        }) || null;
+      }
+      return null;
+    };
+
     const isCancelledSale = this.activeVente ? this.determineVenteCategory(this.activeVente) === 'annuler' : false;
     console.debug('isCancelledSale:', isCancelledSale, 'activeVente.status:', this.activeVente?.status);
 
-    // construire les activeVenteItems avec tous les champs utiles
     this.activeVenteItems = lignes.map((ligne: any) => {
-      const originalQty = resolveNumberFrom(ligne, qtyKeysOriginal) ?? resolveNumberFrom(ligne, qtyKeysCurrent) ?? null;
+      // valeurs depuis la ligne actuelle (après éventuel remboursement)
       const currentQty  = resolveNumberFrom(ligne, qtyKeysCurrent)  ?? resolveNumberFrom(ligne, qtyKeysOriginal) ?? 0;
+      const currentPrice = resolveNumberFrom(ligne, priceKeysCurrent) ?? resolveNumberFrom(ligne, priceKeysOriginal) ?? (ligne.prixUnitaire ?? 0);
 
-      const originalPrice = resolveNumberFrom(ligne, priceKeysOriginal) ?? resolveNumberFrom(ligne, priceKeysCurrent) ?? (ligne.prixUnitaire ?? null);
-      const currentPrice  = resolveNumberFrom(ligne, priceKeysCurrent)  ?? resolveNumberFrom(ligne, priceKeysOriginal) ?? (ligne.prixUnitaire ?? 0);
+      // tenter de récupérer les valeurs originales depuis la ligne elle-même
+      let originalQty  = resolveNumberFrom(ligne, qtyKeysOriginal) ?? null;
+      let originalPrice = resolveNumberFrom(ligne, priceKeysOriginal) ?? null;
 
-      const displayQty   = (isCancelledSale && originalQty !== null) ? originalQty : currentQty;
-      const displayPrice = (isCancelledSale && originalPrice !== null) ? originalPrice : currentPrice;
+      // si original absente, tenter le snapshot
+      if ((originalQty === null || originalPrice === null) && snapshot && snapshot.length > 0) {
+        const snapLine = findInSnapshot(ligne);
+        if (snapLine) {
+          if (originalQty === null) originalQty = resolveNumberFrom(snapLine, qtyKeysOriginal) ?? resolveNumberFrom(snapLine, qtyKeysCurrent) ?? originalQty;
+          if (originalPrice === null) originalPrice = resolveNumberFrom(snapLine, priceKeysOriginal) ?? resolveNumberFrom(snapLine, priceKeysCurrent) ?? originalPrice;
+        }
+      }
+
+      // now set fields clearly: current = after refund, original = before refund
+      // Ensure product.prixVente is current price (so total uses current price)
+      const productObj = {
+        id: ligne.produitId ?? ligne.productId ?? ligne.idProduit ?? null,
+        nom: ligne.nomProduit ?? ligne.productName ?? ligne.name ?? 'Produit',
+        prixVente: currentPrice ?? 0
+      };
 
       return {
-        product: {
-          id: ligne.produitId ?? ligne.productId ?? ligne.idProduit ?? null,
-          nom: ligne.nomProduit ?? ligne.productName ?? ligne.name ?? 'Produit',
-          prixVente: displayPrice ?? 0
-        },
-        quantity: displayQty ?? 0,
+        product: productObj,
+        // quantity = valeur actuelle (après remboursement) — c'est la valeur utilisée pour calcul total
+        quantity: currentQty ?? 0,
 
-        // conserver les valeurs brutes pour décisions futures
+        // on conserve explicitement original/current séparés pour affichage
         originalQuantity: originalQty,
         currentQuantity: currentQty,
+
         originalPrice: originalPrice,
         currentPrice: currentPrice,
 
@@ -367,29 +413,23 @@ filterOptions = [
       } as any;
     });
 
-    // filtrage : si vente annulée afficher toutes les lignes, sinon garder uniquement qty>0
+    // si la vente n'est pas annulée, on cache les lignes dont la quantité actuelle est 0
     if (!isCancelledSale) {
       this.activeVenteItems = this.activeVenteItems.filter(it => (it.quantity ?? 0) > 0);
     }
 
-    // --- Sélection par défaut selon le filtre courant ---
+    // selection par défaut pour l'onglet "Annuler"
     if (this.currentFilterKey === 'annuler') {
-      // Option A (actuelle) : sélectionner tous les produits par défaut quand on est dans l'onglet "Annuler"
+      // Option : tout sélectionner par défaut
       this.activeVenteItems.forEach(it => it.selected = true);
-
-      // Option B (alternative, commentée) : sélectionner seulement les lignes qui montrent une différence
-      // (ex : originalQuantity > currentQuantity) -> décommenter si tu veux ce comportement
-      // this.activeVenteItems.forEach(it => {
-      //   it.selected = (it.originalQuantity != null && (it.originalQuantity > (it.currentQuantity ?? it.quantity ?? 0)));
-      // });
+      // Variante possible : sélectionner seulement les lignes qui ont été réduites
+      // this.activeVenteItems.forEach(it => it.selected = (it.originalQuantity != null && it.originalQuantity > (it.currentQuantity ?? 0)));
     } else {
-      // désélectionner par défaut dans les autres états (ex : Payées)
       this.activeVenteItems.forEach(it => it.selected = false);
     }
 
     console.debug('activeVenteItems built:', this.activeVenteItems);
 
-    // Mettre à jour la liste des éléments sélectionnés (selectedItems)
     this.updateSelectedItems();
   }
 
