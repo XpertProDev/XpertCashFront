@@ -220,4 +220,8 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
     });
   }
 
+  goToDashboard() {
+    this.router.navigate(['/analytics'])
+  }
+
 }
