@@ -13,6 +13,7 @@ import { HttpClient } from '@angular/common/http';
 import { ProduitService } from 'src/app/admin-page/SERVICES/produit.service';
 import { UserRequest } from 'src/app/admin-page/MODELS/user-request';
 import { tap } from 'rxjs';
+import { VenteService } from 'src/app/admin-page/SERVICES/VenteService/vente-service';
 @Component({
   selector: 'app-dash-analytics',
   standalone: true,
@@ -32,8 +33,11 @@ export default class DashAnalyticsComponent {
   userEmail: string = '';
 
   // constructor
-  constructor(private userService: UsersService,private http: HttpClient, private produitService: ProduitService, 
+  constructor(private userService: UsersService,
+    private http: HttpClient, 
+    private produitService: ProduitService, 
     private usersService: UsersService,
+    private venteService: VenteService
   ) {
     this.chartOptions = {
       chart: {
@@ -397,6 +401,7 @@ getBoutiqueInfo() {
             const totalNonEnStock = totaux.totalNonEnStock || 0; 
 
             const totalProduits = totalEnStock + totalNonEnStock;
+            const montantTotal = totaux.montantTotal || 0; // Assurez-vous que cette propriété existe dans la réponse
             
 
             // Mise à jour des cartes avec les totaux des produits
@@ -414,7 +419,7 @@ getBoutiqueInfo() {
                 title: 'Vente du jour',
                 icon: 'icon-tag',
                 text: 'du mois',
-                number: '1641',
+                number: montantTotal.toString(),
                 no: '213'
               },
               {
@@ -484,6 +489,15 @@ getBoutiqueInfo() {
       } else {
         console.error('Aucune boutique trouvée pour cet utilisateur');
       }
+      this.venteService.getMontantTotalEntreprise().subscribe(
+        (montantTotal: number) => {
+          console.log('Montant total de l\'entreprise:', montantTotal);
+          this.cards[1].number = montantTotal.toString(); // Exemple de mise à jour
+        },
+        (error) => {
+          console.error('Erreur lors de la récupération du montant total de l\'entreprise', error);
+        }
+      );
     },
     (error) => {
       console.error('Erreur lors de la récupération des informations utilisateur', error);

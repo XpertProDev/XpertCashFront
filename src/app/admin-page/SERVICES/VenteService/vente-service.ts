@@ -41,5 +41,19 @@ export class VenteService {
     );
   }
 
+  getMontantTotalEntreprise(): Observable<number> {
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) {
+          return throwError(() => new Error('Aucun token trouvé'));
+        }
+        const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+        return this.http.get<number>(`${this.apiUrl}/vente/montant-total-jour`, { headers });
+      }),
+      catchError(err => throwError(() => err))
+  );
+}
+
+
 
 }
