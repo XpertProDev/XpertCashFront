@@ -210,7 +210,7 @@
                     <!-- Afficher le total original si annulée -->
                     <span *ngIf="currentFilterKey === 'annuler' && item.originalPrice !== null">
                       <span style="text-decoration: line-through; opacity: 0.7;">
-                        {{ (item.originalQuantity * item.originalPrice) | cfaCurrency }}
+                        {{ (item.originalQuantity * item.originalPrice) }}
                       </span><br>
                     </span>
                     {{ (item.quantity * item.product.prixVente) | cfaCurrency }}
