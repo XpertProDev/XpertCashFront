@@ -9,6 +9,7 @@ import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-
 import { CaisseResponse, OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/CaisseModel/caisse.model';
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { CaisseStateService } from 'src/app/admin-page/SERVICES/CaisseService/caisse-state.service';
+import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 
 @Component({
   selector: 'app-pos-caisse-header',
@@ -37,7 +38,8 @@ export class PosCaisseHeaderComponent {
     private caisseState: CaisseStateService,
     private posCaisseService: PosCaisseService,
     private boutiqueState: BoutiqueStateService,
-    private router: Router
+    private router: Router,
+    private usersService: UsersService,
   ) {}
 
   ngOnInit(): void {
@@ -51,24 +53,43 @@ export class PosCaisseHeaderComponent {
   }
   
   loadBoutiques(): void {
-    this.boutiqueService.getBoutiquesByEntreprise().subscribe({
-      next: (boutiques) => {
-        this.boutiques = boutiques;
-        
-        if (this.boutiques.length > 0) {
-          // Utiliser la boutique sauvegardée ou la première
+    // On récupère d'abord l'utilisateur courant
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        if (user && user.roleType === 'VENDEUR') {
+          // Vendeur : ne récupérer que les boutiques qui lui sont assignées
+          this.boutiques = user.boutiques || [];
+          // Sélectionne la première boutique assignée (ou 0 si aucune)
           this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
           this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
-          
-          // Vérifier que l'ID n'est pas null avant d'appeler
-          if (this.selectedBoutiqueIdForList !== null) {
+          if (this.selectedBoutiqueIdForList) {
             this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
           }
+        } else {
+          // Admin / Manager : récupérer toutes les boutiques de l'entreprise
+          this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+            next: (boutiques) => {
+              this.boutiques = boutiques;
+              this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
+              this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
+              if (this.selectedBoutiqueIdForList) {
+                this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+              }
+            },
+            error: (err) => {
+              console.error('Erreur lors du chargement des boutiques', err);
+              this.errorMessage = 'Erreur lors du chargement des boutiques';
+            }
+          });
         }
       },
-      error: (error) => {
-        console.error('Erreur lors du chargement des boutiques', error);
-        this.errorMessage = 'Erreur lors du chargement des boutiques';
+      error: (err) => {
+        console.error('Impossible de récupérer l\'utilisateur courant', err);
+        // Fallback : charger toutes les boutiques (ou laisser vide)
+        this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+          next: (boutiques) => this.boutiques = boutiques,
+          error: () => this.boutiques = []
+        });
       }
     });
   }

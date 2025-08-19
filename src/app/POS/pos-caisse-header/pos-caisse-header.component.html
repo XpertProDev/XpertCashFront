@@ -18,8 +18,11 @@
                                 <!-- Option désactivée pour sélection explicite -->
                                 <!-- <option [value]="null">Sélectionnez une boutique</option> -->
                                 
-                                <option *ngFor="let boutique of boutiques" [value]="boutique.id">
+                                <!-- <option *ngFor="let boutique of boutiques" [value]="boutique.id">
                                     {{ boutique.nomBoutique }}
+                                </option> -->
+                                <option *ngFor="let boutique of boutiques" [value]="boutique.id" [disabled]="!boutique.actif">
+                                {{ boutique.nomBoutique }}
                                 </option>
                             </select>
                         </div>

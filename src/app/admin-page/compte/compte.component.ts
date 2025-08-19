@@ -358,42 +358,67 @@ handleRoleTypeChanges() {
 }
 */
 
-loadBoutiques() {
-  this.boutiqueService.getBoutiquesByEntreprise().subscribe({
-    next: (data) => {
-      this.boutiques = data;
-      console.log("Liste des boutiques :", data);
-    },
-    error: (err) => {
-      console.error('Erreur lors du chargement des boutiques', err);
-    }
-  });
-}
+// loadBoutiques() {
+//   this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+//     next: (data) => {
+//       this.boutiques = data;
+//       console.log("Liste des boutiques :", data);
+//     },
+//     error: (err) => {
+//       console.error('Erreur lors du chargement des boutiques', err);
+//     }
+//   });
+// }
 
-isRoleVisible(roleName: string): boolean {
-  if (this.currentUserRole === 'ADMIN' && roleName === 'ADMIN' || roleName === 'VENDEUR') {
-    return false;
-  }
-
-  if (this.currentUserRole === 'MANAGER' && roleName === 'MANAGER'|| roleName === 'ADMIN' || roleName === 'VENDEUR') {
-    return false;
-  }
-
-  return true;
-}
-
-private loadCurrentUserRole(): void {
-  this.usersService.getUserInfo()
-    .pipe(take(1))
-    .subscribe({
+  loadBoutiques() {
+    // Vérifier rôle courant
+    this.usersService.getUserInfo().pipe(take(1)).subscribe({
       next: (user) => {
-        this.currentUserRole = user.roleType;
+        if (user && user.roleType === 'VENDEUR') {
+          // Un vendeur ne doit pas créer/affecter d'autres vendeurs -> ne pas afficher la liste
+          this.boutiques = user.boutiques || [];
+        } else {
+          // Admin/Manager : charge toutes les boutiques
+          this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+            next: (data) => { this.boutiques = data; },
+            error: (err) => console.error('Erreur lors du chargement des boutiques', err)
+          });
+        }
       },
       error: (err) => {
-        console.error('Erreur lors de la récupération du rôle utilisateur :', err);
+        // fallback
+        this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+          next: (data) => { this.boutiques = data; },
+          error: (err) => console.error(err)
+        });
       }
     });
-}
+  }
+
+  isRoleVisible(roleName: string): boolean {
+    if (this.currentUserRole === 'ADMIN' && roleName === 'ADMIN' || roleName === 'VENDEUR') {
+      return false;
+    }
+
+    if (this.currentUserRole === 'MANAGER' && roleName === 'MANAGER'|| roleName === 'ADMIN' || roleName === 'VENDEUR') {
+      return false;
+    }
+
+    return true;
+  }
+
+  private loadCurrentUserRole(): void {
+    this.usersService.getUserInfo()
+      .pipe(take(1))
+      .subscribe({
+        next: (user) => {
+          this.currentUserRole = user.roleType;
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération du rôle utilisateur :', err);
+        }
+      });
+  }
 
 }
 
