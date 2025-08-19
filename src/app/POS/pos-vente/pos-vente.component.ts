@@ -1708,6 +1708,10 @@ isNearExpiry(dateStr: string | null): boolean {
   return date <= oneMonthLater;
 }
 
-
+//Récupérer les produits filtrés selon la boutique sélectionnée
+getFilteredProductsByBoutique(): ProduitDetailsResponseDTO[] {
+  if (!this.selectedBoutiqueId) return [];
+  return this.allProducts.filter(product => product.boutiqueId === this.selectedBoutiqueId);  
+}
 
 }

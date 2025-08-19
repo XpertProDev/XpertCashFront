@@ -46,10 +46,17 @@
                     </div>
                 </div>
                 
+               <div class="caisse-container">
                 <button class="caisse-btn" (click)="onCaisseButtonClick(caisse)">
                     {{ getButtonText(caisse) }}
                 </button>
-            </div>
+
+                <div class="boutique-name">
+                    <i class="ri-store-2-line"></i>
+                    <span>{{ getNomBoutique(caisse) }}</span>
+                </div>
+                </div>
+
         </div>
     </div>
 </div>

@@ -423,5 +423,4 @@ export class PosAccueilComponent {
 
 
 
-
 }

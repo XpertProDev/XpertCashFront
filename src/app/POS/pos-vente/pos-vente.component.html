@@ -46,7 +46,7 @@
         <div class="cadre_produit product-grid" *ngIf="isListView">
           
           <div class="product-card"
-               *ngFor="let produit of displayedProducts"
+               *ngFor="let produit of getFilteredProductsByBoutique()"
                   [class.disabled]="getAvailableStock(produit) <= 0"
                   (click)="addToCart(produit)"
                   (pointerdown)="startPress($event, produit)"
