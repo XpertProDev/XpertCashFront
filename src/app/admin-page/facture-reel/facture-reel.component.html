@@ -22,35 +22,35 @@
         </div>
         
 
-        <div class="filter-toggle-icon" (click)="toggleDropdown()">
+        <!-- <div class="filter-toggle-icon" (click)="toggleDropdown()">
           <i class="ri-filter-line"></i>
-        </div>
+        </div> -->
 
 
         <div class="filter-dropdown-wrapper" *ngIf="dropdownOuvert">
-  <div class="filter-dropdown">
-    <div class="filter-type">
-      <div
-        *ngFor="let type of typesPeriode"
-        class="filter-option"
-        [class.active]="type.value === typeSelectionne"
-        (click)="choisirType(type.value)">
-        {{ type.label }}
-      </div>
-    </div>
+          <div class="filter-dropdown">
+            <div class="filter-type">
+              <div
+                *ngFor="let type of typesPeriode"
+                class="filter-option"
+                [class.active]="type.value === typeSelectionne"
+                (click)="choisirType(type.value)">
+                {{ type.label }}
+              </div>
+            </div>
 
-    <div *ngIf="typeSelectionne === 'personnalise'" class="filter-date">
-      <label>Date début</label>
-      <input type="date" [(ngModel)]="dateDebut" />
-      <label>Date fin</label>
-      <input type="date" [(ngModel)]="dateFin" />
-    </div>
+            <div *ngIf="typeSelectionne === 'personnalise'" class="filter-date">
+              <label>Date début</label>
+              <input type="date" [(ngModel)]="dateDebut" />
+              <label>Date fin</label>
+              <input type="date" [(ngModel)]="dateFin" />
+            </div>
 
-    <button class="filter-btn" (click)="appliquerFiltre()">🔍 Appliquer</button>
-  </div>
+            <button class="filter-btn" (click)="appliquerFiltre()">🔍 Appliquer</button>
+          </div>
         </div>
         <div class="contentIcon">
-          <div class="bare"></div>
+          <!-- <div class="bare"></div> -->
         </div>
 
         

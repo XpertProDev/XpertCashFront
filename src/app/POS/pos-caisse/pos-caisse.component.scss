@@ -14,7 +14,7 @@ p { margin: 0; }
 .caisse-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px;}
 .caisse-card { border: 1px solid #ddd; padding: 20px; border-radius: 4px; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between;}
 .caisse-nom { font-weight: bold; font-size: 18px; color: #1a1a1a;}
-.caisse-btn { background-color: #0672E4; color: white; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; align-self: flex-start; transition: background-color 0.2s ease;}
+.caisse-btn { background-color: #0672E4; color: white; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 500; align-self: flex-start; transition: background-color 0.2s ease;}
 .caisse-btn:hover { background-color: #0361c6;}
 .profil { background-color: #E9D421; padding: 0px 12px; border-radius: 4px; cursor: pointer;}
 .profil span { font-size: 12px; color: #000000;}
@@ -347,4 +347,10 @@ button:disabled {
     border: 1px solid #d1d5db;
     font-weight: 500;
     color: #1e293b;
+}
+
+.caisse-container {
+  display: flex;
+  align-items: center; /* aligne verticalement bouton + texte */
+  gap: 10px; /* espace entre les deux */
 }

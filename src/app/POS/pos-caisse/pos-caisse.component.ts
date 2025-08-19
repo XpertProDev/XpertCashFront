@@ -216,8 +216,26 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
     return 'Action inconnue';
   }
 
+  getNomBoutique(caisse: CaisseResponse): string {
+    const boutique = this.boutiques.find(b => b.id === caisse.boutiqueId);
+    return boutique ? boutique.nomBoutique : 'Boutique inconnue';
+  }
+  
   getStatusText(caisse: CaisseResponse): string {
     if (caisse.statut === 'OUVERTE') {
+        // Vérifiez si la date d'ouverture est présente
+        if (caisse.dateOuverture) {
+            const ouvertureDate = new Date(caisse.dateOuverture);
+            const options: Intl.DateTimeFormatOptions = { 
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            const formattedDate = ouvertureDate.toLocaleString('fr-FR', options);
+            return `Ouverte le ${formattedDate}`;
+        }
         return 'Ouverte';
     } else if (caisse.statut === 'FERMEE') {
         // Vérifiez si la date de fermeture est présente
@@ -293,5 +311,15 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
     });
   }
 
-  
+    formatDate(dateInput: Date | string): string {
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+    
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
 }

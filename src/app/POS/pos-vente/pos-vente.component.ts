@@ -666,7 +666,7 @@ startPress(event: Event, produit: ProduitDetailsResponseDTO): void {
           boutiqueId: result.boutiqueId ?? null,
           description: result.description ?? '',
           codeBare: result.codeBare ?? '',
-          codeGenerique: result.codeGenerique ?? ''
+          codeGenerique: result.codeGenerique ?? '',
         });
 
         this.selectedProductForDetail = mappedProduct;
@@ -690,7 +690,7 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   const quantite = this.getQuantiteDansBoutiqueCourante(produit);
 
   if (produit.seuilAlert == null || produit.seuilAlert === 0) {
-    return true;
+    return quantite <= 10;
   }
   return quantite <= produit.seuilAlert;
 }
@@ -1691,6 +1691,27 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   // Réinitialiser le champ de remise
   this.currentDiscountInput = '';
   this.discountMode.value = 0;
+}
+
+formatDate(dateStr: string | null): string {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('fr-FR');
+}
+
+isNearExpiry(dateStr: string | null): boolean {
+  if (!dateStr) return false;
+  const date = new Date(dateStr);
+  const now = new Date();
+  const oneMonthLater = new Date();
+  oneMonthLater.setMonth(now.getMonth() + 1);
+  return date <= oneMonthLater;
+}
+
+//Récupérer les produits filtrés selon la boutique sélectionnée
+getFilteredProductsByBoutique(): ProduitDetailsResponseDTO[] {
+  if (!this.selectedBoutiqueId) return [];
+  return this.allProducts.filter(product => product.boutiqueId === this.selectedBoutiqueId);  
 }
 
 }

@@ -594,7 +594,19 @@ export class AddProduitComponent implements OnInit {
     }
     this.isLoading = true;
     const produit = this.ajouteProduitForm.value;
-    const datePreemption = this.ajouteProduitForm.get('datePreemption')?.value;
+    let date = this.ajouteProduitForm.get('datePreemption')?.value;
+
+    if (date) {
+      if (date instanceof Date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        produit.datePreemption = `${day}-${month}-${year}`;
+      } else {
+        const [yyyy, mm, dd] = date.split('-');
+        produit.datePreemption = `${dd}-${mm}-${yyyy}`;
+      }
+    }
 
     // Si le prix d'achat n'est pas fourni, mettez-le à null ou 0
     if (produit.prixAchat === '' || produit.prixAchat === null) {
@@ -657,7 +669,7 @@ export class AddProduitComponent implements OnInit {
             produit, 
             finalImage, 
             addToStock,
-            datePreemption,
+            produit.datePreemption,
         ).subscribe({
           next: data => {
             this.showPopupMessage({

@@ -339,23 +339,53 @@ export class DetailFactureProformaApercuComponent implements OnInit {
       doc.text(lines[i], 15, currentAmountInWordsY);
     }
 
-    // 10. Signature centrée
-    let y_signature_block = currentAmountInWordsY + 30;
-    const min_y_signature = doc.internal.pageSize.height - 70;
-    y_signature_block = Math.max(y_signature_block, min_y_signature);
-    const blocCenterX = 180;
-    doc.setFontSize(9);
-    doc.setFont('helvetica');
-    const signataire = this.signataire || 'Directeur';
-    const signataireWidth = doc.getTextWidth(signataire);
-    const signataireX = blocCenterX - signataireWidth / 2;
-    doc.text(signataire, signataireX, y_signature_block);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    const nom = this.signataireNom || 'Nom du signataire';
-    const nomWidth = doc.getTextWidth(nom);
-    const nomX = blocCenterX - nomWidth / 2;
-    doc.text(nom, nomX, y_signature_block + 8);
+// 10. Signature centrée
+let y_signature_block = currentAmountInWordsY + 30;
+const min_y_signature = doc.internal.pageSize.height - 100;
+y_signature_block = Math.max(y_signature_block, min_y_signature);
+const blocCenterX = 180;
+
+// Affichage du nom et du poste du signataire
+doc.setFontSize(9);
+doc.setFont('helvetica');
+const signataire = this.signataire || 'Directeur';
+const signataireWidth = doc.getTextWidth(signataire);
+const signataireX = blocCenterX - signataireWidth / 2;
+doc.text(signataire, signataireX, y_signature_block);
+doc.setFontSize(9);
+doc.setFont('helvetica', 'normal');
+const nom = this.signataireNom || 'Nom du signataire';
+const nomWidth = doc.getTextWidth(nom);
+const nomX = blocCenterX - nomWidth / 2;
+doc.text(nom, nomX, y_signature_block + 8);
+
+// Ajouter la signature numérique juste à côté du texte du signataire
+try {
+  // Vérifier si la signature numérique est présente
+  if (this.signaturNum) {
+    const signatureImg = this.signaturNum.startsWith('data:image/') ? this.signaturNum : await this.getImageFromUrl(this.signaturNum);
+    if (signatureImg) {
+      // Signature à droite du nom du signataire
+      doc.addImage(signatureImg, 'PNG', signataireX + signataireWidth - 35, y_signature_block + 10, 40, 20); // Ajuste la position et la taille
+    } else {
+      console.error('Impossible de charger l\'image de la signature');
+    }
+  }
+
+  // Vérifier si le cachet numérique est présent
+  if (this.cachetNum) {
+    const cachetImg = this.cachetNum.startsWith('data:image/') ? this.cachetNum : await this.getImageFromUrl(this.cachetNum);
+    if (cachetImg) {
+      // Cachet sous la signature
+      doc.addImage(cachetImg, 'PNG', signataireX + signataireWidth - 50, y_signature_block + 5, 40, 40); // Ajuste la position et la taille
+    } else {
+      console.error('Impossible de charger l\'image du cachet');
+    }
+  }
+} catch (imgErr) {
+  console.error("Erreur lors de l'ajout de la signature ou du cachet : ", imgErr);
+}
+
 
     // 11. Footer
     const margin = 15;
