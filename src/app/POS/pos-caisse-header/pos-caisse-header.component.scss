@@ -1,2 +1,60 @@
-@import '../pos-caisse/pos-caisse.component.scss'
+@import '../pos-caisse/pos-caisse.component.scss';
 
+.menu i {
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.menu {
+  position: relative;
+  cursor: pointer;
+  
+  .menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 200px;
+    margin-top: 8px;
+    overflow: hidden;
+
+    .dropdown-item {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: #333;
+      transition: all 0.2s;
+      cursor: pointer;
+
+      &:hover {
+        background: #f5f7fa;
+      }
+
+      i {
+        font-size: 16px;
+        color: #64748b;
+      }
+    }
+  }
+}
+
+/* couleur rouge visible, accessible et légèrement saturée */
+.dropdown-item.hide-all {
+  color: #e53935;    /* rouge chaud */
+}
+
+/* s'assurer que l'icône prenne aussi la couleur */
+.dropdown-item.hide-all i {
+  color: inherit;
+}
+
+/* (optionnel) style hover pour rester cohérent */
+.dropdown-item.hide-all:hover {
+  color: #c62828;
+}

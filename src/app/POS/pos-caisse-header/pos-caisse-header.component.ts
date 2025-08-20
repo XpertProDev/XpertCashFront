@@ -10,6 +10,7 @@ import { CaisseResponse, OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/C
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { CaisseStateService } from 'src/app/admin-page/SERVICES/CaisseService/caisse-state.service';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-pos-caisse-header',
@@ -19,16 +20,22 @@ import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 })
 export class PosCaisseHeaderComponent {
 
+  private destroy$ = new Subject<void>();
+
+  showMenuDropdown = false;
+  showAllCaissesSection = false;
+  isAllowedToViewAllCaisses = false;
+
   showModal = false;
   boutiques: any[] = [];
-  selectedBoutiqueId: number | null = null;
   montantOuverture: number = 0;
   isLoading = false;
   errorMessage: string | null = null;
   caisses: CaisseResponse[] = [];
-
-  // selectedBoutiqueIdForList: number | null = null;
-  selectedBoutiqueIdForList: number = 0; 
+  
+  selectedBoutiqueIdForList: number | null = null;
+  selectedBoutiqueId: number | null = null;
+  // selectedBoutiqueIdForList: number = 0; 
   isLoadingCaisses = false;
 
   openMenuId: number | null = null;
@@ -50,48 +57,165 @@ export class PosCaisseHeaderComponent {
     if (savedBoutiqueId) {
       this.selectedBoutiqueIdForList = savedBoutiqueId;
     }
+    
+    this.caisseState.showAllCaisses$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(val => {
+        this.showAllCaissesSection = !!val;
+        console.log('[Header] showAllCaisses$ ->', val);
+      });
+  }
+
+   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  toggleMenuDropdown() {
+    this.showMenuDropdown = !this.showMenuDropdown;
   }
   
+  // loadBoutiques(): void {
+  //   // On récupère d'abord l'utilisateur courant
+  //   this.usersService.getUserInfo().subscribe({
+  //     next: (user) => {
+  //       console.log('Boutiques chargées:', this.boutiques.map(b => ({id: b.id, nom: b.nomBoutique, actif: b.actif})));
+
+  //       if (user && user.roleType === 'VENDEUR') {
+  //         // Vendeur : ne récupérer que les boutiques qui lui sont assignées
+  //         this.boutiques = user.boutiques || [];
+  //         // Sélectionne la première boutique assignée (ou 0 si aucune)
+  //         this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
+  //         this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
+  //         if (this.selectedBoutiqueIdForList) {
+  //           this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+  //         }
+  //       } else {
+  //         // Admin / Manager : récupérer toutes les boutiques de l'entreprise
+  //         this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+  //           next: (boutiques) => {
+  //             this.boutiques = boutiques;
+  //             this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
+  //             this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
+  //             if (this.selectedBoutiqueIdForList) {
+  //               this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+  //             }
+  //           },
+  //           error: (err) => {
+  //             console.error('Erreur lors du chargement des boutiques', err);
+  //             this.errorMessage = 'Erreur lors du chargement des boutiques';
+  //           }
+  //         });
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error('Impossible de récupérer l\'utilisateur courant', err);
+  //       // Fallback : charger toutes les boutiques (ou laisser vide)
+  //       this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+  //         next: (boutiques) => this.boutiques = boutiques,
+  //         error: () => this.boutiques = []
+  //       });
+  //     }
+  //   });
+  // }
+
   loadBoutiques(): void {
-    // On récupère d'abord l'utilisateur courant
-    this.usersService.getUserInfo().subscribe({
-      next: (user) => {
-        if (user && user.roleType === 'VENDEUR') {
-          // Vendeur : ne récupérer que les boutiques qui lui sont assignées
-          this.boutiques = user.boutiques || [];
-          // Sélectionne la première boutique assignée (ou 0 si aucune)
-          this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
-          this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
-          if (this.selectedBoutiqueIdForList) {
-            this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+    this.isLoading = true;
+    this.boutiques = [];
+    this.errorMessage = null;
+
+    // Essayer d'obtenir l'utilisateur depuis l'API
+    this.usersService.getUserInfo()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (user) => {
+          // Définit si l'utilisateur peut voir "Toutes les caisses"
+          this.isAllowedToViewAllCaisses = !!(user && ['ADMIN', 'MANAGER'].includes(user.roleType));
+          console.log('[loadBoutiques] user from API ->', user?.roleType);
+
+          if (user && user.roleType === 'VENDEUR') {
+            // Vendeur : utiliser uniquement ses boutiques
+            this.boutiques = user.boutiques || [];
+            this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
+            this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
+
+            // Charger la dernière caisse si on a une boutique sélectionnée
+            if (this.selectedBoutiqueIdForList) {
+              this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+            } else {
+              // Pas de boutique disponible pour ce vendeur
+              this.caisses = [];
+            }
+
+            this.isLoading = false;
+          } else {
+            // Admin/Manager (ou user non-vendeur) : récupérer toutes les boutiques de l'entreprise
+            this.boutiqueService.getBoutiquesByEntreprise()
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                next: (boutiques) => {
+                  this.boutiques = boutiques || [];
+                  this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
+                  this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
+
+                  if (this.selectedBoutiqueIdForList) {
+                    this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+                  } else {
+                    this.caisses = [];
+                  }
+
+                  this.isLoading = false;
+                },
+                error: (err) => {
+                  console.error('[loadBoutiques] erreur getBoutiquesByEntreprise', err);
+                  this.errorMessage = 'Erreur lors du chargement des boutiques';
+                  this.isLoading = false;
+                }
+              });
           }
-        } else {
-          // Admin / Manager : récupérer toutes les boutiques de l'entreprise
-          this.boutiqueService.getBoutiquesByEntreprise().subscribe({
-            next: (boutiques) => {
-              this.boutiques = boutiques;
+        },
+        error: (err) => {
+          console.error('[loadBoutiques] getUserInfo() failed', err);
+
+          // Fallback : essayer de récupérer l'utilisateur depuis le localStorage
+          const localUser = this.usersService.getCurrentUser();
+          if (localUser) {
+            console.log('[loadBoutiques] using local user fallback ->', localUser?.roleType);
+            this.isAllowedToViewAllCaisses = !!(['ADMIN', 'MANAGER'].includes(localUser.roleType));
+            if (localUser.roleType === 'VENDEUR') {
+              this.boutiques = localUser.boutiques || [];
               this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
               this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
               if (this.selectedBoutiqueIdForList) {
                 this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
               }
-            },
-            error: (err) => {
-              console.error('Erreur lors du chargement des boutiques', err);
-              this.errorMessage = 'Erreur lors du chargement des boutiques';
+              this.isLoading = false;
+              return;
             }
-          });
+          }
+
+          // Si pas de user local, retenter de charger toutes les boutiques (dégradation)
+          this.boutiqueService.getBoutiquesByEntreprise()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (boutiques) => {
+                this.boutiques = boutiques || [];
+                this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
+                this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
+                if (this.selectedBoutiqueIdForList) {
+                  this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+                }
+                this.isLoading = false;
+              },
+              error: (err2) => {
+                console.error('[loadBoutiques] fallback getBoutiquesByEntreprise failed', err2);
+                this.errorMessage = 'Impossible de charger les boutiques';
+                this.boutiques = [];
+                this.isLoading = false;
+              }
+            });
         }
-      },
-      error: (err) => {
-        console.error('Impossible de récupérer l\'utilisateur courant', err);
-        // Fallback : charger toutes les boutiques (ou laisser vide)
-        this.boutiqueService.getBoutiquesByEntreprise().subscribe({
-          next: (boutiques) => this.boutiques = boutiques,
-          error: () => this.boutiques = []
-        });
-      }
-    });
+      });
   }
 
   private getValidBoutiqueId(): number {
@@ -166,8 +290,54 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
     this.errorMessage = null;
     this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
   }
-  
-  openModal() {
+
+  /**
+   * Ouvre le modal et initialise `selectedBoutiqueId`.
+   * @param preferDifferent si true -> sélectionne la première boutique différente de la sélection d'en-tête (comportement "autre boutique")
+   *                         si false (par défaut) -> sélectionne la même boutique que l'en-tête si disponible, sinon la première disponible.
+   */
+  openModal(preferDifferent: boolean = false) {
+    console.log('openModal() called. headerSelected=', this.selectedBoutiqueIdForList, 'boutiques length=', this.boutiques?.length);
+
+    // Forcer le type number si la valeur vient en string
+    if (this.selectedBoutiqueIdForList != null) {
+      this.selectedBoutiqueIdForList = Number(this.selectedBoutiqueIdForList);
+    }
+
+    // Si les boutiques ne sont pas encore chargées, ouvrir modal sans sélection
+    if (!this.boutiques || this.boutiques.length === 0) {
+      console.warn('Boutiques non chargées au moment de openModal(). Ouvrir modal sans sélection.');
+      this.selectedBoutiqueId = null;
+      this.errorMessage = null;
+      this.showModal = true;
+      return;
+    }
+
+    // Filtrer boutiques actives (adapter si tu veux inclure les inactives)
+    const available = (this.boutiques || [])
+      .filter(b => b && b.actif !== false)
+      .map(b => ({ ...b, id: Number(b.id) })); // forcer id en number
+
+    // Trier pour comportement déterministe (optionnel)
+    available.sort((a, b) => a.id - b.id);
+
+    if (available.length === 0) {
+      // Aucune boutique disponible après filtre
+      this.selectedBoutiqueId = null;
+    } else if (preferDifferent) {
+      // Option : sélectionner la première boutique différente de l'en-tête
+      const firstDifferent = available.find(b => b.id !== this.selectedBoutiqueIdForList);
+      this.selectedBoutiqueId = firstDifferent ? firstDifferent.id : available[0].id;
+    } else {
+      // Option par défaut : sélectionner la même boutique que l'en-tête si possible, sinon la première disponible
+      this.selectedBoutiqueId = (this.selectedBoutiqueIdForList != null && available.some(b => b.id === this.selectedBoutiqueIdForList))
+        ? this.selectedBoutiqueIdForList
+        : available[0].id;
+    }
+
+    console.log('Modal selection computed -> header:', this.selectedBoutiqueIdForList, 'modal:', this.selectedBoutiqueId, 'available:', available.map(x => ({id: x.id, nom: x.nomBoutique})));
+
+    this.errorMessage = null;
     this.showModal = true;
   }
 
@@ -177,7 +347,6 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
     this.montantOuverture = 0;
     this.errorMessage = null;
   }
-
 
   goToPosJournalCaisse() {
     this.router.navigate(['/pos-caisse/pos-journal-caisse'])
@@ -244,5 +413,22 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
   goToDashboard() {
     this.router.navigate(['/analytics'])
   }
+
+  onVoirToutesLesCaisses(event: MouseEvent) {
+    event.stopPropagation();            // empêche toggle parent
+    this.showMenuDropdown = false;      // ferme le menu
+
+    // Si actuellement visible -> forcer fermeture, sinon ouvrir
+    if (this.showAllCaissesSection) {
+      // force close (assure la disparition du *ngIf)
+      this.caisseState.showAllCaisses(false);
+      console.log('[Header] clicked -> fermer toutes les caisses');
+    } else {
+      this.caisseState.showAllCaisses(true);
+      console.log('[Header] clicked -> voir toutes les caisses');
+    }
+  }
+
+
 
 }

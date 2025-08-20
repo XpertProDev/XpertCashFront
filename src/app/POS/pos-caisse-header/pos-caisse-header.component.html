@@ -15,14 +15,8 @@
                             <select class="content_select" name="boutique" 
                                     [(ngModel)]="selectedBoutiqueIdForList"
                                     (ngModelChange)="onBoutiqueChange()">
-                                <!-- Option désactivée pour sélection explicite -->
-                                <!-- <option [value]="null">Sélectionnez une boutique</option> -->
-                                
-                                <!-- <option *ngFor="let boutique of boutiques" [value]="boutique.id">
+                                <option *ngFor="let boutique of boutiques" [ngValue]="boutique.id" [disabled]="!boutique.actif">
                                     {{ boutique.nomBoutique }}
-                                </option> -->
-                                <option *ngFor="let boutique of boutiques" [value]="boutique.id" [disabled]="!boutique.actif">
-                                {{ boutique.nomBoutique }}
                                 </option>
                             </select>
                         </div>
@@ -50,6 +44,32 @@
                         placeholder="Recherche...."
                     />
                 </div>
+  
+                <div class="barre"></div>
+
+                <!-- // Menu  -->
+                <div class="menu" 
+                    (click)="toggleMenuDropdown()" 
+                    clickOutside 
+                    (clickOutside)="showMenuDropdown = false">
+                    <i class="ri-menu-line"></i>
+                    
+                    <!-- Dropdown Menu -->
+                    <div class="menu-dropdown" *ngIf="showMenuDropdown">
+                        <div class="dropdown-item"
+                            *ngIf="isAllowedToViewAllCaisses"
+                            [ngStyle]="{'color': showAllCaissesSection ? 'red' : 'inherit'}"
+                            (click)="onVoirToutesLesCaisses($event)">
+                            <i class="ri-eye-2-line"></i>
+                            {{ showAllCaissesSection ? 'Cacher toutes les caisses' : 'Voir toutes les caisses' }}
+                        </div>
+
+                        <div class="dropdown-item">
+                            <i class="ri-restart-line"></i>
+                           Autres
+                        </div>
+                    </div>
+                </div>
             </div>
         </nav>
         <!-- // Route  -->
@@ -72,8 +92,8 @@
                 <div class="form-group">
                     <label>Boutique assignée</label>
                     <select [(ngModel)]="selectedBoutiqueId" name="boutique" [disabled]="isLoading">
-                        <option [value]="null">Sélectionnez une boutique</option>
-                        <option *ngFor="let boutique of boutiques" [value]="boutique.id">
+                        <option [ngValue]="null">Sélectionnez une boutique</option>
+                        <option *ngFor="let boutique of boutiques" [ngValue]="boutique.id">
                             {{ boutique.nomBoutique }}
                         </option>
                     </select>
