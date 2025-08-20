@@ -44,3 +44,17 @@
   }
 }
 
+/* couleur rouge visible, accessible et légèrement saturée */
+.dropdown-item.hide-all {
+  color: #e53935;    /* rouge chaud */
+}
+
+/* s'assurer que l'icône prenne aussi la couleur */
+.dropdown-item.hide-all i {
+  color: inherit;
+}
+
+/* (optionnel) style hover pour rester cohérent */
+.dropdown-item.hide-all:hover {
+  color: #c62828;
+}

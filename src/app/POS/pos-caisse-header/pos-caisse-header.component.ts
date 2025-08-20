@@ -10,6 +10,7 @@ import { CaisseResponse, OuvrirCaisseRequest } from 'src/app/admin-page/MODELS/C
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { CaisseStateService } from 'src/app/admin-page/SERVICES/CaisseService/caisse-state.service';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-pos-caisse-header',
@@ -19,13 +20,17 @@ import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 })
 export class PosCaisseHeaderComponent {
 
+  private destroy$ = new Subject<void>();
+
+  showMenuDropdown = false;
+  showAllCaissesSection = false;
+
   showModal = false;
   boutiques: any[] = [];
   montantOuverture: number = 0;
   isLoading = false;
   errorMessage: string | null = null;
   caisses: CaisseResponse[] = [];
-  showMenuDropdown = false;
   
   selectedBoutiqueIdForList: number | null = null;
   selectedBoutiqueId: number | null = null;
@@ -51,6 +56,18 @@ export class PosCaisseHeaderComponent {
     if (savedBoutiqueId) {
       this.selectedBoutiqueIdForList = savedBoutiqueId;
     }
+    
+    this.caisseState.showAllCaisses$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(val => {
+        this.showAllCaissesSection = !!val;
+        console.log('[Header] showAllCaisses$ ->', val);
+      });
+  }
+
+   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleMenuDropdown() {
@@ -296,5 +313,22 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
   goToDashboard() {
     this.router.navigate(['/analytics'])
   }
+
+  onVoirToutesLesCaisses(event: MouseEvent) {
+    event.stopPropagation();            // empêche toggle parent
+    this.showMenuDropdown = false;      // ferme le menu
+
+    // Si actuellement visible -> forcer fermeture, sinon ouvrir
+    if (this.showAllCaissesSection) {
+      // force close (assure la disparition du *ngIf)
+      this.caisseState.showAllCaisses(false);
+      console.log('[Header] clicked -> fermer toutes les caisses');
+    } else {
+      this.caisseState.showAllCaisses(true);
+      console.log('[Header] clicked -> voir toutes les caisses');
+    }
+  }
+
+
 
 }

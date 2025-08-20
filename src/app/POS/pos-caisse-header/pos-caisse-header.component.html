@@ -56,9 +56,16 @@
                     
                     <!-- Dropdown Menu -->
                     <div class="menu-dropdown" *ngIf="showMenuDropdown">
-                        <div class="dropdown-item">
+                        <div class="dropdown-item"
+                            [ngStyle]="{'color': showAllCaissesSection ? 'red' : 'inherit'}"
+                            (click)="onVoirToutesLesCaisses($event)">
                             <i class="ri-eye-2-line"></i>
-                            Voir Toutes les caisses
+                            {{ showAllCaissesSection ? 'Cacher toutes les caisses' : 'Voir toutes les caisses' }}
+                        </div>
+
+                        <div class="dropdown-item">
+                            <i class="ri-restart-line"></i>
+                            Recharger les donnees
                         </div>
                     </div>
                 </div>

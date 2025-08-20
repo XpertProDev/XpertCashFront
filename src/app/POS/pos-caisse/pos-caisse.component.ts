@@ -20,10 +20,11 @@ import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-
 export class PosCaisseComponent {
   private destroy$ = new Subject<void>();
   currentBoutiqueId: number | null = null;
+  showAllCaissesSection = false;
+  boutiques: any[] = [];
 
   
   showModal = false;
-  boutiques: any[] = [];
   selectedBoutiqueId: number | null = null;
   montantOuverture: number = 0;
   isLoading = false;
@@ -90,6 +91,24 @@ export class PosCaisseComponent {
         this.caisses = [];
       }
     });
+
+    // abonnement
+    this.caisseState.showAllCaisses$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(show => {
+        console.log('[PosCaisse] showAllCaisses$ ->', show);
+        this.showAllCaissesSection = !!show;
+
+        if (this.showAllCaissesSection) {
+          const bId = this.currentBoutiqueId || (this.boutiques?.length ? this.boutiques[0].id : null);
+          if (bId) {
+            this.loadAllCaisses(bId);
+          } else {
+            this.allCaisses = [];
+            this.errorMessageAllCaisses = 'Aucune boutique sélectionnée';
+          }
+        }
+      });
   }
 
   ngOnDestroy(): void {
