@@ -109,9 +109,20 @@
                     </div>
                     
                     <div class="caisse-container-bottom">
-                        <button class="caisse-btn" (click)="onCaisseButtonClick(caisse)">
-                            {{ getButtonText(caisse) }}
+                        <!-- <button class="caisse-btn" (click)="onCaisseButtonClick(caisse)" style="cursor: no-drop;">
+                            {{ getButtonTextFerme(caisse) }}
+                        </button> -->
+
+                        <button class="caisse-btn"
+                            [disabled]="caisse.statut === 'FERMEE' || caisse.statut === 'OUVERTE'"
+                            [ngClass]="{ 'disabled-like': caisse.statut === 'FERMEE' || caisse.statut === 'OUVERTE' }"
+                            [attr.aria-disabled]="(caisse.statut === 'FERMEE' || caisse.statut === 'OUVERTE')"
+                            title="{{ (caisse.statut === 'FERMEE' || caisse.statut === 'OUVERTE') ? 'Action non disponible' : '' }}"
+                            >
+                            {{ getButtonTextFerme(caisse) }}
                         </button>
+
+
 
                         <div class="boutique-name" style="display: flex; align-items: center; gap: 5px;">
                             <div><i class="ri-store-2-line"></i></div>

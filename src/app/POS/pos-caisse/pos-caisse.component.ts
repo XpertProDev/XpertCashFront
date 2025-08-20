@@ -244,6 +244,15 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
     return 'Action inconnue';
   }
 
+  getButtonTextFerme(caisse: CaisseResponse): string {
+    if (caisse.statut === 'OUVERTE') {
+        return 'La caisse est ouverte';
+    } else if (caisse.statut === 'FERMEE') {
+        return 'La caisse est fermer';
+    }
+    return 'Action inconnue';
+  }
+
   getNomBoutique(caisse: CaisseResponse): string {
     const boutique = this.boutiques.find(b => b.id === caisse.boutiqueId);
     return boutique ? boutique.nomBoutique : 'Boutique inconnue';

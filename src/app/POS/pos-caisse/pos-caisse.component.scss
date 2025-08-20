@@ -358,3 +358,10 @@ button:disabled {
   gap: 10px;
   justify-content: space-between;
 }
+
+.caisse-btn[disabled],
+.caisse-btn.disabled-like {
+  cursor: not-allowed;    /* curseur interdit */
+  opacity: 0.6;           /* visuel atténué */
+  pointer-events: none;   /* sécurité supplémentaire */
+}
