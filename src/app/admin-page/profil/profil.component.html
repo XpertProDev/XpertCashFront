@@ -88,6 +88,7 @@
                           </div>
                         </div>
 
+                        
                         <!-- MODALE CAMERA -->
                         <div class="camera-modal" *ngIf="cameraActive">
                           <div class="camera-content">
@@ -119,6 +120,9 @@
                         <button class="fermer-btn" (click)="fermerModal()">✕</button>
                       </div>
                     </div>
+                    <div>
+                      <img [src]="qrCodeUrl" alt="qrCodeUrl code" class="qrcode-img"/>
+                    </div>
 
                     <h2>{{ userName }}</h2>
                     
@@ -138,6 +142,7 @@
                         </button>
                       </div>
                     </div>
+                   
                 </div>
             </div>
             <!-- // Cadre password right -->
@@ -189,6 +194,7 @@
                       </div>
                     </div>
                 </div>
+                
             </div>
         </div>
         <!-- // Reste de l'information de user pour la modification  -->
@@ -199,6 +205,8 @@
                 <p>Pour modifier vos informations personnelles, modifiez-les et enregistrez-les ici</p>
             </div>
         </div>
+        
+         
     </div>
 </div>
 

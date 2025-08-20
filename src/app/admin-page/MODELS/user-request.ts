@@ -8,6 +8,7 @@ export interface UserRequest {
   nomEntreprise: string;
   email: string;
   photo: string;
+  qrCodeUrl: string;
   roleType: string;
   phone: string;
   pays: string;

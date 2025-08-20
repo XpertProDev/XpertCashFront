@@ -44,6 +44,7 @@ export class ProfilComponent  implements OnInit{
   boutiqueAdresse: string = '';
   flagPays: string = '';
   personalCode: string = '';
+  qrCodeUrl: string = '';
   isNomBoutiqueFormVisible = false;
   isUserFormVisible = false;
   boutiques: any[] = [];
@@ -116,6 +117,10 @@ export class ProfilComponent  implements OnInit{
      const savedPhoto = localStorage.getItem('photo');
       if (savedPhoto) {
         this.photo = savedPhoto;
+      }
+      const savedQrCode = localStorage.getItem('qrCodeUrl');
+      if (savedQrCode) {
+        this.qrCodeUrl = savedQrCode;
       }
   }
 
@@ -262,6 +267,7 @@ export class ProfilComponent  implements OnInit{
         this.email = user.email;
         this.phone = user.phone;
         this.photo = user.photo ? `${this.imgUrl}${user.photo}` : '';
+        this.qrCodeUrl = user.qrCodeUrl ? `${this.imgUrl}${user.qrCodeUrl}` : '';
         this.roleType = user.roleType;
         this.pays = user.pays;
         this.nomBoutique = user.boutiques?.length ? user.boutiques[0].nomBoutique : 'Aucune boutique';
@@ -269,6 +275,8 @@ export class ProfilComponent  implements OnInit{
         this.boutiques = user.boutiques || [];
         console.log("Liste des boutiques:", this.boutiques);
         console.log("Infos utilisateur récupérées :", user);
+        console.log("QR Code URL construite :", this.qrCodeUrl);
+
         
       },
       error: (err) => {
@@ -657,5 +665,6 @@ async prendrePhoto(): Promise<void> {
   }
 }
 
+  
 
 }

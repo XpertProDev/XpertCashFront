@@ -1,5 +1,5 @@
 // angular import
-import { Component, viewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, viewChild } from '@angular/core';
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
@@ -21,221 +21,101 @@ import { VenteService } from 'src/app/admin-page/SERVICES/VenteService/vente-ser
   templateUrl: './dash-analytics.component.html',
   styleUrls: ['./dash-analytics.component.scss']
 })
-export default class DashAnalyticsComponent {
-  // public props
-  chart = viewChild<ChartComponent>('chart');
-  customerChart = viewChild<ChartComponent>('customerChart');
+export default class DashAnalyticsComponent{
+  @ViewChild('chart') chart!: ChartComponent;
+  @ViewChild('customerChart') customerChart!: ChartComponent;
+
   chartOptions!: Partial<ApexOptions>;
   chartOptions_1!: Partial<ApexOptions>;
   chartOptions_2!: Partial<ApexOptions>;
   chartOptions_3!: Partial<ApexOptions>;
+
   boutiqueName: string = '';
   userEmail: string = '';
 
-  // constructor
-  constructor(private userService: UsersService,
-    private http: HttpClient, 
-    private produitService: ProduitService, 
-    private usersService: UsersService,
-    private venteService: VenteService
-  ) {
-    this.chartOptions = {
-      chart: {
-        height: 205,
-        type: 'line',
-        toolbar: {
-          show: false
-        }
-      },
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        width: 2,
-        curve: 'smooth'
-      },
-      series: [
-        {
-          name: 'Arts',
-          data: [20, 50, 30, 60, 30, 50]
-        },
-        {
-          name: 'Commerce',
-          data: [60, 30, 65, 45, 67, 35]
-        }
-      ],
-      legend: {
-        position: 'top'
-      },
-      xaxis: {
-        type: 'datetime',
-        categories: ['1/11/2000', '2/11/2000', '3/11/2000', '4/11/2000', '5/11/2000', '6/11/2000'],
-        axisBorder: {
-          show: false
-        }
-      },
-      yaxis: {
-        show: true,
-        min: 10,
-        max: 70
-      },
-      colors: ['#73b4ff', '#59e0c5'],
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shade: 'light',
-          gradientToColors: ['#4099ff', '#2ed8b6'],
-          shadeIntensity: 0.5,
-          type: 'horizontal',
-          opacityFrom: 1,
-          opacityTo: 1,
-          stops: [0, 100]
-        }
-      },
-      grid: {
-        borderColor: '#cccccc3b'
-      }
-    };
-    this.chartOptions_1 = {
-      chart: {
-        height: 150,
-        type: 'donut'
-      },
-      dataLabels: {
-        enabled: false
-      },
-      plotOptions: {
-        pie: {
-          donut: {
-            size: '75%'
-          }
-        }
-      },
-      labels: ['New', 'Return'],
-      series: [39, 10],
-      legend: {
-        show: false
-      },
-      tooltip: {
-        theme: 'dark'
-      },
-      grid: {
-        padding: {
-          top: 20,
-          right: 0,
-          bottom: 0,
-          left: 0
-        }
-      },
-      colors: ['#4680ff', '#2ed8b6'],
-      fill: {
-        opacity: [1, 1]
-      },
-      stroke: {
-        width: 0
-      }
-    };
-    this.chartOptions_2 = {
-      chart: {
-        height: 150,
-        type: 'donut'
-      },
-      dataLabels: {
-        enabled: false
-      },
-      plotOptions: {
-        pie: {
-          donut: {
-            size: '75%'
-          }
-        }
-      },
-      labels: ['New', 'Return'],
-      series: [20, 15],
-      legend: {
-        show: false
-      },
-      tooltip: {
-        theme: 'dark'
-      },
-      grid: {
-        padding: {
-          top: 20,
-          right: 0,
-          bottom: 0,
-          left: 0
-        }
-      },
-      colors: ['#fff', '#2ed8b6'],
-      fill: {
-        opacity: [1, 1]
-      },
-      stroke: {
-        width: 0
-      }
-    };
-    this.chartOptions_3 = {
-      chart: {
-        type: 'area',
-        height: 145,
-        sparkline: {
-          enabled: true
-        }
-      },
-      dataLabels: {
-        enabled: false
-      },
-      colors: ['#ff5370'],
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shade: 'dark',
-          gradientToColors: ['#ff869a'],
-          shadeIntensity: 1,
-          type: 'horizontal',
-          opacityFrom: 1,
-          opacityTo: 0.8,
-          stops: [0, 100, 100, 100]
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        width: 2
-      },
-      series: [
-        {
-          data: [45, 35, 60, 50, 85, 70]
-        }
-      ],
-      yaxis: {
-        min: 5,
-        max: 90
-      },
-      tooltip: {
-        fixed: {
-          enabled: false
-        },
-        x: {
-          show: false
-        },
-        marker: {
-          show: false
-        }
-      }
-    };
-  }
   cards: any[] = [];
   carde2: any[] = [];
 
+  constructor(
+    private userService: UsersService,
+    private http: HttpClient,
+    private produitService: ProduitService,
+    private usersService: UsersService,
+    private venteService: VenteService
+  ) {}
 
   ngOnInit() {
+    this.initializeCharts();
     this.updateTotalProduits();
     this.getBoutiqueInfo();
     this.getBoutiqueName();
     // this.checkAccountStatus();
+  }
 
+  private initializeCharts() {
+    this.chartOptions = {
+      chart: { height: 205, type: 'line', toolbar: { show: false } },
+      dataLabels: { enabled: false },
+      stroke: { width: 2, curve: 'smooth' },
+      series: [
+        { name: 'Arts', data: [20, 50, 30, 60, 30, 50] },
+        { name: 'Commerce', data: [60, 30, 65, 45, 67, 35] }
+      ],
+      legend: { position: 'top' },
+      xaxis: {
+        type: 'datetime',
+        categories: ['1/11/2000', '2/11/2000', '3/11/2000', '4/11/2000', '5/11/2000', '6/11/2000'],
+        axisBorder: { show: false }
+      },
+      yaxis: { show: true, min: 10, max: 70 },
+      colors: ['#73b4ff', '#59e0c5'],
+      fill: {
+        type: 'gradient',
+        gradient: { shade: 'light', gradientToColors: ['#4099ff', '#2ed8b6'], shadeIntensity: 0.5, type: 'horizontal', opacityFrom: 1, opacityTo: 1, stops: [0, 100] }
+      },
+      grid: { borderColor: '#cccccc3b' }
+    };
 
-    
+    this.chartOptions_1 = {
+      chart: { 
+        height: 150, 
+        type: 'donut' 
+      },
+      dataLabels: { 
+        enabled: false 
+      },
+      plotOptions: { 
+        pie: { donut: 
+          { 
+            size: '75%' } 
+          } 
+        },
+      labels: ['New', 'Return'],
+      series: [39, 10],
+      legend: { show: false },
+      tooltip: { theme: 'dark' },
+      grid: { padding: { top: 20, right: 0, bottom: 0, left: 0 } },
+      colors: ['#4680ff', '#2ed8b6'],
+      fill: { opacity: [1, 1] },
+      stroke: { width: 0 }
+    };
+
+    this.chartOptions_2 = {
+      ...this.chartOptions_1,
+      series: [20, 15],
+      colors: ['#fff', '#2ed8b6']
+    };
+
+    this.chartOptions_3 = {
+      chart: { type: 'area', height: 145, sparkline: { enabled: true } },
+      dataLabels: { enabled: false },
+      colors: ['#ff5370'],
+      fill: { type: 'gradient', gradient: { shade: 'dark', gradientToColors: ['#ff869a'], shadeIntensity: 1, type: 'horizontal', opacityFrom: 1, opacityTo: 0.8, stops: [0, 100, 100, 100] } },
+      stroke: { curve: 'smooth', width: 2 },
+      series: [{ data: [45, 35, 60, 50, 85, 70] }],
+      yaxis: { min: 5, max: 90 },
+      tooltip: { fixed: { enabled: false }, x: { show: false }, marker: { show: false } }
+    };
   }
 
 
@@ -402,6 +282,7 @@ getBoutiqueInfo() {
 
             const totalProduits = totalEnStock + totalNonEnStock;
             const montantTotal = totaux.montantTotal || 0; // Assurez-vous que cette propriété existe dans la réponse
+            const montantTotalMois = totaux.montantTotalMois || 0; // Assurez-vous que cette propriété existe dans la réponse
             
 
             // Mise à jour des cartes avec les totaux des produits
@@ -418,9 +299,9 @@ getBoutiqueInfo() {
                 background: 'bg-c-green',
                 title: 'Vente du jour',
                 icon: 'icon-tag',
-                text: 'du mois',
+                text: 'du mois', 
                 number: montantTotal.toString(),
-                no: '213'
+                no: montantTotalMois.toString()
               },
               {
                 background: 'bg-c-yellow',
@@ -489,15 +370,29 @@ getBoutiqueInfo() {
       } else {
         console.error('Aucune boutique trouvée pour cet utilisateur');
       }
-      this.venteService.getMontantTotalEntreprise().subscribe(
-        (montantTotal: number) => {
-          console.log('Montant total de l\'entreprise:', montantTotal);
-          this.cards[1].number = montantTotal.toString(); // Exemple de mise à jour
-        },
-        (error) => {
-          console.error('Erreur lors de la récupération du montant total de l\'entreprise', error);
-        }
-      );
+      // Vente total du jour
+this.venteService.getMontantTotalEntreprise().subscribe(
+  (montantTotal: number) => {
+    console.log('Montant total de l\'entreprise:', montantTotal);
+    this.cards[1].number = montantTotal.toString();
+  },
+  (error) => {
+    console.error('Erreur lors de la récupération du montant total de l\'entreprise', error);
+  }
+);
+
+// Vente total du mois
+this.venteService.getMontantTotalEntrepriseMois().subscribe(
+  (montantTotalMois: number) => {
+    console.log('Montant total de l\'entreprise pour le mois:', montantTotalMois);
+    this.cards[1].no = montantTotalMois.toString();  // <-- ici
+  },
+  (error) => {
+    console.error('Erreur lors de la récupération du montant total de l\'entreprise pour le mois', error);
+  }
+);
+
+
     },
     (error) => {
       console.error('Erreur lors de la récupération des informations utilisateur', error);
