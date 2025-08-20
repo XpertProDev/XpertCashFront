@@ -1,8 +1,5 @@
 <div class="container_pos_caisse">
     <div class="content_pos_caisse">
-
-        
-
         <div class="caisse-container">
             <!-- Loading State -->
             <div *ngIf="isLoadingCaisses" class="loading-indicator">
@@ -46,17 +43,68 @@
                     </div>
                 </div>
                 
-               <div class="caisse-container">
-                <button class="caisse-btn" (click)="onCaisseButtonClick(caisse)">
-                    {{ getButtonText(caisse) }}
-                </button>
+               <div class="caisse-container-bottom">
+                    <button class="caisse-btn" (click)="onCaisseButtonClick(caisse)">
+                        {{ getButtonText(caisse) }}
+                    </button>
 
-                <div class="boutique-name" style="display: flex; align-items: center; gap: 5px;">
-                    <div><i class="ri-store-2-line"></i></div>
-                    <span>{{ getNomBoutique(caisse) }}</span>
+                    <div class="boutique-name" style="display: flex; align-items: center; gap: 5px;">
+                        <div><i class="ri-store-2-line"></i></div>
+                        <span>{{ getNomBoutique(caisse) }}</span>
+                    </div>
                 </div>
-                </div>
+            </div>
+        </div>
 
+        <!-- // All caisse  -->
+        <div class="all_caisse_container">
+            <div class="titre_all_caisse" style="padding: 0 20px;">
+                <h6>Toutes les caisses</h6>
+            </div>
+
+            <div class="all-caisse-container-bottom">
+                <div *ngFor="let caisse of caisses" class="caisse-card">
+                    <div class="block">
+                        <div class="double" style="align-items: baseline;">
+                            <div class="profil">
+                                <span>{{ caisse.nomVendeur ? caisse.nomVendeur[0] : '?' }}</span>
+                            </div>
+                            <div class="caisse-info">
+                                <div class="caisse-nom">{{ caisse.nomVendeur || 'Non assigné' }}</div>
+                                <div class="caisse-status" 
+                                    [class.open]="caisse.statut === 'OUVERTE'"
+                                    [class.closed]="caisse.statut === 'FERMEE'">
+                                    {{ getStatusText(caisse) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- zone "more" cliquable -->
+                        <div class="icon_more" (click)="toggleMenu(caisse.id)">
+                            <i class="ri-more-2-fill"></i>
+                            <!-- dropdown -->
+                            <div 
+                                class="dropdown-menu" 
+                                *ngIf="openMenuId === caisse.id"
+                                (click)="$event.stopPropagation()">
+                            <button (click)="goToPosJournalCaisse()">Journal des caisses</button>
+                                <!-- <button (click)="allCaisseClose(caisse)">Autres</button> -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                <div class="caisse-container-bottom">
+                        <button class="caisse-btn" (click)="onCaisseButtonClick(caisse)">
+                            {{ getButtonText(caisse) }}
+                        </button>
+
+                        <div class="boutique-name" style="display: flex; align-items: center; gap: 5px;">
+                            <div><i class="ri-store-2-line"></i></div>
+                            <span>{{ getNomBoutique(caisse) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

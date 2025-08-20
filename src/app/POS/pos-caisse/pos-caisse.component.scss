@@ -12,6 +12,8 @@ p { margin: 0; }
 .add-task { padding: 10px 30px; background-color: #0672E4; color: #ffffff; border-radius: 5px; border: none;}
 .add-task:hover { background-color: #0361c6 }
 .caisse-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px;}
+// .all_caisse_container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 0 20px 20px;}
+.all-caisse-container-bottom { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 0 20px 20px;}
 .caisse-card { border: 1px solid #ddd; padding: 20px; border-radius: 4px; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between;}
 .caisse-nom { font-weight: bold; font-size: 18px; color: #1a1a1a;}
 .caisse-btn { background-color: #0672E4; color: white; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 500; align-self: flex-start; transition: background-color 0.2s ease;}
@@ -349,8 +351,9 @@ button:disabled {
     color: #1e293b;
 }
 
-.caisse-container {
+.caisse-container-bottom {
   display: flex;
-  align-items: center; /* aligne verticalement bouton + texte */
-  gap: 10px; /* espace entre les deux */
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
 }

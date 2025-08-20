@@ -44,6 +44,24 @@
                         placeholder="Recherche...."
                     />
                 </div>
+  
+                <div class="barre"></div>
+
+                <!-- // Menu  -->
+                <div class="menu" 
+                    (click)="toggleMenuDropdown()" 
+                    clickOutside 
+                    (clickOutside)="showMenuDropdown = false">
+                    <i class="ri-menu-line"></i>
+                    
+                    <!-- Dropdown Menu -->
+                    <div class="menu-dropdown" *ngIf="showMenuDropdown">
+                        <div class="dropdown-item">
+                            <i class="ri-eye-2-line"></i>
+                            Voir Toutes les caisses
+                        </div>
+                    </div>
+                </div>
             </div>
         </nav>
         <!-- // Route  -->

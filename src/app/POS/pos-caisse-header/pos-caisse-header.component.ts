@@ -25,6 +25,7 @@ export class PosCaisseHeaderComponent {
   isLoading = false;
   errorMessage: string | null = null;
   caisses: CaisseResponse[] = [];
+  showMenuDropdown = false;
   
   selectedBoutiqueIdForList: number | null = null;
   selectedBoutiqueId: number | null = null;
@@ -50,6 +51,10 @@ export class PosCaisseHeaderComponent {
     if (savedBoutiqueId) {
       this.selectedBoutiqueIdForList = savedBoutiqueId;
     }
+  }
+
+  toggleMenuDropdown() {
+    this.showMenuDropdown = !this.showMenuDropdown;
   }
   
   loadBoutiques(): void {
