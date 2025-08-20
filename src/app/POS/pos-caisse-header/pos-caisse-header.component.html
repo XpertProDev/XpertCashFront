@@ -57,6 +57,7 @@
                     <!-- Dropdown Menu -->
                     <div class="menu-dropdown" *ngIf="showMenuDropdown">
                         <div class="dropdown-item"
+                            *ngIf="isAllowedToViewAllCaisses"
                             [ngStyle]="{'color': showAllCaissesSection ? 'red' : 'inherit'}"
                             (click)="onVoirToutesLesCaisses($event)">
                             <i class="ri-eye-2-line"></i>
@@ -65,7 +66,7 @@
 
                         <div class="dropdown-item">
                             <i class="ri-restart-line"></i>
-                            Recharger les donnees
+                           Autres
                         </div>
                     </div>
                 </div>
