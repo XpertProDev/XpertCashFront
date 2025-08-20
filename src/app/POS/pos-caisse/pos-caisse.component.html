@@ -62,8 +62,20 @@
                 <h6>Toutes les caisses</h6>
             </div>
 
+            <!-- Loading State pour toutes les caisses -->
+            <div *ngIf="isLoadingAllCaisses" class="loading-indicator">
+                <i class="ri-loader-4-line spin"></i> Chargement des caisses...
+            </div>
+
+            <!-- Empty State pour toutes les caisses -->
+            <div *ngIf="!isLoadingAllCaisses && allCaisses.length === 0" class="no-caisses">
+                <i class="ri-information-line"></i>
+                <p>{{ errorMessageAllCaisses || 'Aucune caisse disponible' }}</p>
+            </div>
+
             <div class="all-caisse-container-bottom">
-                <div class="caisse-card">
+                <!-- Boucle sur allCaisses -->
+                <div *ngFor="let caisse of allCaisses" class="caisse-card">
                     <div class="block">
                         <div class="double" style="align-items: baseline;">
                             <div class="profil">
@@ -80,20 +92,18 @@
                         </div>
 
                         <!-- zone "more" cliquable -->
-                        <div class="icon_more" (click)="toggleMenu(caisse.id)">
+                        <div class="icon_more" (click)="toggleMenu('last_' + caisse.id)">
                             <i class="ri-more-2-fill"></i>
-                            <!-- dropdown -->
                             <div 
                                 class="dropdown-menu" 
-                                *ngIf="openMenuId === caisse.id"
+                                *ngIf="openMenuId === 'last_' + caisse.id"
                                 (click)="$event.stopPropagation()">
-                            <button (click)="goToPosJournalCaisse()">Journal des caisses</button>
-                                <!-- <button (click)="allCaisseClose(caisse)">Autres</button> -->
+                                <button (click)="goToPosJournalCaisse()">Journal des caisses</button>
                             </div>
                         </div>
                     </div>
                     
-                <div class="caisse-container-bottom">
+                    <div class="caisse-container-bottom">
                         <button class="caisse-btn" (click)="onCaisseButtonClick(caisse)">
                             {{ getButtonText(caisse) }}
                         </button>

@@ -33,7 +33,11 @@ export class PosCaisseComponent {
   caisses: CaisseResponse[] = [];
   isLoadingCaisses = false;
 
-  openMenuId: number | null = null;
+  openMenuId: string | number | null = null;
+
+  allCaisses: CaisseResponse[] = [];
+  isLoadingAllCaisses = false;
+  errorMessageAllCaisses: string | null = null;
 
   constructor(
     private boutiqueService: BoutiqueService,
@@ -46,13 +50,14 @@ export class PosCaisseComponent {
   ngOnInit(): void {
     this.loadBoutiques();
 
-    // Écouter les changements de boutique
+    // Écoutez les changements de boutique pour recharger toutes les caisses
     this.boutiqueState.selectedBoutique$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(boutiqueId => {
       this.currentBoutiqueId = boutiqueId;
       if (boutiqueId) {
         this.loadDerniereCaisseVendeur(boutiqueId);
+        this.loadAllCaisses(boutiqueId); // Charger toutes les caisses
       }
     });
 
@@ -193,9 +198,13 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
     this.errorMessage = null;
   }
 
-  toggleMenu(caisseId: number): void {
-    // si on reclique sur la même, on referme
-    this.openMenuId = this.openMenuId === caisseId ? null : caisseId;
+  // toggleMenu(caisseId: number): void {
+  //   // si on reclique sur la même, on referme
+  //   this.openMenuId = this.openMenuId === caisseId ? null : caisseId;
+  // }
+
+  toggleMenu(menuId: string | number): void {
+    this.openMenuId = this.openMenuId === menuId ? null : menuId;
   }
 
   allCaisseClose(caisse: CaisseResponse) {
@@ -322,4 +331,28 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
       minute: '2-digit'
     });
   }
+
+  // Ajoutez cette méthode pour charger toutes les caisses
+loadAllCaisses(boutiqueId: number): void {
+  if (!boutiqueId) {
+    this.errorMessageAllCaisses = 'Veuillez sélectionner une boutique';
+    return;
+  }
+
+  this.isLoadingAllCaisses = true;
+  this.errorMessageAllCaisses = null;
+
+  this.posCaisseService.getCaissesByBoutique(boutiqueId).subscribe({
+    next: (caisses) => {
+      this.allCaisses = caisses;
+      this.isLoadingAllCaisses = false;
+    },
+    error: (error) => {
+      console.error('Erreur lors du chargement de toutes les caisses', error);
+      this.isLoadingAllCaisses = false;
+      this.errorMessageAllCaisses = error.message || 'Erreur lors du chargement des caisses';
+    }
+  });
+}
+
 }
