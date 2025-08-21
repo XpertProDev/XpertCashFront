@@ -150,7 +150,11 @@
                     <div class="icon_check">
                       <label class="cyber-checkbox">
                         <input 
-                            type="checkbox">
+                            #selectAllCheckbox
+                            type="checkbox"
+                            [(ngModel)]="allSelected"
+                            (ngModelChange)="toggleSelectAll($event)"
+                            [disabled]="activeVenteItems.length === 0">
                             
                             <span class="cyber-checkbox__mark">
                               <div class="cyber-checkbox__box">
