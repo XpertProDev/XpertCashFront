@@ -257,7 +257,13 @@ export class PosVenteComponent {
     });
 
   // Si tu veux suivre à tout moment :
-  this.boutiqueState.selectedBoutique$.subscribe(id => this.selectedBoutiqueId = id);
+  // this.boutiqueState.selectedBoutique$.subscribe(id => this.selectedBoutiqueId = id);
+  this.boutiqueState.selectedBoutique$.subscribe(id => {
+    this.selectedBoutiqueId = id;
+    // recalculer les compteurs visible pour l'UI
+    this.recomputeCategoryCountsForBoutique();
+  });
+
 
   }
 
@@ -273,17 +279,15 @@ export class PosVenteComponent {
     this.categorieService.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
-
-        // 1. Reconstruire la liste complète
         this.allProducts = [];
         this.categories.forEach(categorie => {
           if (categorie.produits) {
             this.allProducts.push(...categorie.produits);
           }
         });
-
-        // 2. Initialiser displayedProducts avec tous les produits
         this.showAllProducts();
+        // <-- important : recalculer les compteurs maintenant
+        this.recomputeCategoryCountsForBoutique();
       },
       error: (error) => {
         console.error('Erreur lors du chargement des catégories', error);
@@ -387,15 +391,54 @@ export class PosVenteComponent {
     this.calculatePayment();
   }
 
-  // calculatePayment(): void {
-  //   const enteredValue = parseFloat(this.enteredAmount.replace(',', '.')) || 0;
-    
-  //   this.paymentAmount = enteredValue;
-  //   this.isAmountEntered = enteredValue > 0;
-    
-  //   // Toujours calculer la différence
-  //   this.changeDue = Math.abs(this.totalAmount - this.paymentAmount);
-  // }
+  /** Retourne la liste visible en appliquant boutique + catégorie + autres filtres */
+  getVisibleProducts(): ProduitDetailsResponseDTO[] {
+    // partir de tous les produits
+    let products = [...this.allProducts];
+
+    // filtrer par boutique si nécessaire
+    if (this.selectedBoutiqueId) {
+      products = products.filter(p => p.boutiqueId === this.selectedBoutiqueId);
+    }
+
+    // filtrer par catégorie si sélectionnée
+    if (this.selectedCategoryId !== null && this.selectedCategoryId !== undefined) {
+      products = products.filter(p => p.categorieId === this.selectedCategoryId);
+    }
+
+    return products;
+  }
+
+  /** Retourne le nombre de produits de la catégorie pour la boutique sélectionnée */
+  getCategoryProductCount(category: any): number {
+    if (!category || !category.produits || !category.produits.length) return 0;
+
+    // si aucune boutique sélectionnée, renvoyer le total de la catégorie
+    if (!this.selectedBoutiqueId) {
+      return category.produits.length;
+    }
+
+    // filtrer les produits de la catégorie par boutique
+    return category.produits.filter((p: ProduitDetailsResponseDTO) =>
+      // attention: certains produits peuvent avoir boutiqueId null, on gère ça
+      p.boutiqueId !== null && p.boutiqueId === this.selectedBoutiqueId
+    ).length;
+  }
+
+  /** Recalculer les compteurs produits par catégorie pour la boutique sélectionnée */
+  private recomputeCategoryCountsForBoutique() {
+    const boutiqueId = this.selectedBoutiqueId;
+    (this.categories || []).forEach(cat => {
+      const total = Array.isArray(cat.produits)
+        ? cat.produits.filter((p: ProduitDetailsResponseDTO) =>
+            !boutiqueId ? true : (p.boutiqueId !== null && p.boutiqueId === boutiqueId)
+          ).length
+        : 0;
+
+      // écrire sur l'objet existant (type-safe après modification du modèle)
+      cat.produitCountBoutique = total;
+    });
+  }
 
   calculatePayment(): void {
     // recalculer le total courant (au cas où remises ont changé)
@@ -1685,33 +1728,41 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   }
 
   saveDiscount(produit: ProduitDetailsResponseDTO) {
-  this.applyDiscount(produit);
-  this.updateCommandeTotals();
-  
-  // Réinitialiser le champ de remise
-  this.currentDiscountInput = '';
-  this.discountMode.value = 0;
-}
+    this.applyDiscount(produit);
+    this.updateCommandeTotals();
+    
+    // Réinitialiser le champ de remise
+    this.currentDiscountInput = '';
+    this.discountMode.value = 0;
+  }
 
-formatDate(dateStr: string | null): string {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('fr-FR');
-}
+  formatDate(dateStr: string | null): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('fr-FR');
+  }
 
-isNearExpiry(dateStr: string | null): boolean {
-  if (!dateStr) return false;
-  const date = new Date(dateStr);
-  const now = new Date();
-  const oneMonthLater = new Date();
-  oneMonthLater.setMonth(now.getMonth() + 1);
-  return date <= oneMonthLater;
-}
+  isNearExpiry(dateStr: string | null): boolean {
+    if (!dateStr) return false;
+    const date = new Date(dateStr);
+    const now = new Date();
+    const oneMonthLater = new Date();
+    oneMonthLater.setMonth(now.getMonth() + 1);
+    return date <= oneMonthLater;
+  }
 
-//Récupérer les produits filtrés selon la boutique sélectionnée
-getFilteredProductsByBoutique(): ProduitDetailsResponseDTO[] {
-  if (!this.selectedBoutiqueId) return [];
-  return this.allProducts.filter(product => product.boutiqueId === this.selectedBoutiqueId);  
-}
+  //Récupérer les produits filtrés selon la boutique sélectionnée
+  getFilteredProductsByBoutique(): ProduitDetailsResponseDTO[] {
+    if (!this.selectedBoutiqueId) return [];
+
+    let products = this.allProducts.filter(p => p.boutiqueId === this.selectedBoutiqueId);
+
+    if (this.selectedCategoryId !== null && this.selectedCategoryId !== undefined) {
+      products = products.filter(p => p.categorieId === this.selectedCategoryId);
+    }
+
+    return products;
+  }
+
 
 }

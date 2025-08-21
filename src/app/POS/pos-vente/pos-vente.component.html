@@ -34,8 +34,11 @@
             <div class="name_categorie">
               <span>{{ categorie.nom }}</span>
             </div>
-            <div class="nombre">
+            <!-- <div class="nombre">
                 {{ categorie.produitCount || 0 }}
+            </div> -->
+            <div class="nombre">
+              {{ getCategoryProductCount(categorie) }}
             </div>
           </li>
         </ul>
@@ -46,7 +49,7 @@
         <div class="cadre_produit product-grid" *ngIf="isListView">
           
           <div class="product-card"
-               *ngFor="let produit of getFilteredProductsByBoutique()"
+               *ngFor="let produit of getVisibleProducts()"
                   [class.disabled]="getAvailableStock(produit) <= 0"
                   (click)="addToCart(produit)"
                   (pointerdown)="startPress($event, produit)"
@@ -89,7 +92,7 @@
         <div class="cadre_produit_list product-list" *ngIf="!isListView">
           <ul class="ul_list">
             <li class="li_list" 
-                 *ngFor="let produit of displayedProducts"
+                 *ngFor="let produit of getVisibleProducts()"
                   [class.disabled]="getAvailableStock(produit) <= 0"
                   (click)="addToCart(produit)"
                   (pointerdown)="startPress($event, produit)"

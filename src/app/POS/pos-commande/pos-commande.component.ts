@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subject, takeUntil } from 'rxjs';
@@ -23,6 +23,7 @@ type FilterKey = 'en-cours' | 'payer' | 'terminee' | 'annuler';
   styleUrl: './pos-commande.component.scss'
 })
 export class PosCommandeComponent implements OnDestroy {
+  @ViewChild('selectAllCheckbox') selectAllCheckbox!: ElementRef<HTMLInputElement>;
   private apiUrl = environment.imgUrl;
   private destroy$ = new Subject<void>();
 
@@ -39,6 +40,10 @@ export class PosCommandeComponent implements OnDestroy {
   activeCommandeCart: Map<number, number> = new Map();
   activeCommandeTotal = 0;
   activeCommandeItems: { product: ProduitDetailsResponseDTO, quantity: number }[] = [];
+
+
+  // état du header checkbox
+  allSelected = false;
 
   // ventes backend
   allVentes: VenteResponse[] = [];
@@ -111,6 +116,24 @@ export class PosCommandeComponent implements OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  ngAfterViewInit() {
+    // s'assure que l'état visuel du checkbox est correct une fois la vue initialisée
+    this.updateSelectAllState();
+  }
+
+  /** Toggle quand on clique le checkbox header */
+  toggleSelectAll(checked: boolean) {
+    if (!this.activeVenteItems || this.activeVenteItems.length === 0) return;
+
+    this.activeVenteItems.forEach(item => {
+      item.selected = !!checked;
+    });
+
+    // mettre à jour la sélection dérivée & l'état du header
+    this.updateSelectedItems();
+    this.updateSelectAllState();
   }
 
   /** Charger snapshots depuis localStorage au démarrage */
@@ -707,9 +730,31 @@ export class PosCommandeComponent implements OnDestroy {
     }
   }
 
-  // Méthode pour mettre à jour les éléments sélectionnés
+  /** Appelée après toute modification individuelle pour recalculer selectedItems */
   updateSelectedItems(): void {
     this.selectedItems = this.activeVenteItems.filter(item => item.selected);
+    this.updateSelectAllState();
+  }
+
+  /** Met à jour allSelected et l'état indéterminé visuel */
+  private updateSelectAllState(): void {
+    if (!this.activeVenteItems || !this.selectAllCheckbox) {
+      this.allSelected = false;
+      return;
+    }
+
+    const total = this.activeVenteItems.length;
+    const selectedCount = this.activeVenteItems.filter(i => i.selected).length;
+
+    this.allSelected = (selectedCount === total && total > 0);
+
+    // indeterminate = some selected but not all
+    try {
+      const el = this.selectAllCheckbox.nativeElement;
+      el.indeterminate = selectedCount > 0 && selectedCount < total;
+    } catch (e) {
+      // si ViewChild pas encore prêt ou environnement ne supporte pas, ignore
+    }
   }
 
   // Ouvrir la popup d'annulation
@@ -891,6 +936,17 @@ export class PosCommandeComponent implements OnDestroy {
     }, 0);
   }
 
+  /** Retourne true si la vente active est considérée comme annulée */
+  public isActiveVenteAnnule(): boolean {
+    if (!this.activeVente) return false;
+    try {
+      // utilise la logique existante pour déterminer la catégorie ('annuler'|'payer'|'en-cours')
+      return this.determineVenteCategory(this.activeVente) === 'annuler';
+    } catch {
+      // fallback : tenter d'utiliser getVenteStatus si determineVenteCategory non disponible
+      return this.getVenteStatus(this.activeVente).toLowerCase().includes('annul');
+    }
+  }
 
 
 }

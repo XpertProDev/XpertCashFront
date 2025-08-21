@@ -5,5 +5,7 @@ export class Categorie {
     nom!: string;
     produitCount?: number;
     produits?: ProduitDetailsResponseDTO[];
+
+    produitCountBoutique?: number;
 }
   
