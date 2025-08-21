@@ -287,6 +287,9 @@ getBoutiqueInfo() {
             const totalProduits = totalEnStock + totalNonEnStock;
             const montantTotal = totaux.montantTotal || 0; // Assurez-vous que cette propriété existe dans la réponse
             const montantTotalMois = totaux.montantTotalMois || 0; // Assurez-vous que cette propriété existe dans la réponse
+            const beneficeMois = totaux.beneficeMois || 0; // Assurez-vous que cette propriété existe dans la réponse
+            const beneficeJour = totaux.beneficeJour || 0; // Assurez-vous que cette propriété existe dans la réponse
+            const beneficeAnnuel = totaux.beneficeAnne || 0; // Assurez-vous que cette propriété existe dans la réponse
             
 
             // Mise à jour des cartes avec les totaux des produits
@@ -312,16 +315,16 @@ getBoutiqueInfo() {
                 title: 'Revenue du jour',
                 icon: 'icon-repeat',
                 text: 'du mois',
-                number: '42,56',
-                no: '5,032'
+                number: beneficeJour.toString(),
+                no: beneficeMois.toString(),
               },
               {
                 background: 'bg-c-red',
-                title: 'Total Profit',
+                title: 'Total Profit Annuel',
                 icon: 'icon-shopping-cart',
                 text: 'du mois',
-                number: '9,562', 
-                no: '542'
+                number: beneficeAnnuel.toString(), 
+                // no: '542'
               },
              
             ];
@@ -395,6 +398,35 @@ this.venteService.getMontantTotalEntrepriseMois().subscribe(
     console.error('Erreur lors de la récupération du montant total de l\'entreprise pour le mois', error);
   }
 );
+// Bénéfice du mois
+this.venteService.getBeneficheEntrepriseMois().subscribe(
+  (beneficeMois: number) => {
+    console.log('Bénéfice du mois:', beneficeMois);
+    this.cards[2].no = beneficeMois.toString();
+  }
+);
+
+// Bénéfice du jour
+this.venteService.getBeneficheEntrepriseJour().subscribe(
+  (beneficeJour: number) => {
+    console.log('Bénéfice du jour:', beneficeJour);
+    this.cards[2].number = beneficeJour.toString(); 
+  }
+); 
+
+//Benefice annuel
+this.venteService.getBeneficheEntrepriseAnnuel().subscribe(
+  (beneficeAnnuel: number) => {
+    console.log('Bénéfice Annuel:', beneficeAnnuel);
+    this.cards[3].number = beneficeAnnuel.toString();  
+  }
+);
+
+
+
+
+
+
 
 
     },
@@ -403,6 +435,7 @@ this.venteService.getMontantTotalEntrepriseMois().subscribe(
     }
   );
 }
+
 
 getBoutiqueName() {
   this.usersService.getUserInfo().subscribe(
