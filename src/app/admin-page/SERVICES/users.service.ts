@@ -293,6 +293,17 @@ deleteUserFromEntreprise(userId: number): Observable<any> {
   );
 }
 
+  // Get Count of users dans l'entreprise
+  countUsersInEntreprise(): Observable<number> {
+    return this.getValidAccessToken().pipe(
+      switchMap((token) => {
+        const headers = new HttpHeaders({
+          Authorization: `Bearer ${token}`
+        });
+        return this.http.get<number>(`${this.apiUrl}/entreprise/countUsers`, { headers });
+      })
+    );
+  }
 
   
 getUserById(userId: number): Observable<UserNewRequest> {

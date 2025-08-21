@@ -14,6 +14,7 @@ import { ProduitService } from 'src/app/admin-page/SERVICES/produit.service';
 import { UserRequest } from 'src/app/admin-page/MODELS/user-request';
 import { tap } from 'rxjs';
 import { VenteService } from 'src/app/admin-page/SERVICES/VenteService/vente-service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-dash-analytics',
   standalone: true,
@@ -35,13 +36,15 @@ export default class DashAnalyticsComponent{
 
   cards: any[] = [];
   carde2: any[] = [];
+  error: string | null = null;
 
   constructor(
     private userService: UsersService,
     private http: HttpClient,
     private produitService: ProduitService,
     private usersService: UsersService,
-    private venteService: VenteService
+    private venteService: VenteService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -49,6 +52,7 @@ export default class DashAnalyticsComponent{
     this.updateTotalProduits();
     this.getBoutiqueInfo();
     this.getBoutiqueName();
+    this.fetchUsersCount();
     // this.checkAccountStatus();
   }
 
@@ -477,7 +481,19 @@ getBoutiqueName() {
 
 
 
+//Get Count of users dans l'entreprise
+usersCount: number | null = null;
+ fetchUsersCount(): void {
 
+    this.userService.countUsersInEntreprise()
+      .subscribe({
+        next: (count) => this.usersCount = count,
+        error: (err) => this.error = 'Impossible de récupérer le nombre d’utilisateurs.'
+      });
+  }
 
+goToUtilisateurs(): void {
+    this.router.navigate(['/utilisateur']);
+  }
 
 }
