@@ -34,8 +34,11 @@
             <div class="name_categorie">
               <span>{{ categorie.nom }}</span>
             </div>
-            <div class="nombre">
+            <!-- <div class="nombre">
                 {{ categorie.produitCount || 0 }}
+            </div> -->
+            <div class="nombre">
+              {{ getCategoryProductCount(categorie) }}
             </div>
           </li>
         </ul>

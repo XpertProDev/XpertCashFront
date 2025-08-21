@@ -257,7 +257,13 @@ export class PosVenteComponent {
     });
 
   // Si tu veux suivre à tout moment :
-  this.boutiqueState.selectedBoutique$.subscribe(id => this.selectedBoutiqueId = id);
+  // this.boutiqueState.selectedBoutique$.subscribe(id => this.selectedBoutiqueId = id);
+  this.boutiqueState.selectedBoutique$.subscribe(id => {
+    this.selectedBoutiqueId = id;
+    // recalculer les compteurs visible pour l'UI
+    this.recomputeCategoryCountsForBoutique();
+  });
+
 
   }
 
@@ -273,17 +279,15 @@ export class PosVenteComponent {
     this.categorieService.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
-
-        // 1. Reconstruire la liste complète
         this.allProducts = [];
         this.categories.forEach(categorie => {
           if (categorie.produits) {
             this.allProducts.push(...categorie.produits);
           }
         });
-
-        // 2. Initialiser displayedProducts avec tous les produits
         this.showAllProducts();
+        // <-- important : recalculer les compteurs maintenant
+        this.recomputeCategoryCountsForBoutique();
       },
       error: (error) => {
         console.error('Erreur lors du chargement des catégories', error);
@@ -403,6 +407,37 @@ export class PosVenteComponent {
     }
 
     return products;
+  }
+
+  /** Retourne le nombre de produits de la catégorie pour la boutique sélectionnée */
+  getCategoryProductCount(category: any): number {
+    if (!category || !category.produits || !category.produits.length) return 0;
+
+    // si aucune boutique sélectionnée, renvoyer le total de la catégorie
+    if (!this.selectedBoutiqueId) {
+      return category.produits.length;
+    }
+
+    // filtrer les produits de la catégorie par boutique
+    return category.produits.filter((p: ProduitDetailsResponseDTO) =>
+      // attention: certains produits peuvent avoir boutiqueId null, on gère ça
+      p.boutiqueId !== null && p.boutiqueId === this.selectedBoutiqueId
+    ).length;
+  }
+
+  /** Recalculer les compteurs produits par catégorie pour la boutique sélectionnée */
+  private recomputeCategoryCountsForBoutique() {
+    const boutiqueId = this.selectedBoutiqueId;
+    (this.categories || []).forEach(cat => {
+      const total = Array.isArray(cat.produits)
+        ? cat.produits.filter((p: ProduitDetailsResponseDTO) =>
+            !boutiqueId ? true : (p.boutiqueId !== null && p.boutiqueId === boutiqueId)
+          ).length
+        : 0;
+
+      // écrire sur l'objet existant (type-safe après modification du modèle)
+      cat.produitCountBoutique = total;
+    });
   }
 
   calculatePayment(): void {
