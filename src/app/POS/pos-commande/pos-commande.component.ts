@@ -936,6 +936,17 @@ export class PosCommandeComponent implements OnDestroy {
     }, 0);
   }
 
+  /** Retourne true si la vente active est considérée comme annulée */
+  public isActiveVenteAnnule(): boolean {
+    if (!this.activeVente) return false;
+    try {
+      // utilise la logique existante pour déterminer la catégorie ('annuler'|'payer'|'en-cours')
+      return this.determineVenteCategory(this.activeVente) === 'annuler';
+    } catch {
+      // fallback : tenter d'utiliser getVenteStatus si determineVenteCategory non disponible
+      return this.getVenteStatus(this.activeVente).toLowerCase().includes('annul');
+    }
+  }
 
 
 }
