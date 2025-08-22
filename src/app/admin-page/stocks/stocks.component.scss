@@ -5,12 +5,17 @@ table {
 
 .title {
   font-size: 18px;
+    font-family: "Poppins", sans-serif;
+    color: #222222;
+
 }
 
 th, td {
   border-bottom: 1px solid #dddddd94;
   padding: 8px;
   font-size: 13px!important;
+  font-family: "Poppins", sans-serif;
+  color: #222222;
 }
 
 th {
@@ -26,7 +31,9 @@ tr:hover {
 }
 
 .titleTableProduit th {
-  font-size: 12px;
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+  color: #222222;
 }
 
 .containerTable {
