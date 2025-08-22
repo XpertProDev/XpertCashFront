@@ -38,11 +38,14 @@ export class PosAccueilComponent {
   showCommandePopup = false;
   private commandeSubscription: Subscription;
 
-  selectedBoutiqueId: number | null = null;
-  selectedBoutiqueName: string = 'Ma boutique name';
   private boutiqueSub?: Subscription;
   private boutiques: any[] = [];
+
+  selectedBoutiqueId: number | null = null;
+  selectedBoutiqueName: string = '';         // vide par défaut
   private boutiquesLoaded = false;
+  isBoutiqueNameLoaded = false;              // <- nouveau flag
+
 
   isDraggingPopup = false;
   startXPopup = 0;
@@ -139,14 +142,23 @@ export class PosAccueilComponent {
   }
 
   private updateBoutiqueName(id: number): void {
+    // reset du flag pendant le chargement
+    this.isBoutiqueNameLoaded = false;
     const found = this.boutiques.find(b => b.id === id);
     if (found) {
-      this.selectedBoutiqueName = found.nomBoutique;
+      this.selectedBoutiqueName = found.nomBoutique || '';
+      this.isBoutiqueNameLoaded = true;
     } else {
       // Si non trouvée, tenter une requête directe
       this.boutiqueService.getBoutiqueById(id).subscribe({
-        next: (boutique) => this.selectedBoutiqueName = boutique.nomBoutique,
-        error: () => this.selectedBoutiqueName = 'Boutique inconnue'
+        next: (boutique) => {
+          this.selectedBoutiqueName = boutique?.nomBoutique || 'Boutique inconnue';
+          this.isBoutiqueNameLoaded = true;
+        },
+        error: () => {
+          this.selectedBoutiqueName = 'Boutique inconnue';
+          this.isBoutiqueNameLoaded = true;
+        }
       });
     }
   }

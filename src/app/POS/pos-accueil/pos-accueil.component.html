@@ -65,8 +65,18 @@
         <div class="header_right">
           <!-- // Name boutique  -->
           <div class="name_boutique">
-            <p>{{ selectedBoutiqueName }}</p>
+            <!-- Affiche le nom seulement une fois chargé ; sinon mini loader / rien -->
+            <ng-container *ngIf="isBoutiqueNameLoaded; else loadingBoutique">
+              <p>{{ selectedBoutiqueName }}</p>
+            </ng-container>
+
+            <ng-template #loadingBoutique>
+              <!-- tu peux afficher rien, un placeholder ou un petit spinner -->
+              <!-- Exemple : un petit texte discret -->
+              <p class="boutique-loading">...</p>
+            </ng-template>
           </div>
+
           <!-- // Input de recherche  -->
           <div class="inputSearch">
             <i class="ri-search-2-line"></i>
