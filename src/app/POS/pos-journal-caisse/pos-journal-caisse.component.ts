@@ -74,24 +74,46 @@ export class PosJournalCaisseComponent {
   }
 
   // Ajoute cette méthode :
+  // loadBoutiques(): void {
+  //   this.boutiques = [];
+  //   this.usersService.getUserInfo().subscribe({
+  //     next: (user) => {
+  //       if (user && user.roleType === 'VENDEUR') {
+  //         this.boutiques = user.boutiques || [];
+  //         this.selectedBoutiqueIdForList = this.boutiques.length > 0 ? this.boutiques[0].id : null;
+  //       } else {
+  //         this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+  //           next: (boutiques) => {
+  //             this.boutiques = boutiques || [];
+  //             this.selectedBoutiqueIdForList = this.boutiques.length > 0 ? this.boutiques[0].id : null;
+  //           }
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
+
   loadBoutiques(): void {
-    this.boutiques = [];
-    this.usersService.getUserInfo().subscribe({
-      next: (user) => {
-        if (user && user.roleType === 'VENDEUR') {
-          this.boutiques = user.boutiques || [];
-          this.selectedBoutiqueIdForList = this.boutiques.length > 0 ? this.boutiques[0].id : null;
-        } else {
-          this.boutiqueService.getBoutiquesByEntreprise().subscribe({
-            next: (boutiques) => {
-              this.boutiques = boutiques || [];
-              this.selectedBoutiqueIdForList = this.boutiques.length > 0 ? this.boutiques[0].id : null;
-            }
-          });
-        }
+  this.boutiques = [];
+  this.usersService.getUserInfo().subscribe({
+    next: (user) => {
+      if (user && user.roleType === 'VENDEUR') {
+        this.boutiques = user.boutiques || [];
+        // Correction ici : utilise la valeur du state si elle existe
+        const stateBoutiqueId = this.boutiqueState.getCurrentValue();
+        this.selectedBoutiqueIdForList = stateBoutiqueId ?? (this.boutiques.length > 0 ? this.boutiques[0].id : null);
+      } else {
+        this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+          next: (boutiques) => {
+            this.boutiques = boutiques || [];
+            const stateBoutiqueId = this.boutiqueState.getCurrentValue();
+            this.selectedBoutiqueIdForList = stateBoutiqueId ?? (this.boutiques.length > 0 ? this.boutiques[0].id : null);
+          }
+        });
       }
-    });
-  }
+    }
+  });
+}
 
   toggleSortDirection(): void {
     this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
