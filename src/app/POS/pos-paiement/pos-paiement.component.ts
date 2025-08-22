@@ -254,9 +254,7 @@ export class PosPaiementComponent {
   }
 
   // Modifier le paiement: renvoyer vers la page de vente en gardant le state
-  modifyPayment() {
-    // Si tu veux renvoyer les infos actuelles pour éditer, tu peux passer state
-    this.router.navigate(['/pos-accueil'], { state: { editVente: this.vente } });
+  modifyPaymentRecu() {
   }
 
   // Utility pour afficher une ligne produit (sécurité si vente undefined)
@@ -268,4 +266,6 @@ export class PosPaiementComponent {
   //   if (!this.vente) return '';
   //   return this.paymentAmount >= this.vente.montantTotal ? 'Monnaie' : 'Reste à payer';
   // }
+  // 
+  //
 }
