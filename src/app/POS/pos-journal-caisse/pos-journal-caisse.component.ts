@@ -26,6 +26,10 @@ export class PosJournalCaisseComponent {
   statusFilter = '';
   viewMode: 'card' | 'list' = 'card'; // Nouvelle propriété pour le mode de vue
 
+  selectedBoutiqueIdForList: number | null = null;
+  isLoadingCaisses = false;
+  boutiques: any[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -137,4 +141,52 @@ export class PosJournalCaisseComponent {
       minute: '2-digit'
     });
   }
+
+  onBoutiqueChange(): void {
+    if (this.selectedBoutiqueIdForList === null) return;
+    
+    this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
+    this.caisses = [];
+    this.errorMessage = null;
+    this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+  }
+
+  loadDerniereCaisseVendeur(boutiqueId: number): void {
+    this.isLoadingCaisses = true;
+    this.caisses = [];
+    this.errorMessage = null;
+    
+    const currentBoutiqueId = boutiqueId; // Sauvegarder l'ID actuel
+
+    this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
+      next: (response) => {
+        // Vérifier si la sélection n'a pas changé pendant la requête
+        if (this.selectedBoutiqueIdForList !== currentBoutiqueId) {
+          this.isLoadingCaisses = false;
+          return;
+        }
+
+        if (typeof response === 'string') {
+          this.errorMessage = response;
+        } else if (response && response.boutiqueId === boutiqueId) { // Filtrer par boutique
+          this.caisses = [response];
+        } else {
+          this.errorMessage = 'Aucune caisse disponible pour cette boutique';
+        }
+        this.isLoadingCaisses = false;
+      },
+      error: (error) => {
+        // Vérifier si la sélection n'a pas changé pendant la requête
+        if (this.selectedBoutiqueIdForList !== currentBoutiqueId) {
+          this.isLoadingCaisses = false;
+          return;
+        }
+        
+        console.error('Erreur lors du chargement de la dernière caisse', error);
+        this.isLoadingCaisses = false;
+        this.errorMessage = error.message || 'Erreur lors du chargement de la dernière caisse';
+      }
+    });
+  }
+  
 }
