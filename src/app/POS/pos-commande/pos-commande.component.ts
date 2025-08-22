@@ -517,6 +517,8 @@ export class PosCommandeComponent implements OnDestroy {
           originalPrice: originalPrice,
           currentPrice: currentPrice,
           selected: false,
+          editing: false, // <-- Ajoutez cette ligne
+          editQuantity: 0, // <-- Ajoutez cette ligne
           __rawLine: ligne
         } as any;
       });
@@ -979,6 +981,32 @@ export class PosCommandeComponent implements OnDestroy {
       return this.getVenteStatus(this.activeVente).toLowerCase().includes('annul');
     }
   }
+
+  // Méthode pour basculer entre mode édition et affichage
+  toggleQuantityEdit(item: any): void {
+    if (item.editing) {
+      // Si on est déjà en mode édition, valider les changements
+      this.validateQuantityEdit(item);
+    } else {
+      // Activer le mode édition
+      item.editing = true;
+      item.editQuantity = item.quantity; // Initialiser avec la valeur actuelle
+    }
+  }
+
+  // Méthode pour valider la modification de quantité
+  validateQuantityEdit(item: any): void {
+    if (item.editQuantity && item.editQuantity > 0) {
+      item.quantity = item.editQuantity;
+      
+      // Mettre à jour les totaux si nécessaire
+      this.updateSelectedItems();
+    }
+    
+    // Désactiver le mode édition
+    item.editing = false;
+  }
+
 
 
 }
