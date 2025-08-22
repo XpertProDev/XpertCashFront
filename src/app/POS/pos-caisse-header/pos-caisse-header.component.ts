@@ -74,50 +74,6 @@ export class PosCaisseHeaderComponent {
   toggleMenuDropdown() {
     this.showMenuDropdown = !this.showMenuDropdown;
   }
-  
-  // loadBoutiques(): void {
-  //   // On récupère d'abord l'utilisateur courant
-  //   this.usersService.getUserInfo().subscribe({
-  //     next: (user) => {
-  //       console.log('Boutiques chargées:', this.boutiques.map(b => ({id: b.id, nom: b.nomBoutique, actif: b.actif})));
-
-  //       if (user && user.roleType === 'VENDEUR') {
-  //         // Vendeur : ne récupérer que les boutiques qui lui sont assignées
-  //         this.boutiques = user.boutiques || [];
-  //         // Sélectionne la première boutique assignée (ou 0 si aucune)
-  //         this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
-  //         this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
-  //         if (this.selectedBoutiqueIdForList) {
-  //           this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-  //         }
-  //       } else {
-  //         // Admin / Manager : récupérer toutes les boutiques de l'entreprise
-  //         this.boutiqueService.getBoutiquesByEntreprise().subscribe({
-  //           next: (boutiques) => {
-  //             this.boutiques = boutiques;
-  //             this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
-  //             this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
-  //             if (this.selectedBoutiqueIdForList) {
-  //               this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-  //             }
-  //           },
-  //           error: (err) => {
-  //             console.error('Erreur lors du chargement des boutiques', err);
-  //             this.errorMessage = 'Erreur lors du chargement des boutiques';
-  //           }
-  //         });
-  //       }
-  //     },
-  //     error: (err) => {
-  //       console.error('Impossible de récupérer l\'utilisateur courant', err);
-  //       // Fallback : charger toutes les boutiques (ou laisser vide)
-  //       this.boutiqueService.getBoutiquesByEntreprise().subscribe({
-  //         next: (boutiques) => this.boutiques = boutiques,
-  //         error: () => this.boutiques = []
-  //       });
-  //     }
-  //   });
-  // }
 
   loadBoutiques(): void {
     this.isLoading = true;

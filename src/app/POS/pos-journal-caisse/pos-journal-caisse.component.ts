@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CaisseResponse } from 'src/app/admin-page/MODELS/CaisseModel/caisse.model';
+import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
@@ -35,10 +36,12 @@ export class PosJournalCaisseComponent {
     private router: Router,
     private usersService: UsersService,
     private boutiqueState: BoutiqueStateService,
-    private posCaisseService: PosCaisseService
+    private posCaisseService: PosCaisseService,
+    private boutiqueService: BoutiqueService
   ) {}
 
   ngOnInit(): void {
+    this.loadBoutiques();
     this.boutiqueState.selectedBoutique$.subscribe(boutiqueId => {
       this.currentBoutiqueId = boutiqueId;
       this.loadCaisses();
@@ -66,6 +69,26 @@ export class PosJournalCaisseComponent {
       error: (error) => {
         this.isLoading = false;
         this.errorMessage = error.message || 'Erreur lors du chargement des caisses';
+      }
+    });
+  }
+
+  // Ajoute cette méthode :
+  loadBoutiques(): void {
+    this.boutiques = [];
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        if (user && user.roleType === 'VENDEUR') {
+          this.boutiques = user.boutiques || [];
+          this.selectedBoutiqueIdForList = this.boutiques.length > 0 ? this.boutiques[0].id : null;
+        } else {
+          this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+            next: (boutiques) => {
+              this.boutiques = boutiques || [];
+              this.selectedBoutiqueIdForList = this.boutiques.length > 0 ? this.boutiques[0].id : null;
+            }
+          });
+        }
       }
     });
   }
