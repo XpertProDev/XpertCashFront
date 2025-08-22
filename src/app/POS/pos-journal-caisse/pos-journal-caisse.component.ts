@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CaisseResponse } from 'src/app/admin-page/MODELS/CaisseModel/caisse.model';
+import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
@@ -26,15 +27,21 @@ export class PosJournalCaisseComponent {
   statusFilter = '';
   viewMode: 'card' | 'list' = 'card'; // Nouvelle propriété pour le mode de vue
 
+  selectedBoutiqueIdForList: number | null = null;
+  isLoadingCaisses = false;
+  boutiques: any[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private usersService: UsersService,
     private boutiqueState: BoutiqueStateService,
-    private posCaisseService: PosCaisseService
+    private posCaisseService: PosCaisseService,
+    private boutiqueService: BoutiqueService
   ) {}
 
   ngOnInit(): void {
+    this.loadBoutiques();
     this.boutiqueState.selectedBoutique$.subscribe(boutiqueId => {
       this.currentBoutiqueId = boutiqueId;
       this.loadCaisses();
@@ -62,6 +69,28 @@ export class PosJournalCaisseComponent {
       error: (error) => {
         this.isLoading = false;
         this.errorMessage = error.message || 'Erreur lors du chargement des caisses';
+      }
+    });
+  }
+
+  loadBoutiques(): void {
+    this.boutiques = [];
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        if (user && user.roleType === 'VENDEUR') {
+          this.boutiques = user.boutiques || [];
+          // Correction ici : utilise la valeur du state si elle existe
+          const stateBoutiqueId = this.boutiqueState.getCurrentValue();
+          this.selectedBoutiqueIdForList = stateBoutiqueId ?? (this.boutiques.length > 0 ? this.boutiques[0].id : null);
+        } else {
+          this.boutiqueService.getBoutiquesByEntreprise().subscribe({
+            next: (boutiques) => {
+              this.boutiques = boutiques || [];
+              const stateBoutiqueId = this.boutiqueState.getCurrentValue();
+              this.selectedBoutiqueIdForList = stateBoutiqueId ?? (this.boutiques.length > 0 ? this.boutiques[0].id : null);
+            }
+          });
+        }
       }
     });
   }
@@ -137,4 +166,52 @@ export class PosJournalCaisseComponent {
       minute: '2-digit'
     });
   }
+
+  onBoutiqueChange(): void {
+    if (this.selectedBoutiqueIdForList === null) return;
+    
+    this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
+    this.caisses = [];
+    this.errorMessage = null;
+    this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
+  }
+
+  loadDerniereCaisseVendeur(boutiqueId: number): void {
+    this.isLoadingCaisses = true;
+    this.caisses = [];
+    this.errorMessage = null;
+    
+    const currentBoutiqueId = boutiqueId; // Sauvegarder l'ID actuel
+
+    this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
+      next: (response) => {
+        // Vérifier si la sélection n'a pas changé pendant la requête
+        if (this.selectedBoutiqueIdForList !== currentBoutiqueId) {
+          this.isLoadingCaisses = false;
+          return;
+        }
+
+        if (typeof response === 'string') {
+          this.errorMessage = response;
+        } else if (response && response.boutiqueId === boutiqueId) { // Filtrer par boutique
+          this.caisses = [response];
+        } else {
+          this.errorMessage = 'Aucune caisse disponible pour cette boutique';
+        }
+        this.isLoadingCaisses = false;
+      },
+      error: (error) => {
+        // Vérifier si la sélection n'a pas changé pendant la requête
+        if (this.selectedBoutiqueIdForList !== currentBoutiqueId) {
+          this.isLoadingCaisses = false;
+          return;
+        }
+        
+        console.error('Erreur lors du chargement de la dernière caisse', error);
+        this.isLoadingCaisses = false;
+        this.errorMessage = error.message || 'Erreur lors du chargement de la dernière caisse';
+      }
+    });
+  }
+  
 }

@@ -74,50 +74,6 @@ export class PosCaisseHeaderComponent {
   toggleMenuDropdown() {
     this.showMenuDropdown = !this.showMenuDropdown;
   }
-  
-  // loadBoutiques(): void {
-  //   // On récupère d'abord l'utilisateur courant
-  //   this.usersService.getUserInfo().subscribe({
-  //     next: (user) => {
-  //       console.log('Boutiques chargées:', this.boutiques.map(b => ({id: b.id, nom: b.nomBoutique, actif: b.actif})));
-
-  //       if (user && user.roleType === 'VENDEUR') {
-  //         // Vendeur : ne récupérer que les boutiques qui lui sont assignées
-  //         this.boutiques = user.boutiques || [];
-  //         // Sélectionne la première boutique assignée (ou 0 si aucune)
-  //         this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
-  //         this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
-  //         if (this.selectedBoutiqueIdForList) {
-  //           this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-  //         }
-  //       } else {
-  //         // Admin / Manager : récupérer toutes les boutiques de l'entreprise
-  //         this.boutiqueService.getBoutiquesByEntreprise().subscribe({
-  //           next: (boutiques) => {
-  //             this.boutiques = boutiques;
-  //             this.selectedBoutiqueIdForList = this.getValidBoutiqueId();
-  //             this.boutiqueState.setSelectedBoutique(this.selectedBoutiqueIdForList);
-  //             if (this.selectedBoutiqueIdForList) {
-  //               this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-  //             }
-  //           },
-  //           error: (err) => {
-  //             console.error('Erreur lors du chargement des boutiques', err);
-  //             this.errorMessage = 'Erreur lors du chargement des boutiques';
-  //           }
-  //         });
-  //       }
-  //     },
-  //     error: (err) => {
-  //       console.error('Impossible de récupérer l\'utilisateur courant', err);
-  //       // Fallback : charger toutes les boutiques (ou laisser vide)
-  //       this.boutiqueService.getBoutiquesByEntreprise().subscribe({
-  //         next: (boutiques) => this.boutiques = boutiques,
-  //         error: () => this.boutiques = []
-  //       });
-  //     }
-  //   });
-  // }
 
   loadBoutiques(): void {
     this.isLoading = true;
@@ -243,43 +199,43 @@ export class PosCaisseHeaderComponent {
   }
 
   // Ajouter cette nouvelle méthode dans PosCaisseComponent
-loadDerniereCaisseVendeur(boutiqueId: number): void {
-  this.isLoadingCaisses = true;
-  this.caisses = [];
-  this.errorMessage = null;
-  
-  const currentBoutiqueId = boutiqueId; // Sauvegarder l'ID actuel
+  loadDerniereCaisseVendeur(boutiqueId: number): void {
+    this.isLoadingCaisses = true;
+    this.caisses = [];
+    this.errorMessage = null;
+    
+    const currentBoutiqueId = boutiqueId; // Sauvegarder l'ID actuel
 
-  this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
-    next: (response) => {
-      // Vérifier si la sélection n'a pas changé pendant la requête
-      if (this.selectedBoutiqueIdForList !== currentBoutiqueId) {
-        this.isLoadingCaisses = false;
-        return;
-      }
+    this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
+      next: (response) => {
+        // Vérifier si la sélection n'a pas changé pendant la requête
+        if (this.selectedBoutiqueIdForList !== currentBoutiqueId) {
+          this.isLoadingCaisses = false;
+          return;
+        }
 
-      if (typeof response === 'string') {
-        this.errorMessage = response;
-      } else if (response && response.boutiqueId === boutiqueId) { // Filtrer par boutique
-        this.caisses = [response];
-      } else {
-        this.errorMessage = 'Aucune caisse disponible pour cette boutique';
-      }
-      this.isLoadingCaisses = false;
-    },
-    error: (error) => {
-      // Vérifier si la sélection n'a pas changé pendant la requête
-      if (this.selectedBoutiqueIdForList !== currentBoutiqueId) {
+        if (typeof response === 'string') {
+          this.errorMessage = response;
+        } else if (response && response.boutiqueId === boutiqueId) { // Filtrer par boutique
+          this.caisses = [response];
+        } else {
+          this.errorMessage = 'Aucune caisse disponible pour cette boutique';
+        }
         this.isLoadingCaisses = false;
-        return;
+      },
+      error: (error) => {
+        // Vérifier si la sélection n'a pas changé pendant la requête
+        if (this.selectedBoutiqueIdForList !== currentBoutiqueId) {
+          this.isLoadingCaisses = false;
+          return;
+        }
+        
+        console.error('Erreur lors du chargement de la dernière caisse', error);
+        this.isLoadingCaisses = false;
+        this.errorMessage = error.message || 'Erreur lors du chargement de la dernière caisse';
       }
-      
-      console.error('Erreur lors du chargement de la dernière caisse', error);
-      this.isLoadingCaisses = false;
-      this.errorMessage = error.message || 'Erreur lors du chargement de la dernière caisse';
-    }
-  });
-}
+    });
+  }
 
 // Modifier onBoutiqueChange
   onBoutiqueChange(): void {

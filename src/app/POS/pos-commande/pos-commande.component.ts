@@ -247,6 +247,13 @@ export class PosCommandeComponent implements OnDestroy {
         createdAt: commande?.createdAt || new Date()
       };
     });
+
+    // Tri décroissant par createdAt (plus récent d'abord)
+    this.commandes.sort((a, b) => {
+      const ta = new Date(a.createdAt).getTime();
+      const tb = new Date(b.createdAt).getTime();
+      return tb - ta;
+    });
   }
 
   loadActiveCommandeDetails() {
@@ -328,9 +335,34 @@ export class PosCommandeComponent implements OnDestroy {
     });
   }
 
+  // private applyVentesFilter(key: FilterKey) {
+  //   // filtre flexible selon le contenu de VenteResponse
+  //   this.ventes = this.allVentes.filter(v => this.matchesVenteStatus(v, key));
+  // }
+
   private applyVentesFilter(key: FilterKey) {
-    // filtre flexible selon le contenu de VenteResponse
     this.ventes = this.allVentes.filter(v => this.matchesVenteStatus(v, key));
+
+    // Tri décroissant par date (dateVente > createdAt > fallback sur venteId)
+    this.ventes.sort((a, b) => {
+      const ta = this.getTimeFromVente(a);
+      const tb = this.getTimeFromVente(b);
+      return tb - ta; // tb - ta => ordre décroissant
+    });
+  }
+
+  /** Retourne un timestamp à partir d'une vente (robuste aux champs manquants) */
+  private getTimeFromVente(v: any): number {
+    const candidates = [v.dateVente, v.createdAt, v.date || v.timestamp];
+    for (const c of candidates) {
+      if (c !== undefined && c !== null) {
+        const dt = new Date(c);
+        if (!Number.isNaN(dt.getTime())) return dt.getTime();
+      }
+    }
+    // fallback : si pas de date, utilise venteId numérique sinon 0
+    const idNum = Number(v.venteId ?? v.id);
+    return Number.isNaN(idNum) ? 0 : idNum;
   }
 
   private matchesVenteStatus(v: VenteResponse, key: FilterKey): boolean {

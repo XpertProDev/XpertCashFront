@@ -13,7 +13,7 @@
             <div class="method">/ {{ paymentMethod }}</div>
         </div>
 
-        <button class="btn btn-secondary" (click)="modifyPayment()">Modifier le paiement</button>
+        <button class="btn btn-secondary" (click)="modifyPaymentRecu()">Modifier le reçu</button>
         <button class="btn btn-secondary" (click)="impressionReceipt()">Imprimer le reçu</button>
 
         <div class="email-send">
@@ -88,6 +88,51 @@
       <ng-template #loadingTpl>
         <div class="loading">Chargement du reçu...</div>
       </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de modification -->
+<div class="modal-overlay" *ngIf="showModifyModal">
+  <div class="modal-content">
+    <h5>Modifier le reçu</h5>
+    
+    <div class="form-group">
+      <label>Montant total: {{ vente?.montantTotal | currency:'CFA ':'symbol':'1.0-0' }}</label>
+    </div>
+
+    <div class="form-group">
+      <label>Montant payé</label>
+      <input 
+        type="number" 
+        [(ngModel)]="tempPaymentAmount" 
+        (input)="calculateChange()"
+        min="0"
+        step="100"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Mode de paiement</label>
+      <select [(ngModel)]="tempPaymentMethod">
+        <option value="Espèces">Espèces</option>
+        <option value="Carte">Carte</option>
+        <option value="Virement">Virement</option>
+        <option value="Mobile Money">Mobile Money</option>
+      </select>
+    </div>
+
+    <div class="form-group" *ngIf="tempPaymentAmount >= (vente?.montantTotal ?? 0)">
+      <label>Monnaie à rendre: {{ (tempPaymentAmount - (vente?.montantTotal ?? 0)) | currency:'CFA ':'symbol':'1.0-0' }}</label>
+    </div>
+
+    <div class="form-group" *ngIf="tempPaymentAmount < (vente?.montantTotal ?? 0)">
+      <label>Reste à payer: {{ ((vente?.montantTotal ?? 0) - tempPaymentAmount) | currency:'CFA ':'symbol':'1.0-0' }}</label>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cancelModify()">Annuler</button>
+      <button class="btn btn-primary btn-new-order" (click)="updatePayment()">Valider et Imprimer</button>
     </div>
   </div>
 </div>

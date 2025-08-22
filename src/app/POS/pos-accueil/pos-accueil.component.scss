@@ -595,19 +595,8 @@ ul.list_commande li.list_commande_plus {
   }
 }
 
-.error-message {
-  padding: 10px;
-  background: #f8d7da;
-  color: #721c24;
-  border-radius: 4px;
-  margin-top: 15px;
-  display: flex;
-  align-items: center;
-  
-  i {
-    margin-right: 8px;
-    font-size: 18px;
-  }
+.error-message { padding: 10px; background: #f8d7da; color: #721c24; border-radius: 4px; margin-top: 15px; display: flex; align-items: center;
+  i { margin-right: 8px; font-size: 18px; }
 }
 
 @keyframes spin {
@@ -617,3 +606,7 @@ ul.list_commande li.list_commande_plus {
 .popup-body {
   padding: 20px;
 }
+
+.boutique-loading { opacity: 0.6; font-size: 14px; color: #666; }
+.spin {  animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

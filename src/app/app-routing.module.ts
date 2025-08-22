@@ -76,13 +76,35 @@ const routes: Routes = [
         import('./POS/pos-caisse/pos-caisse.component')
           .then(m => m.PosCaisseComponent),
     },
-    {
-      path: 'pos-journal-caisse',
-      loadComponent: () =>
-        import('./POS/pos-journal-caisse/pos-journal-caisse.component')
-          .then(m => m.PosJournalCaisseComponent),
-    },
+    // {
+    //   path: 'pos-journal-caisse',
+    //   loadComponent: () =>
+    //     import('./POS/pos-journal-caisse/pos-journal-caisse.component')
+    //       .then(m => m.PosJournalCaisseComponent),
+    // },
   ]
+},
+
+{
+  path: 'pos-journal-caisse',
+  loadComponent: () => import('./POS/pos-journal-caisse/pos-journal-caisse.component')
+    .then(m => m.PosJournalCaisseComponent),
+  canActivate: [authGuard],
+  // data: { hideHeader: true, hideSidebar: true },
+  // children: [
+  //   {
+  //     path: '',
+  //     loadComponent: () =>
+  //       import('./POS/pos-caisse/pos-caisse.component')
+  //         .then(m => m.PosCaisseComponent),
+  //   },
+  //   {
+  //     path: 'pos-journal-caisse',
+  //     loadComponent: () =>
+  //       import('./POS/pos-journal-caisse/pos-journal-caisse.component')
+  //         .then(m => m.PosJournalCaisseComponent),
+  //   },
+  // ]
 },
 
 {

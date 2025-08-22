@@ -232,7 +232,7 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
   }
 
   goToPosJournalCaisse() {
-    this.router.navigate(['/pos-caisse/pos-journal-caisse'])
+    this.router.navigate(['/pos-journal-caisse'])
   }
 
   getButtonText(caisse: CaisseResponse): string {

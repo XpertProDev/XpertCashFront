@@ -86,7 +86,7 @@
                       <label for="categorieId" class="label">Catégorie</label>
                       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)" [displayWith]="displayFn">
 
-                        <mat-option class="select-option" (click)="onCreateCategoryClick()">
+                        <mat-option class="select-option" (click)="$event.stopPropagation(); onCreateCategoryClick()">
                           <div style="display: flex; align-items: center; color: #0672E4;">
                             <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
                             <span style="margin-left: 8px;">Créer une catégorie</span>

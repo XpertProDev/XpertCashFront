@@ -247,45 +247,83 @@ export class AddProduitComponent implements OnInit {
   }
 
   setupFormSubscriptions() {
-  const token = localStorage.getItem('accessToken');
-  if (!token) {
-    console.error('Aucun token trouvé !');
-    return;
+    // Réinitialisation des messages d'API (sécurité)
+    this.messageAPI = '';
+    this.apiMessageType = '';
+
+    // Chargement des catégories depuis l'API et initialisation du filtre autocomplete
+    this.categorieService.getCategories().subscribe({
+      next: (categories: Categorie[]) => {
+        this.options = categories || [];
+        // filteredOptions émettra une première fois grâce à startWith('')
+        this.filteredOptions = this.myControl.valueChanges.pipe(
+          startWith<string | Categorie>(''),
+          map(value => {
+            // value peut être une string saisie par l'utilisateur ou un objet Categorie
+            const name = value ? (typeof value === 'string' ? value : (value as Categorie).nom) : '';
+            return name;
+          }),
+          map(name => name ? this._filter(name) : this.options.slice())
+        );
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des catégories :', error);
+        // garde options vide si erreur
+        this.options = [];
+        this.filteredOptions = of([]);
+      }
+    });
+
+    // Chargement des unités de mesure et initialisation du filtre autocomplete
+    this.uniteMesureService.getUniteMesure().subscribe({
+      next: (uniteMesures: UniteMesure[]) => {
+        this.optionsUnite = uniteMesures || [];
+        this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
+          startWith<string | UniteMesure>(''),
+          map(value => {
+            const name = value ? (typeof value === 'string' ? value : (value as UniteMesure).nom) : '';
+            return name;
+          }),
+          map(name => name ? this._filterUnite(name) : this.optionsUnite.slice())
+        );
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des unités :', error);
+        this.optionsUnite = [];
+        this.filteredNomUnite = of([]);
+      }
+    });
+
+    // Propagation automatique de la valeur sélectionnée dans myControl vers ajouteProduitForm.categorieId
+    // Ceci gère à la fois les sélections UI (mat-option) et les valeurs définies programatiquement (setValue)
+    this.myControl.valueChanges.subscribe(value => {
+      if (value && typeof value !== 'string' && (value as Categorie).id !== undefined) {
+        // L'utilisateur a sélectionné (ou on a programmé) un objet Categorie
+        this.ajouteProduitForm.get('categorieId')?.setValue((value as Categorie).id);
+      } else {
+        // texte libre ou vide => effacer l'id lié
+        this.ajouteProduitForm.get('categorieId')?.setValue(null);
+      }
+    });
+
+    // Même logique pour l'unité
+    this.uniteControl.valueChanges.subscribe(value => {
+      if (value && typeof value !== 'string' && (value as UniteMesure).id !== undefined) {
+        this.ajouteProduitForm.get('uniteId')?.setValue((value as UniteMesure).id);
+      } else {
+        this.ajouteProduitForm.get('uniteId')?.setValue(null);
+      }
+    });
+
+    // (Optionnel mais utile) Si tu veux que l'input affiche directement 'nom' quand on met un objet dans le control
+    // tu as déjà les displayFn() / displayFnUnite() utilisés par [displayWith] dans le template.
+
+    // Remarque : l'event de création (onCreateCategoryClick / submitFormCategory) doit faire :
+    // this.options.push(newCategory);
+    // this.myControl.setValue(newCategory, { emitEvent: true });
+    // this.ajouteProduitForm.get('categorieId')?.setValue(newCategory.id);
+    // De cette façon, la subscription myControl.valueChanges ci-dessus propagera automatiquement l'id.
   }
-
-  // Chargement des catégories
-  this.categorieService.getCategories().subscribe({
-    next: (categories) => {
-      console.log('Catégories reçues depuis l\'API :', categories);
-      this.options = categories;
-      this.filteredOptions = this.myControl.valueChanges.pipe(
-        startWith<string | Categorie>(''),
-        map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-        map(name => (name ? this._filter(name) : this.options.slice()))
-      );
-    },
-    error: (error) => {
-      console.error('Erreur lors de la récupération des catégories :', error);
-    }
-  });
-
-  // Chargement des unités de mesure
-  this.uniteMesureService.getUniteMesure().subscribe({
-    next: (uniteMesures) => {
-      console.log('Unité de mesure reçues depuis l\'API :', uniteMesures);
-      this.optionsUnite = uniteMesures;
-      this.filteredNomUnite = this.uniteControl.valueChanges.pipe(
-        startWith<string | UniteMesure>(''),
-        map(value => (value ? (typeof value === 'string' ? value : value.nom) : '')),
-        map(name => (name ? this._filterUnite(name) : this.optionsUnite.slice()))
-      );
-    },
-    error: (error) => {
-      console.error('Erreur lors de la récupération des unités de mesure :', error);
-    }
-  });
-}
-
 
   loadInitialData() {
     this.ajouteProduitForm = this.fb.group({
@@ -487,6 +525,10 @@ export class AddProduitComponent implements OnInit {
 
         // Ajouter à la liste des options
         this.options.push(newCategory);
+
+        // Mettre la valeur dans l'input (et émettre l'événement valueChanges)
+        this.myControl.setValue(newCategory, { emitEvent: true });
+
 
         // 1. Mettre à jour l'input d'autocomplete
         setTimeout(() => {
