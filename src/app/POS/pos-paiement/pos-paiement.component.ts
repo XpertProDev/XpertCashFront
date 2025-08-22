@@ -26,6 +26,10 @@ export class PosPaiementComponent {
 
   @ViewChild('receipt', { static: false }) receiptEl?: ElementRef;
 
+  showModifyModal = false;
+  tempPaymentAmount: number = 0;
+  tempPaymentMethod: string = 'Espèces';
+
   constructor(
     private router: Router,
     private venteService: VenteService,
@@ -253,13 +257,41 @@ export class PosPaiementComponent {
     this.router.navigate(['/pos-accueil']);
   }
 
-  // Modifier le paiement: renvoyer vers la page de vente en gardant le state
-  modifyPaymentRecu() {
-  }
-
   // Utility pour afficher une ligne produit (sécurité si vente undefined)
   getLignes() {
     return this.vente?.lignes ?? [];
+  }
+
+  modifyPaymentRecu() {
+    this.tempPaymentAmount = this.paymentAmount;
+    this.tempPaymentMethod = this.paymentMethod;
+    this.showModifyModal = true;
+  }
+
+  updatePayment() {
+    this.paymentAmount = this.tempPaymentAmount;
+    this.paymentMethod = this.tempPaymentMethod;
+    
+    // Calculer le changement ou le reste à payer
+    const total = this.vente?.montantTotal ?? 0;
+    this.changeDue = this.paymentAmount - total;
+    
+    this.showModifyModal = false;
+    
+    // Réimprimer automatiquement
+    setTimeout(() => {
+      this.impressionReceipt();
+    }, 100);
+  }
+
+  cancelModify() {
+    this.showModifyModal = false;
+  }
+
+  calculateChange() {
+    // Cette méthode est appelée automatiquement lors de la saisie
+    const total = this.vente?.montantTotal ?? 0;
+    this.changeDue = this.tempPaymentAmount - total;
   }
 
   // getPaymentStatus(): string {
