@@ -666,5 +666,17 @@ async prendrePhoto(): Promise<void> {
 }
 
   
+isExpanded = false;
 
+toggleExpand(event: Event) {
+    event.stopPropagation();
+    this.isExpanded = !this.isExpanded;
+  }
+
+  @HostListener('document:click')
+  onClick() {
+    if (this.isExpanded) {
+      this.isExpanded = false;
+    }
+  }
 }

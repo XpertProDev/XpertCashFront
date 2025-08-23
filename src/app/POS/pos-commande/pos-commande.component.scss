@@ -29,6 +29,14 @@ p {
   font-size: 16px;
 }
 
+.icon_edit_quantite {
+  cursor: pointer;
+}
+
+.icon_edit_quantite:hover {
+  color: #0672E4;
+}
+
 .btn-payment {
   width: 100%;
 }
@@ -796,4 +804,25 @@ textarea {
   opacity: 0.7;
   text-decoration: line-through;
   margin-right: 5px;
+}
+
+.quantity-input {
+  width: 50px;
+  padding: 4px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  
+  &:focus {
+    outline: none;
+    border-color: #4d90fe;
+  }
+}
+
+.icon_edit_quantite {
+  cursor: pointer;
+  
+  &:hover {
+    color: #4d90fe;
+  }
 }

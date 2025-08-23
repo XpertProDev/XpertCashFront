@@ -189,10 +189,22 @@
               <li class="li_list_produit_select" *ngFor="let item of activeVenteItems" [class.selected-item]="item.selected">
                 <div class="double_commande">
                   <div class="nombre_select">
-                    <span *ngIf="currentFilterKey === 'annuler' && item.originalQuantity !== null">
-                      {{ item.originalQuantity }} ➔ 
-                    </span>
-                    {{ item.quantity }}
+
+                    <!-- Mode édition -->
+                    <input
+                      *ngIf="item.editing"
+                      type="number"
+                      min="1"
+                      [max]="item.originalQuantity || 100"
+                      [(ngModel)]="item.editQuantity"
+                      class="quantity-input"
+                    />
+                    <p *ngIf="!item.editing">
+                      <span *ngIf="currentFilterKey === 'annuler' && item.originalQuantity !== null">
+                        {{ item.originalQuantity }} ➔ 
+                      </span>
+                      {{ item.quantity }}
+                    </p>
                   </div>
                   
                   <div class="name_produit_select">
@@ -218,6 +230,11 @@
                       </span><br>
                     </span>
                     {{ (item.quantity * item.product.prixVente) | cfaCurrency }}
+                  </div>
+
+                  <div class="icon_edit_quantite">
+                    <i class="ri-edit-2-line" *ngIf="!item.editing" (click)="startEditQuantity(item)"></i>
+                    <i class="ri-check-line" *ngIf="item.editing" (click)="onValidateQuantityEdit(item)"></i>
                   </div>
                 </div>
                 <div class="icon_check">
