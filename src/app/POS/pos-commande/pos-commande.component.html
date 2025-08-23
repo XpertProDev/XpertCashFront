@@ -191,16 +191,14 @@
                   <div class="nombre_select">
 
                     <!-- Mode édition -->
-                    <input 
+                    <input
                       *ngIf="item.editing"
-                      type="number" 
-                      min="1" 
+                      type="number"
+                      min="1"
                       [max]="item.originalQuantity || 100"
                       [(ngModel)]="item.editQuantity"
-                      (keyup.enter)="validateQuantityEdit(item)"
                       class="quantity-input"
-                    >
-
+                    />
                     <p *ngIf="!item.editing">
                       <span *ngIf="currentFilterKey === 'annuler' && item.originalQuantity !== null">
                         {{ item.originalQuantity }} ➔ 
@@ -234,9 +232,9 @@
                     {{ (item.quantity * item.product.prixVente) | cfaCurrency }}
                   </div>
 
-                  <div class="icon_edit_quantite" (click)="toggleQuantityEdit(item)">
-                    <i class="ri-edit-2-line" *ngIf="!item.editing"></i>
-                    <i class="ri-check-line" style="font-size: 18px;" *ngIf="item.editing"></i>
+                  <div class="icon_edit_quantite">
+                    <i class="ri-edit-2-line" *ngIf="!item.editing" (click)="startEditQuantity(item)"></i>
+                    <i class="ri-check-line" *ngIf="item.editing" (click)="onValidateQuantityEdit(item)"></i>
                   </div>
                 </div>
                 <div class="icon_check">

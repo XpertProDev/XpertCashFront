@@ -81,6 +81,8 @@ export class PosCommandeComponent implements OnDestroy {
   // clé pour localStorage (changer version si tu modifies le format)
   private readonly SNAPSHOT_KEY = 'vente_line_snapshots_v1';
 
+  private pendingRemboursementItem: any = null;
+
   constructor(
     public router: Router,
     private viewState: ViewStateService,
@@ -806,9 +808,8 @@ export class PosCommandeComponent implements OnDestroy {
   // Vérifier le code PIN
   verifyCode(): void {
     const enteredPin = this.pin.join('');
-    
     this.usersService.verifyCode(enteredPin, ['ADMIN', 'MANAGER']).subscribe({
-      next: (isValid: boolean) => { // Ajout du type explicitement
+      next: (isValid: boolean) => {
         if (isValid) {
           this.showCancelPopup = false;
           this.showMotifPopup = true;
@@ -833,41 +834,29 @@ export class PosCommandeComponent implements OnDestroy {
     }
 
     this.isProcessing = true;
-    
+
+    let produitsQuantites: { [key: number]: number } = {};
+    if (this.pendingRemboursementItem) {
+      // Utilise la quantité à rembourser calculée
+      produitsQuantites[this.pendingRemboursementItem.product.id] = this.pendingRemboursementItem.qtyToRefund;
+    } else {
+      produitsQuantites = this.getProduitsQuantites();
+    }
+
     const request: RemboursementRequest = {
       venteId: this.activeVenteId!,
-      produitsQuantites: this.getProduitsQuantites(),
+      produitsQuantites,
       motif: this.motifRemboursement,
       rescodePin: this.pin.join('')
     };
 
     this.posCommandeService.rembourserVente(request).subscribe({
       next: (response) => {
-        const venteId = response.venteId ?? this.activeVenteId!;
-        const responseAny = response as any;
-
-        // fallback robustes sans erreur de typage TS
-        const responseLines = responseAny.lignes ?? responseAny.lines ?? responseAny.items ?? null;
-
-        // s'assurer d'avoir un snapshot avant d'écraser la vente
-        if (!this.venteLineSnapshots.has(venteId)) {
-          const old = this.allVentes.find(v => v.venteId === venteId) as any;
-          const oldLines = old?.lignes ?? old?.lines ?? null;
-          this.ensureSnapshotForVente(venteId, oldLines ?? responseLines);
-        }
-
-        // remplacer la vente dans la liste locale
-        this.allVentes = this.allVentes.map(v => v.venteId === venteId ? response : v);
-        this.saveSnapshotsToStorage();
-
-        // recharger / mettre à jour UI
+        this.pendingRemboursementItem = null;
+        this.closeAllPopups();
         this.loadVentesAndFilter(this.currentFilterKey);
         this.activeVente = response;
         this.loadActiveVenteDetails();
-
-        this.closeAllPopups();
-        this.selectedItems = [];
-        this.updateSelectedItems();
       },
       error: (error) => {
         console.error('Erreur remboursement', error);
@@ -909,8 +898,7 @@ export class PosCommandeComponent implements OnDestroy {
     this.showMotifPopup = false;
     this.motifRemboursement = '';
     this.selectedItems = [];
-    
-    // Réinitialiser les sélections
+    this.pendingRemboursementItem = null;
     this.activeVenteItems.forEach(item => item.selected = false);
   }
 
@@ -1005,6 +993,36 @@ export class PosCommandeComponent implements OnDestroy {
     
     // Désactiver le mode édition
     item.editing = false;
+  }
+
+  startEditQuantity(item: any) {
+    item.editing = true;
+    item.editQuantity = item.quantity;
+  }
+
+  onValidateQuantityEdit(item: any) {
+    // Sauvegarde la quantité initiale avant modification
+    const initialQuantity = item.quantity;
+
+    if (item.editQuantity >= 1 && item.editQuantity < initialQuantity) {
+      // Calcule la quantité à rembourser
+      const qtyToRefund = initialQuantity - item.editQuantity;
+
+      // Mets à jour la quantité affichée
+      item.quantity = item.editQuantity;
+
+      // Prépare l'item pour remboursement partiel
+      this.pendingRemboursementItem = {
+        ...item,
+        qtyToRefund
+      };
+
+      this.showCancelPopup = true;
+      this.pin = ['', '', '', ''];
+      this.isCodeWrong = false;
+    } else {
+      item.editing = false;
+    }
   }
 
 
