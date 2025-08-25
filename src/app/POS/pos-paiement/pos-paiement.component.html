@@ -34,7 +34,7 @@
             alt="Logo XpertPro"
             class="logo" />
           <div class="ticket-info">
-            <div>Ticket : {{ vente?.venteId ?? '—' }}</div>
+            <div>Ticket : {{ vente?.numeroFacture ?? '—' }}</div>
             <div>{{ vente?.dateVente | date:'dd/MM/yyyy HH:mm' }}</div>
             <div>Servi par : {{ vente?.nomVendeur ?? '—' }}</div>
             <div>Boutique : {{ vente?.nomBoutique ?? '—' }}</div>
@@ -81,8 +81,12 @@
 
 
         <div class="receipt-footer">
-          Généré par Tchakeda
+          Généré par Tchakeda 
         </div>
+
+        
+        
+        
       </div>
 
       <ng-template #loadingTpl>

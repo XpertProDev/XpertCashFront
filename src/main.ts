@@ -17,9 +17,13 @@ if (environment.production) {
   console.debug = () => {};
   console.info = () => {};
   console.warn = () => {};
-  // Garder console.error pour les erreurs importantes
 }
 
 bootstrapApplication(AppComponent, {
-  providers: [importProvidersFrom(BrowserModule, AppRoutingModule), provideAnimations(), provideHttpClient(), provideAnimationsAsync()]
+  providers: [
+    importProvidersFrom(BrowserModule, AppRoutingModule),
+    provideAnimations(),
+    provideHttpClient(),
+    provideAnimationsAsync()
+  ]
 }).catch((err) => console.error(err));

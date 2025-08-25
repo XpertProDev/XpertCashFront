@@ -101,12 +101,16 @@ export class PosPaiementComponent {
   private loadVenteById(id: number) {
     this.loading = true;
     this.venteService.getVenteById(id).subscribe({
+      //console log des info dune vente
+      
       next: (res) => {
+        console.log('Réponse API:', res);
         this.vente = res;
         this.paymentAmount = res.montantPaye ?? res.montantTotal ?? 0;
         this.changeDue = this.paymentAmount - (res.montantTotal ?? 0);
         this.paymentMethod = res.modePaiement ?? this.paymentMethod;
         this.loading = false;
+        console.log('Vente chargée:', res);
       },
       error: (err: any) => {
         console.error('Erreur chargement vente', err);
@@ -275,6 +279,8 @@ export class PosPaiementComponent {
     // Calculer le changement ou le reste à payer
     const total = this.vente?.montantTotal ?? 0;
     this.changeDue = this.paymentAmount - total;
+
+    //numeroFacture
     
     this.showModifyModal = false;
     
