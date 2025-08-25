@@ -24,7 +24,7 @@ export class PosCaisseHeaderComponent {
   private destroy$ = new Subject<void>();
 
   showMenuDropdown = false;
-  showAllCaissesSection = false;
+  showAllCaissesSection = true;
   isAllowedToViewAllCaisses = false;
 
   showModal = false;
@@ -63,13 +63,20 @@ export class PosCaisseHeaderComponent {
 
   ngOnInit(): void {
     this.loadBoutiques();
+    this.initBoutique();
+    this.initStateCaisse();
+    this.initPaginationService();
+  }
 
-    // Initialiser avec la boutique sauvegardée
+  initBoutique() {
+     // Initialiser avec la boutique sauvegardée
     const savedBoutiqueId = this.boutiqueState.getCurrentValue();
     if (savedBoutiqueId) {
       this.selectedBoutiqueIdForList = savedBoutiqueId;
     }
-    
+  }
+
+  initStateCaisse() {
     this.caisseState.showAllCaisses$
       .pipe(takeUntil(this.destroy$))
       .subscribe(val => {
@@ -77,7 +84,15 @@ export class PosCaisseHeaderComponent {
         console.log('[Header] showAllCaisses$ ->', val);
       });
 
-      // Subscribe to pagination changes
+      // Ajouter cette ligne pour synchroniser avec l'état initial du service
+    this.caisseState.showAllCaisses$.pipe(takeUntil(this.destroy$))
+      .subscribe(val => {
+        this.showAllCaissesSection = !!val;
+      });
+  }
+
+  initPaginationService() {
+    // Subscribe to pagination changes
     this.paginationService.state$
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {

@@ -6,7 +6,7 @@ import { CaisseResponse } from '../../MODELS/CaisseModel/caisse.model';
 export class CaisseStateService {
   private caisseCreatedSource = new BehaviorSubject<CaisseResponse | null>(null);
   private refreshCaissesSource = new BehaviorSubject<boolean>(false);
-  private showAllCaissesSource = new BehaviorSubject<boolean>(false);
+  private showAllCaissesSource = new BehaviorSubject<boolean>(true);
 
   caisseCreated$ = this.caisseCreatedSource.asObservable();
   refreshCaisses$ = this.refreshCaissesSource.asObservable();
