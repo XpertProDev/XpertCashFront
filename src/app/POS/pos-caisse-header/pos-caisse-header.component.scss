@@ -58,3 +58,9 @@
 .dropdown-item.hide-all:hover {
   color: #c62828;
 }
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
