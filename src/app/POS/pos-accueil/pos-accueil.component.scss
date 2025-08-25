@@ -610,3 +610,22 @@ ul.list_commande li.list_commande_plus {
 .boutique-loading { opacity: 0.6; font-size: 14px; color: #666; }
 .spin {  animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+// pos-accueil.component.scss
+.miin_loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  .scan-indicator {
+    font-size: 24px;
+    color: #4CAF50;
+    animation: pulse 0.1s;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}

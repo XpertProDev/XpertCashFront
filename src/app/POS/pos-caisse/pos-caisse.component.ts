@@ -9,6 +9,7 @@ import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.d
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { CaisseStateService } from 'src/app/admin-page/SERVICES/CaisseService/caisse-state.service';
+import { PaginationService } from 'src/app/admin-page/SERVICES/CaisseService/pagination.service';
 import { PosCaisseService } from 'src/app/admin-page/SERVICES/CaisseService/pos-caisse-service';
 
 @Component({
@@ -40,17 +41,39 @@ export class PosCaisseComponent {
   isLoadingAllCaisses = false;
   errorMessageAllCaisses: string | null = null;
 
+  // propriétés à ajouter
+  currentPage = 1;
+  itemsPerPage = 10;
+
   constructor(
     private boutiqueService: BoutiqueService,
     private caisseState: CaisseStateService,
     private posCaisseService: PosCaisseService,
     private boutiqueState: BoutiqueStateService,
     private router: Router,
+    private paginationService: PaginationService,
   ) {}
 
   ngOnInit(): void {
     this.loadBoutiques();
+    this.initStateCaisse();
+    this.initStateBoutique();
+  }
 
+  initPaginationBoutique() {
+    this.paginationService.state$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(state => {
+      this.currentPage = state.currentPage;
+      this.itemsPerPage = state.itemsPerPage;
+      // si on a une boutique courante, recharger la page demandée
+      if (this.currentBoutiqueId) {
+        this.loadCaisses(this.currentBoutiqueId, this.currentPage, this.itemsPerPage);
+      }
+    });
+  }
+
+  initStateBoutique() {
     // Écoutez les changements de boutique pour recharger toutes les caisses
     this.boutiqueState.selectedBoutique$.pipe(
       takeUntil(this.destroy$)
@@ -62,6 +85,31 @@ export class PosCaisseComponent {
       }
     });
 
+    // Écoute les changements de boutique
+    this.boutiqueState.selectedBoutique$.subscribe(boutiqueId => {
+      this.currentBoutiqueId = boutiqueId;
+      // this.selectedBoutiqueIdForList = boutiqueId;
+      if (boutiqueId !== null) {
+        this.loadDerniereCaisseVendeur(boutiqueId);
+      } else {
+        this.caisses = [];
+      }
+    });
+
+    // also, when boutiqueState changes, set pagination total/items to default or reset if you want:
+    this.boutiqueState.selectedBoutique$.pipe(takeUntil(this.destroy$)).subscribe(bId => {
+      this.currentBoutiqueId = bId;
+      // reset page when boutique changes
+      this.paginationService.setPage(1);
+      if (bId) {
+        this.loadDerniereCaisseVendeur(bId);
+        this.loadCaisses(bId, this.paginationService.getState().currentPage, this.paginationService.getState().itemsPerPage);
+        this.loadAllCaisses(bId);
+      }
+    });
+  }
+
+  initStateCaisse() {
     // Écouter les nouvelles caisses créées
     this.caisseState.caisseCreated$.pipe(
       takeUntil(this.destroy$)
@@ -81,16 +129,6 @@ export class PosCaisseComponent {
         }
       });
 
-    // Écoute les changements de boutique
-    this.boutiqueState.selectedBoutique$.subscribe(boutiqueId => {
-      this.currentBoutiqueId = boutiqueId;
-      // this.selectedBoutiqueIdForList = boutiqueId;
-      if (boutiqueId !== null) {
-        this.loadDerniereCaisseVendeur(boutiqueId);
-      } else {
-        this.caisses = [];
-      }
-    });
 
     // abonnement
     this.caisseState.showAllCaisses$
@@ -120,13 +158,6 @@ export class PosCaisseComponent {
     this.boutiqueService.getBoutiquesByEntreprise().subscribe({
       next: (boutiques) => {
         this.boutiques = boutiques;
-        if (this.boutiques.length > 0) {
-          // this.selectedBoutiqueIdForList = this.boutiques[0].id;
-          // if (this.selectedBoutiqueIdForList !== null) {
-          //   // Utiliser la nouvelle méthode ici
-          //   this.loadDerniereCaisseVendeur(this.selectedBoutiqueIdForList);
-          // }
-        }
       },
       error: (error) => {
         console.error('Erreur lors du chargement des boutiques', error);
@@ -136,28 +167,26 @@ export class PosCaisseComponent {
   }
 
   // Ajoutez cette méthode dans la classe PosCaisseComponent
-loadDerniereCaisseVendeur(boutiqueId: number): void {
-  this.isLoadingCaisses = true;
-  this.caisses = [];
-  this.errorMessage = null;
+  loadDerniereCaisseVendeur(boutiqueId: number): void {
+    this.isLoadingCaisses = true;
+    this.caisses = [];
+    this.errorMessage = null;
 
-  this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
-    next: (response) => {
-      this.caisses = [response];
-      this.isLoadingCaisses = false;
-    },
-    error: (error) => {
-      this.isLoadingCaisses = false;
-      
-      // Gestion spécifique des messages d'erreur
-      if (error.message.includes('Aucune caisse trouvée')) {
-        this.errorMessage = 'Aucune caisse disponible pour cette boutique';
-      } else {
-        this.errorMessage = error.message || 'Erreur de communication avec le serveur';
+    this.posCaisseService.getDerniereCaisseVendeur(boutiqueId).subscribe({
+      next: (response) => {
+        this.caisses = [response];
+        this.isLoadingCaisses = false;
+      },
+      error: (error) => {
+        this.isLoadingCaisses = false;
+        if (error?.message && error.message.includes('Aucune caisse trouvée')) {
+          this.errorMessage = 'Aucune caisse disponible pour cette boutique';
+        } else {
+          this.errorMessage = error?.message || 'Erreur de communication avec le serveur';
+        }
       }
-    }
-  });
-}
+    });
+  }
 
   openModal() {
     this.showModal = true;
@@ -171,17 +200,66 @@ loadDerniereCaisseVendeur(boutiqueId: number): void {
   }
 
   // Nouvelle méthode pour charger les caisses
-  loadCaisses(boutiqueId: number): void {
+  // loadCaisses(boutiqueId: number): void {
+  //   this.isLoadingCaisses = true;
+  //   this.caisses = [];
+    
+  //   this.posCaisseService.getCaissesByBoutique(boutiqueId).subscribe({
+  //     next: (caisses) => {
+  //       this.caisses = caisses;
+  //       this.isLoadingCaisses = false;
+  //     },
+  //     error: (error) => {
+  //       console.error('Erreur lors du chargement des caisses', error);
+  //       this.isLoadingCaisses = false;
+  //       this.errorMessage = 'Erreur lors du chargement des caisses';
+  //     }
+  //   });
+  // }
+
+  // ---------- CHANGEMENT: appel unique et traitement de différentes formes de réponse ----------
+  loadCaisses(boutiqueId: number, page: number = 1, size: number = 10): void {
     this.isLoadingCaisses = true;
     this.caisses = [];
-    
+    this.errorMessage = null;
+
     this.posCaisseService.getCaissesByBoutique(boutiqueId).subscribe({
-      next: (caisses) => {
-        this.caisses = caisses;
+      next: (resp: any) => {
+        // 1) API paginée classique { items: CaisseResponse[], totalItems: number }
+        if (resp && Array.isArray(resp.items) && typeof resp.totalItems === 'number') {
+          // On suppose que resp.items contient déjà la page demandée.
+          this.paginationService.setTotalItems(resp.totalItems);
+          this.caisses = resp.items;
+        }
+        // 2) API qui retourne directement un tableau complet -> découpage côté client
+        else if (Array.isArray(resp)) {
+          const items = resp as CaisseResponse[];
+          this.paginationService.setTotalItems(items.length);
+          const start = (page - 1) * size;
+          this.caisses = items.slice(start, start + size);
+        }
+        // 3) autre forme courante { data: [...], total: n }
+        else if (resp && Array.isArray(resp.data)) {
+          const items = resp.data as CaisseResponse[];
+          this.paginationService.setTotalItems(resp.total || items.length);
+          const start = (page - 1) * size;
+          this.caisses = items.slice(start, start + size);
+        }
+        // 4) réponse inconnue -> essayer d'extraire ce qu'on peut
+        else if (resp && Array.isArray(resp.items)) {
+          const items = resp.items as CaisseResponse[];
+          this.paginationService.setTotalItems(resp.totalItems || items.length);
+          this.caisses = items;
+        } else {
+          // Rien de connu -> afficher vide
+          this.caisses = [];
+          this.paginationService.setTotalItems(0);
+        }
+
         this.isLoadingCaisses = false;
       },
-      error: (error) => {
-        console.error('Erreur lors du chargement des caisses', error);
+      error: (err) => {
+        console.error('Erreur loadCaisses', err);
         this.isLoadingCaisses = false;
         this.errorMessage = 'Erreur lors du chargement des caisses';
       }

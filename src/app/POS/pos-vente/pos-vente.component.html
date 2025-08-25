@@ -111,7 +111,7 @@
               </div>
               
               <div class="list_right">
-                <div class="double" style="gap: 15px;">
+                <div class="double" style="gap: 10px;">
                   <div class="product-price">
                     <p>{{ produit.prixVente | cfaCurrency }}</p>
                   </div>
@@ -123,9 +123,9 @@
                   <button class="btn-decrement" (click)="decreaseQuantity(produit); $event.stopPropagation()">
                     <i class="ri-subtract-line"></i>
                   </button>
-                  <div class="btn_fovory">
+                  <!-- <div class="btn_fovory">
                     <i class="ri-heart-line favorite-icon-list"></i>
-                  </div>
+                  </div> -->
                 </div>
               </div>
             </li>
@@ -1116,4 +1116,9 @@
       </button>
     </div>
   </div>
+</div>
+
+<div class="scan-error-toast" *ngIf="showScanError">
+  <i class="ri-error-warning-line"></i>
+  <span>{{ scanErrorMessage }}</span>
 </div>

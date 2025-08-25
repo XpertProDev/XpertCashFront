@@ -11,6 +11,7 @@ import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/
 import { CaisseStateService } from 'src/app/admin-page/SERVICES/CaisseService/caisse-state.service';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
 import { Subject, takeUntil } from 'rxjs';
+import { PaginationService } from 'src/app/admin-page/SERVICES/CaisseService/pagination.service';
 
 @Component({
   selector: 'app-pos-caisse-header',
@@ -23,7 +24,7 @@ export class PosCaisseHeaderComponent {
   private destroy$ = new Subject<void>();
 
   showMenuDropdown = false;
-  showAllCaissesSection = false;
+  showAllCaissesSection = true;
   isAllowedToViewAllCaisses = false;
 
   showModal = false;
@@ -40,6 +41,16 @@ export class PosCaisseHeaderComponent {
 
   openMenuId: number | null = null;
 
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalItems = 0;
+
+  displayStart = 0;
+  displayEnd = 0;
+  pageCount = 0;
+  isFirstPage = true;
+  isLastPage = true;
+
   constructor(
     private boutiqueService: BoutiqueService,
     private caisseState: CaisseStateService,
@@ -47,26 +58,72 @@ export class PosCaisseHeaderComponent {
     private boutiqueState: BoutiqueStateService,
     private router: Router,
     private usersService: UsersService,
+     private paginationService: PaginationService,
   ) {}
 
   ngOnInit(): void {
     this.loadBoutiques();
+    this.initBoutique();
+    this.initStateCaisse();
+    this.initPaginationService();
+  }
 
-    // Initialiser avec la boutique sauvegardée
+  initBoutique() {
+     // Initialiser avec la boutique sauvegardée
     const savedBoutiqueId = this.boutiqueState.getCurrentValue();
     if (savedBoutiqueId) {
       this.selectedBoutiqueIdForList = savedBoutiqueId;
     }
-    
+  }
+
+  initStateCaisse() {
     this.caisseState.showAllCaisses$
       .pipe(takeUntil(this.destroy$))
       .subscribe(val => {
         this.showAllCaissesSection = !!val;
         console.log('[Header] showAllCaisses$ ->', val);
       });
+
+      // Ajouter cette ligne pour synchroniser avec l'état initial du service
+    this.caisseState.showAllCaisses$.pipe(takeUntil(this.destroy$))
+      .subscribe(val => {
+        this.showAllCaissesSection = !!val;
+      });
   }
 
-   ngOnDestroy(): void {
+  initPaginationService() {
+    // Subscribe to pagination changes
+    this.paginationService.state$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(state => {
+        this.currentPage = state.currentPage;
+        this.itemsPerPage = state.itemsPerPage;
+        this.totalItems = state.totalItems;
+        this.recomputeDisplay();
+      });
+  }
+
+  // helper pour recalculer l'affichage
+  private recomputeDisplay() {
+    this.pageCount = Math.max(1, Math.ceil(this.totalItems / this.itemsPerPage || 1));
+    this.displayStart = this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1;
+    this.displayEnd = Math.min(this.totalItems, this.currentPage * this.itemsPerPage);
+    this.isFirstPage = this.currentPage <= 1;
+    this.isLastPage = this.currentPage >= this.pageCount;
+  }
+
+  // handlers appelés par le template
+  prevPage() {
+    if (this.isFirstPage) return;
+    this.paginationService.setPage(this.currentPage - 1);
+  }
+
+  nextPage() {
+    if (this.isLastPage) return;
+    this.paginationService.setPage(this.currentPage + 1);
+  }
+
+  ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }

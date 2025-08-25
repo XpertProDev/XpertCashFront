@@ -28,12 +28,39 @@
   
                 <div class="barre"></div>
 
-                <span class="o_pager_counter"><span class="">1-1</span><span> / </span><span class="o_pager_limit">1</span></span>
-                
-                <span class="btn-group d-print-none" aria-atomic="true">
-                    <button type="button" class="o_pager_previous" aria-label="Précédent" data-tooltip="Précédent" ><i class="ri-arrow-left-s-line"></i></button>
-                    <button type="button" class="o_pager_next" aria-label="Suivant" data-tooltip="Suivant"><i class="ri-arrow-right-s-line"></i></button>
-                </span>
+                <!-- pager -->
+                <div class="pager" aria-label="Pagination">
+                    <div class="pager-info" aria-live="polite">
+                        <span class="o_pager_counter">
+                            <span>{{ displayStart }} - {{ displayEnd }}</span>
+                                <span> / </span>
+                            <span class="o_pager_limit">{{ totalItems }}</span>
+                        </span>
+                    </div>
+
+                    <div class="btn-group d-print-none" aria-atomic="true" role="group" aria-label="Navigation pages">
+                        <button
+                        type="button"
+                        class="o_pager_previous"
+                        (click)="prevPage()"
+                        [disabled]="isFirstPage"
+                        aria-label="Précédent"
+                        title="Page précédente">
+                        <i class="ri-arrow-left-s-line"></i>
+                        </button>
+
+                        <button
+                        type="button"
+                        class="o_pager_next"
+                        (click)="nextPage()"
+                        [disabled]="isLastPage"
+                        aria-label="Suivant"
+                        title="Page suivante">
+                        <i class="ri-arrow-right-s-line"></i>
+                        </button>
+                    </div>
+                </div>
+
   
                 <div class="barre"></div>
                 
