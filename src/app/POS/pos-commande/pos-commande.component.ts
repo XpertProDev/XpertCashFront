@@ -640,7 +640,8 @@ export class PosCommandeComponent implements OnDestroy {
         this.ventes = this.ventes.filter(v =>
           String(v.venteId).toLowerCase().includes(this.searchTerm) ||
           String(v.montantTotal).toLowerCase().includes(this.searchTerm) ||
-          (v.clientNom && String(v.clientNom).toLowerCase().includes(this.searchTerm))
+          (v.clientNom && String(v.clientNom).toLowerCase().includes(this.searchTerm)) ||
+          (v.numeroFacture && v.numeroFacture.toLowerCase().includes(this.searchTerm))
         );
       }
     }
