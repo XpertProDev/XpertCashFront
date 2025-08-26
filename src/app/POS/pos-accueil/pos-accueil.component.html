@@ -249,9 +249,9 @@
 
 <!-- Popup de calculatrice -->
 <div *ngIf="showCalculatorPopup" class="calculate-popup-overlay">
-  <div class="calculator">
+  <div class="calculator" [ngStyle]="{ 'transform': 'translate3d(' + popupOffsetPopup.x + 'px, ' + popupOffsetPopup.y + 'px, 0)' }" (click)="$event.stopPropagation()">
     <!-- CALCULATOR BODY -->
-    <div class="calc">
+    <div class="calc" (mousedown)="startDragPopup($event)">
       <!-- Top bar -->
       <div class="calc-top">
         <div class="brand-img">
@@ -262,7 +262,7 @@
 
       <!-- Screen -->
       <div class="screen">
-        <span class="screen-text" style="line-height: 10;">1234567890 12.</span>
+        <span class="screen-text">{{ calcDisplay }}</span>
       </div>
 
 
@@ -275,57 +275,49 @@
           <span class="screen-text-sub">0000</span>
         </div>
         <div class="keys-true">
-        <button class="key fn">+/-</button>
-        <button class="key fn">√</button>
-        <button class="key on" style="font-size: 14px;">ON/AC</button>
+          <button class="key fn" (click)="onCalcKey('+/-')">+/-</button>
+          <button class="key fn" (click)="onCalcKey('√')">√</button>
+          <button class="key on" style="font-size: 14px;" (click)="onCalcKey('ON/AC')">ON/AC</button>
         </div>
       </div>
 
-      <!-- Keys -->
+      <!-- Keys (extrait complet, adapte selon ton HTML existant) -->
       <div class="keys">
-        <!-- Row 1 -->
-        <button class="key fn">M+</button>
-        <button class="key fn">M-</button>
-        <button class="key fn">MRC</button>
-        <button class="key fn">GT</button>
-        <button class="key fn">C.CE</button>
+        <button class="key fn" (click)="onCalcKey('M+')">M+</button>
+        <button class="key fn" (click)="onCalcKey('M-')">M-</button>
+        <button class="key fn" (click)="onCalcKey('MRC')">MRC</button>
+        <button class="key fn" (click)="onCalcKey('GT')">GT</button>
+        <button class="key fn" (click)="onCalcKey('C.CE')">C.CE</button>
 
-        <!-- Row 2 -->
-        <button class="key fn">MC</button>
-        <button class="key fn">MR</button>
-        <button class="key fn">Ex</button>
-        <button class="key op">÷</button>
-        <button class="key fn">▶</button>
+        <button class="key fn" (click)="onCalcKey('MC')">MC</button>
+        <button class="key fn" (click)="onCalcKey('MR')">MR</button>
+        <button class="key fn" (click)="onCalcKey('Ex')">Ex</button>
+        <button class="key op" (click)="onCalcKey('÷')">÷</button>
+        <button class="key fn" (click)="onCalcKey('▶')">▶</button>
 
-        <!-- Row 3 -->
-        <button class="key num">7</button>
-        <button class="key num">8</button>
-        <button class="key num">9</button>
-        <button class="key op">×</button>
-        <button class="key fn">%</button>
+        <button class="key num" (click)="onCalcKey('7')">7</button>
+        <button class="key num" (click)="onCalcKey('8')">8</button>
+        <button class="key num" (click)="onCalcKey('9')">9</button>
+        <button class="key op" (click)="onCalcKey('×')">×</button>
+        <button class="key fn" (click)="onCalcKey('%')">%</button>
 
-        <!-- Row 4 -->
-        <button class="key num">4</button>
-        <button class="key num">5</button>
-        <button class="key num">6</button>
-        <button class="key op">−</button>
-        <button class="key fn">MU</button>
+        <button class="key num" (click)="onCalcKey('4')">4</button>
+        <button class="key num" (click)="onCalcKey('5')">5</button>
+        <button class="key num" (click)="onCalcKey('6')">6</button>
+        <button class="key op" (click)="onCalcKey('−')">−</button>
+        <button class="key fn" (click)="onCalcKey('MU')">MU</button>
 
-        <!-- Row 5 -->
-        <button class="key num">1</button>
-        <button class="key num">2</button>
-        <button class="key num">3</button>
-        <!-- + spans 2 rows -->
-        <button class="key plus tall">+</button>
-        <!-- = spans 2 rows -->
-        <button class="key equals tall">=</button>
+        <button class="key num" (click)="onCalcKey('1')">1</button>
+        <button class="key num" (click)="onCalcKey('2')">2</button>
+        <button class="key num" (click)="onCalcKey('3')">3</button>
+        <button class="key plus tall" (click)="onCalcKey('+')">+</button>
+        <button class="key equals tall" (click)="onCalcKey('=')">=</button>
 
-        <!-- Row 6 -->
-        <button class="key num wide0">0</button>
-        <button class="key num">00</button>
-        <button class="key num">.</button>
-        <!-- grid gaps are filled by the tall + and = -->
+        <button class="key num wide0" (click)="onCalcKey('0')">0</button>
+        <button class="key num" (click)="onCalcKey('00')">00</button>
+        <button class="key num" (click)="onCalcKey('.')">.</button>
       </div>
+
     </div>
   </div>
 </div>

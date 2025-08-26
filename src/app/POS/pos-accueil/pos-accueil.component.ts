@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.directive';
@@ -14,6 +14,7 @@ import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
 import { ScannerService } from 'src/app/admin-page/SERVICES/VenteService/scanner.service';
+import { CalculatorService } from 'src/app/admin-page/SERVICES/VenteService/calculator.service';
 
 @Component({
   selector: 'app-pos-accueil',
@@ -71,7 +72,8 @@ export class PosAccueilComponent {
     private commandeState: CommandeStateService,
     private boutiqueState: BoutiqueStateService,
     private boutiqueService: BoutiqueService,
-     private scannerService: ScannerService,
+    private calculator: CalculatorService,
+    private scannerService: ScannerService,
   ) {
     this.isListView$ = this.viewState.isListView$;
     
@@ -445,6 +447,36 @@ export class PosAccueilComponent {
 
   toggleCalculator(): void {
     this.showCalculatorPopup = !this.showCalculatorPopup;
+  }
+
+  // Méthode appelée depuis le template
+  onCalcKey(key: string) {
+    this.calculator.handleKey(key);
+  }
+
+  // expose l'affichage pour le template
+  get calcDisplay(): string {
+    return this.calculator.display;
+  }
+
+  // Optionnel : gestion clavier global pour la calculatrice
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    // map clavier -> touches calcule
+    const k = event.key;
+    if ((/^[0-9]$/).test(k)) {
+      this.onCalcKey(k);
+      event.preventDefault();
+      return;
+    }
+    if (k === 'Enter') { this.onCalcKey('='); event.preventDefault(); return; }
+    if (k === '.') { this.onCalcKey('.'); event.preventDefault(); return; }
+    if (k === '+') { this.onCalcKey('+'); event.preventDefault(); return; }
+    if (k === '-') { this.onCalcKey('−'); event.preventDefault(); return; }
+    if (k === '*') { this.onCalcKey('×'); event.preventDefault(); return; }
+    if (k === '/') { this.onCalcKey('÷'); event.preventDefault(); return; }
+    if (k === 'Backspace') { this.onCalcKey('▶'); event.preventDefault(); return; }
+    if (k === 'Escape') { this.onCalcKey('ON/AC'); event.preventDefault(); return; }
   }
 
 }
