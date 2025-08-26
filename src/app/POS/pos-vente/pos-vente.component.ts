@@ -507,22 +507,6 @@ export class PosVenteComponent {
     this.selectedPaymentMethod = method;
   }
 
-  // completePayment(): void {
-  //   // Logique pour finaliser le paiement
-  //   console.log('Paiement complété:', {
-  //     method: this.selectedPaymentMethod,
-  //     amount: this.paymentAmount,
-  //     change: this.changeDue
-  //   });
-  //   this.submitVente()
-  //   // this.goTopaiement()
-    
-  //   // Fermer le popup et réinitialiser le panier
-  //   this.closePaymentPopup();
-  //   this.cart.clear();
-  //   this.saveActiveCart();
-  // } 
-
   completePayment(): void {
     // protection double-click / UI feedback
     if (this.isSubmittingVente) return;
@@ -899,12 +883,6 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
     });
   }
 
-  // selectClient(client: Clients) {
-  //   // Logique pour sélectionner le client
-  //   console.log('Client sélectionné:', client);
-  //   this.closeListClientPopup();
-  // }
-
   selectClient(client: Clients) {
     this.selectedClient = client;
     this.selectedEntreprise = null; // Réinitialiser l'entreprise sélectionnée
@@ -1132,27 +1110,6 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
     });
   }
 
-  // loadEntreprisesForPopup() {
-  //   this.usersService.getValidAccessToken().pipe(
-  //     switchMap(token => {
-  //       if (!token) {
-  //         console.error('Aucun token valide trouvé !');
-  //         return throwError(() => new Error('Aucun token trouvé'));
-  //       }
-  //       return this.entrepriseService.getListEntreprises();
-  //     })
-  //   ).subscribe({
-  //     next: (data: EntrepriseClient[]) => {
-  //       this.entreprisesPopup = data;
-  //       // Pas besoin d'initialiser filteredEntreprisesPopup ici
-  //       // car le getter s'en chargera dynamiquement
-  //     },
-  //     error: (err) => {
-  //       console.error('Erreur récupération entreprises :', err);
-  //     }
-  //   });
-  // }
-
   loadEntreprisesForPopup() {
     this.usersService.getValidAccessToken().pipe(
       switchMap(token => {
@@ -1204,12 +1161,6 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
       return dateB - dateA;
     });
   }
-
-  // Sélectionner une entreprise
-  // selectEntreprise(entreprise: EntrepriseClient) {
-  //   console.log('Entreprise sélectionnée:', entreprise);
-  //   this.closeListClientPopup();
-  // }
 
   selectEntreprise(entreprise: EntrepriseClient) {
     this.selectedEntreprise = entreprise;
@@ -1580,29 +1531,6 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
     this.discountMode.type = type;
     this.updateCommandeTotals();
   }
-
-  // --- on discount input change : appeler updateCommandeTotals() pour que l'UI rafraîchisse en temps réel ---
-  // onDiscountInputChange() {
-  //   if (this.discountMode.value < 0) {
-  //     this.discountMode.value = 0;
-  //   }
-
-  //   // Si l'utilisateur saisit une valeur sans avoir ciblé de produit,
-  //   // tenter d'auto-cibler (dernier sélectionné ou la seule ligne du panier)
-  //   if (!this.discountMode.productId) {
-  //     if (this.lastSelectedForDiscount) {
-  //       this.discountMode.productId = this.lastSelectedForDiscount;
-  //     } else {
-  //       const items = this.getCartItems();
-  //       if (items.length === 1) {
-  //         this.discountMode.productId = items[0].product.id;
-  //       }
-  //     }
-  //   }
-
-  //   // recalculer immédiatement l'UI
-  //   this.updateCommandeTotals();
-  // }
 
   selectProductForDiscount(product: ProduitDetailsResponseDTO) {
     this.lastSelectedForDiscount = product.id;
