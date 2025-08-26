@@ -66,16 +66,19 @@
           </div>
         </div>
 
-        
+            
 
         <!-- // COTE RIGHT  -->
         <div class="header_right">
+
           <!-- // Name boutique  -->
           <div class="name_boutique">
             <!-- Affiche le nom seulement une fois chargé ; sinon mini loader / rien -->
             <ng-container *ngIf="isBoutiqueNameLoaded; else loadingBoutique">
               <p>{{ selectedBoutiqueName }}</p>
             </ng-container>
+
+           
 
             <ng-template #loadingBoutique>
               <!-- tu peux afficher rien, un placeholder ou un petit spinner -->
@@ -86,10 +89,22 @@
 
           <!-- // Input de recherche  -->
           <div class="inputSearch">
-            <i class="ri-search-2-line"></i>
-            <input 
-              type="text" placeholder="Recherche des produits"/>
+            <i 
+              class="ri-search-2-line" 
+              *ngIf="!searchTerm">
+            </i>
+
+            <i 
+              class="ri-close-line" 
+              *ngIf="searchTerm" 
+              (click)="clearSearch()">
+            </i>
+
+            <input type="text" placeholder="Recherche des produits" 
+              [value]="searchTerm"
+              (input)="onSearch($event)"/>
           </div>
+
           <!-- // Icon de sort -->
           <!-- <div class="icon_sort">
             <i class="ri-sort-asc"></i>
@@ -123,9 +138,9 @@
                 <i class="ri-download-line"></i>
                 Installer l'application
               </div>
-              <div class="dropdown-item">
+              <div class="dropdown-item" (click)="handleAnalytique()">
                 <i class="ri-home-5-line"></i>
-                Tableau de bord
+                Tableau de bord 
               </div>
               <div class="dropdown-item">
                 <i class="ri-restart-line"></i>
@@ -149,6 +164,10 @@
 
   </div>
 </div>
+
+
+
+
 
 <!-- Popup de fermeture de caisse -->
 <div *ngIf="showFermerCaissePopup" class="commande-popup-overlay">

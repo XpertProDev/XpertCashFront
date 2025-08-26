@@ -14,11 +14,12 @@ import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
 import { ScannerService } from 'src/app/admin-page/SERVICES/VenteService/scanner.service';
+import { SearchService } from 'src/app/admin-page/SERVICES/SearchService';
 
 @Component({
   selector: 'app-pos-accueil',
   standalone: true,
-  imports: [ FormsModule, CommonModule, RouterModule, ClickOutsideDirective, CfaCurrencyPipe],
+  imports: [ FormsModule, CommonModule, RouterModule, ClickOutsideDirective, CfaCurrencyPipe ],
   templateUrl: './pos-accueil.component.html',
   styleUrl: './pos-accueil.component.scss'
 })
@@ -43,11 +44,12 @@ export class PosAccueilComponent {
   private boutiques: any[] = [];
 
   selectedBoutiqueId: number | null = null;
-  selectedBoutiqueName: string = '';         // vide par défaut
+  selectedBoutiqueName: string = '';
   private boutiquesLoaded = false;
-  isBoutiqueNameLoaded = false;              // <- nouveau flag
+  isBoutiqueNameLoaded = false;
 
   scanInProgress = false;
+
 
   isDraggingPopup = false;
   startXPopup = 0;
@@ -70,6 +72,7 @@ export class PosAccueilComponent {
     private boutiqueState: BoutiqueStateService,
     private boutiqueService: BoutiqueService,
      private scannerService: ScannerService,
+     private searchService: SearchService
   ) {
     this.isListView$ = this.viewState.isListView$;
     
@@ -400,6 +403,23 @@ export class PosAccueilComponent {
     });
   }
 
+  // Méthode pour redirection
+  handleAnalytique(): void {
+    this.userService.getUserInfo().subscribe({
+      next: (user) => {
+        const permissions = user.permissions;
+        if (permissions.length === 1 && permissions.includes("VENDRE_PRODUITS")) {
+          this.userService.logoutUser();
+          this.router.navigate(['/pos-accueil']);
+        } else {
+          this.router.navigate(['/analytics']);
+        }
+      },
+      error: () => this.router.navigate(['/analytics'])
+    });
+  }
+  
+
   startDragPopup(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation(); // Empêche la propagation à l'overlay
@@ -442,5 +462,17 @@ export class PosAccueilComponent {
   }
 
 
+ onSearch(event: Event) {
+    const input = event.target as HTMLInputElement;
+    console.log('Recherche:', input.value);
+     this.searchTerm = input.value;
+    this.searchService.setSearch(input.value);
+  }
 
+  searchTerm: string = '';
+
+  clearSearch() {
+    this.searchTerm = '';
+    this.searchService.setSearch('');
+  }
 }

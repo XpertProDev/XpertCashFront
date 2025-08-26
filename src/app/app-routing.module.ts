@@ -140,8 +140,9 @@ const routes: Routes = [
   {
   path: 'home', // mettre en minuscules
   loadComponent: () => import('./admin-page/home/home.component').then(m => m.HomeComponent),
-},
+  },
 
+ 
 
 
   // puis votre bloc AdminComponent { … } sans la route pos-accueil à l’intérieur

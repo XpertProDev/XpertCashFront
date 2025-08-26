@@ -12,7 +12,7 @@ import { Clients } from 'src/app/admin-page/MODELS/clients-model';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ClientService } from 'src/app/admin-page/SERVICES/client-service';
 import { UsersService } from 'src/app/admin-page/SERVICES/users.service';
-import { BehaviorSubject, combineLatest, finalize, map, Observable, of, startWith, switchMap, take, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, finalize, map, Observable, of, startWith, Subscription, switchMap, take, throwError } from 'rxjs';
 import { Entreprise } from 'src/app/admin-page/MODELS/entreprise-model';
 import { EntrepriseService } from 'src/app/admin-page/SERVICES/entreprise-service';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -25,6 +25,7 @@ import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/
 import { VenteRequest, VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
 import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
 import { ScannerService } from 'src/app/admin-page/SERVICES/VenteService/scanner.service';
+import { SearchService } from 'src/app/admin-page/SERVICES/SearchService';
 
 interface DiscountMode {
   active: boolean;
@@ -49,6 +50,9 @@ export class PosVenteComponent {
   displayedProducts: ProduitDetailsResponseDTO[] = [];
 
   scanInProgress = false;
+
+  searchTerm: string = '';
+  private searchSub!: Subscription;
   
   // Déclaration des nouvelles propriétés
   currentQuantityInput: string = '';
@@ -205,6 +209,7 @@ export class PosVenteComponent {
     private venteService: VenteService, 
     private boutiqueState: BoutiqueStateService,
     private scannerService: ScannerService,
+    private searchService: SearchService
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
@@ -246,6 +251,11 @@ export class PosVenteComponent {
 
   // Gestion du clic/tape sur un produit
   ngOnInit() {
+
+    this.searchSub = this.searchService.search$.subscribe(term => {
+      this.searchTerm = term;
+    });
+     
     const savedView = localStorage.getItem('viewPreference');
     this.isListView = savedView ? savedView === 'list' : true;
 
@@ -282,6 +292,10 @@ export class PosVenteComponent {
       this.scanInProgress = scanning;
     });
 
+  }
+
+   ngOnDestroy() {
+    if (this.searchSub) this.searchSub.unsubscribe();
   }
 
   private indexProductsByBarcode(): void {
@@ -350,6 +364,7 @@ export class PosVenteComponent {
         this.displayedProducts = [...this.displayedProducts, ...categorie.produits];
       }
     });
+    this.allProducts = [...this.displayedProducts];
   }
 
   selectCategory(categoryId: number | undefined) {
@@ -451,6 +466,12 @@ export class PosVenteComponent {
     // filtrer par catégorie si sélectionnée
     if (this.selectedCategoryId !== null && this.selectedCategoryId !== undefined) {
       products = products.filter(p => p.categorieId === this.selectedCategoryId);
+    }
+
+     // filtrer par terme de recherche si présent
+    if (this.searchTerm && this.searchTerm.trim() !== '') {
+      const termLower = this.searchTerm.toLowerCase();
+      products = products.filter(p => p.nom.toLowerCase().includes(termLower));
     }
 
     return products;
@@ -1819,6 +1840,9 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
 
     return products;
   }
+
+
+
 
 
 }
