@@ -47,6 +47,8 @@ export class PosVenteComponent {
   categories: Categorie[] = [];
   selectedCategoryId: number | null = null;
   displayedProducts: ProduitDetailsResponseDTO[] = [];
+
+  scanInProgress = false;
   
   // Déclaration des nouvelles propriétés
   currentQuantityInput: string = '';
@@ -270,10 +272,14 @@ export class PosVenteComponent {
       this.recomputeCategoryCountsForBoutique();
     });
 
-
-    // S'abonner aux scans de code-barres
+    // Abonnement aux scans (déjà présent) -> aussi suivre l'indicateur de scan
     this.scannerService.getScanObservable().subscribe(barcode => {
       this.handleBarcodeScan(barcode);
+    });
+
+    // Nouveau : pour bloquer le HostListener pendant un scan
+    this.scannerService.getScanningObservable().subscribe(scanning => {
+      this.scanInProgress = scanning;
     });
 
   }
@@ -326,6 +332,7 @@ export class PosVenteComponent {
           }
         });
         this.showAllProducts();
+        this.indexProductsByBarcode(); 
         // <-- important : recalculer les compteurs maintenant
         this.recomputeCategoryCountsForBoutique();
       },
@@ -1231,6 +1238,15 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   }
 
   handleKeyPressPhysical(event: KeyboardEvent) {
+    // Ignorer si un scan matériel est en cours
+    if (this.scanInProgress) return;
+
+    // Ignorer si le focus est dans un input / textarea (user tape)
+    const ae = document.activeElement as HTMLElement | null;
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable)) {
+      return;
+    }
+
     if (this.disablePhysicalKeyboard || this.discountMode.active) return;
     // condition pour ignorer si le champ de remise est actif
     if (this.discountMode.active) return;

@@ -202,12 +202,12 @@ export class PosAccueilComponent {
   }
 
   addCommande() {
-  const newId = this.commandeState.addNewCommande();
-  // Récupère la liste mise à jour du service
-  this.commandes = this.commandeState.getAllCommandesIds(); 
-  this.setActiveCommande(newId);
-  this.showCommandePopup = false;
-}
+    const newId = this.commandeState.addNewCommande();
+    // Récupère la liste mise à jour du service
+    this.commandes = this.commandeState.getAllCommandesIds(); 
+    this.setActiveCommande(newId);
+    this.showCommandePopup = false;
+  }
 
   // addCommande() {
   //   const newId = this.commandeState.addNewCommande();
