@@ -1117,3 +1117,8 @@
     </div>
   </div>
 </div>
+
+<div class="scan-error-toast" *ngIf="showScanError">
+  <i class="ri-error-warning-line"></i>
+  <span>{{ scanErrorMessage }}</span>
+</div>

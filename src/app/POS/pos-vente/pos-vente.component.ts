@@ -24,6 +24,7 @@ import { VenteService } from 'src/app/admin-page/SERVICES/VenteService/vente-ser
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { VenteRequest, VenteResponse } from 'src/app/admin-page/MODELS/VenteModel/vente-model';
 import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
+import { ScannerService } from 'src/app/admin-page/SERVICES/VenteService/scanner.service';
 
 interface DiscountMode {
   active: boolean;
@@ -39,6 +40,7 @@ interface DiscountMode {
   styleUrl: './pos-vente.component.scss'
 })
 export class PosVenteComponent {
+  private barcodeIndex: Map<string, ProduitDetailsResponseDTO> = new Map();
   isListView = true;
   showDropdown = false;
   showPaymentPopup = false;
@@ -85,6 +87,9 @@ export class PosVenteComponent {
   currentListTypePopup: 'clients' | 'entreprises' = 'clients';
   entreprisesPopup: EntrepriseClient[] = [];
   // filteredEntreprisesPopup: EntrepriseClient[] = [];
+
+  showScanError = false;
+  scanErrorMessage = '';
 
   clientForm!: FormGroup;
   isEntrepriseSelected = false;
@@ -196,7 +201,8 @@ export class PosVenteComponent {
     private entrepriseService: EntrepriseService,
     private produitService: ProduitService,
     private venteService: VenteService, 
-    private boutiqueState: BoutiqueStateService
+    private boutiqueState: BoutiqueStateService,
+    private scannerService: ScannerService,
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
@@ -256,15 +262,49 @@ export class PosVenteComponent {
       this.selectedBoutiqueId = id;
     });
 
-  // Si tu veux suivre à tout moment :
-  // this.boutiqueState.selectedBoutique$.subscribe(id => this.selectedBoutiqueId = id);
-  this.boutiqueState.selectedBoutique$.subscribe(id => {
-    this.selectedBoutiqueId = id;
-    // recalculer les compteurs visible pour l'UI
-    this.recomputeCategoryCountsForBoutique();
-  });
+    // Si tu veux suivre à tout moment :
+    // this.boutiqueState.selectedBoutique$.subscribe(id => this.selectedBoutiqueId = id);
+    this.boutiqueState.selectedBoutique$.subscribe(id => {
+      this.selectedBoutiqueId = id;
+      // recalculer les compteurs visible pour l'UI
+      this.recomputeCategoryCountsForBoutique();
+    });
 
 
+    // S'abonner aux scans de code-barres
+    this.scannerService.getScanObservable().subscribe(barcode => {
+      this.handleBarcodeScan(barcode);
+    });
+
+  }
+
+  private indexProductsByBarcode(): void {
+    this.barcodeIndex.clear();
+    this.allProducts.forEach(product => {
+      if (product.codeBare) {
+        this.barcodeIndex.set(product.codeBare.toString().toLowerCase(), product);
+      }
+    });
+  }
+
+  private handleBarcodeScan(barcode: string): void {
+    const normalizedBarcode = barcode.toLowerCase();
+    // const product = this.barcodeIndex.get(normalizedBarcode);
+    const product = this.allProducts.find(p => 
+      p.codeBare && p.codeBare.toString().toLowerCase() === barcode.toLowerCase()
+    );
+
+    if (product) {
+      this.addToCart(product);
+    } else {
+      this.showScanError = true;
+      this.scanErrorMessage = `Aucun produit trouvé avec le code: ${barcode}`;
+      
+      // Masquer le message après 3 secondes
+      setTimeout(() => {
+        this.showScanError = false;
+      }, 3000);
+    }
   }
 
   private loadActiveCart() {

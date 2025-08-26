@@ -1,0 +1,7 @@
+<div class="miin_loading">
+  <!-- Indicateur de scan de code-barres -->
+  <div *ngIf="isScanning" class="scan-indicator">
+    <i class="ri-barcode-line"></i>
+    <span class="scan-message">{{ scanMessage }}</span>
+  </div>
+</div>

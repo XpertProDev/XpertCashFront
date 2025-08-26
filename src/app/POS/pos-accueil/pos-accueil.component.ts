@@ -13,6 +13,7 @@ import { FermerCaisseRequest } from 'src/app/admin-page/MODELS/CaisseModel/caiss
 import { BoutiqueStateService } from 'src/app/admin-page/SERVICES/CaisseService/boutique-state.service';
 import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
+import { ScannerService } from 'src/app/admin-page/SERVICES/VenteService/scanner.service';
 
 @Component({
   selector: 'app-pos-accueil',
@@ -46,6 +47,7 @@ export class PosAccueilComponent {
   private boutiquesLoaded = false;
   isBoutiqueNameLoaded = false;              // <- nouveau flag
 
+  scanInProgress = false;
 
   isDraggingPopup = false;
   startXPopup = 0;
@@ -66,7 +68,8 @@ export class PosAccueilComponent {
     private posCaisseService: PosCaisseService,
     private commandeState: CommandeStateService,
     private boutiqueState: BoutiqueStateService,
-    private boutiqueService: BoutiqueService
+    private boutiqueService: BoutiqueService,
+     private scannerService: ScannerService,
   ) {
     this.isListView$ = this.viewState.isListView$;
     
@@ -123,6 +126,11 @@ export class PosAccueilComponent {
     if (nav?.caisse?.boutiqueId) {
       this.boutiqueState.setSelectedBoutique(nav.caisse.boutiqueId);
     }
+
+    // S'abonner aux événements de scan
+    this.scannerService.getScanningObservable().subscribe(scanning => {
+      this.scanInProgress = scanning;
+    });
   }
 
   private loadBoutiques(): void {
