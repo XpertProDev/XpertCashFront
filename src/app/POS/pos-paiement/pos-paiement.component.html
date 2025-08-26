@@ -29,12 +29,12 @@
     <div class="paiement_right">
       <div class="receipt" #receipt>
         <div class="receipt-header">
-          <img [src]="logo || 'assets/img/TCHAKEDA.png'"
+          <img [src]="logo || 'assets/logo/reçu.png'"
             (error)="onLogoError()"
             alt="Logo XpertPro"
             class="logo" />
           <div class="ticket-info">
-            <div>Ticket : {{ vente?.venteId ?? '—' }}</div>
+            <div>Ticket : {{ vente?.numeroFacture ?? '—' }}</div>
             <div>{{ vente?.dateVente | date:'dd/MM/yyyy HH:mm' }}</div>
             <div>Servi par : {{ vente?.nomVendeur ?? '—' }}</div>
             <div>Boutique : {{ vente?.nomBoutique ?? '—' }}</div>
@@ -81,8 +81,12 @@
 
 
         <div class="receipt-footer">
-          Généré par Tchakeda
+          Généré par Tchakeda 
         </div>
+
+        
+        
+        
       </div>
 
       <ng-template #loadingTpl>

@@ -14,6 +14,7 @@ import { ProduitService } from 'src/app/admin-page/SERVICES/produit.service';
 import { UserRequest } from 'src/app/admin-page/MODELS/user-request';
 import { tap } from 'rxjs';
 import { VenteService } from 'src/app/admin-page/SERVICES/VenteService/vente-service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-dash-analytics',
   standalone: true,
@@ -35,13 +36,15 @@ export default class DashAnalyticsComponent{
 
   cards: any[] = [];
   carde2: any[] = [];
+  error: string | null = null;
 
   constructor(
     private userService: UsersService,
     private http: HttpClient,
     private produitService: ProduitService,
     private usersService: UsersService,
-    private venteService: VenteService
+    private venteService: VenteService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -49,6 +52,7 @@ export default class DashAnalyticsComponent{
     this.updateTotalProduits();
     this.getBoutiqueInfo();
     this.getBoutiqueName();
+    this.fetchUsersCount();
     // this.checkAccountStatus();
   }
 
@@ -283,6 +287,9 @@ getBoutiqueInfo() {
             const totalProduits = totalEnStock + totalNonEnStock;
             const montantTotal = totaux.montantTotal || 0; // Assurez-vous que cette propriété existe dans la réponse
             const montantTotalMois = totaux.montantTotalMois || 0; // Assurez-vous que cette propriété existe dans la réponse
+            const beneficeMois = totaux.beneficeMois || 0; // Assurez-vous que cette propriété existe dans la réponse
+            const beneficeJour = totaux.beneficeJour || 0; // Assurez-vous que cette propriété existe dans la réponse
+            const beneficeAnnuel = totaux.beneficeAnne || 0; // Assurez-vous que cette propriété existe dans la réponse
             
 
             // Mise à jour des cartes avec les totaux des produits
@@ -299,25 +306,25 @@ getBoutiqueInfo() {
                 background: 'bg-c-green',
                 title: 'Vente du jour',
                 icon: 'icon-tag',
-                text: 'du mois', 
+                text: 'Statistique', 
                 number: montantTotal.toString(),
-                no: montantTotalMois.toString()
+                no: ''
               },
               {
                 background: 'bg-c-yellow',
                 title: 'Revenue du jour',
                 icon: 'icon-repeat',
                 text: 'du mois',
-                number: '42,56',
-                no: '5,032'
+                number: beneficeJour.toString(),
+                no: beneficeMois.toString(),
               },
               {
                 background: 'bg-c-red',
-                title: 'Total Profit',
+                title: 'Total Profit Annuel',
                 icon: 'icon-shopping-cart',
-                text: 'du mois',
-                number: '9,562', 
-                no: '542'
+                text: 'Statistique',
+                number: beneficeAnnuel.toString(), 
+                no: ''
               },
              
             ];
@@ -385,12 +392,41 @@ this.venteService.getMontantTotalEntreprise().subscribe(
 this.venteService.getMontantTotalEntrepriseMois().subscribe(
   (montantTotalMois: number) => {
     console.log('Montant total de l\'entreprise pour le mois:', montantTotalMois);
-    this.cards[1].no = montantTotalMois.toString();  // <-- ici
+    this.cards[2].no = montantTotalMois.toString();  // <-- ici
   },
   (error) => {
     console.error('Erreur lors de la récupération du montant total de l\'entreprise pour le mois', error);
   }
 );
+// Bénéfice du mois
+this.venteService.getBeneficheEntrepriseMois().subscribe(
+  (beneficeMois: number) => {
+    console.log('Bénéfice du mois:', beneficeMois);
+    this.cards[2].no = beneficeMois.toString();
+  }
+);
+
+// Bénéfice du jour
+this.venteService.getBeneficheEntrepriseJour().subscribe(
+  (beneficeJour: number) => {
+    console.log('Bénéfice du jour:', beneficeJour);
+    this.cards[2].number = beneficeJour.toString(); 
+  }
+); 
+
+//Benefice annuel
+this.venteService.getBeneficheEntrepriseAnnuel().subscribe(
+  (beneficeAnnuel: number) => {
+    console.log('Bénéfice Annuel:', beneficeAnnuel);
+    this.cards[3].number = beneficeAnnuel.toString();  
+  }
+);
+
+
+
+
+
+
 
 
     },
@@ -399,6 +435,7 @@ this.venteService.getMontantTotalEntrepriseMois().subscribe(
     }
   );
 }
+
 
 getBoutiqueName() {
   this.usersService.getUserInfo().subscribe(
@@ -477,7 +514,19 @@ getBoutiqueName() {
 
 
 
+//Get Count of users dans l'entreprise
+usersCount: number | null = null;
+ fetchUsersCount(): void {
 
+    this.userService.countUsersInEntreprise()
+      .subscribe({
+        next: (count) => this.usersCount = count,
+        error: (err) => this.error = 'Impossible de récupérer le nombre d’utilisateurs.'
+      });
+  }
 
+goToUtilisateurs(): void {
+    this.router.navigate(['/utilisateur']);
+  }
 
 }

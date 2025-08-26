@@ -638,17 +638,24 @@ export class AddProduitComponent implements OnInit {
     const produit = this.ajouteProduitForm.value;
     let date = this.ajouteProduitForm.get('datePreemption')?.value;
 
-    if (date) {
-      if (date instanceof Date) {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        produit.datePreemption = `${day}-${month}-${year}`;
+   if (date) {
+    let dateISO: string;
+    if (date instanceof Date) {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      dateISO = `${year}-${month}-${day}`;
+    } else {
+      const parts = date.split('-');
+      if (parts[0].length === 4) {
+        dateISO = date;
       } else {
-        const [yyyy, mm, dd] = date.split('-');
-        produit.datePreemption = `${dd}-${mm}-${yyyy}`;
+        dateISO = `${parts[2]}-${parts[1]}-${parts[0]}`;
       }
     }
+    produit.datePreemption = dateISO;
+  }
+
 
     // Si le prix d'achat n'est pas fourni, mettez-le à null ou 0
     if (produit.prixAchat === '' || produit.prixAchat === null) {
@@ -658,7 +665,7 @@ export class AddProduitComponent implements OnInit {
     console.log('Produit soumis:', produit);
     const tokenStored = localStorage.getItem('accessToken');
     if (!tokenStored) {
-      this.showPopupMessage({
+      this.showPopupMessage({ 
         title: 'Erreur',
         message: 'Aucun token trouvé !',
         image: 'assets/img/error.png',

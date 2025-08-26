@@ -11,6 +11,7 @@ table {
 .title {
     font-size: 18px;
     margin: 0 0 0 10px;
+    font-family: "Poppins", sans-serif;
     
 }
 
@@ -25,8 +26,10 @@ th{
 }
 
 td {
-  padding: 15px 8px;
-  border-bottom: 1px solid #dddddd94;
+  font-family: "Poppins", sans-serif;
+    padding: 15px 8px;
+    border-bottom: 1px solid rgba(221, 221, 221, 0.5803921569);
+    color: #222222;
 }
   
 th {
@@ -155,6 +158,8 @@ tr:hover {
 
 .titleTableProduit th {
     font-size: 12px;
+    font-family: "Poppins", sans-serif;
+    color: #222222;
 }
 
 .content_sort {

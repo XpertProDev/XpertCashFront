@@ -12,6 +12,7 @@ export interface VenteRequest {
 
 export interface VenteResponse {
   venteId: number;
+  numeroFacture?: string;
   boutiqueId?: number;
   vendeurId?: number;
   dateVente?: string;

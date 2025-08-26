@@ -120,10 +120,18 @@
                         <button class="fermer-btn" (click)="fermerModal()">✕</button>
                       </div>
                     </div>
+
+                    <!-- // Qr code  -->
                     <div>
-                      <img [src]="qrCodeUrl" alt="qrCodeUrl code" class="qrcode-img"/>
+                      <img [src]="qrCodeUrl" 
+                          alt="qrCodeUrl code" 
+                          class="qrcode-img" 
+                          [class.expanded]="isExpanded"
+                          (click)="toggleExpand($event)" />
                     </div>
 
+
+                 
                     <h2>{{ userName }}</h2>
                     
                     <p class="profil_email">{{ email }}</p>

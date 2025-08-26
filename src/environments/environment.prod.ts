@@ -7,5 +7,5 @@ export const environment = {
   apiUrl: 'https://xpertcash.tchakeda.com',
   apiBaseUrl: "https://xpertcash.tchakeda.com/api/v1/api/auth",
   imgUrl: "https://xpertcash.tchakeda.com",
-  wsEndpoint: 'https://xpertcash.tchakeda.com/ws'
+  wsEndpoint: 'https://xpertcash.tchakeda.com/api/v1/ws'
 };

@@ -5,12 +5,15 @@ table {
 
 .title {
   font-size: 18px;
+    font-family: "Poppins", sans-serif;
+
 }
 
 th, td {
   border-bottom: 1px solid #dddddd94;
-  padding: 8px;
-  // font-size: 13px;
+  padding: 14px;
+  font-family: "Poppins", sans-serif;
+  color: #222222;
 }
 
 tr {
@@ -819,7 +822,9 @@ img.roudel{
 }
 
 .titleTableProduit th {
-  font-size: 12px;
+  font-size: 13px;
+  font-family: "Poppins", sans-serif;
+  color: #222222;
 }
 
 // .tableProduit td{

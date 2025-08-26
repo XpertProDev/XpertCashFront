@@ -76,6 +76,9 @@ export class PosCommandeComponent implements OnDestroy {
 
   activeVenteLoading = false;
 
+  private scannerBuffer: string = '';
+  private lastKeyTime: number = 0;
+
   // snapshot map pour garder une copie initiale des lignes par venteId
   private venteLineSnapshots: Map<number, any[]> = new Map<number, any[]>();
   // clé pour localStorage (changer version si tu modifies le format)
@@ -95,6 +98,8 @@ export class PosCommandeComponent implements OnDestroy {
   ngOnInit() {
 
     this.loadSnapshotsFromStorage();
+
+    window.addEventListener('keydown', this.handleScannerInput.bind(this));
 
     this.viewState.isListView$.pipe(takeUntil(this.destroy$)).subscribe(view => {
       this.isListView = view;
@@ -118,6 +123,7 @@ export class PosCommandeComponent implements OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    window.removeEventListener('keydown', this.handleScannerInput.bind(this));
   }
 
   ngAfterViewInit() {
@@ -634,7 +640,8 @@ export class PosCommandeComponent implements OnDestroy {
         this.ventes = this.ventes.filter(v =>
           String(v.venteId).toLowerCase().includes(this.searchTerm) ||
           String(v.montantTotal).toLowerCase().includes(this.searchTerm) ||
-          (v.clientNom && String(v.clientNom).toLowerCase().includes(this.searchTerm))
+          (v.clientNom && String(v.clientNom).toLowerCase().includes(this.searchTerm)) ||
+          (v.numeroFacture && v.numeroFacture.toLowerCase().includes(this.searchTerm))
         );
       }
     }
@@ -1020,11 +1027,42 @@ export class PosCommandeComponent implements OnDestroy {
       this.showCancelPopup = true;
       this.pin = ['', '', '', ''];
       this.isCodeWrong = false;
+      setTimeout(() => {
+      const firstInput = document.getElementById('0') as HTMLInputElement;
+      firstInput?.focus();
+    }, 0);
     } else {
       item.editing = false;
     }
   }
 
+
+   private handleScannerInput(event: KeyboardEvent): void {
+    console.log(event.key);
+    const now = Date.now();
+
+    if (now - this.lastKeyTime > 100) {
+      this.scannerBuffer = '';
+    }
+
+    this.lastKeyTime = now;
+
+    if (/^\d$/.test(event.key)) { 
+      this.scannerBuffer += event.key;
+
+      if (this.scannerBuffer.length === 4) {
+        this.pin = this.scannerBuffer.split('');
+        this.verifyCode();
+        this.scannerBuffer = '';
+      }
+    }
+
+    if (event.key === 'Enter' && this.scannerBuffer.length === 4) {
+      this.pin = this.scannerBuffer.split('');
+      this.verifyCode();
+      this.scannerBuffer = '';
+    }
+  }
 
 
 }

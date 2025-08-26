@@ -609,28 +609,32 @@ video {
 
 
 .qrcode-img {
- position: absolute;
-    width: 10%;
-    max-width: 100px;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 10px;
-    top: 62%;
-    left: 32%;
-    transform: translateY(-50%);
+  position: absolute;
+  width: 10%;
+  max-width: 100px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 10px;
+  top: 62%;
+  left: 32%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
 }
 
 .qrcode-img:hover {
   transform: translateY(-50%) scale(1.05);
-  transition: transform 0.2s ease-in-out;
   box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 8px;
 }
 
-@media (max-width: 600px) {
-  .qrcode-img {
-    width: 15%;
-    right: 5%;
-  }
+.qrcode-img.expanded {
+  transform: translateY(-70%) scale(2);
+  z-index: 1000;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 8px;
+
 }
+
+
+
 
 
