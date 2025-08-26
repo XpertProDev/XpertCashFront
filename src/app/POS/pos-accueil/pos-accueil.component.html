@@ -70,7 +70,7 @@
         <div class="header_right">
 
           <!-- // Calculatrice -->
-          <div class="icon_calculatrice">
+          <div class="icon_calculatrice" (click)="toggleCalculator()">
             <img src="assets/img/calculatrice-moderne.png" alt="">
           </div>
 
@@ -243,6 +243,89 @@
               [disabled]="isLoadingCaisseDetails || !caisseDetails">
         Confirmer la fermeture
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Popup de calculatrice -->
+<div *ngIf="showCalculatorPopup" class="calculate-popup-overlay">
+  <div class="calculator">
+    <!-- CALCULATOR BODY -->
+    <div class="calc">
+      <!-- Top bar -->
+      <div class="calc-top">
+        <div class="brand-img">
+          <img src="assets/logo/tchakeda.png" alt="">
+        </div>
+        <span class="digits-badge">12&nbsp;DIGITS</span>
+      </div>
+
+      <!-- Screen -->
+      <div class="screen">
+        <span class="screen-text" style="line-height: 10;">1234567890 12.</span>
+      </div>
+
+
+      <!-- label -->
+      <div class="meta">Dispositifs de calcul</div>
+
+      <!-- Solar + btn -->
+      <div class="meta-row">
+        <div class="solar">
+          <span class="screen-text-sub">0000</span>
+        </div>
+        <div class="keys-true">
+        <button class="key fn">+/-</button>
+        <button class="key fn">√</button>
+        <button class="key on" style="font-size: 14px;">ON/AC</button>
+        </div>
+      </div>
+
+      <!-- Keys -->
+      <div class="keys">
+        <!-- Row 1 -->
+        <button class="key fn">M+</button>
+        <button class="key fn">M-</button>
+        <button class="key fn">MRC</button>
+        <button class="key fn">GT</button>
+        <button class="key fn">C.CE</button>
+
+        <!-- Row 2 -->
+        <button class="key fn">MC</button>
+        <button class="key fn">MR</button>
+        <button class="key fn">Ex</button>
+        <button class="key op">÷</button>
+        <button class="key fn">▶</button>
+
+        <!-- Row 3 -->
+        <button class="key num">7</button>
+        <button class="key num">8</button>
+        <button class="key num">9</button>
+        <button class="key op">×</button>
+        <button class="key fn">%</button>
+
+        <!-- Row 4 -->
+        <button class="key num">4</button>
+        <button class="key num">5</button>
+        <button class="key num">6</button>
+        <button class="key op">−</button>
+        <button class="key fn">MU</button>
+
+        <!-- Row 5 -->
+        <button class="key num">1</button>
+        <button class="key num">2</button>
+        <button class="key num">3</button>
+        <!-- + spans 2 rows -->
+        <button class="key plus tall">+</button>
+        <!-- = spans 2 rows -->
+        <button class="key equals tall">=</button>
+
+        <!-- Row 6 -->
+        <button class="key num wide0">0</button>
+        <button class="key num">00</button>
+        <button class="key num">.</button>
+        <!-- grid gaps are filled by the tall + and = -->
+      </div>
     </div>
   </div>
 </div>

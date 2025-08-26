@@ -61,6 +61,8 @@ export class PosAccueilComponent {
   isLoadingCaisseDetails = false;
   fermetureErrorMessage: string | null = null;
 
+  showCalculatorPopup = true;
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -441,6 +443,8 @@ export class PosAccueilComponent {
     return (this.caisseDetails.montantCourant || 0) - (this.caisseDetails.montantInitial || 0);
   }
 
-
+  toggleCalculator(): void {
+    this.showCalculatorPopup = !this.showCalculatorPopup;
+  }
 
 }
