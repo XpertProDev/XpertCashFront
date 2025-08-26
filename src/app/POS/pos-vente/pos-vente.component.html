@@ -459,6 +459,17 @@
             </div>
             
             <div class="cadre_paiement" 
+                [class.selected_mode_pay]="selectedPaymentMethod === 'mobile'"
+                (click)="selectPaymentMethod('Mobile money')">
+              <div class="img_paiement img_paiement_mobile">
+                <img src="assets/img/money.png" alt="">
+              </div>
+              <div class="title_paiement">
+                <p>Mobile money</p>
+              </div>
+            </div>
+            
+            <div class="cadre_paiement" 
                 [class.selected_mode_pay]="selectedPaymentMethod === 'card'"
                 (click)="selectPaymentMethod('Carte')">
               <div class="img_paiement img_paiement_carte">
@@ -466,17 +477,6 @@
               </div>
               <div class="title_paiement">
                 <p>Carte</p>
-              </div>
-            </div>
-            
-            <div class="cadre_paiement" 
-                [class.selected_mode_pay]="selectedPaymentMethod === 'mobile'"
-                (click)="selectPaymentMethod('Mobile money')">
-              <div class="img_paiement img_paiement_mobile">
-                <img src="assets/img/send-money.png" alt="">
-              </div>
-              <div class="title_paiement">
-                <p>Mobile money</p>
               </div>
             </div>
             
