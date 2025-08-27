@@ -68,7 +68,7 @@ export class PosAccueilComponent {
   @ViewChild('calcElement', { static: false }) calcElement?: ElementRef<HTMLElement>;
 
 
-  private baseWidth = 420;   // will be overwritten in ngAfterViewInit
+  private baseWidth = 420; 
   private baseHeight = 480;
 
   calcWidth = 420;
@@ -90,8 +90,8 @@ export class PosAccueilComponent {
   private initialPopupY = 0;
 
   // min / max
-  private minWidth = 260;
-  private minHeight = 300;
+  private minWidth = 160;
+  private minHeight = 200;
   private maxWidth = window.innerWidth - 40;
   private maxHeight = window.innerHeight - 40;
 

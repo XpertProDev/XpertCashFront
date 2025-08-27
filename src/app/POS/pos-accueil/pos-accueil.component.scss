@@ -720,6 +720,7 @@ ul.list_commande li.list_commande_plus {
   --accent:#9aa0a6;
   --badge:#ffffff;
 
+  position: relative;
   width: 420px;
   max-width: 92vw;
   background: var(--body);
@@ -956,4 +957,24 @@ ul.list_commande li.list_commande_plus {
 .resize-handle:hover {
   background: rgba(0,0,0,0.22);
   transform: scale(1.05);
+}
+
+.popup-header-close-calc {
+  position: absolute;
+  top: -28px;
+  right: 0;
+}
+
+.popup-header-close-calc span {
+    background-color: #cec7c7;
+    font-size: 14px;
+    cursor: pointer;
+    color: red;
+    transition: color 0.2s;
+    padding: 5px 20px;
+    border-radius: 5px;
+  
+  &:hover {
+    background-color: #aca7a7;
+  }
 }
