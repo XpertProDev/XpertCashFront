@@ -724,7 +724,7 @@ ul.list_commande li.list_commande_plus {
   max-width: 92vw;
   background: var(--body);
   border-radius: 20px;
-  padding: 18px 18px 22px;
+  padding: 0 18px 22px;
   box-shadow: 0 8px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
   color: #fff;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Helvetica Neue", Helvetica, sans-serif;
@@ -736,6 +736,7 @@ ul.list_commande li.list_commande_plus {
   align-items:center;
   justify-content:space-between;
   margin-bottom:10px;
+  padding-top: 15px;
 }
 
 .calculator .brand{
@@ -908,4 +909,51 @@ ul.list_commande li.list_commande_plus {
   display: flex;
   gap: 5px;
   align-items: center;
+}
+
+// .calculator {
+//   position: absolute !important;
+//   top: 0;
+//   left: 0;
+//   overflow: visible !important;
+//   z-index: 11000;
+//   user-select: none;
+//   touch-action: none; /* empêche les gestes de scrolling natif quand on touche la calculatrice */
+// }
+
+
+/* Handles plus visibles et plus larges pour debug */
+.resize-handle {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: rgba(0,0,0,0.12);
+  border: 2px solid rgba(255,255,255,0.85);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  z-index: 12000;
+  touch-action: none; /* utile pour le tactile */
+  pointer-events: auto;
+  border-radius: 4px;
+  transition: background 0.12s, transform 0.08s;
+  display: block;
+}
+
+/* coin bas-droit */
+.resize-handle.br {
+  right: 6px;
+  bottom: 6px;
+  cursor: nwse-resize;
+}
+
+/* coin bas-gauche */
+.resize-handle.bl {
+  left: 6px;
+  bottom: 6px;
+  cursor: nesw-resize;
+}
+
+/* Hover pour confirmer visuellement */
+.resize-handle:hover {
+  background: rgba(0,0,0,0.22);
+  transform: scale(1.05);
 }

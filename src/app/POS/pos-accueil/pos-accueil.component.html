@@ -248,12 +248,25 @@
 </div>
 
 <!-- Popup de calculatrice -->
-<div *ngIf="showCalculatorPopup" class="calculate-popup-overlay">
-  <div class="calculator" [ngStyle]="{ 'transform': 'translate3d(' + popupOffsetPopup.x + 'px, ' + popupOffsetPopup.y + 'px, 0)' }" (click)="$event.stopPropagation()">
+<div *ngIf="showCalculatorPopup" class="calculate-popup-overlay" >
+  <div
+      class="calculator"
+      #calculatorRef
+      (click)="$event.stopPropagation()"
+      [ngStyle]="{
+        'transform': 'translate3d(' + popupOffsetPopup.x + 'px, ' + popupOffsetPopup.y + 'px, 0)',
+        'width.px': calcWidth,
+        'height.px': calcHeight
+      }"
+      (mousemove)="onCalculatorMouseMove($event)"
+      (mouseleave)="onCalculatorMouseLeave($event)"
+      (mousedown)="onCalculatorMouseDown($event)"
+      (touchstart)="onCalculatorTouchStart($event)"
+    >
     <!-- CALCULATOR BODY -->
-    <div class="calc" (mousedown)="startDragPopup($event)">
+    <div class="calc" #calcElement>
       <!-- Top bar -->
-      <div class="calc-top">
+      <div class="calc-top" (mousedown)="startDragPopup($event)">
         <div class="brand-img">
           <img src="assets/logo/tchakeda.png" alt="">
         </div>
@@ -319,5 +332,8 @@
       </div>
 
     </div>
+
+        <!-- Resize handles -->
+
   </div>
 </div>
