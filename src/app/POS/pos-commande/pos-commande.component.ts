@@ -32,6 +32,9 @@ export class PosCommandeComponent implements OnDestroy {
   showDropdown = false;
   showFilterDropdown = false;
 
+  errorMessage: string | null = null;
+  successMessage: string | null = null;
+
   // commandes locales
   commandes: any[] = [];
   products: ProduitDetailsResponseDTO[] = [];
@@ -840,6 +843,8 @@ export class PosCommandeComponent implements OnDestroy {
       return;
     }
 
+    this.successMessage = null;
+    this.errorMessage = null;
     this.isProcessing = true;
 
     let produitsQuantites: { [key: number]: number } = {};
@@ -857,17 +862,19 @@ export class PosCommandeComponent implements OnDestroy {
       rescodePin: this.pin.join('')
     };
 
-    this.posCommandeService.rembourserVente(request).subscribe({
+    this.posCommandeService.rembourserVente(request).subscribe({ 
       next: (response) => {
         this.pendingRemboursementItem = null;
-        this.closeAllPopups();
+        this.closeAllPopups(); 
         this.loadVentesAndFilter(this.currentFilterKey);
         this.activeVente = response;
         this.loadActiveVenteDetails();
+
+        this.successMessage = "Remboursement effectué avec succès !";
       },
       error: (error) => {
         console.error('Erreur remboursement', error);
-        alert('Erreur lors du remboursement: ' + error.error?.message || error.message);
+        this.errorMessage = error.error?.message || 'Une erreur est survenue lors du remboursement';
       },
       complete: () => this.isProcessing = false
     });

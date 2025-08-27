@@ -1,3 +1,12 @@
+<div class="toast-container">
+    <div *ngIf="successMessage" class="alert alert-success toast-message-success">
+      {{ successMessage }}
+    </div>
+  
+    <div *ngIf="errorMessage" class="alert alert-danger toast-message-danger">
+      {{ errorMessage }}
+    </div>
+</div>
 
 <div class="section_contenu_container">
     <!-- // section contenu left -->
@@ -343,8 +352,8 @@
       <i class="ri-close-line"></i>
     </button>
 
-    <h2>Confirmation d'annulation</h2>
-    <p>Veuillez entrer le Code PIN pour annuler la commande.</p>
+    <h4 class="titlh">Confirmation d'annulation</h4>
+    <p class="titlp">Veuillez entrer le Code PIN pour annuler la commande.</p>
     
     <div class="pin-container" [class.shake]="isCodeWrong">
       <input type="password" maxlength="1" [(ngModel)]="pin[0]" #pin0 id="0"
@@ -363,7 +372,7 @@
              (input)="verifyCode()" 
              (keydown)="handleBackspace($event, 3, pin3, pin2)" />
     </div>
-    <button (click)="verifyCode()">Valider</button>
+    <!-- <button (click)="verifyCode()">Valider</button> -->
   </div>
 </div>
 
@@ -374,12 +383,13 @@
       <i class="ri-close-line"></i>
     </button>
 
-    <h2>Motif du remboursement</h2>
+    <h6>Motif du remboursement</h6>
     <textarea [(ngModel)]="motifRemboursement" placeholder="Raison du remboursement" rows="4"></textarea>
     
     <div class="btn-container">
-      <button class="btn-cancel" (click)="closeAllPopups()">Annuler</button>
+      
       <button class="btn-confirm" (click)="confirmRemboursement()">Confirmer</button>
+      <button class="btn-cancel" (click)="closeAllPopups()">Annuler</button>
     </div>
   </div>
 </div>
