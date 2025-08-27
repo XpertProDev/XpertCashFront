@@ -15,6 +15,7 @@ interface CalcState {
 })
 export class CalculatorService {
   private state: CalcState = this.createInitialState();
+  private _solarDisplay: string = '0000';
 
   private createInitialState(): CalcState {
     return {
@@ -28,64 +29,52 @@ export class CalculatorService {
     };
   }
 
-  get display(): string {
-    return this.state.display;
-  }
+    /** getters exposés */
+  get display(): string { return this.state.display; }
+  get solarDisplay(): string { return this._solarDisplay; }
 
   /** Public single entry point for UI */
-  handleKey(key: string) {
-    // normalize
-    if (!key) return;
-    switch (key) {
-      // digits
-      case '00': return this.inputDigit('00');
-      case '0': case '1': case '2': case '3': case '4':
-      case '5': case '6': case '7': case '8': case '9':
-        return this.inputDigit(key);
-      case '.': return this.inputDot();
-
-      // operators
-      case '+': case '−': case '-': case '×': case '*': case '÷': case '/':
-      case '=':
-        return this.performOperator(key === '*' ? '×' : key === '/' ? '÷' : key);
-
-      // functions
-      case 'ON/AC': return this.allClear();
-      case 'C.CE': return this.clearEntry();
-      case '▶': return this.backspace();
-      case '+/-': return this.toggleSign();
-      case '√': return this.sqrt();
-      case '%': return this.percent();
-      case 'M+': return this.memoryAdd();
-      case 'M-': return this.memorySub();
-      case 'MC': return this.memoryClear();
-      case 'MR': return this.memoryRecall();
-      case 'MRC': return this.memoryRecallClearToggle();
-      case 'GT': return this.getGrandTotal();
-      case 'MU': return this.placeholderMU();
-      case 'Ex': return this.exp(); // exponential (e^x)
-      case '=': return this.performOperator('=');
-      default:
-        return; // ignore unknown
+    handleKey(key: string) {
+        if (!key) return;
+        // digits
+        if (/^[0-9]|^00$/.test(key)) { this.inputDigit(key); return; }
+        switch (key) {
+        case '.': this.inputDot(); return;
+        case '+': case '−': case '-': case '×': case '*': case '÷': case '/':
+            this.onOperator((key === '*' ? '×' : key === '/' ? '÷' : (key === '-' ? '−' : key)));
+            return;
+        case '=': this.onEquals(); return;
+        case 'ON/AC': this.allClear(); return;
+        case 'C.CE': this.clearEntry(); return;
+        case '▶': this.backspace(); return;
+        case '+/-': this.toggleSign(); return;
+        case '√': this.sqrt(); return;
+        case '%': this.percent(); return;
+        case 'M+': this.memoryAdd(); return;
+        case 'M-': this.memorySub(); return;
+        case 'MC': this.memoryClear(); return;
+        case 'MR': this.memoryRecall(); return;
+        case 'MRC': this.memoryRecallClearToggle(); return;
+        case 'GT': this.getGrandTotal(); return;
+        case '00': this.inputDigit('00'); return;
+        // autres touches laissées en placeholder
+        default: return;
+        }
     }
-  }
 
   private inputDigit(d: string) {
     if (this.state.waitingForOperand) {
-      // start new entry
+      // démarrer une nouvelle saisie : le digit remplace l'affichage
       this.state.display = (d === '00' ? '0' : d);
       this.state.waitingForOperand = false;
-    } else {
-      if (d === '00') {
-        if (this.state.display === '0') {
-          // keep '0'
-        } else {
-          this.state.display = this.state.display + '00';
-        }
-      } else {
-        this.state.display = (this.state.display === '0') ? d : this.state.display + d;
-      }
+      return;
     }
+    if (d === '00') {
+      if (this.state.display === '0') return;
+      this.state.display = this.state.display + '00';
+      return;
+    }
+    this.state.display = (this.state.display === '0') ? d : this.state.display + d;
   }
 
   private inputDot() {
@@ -106,14 +95,12 @@ export class CalculatorService {
 
   private allClear() {
     this.state = this.createInitialState();
+    this._solarDisplay = '0000';
   }
 
   private toggleSign() {
     if (this.state.display === '0') return;
-    this.state.display = this.state.display.startsWith('-')
-      ? this.state.display.slice(1)
-      : '-' + this.state.display;
-    this.state.waitingForOperand = false;
+    this.state.display = this.state.display.startsWith('-') ? this.state.display.slice(1) : '-' + this.state.display;
   }
 
   private backspace() {
@@ -145,8 +132,8 @@ export class CalculatorService {
     this.state.waitingForOperand = true;
   }
 
-  private calculate(a: number, b: number, operator: string): number {
-    switch (operator) {
+  private calculate(a: number, b: number, op: string): number {
+    switch (op) {
       case '+': return a + b;
       case '−': case '-': return a - b;
       case '×': return a * b;
@@ -155,25 +142,23 @@ export class CalculatorService {
     }
   }
 
-  private percent() {
-    const current = parseFloat(this.state.display);
+private percent() {
+    const cur = parseFloat(this.state.display);
     if (this.state.operand != null) {
-      const res = this.state.operand * current / 100;
+      const res = this.state.operand * cur / 100;
       this.state.display = this.formatResult(res);
+      this.state.waitingForOperand = true;
     } else {
-      this.state.display = this.formatResult(current / 100);
-    }
-    this.state.waitingForOperand = true;
-  }
-
-  private sqrt() {
-    const v = parseFloat(this.state.display);
-    if (v < 0) {
-      this.state.display = 'Erreur';
-    } else {
-      this.state.display = this.formatResult(Math.sqrt(v));
+      this.state.display = this.formatResult(cur / 100);
       this.state.waitingForOperand = true;
     }
+  }
+
+private sqrt() {
+    const v = parseFloat(this.state.display);
+    if (v < 0) { this.state.display = 'Erreur'; return; }
+    this.state.display = this.formatResult(Math.sqrt(v));
+    this.state.waitingForOperand = true;
   }
 
   // simple exponential e^x
@@ -190,53 +175,63 @@ export class CalculatorService {
     // Laisser tel quel pour éviter comportement inattendu.
     return;
   }
-
-  // Memory functions
-  private memoryAdd() {
-    this.state.memory += parseFloat(this.state.display);
-    this.state.lastMemoryRecall = false;
-  }
-
-  private memorySub() {
-    this.state.memory -= parseFloat(this.state.display);
-    this.state.lastMemoryRecall = false;
-  }
-
-  private memoryRecall() {
-    this.state.display = this.formatResult(this.state.memory);
-    this.state.lastMemoryRecall = true;
-    this.state.waitingForOperand = true;
-  }
-
-  private memoryClear() {
-    this.state.memory = 0;
-    this.state.lastMemoryRecall = false;
-  }
-
-  /**
-   * MRC: si précédemment on a déjà fait MR -> MC (double usage).
-   * Sinon MR.
+  
+  /** Lorsqu'on appuie sur un opérateur (ex: + - × ÷) :
+   *  - on stocke la valeur courante dans operand
+   *  - on place cette valeur dans le solarDisplay
+   *  - on remet l'affichage principal à 0 (prêt pour la saisie suivante)
    */
-  private memoryRecallClearToggle() {
-    if (this.state.lastMemoryRecall) {
-      this.memoryClear();
-    } else {
-      this.memoryRecall();
+  private onOperator(op: string) {
+    const cur = parseFloat(this.state.display);
+    // si operand n'existe pas => stocke la valeur
+    if (this.state.operand == null) {
+      this.state.operand = isNaN(cur) ? 0 : cur;
+    } else if (!this.state.waitingForOperand && this.state.operator) {
+      // si on avait déjà un opérateur et qu'on a saisi un nouveau nombre,
+      // on peut faire un calcul intermédiaire (chaînage) et stocker le résultat
+      const result = this.calculate(this.state.operand, cur, this.state.operator);
+      this.state.operand = result;
     }
+
+    // afficher dans solar la valeur stockée (ex: 300)
+    this._solarDisplay = this.formatResult(this.state.operand ?? 0);
+
+    // mettre en attente pour remplacer l'écran principal par la prochaine saisie
+    this.state.display = '0';
+    this.state.waitingForOperand = true;
+    this.state.operator = op;
   }
 
-  private getGrandTotal() {
-    // affiche l'accumulateur GT (ne le remet pas à zéro automatiquement)
-    this.state.display = this.formatResult(this.state.gtAccumulator);
+  /** = : calcule operand operator currentDisplay et affiche le total */
+  private onEquals() {
+    const cur = parseFloat(this.state.display);
+    if (this.state.operand == null || !this.state.operator) {
+      // rien à calculer
+      return;
+    }
+    const result = this.calculate(this.state.operand, cur, this.state.operator);
+    // solar : montrer l'expression (ex: "300 + 50 =")
+    this._solarDisplay = `${this.formatResult(this.state.operand)} ${this.state.operator} ${this.formatResult(cur)} =`;
+    // afficher le résultat
+    this.state.display = this.formatResult(result);
+    // reset opérateur mais on peut garder operand si on veut réutiliser
+    this.state.operand = result;
+    this.state.operator = null;
     this.state.waitingForOperand = true;
   }
 
-  /** small helper to keep floats readable */
-  private formatResult(value: number): string {
-    if (!isFinite(value)) return 'Erreur';
-    // limite raisonnable de précision
-    const s = Number.parseFloat(String(value)).toPrecision(12);
-    // retire les zéros superflus
-    return parseFloat(s).toString();
-  }
+  // Memory & GT (identiques à l'implémentation précédente)
+    private memoryAdd() { this.state.memory += parseFloat(this.state.display); this.state.lastMemoryRecall = false; }
+    private memorySub() { this.state.memory -= parseFloat(this.state.display); this.state.lastMemoryRecall = false; }
+    private memoryClear() { this.state.memory = 0; this.state.lastMemoryRecall = false; }
+    private memoryRecall() { this.state.display = this.formatResult(this.state.memory); this.state.lastMemoryRecall = true; this.state.waitingForOperand = true; }
+    private memoryRecallClearToggle() { if (this.state.lastMemoryRecall) { this.memoryClear(); } else { this.memoryRecall(); } }
+    private getGrandTotal() { this.state.display = this.formatResult(this.state.gtAccumulator); this.state.waitingForOperand = true; }
+
+    private formatResult(value: number): string {
+        if (!isFinite(value)) return 'Erreur';
+        const s = Number.parseFloat(String(value)).toPrecision(12);
+        return parseFloat(s).toString();
+    }
+
 }

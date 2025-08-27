@@ -459,6 +459,10 @@ export class PosAccueilComponent {
     return this.calculator.display;
   }
 
+  get calcSolarDisplay(): string {
+    return this.calculator.solarDisplay;
+  }
+
   // Optionnel : gestion clavier global pour la calculatrice
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
