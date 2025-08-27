@@ -1,116 +1,226 @@
-<div class="col-md-12">
-  <app-card cardTitle="Comptabilité" cardClass="tab-card tab-content" blockClass="nav-fill" [options]="false">
-    <ul ngbNav #nav="ngbNav" class="nav-pills">
-      <!-- Onglet Versements -->
-      <li [ngbNavItem]="1" class="flex">
-        <a ngbNavLink (click)="setActiveTab('versements')">
-          <i class="fa fa-university m-r-10"></i> Versements
-        </a>
-        <ng-template ngbNavContent>
-          <div *ngIf="activeTab === 'versements'" class="table-responsive">
-            <table *ngIf="versements.length > 0" class="table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nom Boutique</th>
-                  <th>Vendeur</th>
-                  <th>Montant Initial</th>
-                  <th>Montant Courant</th>
-                  <th>Montant Versé</th>
-                  <th>Date Versement</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let versement of versements">
-                  <td>{{ versement.id }}</td>
-                  <td>{{ versement.nomBoutique }}</td>
-                  <td>{{ versement.nomVendeur }}</td>
-                  <td>{{ versement.montantInitialCaisse | number: '1.0-0' }} XOF</td>
-                  <td>{{ versement.montantCourantCaisse | number: '1.0-0' }} XOF</td>
-                  <td>{{ versement.montantVerse | number: '1.0-0' }} XOF</td>
-                  <td>{{ versement.dateVersement | date: 'dd/MM/yyyy HH:mm' }}</td>
-                  <td>{{ versement.statut }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div *ngIf="versements.length === 0">
-              <p>Aucun versement disponible.</p>
+<!-- Header -->
+<header class="app-header">
+  <div class="container header-inner">
+    <h1>Comptabilité</h1>
+  </div>
+</header>
+
+<main class="container main">
+  <!-- Dashboard -->
+  <div class="dashboard">
+    <div class="card">
+      <div class="icon green"><i class="fas fa-dollar-sign"></i></div>
+      <dl>
+        <dt>Chiffre d'affaires</dt>
+        <dd>120 450 €</dd>
+      </dl>
+    </div>
+
+    <div class="card">
+      <div class="icon blue"><i class="fas fa-file-invoice"></i></div>
+      <dl>
+        <dt>Factures en attente</dt>
+        <dd>24</dd>
+      </dl>
+    </div>
+
+    <div class="card">
+      <div class="icon red"><i class="fas fa-money-bill-wave"></i></div>
+      <dl>
+        <dt>Dépenses mensuelles</dt>
+        <dd>8 950 €</dd>
+      </dl>
+    </div>
+
+    <div class="card">
+      <div class="icon yellow"><i class="fas fa-users"></i></div>
+      <dl>
+        <dt>Clients actifs</dt>
+        <dd>185</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Onglets navigation -->
+  <nav class="tabs">
+    <button
+      *ngFor="let tab of tabs"
+      (click)="activeTab = tab.name"
+      class="tab-btn"
+      [class.active]="activeTab === tab.name" >
+      <i [class]="tab.icon"></i> {{ tab.label }}
+    </button>
+  </nav>
+
+  <!-- Contenu -->
+  <div class="panel">
+    <div *ngIf="activeTab === 'ventes'">
+      <h2>Historique des ventes</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Montant</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>01/08/2023</td>
+            <td>Dupont SARL</td>
+            <td>3 500 €</td>
+            <td><span class="badge paid">Payé</span></td>
+          </tr>
+          <tr>
+            <td>03/08/2023</td>
+            <td>Martin SA</td>
+            <td>1 200 €</td>
+            <td><span class="badge pending">En attente</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="activeTab === 'facturation'">
+      <h2>Gestion des factures</h2>
+      <p>Ici tu affiches la liste des factures, avec ajout/modification.</p>
+    </div>
+
+  
+
+    <!-- Tab Dépenses -->
+    <div class="depenses-grid" *ngIf="activeTab === 'depenses'">
+            <div class="depenses-categorie">
+              <h3>Dépenses par Catégorie</h3>
+              <div class="card">
+                <div class="chart-placeholder">
+                  <p>Graphique des dépenses par catégorie</p>
+                </div>
+              </div>
+            </div>
+
+          <div class="dernieres-depenses">
+            <h3>Dernières Dépenses</h3>
+            <div class="depenses-list">
+              <div class="depense-item">
+                <div>
+                  <p class="label">Fournitures de bureau</p>
+                  <p class="date">12/06/2023</p>
+                </div>
+                <div class="montant">
+                  <p class="value">- 120 €</p>
+                  <p class="moyen">Carte bancaire</p>
+                </div>
+              </div>
+
+              <div class="depense-item">
+                <div>
+                  <p class="label">Abonnement logiciel</p>
+                  <p class="date">05/06/2023</p>
+                </div>
+                <div class="montant">
+                  <p class="value">- 49 €</p>
+                  <p class="moyen">Prélèvement</p>
+                </div>
+              </div>
+
+              <div class="depense-item">
+                <div>
+                  <p class="label">Frais de déplacement</p>
+                  <p class="date">01/06/2023</p>
+                </div>
+                <div class="montant">
+                  <p class="value">- 85 €</p>
+                  <p class="moyen">Espèces</p>
+                </div>
+              </div>
             </div>
           </div>
-        </ng-template>
-      </li>
+    </div>
 
-      <!-- Onglet Mouvements -->
-      <li [ngbNavItem]="2" class="flex">
-        <a ngbNavLink (click)="setActiveTab('mouvements')">
-          <i class="fa fa-exchange-alt m-r-10"></i> Mouvements de Caisse
-        </a>
-        <ng-template ngbNavContent>
-          <div *ngIf="activeTab === 'mouvements'" class="table-responsive">
-            <table *ngIf="mouvements.length > 0; else noData" class="table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nom Boutique</th>
-                  <th>Nom Vendeur</th>
-                  <th>Montant</th>
-                  <th>Date</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let versement of mouvements">
-                  <td>{{ versement.id }}</td>
-                  <td>{{ versement.nomBoutique }}</td>
-                  <td>{{ versement.nomVendeur }}</td>
-                  <td>{{ versement.montantVerse | number: '1.0-0' }} XOF</td>
-                  <td>{{ versement.dateVersement | date: 'dd/MM/yyyy HH:mm' }}</td>
-                  <td>{{ versement.statut }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <ng-template #noData>
-              <p>Aucun mouvement de caisse disponible.</p>
-            </ng-template>
-          </div>
-        </ng-template>
-      </li>
 
-      <!-- Onglet Factures -->
-      <li [ngbNavItem]="3" class="flex">
-        <a ngbNavLink (click)="setActiveTab('factures')">
-          <i class="fa fa-file-invoice m-r-10"></i> Factures
-        </a>
-        <ng-template ngbNavContent>
-          <div *ngIf="activeTab === 'factures'" class="table-responsive">
-            <table *ngIf="factures.length > 0" class="table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nom Client</th>
-                  <th>Montant Facture</th>
-                  <th>Date Facture</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let facture of factures">
-                  <td>{{ facture.id }}</td>
-                  <td>{{ facture.nomClient }}</td>
-                  <td>{{ facture.montant | number: '1.0-0' }} XOF</td>
-                  <td>{{ facture.dateFacture | date: 'dd/MM/yyyy' }}</td>
-                  <td>{{ facture.status }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div *ngIf="factures.length === 0">
-              <p>Aucune facture disponible.</p>
+
+    <!-- Tab Clients -->
+<div id="clients" class="clients-tab" *ngIf="activeTab === 'clients'">
+  <div class="clients-header">
+    <h2>Gestion des Clients</h2>
+    <button class="btn-primary">
+      <i class="fas fa-plus"></i> Nouveau Client
+    </button>
+  </div>
+
+  <div class="clients-stats">
+    <div class="stat-card">
+      <div class="icon bg-blue">
+        <i class="fas fa-user"></i>
+      </div>
+      <div>
+        <p class="label">Clients actifs</p>
+        <p class="value">24</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="icon bg-green">
+        <i class="fas fa-euro-sign"></i>
+      </div>
+      <div>
+        <p class="label">CA moyen/client</p>
+        <p class="value">1,024 €</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="icon bg-purple">
+        <i class="fas fa-star"></i>
+      </div>
+      <div>
+        <p class="label">Clients VIP</p>
+        <p class="value">5</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="clients-table-container">
+    <table class="clients-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>CA Total</th>
+          <th>Dernière commande</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="client-info">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+              <div>
+                <p class="name">Jean Dupont</p>
+                <p class="company">Entreprise A</p>
+              </div>
             </div>
-          </div>
-        </ng-template>
-      </li>
-    </ul>
-    <div [ngbNavOutlet]="nav" class="mt-2"></div>
-  </app-card>
+          </td>
+          <td>jean.dupontentreprisea.com</td>
+          <td>06 12 34 56 78</td>
+          <td>8,450 €</td>
+          <td>15/06/2023</td>
+         
+        </tr>
+
+      
+      </tbody>
+    </table>
+  </div>
 </div>
+
+
+    <div *ngIf="activeTab === 'rapports'">
+      <h2>Rapports financiers</h2>
+      <p>Ici tu affiches tes graphiques et rapports comptables.</p>
+    </div>
+  </div>
+</main>
