@@ -592,6 +592,11 @@ export class PosAccueilComponent {
     if (k === 'Escape') { this.onCalcKey('ON/AC'); event.preventDefault(); return; }
   }
 
+  /** Réactive la calculatrice lors d'un clic dessus */
+  onCalculatorClick(): void {
+    this.calculator.setActive(true);
+  }
+
   ngAfterViewInit(): void {
     // mesurer la taille réelle de .calc pour établir la base
     setTimeout(() => {

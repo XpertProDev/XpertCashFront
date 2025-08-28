@@ -745,6 +745,10 @@ ul.list_commande li.list_commande_plus {
   justify-content:space-between;
   margin-bottom:10px;
   padding-top: 15px;
+
+  .calculator {
+    pointer-events: all;
+  }
 }
 
 .calculator .brand{

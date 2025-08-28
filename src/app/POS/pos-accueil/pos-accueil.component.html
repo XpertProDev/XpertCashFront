@@ -271,7 +271,7 @@
   <div class="calc-backdrop" (click)="minimizeCalculator()" style="pointer-events: auto;"></div>
   <div class="calculator"
       #calculatorRef
-      (click)="$event.stopPropagation()"
+      (click)="$event.stopPropagation(); onCalculatorClick()"
       [ngStyle]="{
         'transform': 'translate3d(' + popupOffsetPopup.x + 'px, ' + popupOffsetPopup.y + 'px, 0)',
         'width.px': calcWidth,

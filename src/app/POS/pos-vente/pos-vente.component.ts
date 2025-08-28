@@ -26,6 +26,7 @@ import { VenteRequest, VenteResponse } from 'src/app/admin-page/MODELS/VenteMode
 import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
 import { ScannerService } from 'src/app/admin-page/SERVICES/VenteService/scanner.service';
 import { SearchService } from 'src/app/admin-page/SERVICES/SearchService';
+import { CalculatorService } from 'src/app/admin-page/SERVICES/VenteService/calculator.service';
 
 interface DiscountMode {
   active: boolean;
@@ -53,6 +54,8 @@ export class PosVenteComponent {
 
   searchTerm: string = '';
   private searchSub!: Subscription;
+  private calcActiveSub!: Subscription;
+  private isCalculatorActive = true;
   
   // Déclaration des nouvelles propriétés
   currentQuantityInput: string = '';
@@ -209,7 +212,8 @@ export class PosVenteComponent {
     private venteService: VenteService, 
     private boutiqueState: BoutiqueStateService,
     private scannerService: ScannerService,
-    private searchService: SearchService
+    private searchService: SearchService,
+    private calculatorService: CalculatorService
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
@@ -253,6 +257,10 @@ export class PosVenteComponent {
   ngOnInit() {
 
     this.scannerService.disableScanner();
+
+    this.calcActiveSub = this.calculatorService.isActive$.subscribe(active => {
+      this.isCalculatorActive = active;
+    });
 
     this.searchSub = this.searchService.search$.subscribe(term => {
       this.searchTerm = term;
@@ -301,6 +309,7 @@ export class PosVenteComponent {
 
    ngOnDestroy() {
     if (this.searchSub) this.searchSub.unsubscribe();
+    if (this.calcActiveSub) this.calcActiveSub.unsubscribe();
     this.scannerService.enableScanner();
   }
 
@@ -550,6 +559,9 @@ export class PosVenteComponent {
   // Mettre à jour addToCart pour gérer la remise
 addToCart(produit: ProduitDetailsResponseDTO): void {
   if (this.getAvailableStock(produit) <= 0) return;
+
+  // Désactiver la calculatrice pour éviter les conflits d'input
+  this.calculatorService.setActive(false);
   
   // Gestion de la remise
   if (this.discountMode.active) {
@@ -690,6 +702,9 @@ getTotalDiscount(): number {
   }
   
   handleKeyPress(key: string): void {
+    // Désactiver la calculatrice dès qu'on utilise le clavier de vente
+    this.calculatorService.setActive(false);
+
     if (this.inputMode === 'discount') {
       this.handleDiscountKeyPress(key); // Gestion remise
     } else {
@@ -1208,6 +1223,12 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
+    // Si la calculatrice est active, on ne fait rien ici.
+    // L'événement sera capturé par le listener de PosAccueilComponent.
+    if (this.isCalculatorActive) {
+      return;
+    }
+
     if (this.showPaymentPopup) {
       this.handlePaymentKeyPressPhysical(event);
     } else {

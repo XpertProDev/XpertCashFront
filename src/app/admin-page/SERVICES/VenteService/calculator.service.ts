@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 interface CalcState {
   display: string;
@@ -16,6 +17,8 @@ interface CalcState {
 export class CalculatorService {
   private state: CalcState = this.createInitialState();
   private _solarDisplay: string = '0000';
+  private _isActive = new BehaviorSubject<boolean>(true);
+  public isActive$ = this._isActive.asObservable();
 
   private createInitialState(): CalcState {
     return {
@@ -32,6 +35,11 @@ export class CalculatorService {
     /** getters exposés */
   get display(): string { return this.state.display; }
   get solarDisplay(): string { return this._solarDisplay; }
+
+  /** Gère l'état actif de la calculatrice pour la capture clavier */
+  setActive(isActive: boolean) {
+    this._isActive.next(isActive);
+  }
 
   /** Public single entry point for UI */
   handleKey(key: string) {
@@ -235,6 +243,11 @@ private sqrt() {
   }
   
   public handleComputerKeyboard(event: KeyboardEvent): void {
+    // Ne fait rien si la calculatrice n'est pas active
+    if (!this._isActive.value) {
+      return;
+    }
+
     const key = event.key;
     
     // Mapper les touches du clavier aux touches de la calculatrice
