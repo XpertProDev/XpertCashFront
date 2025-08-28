@@ -506,9 +506,25 @@ export class PosAccueilComponent {
     return (this.caisseDetails.montantCourant || 0) - (this.caisseDetails.montantInitial || 0);
   }
 
+  // toggleCalculator(): void {
+  //   this.showCalculatorPopup = !this.showCalculatorPopup;
+  //   if (this.showCalculatorPopup) {
+  //     this.isCalculatorMinimized = false;
+  //     this.calcWidth = this.baseWidth;
+  //     this.calcHeight = this.baseHeight;
+  //     this.calcScale = 1;
+  //     if (this.calcElement?.nativeElement) {
+  //       this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(1)`);
+  //     }
+  //   }
+  // }
+
   toggleCalculator(): void {
     this.showCalculatorPopup = !this.showCalculatorPopup;
+    
     if (this.showCalculatorPopup) {
+      // Désactiver le scanner lorsque la calculatrice est ouverte
+      this.scannerService.disableScanner();
       this.isCalculatorMinimized = false;
       this.calcWidth = this.baseWidth;
       this.calcHeight = this.baseHeight;
@@ -516,7 +532,16 @@ export class PosAccueilComponent {
       if (this.calcElement?.nativeElement) {
         this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(1)`);
       }
+    } else {
+      // Réactiver le scanner lorsque la calculatrice est fermée
+      this.scannerService.enableScanner();
     }
+  }
+
+  // Ajoutez aussi cette méthode pour fermer proprement
+  closeCalculator(): void {
+    this.showCalculatorPopup = false;
+    this.scannerService.enableScanner();
   }
 
   // Méthode appelée depuis le template
@@ -536,6 +561,13 @@ export class PosAccueilComponent {
   // Optionnel : gestion clavier global pour la calculatrice
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
+
+    // Si la calculatrice est ouverte, laisser CalculatorService gérer les événements
+    if (this.showCalculatorPopup) {
+      this.calculator.handleComputerKeyboard(event);
+      return;
+    }
+
     // Si l'utilisateur tape dans un input / textarea / contentEditable -> ne pas interférer
     const target = event.target as HTMLElement | null;
     const isEditable = !!target && (

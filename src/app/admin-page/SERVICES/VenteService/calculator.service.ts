@@ -34,33 +34,33 @@ export class CalculatorService {
   get solarDisplay(): string { return this._solarDisplay; }
 
   /** Public single entry point for UI */
-    handleKey(key: string) {
-        if (!key) return;
-        // digits
-        if (/^[0-9]|^00$/.test(key)) { this.inputDigit(key); return; }
-        switch (key) {
-        case '.': this.inputDot(); return;
-        case '+': case '−': case '-': case '×': case '*': case '÷': case '/':
-            this.onOperator((key === '*' ? '×' : key === '/' ? '÷' : (key === '-' ? '−' : key)));
-            return;
-        case '=': this.onEquals(); return;
-        case 'ON/AC': this.allClear(); return;
-        case 'C.CE': this.clearEntry(); return;
-        case '▶': this.backspace(); return;
-        case '+/-': this.toggleSign(); return;
-        case '√': this.sqrt(); return;
-        case '%': this.percent(); return;
-        case 'M+': this.memoryAdd(); return;
-        case 'M-': this.memorySub(); return;
-        case 'MC': this.memoryClear(); return;
-        case 'MR': this.memoryRecall(); return;
-        case 'MRC': this.memoryRecallClearToggle(); return;
-        case 'GT': this.getGrandTotal(); return;
-        case '00': this.inputDigit('00'); return;
-        // autres touches laissées en placeholder
-        default: return;
-        }
-    }
+  handleKey(key: string) {
+      if (!key) return;
+      // digits
+      if (/^[0-9]|^00$/.test(key)) { this.inputDigit(key); return; }
+      switch (key) {
+      case '.': this.inputDot(); return;
+      case '+': case '−': case '-': case '×': case '*': case '÷': case '/':
+          this.onOperator((key === '*' ? '×' : key === '/' ? '÷' : (key === '-' ? '−' : key)));
+          return;
+      case '=': this.onEquals(); return;
+      case 'ON/AC': this.allClear(); return;
+      case 'C.CE': this.clearEntry(); return;
+      case '▶': this.backspace(); return;
+      case '+/-': this.toggleSign(); return;
+      case '√': this.sqrt(); return;
+      case '%': this.percent(); return;
+      case 'M+': this.memoryAdd(); return;
+      case 'M-': this.memorySub(); return;
+      case 'MC': this.memoryClear(); return;
+      case 'MR': this.memoryRecall(); return;
+      case 'MRC': this.memoryRecallClearToggle(); return;
+      case 'GT': this.getGrandTotal(); return;
+      case '00': this.inputDigit('00'); return;
+      // autres touches laissées en placeholder
+      default: return;
+      }
+  }
 
   private inputDigit(d: string) {
     if (this.state.waitingForOperand) {
@@ -221,17 +221,53 @@ private sqrt() {
   }
 
   // Memory & GT (identiques à l'implémentation précédente)
-    private memoryAdd() { this.state.memory += parseFloat(this.state.display); this.state.lastMemoryRecall = false; }
-    private memorySub() { this.state.memory -= parseFloat(this.state.display); this.state.lastMemoryRecall = false; }
-    private memoryClear() { this.state.memory = 0; this.state.lastMemoryRecall = false; }
-    private memoryRecall() { this.state.display = this.formatResult(this.state.memory); this.state.lastMemoryRecall = true; this.state.waitingForOperand = true; }
-    private memoryRecallClearToggle() { if (this.state.lastMemoryRecall) { this.memoryClear(); } else { this.memoryRecall(); } }
-    private getGrandTotal() { this.state.display = this.formatResult(this.state.gtAccumulator); this.state.waitingForOperand = true; }
+  private memoryAdd() { this.state.memory += parseFloat(this.state.display); this.state.lastMemoryRecall = false; }
+  private memorySub() { this.state.memory -= parseFloat(this.state.display); this.state.lastMemoryRecall = false; }
+  private memoryClear() { this.state.memory = 0; this.state.lastMemoryRecall = false; }
+  private memoryRecall() { this.state.display = this.formatResult(this.state.memory); this.state.lastMemoryRecall = true; this.state.waitingForOperand = true; }
+  private memoryRecallClearToggle() { if (this.state.lastMemoryRecall) { this.memoryClear(); } else { this.memoryRecall(); } }
+  private getGrandTotal() { this.state.display = this.formatResult(this.state.gtAccumulator); this.state.waitingForOperand = true; }
 
-    private formatResult(value: number): string {
-        if (!isFinite(value)) return 'Erreur';
-        const s = Number.parseFloat(String(value)).toPrecision(12);
-        return parseFloat(s).toString();
+  private formatResult(value: number): string {
+      if (!isFinite(value)) return 'Erreur';
+      const s = Number.parseFloat(String(value)).toPrecision(12);
+      return parseFloat(s).toString();
+  }
+  
+  public handleComputerKeyboard(event: KeyboardEvent): void {
+    const key = event.key;
+    
+    // Mapper les touches du clavier aux touches de la calculatrice
+    const keyMap: {[key: string]: string} = {
+      'Enter': '=',
+      'Escape': 'ON/AC',
+      'Backspace': '▶',
+      '+': '+',
+      '-': '−',
+      '*': '×',
+      '/': '÷',
+      '.': '.',
+      '%': '%'
+    };
+    
+    // Gestion des chiffres
+    if (/^[0-9]$/.test(key)) {
+      this.inputDigit(key);
+      return;
     }
+    
+    // Gestion des touches spéciales mappées
+    if (keyMap[key]) {
+      this.handleKey(keyMap[key]);
+      event.preventDefault();
+      return;
+    }
+    
+    // Gestion de la touche 00
+    if (key === '0' && event.shiftKey) {
+      this.inputDigit('00');
+      event.preventDefault();
+    }
+  }
 
 }
