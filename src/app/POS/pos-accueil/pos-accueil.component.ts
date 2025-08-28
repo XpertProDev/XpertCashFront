@@ -486,15 +486,19 @@ export class PosAccueilComponent {
     return (this.caisseDetails.montantCourant || 0) - (this.caisseDetails.montantInitial || 0);
   }
 
-  toggleCalculator(): void {
-    this.showCalculatorPopup = !this.showCalculatorPopup;
-    if (this.showCalculatorPopup) {
-      this.isCalculatorMinimized = false;
-      // Réinitialiser la taille quand on ouvre la calculatrice
-      this.calcWidth = this.baseWidth;
-      this.calcHeight = this.baseHeight;
+toggleCalculator(): void {
+  this.showCalculatorPopup = !this.showCalculatorPopup;
+  if (this.showCalculatorPopup) {
+    this.isCalculatorMinimized = false;
+    this.calcWidth = this.baseWidth;
+    this.calcHeight = this.baseHeight;
+    this.calcScale = 1;
+    if (this.calcElement?.nativeElement) {
+      this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(1)`);
     }
   }
+}
+
 
   // Méthode appelée depuis le template
   onCalcKey(key: string) {
@@ -858,25 +862,40 @@ onCalculatorTouchStart(ev: TouchEvent): void {
 // Méthode pour réduire la calculatrice
 minimizeCalculator(): void {
   this.isCalculatorMinimized = !this.isCalculatorMinimized;
-  
+
   if (this.isCalculatorMinimized) {
     // Sauvegarder la position actuelle
     this.calculatorPosition.x = this.popupOffsetPopup.x;
     this.calculatorPosition.y = this.popupOffsetPopup.y;
-    
-    // Réduire la taille
+
+    // Réduire la taille du container
     this.calcWidth = 200;
     this.calcHeight = 40;
+
+    // Calculer un scale basé sur la baseWidth pour garder les proportions
+    this.calcScale = Math.max(0.1, Math.min(1, this.calcWidth / this.baseWidth));
+
+    // Appliquer transform au contenu .calc
+    if (this.calcElement?.nativeElement) {
+      this.renderer.setStyle(this.calcElement.nativeElement, 'transformOrigin', 'top left');
+      this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(${this.calcScale})`);
+    }
   } else {
     // Restaurer la taille normale
     this.calcWidth = this.baseWidth;
     this.calcHeight = this.baseHeight;
-    
+    this.calcScale = 1;
+
+    if (this.calcElement?.nativeElement) {
+      this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(${this.calcScale})`);
+    }
+
     // Restaurer la position
     this.popupOffsetPopup.x = this.calculatorPosition.x;
     this.popupOffsetPopup.y = this.calculatorPosition.y;
   }
 }
+
 
 
 }

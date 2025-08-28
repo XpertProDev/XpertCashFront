@@ -708,6 +708,9 @@ ul.list_commande li.list_commande_plus {
   --badge:#ffffff;
 
   position: relative;
+  // width: 100%;
+  // max-width: 420px;
+  overflow: hidden;
   width: 420px;
   max-width: 92vw;
   background: var(--body);
@@ -1007,11 +1010,6 @@ ul.list_commande li.list_commande_plus {
     overflow: hidden;
     pointer-events: none;
   }
-}
-
-// Ajustement pour que le contenu de la calculatrice ne dépasse pas
-.calculator .calc {
-  overflow: hidden;
 }
 
 // Modification de l'overlay pour permettre les interactions
