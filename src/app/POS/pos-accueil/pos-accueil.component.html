@@ -65,11 +65,14 @@
             </div>
           </div>
         </div>
-
-            
-
+        
         <!-- // COTE RIGHT  -->
         <div class="header_right">
+
+          <!-- // Calculatrice -->
+          <div class="icon_calculatrice" (click)="toggleCalculator()">
+            <img src="assets/img/calculatrice-moderne.png" alt="">
+          </div>
 
           <!-- // Name boutique  -->
           <div class="name_boutique">
@@ -258,6 +261,196 @@
               [disabled]="isLoadingCaisseDetails || !caisseDetails">
         Confirmer la fermeture
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Popup de calculatrice -->
+<!-- <div *ngIf="showCalculatorPopup" class="calculate-popup-overlay" >
+  <div
+      class="calculator"
+      #calculatorRef
+      (click)="$event.stopPropagation()"
+      [ngStyle]="{
+        'transform': 'translate3d(' + popupOffsetPopup.x + 'px, ' + popupOffsetPopup.y + 'px, 0)',
+        'width.px': calcWidth,
+        'height.px': calcHeight
+      }"
+      (mousemove)="onCalculatorMouseMove($event)"
+      (mouseleave)="onCalculatorMouseLeave($event)"
+      (mousedown)="onCalculatorMouseDown($event)"
+      (touchstart)="onCalculatorTouchStart($event)"
+    >
+    <div class="calc" #calcElement>
+      <div class="popup-header-close-calc">
+        <span><i class="ri-subtract-line" style="color: #202020;"></i></span>
+        &nbsp;
+        <span>Fermer</span>
+      </div>
+
+      <div class="calc-top" (mousedown)="startDragPopup($event)">
+        <div class="brand-img">
+          <img src="assets/logo/tchakeda.png" alt="">
+        </div>
+        <span class="digits-badge">12&nbsp;DIGITS</span>
+      </div>
+
+      <div class="screen">
+        <span class="screen-text">{{ calcDisplay }}</span>
+      </div>
+
+      <div class="meta">Dispositifs de calcul</div>
+
+      <div class="meta-row">
+        <div class="solar">
+          <span class="screen-text-sub">{{ calcSolarDisplay }}</span>
+        </div>
+        <div class="keys-true">
+          <button class="key fn" (click)="onCalcKey('+/-')">+/-</button>
+          <button class="key fn" (click)="onCalcKey('√')">√</button>
+          <button class="key on" style="font-size: 14px;" (click)="onCalcKey('ON/AC')">ON/AC</button>
+        </div>
+      </div>
+
+      <div class="keys">
+        <button class="key fn" (click)="onCalcKey('M+')">M+</button>
+        <button class="key fn" (click)="onCalcKey('M-')">M-</button>
+        <button class="key fn" (click)="onCalcKey('MRC')">MRC</button>
+        <button class="key fn" (click)="onCalcKey('GT')">GT</button>
+        <button class="key fn" (click)="onCalcKey('C.CE')">C.CE</button>
+
+        <button class="key fn" (click)="onCalcKey('MC')">MC</button>
+        <button class="key fn" (click)="onCalcKey('MR')">MR</button>
+        <button class="key fn" (click)="onCalcKey('Ex')">Ex</button>
+        <button class="key op" (click)="onCalcKey('÷')">÷</button>
+        <button class="key fn" (click)="onCalcKey('▶')">▶</button>
+
+        <button class="key num" (click)="onCalcKey('7')">7</button>
+        <button class="key num" (click)="onCalcKey('8')">8</button>
+        <button class="key num" (click)="onCalcKey('9')">9</button>
+        <button class="key op" (click)="onCalcKey('×')">×</button>
+        <button class="key fn" (click)="onCalcKey('%')">%</button>
+
+        <button class="key num" (click)="onCalcKey('4')">4</button>
+        <button class="key num" (click)="onCalcKey('5')">5</button>
+        <button class="key num" (click)="onCalcKey('6')">6</button>
+        <button class="key op" (click)="onCalcKey('−')">−</button>
+        <button class="key fn" (click)="onCalcKey('MU')">MU</button>
+
+        <button class="key num" (click)="onCalcKey('1')">1</button>
+        <button class="key num" (click)="onCalcKey('2')">2</button>
+        <button class="key num" (click)="onCalcKey('3')">3</button>
+        <button class="key plus tall" (click)="onCalcKey('+')">+</button>
+        <button class="key equals tall" (click)="onCalcKey('=')">=</button>
+
+        <button class="key num wide0" (click)="onCalcKey('0')">0</button>
+        <button class="key num" (click)="onCalcKey('00')">00</button>
+        <button class="key num" (click)="onCalcKey('.')">.</button>
+      </div>
+
+    </div>
+
+  </div>
+</div> -->
+
+<!-- Popup de calculatrice - Modifié pour ajouter les contrôles de fenêtre -->
+<div *ngIf="showCalculatorPopup" class="calculate-popup-overlay">
+  <!-- backdrop subtil mais non bloquant : on peut choisir pointer-events selon besoin -->
+  <div class="calc-backdrop" (click)="minimizeCalculator()" style="pointer-events: auto;"></div>
+  <div class="calculator"
+      #calculatorRef
+      (click)="$event.stopPropagation()"
+      [ngStyle]="{
+        'transform': 'translate3d(' + popupOffsetPopup.x + 'px, ' + popupOffsetPopup.y + 'px, 0)',
+        'width.px': calcWidth,
+        'height.px': calcHeight
+      }"
+      (mousemove)="onCalculatorMouseMove($event)"
+      (mouseleave)="onCalculatorMouseLeave($event)"
+      (mousedown)="onCalculatorMouseDown($event)"
+      (touchstart)="onCalculatorTouchStart($event)"
+    >
+    
+    <div class="total">
+      <!-- Barre de titre avec contrôles de fenêtre -->
+      <div class="calculator-title-bar" (mousedown)="startDragPopup($event)">
+        <span>Calculatrice</span>
+        <div class="calculator-window-controls">
+          <i class="ri-subtract-line" (click)="minimizeCalculator(); $event.stopPropagation()"></i>
+          <i class="ri-close-line" (click)="showCalculatorPopup = false; $event.stopPropagation()"></i>
+        </div>
+      </div>
+      
+      <!-- Contenu de la calculatrice (masqué en mode réduit) -->
+      <div class="calculator-content" [class.minimized]="isCalculatorMinimized">
+        <!-- CALCULATOR BODY -->
+        <div class="calc" #calcElement>
+          <!-- Top bar -->
+          <div class="calc-top">
+            <div class="brand-img">
+              <img src="assets/logo/tchakeda.png" alt="">
+            </div>
+            <span class="digits-badge">12&nbsp;FICHES</span>
+          </div>
+
+          <!-- Screen -->
+          <div class="screen">
+            <span class="screen-text">{{ calcDisplay }}</span>
+          </div>
+
+          <!-- label -->
+          <div class="meta">Dispositifs de calcul</div>
+
+          <!-- Solar + btn -->
+          <div class="meta-row">
+            <div class="solar">
+              <span class="screen-text-sub">{{ calcSolarDisplay }}</span>
+            </div>
+            <div class="keys-true">
+              <button class="key fn" (click)="onCalcKey('+/-')">+/-</button>
+              <button class="key fn" (click)="onCalcKey('√')">√</button>
+              <button class="key on" style="font-size: 14px;" (click)="onCalcKey('ON/AC')">ON/AC</button>
+            </div>
+          </div>
+
+          <!-- Keys (extrait complet, adapte selon ton HTML existant) -->
+          <div class="keys">
+            <button class="key fn" (click)="onCalcKey('M+')">M+</button>
+            <button class="key fn" (click)="onCalcKey('M-')">M-</button>
+            <button class="key fn" (click)="onCalcKey('MRC')">MRC</button>
+            <button class="key fn" (click)="onCalcKey('GT')">GT</button>
+            <button class="key fn" (click)="onCalcKey('C.CE')">C.CE</button>
+
+            <button class="key fn" (click)="onCalcKey('MC')">MC</button>
+            <button class="key fn" (click)="onCalcKey('MR')">MR</button>
+            <button class="key fn" (click)="onCalcKey('Ex')">Ex</button>
+            <button class="key op" (click)="onCalcKey('÷')">÷</button>
+            <button class="key fn" (click)="onCalcKey('▶')">▶</button>
+
+            <button class="key num" (click)="onCalcKey('7')">7</button>
+            <button class="key num" (click)="onCalcKey('8')">8</button>
+            <button class="key num" (click)="onCalcKey('9')">9</button>
+            <button class="key op" (click)="onCalcKey('×')">×</button>
+            <button class="key fn" (click)="onCalcKey('%')">%</button>
+
+            <button class="key num" (click)="onCalcKey('4')">4</button>
+            <button class="key num" (click)="onCalcKey('5')">5</button>
+            <button class="key num" (click)="onCalcKey('6')">6</button>
+            <button class="key op" (click)="onCalcKey('−')">−</button>
+            <button class="key fn" (click)="onCalcKey('MU')">MU</button>
+
+            <button class="key num" (click)="onCalcKey('1')">1</button>
+            <button class="key num" (click)="onCalcKey('2')">2</button>
+            <button class="key num" (click)="onCalcKey('3')">3</button>
+            <button class="key plus tall" (click)="onCalcKey('+')">+</button>
+            <button class="key equals tall" (click)="onCalcKey('=')">=</button>
+
+            <button class="key num wide0" (click)="onCalcKey('0')">0</button>
+            <button class="key num" (click)="onCalcKey('00')">00</button>
+            <button class="key num" (click)="onCalcKey('.')">.</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

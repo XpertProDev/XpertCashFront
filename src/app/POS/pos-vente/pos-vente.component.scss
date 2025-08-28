@@ -446,7 +446,9 @@ ul.ul_list {
 
 .methode_paiement {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  // grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+
+  grid-template-columns: repeat(4, 1fr);
   gap: 15px;
   margin: 20px 10px;
 }
@@ -454,7 +456,7 @@ ul.ul_list {
 .cadre_paiement {
   background-color: #ffffff;
   border-radius: 10px;
-  height: 135px;
+  height: 100px;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
   padding: 10px 0;
   cursor: pointer;
@@ -465,8 +467,8 @@ ul.ul_list {
 }
 
 .img_paiement {
-  width: 50px;
-  height: 50px;
+  width: 35px;
+  height: 35px;
   object-fit: cover;
   margin: 0 auto;
   display: flex;
@@ -490,12 +492,13 @@ ul.ul_list {
 }
 
 .title_paiement {
-  margin-top: 22px;
+  margin-top: 12px;
 }
 
 .title_paiement p {
   margin: 0;
   text-align: center;
+  font-size: 12px;
 }
 
 .montant_paiement {

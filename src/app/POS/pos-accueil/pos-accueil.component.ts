@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener, Renderer2, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ClickOutsideDirective } from 'src/app/admin-page/MODELS/click-outside.directive';
@@ -15,6 +15,7 @@ import { BoutiqueService } from 'src/app/admin-page/SERVICES/boutique-service';
 import { CfaCurrencyPipe } from 'src/app/admin-page/MODELS/cfa-currency.pipe';
 import { ScannerService } from 'src/app/admin-page/SERVICES/VenteService/scanner.service';
 import { SearchService } from 'src/app/admin-page/SERVICES/SearchService';
+import { CalculatorService } from 'src/app/admin-page/SERVICES/VenteService/calculator.service';
 
 @Component({
   selector: 'app-pos-accueil',
@@ -63,6 +64,47 @@ export class PosAccueilComponent {
   isLoadingCaisseDetails = false;
   fermetureErrorMessage: string | null = null;
 
+  showCalculatorPopup = false;
+
+  @ViewChild('calculatorRef', { static: false }) calculatorRef?: ElementRef<HTMLDivElement>;
+  @ViewChild('calcElement', { static: false }) calcElement?: ElementRef<HTMLElement>;
+
+
+  private baseWidth = 420; 
+  private baseHeight = 480;
+
+  calcWidth = 420;
+  calcHeight = 480;
+
+  calcScale = 1;
+  hoverResizeCorner: 'br' | 'bl' | null = null;
+  // seuil (en px) pour détecter la zone de redimensionnement près des coins
+  private readonly cornerThreshold = 18;
+
+  // resize state
+  private isResizing = false;
+  private resizeCorner: 'br' | 'bl' | null = null;
+  private startXResize = 0;
+  private startYResize = 0;
+  private initialWidth = 0;
+  private initialHeight = 0;
+  private initialPopupX = 0;
+  private initialPopupY = 0;
+
+  // min / max
+  private minWidth = 160;
+  private minHeight = 200;
+  private maxWidth = window.innerWidth - 40;
+  private maxHeight = window.innerHeight - 40;
+
+  // handlers references
+  private pointerMoveHandler: any;
+  private pointerUpHandler: any;
+
+  // Ajoutez ces propriétés à votre classe
+  isCalculatorMinimized = false;
+  calculatorPosition = { x: 100, y: 100 };
+
   constructor(
     private router: Router,
     private viewState: ViewStateService,
@@ -71,8 +113,10 @@ export class PosAccueilComponent {
     private commandeState: CommandeStateService,
     private boutiqueState: BoutiqueStateService,
     private boutiqueService: BoutiqueService,
-     private scannerService: ScannerService,
-     private searchService: SearchService
+     private searchService: SearchService,
+    private calculator: CalculatorService,
+    private scannerService: ScannerService,
+    private renderer: Renderer2, 
   ) {
     this.isListView$ = this.viewState.isListView$;
     
@@ -175,6 +219,7 @@ export class PosAccueilComponent {
   }
 
   ngOnDestroy() {
+    this.removeResizeListeners();
     this.boutiqueSub?.unsubscribe();
   }
 
@@ -460,6 +505,422 @@ export class PosAccueilComponent {
     if (!this.caisseDetails) return 0;
     return (this.caisseDetails.montantCourant || 0) - (this.caisseDetails.montantInitial || 0);
   }
+
+  toggleCalculator(): void {
+    this.showCalculatorPopup = !this.showCalculatorPopup;
+    if (this.showCalculatorPopup) {
+      this.isCalculatorMinimized = false;
+      this.calcWidth = this.baseWidth;
+      this.calcHeight = this.baseHeight;
+      this.calcScale = 1;
+      if (this.calcElement?.nativeElement) {
+        this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(1)`);
+      }
+    }
+  }
+
+  // Méthode appelée depuis le template
+  onCalcKey(key: string) {
+    this.calculator.handleKey(key);
+  }
+
+  // expose l'affichage pour le template
+  get calcDisplay(): string {
+    return this.calculator.display;
+  }
+
+  get calcSolarDisplay(): string {
+    return this.calculator.solarDisplay;
+  }
+
+  // Optionnel : gestion clavier global pour la calculatrice
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    // Si l'utilisateur tape dans un input / textarea / contentEditable -> ne pas interférer
+    const target = event.target as HTMLElement | null;
+    const isEditable = !!target && (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      (target as HTMLElement).isContentEditable
+    );
+    if (isEditable) return; // laisse le champ gérer l'évènement normalement
+
+    // N'intercepte que si la calculatrice est visible
+    if (!this.showCalculatorPopup) return;
+
+    const k = event.key;
+    if ((/^[0-9]$/).test(k)) { this.onCalcKey(k); event.preventDefault(); return; }
+    if (k === 'Enter') { this.onCalcKey('='); event.preventDefault(); return; }
+    if (k === '.') { this.onCalcKey('.'); event.preventDefault(); return; }
+    if (k === '+') { this.onCalcKey('+'); event.preventDefault(); return; }
+    if (k === '-') { this.onCalcKey('−'); event.preventDefault(); return; }
+    if (k === '*') { this.onCalcKey('×'); event.preventDefault(); return; }
+    if (k === '/') { this.onCalcKey('÷'); event.preventDefault(); return; }
+    if (k === 'Backspace') { this.onCalcKey('▶'); event.preventDefault(); return; }
+    if (k === 'Escape') { this.onCalcKey('ON/AC'); event.preventDefault(); return; }
+  }
+
+  ngAfterViewInit(): void {
+    // mesurer la taille réelle de .calc pour établir la base
+    setTimeout(() => {
+      if (this.calcElement?.nativeElement) {
+        const el = this.calcElement.nativeElement;
+        this.baseWidth = el.offsetWidth || 420;
+        this.baseHeight = el.offsetHeight || 480;
+
+        // initialiser les dimensions actuelles à la base
+        this.calcWidth = this.baseWidth;
+        this.calcHeight = this.baseHeight;
+        this.calcScale = 1;
+      }
+      // recalculer max selon fenêtre actuelle
+      this.maxWidth = Math.max(400, window.innerWidth - 40);
+      this.maxHeight = Math.max(400, window.innerHeight - 40);
+    }, 0);
+  }
+
+  // Unified start (mouse) — délègue au startResizeFromCoords
+  startResize(event: MouseEvent, corner: 'br' | 'bl'): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.startResizeFromCoords(corner, event.clientX, event.clientY);
+  }
+
+  // start pour touch
+  startResizeTouch(touch: Touch, corner: 'br' | 'bl'): void {
+    this.startResizeFromCoords(corner, touch.clientX, touch.clientY);
+  }
+
+    // point d'entrée commun
+  private startResizeFromCoords(corner: 'br' | 'bl', clientX: number, clientY: number): void {
+    this.isResizing = true;
+    this.resizeCorner = corner;
+    this.startXResize = clientX;
+    this.startYResize = clientY;
+    this.initialWidth = this.calcWidth;
+    this.initialHeight = this.calcHeight;
+    this.initialPopupX = this.popupOffsetPopup.x;
+    this.initialPopupY = this.popupOffsetPopup.y;
+
+    // handlers unifiés pour mouse & touch
+    this.pointerMoveHandler = (e: any) => {
+      // empêcher scroll mobile quand on redimensionne
+      if (e.type === 'touchmove') e.preventDefault();
+      const { clientX, clientY } = this.extractClientFromEvent(e);
+      this.handlePointerMove(clientX, clientY);
+    };
+    this.pointerUpHandler = (e: any) => {
+      this.handlePointerUp();
+    };
+
+    document.addEventListener('mousemove', this.pointerMoveHandler, { passive: false });
+    document.addEventListener('mouseup', this.pointerUpHandler);
+    document.addEventListener('touchmove', this.pointerMoveHandler, { passive: false });
+    document.addEventListener('touchend', this.pointerUpHandler);
+  }
+
+  // extraction client coords pour mouse/touch
+  private extractClientFromEvent(e: any): { clientX: number, clientY: number } {
+    if (!e) return { clientX: 0, clientY: 0 };
+    if (e.type && e.type.startsWith('touch')) {
+      const t = e.touches && e.touches[0] ? e.touches[0] : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0] : null);
+      if (t) return { clientX: t.clientX, clientY: t.clientY };
+    } else if (e.clientX !== undefined) {
+      return { clientX: e.clientX, clientY: e.clientY };
+    }
+    // fallback
+    return { clientX: this.startXResize, clientY: this.startYResize };
+  }
+
+  // logique principale: on garde scale uniforme (même ratio), container suit le scale
+  private handlePointerMove(clientX: number, clientY: number): void {
+    if (!this.isResizing || !this.resizeCorner) return;
+
+    const deltaX = clientX - this.startXResize;
+    const deltaY = clientY - this.startYResize;
+
+    // calcul des candidats selon coin
+    let candidateWidth = this.initialWidth;
+    let candidateHeight = this.initialHeight;
+
+    if (this.resizeCorner === 'br') {
+      candidateWidth = this.initialWidth + deltaX;
+    } else if (this.resizeCorner === 'bl') {
+      candidateWidth = this.initialWidth - deltaX; // mouvement du coin gauche inverse
+    }
+    candidateHeight = this.initialHeight + deltaY;
+
+    // éviter valeurs négatives
+    candidateWidth = Math.max(10, candidateWidth);
+    candidateHeight = Math.max(10, candidateHeight);
+
+    // échelles relatives
+    const scaleX = candidateWidth / this.initialWidth;
+    const scaleY = candidateHeight / this.initialHeight;
+
+    // choisir le scale qui respecte à la fois deltaX et deltaY sans déformer (on prend le plus restrictif)
+    // ainsi largeur et hauteur changent ensemble en gardant le ratio initial
+    let newScale = Math.min(scaleX, scaleY);
+
+    // clamp scale global
+    newScale = Math.max(0.4, Math.min(2.5, newScale));
+
+    // nouvelles dimensions basées sur la base (ratio initial)
+    const newWidth = Math.round(this.baseWidth * newScale);
+    const newHeight = Math.round(this.baseHeight * newScale);
+
+    // clamp dimensions sur min/max en px
+    const clampedWidth = Math.max(this.minWidth, Math.min(this.maxWidth, newWidth));
+    const clampedHeight = Math.max(this.minHeight, Math.min(this.maxHeight, newHeight));
+
+    // recalc scale si les dimensions clampées ont changé
+    const finalScaleW = clampedWidth / this.baseWidth;
+    const finalScaleH = clampedHeight / this.baseHeight;
+    // garder le plus petit pour éviter débordements
+    const finalScale = Math.min(finalScaleW, finalScaleH);
+
+    // appliquer
+    this.calcScale = finalScale;
+    this.calcWidth = Math.round(this.baseWidth * finalScale);
+    this.calcHeight = Math.round(this.baseHeight * finalScale);
+
+    // ajuster position si coin gauche (bl) : le left doit bouger pour suivre le coin
+    if (this.resizeCorner === 'bl') {
+      // quand le width diminue, left augmente; quand width augmente, left diminue
+      this.popupOffsetPopup.x = Math.round(this.initialPopupX + (this.initialWidth - this.calcWidth));
+    } else {
+      this.popupOffsetPopup.x = this.initialPopupX;
+    }
+
+    // appliquer le scale au contenu
+    if (this.calcElement?.nativeElement) {
+      const el = this.calcElement.nativeElement;
+      el.style.transformOrigin = 'top left';
+      el.style.transform = `scale(${this.calcScale})`;
+    }
+  }
+
+  private onMouseMoveResize(event: MouseEvent): void {
+    if (!this.isResizing || !this.resizeCorner) return;
+    // calcul deltas
+    const deltaX = event.clientX - this.startXResize;
+    const deltaY = event.clientY - this.startYResize;
+
+    let newWidth = this.initialWidth;
+    let newHeight = this.initialHeight;
+    let newPopupX = this.initialPopupX;
+
+    if (this.resizeCorner === 'br') {
+      newWidth = this.initialWidth + deltaX;
+      newPopupX = this.initialPopupX; // gauche fixe
+    } else if (this.resizeCorner === 'bl') {
+      // left handle bouge -> on déplace aussi popupOffsetPopup.x
+      newWidth = this.initialWidth - deltaX;
+      newPopupX = this.initialPopupX + deltaX;
+    }
+
+    newHeight = this.initialHeight + deltaY;
+
+    // clamp
+    newWidth = Math.max(this.minWidth, Math.min(this.maxWidth, newWidth));
+    newHeight = Math.max(this.minHeight, Math.min(this.maxHeight, newHeight));
+
+    // appliquer
+    this.calcWidth = Math.round(newWidth);
+    this.calcHeight = Math.round(newHeight);
+    this.popupOffsetPopup.x = Math.round(newPopupX);
+
+    // recalculer scale du contenu pour conserver proportions et éviter débordements
+    const scaleX = this.calcWidth / this.baseWidth;
+    const scaleY = this.calcHeight / this.baseHeight;
+    // on prend le min pour garder le contenu entier visible
+    this.calcScale = Math.max(0.4, Math.min(2.5, Math.min(scaleX, scaleY)));
+
+    // appliquer scale directement via style sur l'élément
+    if (this.calcElement?.nativeElement) {
+      const el = this.calcElement.nativeElement;
+      el.style.transformOrigin = 'top left';
+      el.style.transform = `scale(${this.calcScale})`;
+      // pour éviter que le contenu dépasse lors du scale, on peut ajuster la hauteur du container
+      // si tu veux que le container suive exactement le contenu scaled, décommente :
+      // this.calcHeight = Math.round(this.baseHeight * this.calcScale);
+    }
+  }
+
+  private onMouseUpResize(): void {
+    this.isResizing = false;
+    this.resizeCorner = null;
+    this.removeResizeListeners();
+  }
+
+  // Si tu veux gérer le redimensionnement sur changement de fenêtre :
+  @HostListener('window:resize', ['$event'])
+  onWindowResize() {
+    this.maxWidth = Math.max(300, window.innerWidth - 40);
+    this.maxHeight = Math.max(300, window.innerHeight - 40);
+    // clamp des valeurs actuelles
+    this.calcWidth = Math.min(this.calcWidth, this.maxWidth);
+    this.calcHeight = Math.min(this.calcHeight, this.maxHeight);
+  }
+
+  onCalculatorMouseMove(event: MouseEvent): void {
+  const el = this.calculatorRef?.nativeElement;
+  if (!el) return;
+
+  const rect = el.getBoundingClientRect();
+  const x = event.clientX - rect.left; // position locale
+  const y = event.clientY - rect.top;
+
+  const nearRight = (rect.width - x) <= this.cornerThreshold;
+  const nearLeft = x <= this.cornerThreshold;
+  const nearBottom = (rect.height - y) <= this.cornerThreshold;
+
+  // détecte coin bas-droit ou bas-gauche
+  if (nearBottom && nearRight) {
+    this.hoverResizeCorner = 'br';
+    el.style.cursor = 'nwse-resize';
+  } else if (nearBottom && nearLeft) {
+    this.hoverResizeCorner = 'bl';
+    el.style.cursor = 'nesw-resize';
+  } else {
+    // pas près d'un coin
+    this.hoverResizeCorner = null;
+    el.style.cursor = 'default';
+  }
+}
+
+
+// reset du curseur quand on sort du cadre
+onCalculatorMouseLeave(_: MouseEvent): void {
+  const el = this.calculatorRef?.nativeElement;
+  if (el) el.style.cursor = 'default';
+  this.hoverResizeCorner = null;
+}
+
+// fin du pointer
+private handlePointerUp(): void {
+  this.isResizing = false;
+  this.resizeCorner = null;
+  // remove listeners
+  document.removeEventListener('mousemove', this.pointerMoveHandler);
+  document.removeEventListener('mouseup', this.pointerUpHandler);
+  document.removeEventListener('touchmove', this.pointerMoveHandler);
+  document.removeEventListener('touchend', this.pointerUpHandler);
+  this.pointerMoveHandler = undefined;
+  this.pointerUpHandler = undefined;
+}
+
+// ancien removeResizeListeners - on peut garder ou supprimer selon usage
+private removeResizeListeners(): void {
+  if (this.pointerMoveHandler) {
+    document.removeEventListener('mousemove', this.pointerMoveHandler);
+    document.removeEventListener('touchmove', this.pointerMoveHandler);
+    this.pointerMoveHandler = undefined;
+  }
+  if (this.pointerUpHandler) {
+    document.removeEventListener('mouseup', this.pointerUpHandler);
+    document.removeEventListener('touchend', this.pointerUpHandler);
+    this.pointerUpHandler = undefined;
+  }
+}
+
+// -----------------------------------------------------------
+// mouse flow resto — remplace onCalculatorMouseDown & add touch start
+onCalculatorMouseDown(event: MouseEvent): void {
+  const target = event.target as HTMLElement;
+  // si click sur un bouton/clavier => laisser l'action normale
+  if (target.closest('.key') || target.tagName === 'BUTTON' || target.tagName === 'INPUT') {
+    return;
+  }
+
+  // si déjà près d'un coin
+  if (this.hoverResizeCorner) {
+    this.startResize(event, this.hoverResizeCorner);
+    return;
+  }
+
+  // sinon drag
+  this.startDragPopup(event);
+}
+
+// tactile: touchstart
+onCalculatorTouchStart(ev: TouchEvent): void {
+  // si multiple touches -> ignore
+  if (!ev || !ev.touches || ev.touches.length === 0) return;
+
+  const touch = ev.touches[0];
+  const el = this.calculatorRef?.nativeElement;
+  if (!el) return;
+
+  const rect = el.getBoundingClientRect();
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  const nearRight = (rect.width - x) <= this.cornerThreshold;
+  const nearLeft = x <= this.cornerThreshold;
+  const nearBottom = (rect.height - y) <= this.cornerThreshold;
+
+  // si on commence un resize tactile
+  if (nearBottom && (nearRight || nearLeft)) {
+    const corner = nearRight ? 'br' : 'bl';
+    // preventDefault pour éviter le scroll
+    ev.preventDefault();
+    this.startResizeTouch(touch, corner);
+    return;
+  }
+
+  // sinon si on touche sur une zone non interactive -> démarrer drag
+  const target = ev.target as HTMLElement;
+  if (target && (target.closest('.key') || target.tagName === 'BUTTON' || target.tagName === 'INPUT')) {
+    // laisser interaction normale
+    return;
+  }
+
+  // simuler startDragPopup via start coords (on convertit touch à mouse event)
+  const fakeMouseEvent = new MouseEvent('mousedown', {
+    clientX: touch.clientX,
+    clientY: touch.clientY,
+    bubbles: true
+  });
+  this.startDragPopup(fakeMouseEvent);
+}
+
+// Méthode pour réduire la calculatrice
+minimizeCalculator(): void {
+  this.isCalculatorMinimized = !this.isCalculatorMinimized;
+
+  if (this.isCalculatorMinimized) {
+    // Sauvegarder la position actuelle
+    this.calculatorPosition.x = this.popupOffsetPopup.x;
+    this.calculatorPosition.y = this.popupOffsetPopup.y;
+
+    // Réduire la taille du container
+    this.calcWidth = 200;
+    this.calcHeight = 40;
+
+    // Calculer un scale basé sur la baseWidth pour garder les proportions
+    this.calcScale = Math.max(0.1, Math.min(1, this.calcWidth / this.baseWidth));
+
+    // Appliquer transform au contenu .calc
+    if (this.calcElement?.nativeElement) {
+      this.renderer.setStyle(this.calcElement.nativeElement, 'transformOrigin', 'top left');
+      this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(${this.calcScale})`);
+    }
+  } else {
+    // Restaurer la taille normale
+    this.calcWidth = this.baseWidth;
+    this.calcHeight = this.baseHeight;
+    this.calcScale = 1;
+
+    if (this.calcElement?.nativeElement) {
+      this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(${this.calcScale})`);
+    }
+
+    // Restaurer la position
+    this.popupOffsetPopup.x = this.calculatorPosition.x;
+    this.popupOffsetPopup.y = this.calculatorPosition.y;
+  }
+}
 
 
  onSearch(event: Event) {

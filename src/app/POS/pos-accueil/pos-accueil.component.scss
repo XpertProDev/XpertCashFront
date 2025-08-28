@@ -1,3 +1,5 @@
+
+
 :host {
   display: flex;
   flex-direction: column;
@@ -639,3 +641,399 @@ ul.list_commande li.list_commande_plus {
 
 
 
+.icon_calculatrice {
+  width: 30px;
+  height: 30px;
+  // background-color: #f7f7f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.icon_calculatrice img {
+  width: 100%;
+  height: 100%;
+}
+
+.calculate-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  // background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.calculator {
+  pointer-events: auto;  /* <- la calculatrice capte les clics et le drag */
+  z-index: 10001;
+}
+
+.calculator-popup-content-back {
+  background-color: #44424D;
+  max-width: 400px;
+  width: 100%;
+  min-height: 80vh;
+  // overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border-radius: 35px;
+}
+
+.calculator-popup-content {
+  padding: 10px;
+  border: 1px solid #858489;
+  // background-color: #494B57;
+  max-width: 400px;
+  // width: 100%;
+  min-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border-radius: 28px;
+  margin: 5px;
+  overflow: hidden;
+}
+
+.brand-img { width: 90px; ; }
+.brand-img img { width: 100%; height: auto; }
+.calculator-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;}
+.digits { font-size: 12px; color: #ccc; }
+
+
+/* Scope: uniquement à l’intérieur de .calculator pour éviter les fuites */
+.calculator .calc {
+  --body:#2e2f33;
+  --bezel:#3a3b40;
+  --screen:#eef3f6;
+  --screen-text:#213a52;
+  --key-dark:#111214;
+  --key-dark-text:#ffffff;
+  --key-mid:#a9adb3;
+  --key-mid-text:#1c1f23;
+  --key-blue:#0672E4;
+  --key-blue-text:#ffffff;
+  --key-grey:#cfd3d7;
+  --accent:#9aa0a6;
+  --badge:#ffffff;
+
+  position: relative;
+  // width: 100%;
+  // max-width: 420px;
+  overflow: hidden;
+  width: 420px;
+  max-width: 92vw;
+  background: var(--body);
+  // border-radius: 20px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding: 0 18px 22px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+  color: #fff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+/* Top line -------------------------------------------------- */
+.calculator .calc-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+  padding-top: 15px;
+}
+
+.calculator .brand{
+  display:flex;
+  gap:12px;
+  align-items:flex-end;
+}
+.calculator .brand .logo{
+  font-weight:800;
+  letter-spacing:.6px;
+  font-size:20px;
+}
+.calculator .brand .model{
+  font-size:12px;
+  opacity:.7;
+}
+.calculator .digits-badge{
+  font-size:12px;
+  color: var(--badge);
+  opacity:.9;
+}
+
+/* Screen ---------------------------------------------------- */
+.calculator .screen{
+  font-family: 'Calculator', monospace;
+  background: var(--screen);
+  color: var(--screen-text);
+  border-radius: 10px;
+  height: 72px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding: 0 16px;
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.18);
+  margin-bottom: 10px;
+  border: 5px outset #f4f4f4dd;
+}
+.calculator .screen-text{
+  font-size: 55px;
+  letter-spacing: 2px;
+}
+.calculator .screen-text-sub {
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #c0c0c0;
+}
+
+/* Solar + label -------------------------------------------- */
+.calculator .meta-row{
+  display:grid;
+  grid-template-columns: 140px 1fr;
+  align-items:center;
+  gap:14px;
+  margin-bottom: 14px;
+}
+.calculator .solar{
+  font-family: 'Calculator', monospace;
+  height: 40px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  border-radius:6px;
+  background-color: #5f4a3a;
+  border: 1px solid #bababa2f;
+  padding: 0 5px 0 0;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.35);
+}
+.calculator .meta{
+  text-align:center;
+  font-size:12px;
+  letter-spacing:.4px;
+  color:#afb1b278;
+  opacity:.9;
+  margin-bottom: 8px;
+}
+
+/* Keys grid ------------------------------------------------- */
+.calculator .keys{
+  display:grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap:10px;
+}
+
+.calculator .keys-true{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+
+/* Base key */
+.calculator .key{
+  height:54px;
+  border:none;
+  border-radius:12px;
+  font-size:22px;
+  line-height:1;
+  cursor:default;        /* statique – pas de JS */
+  box-shadow:
+    0 3px 0 rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+/* Variants */
+.calculator .key.num{
+  background: var(--key-dark);
+  color: var(--key-dark-text);
+}
+.calculator .key.fn{
+  background: var(--key-mid);
+  color: var(--key-mid-text);
+  font-size:18px;
+  font-weight:600;
+}
+.calculator .key.on{
+  background: var(--key-blue);
+  color: var(--key-blue-text);
+  font-weight:700;
+}
+.calculator .key.op{
+  background: var(--key-mid);
+  color: var(--key-mid-text);
+  font-size:26px;
+}
+.calculator .key.nav{
+  background: var(--key-grey);
+  color: #222;
+  font-weight:700;
+}
+
+/* Special large keys */
+.calculator .key.plus{
+  background: var(--key-blue);
+  color: var(--key-blue-text);
+  font-weight:800;
+  font-size:28px;
+  grid-column: 4;     /* 4e colonne */
+  grid-row: 5 / span 2; /* sur 2 lignes */
+  height: calc(54px*2 + 10px);
+}
+.calculator .key.equals{
+  background: var(--key-grey);
+  color:#222;
+  font-weight:700;
+  font-size:28px;
+  grid-column: 5;       /* 5e colonne */
+  grid-row: 5 / span 2; /* sur 2 lignes */
+  height: calc(54px*2 + 10px);
+}
+
+/* Row-6 layout tweaks */
+.calculator .wide0 { /* juste 0 simple, mais un peu plus large visuellement */
+  letter-spacing:.5px;
+}
+
+/* Make buttons “pressable” visually (pure CSS) */
+.calculator .key:active{
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+/* Container background of the popup area */
+// .calculate-popup-overlay .calculator-popup-content .calc{
+//   background: var(--bezel, #3a3b40) linear-gradient(#2f3034, #2a2b2f);
+// }
+
+
+.display {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+// .calculator {
+//   position: absolute !important;
+//   top: 0;
+//   left: 0;
+//   overflow: visible !important;
+//   z-index: 11000;
+//   user-select: none;
+//   touch-action: none; /* empêche les gestes de scrolling natif quand on touche la calculatrice */
+// }
+
+
+/* Handles plus visibles et plus larges pour debug */
+.resize-handle {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: rgba(0,0,0,0.12);
+  border: 2px solid rgba(255,255,255,0.85);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  z-index: 12000;
+  touch-action: none; /* utile pour le tactile */
+  pointer-events: auto;
+  border-radius: 4px;
+  transition: background 0.12s, transform 0.08s;
+  display: block;
+}
+
+/* coin bas-droit */
+.resize-handle.br {
+  right: 6px;
+  bottom: 6px;
+  cursor: nwse-resize;
+}
+
+/* coin bas-gauche */
+.resize-handle.bl {
+  left: 6px;
+  bottom: 6px;
+  cursor: nesw-resize;
+}
+
+/* Hover pour confirmer visuellement */
+.resize-handle:hover {
+  background: rgba(0,0,0,0.22);
+  transform: scale(1.05);
+}
+
+.popup-header-close-calc {
+  position: absolute;
+  top: -28px;
+  right: 0;
+}
+
+.popup-header-close-calc span {
+    background-color: #cec7c7;
+    font-size: 14px;
+    cursor: pointer;
+    color: red;
+    transition: color 0.2s;
+    padding: 5px 10px;
+    border-radius: 5px;
+  
+  &:hover {
+    background-color: #aca7a7;
+  }
+}
+
+.calculator-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #3a3b40;
+  color: white;
+  cursor: move;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+
+  span {
+    font-size: 12px;
+  }
+  
+  .calculator-window-controls {
+    display: flex;
+    gap: 12px;
+    
+    i {
+      cursor: pointer;
+      font-size: 16px;
+      
+      &:hover {
+        color: #ccc;
+      }
+    }
+  }
+}
+
+.calculator-content {
+  transition: opacity 0.3s ease;
+  
+  &.minimized {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+}
+
+// Modification de l'overlay pour permettre les interactions
+.calculate-popup-overlay {
+  pointer-events: none;
+  z-index: 10000;
+  
+  .calculator {
+    pointer-events: all;
+  }
+}
