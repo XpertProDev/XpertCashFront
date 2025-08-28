@@ -252,6 +252,8 @@ export class PosVenteComponent {
   // Gestion du clic/tape sur un produit
   ngOnInit() {
 
+    this.scannerService.disableScanner();
+
     this.searchSub = this.searchService.search$.subscribe(term => {
       this.searchTerm = term;
     });
@@ -292,10 +294,14 @@ export class PosVenteComponent {
       this.scanInProgress = scanning;
     });
 
+    // Désactiver le scanner quand on est en mode saisie
+    this.scannerService.setUserTyping(true);
+
   }
 
    ngOnDestroy() {
     if (this.searchSub) this.searchSub.unsubscribe();
+    this.scannerService.enableScanner();
   }
 
   private indexProductsByBarcode(): void {
@@ -1210,6 +1216,15 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   }
 
   handleKeyPressPhysical(event: KeyboardEvent) {
+
+    // Indiquer au scanner qu'on est en train d'utiliser le clavier normalement
+    this.scannerService.setUserTyping(true);
+
+    // Réactiver le scanner après un court délai
+    setTimeout(() => {
+      this.scannerService.setUserTyping(false);
+    }, 1000); // 1 seconde de délai
+    
     // Ignorer si un scan matériel est en cours
     if (this.scanInProgress) return;
 
@@ -1254,6 +1269,11 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   }
 
   handlePaymentKeyPressPhysical(event: KeyboardEvent) {
+    this.scannerService.setUserTyping(true);
+    setTimeout(() => {
+      this.scannerService.setUserTyping(false);
+    }, 1000);
+    
     const key = event.key;
     switch (key) {
       case '0':
@@ -1769,8 +1789,27 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
     return products;
   }
 
+  // Mettre à jour les gestionnaires d'événements de focus
+  onInputFocus() {
+    this.scannerService.setUserTyping(true);
+  }
 
+  onInputBlur() {
+    // Attendre un peu avant de réactiver le scanner
+    setTimeout(() => {
+      this.scannerService.setUserTyping(false);
+    }, 500);
+  }
 
+  // Dans PosVenteComponent
+  notifyUserTyping() {
+    this.scannerService.setUserTyping(true);
+    
+    // Réactiver le scanner après un court délai
+    setTimeout(() => {
+      this.scannerService.setUserTyping(false);
+    }, 1000);
+  }
 
 
 }

@@ -217,7 +217,7 @@
         </button>
         
         <!-- Modifier ici : utiliser currentDiscountInput -->
-        <input 
+        <!-- <input 
           type="number" 
           placeholder="0" 
           class="input-discount"
@@ -225,7 +225,16 @@
           (input)="onDiscountInputChange($event)"
           (focus)="disablePhysicalKeyboard = true"
           (blur)="disablePhysicalKeyboard = false"
-          min="0">
+          min="0"> -->
+          <input 
+            type="number" 
+            placeholder="0" 
+            class="input-discount"
+            [value]="currentDiscountInput"
+            (input)="onDiscountInputChange($event)"
+            (focus)="onInputFocus()"
+            (blur)="onInputBlur()"
+            min="0">
         
         <button class="btn-percent" 
                 [class.active]="discountMode.type === '%'"
@@ -287,9 +296,9 @@
 
     <!-- 3. Clavier numérique + actions -->
     <div class="keypad">
-      <button tabindex="-1" (click)="handleKeyPress('1')">1</button>
-      <button tabindex="-1" (click)="handleKeyPress('2')">2</button>
-      <button tabindex="-1" (click)="handleKeyPress('3')">3</button>
+      <button tabindex="-1" (click)="handleKeyPress('1'); notifyUserTyping()">1</button>
+      <button tabindex="-1" (click)="handleKeyPress('2'); notifyUserTyping()">2</button>
+      <button tabindex="-1" (click)="handleKeyPress('3'); notifyUserTyping()">3</button>
       <!-- <button tabindex="-1" class="btn_keypad_action btn_keypad_active">Qté</button> -->
       <!-- <button tabindex="-1" class="btn_keypad_action btn_keypad_active" (click)="activateQuantityMode()">Qté</button> -->
       <button [class.btn_keypad_active]="inputMode === 'quantity'" 
@@ -297,22 +306,22 @@
     Qté
   </button>
       
-      <button tabindex="-1" (click)="handleKeyPress('4')">4</button>
-      <button tabindex="-1" (click)="handleKeyPress('5')">5</button>
-      <button tabindex="-1" (click)="handleKeyPress('6')">6</button>
+      <button tabindex="-1" (click)="handleKeyPress('4'); notifyUserTyping()">4</button>
+      <button tabindex="-1" (click)="handleKeyPress('5'); notifyUserTyping()">5</button>
+      <button tabindex="-1" (click)="handleKeyPress('6'); notifyUserTyping()">6</button>
       <button [class.btn_keypad_active]="inputMode === 'discount'" 
           (click)="setInputMode('discount')">
     Remise
   </button>
       
-      <button tabindex="-1" (click)="handleKeyPress('7')">7</button>
-      <button tabindex="-1" (click)="handleKeyPress('8')">8</button>
-      <button tabindex="-1" (click)="handleKeyPress('9')">9</button>
+      <button tabindex="-1" (click)="handleKeyPress('7'); notifyUserTyping()">7</button>
+      <button tabindex="-1" (click)="handleKeyPress('8'); notifyUserTyping()">8</button>
+      <button tabindex="-1" (click)="handleKeyPress('9'); notifyUserTyping()">9</button>
       <button tabindex="-1" class="btn_keypad_action">Prix</button>
       
-      <button tabindex="-1" (click)="handleKeyPress('+/-')">+/-</button>
-      <button tabindex="-1" (click)="handleKeyPress('0')">0</button>
-      <button tabindex="-1" (click)="handleKeyPress(',')">,</button>
+      <button tabindex="-1" (click)="handleKeyPress('+/-'); notifyUserTyping()">+/-</button>
+      <button tabindex="-1" (click)="handleKeyPress('0'); notifyUserTyping()">0</button>
+      <button tabindex="-1" (click)="handleKeyPress(','); notifyUserTyping()">,</button>
       <button tabindex="-1" class="backspace" (click)="handleKeyPress('backspace')">
         <i class="ri-delete-back-2-line"></i>
       </button>
@@ -531,24 +540,24 @@
 
         <!-- Clavier numérique -->
         <div class="keypad" style="padding-top: 5px;">
-          <button tabindex="-1" (click)="handlePaymentKeyPress('1')">1</button>
-          <button tabindex="-1" (click)="handlePaymentKeyPress('2')">2</button>
-          <button tabindex="-1" (click)="handlePaymentKeyPress('3')">3</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('1'); notifyUserTyping()">1</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('2'); notifyUserTyping()">2</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('3'); notifyUserTyping()">3</button>
           <button>Qté</button>
           
-          <button tabindex="-1" (click)="handlePaymentKeyPress('4')">4</button>
-          <button tabindex="-1" (click)="handlePaymentKeyPress('5')">5</button>
-          <button tabindex="-1" (click)="handlePaymentKeyPress('6')">6</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('4'); notifyUserTyping()">4</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('5'); notifyUserTyping()">5</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('6'); notifyUserTyping()">6</button>
           <button>%</button>
           
-          <button tabindex="-1" (click)="handlePaymentKeyPress('7')">7</button>
-          <button tabindex="-1" (click)="handlePaymentKeyPress('8')">8</button>
-          <button tabindex="-1" (click)="handlePaymentKeyPress('9')">9</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('7'); notifyUserTyping()">7</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('8'); notifyUserTyping()">8</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('9'); notifyUserTyping()">9</button>
           <button>Prix</button>
           
-          <button tabindex="-1" (click)="handlePaymentKeyPress('+/-')">+/-</button>
-          <button tabindex="-1" (click)="handlePaymentKeyPress('0')">0</button>
-          <button tabindex="-1" (click)="handlePaymentKeyPress(',')">,</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('+/-'); notifyUserTyping()">+/-</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress('0'); notifyUserTyping()">0</button>
+          <button tabindex="-1" (click)="handlePaymentKeyPress(','); notifyUserTyping()">,</button>
           <button tabindex="-1" class="backspace" (click)="handlePaymentKeyPress('backspace')">
             <i class="ri-delete-back-2-line"></i>
           </button>

@@ -11,15 +11,45 @@ export class ScannerService {
   private barcode = '';
   private timer: any;
   private processing = false;
-  private isScannerEnabled = true;
+  private isScannerEnabled = true; // Permet d'activer/désactiver le scanner
+  private isUserTyping = false; // Indique si l'utilisateur tape dans un champ
+  private lastKeyTime = 0;
+  private typingTimeout: any;
 
   constructor() {
     this.setupScannerListener();
   }
 
+  public setUserTyping(typing: boolean): void {
+    this.isUserTyping = typing;
+  }
+
   private setupScannerListener(): void {
     // écoute en capture pour pouvoir stopper la propagation avant les handlers normaux
     document.addEventListener('keydown', (event: KeyboardEvent) => {
+
+      const now = Date.now();
+      const timeSinceLastKey = now - this.lastKeyTime;
+      this.lastKeyTime = now;
+
+      // Si le temps entre les frappes est trop long, c'est probablement un utilisateur qui tape
+      if (timeSinceLastKey > 200) { // 200ms entre les frappes = utilisateur qui tape
+        clearTimeout(this.typingTimeout);
+        this.typingTimeout = setTimeout(() => {
+          // Ne rien faire, c'est juste un utilisateur qui tape
+        }, 1000);
+        return;
+      }
+
+      // Si les frappes sont rapides, c'est probablement un scanner
+      if (timeSinceLastKey < 50) { // 50ms entre les frappes = scanner
+        clearTimeout(this.typingTimeout);
+        
+        // Ignorer si l'utilisateur est en train de taper normalement
+      if (this.isUserTyping) {
+        return;
+      }
+
        // Ignorer si le scanner est désactivé
       if (!this.isScannerEnabled) {
         return;
@@ -73,6 +103,8 @@ export class ScannerService {
           this.barcode = ''; // Réinitialiser si trop de temps entre les frappes
           this.processing = false;
         }, 250); // 250ms -> 300ms selon la config du scanner / machine
+      }
+        
       }
     }, true); // <-- true pour listener en capture
   }
