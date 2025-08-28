@@ -99,8 +99,9 @@ export class PosAccueilComponent {
   private pointerMoveHandler: any;
   private pointerUpHandler: any;
 
-  private mouseMoveHandler?: any;
-  private mouseUpHandler?: any;
+  // Ajoutez ces propriétés à votre classe
+  isCalculatorMinimized = false;
+  calculatorPosition = { x: 100, y: 100 };
 
   constructor(
     private router: Router,
@@ -487,6 +488,12 @@ export class PosAccueilComponent {
 
   toggleCalculator(): void {
     this.showCalculatorPopup = !this.showCalculatorPopup;
+    if (this.showCalculatorPopup) {
+      this.isCalculatorMinimized = false;
+      // Réinitialiser la taille quand on ouvre la calculatrice
+      this.calcWidth = this.baseWidth;
+      this.calcHeight = this.baseHeight;
+    }
   }
 
   // Méthode appelée depuis le template
@@ -846,6 +853,29 @@ onCalculatorTouchStart(ev: TouchEvent): void {
     bubbles: true
   });
   this.startDragPopup(fakeMouseEvent);
+}
+
+// Méthode pour réduire la calculatrice
+minimizeCalculator(): void {
+  this.isCalculatorMinimized = !this.isCalculatorMinimized;
+  
+  if (this.isCalculatorMinimized) {
+    // Sauvegarder la position actuelle
+    this.calculatorPosition.x = this.popupOffsetPopup.x;
+    this.calculatorPosition.y = this.popupOffsetPopup.y;
+    
+    // Réduire la taille
+    this.calcWidth = 200;
+    this.calcHeight = 40;
+  } else {
+    // Restaurer la taille normale
+    this.calcWidth = this.baseWidth;
+    this.calcHeight = this.baseHeight;
+    
+    // Restaurer la position
+    this.popupOffsetPopup.x = this.calculatorPosition.x;
+    this.popupOffsetPopup.y = this.calculatorPosition.y;
+  }
 }
 
 

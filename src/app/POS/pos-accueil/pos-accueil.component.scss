@@ -654,24 +654,11 @@ ul.list_commande li.list_commande_plus {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  // background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 10000;
-}
-
-.calculate-popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
 }
 
 .calculator-popup-content-back {
@@ -687,7 +674,7 @@ ul.list_commande li.list_commande_plus {
 .calculator-popup-content {
   padding: 10px;
   border: 1px solid #858489;
-  background-color: #494B57;
+  // background-color: #494B57;
   max-width: 400px;
   // width: 100%;
   min-height: 80vh;
@@ -724,7 +711,9 @@ ul.list_commande li.list_commande_plus {
   width: 420px;
   max-width: 92vw;
   background: var(--body);
-  border-radius: 20px;
+  // border-radius: 20px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
   padding: 0 18px 22px;
   box-shadow: 0 8px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
   color: #fff;
@@ -902,9 +891,9 @@ ul.list_commande li.list_commande_plus {
 }
 
 /* Container background of the popup area */
-.calculate-popup-overlay .calculator-popup-content .calc{
-  background: var(--bezel, #3a3b40) linear-gradient(#2f3034, #2a2b2f);
-}
+// .calculate-popup-overlay .calculator-popup-content .calc{
+//   background: var(--bezel, #3a3b40) linear-gradient(#2f3034, #2a2b2f);
+// }
 
 .display {
   display: flex;
@@ -971,10 +960,66 @@ ul.list_commande li.list_commande_plus {
     cursor: pointer;
     color: red;
     transition: color 0.2s;
-    padding: 5px 20px;
+    padding: 5px 10px;
     border-radius: 5px;
   
   &:hover {
     background-color: #aca7a7;
+  }
+}
+
+.calculator-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #3a3b40;
+  color: white;
+  cursor: move;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+
+  span {
+    font-size: 12px;
+  }
+  
+  .calculator-window-controls {
+    display: flex;
+    gap: 12px;
+    
+    i {
+      cursor: pointer;
+      font-size: 16px;
+      
+      &:hover {
+        color: #ccc;
+      }
+    }
+  }
+}
+
+.calculator-content {
+  transition: opacity 0.3s ease;
+  
+  &.minimized {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+}
+
+// Ajustement pour que le contenu de la calculatrice ne dépasse pas
+.calculator .calc {
+  overflow: hidden;
+}
+
+// Modification de l'overlay pour permettre les interactions
+.calculate-popup-overlay {
+  pointer-events: none;
+  z-index: 10000;
+  
+  .calculator {
+    pointer-events: all;
   }
 }
