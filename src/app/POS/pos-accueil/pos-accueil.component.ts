@@ -486,19 +486,18 @@ export class PosAccueilComponent {
     return (this.caisseDetails.montantCourant || 0) - (this.caisseDetails.montantInitial || 0);
   }
 
-toggleCalculator(): void {
-  this.showCalculatorPopup = !this.showCalculatorPopup;
-  if (this.showCalculatorPopup) {
-    this.isCalculatorMinimized = false;
-    this.calcWidth = this.baseWidth;
-    this.calcHeight = this.baseHeight;
-    this.calcScale = 1;
-    if (this.calcElement?.nativeElement) {
-      this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(1)`);
+  toggleCalculator(): void {
+    this.showCalculatorPopup = !this.showCalculatorPopup;
+    if (this.showCalculatorPopup) {
+      this.isCalculatorMinimized = false;
+      this.calcWidth = this.baseWidth;
+      this.calcHeight = this.baseHeight;
+      this.calcScale = 1;
+      if (this.calcElement?.nativeElement) {
+        this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(1)`);
+      }
     }
   }
-}
-
 
   // Méthode appelée depuis le template
   onCalcKey(key: string) {
@@ -517,13 +516,20 @@ toggleCalculator(): void {
   // Optionnel : gestion clavier global pour la calculatrice
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-    // map clavier -> touches calcule
+    // Si l'utilisateur tape dans un input / textarea / contentEditable -> ne pas interférer
+    const target = event.target as HTMLElement | null;
+    const isEditable = !!target && (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      (target as HTMLElement).isContentEditable
+    );
+    if (isEditable) return; // laisse le champ gérer l'évènement normalement
+
+    // N'intercepte que si la calculatrice est visible
+    if (!this.showCalculatorPopup) return;
+
     const k = event.key;
-    if ((/^[0-9]$/).test(k)) {
-      this.onCalcKey(k);
-      event.preventDefault();
-      return;
-    }
+    if ((/^[0-9]$/).test(k)) { this.onCalcKey(k); event.preventDefault(); return; }
     if (k === 'Enter') { this.onCalcKey('='); event.preventDefault(); return; }
     if (k === '.') { this.onCalcKey('.'); event.preventDefault(); return; }
     if (k === '+') { this.onCalcKey('+'); event.preventDefault(); return; }

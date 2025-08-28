@@ -336,9 +336,10 @@
 </div> -->
 
 <!-- Popup de calculatrice - Modifié pour ajouter les contrôles de fenêtre -->
-<div *ngIf="showCalculatorPopup" class="calculate-popup-overlay" >
-  <div
-      class="calculator"
+<div *ngIf="showCalculatorPopup" class="calculate-popup-overlay">
+  <!-- backdrop subtil mais non bloquant : on peut choisir pointer-events selon besoin -->
+  <div class="calc-backdrop" (click)="minimizeCalculator()" style="pointer-events: auto;"></div>
+  <div class="calculator"
       #calculatorRef
       (click)="$event.stopPropagation()"
       [ngStyle]="{

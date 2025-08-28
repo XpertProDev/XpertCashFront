@@ -658,7 +658,13 @@ ul.list_commande li.list_commande_plus {
   display: flex;
   justify-content: center;
   align-items: center;
+  pointer-events: none;
   z-index: 10000;
+}
+
+.calculator {
+  pointer-events: auto;  /* <- la calculatrice capte les clics et le drag */
+  z-index: 10001;
 }
 
 .calculator-popup-content-back {
@@ -897,6 +903,7 @@ ul.list_commande li.list_commande_plus {
 // .calculate-popup-overlay .calculator-popup-content .calc{
 //   background: var(--bezel, #3a3b40) linear-gradient(#2f3034, #2a2b2f);
 // }
+
 
 .display {
   display: flex;
