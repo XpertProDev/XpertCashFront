@@ -1816,6 +1816,22 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   }
 
   onInputBlur() {
+    // Si on était en mode édition de remise pour un produit spécifique
+    if (this.inputMode === 'discount' && this.isEditingDiscount(this.discountMode.productId!)) {
+      const productToDiscount = this.allProducts.find(p => p.id === this.discountMode.productId);
+      if (productToDiscount) {
+        // Appliquer la remise directement
+        this.applyDiscount(productToDiscount);
+        
+        // Réinitialiser le champ de saisie et la valeur temporaire
+        this.currentDiscountInput = '';
+        this.discountMode.value = 0;
+        
+        // Mettre à jour les totaux
+        this.updateCommandeTotals();
+      }
+    }
+
     // Attendre un peu avant de réactiver le scanner
     setTimeout(() => {
       this.scannerService.setUserTyping(false);
