@@ -21,6 +21,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
 import { environment } from 'src/environments/environment';
 import { UsersService } from '../../SERVICES/users.service';
+import { VenteService } from '../../SERVICES/VenteService/vente-service';
 
 
 @Component({
@@ -44,6 +45,8 @@ import { UsersService } from '../../SERVICES/users.service';
 export class DetailEditClientComponent {
   private imgUrl = environment.imgUrl
   clientId!: number;
+  ventes: any[] = [];
+  entrepriseClientId?: number;
   errorMessage: string = '';
   errorMessageApi: string = '';
   successMessage = '';
@@ -70,6 +73,8 @@ export class DetailEditClientComponent {
   loadingFactures = false;
   errorFactures = '';
   selectedFactureId: number | null = null;
+  selectedAchatId: number | null = null;
+  selectedAchat: any = null;
   factureDetails: any = null;
 
   // @ViewChild('fileInput') fileInput!: ElementRef;
@@ -95,6 +100,7 @@ export class DetailEditClientComponent {
   entrepriseSignataire: string = '';
 
   factureCount: number = 0;
+  achatCount: number = 0
 
   // Ajoutez cette propriété dans la classe
   isEditing = false;
@@ -156,6 +162,7 @@ export class DetailEditClientComponent {
     this.modifierClientForm.disable();
     this.control.disable();
     this.loadEntrepriseInfo();
+    this.getVentes();
     
   }
   
@@ -166,7 +173,8 @@ export class DetailEditClientComponent {
     private clientService: ClientService,
     private route: ActivatedRoute,
     private factureService: FactureProFormaService,
-    private usersService: UsersService
+    private usersService: UsersService,
+    private venteService: VenteService
   ) {}
 
   async testImageCompression(file: File) {
@@ -280,6 +288,13 @@ onSelectFacture(facture: any): void {
   this.selectedFactureId = facture.id;
   this.loadFactureDetails(facture.id);
 }
+
+onSelectAchat(vente: any): void {
+  this.selectedAchat = vente;               // garde l’objet complet
+  this.selectedAchatId = vente.venteId;     // garde juste l’ID (optionnel)
+  console.log('Achat sélectionné:', this.selectedAchat);
+}
+
 
 // Méthode pour charger les infos entreprise
 loadEntrepriseInfo(): void {
@@ -470,6 +485,9 @@ loadFacturesClient() {
     }
   });
 }
+
+//Load vente by client
+
 
   // Modifiez la méthode populateForm pour initialiser l'indicatif
   private populateForm(client: Clients) {
@@ -934,5 +952,56 @@ async confirmDeleteC(): Promise<void> {
 }
 
 
-  
+//
+  getVentes(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.venteService.getVenteByClient(this.clientId, this.entrepriseClientId)
+      .subscribe({
+        next: (res: any[]) => {
+          console.log("données reçues :", res);
+          this.ventes = res;
+           this.achatCount = this.ventes.length;
+
+            // ✅ Sélectionner automatiquement le premier
+          if (this.ventes.length > 0) {
+            this.selectedAchatId = this.ventes[0].venteId;
+            this.selectedAchat = this.ventes[0];
+
+            console.log('Premier achat sélectionné automatiquement :', this.selectedAchatId);
+          }
+          
+          this.ventes = res;
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Erreur récupération ventes :', err);
+          this.errorMessage = 'Impossible de récupérer les ventes.';
+          this.loading = false;
+        }
+      });
+  }
+
+  // Méthode appelée lors du clic sur un client
+  selectClient(client: any) {
+    this.clientId = client.id;
+    this.entrepriseClientId = undefined; // Réinitialise l'entreprise
+    this.getVentes();
+  }
+
+  // Méthode appelée lors du clic sur une entreprise cliente
+  selectEntrepriseClient(entrepriseClient: any) {
+    this.entrepriseClientId = entrepriseClient.id;
+    this.clientId = 0; 
+    this.getVentes();
+  }
+
+  get totalMontant(): number {
+  return this.ventes?.reduce(function(acc, vente) {
+    return acc + (vente.montantTotal || 0);
+  }, 0) || 0;
+}
+
+
 } 

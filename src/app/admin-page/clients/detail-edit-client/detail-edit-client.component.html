@@ -287,7 +287,7 @@
   <!-- End -->
   <div class="information_cadre">
     <div class="section_navbar">
-      <mat-tab-group [selectedIndex]="0" class="custom-tabs">
+      <mat-tab-group [selectedIndex]="0" class="custom-tabs"> 
         <!-- // Factures  -->
         <mat-tab>
           <ng-template mat-tab-label>
@@ -528,11 +528,194 @@
         </mat-tab>
         
         <!-- // Notifications  -->
-        <mat-tab label="Achats">
+        <mat-tab>
+            <ng-template mat-tab-label>
+              <div class="tab-label">
+                <span>Achat</span>
+                <span class="facture-count">{{achatCount}}</span>
+              </div>
+            </ng-template>
             <div class="tab-content">
-            Contenu des notifications
+              <div class="content_client">
+                <div class="information_grid_two">
+                  <!-- Section Profil -->
+                  <div class="profil_section profil_section_facture" >
+                    <div class="facture_model" *ngIf="selectedAchat">
+                      <!-- En-tête statique -->
+                      <div class="header_apercu" style="display: flex; align-items: center; gap: 5px; margin: 10px;">
+                        <div class="logo_entreprise">
+                          <img src="assets/img/Votre.png">
+                        </div>
+                        <div class="entete_entreprise">
+                          <p class="para1">Nom Entreprise</p>
+                          <p class="para1">Secteur Entreprise</p>
+                          <div class="para1">
+                            Email: emailentreprise.com 
+                            Téléphone: 000000000
+                          </div>
+                        </div>
+                      </div>
+
+                      <hr><hr>
+
+                      <!-- Numéro de facture -->
+                      <div class="titre" style="text-align: center; font-size: 8px;">
+                        <h6>Facture proforma: 
+                          <span style="color: #0000003e;">
+                            {{ selectedAchat.numeroFacture }}
+                          </span>
+                        </h6>
+                      </div>
+
+                      <!-- Date et lieu -->
+                      <div class="date_right">
+                        <p style="margin: 0 10px; font-size: 8px; text-align: right;">
+                         {{ selectedAchat.dateVente | date:'dd/MM/yyyy HH:mm' }}
+                        </p>
+                      </div>
+
+                      <!-- Destinataire -->
+                      <div class="name_client" style="margin-left: 10px;">
+                        <div class="doit" style="display: flex; align-items: center; gap: 3px;">
+                          <h6 style="margin: 0; font-size: 8px;">Vendeur : </h6>
+                          <p style="margin: 0; font-size: 8px;">{{ selectedAchat.nomVendeur }}</p>
+                        </div>
+                        <div class="objets" style="display: flex; align-items: center; gap: 3px;">
+                          <h6 style="margin: 0; font-size: 8px;">Objet : </h6>
+                          <p style="margin: 0; font-size: 8px;">{{selectedAchat.description}}</p>
+                        </div>
+                      </div>
+
+                      <!-- Lignes de produits -->
+                      <div class="container_table" style="display: flex; justify-content: center;">
+                        <table class="table">
+                          <thead>
+                            <tr>
+                              <th class="th">Désignation</th>
+                              <th class="th">PU</th>
+                              <th class="th">Quantité</th>
+                              <th class="th">Montant (FCFA)</th>
+                              <th class="th">Remise </th>
+
+
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let ligne of selectedAchat.lignes">
+                              <td class="td">{{ ligne.nomProduit }}</td>
+                              <td class="td">{{ ligne.prixUnitaire | number:'1.0-0' }}</td>
+                              <td class="td">{{ ligne.quantite }}</td>
+                              <td class="td">{{ ligne.montantLigne | number:'1.0-0' }}</td>
+                              <td class="td">{{ligne.remise}}</td>
+                            </tr>
+                          </tbody>
+                          <tfoot class="tfoot">
+                            <tr>
+                              <td class="td" colspan="4">Total HT</td>
+                              <td class="td">{{ selectedAchat.montantTotal | number:'1.0-0' }}</td>
+                            </tr>
+                            <tr>
+                              <td class="td" colspan="4">Remise 0%</td>
+                              <td class="td">{{ selectedAchat.remiseGlobale | number:'1.0-0' }}</td>
+                            </tr>
+                           
+                            <tr>
+                              <td class="td" colspan="4">Montant TTC</td>
+                              <td class="td">{{ (selectedAchat.montantTotal - selectedAchat.remiseGlobale) | number:'1.0-0' }}</td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+
+                      <div class="arret_somme">
+                        <p style="margin: 0 0 0 10px; font-size: 6px;">Arrêté la présente facture à la somme de : Zero .....</p>
+                      </div>
+
+                      <div class="signature" style="text-align: right; margin: 20px 10px 16px 0;">
+                        <div class="post_signateure">
+                          <p style="font-size: 8px;">Signataire</p>
+                        </div>
+                        <div class="nom_signateure">
+                          <p style="font-size: 8px;">Nom Signataire</p>
+                        </div>
+                      </div>
+
+                      <!-- Pied de page statique -->
+                      <div class="container_footer">
+                        <div class="footer">
+                          <hr>
+                          <p style="text-align: center; font-size: 8px; margin: 0 0 3px 0;">
+                            <strong>www.siteweb.com</strong>
+                          </p>
+                          <div style="font-size: 5px; text-align: center;">
+                            <em>
+                              NINA: 000000
+                              RCCM: 000000
+                              NIF: 000000
+                              Banque: Banque
+                            </em>
+                          </div>
+                          <div style="margin-top: 0px; font-size: 5px; text-align: center;">
+                            <em>Adresse : Rue / Pays</em>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Section Informations Factures -->
+                  <div class="info_section" style="padding: 0;" >
+                    <div class="contact_info__">
+                      <div class="section_title section_title2" style="padding: 20px 20px 6px;">
+                        <div class="title">
+                          <h6>Toutes les achats</h6>
+                        </div>
+                      </div>
+
+                      <!-- Tableau statique -->
+                      <div class="table-container" style="max-height: 41vh; border-radius: 10px; display: flex; flex-direction: column; position: relative;">
+                        <table>
+                          <thead>
+                            <tr style="position: sticky; top: 0; background: white; z-index: 10; box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);">
+                              <th>Numéro Facture</th>
+                              <th>Date</th>
+                              <th>Mode Paiement</th>
+                              <th class="text-right">Montant</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let vente of ventes" [class.selected-row]="selectedAchatId === vente.venteId" (click)="onSelectAchat(vente)">
+                              <td>{{ vente.numeroFacture }}</td>
+                              <td>{{ vente.dateVente | date:'dd/MM/yyyy' }}</td>
+                              <td>
+                                <span class="status-badge">{{ vente.modePaiement }}</span>
+                              </td>
+                              <td class="text-right">{{ vente.montantTotal | number:'1.0-0' }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <!-- Footer statique -->
+                      <div class="sticky-footer">
+                        <table style="width: 100%;">
+                          <tfoot style="background-color: #ffffff;">
+                            <tr>
+                              <td colspan="3" class="text-bold">Total</td>
+                              <td class="text-right text-bold">
+                                 {{ totalMontant | number:'1.0-0' }}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div> 
+                  </div>
+                </div>
+              </div>
             </div>
         </mat-tab>
+
         <!-- // Factures  -->
         <mat-tab label="Notes">
             <div class="tab-content">

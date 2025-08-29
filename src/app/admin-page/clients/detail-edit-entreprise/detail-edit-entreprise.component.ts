@@ -9,6 +9,7 @@ import { CustomNumberPipe } from '../../MODELS/customNumberPipe';
 import { MatTabsModule } from '@angular/material/tabs';
 import { environment } from 'src/environments/environment';
 import { EntrepriseService } from '../../SERVICES/entreprise-service';
+import { VenteService } from '../../SERVICES/VenteService/vente-service';
 
 @Component({
   selector: 'app-detail-edit-entreprise',
@@ -42,6 +43,7 @@ export class DetailEditEntrepriseComponent {
   factureDetails: any = null;
   entrepriseEmitter: any = {};
   factureCount: number = 0;
+  achatCount: number = 0
 
   // Propriétés pour l'aperçu de facture
   entrepriseNom: string = 'Nom entreprise';
@@ -79,7 +81,9 @@ export class DetailEditEntrepriseComponent {
     private fb: FormBuilder,
     private entrepriseService: EntrepriseClientService,
     private factureService: FactureProFormaService,
-    private entrepriseService2: EntrepriseService 
+    private entrepriseService2: EntrepriseService,
+    private venteService: VenteService
+    
   ) {}
 
   ngOnInit() {
@@ -88,6 +92,10 @@ export class DetailEditEntrepriseComponent {
       this.entrepriseId = +params['id'];
       this.loadEntrepriseData();
       this.loadFacturesEntreprise();
+
+      this.entrepriseClientId = this.entrepriseId; 
+    this.clientId = undefined;
+    this.getVentes();
     });
     this.loadEntrepriseEmitter();
     this.entrepriseForm.disable();
@@ -369,5 +377,75 @@ async confirmDeleteE(): Promise<void> {
   }
 }
 
+// ici
+//
+  loading = false;
+  entrepriseClientId?: number;
+  ventes: any[] = [];
+   selectedAchatId: number | null = null;
+  selectedAchat: any = null;
+  clientId?: number;
 
+onSelectAchat(vente: any): void {
+  this.selectedAchat = vente;
+  this.selectedAchatId = vente.venteId;
+  console.log('Achat sélectionné:', this.selectedAchat);
+}
+
+
+ getVentes(): void {
+  this.loading = true;
+  this.errorMessage = '';
+
+  if (!this.clientId && !this.entrepriseClientId) {
+    console.warn("Aucun client ou entreprise sélectionné, impossible de récupérer les ventes.");
+    this.loading = false;
+    return;
+  }
+
+  this.venteService.getVenteByClient(this.clientId, this.entrepriseClientId)
+    .subscribe({
+      next: (res: any[]) => {
+        console.log("données reçues :", res);
+        this.ventes = res;
+        this.achatCount = this.ventes.length;
+
+        // Sélection automatique du premier achat
+        if (this.ventes.length > 0) {
+          this.selectedAchatId = this.ventes[0].venteId;
+          this.selectedAchat = this.ventes[0];
+          console.log('Premier achat sélectionné automatiquement :', this.selectedAchatId);
+        }
+
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur récupération ventes :', err);
+        this.errorMessage = 'Impossible de récupérer les ventes.';
+        this.loading = false;
+      }
+    });
+}
+
+
+
+selectEntrepriseClient(entrepriseClient: any) {
+  this.entrepriseClientId = entrepriseClient.id;
+  this.clientId = undefined;  // NE PAS envoyer clientId
+  this.getVentes();
+}
+
+selectClient(client: any) {
+  this.clientId = client.id;
+  this.entrepriseClientId = undefined;  // NE PAS envoyer entrepriseClientId
+  this.getVentes();
+}
+
+
+
+  get totalMontant(): number {
+  return this.ventes?.reduce(function(acc, vente) {
+    return acc + (vente.montantTotal || 0);
+  }, 0) || 0;
+}
 }

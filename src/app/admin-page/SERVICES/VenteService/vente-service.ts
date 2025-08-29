@@ -1,6 +1,6 @@
 // vente.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
@@ -125,6 +125,34 @@ export class VenteService {
       catchError(err => throwError(() => err))
     );
   }
+
+
+  // Get achat by client
+getVenteByClient(clientId?: number, entrepriseClientId?: number): Observable<any[]> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
+      
+
+      const body: any = {};
+      if (clientId !== undefined) body.clientId = clientId;
+      if (entrepriseClientId !== undefined) body.entrepriseClientId = entrepriseClientId;
+      console.log("Body envoyé :", body);
+
+      return this.http.post<any[]>(`${this.apiUrl}/par-client`, body, { headers });
+      
+    }),
+    catchError(error => {
+      console.error('Erreur dans getVenteByClient:', error);
+      return throwError(() => error);
+    })
+  );
+}
+
+
 
 
 }
