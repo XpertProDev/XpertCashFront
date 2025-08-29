@@ -78,7 +78,7 @@
                 <p>{{ errorMessageAllCaisses || 'Aucune caisse disponible' }}</p>
             </div>
 
-            <div class="all-caisse-container-bottom">
+            <div class="all-caisse-container-bottom"  *ngIf="showAllCaissesSection">
                 <!-- Boucle sur allCaisses -->
                 <div *ngFor="let caisse of allCaisses" class="caisse-card">
                     <div class="block">

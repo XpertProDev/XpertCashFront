@@ -33,6 +33,7 @@ import { NavCollapseComponent } from './theme/layout/admin/navigation/nav-conten
 import { RouterModule } from '@angular/router';
 import { SessionExpiredModalComponent } from './theme/shared/session-expired-modal/session-expired-modal.component';
 import { WebSocketService } from './admin-page/SERVICES/websocket.service';
+import { ScannerService } from './admin-page/SERVICES/VenteService/scanner.service';
 
 registerLocaleData(localeFr);
 
@@ -77,7 +78,7 @@ registerLocaleData(localeFr);
     provideHttpClient(),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true, },
     { provide: LOCALE_ID, useValue: 'fr-FR' },
-    
+    ScannerService
   ],
   bootstrap: [AppComponent]
 })

@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { environment } from "src/environments/environment";
-import { Observable, throwError } from "rxjs";
+import { Observable, of, throwError } from "rxjs";
 import { switchMap, catchError, map } from "rxjs/operators";
 import { OuvrirCaisseRequest, CaisseResponse, FermerCaisseRequest } from "../../MODELS/CaisseModel/caisse.model";
 import { UsersService } from "../users.service";
@@ -108,43 +108,37 @@ fermerCaisse(boutiqueId: number): Observable<any> {
 }
 
 
-
 getDerniereCaisseVendeur(boutiqueId: number): Observable<CaisseResponse> {
-  return this.usersService.getValidAccessToken().pipe(
-    switchMap(token => {
-      if (!token) throw new Error('Aucun token trouvé');
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) throw new Error('Aucun token trouvé');
 
-      const headers = new HttpHeaders({
-        'Authorization': `Bearer ${token}`
-      });
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        });
 
-      return this.http.get(
-        `${this.apiUrl}/caisse/derniere/${boutiqueId}`, 
-        { 
-          headers, 
-          responseType: 'text'  // Accepter tout type de réponse
-        }
-      ).pipe(
-        map(response => {
-          // Essayer de parser en JSON
-          try {
-            return JSON.parse(response) as CaisseResponse;
-          } catch (e) {
-            // Si le parsing échoue, créer un objet d'erreur
-            throw new Error(response || 'Réponse serveur invalide');
-          }
-        })
-      );
-    }),
-    catchError(error => {
-      let errorMsg = 'Erreur lors du chargement de la dernière caisse';
-      if (error instanceof Error) errorMsg = error.message;
-      else if (error?.error) errorMsg = error.error;
-      
-      return throwError(() => new Error(errorMsg));
-    })
-  );
-}
+        return this.http.get<CaisseResponse>(
+          `${this.apiUrl}/caisse/derniere/${boutiqueId}`, 
+          { headers }
+        ).pipe(
+          catchError(error => {
+            // Si l'endpoint retourne un tableau, prendre le premier élément
+            if (error.error && Array.isArray(error.error) && error.error.length > 0) {
+              return of(error.error[0]);
+            }
+            throw error;
+          })
+        );
+      }),
+      catchError(error => {
+        let errorMsg = 'Erreur lors du chargement de la dernière caisse';
+        if (error instanceof Error) errorMsg = error.message;
+        else if (error?.error) errorMsg = error.error;
+        
+        return throwError(() => new Error(errorMsg));
+      })
+    );
+  }
 
   getCaissesByBoutique(boutiqueId: number): Observable<CaisseResponse[]> {
     return this.usersService.getValidAccessToken().pipe(

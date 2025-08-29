@@ -22,8 +22,30 @@
         </ul> -->
         <!-- // categorie -->
         <div class="titre_categorie" [class.selected]="selectedCategoryId === null">
-          <p (click)="showAllProducts()" class="allCate">
-           Toutes les catégories</p>
+          <div class="category-header">
+            <p (click)="showAllProducts()" class="allCate">
+             Toutes les catégories</p>
+            <div class="scan-controls">
+              <button class="scan-test-btn" (click)="testScan('6920484370182')" title="Test scan avec code 6920484370182">
+                <i class="ri-barcode-line"></i> Test Scan
+              </button>
+              <button class="scan-reload-btn" (click)="reloadProductsForScan()" title="Recharger les produits">
+                <i class="ri-refresh-line"></i> Reload
+              </button>
+              <button class="scan-status-btn" (click)="checkScannerStatus()" title="Vérifier l'état du scanner">
+                <i class="ri-information-line"></i> Status
+              </button>
+              <button class="scan-test-multi-btn" (click)="testScannerWithCodes()" title="Test avec plusieurs codes">
+                <i class="ri-test-tube-line"></i> Test Multi
+              </button>
+              <!-- <button class="scan-reset-btn" (click)="resetScanner()" title="Réinitialiser le scanner">
+                <i class="ri-restart-line"></i> Reset
+              </button> -->
+              <span class="scan-status" [class.active]="!scanInProgress">
+                <i class="ri-wifi-line"></i> Scanner {{ scanInProgress ? 'Actif' : 'Prêt' }}
+              </span>
+            </div>
+          </div>
         </div>
         <ul class="ul_name_categorie" *ngIf="categories.length">
           <!-- Boucle sur les catégories -->

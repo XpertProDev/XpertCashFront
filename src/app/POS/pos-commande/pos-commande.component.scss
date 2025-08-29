@@ -152,8 +152,12 @@ p {
     
 .toolbar {
     display: grid;
-    grid-template-columns: 45px 1fr 130px;
+    grid-template-columns: 45px 1fr 130px 180px;
     margin: 10px 10px 0;
+}
+
+.pager-info {
+  margin-left: 10px;
 }
 
 .icon_search {
@@ -947,4 +951,50 @@ textarea {
   // font-size: 14px;
   font-weight: bold;
   margin-top: 10px;
+}
+
+.o_pager_previous i,
+.o_pager_next i {
+  font-size: 20px;
+  padding: 0 5px;
+}
+
+.d-print-none button{
+  border: 1px solid #000;
+}
+
+.d-print-none .o_pager_previous {
+  border-top: 1px solid #000;
+  border-right: none;
+  border-bottom: 1px solid #000;
+  border-left: 1px solid #000;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  background-color: #ddd;
+  color: #000;
+}
+
+.d-print-none .o_pager_next {
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+  border-bottom: 1px solid #000;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  background-color: #ddd;
+  color: #000;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: right;
+}
+
+.empty-cart-message {
+  padding-left: 10px;
 }

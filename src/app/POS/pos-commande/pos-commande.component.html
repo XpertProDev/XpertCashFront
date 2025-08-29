@@ -36,6 +36,40 @@
                       </li>
                     </ul>
                 </div>
+
+                <!-- pager -->
+                <div class="pager" aria-label="Pagination">
+                  <div class="pager-info" aria-live="polite">
+                    <span class="o_pager_counter">
+                      <span>{{ pagerStart }} - {{ pagerEnd }}</span>
+                      <span> / </span>
+                      <span class="o_pager_limit">{{ pagerTotal }}</span>
+                    </span>
+                  </div>
+
+                  <div class="btn-group d-print-none" aria-atomic="true" role="group" aria-label="Navigation pages">
+                    <button
+                      type="button"
+                      class="o_pager_previous"
+                      aria-label="Précédent"
+                      title="Page précédente"
+                      [disabled]="isFirstPage() || pagerTotal === 0"
+                      (click)="prevPage()">
+                      <i class="ri-arrow-left-s-line"></i>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="o_pager_next"
+                      aria-label="Suivant"
+                      title="Page suivante"
+                      [disabled]="isLastPage() || pagerTotal === 0"
+                      (click)="nextPage()">
+                      <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                  </div>
+                </div>
+
             </div>
 
             <!-- Section liste des commandes / ventes -->
