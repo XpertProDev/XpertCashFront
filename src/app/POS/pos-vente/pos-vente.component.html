@@ -700,13 +700,13 @@
       <!-- Barre de recherche -->
       <div class="double" style="gap: 10px;">
 
-        <div class="btnAddClient">
+        <div class="btnAddClient" *ngIf="canAddClient">
           <button (click)="openAddClient()">
             Ajouter Client
           </button>
         </div>
 
-        <div class="barre"></div>
+        <div class="barre" *ngIf="canAddClient"></div>
 
         <!-- Compteur Clients Individuels -->
         <div class="contentIcon" 

@@ -197,6 +197,8 @@ export class PosVenteComponent {
 
   currentDiscountInput: string = '';
   disablePhysicalKeyboard = false;
+  userRole: string | null = null;
+  canAddClient = false;
 
   constructor(
     private router: Router,
@@ -256,6 +258,7 @@ export class PosVenteComponent {
   // Gestion du clic/tape sur un produit
   ngOnInit() {
 
+    this.loadUserRole();
     this.scannerService.disableScanner();
 
     this.calcActiveSub = this.calculatorService.isActive$.subscribe(active => {
@@ -305,6 +308,24 @@ export class PosVenteComponent {
     // Désactiver le scanner quand on est en mode saisie
     this.scannerService.setUserTyping(true);
 
+  }
+
+  private loadUserRole(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: (user) => {
+        if (user && user.roleType) {
+          this.userRole = user.roleType;
+          this.canAddClient = ['ADMIN', 'MANAGER'].includes(this.userRole);
+        }
+      },
+      error: () => {
+        const localUser = this.usersService.getCurrentUser();
+        if (localUser && localUser.roleType) {
+          this.userRole = localUser.roleType;
+          this.canAddClient = ['ADMIN', 'MANAGER'].includes(this.userRole);
+        }
+      }
+    });
   }
 
    ngOnDestroy() {
