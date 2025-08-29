@@ -89,6 +89,10 @@ export class PosCommandeComponent implements OnDestroy {
 
   private pendingRemboursementItem: any = null;
 
+    // --- Pagination (par filter key) ---
+  pageSize = 10; // ou tout autre valeur (ex: 10)
+  private pageMap = new Map<FilterKey, number>();
+
   constructor(
     public router: Router,
     private viewState: ViewStateService,
@@ -198,6 +202,7 @@ export class PosCommandeComponent implements OnDestroy {
   }
   selectFilter(key: FilterKey) {
     this.showFilterDropdown = false;
+    this.resetPageForKey(key);    // <- reset page
     this.applyFilter(key);
   }
 
@@ -235,6 +240,10 @@ export class PosCommandeComponent implements OnDestroy {
 
   loadCommandes() {
     this.commandes = this.commandeState.getAllCommandesIds().map(id => {
+      // après remplissage de this.commandes ou this.ventes
+      const cur = this.pageMap.get(this.currentFilterKey) ?? 1;
+      this.setCurrentPage(cur); // clamp la page si nécessaire
+
       const commande = this.commandeState.getCommandeDetails(id);
       let totalItems = 0;
       let totalAmount = 0;
@@ -353,6 +362,10 @@ export class PosCommandeComponent implements OnDestroy {
 
   private applyVentesFilter(key: FilterKey) {
     this.ventes = this.allVentes.filter(v => this.matchesVenteStatus(v, key));
+    // après remplissage de this.commandes ou this.ventes
+    const cur = this.pageMap.get(this.currentFilterKey) ?? 1;
+    this.setCurrentPage(cur); // clamp la page si nécessaire
+
 
     // Tri décroissant par date (dateVente > createdAt > fallback sur venteId)
     this.ventes.sort((a, b) => {
@@ -625,6 +638,7 @@ export class PosCommandeComponent implements OnDestroy {
   // signature de onSearch — attend une chaîne (template ref fournit une string)
   onSearch(term: string) {
     this.searchTerm = (term || '').trim().toLowerCase();
+    this.resetPageForKey(this.currentFilterKey);
 
     if (this.currentFilterKey === 'en-cours') {
       // recharger les commandes originales avant filter pour ne pas écraser la source
@@ -1069,6 +1083,89 @@ export class PosCommandeComponent implements OnDestroy {
       this.verifyCode();
       this.scannerBuffer = '';
     }
+  }
+
+  /** Obtenir la page courante pour le filtre actif */
+private getCurrentPage(): number {
+  return this.pageMap.get(this.currentFilterKey) ?? 1;
+}
+private setCurrentPage(page: number): void {
+  const total = this.getTotalForCurrentFilter();
+  const last = Math.max(1, Math.ceil((total || 0) / this.pageSize));
+  const p = Math.max(1, Math.min(page, last));
+  this.pageMap.set(this.currentFilterKey, p);
+}
+
+/** Reset page to 1 for given key (useful on filter change or new search) */
+private resetPageForKey(key: FilterKey) {
+  this.pageMap.set(key, 1);
+}
+
+  /** Prev / Next */
+  prevPage(): void {
+    const cur = this.getCurrentPage();
+    if (cur > 1) {
+      this.setCurrentPage(cur - 1);
+    }
+  }
+  nextPage(): void {
+    const cur = this.getCurrentPage();
+    const total = this.getTotalForCurrentFilter();
+    const last = Math.max(1, Math.ceil((total || 0) / this.pageSize));
+    if (cur < last) {
+      this.setCurrentPage(cur + 1);
+    }
+  }
+  isFirstPage(): boolean {
+    return this.getCurrentPage() <= 1;
+  }
+  isLastPage(): boolean {
+    const total = this.getTotalForCurrentFilter();
+    const last = Math.max(1, Math.ceil((total || 0) / this.pageSize));
+    return this.getCurrentPage() >= last;
+  }
+
+  /** Totaux / bornes pour l'affichage du pager */
+  get pagerTotal(): number {
+    return this.getTotalForCurrentFilter();
+  }
+  get pagerStart(): number {
+    const total = this.pagerTotal;
+    if (!total) return 0;
+    const start = (this.getCurrentPage() - 1) * this.pageSize + 1;
+    return Math.min(start, total);
+  }
+  get pagerEnd(): number {
+    const total = this.pagerTotal;
+    if (!total) return 0;
+    const end = this.getCurrentPage() * this.pageSize;
+    return Math.min(end, total);
+  }
+
+  /** Total items selon le filtre courant */
+  private getTotalForCurrentFilter(): number {
+    if (this.currentFilterKey === 'en-cours') {
+      return this.commandes?.length ?? 0;
+    } else {
+      return this.ventes?.length ?? 0;
+    }
+  }
+
+  /** Listes paginées exposées au template */
+  get displayedCommandes(): any[] {
+    if (this.currentFilterKey !== 'en-cours') return [];
+    const total = this.commandes || [];
+    const page = this.getCurrentPage();
+    const start = (page - 1) * this.pageSize;
+    return total.slice(start, start + this.pageSize);
+  }
+
+  get displayedVentes(): any[] {
+    if (this.currentFilterKey === 'en-cours') return [];
+    const total = this.ventes || [];
+    const page = this.getCurrentPage();
+    const start = (page - 1) * this.pageSize;
+    return total.slice(start, start + this.pageSize);
   }
 
 

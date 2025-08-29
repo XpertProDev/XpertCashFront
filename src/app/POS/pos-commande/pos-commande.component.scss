@@ -152,7 +152,7 @@ p {
     
 .toolbar {
     display: grid;
-    grid-template-columns: 45px 1fr 130px 160px;
+    grid-template-columns: 45px 1fr 130px 180px;
     margin: 10px 10px 0;
 }
 
@@ -992,6 +992,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-content: right;
 }
 
 .empty-cart-message {
