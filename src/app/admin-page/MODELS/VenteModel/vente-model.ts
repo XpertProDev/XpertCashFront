@@ -8,6 +8,9 @@ export interface VenteRequest {
   // montantPaye?: number;
   remises?: { [produitId: string]: number }; // Nouveau: remises par produit (%)
   remiseGlobale?: number; // Nouveau: remise globale (%)
+
+  clientId?: number | null;           // ✅ ajouté
+  entrepriseClientId?: number | null;
 }
 
 export interface VenteResponse {

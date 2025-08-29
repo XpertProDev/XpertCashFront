@@ -946,12 +946,21 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
     });
   }
 
-  selectClient(client: Clients) {
-    this.selectedClient = client;
-    this.selectedEntreprise = null; // Réinitialiser l'entreprise sélectionnée
-    console.log('Client sélectionné:', client);
-    this.closeListClientPopup();
-  }
+// Sélection client particulier
+selectClient(client: Clients) {
+  this.selectedClient = client;
+  this.selectedEntreprise = null; // annule toute entreprise sélectionnée
+  console.log('Client sélectionné:', client);
+  this.closeListClientPopup();
+}
+
+// Sélection entreprise cliente
+selectEntreprise(entreprise: EntrepriseClient) {
+  this.selectedEntreprise = entreprise;
+  this.selectedClient = null; // annule tout client particulier
+  console.log('Entreprise sélectionnée:', entreprise);
+  this.closeListClientPopup();
+}
 
   // Gestion du changement de pays
   onPaysChange(event: any): void {
@@ -1225,12 +1234,7 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
     });
   }
 
-  selectEntreprise(entreprise: EntrepriseClient) {
-    this.selectedEntreprise = entreprise;
-    this.selectedClient = null; // Réinitialiser le client sélectionné
-    console.log('Entreprise sélectionnée:', entreprise);
-    this.closeListClientPopup();
-  }
+ 
 
   getSelectedCustomerName(): string {
     if (this.selectedClient) {
@@ -1350,92 +1354,92 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
   }
 
   private buildVenteRequestFromCart(): VenteRequest | null {
-    if (!this.selectedBoutiqueId) {
-      this.venteErrorMessage = 'Aucune boutique sélectionnée.';
-      return null;
-    }
-
-    const produitsQuantites: { [k: string]: number } = {};
-    this.cart.forEach((qty, productId) => {
-      if (qty > 0) produitsQuantites[String(productId)] = qty;
-    });
-
-    if (Object.keys(produitsQuantites).length === 0) {
-      this.venteErrorMessage = 'Le panier est vide.';
-      return null;
-    }
-
-    const modePaiementEnum = this.mapPaymentMethodToEnum(this.selectedPaymentMethod);
-
-    // Récupérer les informations du client/entreprise
-    let clientNom = undefined;
-    let clientNumero = undefined;
-
-    if (this.selectedClient) {
-      clientNom = this.selectedClient.nomComplet || undefined;
-      clientNumero = this.selectedClient.telephone || undefined;
-    } else if (this.selectedEntreprise) {
-      clientNom = this.selectedEntreprise.nom || undefined;
-      clientNumero = this.selectedEntreprise.telephone || undefined;
-    }
-
-    const request: VenteRequest = {
-      boutiqueId: this.selectedBoutiqueId,
-      produitsQuantites,
-      description: 'Vente POS',
-      clientNom: clientNom,     // Utilisez le bon nom de champ
-      clientNumero: clientNumero, // Utilisez le bon nom de champ
-      modePaiement: modePaiementEnum ?? undefined,
-    };
-
-    // Ajouter les remises par produit
-    // --- construction des remises pour la requête (mettre à jour pour inclure remise en cours) ---
-    const remises: { [id: string]: number } = {};
-    this.getCartItems().forEach(item => {
-      // remise persistée en CFA (montant total sur la ligne)
-      let discountAmount = this.productDiscounts.get(item.product.id) || 0;
-
-      // si aucune remise persistée mais l'utilisateur est en train d'éditer cette remise,
-      // calculer la remise temporaire depuis discountMode et l'utiliser
-      if ((!discountAmount || discountAmount === 0)
-          && this.discountMode.active
-          && this.discountMode.productId === item.product.id) {
-
-        if (this.discountMode.type === 'CFA') {
-          // on considère que discountMode.value est le montant TOTAL de remise pour la ligne
-          discountAmount = Math.max(0, this.discountMode.value || 0);
-        } else {
-          // pourcentage -> convertir en montant
-          const pct = Math.max(0, this.discountMode.value || 0) / 100;
-          discountAmount = Math.round(item.product.prixVente * item.quantity * pct);
-        }
-      }
-
-      if (discountAmount > 0) {
-        const totalSansRemise = item.product.prixVente * item.quantity;
-        // envoyer la remise en pourcentage comme attendu par l'API
-        remises[item.product.id] = (discountAmount / totalSansRemise) * 100;
-      }
-    });
-    if (Object.keys(remises).length > 0) {
-      request.remises = remises;
-    }
-
-
-    // Ajouter la remise globale
-    if (this.globalDiscount.active && this.globalDiscount.value > 0) {
-      if (this.globalDiscount.type === 'CFA') {
-        const subtotal = this.getSubtotal();
-        if (subtotal > 0) {
-          request.remiseGlobale = (this.globalDiscount.value / subtotal) * 100;
-        }
-      } else {
-        request.remiseGlobale = this.globalDiscount.value;
-      }
-    }
-
-    return request;
+  if (!this.selectedBoutiqueId) {
+    this.venteErrorMessage = 'Aucune boutique sélectionnée.';
+    return null;
   }
+
+  const produitsQuantites: { [k: string]: number } = {};
+  this.cart.forEach((qty, productId) => {
+    if (qty > 0) produitsQuantites[String(productId)] = qty;
+  });
+
+  if (Object.keys(produitsQuantites).length === 0) {
+    this.venteErrorMessage = 'Le panier est vide.';
+    return null;
+  }
+
+  const modePaiementEnum = this.mapPaymentMethodToEnum(this.selectedPaymentMethod);
+
+  // Récupérer les informations du client/entreprise
+  let clientNom: string | undefined = undefined;
+  let clientNumero: string | undefined = undefined;
+  let clientId: number | null = null;
+  let entrepriseClientId: number | null = null;
+
+  if (this.selectedClient) {
+    clientNom = this.selectedClient.nomComplet || undefined;
+    clientNumero = this.selectedClient.telephone || undefined;
+    clientId = this.selectedClient.id;
+  } else if (this.selectedEntreprise) {
+    clientNom = this.selectedEntreprise.nom || undefined;
+    clientNumero = this.selectedEntreprise.telephone || undefined;
+    entrepriseClientId = this.selectedEntreprise.id ?? null;
+  }
+  // si aucun client sélectionné, clientId et entrepriseClientId restent null → client passant
+
+  const request: VenteRequest = {
+    boutiqueId: this.selectedBoutiqueId,
+    produitsQuantites,
+    description: 'Vente POS',
+    clientNom: clientNom,
+    clientNumero: clientNumero,
+    clientId: clientId,
+    entrepriseClientId: entrepriseClientId,
+    modePaiement: modePaiementEnum ?? undefined,
+  };
+
+  // Ajouter les remises par produit
+  const remises: { [id: string]: number } = {};
+  this.getCartItems().forEach(item => {
+    let discountAmount = this.productDiscounts.get(item.product.id) || 0;
+
+    if ((!discountAmount || discountAmount === 0)
+        && this.discountMode.active
+        && this.discountMode.productId === item.product.id) {
+
+      if (this.discountMode.type === 'CFA') {
+        discountAmount = Math.max(0, this.discountMode.value || 0);
+      } else {
+        const pct = Math.max(0, this.discountMode.value || 0) / 100;
+        discountAmount = Math.round(item.product.prixVente * item.quantity * pct);
+      }
+    }
+
+    if (discountAmount > 0) {
+      const totalSansRemise = item.product.prixVente * item.quantity;
+      remises[item.product.id] = (discountAmount / totalSansRemise) * 100;
+    }
+  });
+  if (Object.keys(remises).length > 0) {
+    request.remises = remises;
+  }
+
+  // Ajouter la remise globale
+  if (this.globalDiscount.active && this.globalDiscount.value > 0) {
+    if (this.globalDiscount.type === 'CFA') {
+      const subtotal = this.getSubtotal();
+      if (subtotal > 0) {
+        request.remiseGlobale = (this.globalDiscount.value / subtotal) * 100;
+      }
+    } else {
+      request.remiseGlobale = this.globalDiscount.value;
+    }
+  }
+
+  return request;
+}
+
 
   submitVente() {
     this.venteErrorMessage = null;
@@ -1527,11 +1531,12 @@ isQuantiteCritique(produit: ProduitDetailsResponseDTO): boolean {
     return 'AUTRE';
   }
 
-  clearCustomerSelection(event: MouseEvent) {
-    event.stopPropagation();
-    this.selectedClient = null;
-    this.selectedEntreprise = null;
-  }
+ // Réinitialiser la sélection
+  clearCustomerSelection(event: Event) {
+  event.stopPropagation(); // éviter que le popup se réouvre
+  this.selectedClient = null;
+  this.selectedEntreprise = null;
+}
 
   // Méthodes pour le déplacement
   startDrag(event: MouseEvent): void {
