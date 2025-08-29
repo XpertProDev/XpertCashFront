@@ -104,6 +104,8 @@ export class PosAccueilComponent {
   // Ajoutez ces propriétés à votre classe
   isCalculatorMinimized = false;
   calculatorPosition = { x: 100, y: 100 };
+  isCalculatorActive = false;
+  private calculatorActiveSub: Subscription;
 
   constructor(
     private router: Router,
@@ -134,6 +136,10 @@ export class PosAccueilComponent {
     
     this.commandeSubscription = this.commandeState.activeCommandeId$.subscribe(id => {
       this.activeCommande = id;
+    });
+
+    this.calculatorActiveSub = this.calculator.isActive$.subscribe(isActive => {
+      this.isCalculatorActive = isActive;
     });
   }
 
@@ -221,6 +227,8 @@ export class PosAccueilComponent {
   ngOnDestroy() {
     this.removeResizeListeners();
     this.boutiqueSub?.unsubscribe();
+    this.commandeSubscription?.unsubscribe();
+    this.calculatorActiveSub?.unsubscribe();
   }
 
   // ngOnDestroy() {
@@ -561,35 +569,29 @@ export class PosAccueilComponent {
   // Optionnel : gestion clavier global pour la calculatrice
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-
-    // Si la calculatrice est ouverte, laisser CalculatorService gérer les événements
-    if (this.showCalculatorPopup) {
-      this.calculator.handleComputerKeyboard(event);
+    // Si la calculatrice n'est pas visible, on ne fait rien.
+    if (!this.showCalculatorPopup) {
       return;
     }
 
-    // Si l'utilisateur tape dans un input / textarea / contentEditable -> ne pas interférer
+    // Si l'utilisateur tape dans un input, textarea, etc., on désactive la calculatrice
+    // et on laisse l'événement se propager normalement.
     const target = event.target as HTMLElement | null;
-    const isEditable = !!target && (
+    const isTypingInInput = !!target && (
       target.tagName === 'INPUT' ||
       target.tagName === 'TEXTAREA' ||
-      (target as HTMLElement).isContentEditable
+      target.isContentEditable
     );
-    if (isEditable) return; // laisse le champ gérer l'évènement normalement
 
-    // N'intercepte que si la calculatrice est visible
-    if (!this.showCalculatorPopup) return;
+    if (isTypingInInput) {
+      this.calculator.setActive(false); // Désactive la calculatrice
+      return; // Ne pas traiter l'événement pour la calculatrice
+    }
 
-    const k = event.key;
-    if ((/^[0-9]$/).test(k)) { this.onCalcKey(k); event.preventDefault(); return; }
-    if (k === 'Enter') { this.onCalcKey('='); event.preventDefault(); return; }
-    if (k === '.') { this.onCalcKey('.'); event.preventDefault(); return; }
-    if (k === '+') { this.onCalcKey('+'); event.preventDefault(); return; }
-    if (k === '-') { this.onCalcKey('−'); event.preventDefault(); return; }
-    if (k === '*') { this.onCalcKey('×'); event.preventDefault(); return; }
-    if (k === '/') { this.onCalcKey('÷'); event.preventDefault(); return; }
-    if (k === 'Backspace') { this.onCalcKey('▶'); event.preventDefault(); return; }
-    if (k === 'Escape') { this.onCalcKey('ON/AC'); event.preventDefault(); return; }
+    // Si la calculatrice est active, on lui envoie la touche
+    if (this.isCalculatorActive) {
+      this.calculator.handleComputerKeyboard(event);
+    }
   }
 
   /** Réactive la calculatrice lors d'un clic dessus */
@@ -962,6 +964,7 @@ minimizeCalculator(): void {
 
  onSearch(event: Event) {
     const input = event.target as HTMLInputElement;
+    this.calculator.setActive(false); // Désactive la calculatrice lors de la recherche
     console.log('Recherche:', input.value);
      this.searchTerm = input.value;
     this.searchService.setSearch(input.value);
