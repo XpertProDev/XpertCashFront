@@ -425,7 +425,7 @@ export class FactureProformaComponent implements OnInit {
   onClickOutside(target: HTMLElement) {
   if (!target.closest('.filter-dropdown-wrapper') && !target.closest('.filter-toggle-icon')) {
     this.dropdownOuvert = false;
-    this.reinitialiserFiltre();
+    // this.reinitialiserFiltre();
   }
 }
 
