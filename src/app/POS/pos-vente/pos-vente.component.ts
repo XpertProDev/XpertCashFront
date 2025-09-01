@@ -219,7 +219,7 @@ export class PosVenteComponent {
     private boutiqueState: BoutiqueStateService,
     private scannerService: ScannerService,
     private searchService: SearchService,
-    private calculatorService: CalculatorService
+    private calculator: CalculatorService
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
@@ -263,9 +263,9 @@ export class PosVenteComponent {
   ngOnInit() {
     this.loadUserRole();
 
-    this.calcActiveSub = this.calculatorService.isActive$.subscribe(active => {
-      this.isCalculatorActive = active;
-    });
+    // this.calcActiveSub = this.calculatorService.isActive$.subscribe(active => {
+    //   this.isCalculatorActive = active;
+    // });
 
     this.searchSub = this.searchService.search$.subscribe(term => {
       this.searchTerm = term;
@@ -310,6 +310,15 @@ export class PosVenteComponent {
     // Désactiver le scanner quand on est en mode saisie
     this.scannerService.setUserTyping(true);
 
+     // S'abonner à l'état de la calculatrice
+    this.calculator.isActive$.subscribe(active => {
+      if (active) {
+        this.scannerService.disableScanner();
+      } else {
+        this.scannerService.enableScanner();
+      }
+    });
+
   }
 
   private loadUserRole(): void {
@@ -345,7 +354,7 @@ export class PosVenteComponent {
     });
   }
 
-  private handleBarcodeScan(barcode: string): void {
+private handleBarcodeScan(barcode: string): void {
     console.log('=== SCAN DEBUG ===');
     console.log('Code scanné:', barcode);
     
@@ -383,7 +392,7 @@ export class PosVenteComponent {
       console.log('Produit trouvé:', product);
       console.log('Ajout au panier...');
       this.addToCart(product);
-      this.showScanSuccess(product.nom);
+      // this.showScanSuccess(product.nom); 
     } else {
       console.log('Aucun produit trouvé');
       console.log('Codes-barres disponibles:', this.allProducts.map(p => p.codeBare).filter(Boolean));
@@ -418,62 +427,62 @@ export class PosVenteComponent {
   }
 
   // Nouvelle méthode pour afficher le succès du scan
-  private showScanSuccess(productName: string): void {
-    // Optionnel: afficher un toast de succès
-    console.log(`Produit "${productName}" ajouté au panier via scan`);
+  // private showScanSuccess(productName: string): void {
+  //   // Optionnel: afficher un toast de succès
+  //   console.log(`Produit "${productName}" ajouté au panier via scan`);
     
-    // Feedback visuel temporaire
-    this.showScanError = false;
-    this.scanErrorMessage = '';
+  //   // Feedback visuel temporaire
+  //   this.showScanError = false;
+  //   this.scanErrorMessage = '';
     
-    // Afficher un message de succès
-    setTimeout(() => {
-      this.showScanError = true;
-      this.scanErrorMessage = `Produit "${productName}" ajouté au panier !`;
-      setTimeout(() => {
-        this.showScanError = false;
-      }, 2000);
-    }, 100);
-  }
+  //   // Afficher un message de succès
+  //   setTimeout(() => {
+  //     this.showScanError = true;
+  //     this.scanErrorMessage = `Produit "${productName}" ajouté au panier !`;
+  //     setTimeout(() => {
+  //       this.showScanError = false;
+  //     }, 2000);
+  //   }, 100);
+  // }
 
   // Méthode de test pour simuler un scan (utile pour debug)
-  testScan(code: string): void {
-    console.log('Test de scan avec le code:', code);
-    this.handleBarcodeScan(code);
-  }
+  // testScan(code: string): void {
+  //   console.log('Test de scan avec le code:', code);
+  //   this.handleBarcodeScan(code);
+  // }
 
   // Méthode pour tester le scanner avec différents codes
-  testScannerWithCodes(): void {
-    console.log('=== TEST SCANNER AVEC DIFFÉRENTS CODES ===');
+  // testScannerWithCodes(): void {
+  //   console.log('=== TEST SCANNER AVEC DIFFÉRENTS CODES ===');
     
-    // Test avec des codes courts
-    this.testScan('123');
-    this.testScan('456');
+  //   // Test avec des codes courts
+  //   this.testScan('123');
+  //   this.testScan('456');
     
-    // Test avec le code que vous avez dans votre bouton
-    this.testScan('6920484370182');
+  //   // Test avec le code que vous avez dans votre bouton
+  //   this.testScan('6920484370182');
     
-    // Test avec des codes aléatoires
-    this.testScan('987654321');
-    this.testScan('ABCDEF123');
-  }
+  //   // Test avec des codes aléatoires
+  //   this.testScan('987654321');
+  //   this.testScan('ABCDEF123');
+  // }
 
   // Méthode pour vérifier l'état du scanner
-  checkScannerStatus(): void {
-    console.log('=== ÉTAT DU SCANNER ===');
-    console.log('ScannerService disponible:', !!this.scannerService);
-    console.log('scanInProgress:', this.scanInProgress);
-    console.log('Produits chargés:', this.allProducts.length);
-    console.log('Produits avec code-barres:', this.allProducts.filter(p => p.codeBare).length);
+  // checkScannerStatus(): void {
+  //   console.log('=== ÉTAT DU SCANNER ===');
+  //   console.log('ScannerService disponible:', !!this.scannerService);
+  //   console.log('scanInProgress:', this.scanInProgress);
+  //   console.log('Produits chargés:', this.allProducts.length);
+  //   console.log('Produits avec code-barres:', this.allProducts.filter(p => p.codeBare).length);
     
-    // Afficher quelques codes-barres disponibles
-    const codesWithProducts = this.allProducts
-      .filter(p => p.codeBare)
-      .slice(0, 5)
-      .map(p => ({ id: p.id, nom: p.nom, code: p.codeBare }));
+  //   // Afficher quelques codes-barres disponibles
+  //   const codesWithProducts = this.allProducts
+  //     .filter(p => p.codeBare)
+  //     .slice(0, 5)
+  //     .map(p => ({ id: p.id, nom: p.nom, code: p.codeBare }));
     
-    console.log('Exemples de codes-barres:', codesWithProducts);
-  }
+  //   console.log('Exemples de codes-barres:', codesWithProducts);
+  // }
 
   private loadActiveCart() {
     this.cart = new Map(this.commandeState.getActiveCart());
@@ -511,10 +520,10 @@ export class PosVenteComponent {
   }
 
   // Méthode pour recharger et vérifier les produits
-  reloadProductsForScan(): void {
-    console.log('=== RECHARGEMENT PRODUITS POUR SCAN ===');
-    this.loadCategories();
-  }
+  // reloadProductsForScan(): void {
+  //   console.log('=== RECHARGEMENT PRODUITS POUR SCAN ===');
+  //   this.loadCategories();
+  // }
 
   showAllProducts() {
     this.selectedCategoryId = null;
@@ -706,7 +715,7 @@ addToCart(produit: ProduitDetailsResponseDTO): void {
   if (this.getAvailableStock(produit) <= 0) return;
 
   // Désactiver la calculatrice pour éviter les conflits d'input
-  this.calculatorService.setActive(false);
+  this.calculator.setActive(false);
   
   // Gestion de la remise
   if (this.discountMode.active) {
@@ -848,7 +857,7 @@ getTotalDiscount(): number {
   
   handleKeyPress(key: string): void {
     // Désactiver la calculatrice dès qu'on utilise le clavier de vente
-    this.calculatorService.setActive(false);
+    this.calculator.setActive(false);
 
     if (this.inputMode === 'discount') {
       this.handleDiscountKeyPress(key); // Gestion remise

@@ -25,7 +25,7 @@
           <div class="category-header">
             <p (click)="showAllProducts()" class="allCate">
              Toutes les catégories</p>
-            <div class="scan-controls">
+            <!-- <div class="scan-controls">
               <button class="scan-test-btn" (click)="testScan('6920484370182')" title="Test scan avec code 6920484370182">
                 <i class="ri-barcode-line"></i> Test Scan
               </button>
@@ -41,7 +41,7 @@
               <span class="scan-status" [class.active]="!scanInProgress">
                 <i class="ri-wifi-line"></i> Scanner {{ scanInProgress ? 'Actif' : 'Prêt' }}
               </span>
-            </div>
+            </div> -->
           </div>
         </div>
         <ul class="ul_name_categorie" *ngIf="categories.length">

@@ -17,7 +17,8 @@ interface CalcState {
 export class CalculatorService {
   private state: CalcState = this.createInitialState();
   private _solarDisplay: string = '0000';
-  private _isActive = new BehaviorSubject<boolean>(true);
+  // private _isActive = new BehaviorSubject<boolean>(true);
+  private _isActive = new BehaviorSubject<boolean>(false);
   public isActive$ = this._isActive.asObservable();
 
   private createInitialState(): CalcState {
@@ -243,10 +244,11 @@ private sqrt() {
   }
   
   public handleComputerKeyboard(event: KeyboardEvent): void {
+    if (!this._isActive.value) return;
     // Ne fait rien si la calculatrice n'est pas active
-    if (!this._isActive.value) {
-      return;
-    }
+    // if (!this._isActive.value) {
+    //   return;
+    // }
 
     const key = event.key;
     
