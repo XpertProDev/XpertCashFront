@@ -27,95 +27,85 @@ export class ScannerService {
   }
 
   private setupScannerListener(): void {
-    // listener global en phase de capture pour intercepter avant d'autres handlers
+    // Utiliser un listener global pour capturer tous les événements clavier
     document.addEventListener('keydown', (event: KeyboardEvent) => {
       this.handleKeyEvent(event);
-    }, true); // capture phase
+    }, true); // true = capture phase pour intercepter avant les autres handlers
   }
 
   private handleKeyEvent(event: KeyboardEvent): void {
     if (!this.isEnabled) return;
 
-    // Si l'utilisateur est en train de taper volontairement, on n'interprète pas les frappes comme un scan
-    if (this.isUserTyping) {
-      return;
-    }
-
     const now = Date.now();
     const timeSinceLastKey = now - this.lastKeyTime;
     this.lastKeyTime = now;
 
-    // Ignorer si on est dans un champ de saisie (user tape)
-    const target = event.target as HTMLElement | null;
+    // Ignorer si on est dans un champ de saisie
+    const target = event.target as HTMLElement;
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
-      // Ne pas traiter comme scan
+      console.log('Scanner: Ignoré - dans un champ de saisie');
       return;
     }
 
-    // Si l'utilisateur tape normalement (délai > 200ms entre touches) => considérer comme saisie normale
+    // Si l'utilisateur tape normalement (délai > 200ms entre touches)
     if (timeSinceLastKey > 200) {
+      console.log('Scanner: Ignoré - utilisateur tape normalement');
       this.resetScan();
       return;
     }
 
-    // Détection d'un scan: touches très rapides
+    // Scanner détecté (délai < 150ms entre touches)
     if (timeSinceLastKey < this.SCAN_TIMEOUT) {
-      const key = this.mapAzertyKey(event.key); // Mapper les touches AZERTY -> chiffres si besoin
-
-      // stopper la propagation pour empêcher d'autres handlers (ex: HostListener dans le composant POS)
-      try {
-        event.preventDefault();
-        // stopImmediatePropagation est utile pour empêcher d'autres listeners sur le même événement
-        // (surtout parce qu'on est en phase de capture)
-        (event as any).stopImmediatePropagation?.();
-      } catch (err) {
-        // ignore si non supporté
-      }
-
+      console.log('Scanner: Événement de scan détecté, délai:', timeSinceLastKey, 'ms');
+      
+      const key = this.mapAzertyKey(event.key); // Mapper les touches AZERTY
+      
       if (key === 'Enter') {
-        // Fin du scan
         if (this.barcode.length >= 3 && !this.isScanning) {
+          console.log('Scanner: Code complet détecté:', this.barcode);
           this.isScanning = true;
           this.scanningSubject.next(true);
-          // émet le code lu
           this.scanSubject.next(this.barcode);
-          // petit délai pour indiquer la fin du scan
+          
           setTimeout(() => {
             this.scanningSubject.next(false);
             this.isScanning = false;
           }, 100);
+        } else if (this.isScanning) {
+          console.log('Scanner: Scan déjà en cours, ignoré');
+        } else {
+          console.log('Scanner: Code trop court:', this.barcode);
         }
         this.resetScan();
       } else if (key.length === 1 && !event.ctrlKey && !event.metaKey) {
-        // Ajouter caractère dans le buffer de scan
         this.barcode += key;
-
-        // Réinitialiser le timer de fin de scan
+        console.log('Scanner: Caractère ajouté:', key, 'Buffer:', this.barcode);
+        
+        // Réinitialiser le timer
         clearTimeout(this.timer);
         this.timer = setTimeout(() => {
-          // si timeout => on considère que le scan est terminé / invalide
+          console.log('Scanner: Timeout, reset buffer');
           this.resetScan();
-        }, 500);
+        }, 500); // 500ms pour détecter la fin du scan
       }
     }
   }
 
-  // Mapper les touches AZERTY vers QWERTY (ex: '&' => '1', etc.)
+  // Mapper les touches AZERTY vers QWERTY
   private mapAzertyKey(key: string): string {
     const azertyMap: {[key: string]: string} = {
       '&': '1', 'é': '2', '"': '3', "'": '4', '(': '5',
       '-': '6', 'è': '7', '_': '8', 'ç': '9', 'à': '0',
       'ù': '0', '²': '2', '°': '0'
     };
+    
     return azertyMap[key] || key;
   }
 
+  // Réinitialiser l'état du scan
   private resetScan(): void {
     this.barcode = '';
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.timer = null;
-    }
+    clearTimeout(this.timer);
     this.isScanning = false;
   }
 
@@ -129,25 +119,29 @@ export class ScannerService {
 
   setUserTyping(typing: boolean): void {
     this.isUserTyping = typing;
-    // console.log('Scanner: User typing:', typing);
+    console.log('Scanner: User typing:', typing);
   }
 
   enableScanner(): void {
     this.isEnabled = true;
+    console.log('Scanner: Activé');
   }
 
   disableScanner(): void {
     this.isEnabled = false;
+    console.log('Scanner: Désactivé');
   }
 
+  // Méthode de test pour simuler un scan
   simulateScan(code: string): void {
+    console.log('Scanner: Simulation de scan avec:', code);
     this.scanSubject.next(code);
   }
 
   destroy(): void {
     if (this.timer) {
       clearTimeout(this.timer);
-      this.timer = null;
     }
+    console.log('Scanner: Service détruit');
   }
 }
