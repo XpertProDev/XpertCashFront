@@ -38,9 +38,6 @@
               <button class="scan-test-multi-btn" (click)="testScannerWithCodes()" title="Test avec plusieurs codes">
                 <i class="ri-test-tube-line"></i> Test Multi
               </button>
-              <!-- <button class="scan-reset-btn" (click)="resetScanner()" title="Réinitialiser le scanner">
-                <i class="ri-restart-line"></i> Reset
-              </button> -->
               <span class="scan-status" [class.active]="!scanInProgress">
                 <i class="ri-wifi-line"></i> Scanner {{ scanInProgress ? 'Actif' : 'Prêt' }}
               </span>
