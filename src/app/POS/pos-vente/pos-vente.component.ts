@@ -354,7 +354,7 @@ export class PosVenteComponent {
     });
   }
 
-private handleBarcodeScan(barcode: string): void {
+  private handleBarcodeScan(barcode: string): void {
     console.log('=== SCAN DEBUG ===');
     console.log('Code scanné:', barcode);
     
@@ -401,20 +401,42 @@ private handleBarcodeScan(barcode: string): void {
       
       setTimeout(() => {
         this.showScanError = false;
-      }, 3000);
+      }, 1000);
     }
   }
 
   // Méthode pour valider un scan et éviter les doublons
+  // private isValidScan(barcode: string): boolean {
+  //   // Vérifier que le code n'est pas vide
+  //   if (!barcode || barcode.trim().length < 3) {
+  //     return false;
+  //   }
+
+  //   // Vérifier que ce n'est pas le même code que le dernier scan
+  //   const currentTime = Date.now();
+  //   if (this.lastScannedCode === barcode && (currentTime - this.lastScanTime) < 1000) {
+  //     console.log('Scan ignoré - même code scanné trop rapidement');
+  //     return false;
+  //   }
+
+  //   // Mettre à jour le dernier scan
+  //   this.lastScannedCode = barcode;
+  //   this.lastScanTime = currentTime;
+
+  //   return true;
+  // }
+
+
   private isValidScan(barcode: string): boolean {
     // Vérifier que le code n'est pas vide
     if (!barcode || barcode.trim().length < 3) {
       return false;
     }
 
-    // Vérifier que ce n'est pas le même code que le dernier scan
+    // Vérifier que ce n'est pas exactement le même code que le dernier scan
+    // mais avec un délai beaucoup plus court pour permettre les scans rapides
     const currentTime = Date.now();
-    if (this.lastScannedCode === barcode && (currentTime - this.lastScanTime) < 1000) {
+    if (this.lastScannedCode === barcode && (currentTime - this.lastScanTime) < 50) {
       console.log('Scan ignoré - même code scanné trop rapidement');
       return false;
     }

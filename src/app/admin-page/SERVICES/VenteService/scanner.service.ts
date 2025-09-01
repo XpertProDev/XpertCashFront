@@ -19,7 +19,7 @@ export class ScannerService {
   private isEnabled = true;
   private isUserTyping = false;
   private lastKeyTime = 0;
-  private readonly SCAN_TIMEOUT = 150; // 150ms pour détecter la fin du scan
+  private readonly SCAN_TIMEOUT = 100; // 150ms pour détecter la fin du scan
   private isScanning = false;
 
   constructor() {
@@ -55,7 +55,7 @@ export class ScannerService {
       return;
     }
 
-    // Scanner détecté (délai < 150ms entre touches)
+    // Scanner détecté (délai < 100ms entre touches)
     if (timeSinceLastKey < this.SCAN_TIMEOUT) {
       console.log('Scanner: Événement de scan détecté, délai:', timeSinceLastKey, 'ms');
       
