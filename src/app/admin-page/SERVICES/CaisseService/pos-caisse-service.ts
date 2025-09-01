@@ -107,35 +107,39 @@ fermerCaisse(boutiqueId: number): Observable<any> {
   );
 }
 
-
-getDerniereCaisseVendeur(boutiqueId: number): Observable<CaisseResponse> {
+  getDerniereCaisseVendeur(boutiqueId: number): Observable<CaisseResponse> {
     return this.usersService.getValidAccessToken().pipe(
       switchMap(token => {
         if (!token) throw new Error('Aucun token trouvé');
 
-        const headers = new HttpHeaders({
-          'Authorization': `Bearer ${token}`
-        });
+        const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-        return this.http.get<CaisseResponse>(
-          `${this.apiUrl}/caisse/derniere/${boutiqueId}`, 
-          { headers }
-        ).pipe(
-          catchError(error => {
-            // Si l'endpoint retourne un tableau, prendre le premier élément
-            if (error.error && Array.isArray(error.error) && error.error.length > 0) {
-              return of(error.error[0]);
+        // pos-caisse-service.ts (extrait)
+        return this.http.get<CaisseResponse>(`${this.apiUrl}/caisse/derniere/${boutiqueId}`, { headers }).pipe(
+          map(resp => resp),
+          catchError(err => {
+            console.error('HTTP getDerniereCaisseVendeur error ->', err);
+
+            let msg = 'Erreur inconnue';
+            if (err?.error) {
+              if (typeof err.error === 'string') {
+                msg = err.error;                     // serveur renvoie directement un texte
+              } else if (err.error?.message) {
+                msg = err.error.message;             // structure { message: "..." }
+              } else {
+                try { msg = JSON.stringify(err.error); } catch { msg = String(err.error); }
+              }
+            } else if (err?.message) {
+              msg = err.message;
+            } else {
+              try { msg = JSON.stringify(err); } catch { msg = String(err); }
             }
-            throw error;
+
+            // Propager une string (évite new Error(obj) qui devient "[object Object]")
+            return throwError(() => msg);
           })
         );
-      }),
-      catchError(error => {
-        let errorMsg = 'Erreur lors du chargement de la dernière caisse';
-        if (error instanceof Error) errorMsg = error.message;
-        else if (error?.error) errorMsg = error.error;
-        
-        return throwError(() => new Error(errorMsg));
+
       })
     );
   }
