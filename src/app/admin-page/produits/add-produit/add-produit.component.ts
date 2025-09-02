@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { map, Observable, of, startWith } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, Observable, of, startWith } from 'rxjs';
 // import { SharedDataService } from '../../SERVICES/shared-data.service';
 import { CategorieService } from '../../SERVICES/categorie.service';
 import { Categorie } from '../../MODELS/categorie.model';
@@ -779,7 +779,16 @@ export class AddProduitComponent implements OnInit {
   getFilteredStreetsBoutique() {
     this.filteredStreetsBoutique = this.controlBoutique.valueChanges.pipe(
       startWith(''),
-      map(value => this._filterBoutique(value || ''))
+      debounceTime(200),
+      distinctUntilChanged(),
+      map(value => {
+        // value peut être une string ou un objet (si tu veux gérer object dans le futur)
+        if (!value) return '';
+        if (typeof value === 'string') return value;
+        // si jamais tu passes un objet boutique ici, on essaie d'en extraire le nom
+        return (value as any).nomBoutique || (value as any).nom || '';
+      }),
+      map((v: string) => this._filterBoutique(v || ''))
     );
   }
 
@@ -788,7 +797,7 @@ export class AddProduitComponent implements OnInit {
     return this.boutiquesList
         .filter(b => this._normalizeValue(b.nomBoutique).includes(filterValue))
         .map(b => b.nomBoutique);
-}
+  }
 
   private _normalizeValue(value: string): string {
     return value.toLowerCase().replace(/\s/g, '');
@@ -799,13 +808,14 @@ export class AddProduitComponent implements OnInit {
   }
 
   initForm() {
-    this.boutiqueForm = this.fb.group({
-      nomBoutique: ['', Validators.required],
-      emailBoutique: ['', [Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
-      adresseBoutique: [''],
-      telephoneBoutique: ['', Validators.pattern(/^\d{8,15}$/)],
-    });
-  }
+  this.boutiqueForm = this.fb.group({
+    nomBoutique: ['', Validators.required],
+    email: ['', [Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
+    adresse: [''],
+    telephone: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
+    type: ['BOUTIQUE', Validators.required]  // Ajout du champ type
+  });
+}
   
   updatePhoneValidator(longueur: number): void {
     this.boutiqueForm.controls['phone'].setValidators([
@@ -824,7 +834,8 @@ export class AddProduitComponent implements OnInit {
       nomBoutique: '',
       emailBoutique: '',
       adresseBoutique: '',
-      telephoneBoutique: ''
+      telephoneBoutique: '',
+      type: 'BOUTIQUE' 
     });
     this.boutiqueForm.markAsPristine();
     this.boutiqueForm.markAsUntouched();
@@ -848,24 +859,61 @@ export class AddProduitComponent implements OnInit {
       const control = this.boutiqueForm.get(field);
       control?.markAsTouched({ onlySelf: true });
     });
-  
+
     if (this.boutiqueForm.invalid) {
       return;
     }
-  
+
     const formData = this.boutiqueForm.value;
     
     this.usersService.addBoutique(formData).subscribe({
       next: (response) => {
+        // Essayer de récupérer l'objet boutique créé dans différentes formes possibles
+        const created = response?.data || response?.boutique || response || null;
+
+        // Construire un objet boutique minimal si nécessaire
+        const newBoutique = {
+          id: created?.id ?? created?.ID ?? Date.now(), // fallback if id missing
+          nomBoutique: created?.nomBoutique ?? created?.nom ?? formData.nomBoutique ?? 'Nouvelle boutique',
+          // preserve other fields if present
+          email: created?.email ?? formData.email,
+          adresse: created?.adresse ?? formData.adresse ?? '',
+          telephone: created?.telephone ?? formData.telephone ?? ''
+        };
+
+        // Ajouter dans la liste locale (éviter les doublons)
+        const exists = this.boutiquesList.some(b => b.id === newBoutique.id);
+        if (!exists) {
+          // marquer sélectionnée pour que l'utilisateur la voie tout de suite
+          (newBoutique as any).selected = true;
+          this.boutiquesList.push(newBoutique);
+        } else {
+          // mettre à jour éventuellement l'objet existant
+          this.boutiquesList = this.boutiquesList.map(b => b.id === newBoutique.id ? { ...b, ...newBoutique } : b);
+          (this.boutiquesList.find(b => b.id === newBoutique.id) as any).selected = true;
+        }
+
+        // Mettre à jour selectedBoutiques et boutiqueIdSelected
+        this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
+        this.boutiqueIdSelected = this.selectedBoutiques.map(b => b.id);
+
+        // Mettre le nom directement dans l'input (comme tu le fais pour categorie/unite)
+        this.controlBoutique.setValue(newBoutique.nomBoutique, { emitEvent: true });
+
+        // Recréer le filtre (pour être sûr que l'autocomplete a les dernières options)
+        this.getFilteredStreetsBoutique();
+
+        // Feedback à l'utilisateur
         this.showPopupMessage({
           title: 'Succès',
           message: 'Boutique créée avec succès',
           image: 'assets/img/succcccc.png',
           type: 'success'
         });
+
+        // Fermer le popup et réinitialiser le formulaire
         this.closePopupBoutique();
-        this.getBoutiqueName(); // Rafraîchir la liste
-        this.boutiqueForm.reset();
+        this.boutiqueForm.reset({ type: 'BOUTIQUE' });
       },
       error: (error) => {
         let errorMessage = 'Erreur lors de la création de la boutique';
@@ -893,14 +941,6 @@ export class AddProduitComponent implements OnInit {
   updateSelectedBoutiques(): void {
     this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
   }
-
-  // confirmBoutiqueSelection(): void {
-  //   this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
-  //   this.boutiqueIdSelected = this.selectedBoutiques.map(b => b.id);
-  //   const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
-  //   this.controlBoutique.setValue(selectedNames.join(', '));
-  //   this.toggleBoutiqueSelectionPanel();
-  // }
 
   confirmBoutiqueSelection(): void {
     this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);

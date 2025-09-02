@@ -481,13 +481,41 @@
           <button class="close-btn" (click)="closePopupBoutique()">&times;</button>
       </div>
       <form [formGroup]="boutiqueForm">
+        <div class="triple">
+          <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio"
+                      id="typeBoutique"
+                      formControlName="type"
+                      name="type"
+                      value="BOUTIQUE"
+                      class="radio-input">
+                <label for="typeBoutique" class="radio-label">
+                  <span class="radio-custom"></span> Boutique
+                </label>
+              </div>
+
+              <div class="radio-option">
+                <input type="radio"
+                      id="typeEntrepot"
+                      formControlName="type"
+                      name="type"
+                      value="ENTREPOT"
+                      class="radio-input">
+                <label for="typeEntrepot" class="radio-label">
+                  <span class="radio-custom"></span> Entrepôt
+                </label>
+              </div>
+          </div>
+        </div>
+        
         <div class="popup-body">
           
           <div class="champ_grid">
             <!-- Input de nom de boutique  -->
             <div class="champ_input">
               <input class="input_focus" style="min-width: 150px;" type="text" formControlName="nomBoutique" placeholder="Saisis le nom de la boutique">
-              <label class="label">Nom de la boutque</label>
+              <label class="label">Nom de la boutique</label>
               <div *ngIf="boutiqueForm.get('nomBoutique')?.invalid && boutiqueForm.get('nomBoutique')?.touched">
                 <small class="error">Ce champ est obligatoire.</small>
               </div>
@@ -495,9 +523,9 @@
 
             <!-- Input d'email'  -->
             <div class="champ_input">
-              <input class="input_focus" style="min-width: 150px;" type="email" formControlName="emailBoutique" placeholder="Saisis l'email">
+              <input class="input_focus" style="min-width: 150px;" type="email" formControlName="email" placeholder="Saisis l'email">
               <label class="label">Email</label>
-              <div *ngIf="boutiqueForm.get('emailBoutique')?.invalid && boutiqueForm.get('emailBoutique')?.touched">
+              <div *ngIf="boutiqueForm.get('email')?.invalid && boutiqueForm.get('email')?.touched">
                 <small class="error">Email invalide.</small>
               </div>
             </div>
@@ -508,16 +536,16 @@
           <div class="champ_grid">
             <!-- // Input de telephone Boutique  -->
             <div class="champ_input">
-              <input class="input_focus" style="min-width: 150px;" type="number" formControlName="telephoneBoutique" placeholder="00 00 00 00">
-              <label class="label">Phone</label>
-              <div *ngIf="boutiqueForm.get('telephoneBoutique')?.invalid && boutiqueForm.get('telephoneBoutique')?.touched">
+              <input class="input_focus" style="min-width: 150px;" type="number" formControlName="telephone" placeholder="00 00 00 00">
+              <label class="label">Téléphone</label>
+              <div *ngIf="boutiqueForm.get('telephone')?.invalid && boutiqueForm.get('telephone')?.touched">
                 <small class="error">Ce champ est obligatoire.</small>
               </div>
             </div>
 
             <!-- Input Numero de téléphone  -->
             <div class="champ_input">
-                <input class="input_focus" style="min-width: 150px;" type="text" formControlName="adresseBoutique" placeholder="Saisis l'adresse">
+                <input class="input_focus" style="min-width: 150px;" type="text" formControlName="adresse" placeholder="Saisis l'adresse">
                 <label class="label">Adresse boutique</label>
             </div>
           </div>
