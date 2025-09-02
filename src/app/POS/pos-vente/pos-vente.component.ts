@@ -597,8 +597,12 @@ loadProduitsByCategorie(categorieId: number, page: number = 0, size: number = 20
 
       // Si c'est la première page ET qu'une catégorie spécifique est sélectionnée
       if (page === 0 && this.selectedCategoryId !== null) {
+        // Remplacer les produits affichés pour cette catégorie
         this.displayedProducts = mappedProducts;
-        this.allProducts = mappedProducts; // Réinitialiser pour cette catégorie
+        
+        // MAIS garder tous les produits dans allProducts et juste mettre à jour cette catégorie
+        this.allProducts = this.allProducts.filter(p => p.categorieId !== this.selectedCategoryId);
+        this.allProducts.push(...mappedProducts);
       } else {
         // Sinon, ajouter à la suite (pour "Toutes les catégories" ou pages suivantes)
         this.displayedProducts.push(...mappedProducts);
@@ -617,6 +621,9 @@ loadProduitsByCategorie(categorieId: number, page: number = 0, size: number = 20
       
       // Recalculer les compteurs
       this.recomputeCategoryCountsForBoutique();
+      
+      // Forcer la mise à jour de l'affichage pour les compteurs
+      this.cdr.detectChanges();
       
       // Désactiver l'indicateur de chargement
       this.isLoadingMore = false;
@@ -691,8 +698,19 @@ selectCategory(categoryId: number | undefined) {
   this.selectedCategoryId = categoryId;
   this.currentPage = 0; // Réinitialiser à la première page
   
-  // Charger la première page de la catégorie sélectionnée
-  this.loadProduitsByCategorie(categoryId, 0, this.pageSize);
+  // Vider le cache AVANT de charger les nouveaux produits
+  // pour éviter d'afficher des compteurs incorrects
+  this.clearCategoryCountCache();
+  
+  // S'assurer que tous les produits de toutes les catégories sont chargés
+  this.ensureAllCategoriesLoaded();
+  
+  // Filtrer l'affichage pour la catégorie sélectionnée
+  const categoryProducts = this.allProducts.filter(p => p.categorieId === categoryId);
+  this.displayedProducts = categoryProducts;
+  
+  // Forcer la mise à jour de l'affichage
+  this.cdr.detectChanges();
 }
 
 
@@ -842,6 +860,20 @@ onScroll() {
       return category.produitCount || 0;
     }
     
+    // Si les produits ne sont pas encore chargés, retourner 0 temporairement
+    if (this.allProducts.length === 0) {
+      console.log(`⏳ Produits pas encore chargés pour catégorie ${category.nom}`);
+      return 0;
+    }
+    
+    // Debug: afficher le nombre de produits par catégorie
+    const productsByCategory = this.allProducts.reduce((acc, p) => {
+      acc[p.categorieId] = (acc[p.categorieId] || 0) + 1;
+      return acc;
+    }, {} as { [key: number]: number });
+    
+    console.log(`📊 Produits par catégorie:`, productsByCategory);
+    
     // Sinon, calculer en temps réel depuis allProducts
     const filteredProducts = this.allProducts.filter((p: ProduitDetailsResponseDTO) => {
       const matchesCategory = p.categorieId === category.id;
@@ -863,6 +895,8 @@ onScroll() {
     
     // Mettre en cache le résultat
     this.categoryCountCache.set(category.id, count);
+    
+    console.log(`📊 Catégorie ${category.nom}: ${count} produits trouvés pour boutique ${this.selectedBoutiqueId}`);
     
     return count;
   }
@@ -893,6 +927,17 @@ onScroll() {
   private clearCategoryCountCache(): void {
     this.categoryCountCache.clear();
     console.log('🗑️ Cache des compteurs de catégories vidé');
+  }
+
+  /** Vérifier que tous les produits sont chargés pour toutes les catégories */
+  private ensureAllCategoriesLoaded(): void {
+    this.categories.forEach(categorie => {
+      const categoryProducts = this.allProducts.filter(p => p.categorieId === categorie.id);
+      if (categoryProducts.length === 0) {
+        console.log(`📦 Chargement des produits pour catégorie ${categorie.nom}`);
+        this.loadProduitsByCategorie(categorie.id!, 0, this.pageSize);
+      }
+    });
   }
 
   /** Recalculer les compteurs produits par catégorie pour la boutique sélectionnée */
