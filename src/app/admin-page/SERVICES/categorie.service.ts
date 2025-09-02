@@ -4,6 +4,7 @@ import { BehaviorSubject, catchError, Observable, switchMap, tap, throwError } f
 import { Categorie } from '../MODELS/categorie.model';
 import { environment } from 'src/environments/environment';
 import { UsersService } from './users.service';
+import { ProduitPaginatedResponseDTO } from '../MODELS/ProduitPaginatedResponseDTO';
 
 @Injectable({
   providedIn: 'root'
@@ -41,29 +42,33 @@ export class CategorieService {
     );
   }
 
-  getCategories(): Observable<Categorie[]> {
-    return this.usersService.getValidAccessToken().pipe(
-      switchMap(token => {
-        if (!token) {
-          console.error('⚠️ Token vide ou non défini ! Vérifiez que l\'utilisateur est bien connecté.');
-          return new Observable<Categorie[]>(); // Observable vide
-        }
+ getProduitsByCategorie(
+  categorieId: number,
+  page: number = 0,
+  size: number = 20
+): Observable<ProduitPaginatedResponseDTO> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap(token => {
+      if (!token) {
+        console.error('⚠️ Token vide ou non défini ! Vérifiez que l\'utilisateur est bien connecté.');
+        return new Observable<ProduitPaginatedResponseDTO>(); 
+      }
 
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-        console.log("🔹 En-têtes envoyés :", headers);
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      const params = { page: page.toString(), size: size.toString() };
 
-        return this.http.get<Categorie[]>(`${this.apiUrl}/allCategory`, { headers }).pipe(
-          tap((data) => {
-            this.categoriesSubject.next(data);  // Émettre les nouvelles catégories
-          })
-        );
-      }),
-      catchError(error => {
-        console.error('Erreur lors de la récupération des catégories:', error);
-        return throwError(() => error);
-      })
-    );
-  }
+      return this.http.get<ProduitPaginatedResponseDTO>(
+        `${this.apiUrl}/categories/${categorieId}/produits`,
+        { headers, params }
+      );
+    }),
+    catchError(error => {
+      console.error('Erreur lors de la récupération des produits paginés:', error);
+      return throwError(() => error);
+    })
+  );
+}
+
 
   deleteCategorie(id: number): Observable<string> {
     return this.usersService.getValidAccessToken().pipe(
@@ -88,6 +93,28 @@ export class CategorieService {
     );
   }
 
-  
+  getCategories(): Observable<Categorie[]> {
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) {
+          console.error('⚠️ Token vide ou non défini ! Vérifiez que l\'utilisateur est bien connecté.');
+          return throwError(() => new Error('Aucun token valide trouvé'));
+        }
+
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+        return this.http.get<Categorie[]>(`${this.apiUrl}/allCategory`, { headers }).pipe(
+          tap((categories) => {
+            // Met à jour le BehaviorSubject avec les catégories récupérées
+            this.categoriesSubject.next(categories);
+          })
+        );
+      }),
+      catchError(error => {
+        console.error('Erreur lors de la récupération des catégories:', error);
+        return throwError(() => error);
+      })
+    );
+  }
 
 }

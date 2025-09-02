@@ -527,25 +527,18 @@ export class PosAccueilComponent {
   //   }
   // }
 
-  toggleCalculator(): void {
-    this.showCalculatorPopup = !this.showCalculatorPopup;
-    
-    if (this.showCalculatorPopup) {
-      // Désactiver le scanner lorsque la calculatrice est ouverte
-      this.scannerService.disableScanner();
-      this.isCalculatorMinimized = false;
-      this.calcWidth = this.baseWidth;
-      this.calcHeight = this.baseHeight;
-      this.calcScale = 1;
-      if (this.calcElement?.nativeElement) {
-        this.renderer.setStyle(this.calcElement.nativeElement, 'transform', `scale(1)`);
-      }
-    } else {
-      // Réactiver le scanner lorsque la calculatrice est fermée
-      this.scannerService.enableScanner();
-    }
+// pos-accueil.component.ts
+toggleCalculator(): void {
+  this.showCalculatorPopup = !this.showCalculatorPopup;
+  
+  if (this.showCalculatorPopup) {
+    this.calculator.setActive(true);
+    this.scannerService.disableScanner();
+  } else {
+    this.calculator.setActive(false);
+    this.scannerService.enableScanner();
   }
-
+}
   // Ajoutez aussi cette méthode pour fermer proprement
   closeCalculator(): void {
     this.showCalculatorPopup = false;

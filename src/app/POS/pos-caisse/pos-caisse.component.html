@@ -14,7 +14,8 @@
             <!-- Empty State -->
             <div *ngIf="!isLoadingCaisses && caisses.length === 0" class="no-caisses">
                 <i class="ri-information-line"></i>
-                <p>{{ errorMessage || 'Aucune caisse disponible pour cette boutique' }}</p>
+                <!-- <p>{{ errorMessage || 'Aucune caisse disponible pour cette boutique' }}</p> -->
+                <p *ngIf="errorMessage">{{ errorMessage }}</p>
             </div>
 
             <!-- Liste des caisses -->

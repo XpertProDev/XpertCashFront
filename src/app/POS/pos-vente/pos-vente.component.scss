@@ -98,6 +98,55 @@ ul {
   background: #1e7e34;
 }
 
+// Indicateurs de chargement et d'état
+.loading-indicator,
+.loading-more-indicator,
+.all-loaded-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.loading-indicator {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+.loading-more-indicator {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+.all-loaded-indicator {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.loading-indicator i,
+.loading-more-indicator i,
+.all-loaded-indicator i {
+  font-size: 18px;
+  animation: spin 1s linear infinite;
+}
+
+.all-loaded-indicator i {
+  animation: none;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .titre_categorie .scan-test-multi-btn {
   background: #ffc107;
   color: #212529;

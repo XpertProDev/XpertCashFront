@@ -164,12 +164,20 @@ export class PosCaisseComponent {
       },
       error: (error) => {
         this.isLoadingCaisses = false;
-        if (error?.message && error.message.includes('Aucune caisse trouvée')) {
+        console.error('Erreur lors du chargement de la dernière caisse', error);
+
+        // Si le service throwError renvoie une string -> error sera une string
+        const rawMsg = typeof error === 'string' ? error
+                    : (error?.message ?? (error?.toString ? error.toString() : 'Erreur inconnue'));
+
+        // Normalise le message visible -> si le serveur dit "Aucune caisse..." on affiche exactement le texte voulu
+        if (rawMsg.includes('Aucune caisse trouvée') || rawMsg.includes('Aucune caisse disponible')) {
           this.errorMessage = 'Aucune caisse disponible pour cette boutique';
-          this.caisses = []; // S'assurer que le tableau est vide
         } else {
-          this.errorMessage = error?.message || 'Erreur de communication avec le serveur';
+          this.errorMessage = rawMsg;
         }
+
+        this.caisses = []; // s'assurer qu'on affiche l'état vide
       }
     });
   }
@@ -447,6 +455,15 @@ loadAllCaisses(boutiqueId: number): void {
         this.allCaisses = []; // S'assurer que le tableau est vide en cas d'erreur
       }
     });
+  }
+
+  private formatErrorForUI(err: any): string {
+    if (!err) return 'Erreur inconnue';
+    if (err instanceof Error) return err.message;
+    if (typeof err === 'string') return err;
+    if (err?.message) return err.message;
+    if (err?.error) return this.formatErrorForUI(err.error);
+    try { return JSON.stringify(err); } catch { return String(err); }
   }
 
 }

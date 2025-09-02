@@ -19,8 +19,8 @@ export class ScannerService {
   private isEnabled = true;
   private isUserTyping = false;
   private lastKeyTime = 0;
-  private readonly SCAN_TIMEOUT = 150; // 150ms pour détecter la fin du scan
-  private isScanning = false; // Flag pour éviter les scans multiples
+  private readonly SCAN_TIMEOUT = 100; // 150ms pour détecter la fin du scan
+  private isScanning = false;
 
   constructor() {
     this.setupScannerListener();
@@ -34,7 +34,8 @@ export class ScannerService {
   }
 
   private handleKeyEvent(event: KeyboardEvent): void {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled || this.isScanning) return; // Empêcher les nouveaux scans pendant le traitement
+    // if (!this.isEnabled) return;
 
     const now = Date.now();
     const timeSinceLastKey = now - this.lastKeyTime;
@@ -54,24 +55,25 @@ export class ScannerService {
       return;
     }
 
-    // Scanner détecté (délai < 150ms entre touches)
+    // Scanner détecté (délai < 100ms entre touches)
     if (timeSinceLastKey < this.SCAN_TIMEOUT) {
       console.log('Scanner: Événement de scan détecté, délai:', timeSinceLastKey, 'ms');
       
       const key = this.mapAzertyKey(event.key); // Mapper les touches AZERTY
       
       if (key === 'Enter') {
-        if (this.barcode.length >= 3 && !this.isScanning) {
-          console.log('Scanner: Code complet détecté:', this.barcode);
-          this.isScanning = true;
-          this.scanningSubject.next(true);
-          this.scanSubject.next(this.barcode);
-          
-          setTimeout(() => {
-            this.scanningSubject.next(false);
-            this.isScanning = false;
-          }, 100);
-        } else if (this.isScanning) {
+        if (this.barcode.length >= 3) {
+        console.log('Scanner: Code complet détecté:', this.barcode);
+        this.isScanning = true; // Marquer le scan comme en cours
+        this.scanningSubject.next(true);
+        this.scanSubject.next(this.barcode);
+        
+        setTimeout(() => {
+          this.scanningSubject.next(false);
+          this.isScanning = false; // Réactiver après le traitement
+          this.resetScan();
+        }, 100);
+      } else if (this.isScanning) {
           console.log('Scanner: Scan déjà en cours, ignoré');
         } else {
           console.log('Scanner: Code trop court:', this.barcode);

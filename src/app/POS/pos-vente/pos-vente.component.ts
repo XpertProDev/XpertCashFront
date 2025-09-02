@@ -50,6 +50,11 @@ export class PosVenteComponent {
   selectedCategoryId: number | null = null;
   displayedProducts: ProduitDetailsResponseDTO[] = [];
 
+  currentPage: number = 0;
+  pageSize: number = 20;
+  totalPages: number = 0;
+  isLoadingMore: boolean = false;
+
   scanInProgress = false;
 
   searchTerm: string = '';
@@ -219,7 +224,7 @@ export class PosVenteComponent {
     private boutiqueState: BoutiqueStateService,
     private scannerService: ScannerService,
     private searchService: SearchService,
-    private calculatorService: CalculatorService
+    private calculator: CalculatorService
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
@@ -262,10 +267,27 @@ export class PosVenteComponent {
   // Gestion du clic/tape sur un produit
   ngOnInit() {
     this.loadUserRole();
-
-    this.calcActiveSub = this.calculatorService.isActive$.subscribe(active => {
-      this.isCalculatorActive = active;
+       // Charger toutes les catégories
+    this.categorieService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        console.log('Catégories chargées :', this.categories);
+        
+        // Charger seulement la première page de chaque catégorie
+        this.categories.forEach(categorie => {
+          this.loadProduitsByCategorie(categorie.id!, 0, this.pageSize);
+        });
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des catégories', err);
+      }
     });
+
+ 
+
+    // this.calcActiveSub = this.calculatorService.isActive$.subscribe(active => {
+    //   this.isCalculatorActive = active;
+    // });
 
     this.searchSub = this.searchService.search$.subscribe(term => {
       this.searchTerm = term;
@@ -310,6 +332,15 @@ export class PosVenteComponent {
     // Désactiver le scanner quand on est en mode saisie
     this.scannerService.setUserTyping(true);
 
+     // S'abonner à l'état de la calculatrice
+    this.calculator.isActive$.subscribe(active => {
+      if (active) {
+        this.scannerService.disableScanner();
+      } else {
+        this.scannerService.enableScanner();
+      }
+    });
+
   }
 
   private loadUserRole(): void {
@@ -334,6 +365,18 @@ export class PosVenteComponent {
     if (this.searchSub) this.searchSub.unsubscribe();
     if (this.calcActiveSub) this.calcActiveSub.unsubscribe();
     // this.scannerService.enableScanner();
+  }
+
+  private loadCategories(): void {
+    // Charger les catégories depuis le service
+    this.categorieService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des catégories:', error);
+      }
+    });
   }
 
   private indexProductsByBarcode(): void {
@@ -383,7 +426,7 @@ export class PosVenteComponent {
       console.log('Produit trouvé:', product);
       console.log('Ajout au panier...');
       this.addToCart(product);
-      this.showScanSuccess(product.nom);
+      // this.showScanSuccess(product.nom); 
     } else {
       console.log('Aucun produit trouvé');
       console.log('Codes-barres disponibles:', this.allProducts.map(p => p.codeBare).filter(Boolean));
@@ -392,20 +435,42 @@ export class PosVenteComponent {
       
       setTimeout(() => {
         this.showScanError = false;
-      }, 3000);
+      }, 1000);
     }
   }
 
   // Méthode pour valider un scan et éviter les doublons
+  // private isValidScan(barcode: string): boolean {
+  //   // Vérifier que le code n'est pas vide
+  //   if (!barcode || barcode.trim().length < 3) {
+  //     return false;
+  //   }
+
+  //   // Vérifier que ce n'est pas le même code que le dernier scan
+  //   const currentTime = Date.now();
+  //   if (this.lastScannedCode === barcode && (currentTime - this.lastScanTime) < 1000) {
+  //     console.log('Scan ignoré - même code scanné trop rapidement');
+  //     return false;
+  //   }
+
+  //   // Mettre à jour le dernier scan
+  //   this.lastScannedCode = barcode;
+  //   this.lastScanTime = currentTime;
+
+  //   return true;
+  // }
+
+
   private isValidScan(barcode: string): boolean {
     // Vérifier que le code n'est pas vide
     if (!barcode || barcode.trim().length < 3) {
       return false;
     }
 
-    // Vérifier que ce n'est pas le même code que le dernier scan
+    // Vérifier que ce n'est pas exactement le même code que le dernier scan
+    // mais avec un délai beaucoup plus court pour permettre les scans rapides
     const currentTime = Date.now();
-    if (this.lastScannedCode === barcode && (currentTime - this.lastScanTime) < 1000) {
+    if (this.lastScannedCode === barcode && (currentTime - this.lastScanTime) < 50) {
       console.log('Scan ignoré - même code scanné trop rapidement');
       return false;
     }
@@ -418,62 +483,62 @@ export class PosVenteComponent {
   }
 
   // Nouvelle méthode pour afficher le succès du scan
-  private showScanSuccess(productName: string): void {
-    // Optionnel: afficher un toast de succès
-    console.log(`Produit "${productName}" ajouté au panier via scan`);
+  // private showScanSuccess(productName: string): void {
+  //   // Optionnel: afficher un toast de succès
+  //   console.log(`Produit "${productName}" ajouté au panier via scan`);
     
-    // Feedback visuel temporaire
-    this.showScanError = false;
-    this.scanErrorMessage = '';
+  //   // Feedback visuel temporaire
+  //   this.showScanError = false;
+  //   this.scanErrorMessage = '';
     
-    // Afficher un message de succès
-    setTimeout(() => {
-      this.showScanError = true;
-      this.scanErrorMessage = `Produit "${productName}" ajouté au panier !`;
-      setTimeout(() => {
-        this.showScanError = false;
-      }, 2000);
-    }, 100);
-  }
+  //   // Afficher un message de succès
+  //   setTimeout(() => {
+  //     this.showScanError = true;
+  //     this.scanErrorMessage = `Produit "${productName}" ajouté au panier !`;
+  //     setTimeout(() => {
+  //       this.showScanError = false;
+  //     }, 2000);
+  //   }, 100);
+  // }
 
   // Méthode de test pour simuler un scan (utile pour debug)
-  testScan(code: string): void {
-    console.log('Test de scan avec le code:', code);
-    this.handleBarcodeScan(code);
-  }
+  // testScan(code: string): void {
+  //   console.log('Test de scan avec le code:', code);
+  //   this.handleBarcodeScan(code);
+  // }
 
   // Méthode pour tester le scanner avec différents codes
-  testScannerWithCodes(): void {
-    console.log('=== TEST SCANNER AVEC DIFFÉRENTS CODES ===');
+  // testScannerWithCodes(): void {
+  //   console.log('=== TEST SCANNER AVEC DIFFÉRENTS CODES ===');
     
-    // Test avec des codes courts
-    this.testScan('123');
-    this.testScan('456');
+  //   // Test avec des codes courts
+  //   this.testScan('123');
+  //   this.testScan('456');
     
-    // Test avec le code que vous avez dans votre bouton
-    this.testScan('6920484370182');
+  //   // Test avec le code que vous avez dans votre bouton
+  //   this.testScan('6920484370182');
     
-    // Test avec des codes aléatoires
-    this.testScan('987654321');
-    this.testScan('ABCDEF123');
-  }
+  //   // Test avec des codes aléatoires
+  //   this.testScan('987654321');
+  //   this.testScan('ABCDEF123');
+  // }
 
   // Méthode pour vérifier l'état du scanner
-  checkScannerStatus(): void {
-    console.log('=== ÉTAT DU SCANNER ===');
-    console.log('ScannerService disponible:', !!this.scannerService);
-    console.log('scanInProgress:', this.scanInProgress);
-    console.log('Produits chargés:', this.allProducts.length);
-    console.log('Produits avec code-barres:', this.allProducts.filter(p => p.codeBare).length);
+  // checkScannerStatus(): void {
+  //   console.log('=== ÉTAT DU SCANNER ===');
+  //   console.log('ScannerService disponible:', !!this.scannerService);
+  //   console.log('scanInProgress:', this.scanInProgress);
+  //   console.log('Produits chargés:', this.allProducts.length);
+  //   console.log('Produits avec code-barres:', this.allProducts.filter(p => p.codeBare).length);
     
-    // Afficher quelques codes-barres disponibles
-    const codesWithProducts = this.allProducts
-      .filter(p => p.codeBare)
-      .slice(0, 5)
-      .map(p => ({ id: p.id, nom: p.nom, code: p.codeBare }));
+  //   // Afficher quelques codes-barres disponibles
+  //   const codesWithProducts = this.allProducts
+  //     .filter(p => p.codeBare)
+  //     .slice(0, 5)
+  //     .map(p => ({ id: p.id, nom: p.nom, code: p.codeBare }));
     
-    console.log('Exemples de codes-barres:', codesWithProducts);
-  }
+  //   console.log('Exemples de codes-barres:', codesWithProducts);
+  // }
 
   private loadActiveCart() {
     this.cart = new Map(this.commandeState.getActiveCart());
@@ -483,62 +548,154 @@ export class PosVenteComponent {
     this.commandeState.updateActiveCart(this.cart);
   }
 
-  loadCategories() {
-    this.categorieService.getCategories().subscribe({
-      next: (categories) => {
-        this.categories = categories;
-        this.allProducts = [];
-        this.categories.forEach(categorie => {
-          if (categorie.produits) {
-            this.allProducts.push(...categorie.produits);
-          }
-        });
-        
-        console.log('=== PRODUITS CHARGÉS ===');
-        console.log('Total produits:', this.allProducts.length);
-        console.log('Produits avec code-barres:', this.allProducts.filter(p => p.codeBare).length);
-        console.log('Codes-barres disponibles:', this.allProducts.map(p => ({id: p.id, nom: p.nom, code: p.codeBare})).filter(p => p.code));
-        
-        this.showAllProducts();
-        this.indexProductsByBarcode(); 
-        // <-- important : recalculer les compteurs maintenant
-        this.recomputeCategoryCountsForBoutique();
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement des catégories', error);
-      }
-    });
+loadProduitsByCategorie(categorieId: number, page: number = 0, size: number = 20) {
+  if (page > 0) {
+    this.isLoadingMore = true;
   }
+  
+  this.categorieService.getProduitsByCategorie(categorieId, page, size).subscribe({
+    next: (res) => {
+      console.log(`Page ${page + 1}/${res.totalPages} pour catégorie ${categorieId}`);
+
+      // Mapper les produits
+      const mappedProducts = res.produits.map(produit => new ProduitDetailsResponseDTO({
+        id: produit.id,
+        nom: produit.nom,
+        prixVente: produit.prixVente,
+        prixAchat: produit.prixAchat,
+        quantite: produit.quantite,
+        seuilAlert: produit.seuilAlert,
+        categorieId: produit.categorieId || 0,
+        uniteId: produit.uniteId,
+        codeBare: produit.codeBare,
+        photo: produit.photo,
+        enStock: produit.enStock,
+        nomCategorie: produit.nomCategorie || '',
+        nomUnite: produit.nomUnite || '',
+        typeProduit: produit.typeProduit || '',
+        createdAt: produit.createdAt || '',
+        lastUpdated: produit.lastUpdated || '',
+        datePreemption: produit.datePreemption,
+        boutiqueId: produit.boutiqueId,
+        nomBoutique: produit.nomBoutique || '',
+        description: produit.description || '',
+        codeGenerique: produit.codeGenerique || '',
+        boutiques: produit.boutiques || []
+      }));
+
+      // Si c'est la première page ET qu'une catégorie spécifique est sélectionnée
+      if (page === 0 && this.selectedCategoryId !== null) {
+        this.displayedProducts = mappedProducts;
+        this.allProducts = mappedProducts; // Réinitialiser pour cette catégorie
+      } else {
+        // Sinon, ajouter à la suite (pour "Toutes les catégories" ou pages suivantes)
+        this.displayedProducts.push(...mappedProducts);
+        this.allProducts.push(...mappedProducts);
+      }
+
+      // Mettre à jour les informations de pagination
+      this.totalPages = res.totalPages;
+      this.currentPage = page;
+      
+      // Indexer les produits pour le scanner
+      this.indexProductsByBarcode();
+      
+      // Recalculer les compteurs
+      this.recomputeCategoryCountsForBoutique();
+      
+      // Désactiver l'indicateur de chargement
+      this.isLoadingMore = false;
+    },
+    error: (err) => {
+      this.isLoadingMore = false;
+      console.error(`Erreur lors du chargement de la page ${page} pour la catégorie ${categorieId}`, err);
+    }
+  });
+}
+
+
 
   // Méthode pour recharger et vérifier les produits
-  reloadProductsForScan(): void {
-    console.log('=== RECHARGEMENT PRODUITS POUR SCAN ===');
-    this.loadCategories();
-  }
+  // reloadProductsForScan(): void {
+  //   console.log('=== RECHARGEMENT PRODUITS POUR SCAN ===');
+  //   this.loadCategories();
+  // }
 
-  showAllProducts() {
-    this.selectedCategoryId = null;
-    this.displayedProducts = [];
-    this.categories.forEach(categorie => {
-      if (categorie.produits) {
-        this.displayedProducts = [...this.displayedProducts, ...categorie.produits];
-      }
-    });
-    this.allProducts = [...this.displayedProducts];
-  }
+showAllProducts() {
+  this.selectedCategoryId = null;
+  this.currentPage = 0;
+  this.totalPages = 0;
+  
+  // Vider les produits affichés et tous les produits
+  this.displayedProducts = [];
+  this.allProducts = [];
+  
+  console.log('Chargement de la première page de chaque catégorie...');
+  
+  // Charger la première page de chaque catégorie
+  this.categories.forEach(categorie => {
+    this.loadProduitsByCategorie(categorie.id!, 0, this.pageSize);
+  });
+}
 
-  selectCategory(categoryId: number | undefined) {
-    if (categoryId === undefined) return;
+// Méthode pour charger plus de produits de toutes les catégories
+private loadMoreProductsFromAllCategories() {
+  if (this.isLoadingMore) return; // Éviter les appels multiples
+  
+  this.isLoadingMore = true;
+  console.log('Chargement de plus de produits de toutes les catégories...');
+  
+  // Charger la page suivante de chaque catégorie qui a encore des pages
+  let hasMoreData = false;
+  
+  this.categories.forEach(categorie => {
+    // Calculer combien de pages ont déjà été chargées pour cette catégorie
+    const productsInCategory = this.allProducts.filter(p => p.categorieId === categorie.id).length;
+    const pagesLoaded = Math.ceil(productsInCategory / this.pageSize);
     
-    this.selectedCategoryId = categoryId;
-    const selectedCategory = this.categories.find(c => c.id === categoryId);
-    
-    if (selectedCategory && selectedCategory.produits) {
-      this.displayedProducts = selectedCategory.produits;
-    } else {
-      this.displayedProducts = [];
+    // Si il y a encore des pages à charger pour cette catégorie
+    if (productsInCategory > 0 && pagesLoaded * this.pageSize < (categorie.produitCount || 0)) {
+      hasMoreData = true;
+      this.loadProduitsByCategorie(categorie.id!, pagesLoaded, this.pageSize);
     }
+  });
+  
+  if (!hasMoreData) {
+    console.log('Toutes les données ont été chargées');
   }
+  
+  this.isLoadingMore = false;
+}
+
+
+
+
+selectCategory(categoryId: number | undefined) {
+  if (categoryId === undefined) return;
+
+  this.selectedCategoryId = categoryId;
+  this.currentPage = 0; // Réinitialiser à la première page
+  
+  // Charger la première page de la catégorie sélectionnée
+  this.loadProduitsByCategorie(categoryId, 0, this.pageSize);
+}
+
+
+
+onScroll() {
+  // Si aucune catégorie n'est sélectionnée (mode "Toutes les catégories")
+  if (this.selectedCategoryId === null) {
+    // Charger plus de produits de toutes les catégories
+    this.loadMoreProductsFromAllCategories();
+    return;
+  }
+  
+  // Si une catégorie spécifique est sélectionnée
+  if (this.currentPage + 1 < this.totalPages) {
+    console.log(`Chargement de la page ${this.currentPage + 1} pour la catégorie ${this.selectedCategoryId}`);
+    this.loadProduitsByCategorie(this.selectedCategoryId, this.currentPage + 1, this.pageSize);
+  }
+}
 
   getProductImage(photoPath: string): string {
     if (!photoPath || photoPath === '') {
@@ -614,8 +771,7 @@ export class PosVenteComponent {
   }
 
   /** Retourne la liste visible en appliquant boutique + catégorie + autres filtres */
-  getVisibleProducts(): ProduitDetailsResponseDTO[] {
-    // partir de tous les produits
+ getVisibleProducts(): ProduitDetailsResponseDTO[] {
     let products = [...this.allProducts];
 
     // filtrer par boutique si nécessaire
@@ -628,14 +784,18 @@ export class PosVenteComponent {
       products = products.filter(p => p.categorieId === this.selectedCategoryId);
     }
 
-     // filtrer par terme de recherche si présent
+    // filtrer par terme de recherche si présent
     if (this.searchTerm && this.searchTerm.trim() !== '') {
       const termLower = this.searchTerm.toLowerCase();
       products = products.filter(p => p.nom.toLowerCase().includes(termLower));
     }
 
+    // filtrer les produits en stock si besoin
+    products = products.filter(p => p.enStock);
+
     return products;
-  }
+}
+
 
   /** Retourne le nombre de produits de la catégorie pour la boutique sélectionnée */
   getCategoryProductCount(category: any): number {
@@ -706,7 +866,7 @@ addToCart(produit: ProduitDetailsResponseDTO): void {
   if (this.getAvailableStock(produit) <= 0) return;
 
   // Désactiver la calculatrice pour éviter les conflits d'input
-  this.calculatorService.setActive(false);
+  this.calculator.setActive(false);
   
   // Gestion de la remise
   if (this.discountMode.active) {
@@ -848,7 +1008,7 @@ getTotalDiscount(): number {
   
   handleKeyPress(key: string): void {
     // Désactiver la calculatrice dès qu'on utilise le clavier de vente
-    this.calculatorService.setActive(false);
+    this.calculator.setActive(false);
 
     if (this.inputMode === 'discount') {
       this.handleDiscountKeyPress(key); // Gestion remise

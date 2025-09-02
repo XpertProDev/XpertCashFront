@@ -21,11 +21,11 @@
           </li>
         </ul> -->
         <!-- // categorie -->
-        <div class="titre_categorie" [class.selected]="selectedCategoryId === null">
+        <div class="titre_categorie" [class.selected]="selectedCategoryId === null" >
           <div class="category-header">
             <p (click)="showAllProducts()" class="allCate">
              Toutes les catégories</p>
-            <div class="scan-controls">
+            <!-- <div class="scan-controls">
               <button class="scan-test-btn" (click)="testScan('6920484370182')" title="Test scan avec code 6920484370182">
                 <i class="ri-barcode-line"></i> Test Scan
               </button>
@@ -38,16 +38,13 @@
               <button class="scan-test-multi-btn" (click)="testScannerWithCodes()" title="Test avec plusieurs codes">
                 <i class="ri-test-tube-line"></i> Test Multi
               </button>
-              <!-- <button class="scan-reset-btn" (click)="resetScanner()" title="Réinitialiser le scanner">
-                <i class="ri-restart-line"></i> Reset
-              </button> -->
               <span class="scan-status" [class.active]="!scanInProgress">
                 <i class="ri-wifi-line"></i> Scanner {{ scanInProgress ? 'Actif' : 'Prêt' }}
               </span>
-            </div>
+            </div> -->
           </div>
         </div>
-        <ul class="ul_name_categorie" *ngIf="categories.length">
+        <ul class="ul_name_categorie" *ngIf="categories.length" style="overflow-y: auto; height: 600px;">
           <!-- Boucle sur les catégories -->
           <li *ngFor="let categorie of categories" 
               class="ul_li_name_categorie"
@@ -60,7 +57,7 @@
                 {{ categorie.produitCount || 0 }}
             </div> -->
             <div class="nombre">
-              {{ getCategoryProductCount(categorie) }}
+              {{ categorie.produitCount}}
             </div>
           </li>
         </ul>
@@ -68,7 +65,7 @@
       <!-- // section produit -->
       <div class="section_produit">
         <!-- on transforme cadre_produit en container de grille -->
-        <div class="cadre_produit product-grid" *ngIf="isListView">
+        <div class="cadre_produit product-grid" *ngIf="isListView" (scroll)="onScroll()" style="overflow-y: auto; max-height: 85vh;">
           
           <div class="product-card"
                *ngFor="let produit of getVisibleProducts()"
@@ -104,14 +101,22 @@
             </div>
           </div>
 
+          <!-- Indicateur de chargement initial -->
           <div *ngIf="!categories.length" class="loading-indicator">
             <i class="ri-loader-4-line"></i> Chargement des produits...
           </div>
+          
+          <!-- Indicateur de chargement de plus de produits -->
+          <div *ngIf="isLoadingMore && selectedCategoryId === null" class="loading-more-indicator">
+            <i class="ri-loader-4-line"></i> Chargement de plus de produits...
+          </div>
+          
+       
 
         </div>
 
         <!-- Mode Liste -->
-        <div class="cadre_produit_list product-list" *ngIf="!isListView">
+        <div class="cadre_produit_list product-list" *ngIf="!isListView" (scroll)="onScroll()" style="overflow-y: auto; max-height: 70vh;">
           <ul class="ul_list">
             <li class="li_list" 
                  *ngFor="let produit of getVisibleProducts()"
@@ -152,6 +157,12 @@
               </div>
             </li>
           </ul>
+          <!-- Indicateur de chargement de plus de produits (mode liste) -->
+          <div *ngIf="isLoadingMore && selectedCategoryId === null" class="loading-more-indicator">
+            <i class="ri-loader-4-line"></i> Chargement de plus de produits...
+          </div>
+          
+       
           <div *ngIf="displayedProducts.length === 0 && categories.length" class="empty-category">
             Aucun produit dans cette catégorie
           </div>

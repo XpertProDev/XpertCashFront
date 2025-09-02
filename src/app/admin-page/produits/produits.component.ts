@@ -9,7 +9,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { CategorieService } from '../SERVICES/categorie.service';
 import { ProduitService } from '../SERVICES/produit.service';
-import { Boutique, Categorie, Produit } from '../MODELS/produit.model';
+import { Boutique, Produit } from '../MODELS/produit.model';
+import { Categorie } from '../MODELS/categorie.model';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
@@ -1119,13 +1120,12 @@ get boutiquesActivesSansEntrepots(): Boutique[] {
         console.error("Erreur de chargement des catégories", err);
         return [];
       })
-    ).subscribe(data => {
-  this.categories = data.map(cat => ({
-    ...(cat as Categorie),
-    selected: false
-  }));
-});
-
+    ).subscribe((data: Categorie[]) => {
+      this.categories = data.map((cat: Categorie) => ({
+        ...cat,
+        selected: false
+      }));
+    });
   }
 
   get isAnySelected(): boolean {
@@ -1167,7 +1167,7 @@ deleteSelection(): void {
   this.successMessage = null;
   this.errorMessageApi = null;
 
-  const selectedIds = this.categories.filter(c => c.selected).map(c => c.id);
+  const selectedIds = this.categories.filter(c => c.selected && c.id !== undefined).map(c => c.id!);
   console.log("🔴 À supprimer :", selectedIds);
 
   if (selectedIds.length === 0) {
