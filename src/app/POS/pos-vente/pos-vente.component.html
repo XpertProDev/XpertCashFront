@@ -56,8 +56,8 @@
             <!-- <div class="nombre">
                 {{ categorie.produitCount || 0 }}
             </div> -->
-            <div class="nombre">
-              {{ categorie.produitCount}}
+            <div class="nombre" [title]="getCategoryProductCountTooltip(categorie)">
+              {{ getCategoryProductCountForDisplay(categorie) }}
             </div>
           </li>
         </ul>
