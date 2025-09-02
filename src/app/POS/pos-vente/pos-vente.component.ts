@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
@@ -49,6 +49,10 @@ export class PosVenteComponent {
   categories: Categorie[] = [];
   selectedCategoryId: number | null = null;
   displayedProducts: ProduitDetailsResponseDTO[] = [];
+  
+  // Cache pour les compteurs de catégories
+  private categoryCountCache: Map<number, number> = new Map();
+  private lastBoutiqueId: number | null = null;
 
   currentPage: number = 0;
   pageSize: number = 20;
@@ -224,7 +228,8 @@ export class PosVenteComponent {
     private boutiqueState: BoutiqueStateService,
     private scannerService: ScannerService,
     private searchService: SearchService,
-    private calculator: CalculatorService
+    private calculator: CalculatorService,
+    private cdr: ChangeDetectorRef
   ) {
     this.commandeState.activeCommandeId$.subscribe(() => {
       this.loadActiveCart();
@@ -314,9 +319,17 @@ export class PosVenteComponent {
     // Si tu veux suivre à tout moment :
     // this.boutiqueState.selectedBoutique$.subscribe(id => this.selectedBoutiqueId = id);
     this.boutiqueState.selectedBoutique$.subscribe(id => {
+      console.log('🏪 Boutique sélectionnée:', id);
       this.selectedBoutiqueId = id;
+      
+      // Vider le cache car la boutique a changé
+      this.clearCategoryCountCache();
+      this.lastBoutiqueId = id;
+      
       // recalculer les compteurs visible pour l'UI
       this.recomputeCategoryCountsForBoutique();
+      // Forcer la détection de changement pour mettre à jour l'affichage
+      this.cdr.detectChanges();
     });
 
     // Abonnement aux scans (déjà présent) -> aussi suivre l'indicateur de scan
@@ -368,7 +381,6 @@ export class PosVenteComponent {
   }
 
   private loadCategories(): void {
-    // Charger les catégories depuis le service
     this.categorieService.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
@@ -597,6 +609,9 @@ loadProduitsByCategorie(categorieId: number, page: number = 0, size: number = 20
       this.totalPages = res.totalPages;
       this.currentPage = page;
       
+      // Vider le cache car les produits ont changé
+      this.clearCategoryCountCache();
+      
       // Indexer les produits pour le scanner
       this.indexProductsByBarcode();
       
@@ -813,9 +828,80 @@ onScroll() {
     ).length;
   }
 
+  /** Retourne le nombre de produits de la catégorie pour la boutique sélectionnée (pour l'affichage) */
+  getCategoryProductCountForDisplay(category: any): number {
+    if (!category) return 0;
+    
+    // Vérifier si le cache est valide
+    if (this.lastBoutiqueId === this.selectedBoutiqueId && this.categoryCountCache.has(category.id)) {
+      return this.categoryCountCache.get(category.id)!;
+    }
+    
+    // Si aucune boutique sélectionnée, afficher le total
+    if (!this.selectedBoutiqueId) {
+      return category.produitCount || 0;
+    }
+    
+    // Sinon, calculer en temps réel depuis allProducts
+    const filteredProducts = this.allProducts.filter((p: ProduitDetailsResponseDTO) => {
+      const matchesCategory = p.categorieId === category.id;
+      
+      // Vérifier si le produit appartient à la boutique sélectionnée
+      // Utiliser d'abord boutiqueId, puis fallback sur boutiques
+      let matchesBoutique = false;
+      
+      if (p.boutiqueId === this.selectedBoutiqueId) {
+        matchesBoutique = true;
+      } else if (p.boutiques && p.boutiques.length > 0) {
+        matchesBoutique = p.boutiques.some(b => b.id === this.selectedBoutiqueId);
+      }
+      
+      return matchesCategory && matchesBoutique;
+    });
+    
+    const count = filteredProducts.length;
+    
+    // Mettre en cache le résultat
+    this.categoryCountCache.set(category.id, count);
+    
+    return count;
+  }
+
+  /** Retourne le tooltip pour expliquer le compteur affiché */
+  getCategoryProductCountTooltip(category: any): string {
+    if (!category) return '';
+    
+    const count = this.getCategoryProductCountForDisplay(category);
+    
+    if (!this.selectedBoutiqueId) {
+      return `${count} produits au total dans cette catégorie`;
+    }
+    
+    // Trouver le nom de la boutique sélectionnée
+    const boutiqueName = this.getBoutiqueName(this.selectedBoutiqueId);
+    return `${count} produits dans ${boutiqueName}`;
+  }
+
+  /** Retourne le nom de la boutique à partir de son ID */
+  getBoutiqueName(boutiqueId: number): string {
+    // Pour l'instant, retourner un nom simple
+    // TODO: Implémenter la récupération du nom depuis le service
+    return `Boutique ${boutiqueId}`;
+  }
+
+  /** Vider le cache des compteurs de catégories */
+  private clearCategoryCountCache(): void {
+    this.categoryCountCache.clear();
+    console.log('🗑️ Cache des compteurs de catégories vidé');
+  }
+
   /** Recalculer les compteurs produits par catégorie pour la boutique sélectionnée */
   private recomputeCategoryCountsForBoutique() {
     const boutiqueId = this.selectedBoutiqueId;
+    
+    // Vider le cache car les données ont changé
+    this.clearCategoryCountCache();
+    
     (this.categories || []).forEach(cat => {
       const total = Array.isArray(cat.produits)
         ? cat.produits.filter((p: ProduitDetailsResponseDTO) =>
