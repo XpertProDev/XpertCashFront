@@ -109,41 +109,38 @@
           <button class="close-btn" (click)="closePopup()">&times;</button>
       </div>
       <form [formGroup]="boutiqueForm">
-             <div class="triple">
-                <div class="radio-group">
-                    <div class="radio-option">
-                      <input type="radio"
-                            id="typeBoutique"
-                            formControlName="type"
-                            name="typeBoutique"
-                            value="BOUTIQUE"
-                            class="radio-input">
-                      <label for="typeBoutique" class="radio-label">
-                        <span class="radio-custom"></span> Boutique
-                      </label>
-                    </div>
-
-                    <div class="radio-option">
-                      <input type="radio"
-                            id="typeEntrepot"
-                            formControlName="type"
-                            name="typeBoutique"
-                            value="ENTREPOT"
-                            class="radio-input">
-                      <label for="typeEntrepot" class="radio-label">
-                        <span class="radio-custom"></span> Entrepôt
-                      </label>
-                    </div>
-                </div>
+        <div class="triple">
+          <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio"
+                      id="typeBoutique"
+                      formControlName="type"
+                      name="typeBoutique"
+                      value="BOUTIQUE"
+                      class="radio-input">
+                <label for="typeBoutique" class="radio-label">
+                  <span class="radio-custom"></span> Boutique
+                </label>
               </div>
 
+              <div class="radio-option">
+                <input type="radio"
+                      id="typeEntrepot"
+                      formControlName="type"
+                      name="typeBoutique"
+                      value="ENTREPOT"
+                      class="radio-input">
+                <label for="typeEntrepot" class="radio-label">
+                  <span class="radio-custom"></span> Entrepôt
+                </label>
+              </div>
+          </div>
+        </div>
 
         <div class="popup-body">
           
           <div class="champ_grid">
             <!-- Input de nom de boutique  -->
-             
-
 
             <div class="champ_input">
               <input class="input_focus" type="text" formControlName="nomBoutique" placeholder="Saisis le nom de boutique">

@@ -799,13 +799,14 @@ export class AddProduitComponent implements OnInit {
   }
 
   initForm() {
-    this.boutiqueForm = this.fb.group({
-      nomBoutique: ['', Validators.required],
-      emailBoutique: ['', [Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
-      adresseBoutique: [''],
-      telephoneBoutique: ['', Validators.pattern(/^\d{8,15}$/)],
-    });
-  }
+  this.boutiqueForm = this.fb.group({
+    nomBoutique: ['', Validators.required],
+    email: ['', [Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
+    adresse: [''],
+    telephone: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
+    type: ['BOUTIQUE', Validators.required]  // Ajout du champ type
+  });
+}
   
   updatePhoneValidator(longueur: number): void {
     this.boutiqueForm.controls['phone'].setValidators([
@@ -824,7 +825,8 @@ export class AddProduitComponent implements OnInit {
       nomBoutique: '',
       emailBoutique: '',
       adresseBoutique: '',
-      telephoneBoutique: ''
+      telephoneBoutique: '',
+      type: 'BOUTIQUE' 
     });
     this.boutiqueForm.markAsPristine();
     this.boutiqueForm.markAsUntouched();
@@ -848,11 +850,11 @@ export class AddProduitComponent implements OnInit {
       const control = this.boutiqueForm.get(field);
       control?.markAsTouched({ onlySelf: true });
     });
-  
+
     if (this.boutiqueForm.invalid) {
       return;
     }
-  
+
     const formData = this.boutiqueForm.value;
     
     this.usersService.addBoutique(formData).subscribe({
@@ -865,7 +867,9 @@ export class AddProduitComponent implements OnInit {
         });
         this.closePopupBoutique();
         this.getBoutiqueName(); // Rafraîchir la liste
-        this.boutiqueForm.reset();
+        this.boutiqueForm.reset({
+          type: 'BOUTIQUE' // Réinitialiser avec la valeur par défaut
+        });
       },
       error: (error) => {
         let errorMessage = 'Erreur lors de la création de la boutique';
@@ -893,14 +897,6 @@ export class AddProduitComponent implements OnInit {
   updateSelectedBoutiques(): void {
     this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
   }
-
-  // confirmBoutiqueSelection(): void {
-  //   this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
-  //   this.boutiqueIdSelected = this.selectedBoutiques.map(b => b.id);
-  //   const selectedNames = this.selectedBoutiques.map(b => b.nomBoutique);
-  //   this.controlBoutique.setValue(selectedNames.join(', '));
-  //   this.toggleBoutiqueSelectionPanel();
-  // }
 
   confirmBoutiqueSelection(): void {
     this.selectedBoutiques = this.boutiquesList.filter(b => b.selected);
