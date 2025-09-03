@@ -870,7 +870,9 @@ onScroll() {
     const productsByCategory = this.allProducts.reduce((acc, p) => {
       acc[p.categorieId] = (acc[p.categorieId] || 0) + 1;
       return acc;
-    }, {} as { [key: number]: number });
+    }, {} as { 
+      [key: number]: number 
+    });
     
     console.log(`📊 Produits par catégorie:`, productsByCategory);
     
