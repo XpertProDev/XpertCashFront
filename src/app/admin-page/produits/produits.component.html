@@ -51,12 +51,6 @@
           </div>
         </div>
 
-         
-
-
-        
-     
-
         <div class="bare"></div>
         <div class="export-container">
           <div class="iconDrop">
@@ -148,11 +142,13 @@
                 (click)="selectBoutique(null)">
                 <p class="all_boutique" style="display: flex; align-items: center;">
                   Toutes les boutiques
-                  <span *ngIf="totalAllProducts > 0" class="facture-count">
+                  <span *ngIf="!isLoadingCounts && totalAllProducts > 0" class="facture-count">
                     {{ totalAllProducts }}
                   </span>
+                  <span *ngIf="isLoadingCounts" class="facture-count">
+                    <i class="ri-loader-line ri-spin" style="font-size: 12px;"></i>
+                  </span>
                 </p>
-
             </div>
         
             <ng-container *ngIf="(boutiques?.length || 0) > 0;">
@@ -258,10 +254,17 @@
 
   <!-- Pagination -->
   <div class="pagination">
-    <mat-paginator *ngIf="tasks.length > 5" [length]="tasks.length"
+    <!-- <mat-paginator *ngIf="tasks.length > 5" [length]="tasks.length"
                    [pageSize]="pageSize"
                    [pageSizeOptions]="[5, 10, 25, 100]"
                    (page)="onPageChange($event)">
+    </mat-paginator> -->
+    <mat-paginator *ngIf="(selectedBoutique ? totalElementsBoutique : totalElementsEnterprise) > pageSize"
+               [length]="selectedBoutique ? totalElementsBoutique : totalElementsEnterprise"
+               [pageSize]="selectedBoutique ? pageSizeBoutique : pageSizeEnterprise"
+               [pageIndex]="selectedBoutique ? currentPageBoutique : currentPageEnterprise"
+               [pageSizeOptions]="[5, 10, 20, 50]"
+               (page)="onPageChange($event)">
     </mat-paginator>
   </div>
 </div>
