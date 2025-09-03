@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BoutiqueService } from '../SERVICES/boutique-service';
 import { Boutique } from '../MODELS/boutique-model';
@@ -90,7 +90,14 @@ export class DetailBoutiqueComponent implements OnInit {
   allUsers: Users[] = [];
   selectedUserIds: number[] = [];
 
+  currentPage = 0;
+  pageSize = 20;
+  totalPages = 0;
+  isLoadingMore = false;
+  allProductsLoaded = false;
+  totalProductsCount = 0;
   
+  @ViewChild('tableScrollContainer') tableScrollContainer!: ElementRef;
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
   constructor(
@@ -110,6 +117,11 @@ export class DetailBoutiqueComponent implements OnInit {
     this.loadAllBoutiques();
     this.boutiqueForm.disable();
     this.loadAllVendeursBoutique();
+
+    // Dans ngOnInit ou là où vous appelez loadProductsInBoutique pour la première fois
+  if (this.boutique) {
+    this.loadProductsInBoutique(this.boutique.id);
+  }
   }
 
   private initForm(): void {
@@ -600,26 +612,91 @@ async confirmCopyProducts(): Promise<void> {
   //   });
   // }
 
-  loadProductsInBoutique(boutiqueId: number): void {
-    this.isLoadingProducts = true;
-    this.boutiqueService.getProductsByBoutiqueId(boutiqueId).subscribe({
-      next: (produits) => {
-        const produitsTries = produits.sort((a, b) => b.id - a.id);
-        this.productsInBoutique = produitsTries.map(produit => ({
-          ...produit,
-          photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0)),
-          nomCategorie: produit.categorie?.nom || '',
-          nomUnite: produit.uniteDeMesure?.nom || '',
-        }));
-        this.filteredProducts = [...this.productsInBoutique];
-        this.isLoadingProducts = false;
-      },
-      error: (err) => {
-        console.error('Erreur chargement produits', err);
-        this.isLoadingProducts = false;
-      }
-    });
+  loadProductsInBoutique(boutiqueId: number, loadMore: boolean = false): void {
+    if (loadMore) {
+      this.isLoadingMore = true;
+    } else {
+      this.isLoadingProducts = true;
+      this.currentPage = 0;
+      this.allProductsLoaded = false;
+    }
+
+    this.boutiqueService.getProduitsBoutiquePaginated(boutiqueId, this.currentPage, this.pageSize)
+      .subscribe({
+        next: (response) => {
+          const newProducts = response.content.map(produit => ({
+            ...produit,
+            photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0)),
+            nomCategorie: produit.categorie?.nom || '',
+            nomUnite: produit.uniteDeMesure?.nom || '',
+          }));
+
+          if (loadMore) {
+            this.productsInBoutique = [...this.productsInBoutique, ...newProducts];
+          } else {
+            this.productsInBoutique = newProducts;
+            // Mettre à jour le compteur total avec la valeur de l'API
+            this.totalProductsCount = response.totalElements;
+          }
+
+          this.filteredProducts = [...this.productsInBoutique];
+          this.totalPages = response.totalPages;
+          
+          this.isLoadingProducts = false;
+          this.isLoadingMore = false;
+          this.allProductsLoaded = this.currentPage >= response.totalPages - 1;
+        },
+        error: (err) => {
+          console.error('Erreur chargement produits', err);
+          this.isLoadingProducts = false;
+          this.isLoadingMore = false;
+        }
+      });
   }
+
+  loadMoreProducts(): void {
+    if (this.isLoadingMore || this.allProductsLoaded || !this.boutique) return;
+    
+    this.isLoadingMore = true;
+    this.currentPage++;
+    
+    this.boutiqueService.getProduitsBoutiquePaginated(this.boutique.id, this.currentPage, this.pageSize)
+      .subscribe({
+        next: (response) => {
+          const newProducts = response.content.map(produit => ({
+            ...produit,
+            photoUrl: produit.photo ? `${this.imgUrl}${produit.photo}` : this.generateInitialImage(produit.nom.charAt(0)),
+            nomCategorie: produit.categorie?.nom || '',
+            nomUnite: produit.uniteDeMesure?.nom || '',
+          }));
+
+          this.productsInBoutique = [...this.productsInBoutique, ...newProducts];
+          this.filteredProducts = [...this.productsInBoutique];
+          this.totalPages = response.totalPages;
+          
+          this.isLoadingMore = false;
+          this.allProductsLoaded = this.currentPage >= response.totalPages - 1;
+        },
+        error: (err) => {
+          console.error('Erreur chargement produits supplémentaires', err);
+          this.isLoadingMore = false;
+          this.currentPage--; // Revenir à la page précédente en cas d'erreur
+        }
+      });
+  }
+  
+ onTableScroll(event: any): void {
+  if (this.allProductsLoaded || this.isLoadingMore || !this.boutique) return;
+
+  const threshold = 100;
+  const container = event.target;
+  const position = container.scrollTop + container.offsetHeight;
+  const height = container.scrollHeight;
+
+  if (position > height - threshold) {
+    this.loadMoreProducts();
+  }
+}
 
   highlightMatch(text: string): string {
     if (!this.searchText) return text;

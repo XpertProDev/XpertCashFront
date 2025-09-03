@@ -265,8 +265,11 @@
                 <div class="section_title" style="display: flex; align-items: center;">
                     <div class="title" style="display: flex; align-items: center;">
                         <h6 style="margin-right: 8px;">Produits de {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'la boutique' }}</h6>
-                        <div class="facture-count" *ngIf="productsInBoutique.length > 0" style="position: relative; top: -4px; right: 2px;">
+                        <!-- <div class="facture-count" *ngIf="productsInBoutique.length > 0" style="position: relative; top: -4px; right: 2px;">
                             {{ productsInBoutique.length }}
+                        </div> -->
+                        <div class="facture-count" *ngIf="totalProductsCount > 0" style="position: relative; top: -4px; right: 2px;">
+                            {{ totalProductsCount }}
                         </div>
                     </div>
 
@@ -426,7 +429,7 @@
             </div>
 
             <!-- Tableau des produits -->
-            <div class="table-scroll-container">
+            <div #tableScrollContainer class="table-scroll-container" (scroll)="onTableScroll($event)">
                 <table>
                     <thead>
                         <tr class="titleTableProduit">
@@ -542,6 +545,22 @@
                                 style="color: red; margin-left: 5px;"
                                 title="Stock bas!"></i>
                             </td>
+                        </tr>
+
+                        <!-- Après la boucle des produits dans le tableau -->
+                        <tr *ngIf="isLoadingMore">
+                        <td colspan="7" style="text-align: center; padding: 20px;">
+                            <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <span style="margin-left: 10px;">Chargement de plus de produits...</span>
+                        </td>
+                        </tr>
+
+                        <tr *ngIf="allProductsLoaded && productsInBoutique.length > 0">
+                        <td colspan="7" style="text-align: center; padding: 20px;">
+                            <p>Tous les produits ont été chargés</p>
+                        </td>
                         </tr>
 
                         <!-- Aucun produit -->
@@ -783,6 +802,22 @@
                                     Associer
                                 </button>
                             </td>
+                        </tr>
+
+                        <!-- Dans le tableau, après la boucle des produits -->
+                        <tr *ngIf="isLoadingMore">
+                        <td colspan="7" style="text-align: center; padding: 20px;">
+                            <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <span style="margin-left: 10px;">Chargement de plus de produits...</span>
+                        </td>
+                        </tr>
+
+                        <tr *ngIf="allProductsLoaded && productsInBoutique.length > 0">
+                        <td colspan="7" style="text-align: center; padding: 20px;">
+                            <p>Tous les produits ont été chargés</p>
+                        </td>
                         </tr>
                         
                         <tr *ngIf="allUsers.length === 0">
