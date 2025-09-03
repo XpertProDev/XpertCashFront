@@ -1,11 +1,42 @@
 // produit.service.ts
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Produit } from '../MODELS/produit.model';
 import { catchError, map, Observable, switchMap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UsersService } from './users.service';
+
+// produit.service.ts
+
+export interface ProduitEntreprisePaginatedResponse {
+  content: Produit[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  totalProduitsUniques: number;
+  totalBoutiques: number;
+}
+
+export interface ProduitStockPaginatedResponse {
+  content: Produit[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  totalProduitsActifs: number;
+  totalProduitsEnStock: number;
+  totalProduitsHorsStock: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -158,6 +189,46 @@ export class ProduitService {
     );
   }
 
+  // Pour les produits d'entreprise (toutes les boutiques) :
+  getProduitsByEntrepriseIdPaginated(entrepriseId: number, page: number = 0, size: number = 20): Observable<ProduitEntreprisePaginatedResponse> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+      const params = new HttpParams()
+        .set('page', page.toString())
+        .set('size', size.toString());
+      
+      return this.http.get<ProduitEntreprisePaginatedResponse>(
+        `${this.apiUrl}/entreprise/${entrepriseId}/produits/paginated`, 
+        { headers, params }
+      );
+    })
+  );
+}
+
+  // Pour les produits d'une boutique :
+  getProduitsEntreprisePaginated(boutiqueId: number, page: number = 0, size: number = 20): Observable<ProduitStockPaginatedResponse> {
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap((token: string) => {
+        const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+        const params = new HttpParams()
+          .set('page', page.toString())
+          .set('size', size.toString());
+        
+        return this.http.get<ProduitStockPaginatedResponse>(
+          `${this.apiUrl}/boutique/${boutiqueId}/produits/paginated`, 
+          { headers, params }
+        ).pipe(
+          catchError(error => {
+            if (error.status === 400 && error.error?.error === 'Cette boutique est désactivée, ses produits ne sont pas accessibles !') {
+              return throwError(() => new Error('BOUTIQUE_DESACTIVEE'));
+            }
+            return throwError(() => error);
+          })
+        );
+      })
+    );
+  }
 
   
   
