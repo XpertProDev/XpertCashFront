@@ -29,14 +29,14 @@ export class NotificationManagerService {
     
     // Surveiller le statut de connexion pour recharger les notifications
     this.webSocketService.getConnectionStatus().subscribe(isConnected => {
-      console.log('📡 Statut WebSocket dans NotificationManager:', isConnected ? 'Connecté' : 'Déconnecté');
+      // console.log('📡 Statut WebSocket dans NotificationManager:', isConnected ? 'Connecté' : 'Déconnecté');
       
       if (isConnected) {
-        console.log('🔄 WebSocket connecté, rechargement des notifications...');
+        // console.log('🔄 WebSocket connecté, rechargement des notifications...');
         // Recharger les notifications
         this.loadInitialNotifications();
       } else {
-        console.log('🔴 WebSocket déconnecté');
+        // console.log('🔴 WebSocket déconnecté');
       }
     });
   }
@@ -54,11 +54,11 @@ export class NotificationManagerService {
   }
 
   private setupWebSocketConnection() {
-    console.log('🔌 Tentative de connexion WebSocket...');
+    // console.log('🔌 Tentative de connexion WebSocket...');
     
     this.webSocketService.connect().subscribe({
       next: (frame) => {
-        console.log('✅ WebSocket connecté avec succès:', frame);
+        // console.log('✅ WebSocket connecté avec succès:', frame);
         // S'abonner aux nouvelles notifications via WebSocket
         this.setupWebSocketSubscription();
       },
@@ -70,11 +70,11 @@ export class NotificationManagerService {
   }
 
   private setupWebSocketSubscription() {
-    console.log('🔌 Configuration de l\'abonnement WebSocket aux notifications...');
+    // console.log('🔌 Configuration de l\'abonnement WebSocket aux notifications...');
     
     // S'abonner au topic de notifications
     this.webSocketService.subscribe('/user/queue/notifications', (newNotif: GlobalNotificationDto) => {
-      console.log('🥳 Nouvelle notification reçue dans NotificationManager:', newNotif);
+      // console.log('🥳 Nouvelle notification reçue dans NotificationManager:', newNotif);
       
       if (newNotif) {
         // Marquer comme non lue
@@ -85,15 +85,15 @@ export class NotificationManagerService {
         const updatedList = [newNotif, ...currentList];
         this.notificationsSubject.next(updatedList);
         
-        console.log('📝 Liste des notifications mise à jour:', updatedList);
+        // console.log('📝 Liste des notifications mise à jour:', updatedList);
         
         // Émettre l'événement de nouvelle notification
         this.newNotificationSubject.next(newNotif);
-        console.log('📢 Événement de nouvelle notification émis');
+        // console.log('📢 Événement de nouvelle notification émis');
       }
     });
     
-    console.log('✅ Abonnement WebSocket configuré');
+    // console.log('✅ Abonnement WebSocket configuré');
   }
 
   public getNotifications(): Observable<GlobalNotificationDto[]> {

@@ -245,6 +245,7 @@ export class DetailEditClientComponent {
 loadFactureDetails(factureId: number): void {
   this.factureService.getFactureProformaById(factureId).subscribe({
     next: (details: any) => {
+      console.log('Details de facture :', details);
       // Calculer le montant après remise
       const remiseValue = details.remise || 0;
       const totalApresRemise = details.totalHT - (details.totalHT * remiseValue / 100);

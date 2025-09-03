@@ -107,7 +107,7 @@ export class NavRightComponent implements OnInit, OnDestroy {
     this.notificationManager.getNotifications().pipe(
       takeUntil(this.destroy$)
     ).subscribe(notifications => {
-      console.log('📡 Notifications mises à jour depuis NotificationManager:', notifications);
+      // console.log('📡 Notifications mises à jour depuis NotificationManager:', notifications);
       this.notificationsList = notifications;
       this.cdr.detectChanges(); // Forcer la mise à jour de l'interface
     });
@@ -116,7 +116,7 @@ export class NavRightComponent implements OnInit, OnDestroy {
     this.notificationManager.getNewNotifications().pipe(
       takeUntil(this.destroy$)
     ).subscribe(newNotif => {
-      console.log('🥳 Nouvelle notification reçue pour badge clignotant:', newNotif);
+      // console.log('🥳 Nouvelle notification reçue pour badge clignotant:', newNotif);
       // Le badge sera mis à jour automatiquement via l'abonnement aux notifications
       this.flashNotificationBadge();
     });
@@ -155,7 +155,7 @@ export class NavRightComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe({
       next: (frame) => {
-        console.log('STOMP connecté :', frame);
+        // console.log('STOMP connecté :', frame);
         // La gestion des notifications est maintenant déléguée au NotificationManagerService
       },
       error: (err) => {
@@ -168,7 +168,7 @@ export class NavRightComponent implements OnInit, OnDestroy {
     this.webSocketService.getConnectionStatus().pipe(
       takeUntil(this.destroy$)
     ).subscribe(isConnected => {
-      console.log('📡 Statut WebSocket:', isConnected ? '🟢 Connecté' : '🔴 Déconnecté');
+      // console.log('📡 Statut WebSocket:', isConnected ? '🟢 Connecté' : '🔴 Déconnecté');
       this.isWebSocketConnected = isConnected; // Mettre à jour la propriété
       // Les notifications seront rechargées automatiquement par le NotificationManagerService
     });
@@ -177,7 +177,7 @@ export class NavRightComponent implements OnInit, OnDestroy {
     this.notificationManager.getNewNotifications().pipe(
       takeUntil(this.destroy$)
     ).subscribe((newNotif: GlobalNotificationDto) => {
-      console.log('🥳 Nouvelle notification reçue via NotificationManager:', newNotif);
+      // console.log('🥳 Nouvelle notification reçue via NotificationManager:', newNotif);
       // Le badge sera mis à jour automatiquement via l'abonnement aux notifications
       this.flashNotificationBadge();
     });
@@ -246,10 +246,10 @@ export class NavRightComponent implements OnInit, OnDestroy {
 
   // Méthode de test pour vérifier les notifications
   testNotification() {
-    console.log('🧪 Test des notifications...');
-    console.log('📊 Notifications actuelles:', this.notificationsList);
-    console.log('📊 Compteur non lues:', this.unreadCount);
-    console.log('📊 Statut WebSocket:', this.isWebSocketConnected);
+    // console.log('🧪 Test des notifications...');
+    // console.log('📊 Notifications actuelles:', this.notificationsList);
+    // console.log('📊 Compteur non lues:', this.unreadCount);
+    // console.log('📊 Statut WebSocket:', this.isWebSocketConnected);
     
     // Forcer la détection des changements
     this.cdr.detectChanges();
@@ -265,7 +265,7 @@ export class NavRightComponent implements OnInit, OnDestroy {
       read: false
     };
     
-    console.log('🧪 Simulation d\'une nouvelle notification:', testNotification);
+    // console.log('🧪 Simulation d\'une nouvelle notification:', testNotification);
     
     // Ajouter directement à la liste locale pour le test
     this.notificationsList = [testNotification, ...this.notificationsList];
@@ -277,13 +277,13 @@ export class NavRightComponent implements OnInit, OnDestroy {
 
   // Méthode pour tester la connexion WebSocket
   testWebSocketConnection() {
-    console.log('🔌 Test de connexion WebSocket...');
-    console.log('📊 Statut actuel:', this.isWebSocketConnected);
+    // console.log('🔌 Test de connexion WebSocket...');
+    // console.log('📊 Statut actuel:', this.isWebSocketConnected);
     
     // Tester la connexion
     this.webSocketService.connect().subscribe({
       next: (frame) => {
-        console.log('✅ Test de connexion réussi:', frame);
+        // console.log('✅ Test de connexion réussi:', frame);
       },
       error: (err) => {
         console.error('❌ Test de connexion échoué:', err);

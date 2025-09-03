@@ -42,7 +42,7 @@ export class WebSocketService {
     // Reconnexion automatique quand la page reprend le focus
     window.addEventListener('focus', () => {
       if (!this.isConnected) {
-        console.log('🎯 Page reprend le focus, tentative de reconnexion...');
+        // console.log('🎯 Page reprend le focus, tentative de reconnexion...');
         this.forceReconnect();
       }
     });
@@ -55,7 +55,7 @@ export class WebSocketService {
         // S'abonner à l'Observable de connexion
         this.connect().subscribe({
           next: (frame) => {
-            console.log('✅ Reconnexion périodique réussie:', frame);
+            // console.log('✅ Reconnexion périodique réussie:', frame);
           },
           error: (err) => {
             console.error('❌ Erreur lors de la reconnexion périodique:', err);
@@ -66,11 +66,11 @@ export class WebSocketService {
   }
 
   private initializeClient(): void {
-    console.log('🔧 Initialisation du client WebSocket avec endpoint:', this.config.endpoint);
+    // console.log('🔧 Initialisation du client WebSocket avec endpoint:', this.config.endpoint);
     
     this.client = new Client({
       webSocketFactory: () => {
-        console.log('🔌 Création de la connexion SockJS vers:', this.config.endpoint);
+        // console.log('🔌 Création de la connexion SockJS vers:', this.config.endpoint);
         return new SockJS(this.config.endpoint);
       },
       reconnectDelay: this.config.reconnectDelay,
@@ -80,8 +80,8 @@ export class WebSocketService {
 
     // Gestion des événements de connexion
     this.client.onConnect = (frame: Frame) => {
-      console.log('🟢 WebSocket connecté:', frame);
-      console.log('📋 Headers de connexion:', frame.headers);
+      // console.log('🟢 WebSocket connecté:', frame);
+      // console.log('📋 Headers de connexion:', frame.headers);
       this.isConnected = true;
       this.reconnectAttempts = 0;
       this.connectionStatus$.next(true);
@@ -98,7 +98,7 @@ export class WebSocketService {
     };
 
     this.client.onDisconnect = () => {
-      console.log('🔴 WebSocket déconnecté - Raison inconnue');
+      // console.log('🔴 WebSocket déconnecté - Raison inconnue');
       this.isConnected = false;
       this.connectionStatus$.next(false);
       this.connectionEvents$.next(WEBSOCKET_EVENTS.DISCONNECTED);
@@ -106,8 +106,8 @@ export class WebSocketService {
     };
 
     this.client.onStompError = (frame) => {
-      console.error('❌ Erreur STOMP:', frame);
-      console.error('📋 Headers d\'erreur:', frame.headers);
+      // console.error('❌ Erreur STOMP:', frame);
+      // console.error('📋 Headers d\'erreur:', frame.headers);
       this.isConnected = false;
       this.connectionStatus$.next(false);
       this.connectionEvents$.next(WEBSOCKET_EVENTS.ERROR);
@@ -115,8 +115,8 @@ export class WebSocketService {
     };
 
     this.client.onWebSocketError = (error) => {
-      console.error('❌ Erreur WebSocket:', error);
-      console.error('📋 Détails de l\'erreur:', error.type, error.target?.readyState);
+      // console.error('❌ Erreur WebSocket:', error);
+      // console.error('📋 Détails de l\'erreur:', error.type, error.target?.readyState);
       this.isConnected = false;
       this.connectionStatus$.next(false);
       this.connectionEvents$.next(WEBSOCKET_EVENTS.ERROR);
@@ -124,8 +124,8 @@ export class WebSocketService {
     };
 
     this.client.onWebSocketClose = (event) => {
-      console.log('🔴 WebSocket fermé - Code:', event.code, 'Raison:', event.reason);
-      console.log('📋 Détails de fermeture:', event);
+      // console.log('🔴 WebSocket fermé - Code:', event.code, 'Raison:', event.reason);
+      // console.log('📋 Détails de fermeture:', event);
       this.isConnected = false;
       this.connectionStatus$.next(false);
       this.connectionEvents$.next(WEBSOCKET_EVENTS.DISCONNECTED);
@@ -146,17 +146,17 @@ export class WebSocketService {
     // Reconnexion plus agressive : délai plus court
     const delay = Math.min(1000 * Math.pow(1.5, this.reconnectAttempts), 10000); // Max 10s au lieu de 30s
     
-    console.log(`🔄 Tentative de reconnexion dans ${delay}ms (tentative ${this.reconnectAttempts + 1}/${this.config.maxReconnectAttempts})`);
+    // console.log(`🔄 Tentative de reconnexion dans ${delay}ms (tentative ${this.reconnectAttempts + 1}/${this.config.maxReconnectAttempts})`);
     this.connectionEvents$.next(WEBSOCKET_EVENTS.RECONNECTING);
     
     this.reconnectTimer = setTimeout(() => {
       this.reconnectAttempts++;
-      console.log(`🔄 Tentative de reconnexion ${this.reconnectAttempts}...`);
+      // console.log(`🔄 Tentative de reconnexion ${this.reconnectAttempts}...`);
       
       // S'abonner à l'Observable de connexion
       this.connect().subscribe({
         next: (frame) => {
-          console.log(`✅ Reconnexion automatique ${this.reconnectAttempts} réussie:`, frame);
+          // console.log(`✅ Reconnexion automatique ${this.reconnectAttempts} réussie:`, frame);
         },
         error: (err) => {
           console.error(`❌ Erreur lors de la reconnexion automatique ${this.reconnectAttempts}:`, err);
@@ -166,7 +166,7 @@ export class WebSocketService {
   }
 
   private resubscribeToTopics(): void {
-    console.log('🔄 Réabonnement aux topics après reconnexion...');
+    // console.log('🔄 Réabonnement aux topics après reconnexion...');
     this.subscriptions.forEach((callback, topic) => {
       this.client.subscribe(topic, (message: IMessage) => {
         try {
@@ -180,21 +180,21 @@ export class WebSocketService {
   }
 
   public connect(): Observable<Frame> {
-    console.log('🚀 Tentative de connexion WebSocket...');
+    // console.log('🚀 Tentative de connexion WebSocket...');
     
     return new Observable<Frame>(observer => {
       const jwt = this.authService.getToken();
       if (!jwt) {
-        console.error('❌ JWT manquant, impossible de se connecter au WS');
+        // console.error('❌ JWT manquant, impossible de se connecter au WS');
         observer.error(new Error('JWT manquant, impossible de se connecter au WS'));
         return;
       }
 
-      console.log('🔑 JWT trouvé, configuration des headers...');
+      // console.log('🔑 JWT trouvé, configuration des headers...');
 
       // Si déjà connecté, ne pas reconnecter
       if (this.isConnected) {
-        console.log('✅ Déjà connecté, pas de reconnexion nécessaire');
+        // console.log('✅ Déjà connecté, pas de reconnexion nécessaire');
         observer.next({} as Frame);
         observer.complete();
         return;
@@ -204,11 +204,11 @@ export class WebSocketService {
         Authorization: `Bearer ${jwt}`
       };
 
-      console.log('📋 Headers de connexion configurés:', this.client.connectHeaders);
+      // console.log('📋 Headers de connexion configurés:', this.client.connectHeaders);
 
       // Timer de timeout de connexion
       this.connectionTimer = setTimeout(() => {
-        console.error('⏰ Timeout de connexion WebSocket');
+        // console.error('⏰ Timeout de connexion WebSocket');
         observer.error(new Error('Timeout de connexion WebSocket'));
         this.client.deactivate();
       }, this.config.connectionTimeout);
@@ -216,17 +216,17 @@ export class WebSocketService {
       // Gestion spéciale pour la première connexion
       const originalOnConnect = this.client.onConnect;
       this.client.onConnect = (frame: Frame) => {
-        console.log('🎯 Callback onConnect appelé');
+        // console.log('🎯 Callback onConnect appelé');
         originalOnConnect(frame);
         observer.next(frame);
         observer.complete();
       };
 
-      console.log('🔌 Activation du client WebSocket...');
+      // console.log('🔌 Activation du client WebSocket...');
       
       try {
         this.client.activate();
-        console.log('✅ Client WebSocket activé avec succès');
+        // console.log('✅ Client WebSocket activé avec succès');
       } catch (error) {
         console.error('❌ Erreur lors de l\'activation du client:', error);
         observer.error(error);
@@ -318,7 +318,7 @@ export class WebSocketService {
       // S'abonner à l'Observable de connexion
       this.connect().subscribe({
         next: (frame) => {
-          console.log('✅ Reconnexion forcée réussie:', frame);
+          // console.log('✅ Reconnexion forcée réussie:', frame);
         },
         error: (err) => {
           console.error('❌ Erreur lors de la reconnexion forcée:', err);
