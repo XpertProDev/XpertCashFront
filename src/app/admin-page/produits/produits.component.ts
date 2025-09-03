@@ -45,6 +45,7 @@ import { catchError } from 'rxjs';
 export class ProduitsComponent implements OnInit {
   boutiqueId!: number;
   private backendUrl = environment.apiBaseUrl;
+  isLoadingCounts: boolean = false;
   searchText: string = '';
   tasks: Produit[] = [];
   imagePopup: string | null = null;
@@ -141,12 +142,8 @@ export class ProduitsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // this.getUserBoutiqueId();
     this.getUserInfo();
     this.fetchCategories();
-    // this.selectBoutique(null);
-
-    // this.loadProduits();
   }
 
     // Méthodes de gestion des filtres
@@ -435,142 +432,68 @@ onPageChange(event: any): void {
     }
   }
 
-  // Récupère les informations utilisateur et stocke les données dans le localStorage
-  // getUserInfo(): void {
-     
-  //   this.usersService.getUserInfo().subscribe({
-  //     next: (user) => {
-  //       console.log('Données reçues:', user);
-  //       localStorage.setItem('user', JSON.stringify(user));
-  //       this.userName = user.nomComplet;
-  //       this.nomEntreprise = user.nomEntreprise;
-  //       // this.boutiques = user.boutiques;
-  //       this.boutiques = user.boutiques ?? []; 
-  
-  //       // Récupération de l'ID entreprise
-  //       this.entrepriseId = user.entrepriseId;
-
-  //       this.selectBoutique(null);
-  
-  //       if (!this.entrepriseId) {
-  //         console.error('Aucun ID entreprise trouvé !');
-  //         return;
-  //       }
-
-  //       if (this.selectedBoutique) {
-  //         const boutiqueId = this.selectedBoutique.id;
-          
-  //       }
-  //       this.allProducts = [...this.tasks];
-  
-  //       // if (this.boutiques.length > 0) {
-  //       //   this.selectedBoutique = this.boutiques[0];
-  //       //   this.loadProduits(this.selectedBoutique.id);
-  //       // }
-  
-  //       this.addressBoutique = this.selectedBoutique?.adresse || 'Adresse non trouvée';
-        
-  //       setTimeout(() => {
-  //         this.showNoProductsMessage = this.tasks.length === 0;
-  //         this.cdr.detectChanges();
-  //       }, 500);
-  //     },
-  //     error: (err) => {
-  //       this.boutiques = [];
-        
-  //       console.error("Erreur lors de la récupération des informations utilisateur :", err);
-  //       setTimeout(() => {
-  //         this.showNoProductsMessage = this.tasks.length === 0;
-  //         this.cdr.detectChanges();
-  //       }, 500);
-  //     }
-  //   });
-  // }
-
   // Dans getUserInfo, ajoutez l'appel pour charger les compteurs initiaux
-getUserInfo(): void {
-  this.usersService.getUserInfo().subscribe({
-    next: (user) => {
-      console.log('Données reçues:', user);
-      localStorage.setItem('user', JSON.stringify(user));
-      this.userName = user.nomComplet;
-      this.nomEntreprise = user.nomEntreprise;
-      this.boutiques = user.boutiques ?? []; 
+  getUserInfo(): void {
+    this.usersService.getUserInfo().subscribe({
+      next: async (user) => {
+        console.log('Données reçues:', user);
+        localStorage.setItem('user', JSON.stringify(user));
+        this.userName = user.nomComplet;
+        this.nomEntreprise = user.nomEntreprise;
+        this.boutiques = user.boutiques ?? []; 
 
-      // Récupération de l'ID entreprise
-      this.entrepriseId = user.entrepriseId;
+        // Récupération de l'ID entreprise
+        this.entrepriseId = user.entrepriseId;
 
-      // Charger les compteurs de toutes les boutiques
-      this.loadAllBoutiquesCounts();
+        // Charger les compteurs avant de sélectionner une boutique
+        await this.loadAllBoutiquesCounts();
+        this.selectBoutique(null);
 
-      this.selectBoutique(null);
+        if (!this.entrepriseId) {
+          console.error('Aucun ID entreprise trouvé !');
+          return;
+        }
 
-      if (!this.entrepriseId) {
-        console.error('Aucun ID entreprise trouvé !');
-        return;
+        this.addressBoutique = this.selectedBoutique?.adresse || 'Adresse non trouvée';
+        
+        setTimeout(() => {
+          this.showNoProductsMessage = this.tasks.length === 0;
+          this.cdr.detectChanges();
+        }, 500);
+      },
+      error: (err) => {
+        this.boutiques = [];
+        console.error("Erreur lors de la récupération des informations utilisateur :", err);
+        setTimeout(() => {
+          this.showNoProductsMessage = this.tasks.length === 0;
+          this.cdr.detectChanges();
+        }, 500);
       }
+    });
+  }
 
-      this.addressBoutique = this.selectedBoutique?.adresse || 'Adresse non trouvée';
-      
-      setTimeout(() => {
-        this.showNoProductsMessage = this.tasks.length === 0;
-        this.cdr.detectChanges();
-      }, 500);
-    },
-    error: (err) => {
-      this.boutiques = [];
-      console.error("Erreur lors de la récupération des informations utilisateur :", err);
-      setTimeout(() => {
-        this.showNoProductsMessage = this.tasks.length === 0;
-        this.cdr.detectChanges();
-      }, 500);
+  async selectBoutique(boutique: any | null): Promise<void> {
+    if (boutique && !boutique.actif) {
+      this.showSuspendedBoutiqueDialog();
+      return;
     }
-  });
-}
 
+    this.previousSelectedBoutique = this.selectedBoutique;
 
-  // Ajoutez cette méthode pour changer de boutique
-// selectBoutique(boutique: any | null): void {
-//   if (boutique && !boutique.actif) {
-//     this.showSuspendedBoutiqueDialog();
-//     return;
-//   }
-
-//   this.previousSelectedBoutique = this.selectedBoutique;
-
-//   if (boutique === null) {
-//     this.selectedBoutique = boutique;
-//     this.boutiqueActuelle = "Toutes les boutiques";
-//     this.loadAllProduitsPaginated(0, this.pageSize);
-//   } else {
-//     this.selectedBoutique = boutique;
-//     this.boutiqueActuelle = boutique.nomBoutique ? boutique.nomBoutique : "Boutique sans nom";
-//     this.loadProduitsPaginated(boutique.id, 0, this.pageSize);
-//   }
-  
-//   this.currentPage = 0;
-// }
-
-selectBoutique(boutique: any | null): void {
-  if (boutique && !boutique.actif) {
-    this.showSuspendedBoutiqueDialog();
-    return;
+    if (boutique === null) {
+      this.selectedBoutique = boutique;
+      this.boutiqueActuelle = "Toutes les boutiques";
+      // Charger les compteurs avant d'afficher les produits
+      await this.loadAllBoutiquesCounts();
+      this.loadAllProduitsPaginated(0, this.pageSize);
+    } else {
+      this.selectedBoutique = boutique;
+      this.boutiqueActuelle = boutique.nomBoutique ? boutique.nomBoutique : "Boutique sans nom";
+      this.loadProduitsPaginated(boutique.id, 0, this.pageSize);
+    }
+    
+    this.currentPage = 0;
   }
-
-  this.previousSelectedBoutique = this.selectedBoutique;
-
-  if (boutique === null) {
-    this.selectedBoutique = boutique;
-    this.boutiqueActuelle = "Toutes les boutiques";
-    this.loadAllProduitsPaginated(0, this.pageSize);
-  } else {
-    this.selectedBoutique = boutique;
-    this.boutiqueActuelle = boutique.nomBoutique ? boutique.nomBoutique : "Boutique sans nom";
-    this.loadProduitsPaginated(boutique.id, 0, this.pageSize);
-  }
-  
-  this.currentPage = 0;
-}
 
   // Ajoutez cette nouvelle méthode
   loadAllProduits(): void {
@@ -635,29 +558,43 @@ selectBoutique(boutique: any | null): void {
     });
   }
 
-  private loadAllBoutiquesCounts(): void {
+  private async loadAllBoutiquesCounts(): Promise<void> {
     if (!this.entrepriseId) return;
 
-    // Réinitialiser les compteurs
-    this.productCounts = {};
+    this.isLoadingCounts = true;
+    
+    // Réinitialiser temporairement les compteurs pour éviter l'affichage de valeurs incorrectes
+    const previousCounts = { ...this.productCounts };
+    this.boutiquesActivesSansEntrepots.forEach(b => {
+      this.productCounts[b.id] = 0;
+    });
 
-    // Charger le compte pour chaque boutique
-    this.boutiquesActivesSansEntrepots.forEach(boutique => {
-      this.produitService.getProduitsEntreprisePaginated(boutique.id, 0, 1).subscribe({
-        next: (response: ProduitStockPaginatedResponse) => {
-          this.productCounts[boutique.id] = response.totalProduitsActifs;
-          this.cdr.detectChanges(); // Forcer la mise à jour de la vue
-        },
-        error: (err) => {
-          console.error(`Erreur lors du chargement du compte pour la boutique ${boutique.id}:`, err);
-          this.productCounts[boutique.id] = 0;
+    try {
+      const requests = this.boutiquesActivesSansEntrepots.map(boutique => 
+        this.produitService.getProduitsEntreprisePaginated(boutique.id, 0, 1).toPromise()
+      );
+
+      const responses = await Promise.all(requests);
+      
+      responses.forEach((response, index) => {
+        if (response) {
+          const boutiqueId = this.boutiquesActivesSansEntrepots[index].id;
+          this.productCounts[boutiqueId] = response.totalProduitsActifs;
         }
       });
-    });
+      
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Erreur lors du chargement des compteurs:', err);
+      // Restaurer les anciennes valeurs en cas d'erreur
+      this.productCounts = previousCounts;
+    } finally {
+      this.isLoadingCounts = false;
+    }
   }
 
   // Pour le mode "Toutes les boutiques"
-  loadAllProduitsPaginated(page: number = 0, size: number = 20): void {
+  async loadAllProduitsPaginated(page: number = 0, size: number = 20): Promise<void> {
     this.showNoProductsMessage = false;
     if (!this.entrepriseId) {
       console.error('ID entreprise manquant');
@@ -666,8 +603,8 @@ selectBoutique(boutique: any | null): void {
 
     this.isLoading = true;
 
-    // Charger les compteurs de toutes les boutiques
-    this.loadAllBoutiquesCounts();
+    // Attendre que tous les compteurs soient chargés
+    await this.loadAllBoutiquesCounts();
 
     this.produitService.getProduitsByEntrepriseIdPaginated(this.entrepriseId, page, size).subscribe({
       next: (response: ProduitEntreprisePaginatedResponse) => {
@@ -708,97 +645,97 @@ selectBoutique(boutique: any | null): void {
   }
 
 // Pour le mode boutique
-loadProduitsPaginated(boutiqueId: number, page: number = 0, size: number = 20): void {
-  this.showNoProductsMessage = false;
-  
-  if (!boutiqueId) {
-    console.error('L\'ID de la boutique est manquant');
-    return;
-  }
-
-  const boutique = this.boutiques.find(b => b.id === boutiqueId);
-  if (boutique?.typeBoutique === 'ENTREPOT') {
-    this.tasks = [];
-    this.dataSource.data = [];
-    this.productCounts[boutiqueId] = 0;
-    this.showNoProductsMessage = true;
-    this.isLoading = false;
-    return;
-  }
-
-  this.isLoading = true;
-  
-  this.produitService.getProduitsEntreprisePaginated(boutiqueId, page, size).subscribe({
-    next: (response: ProduitStockPaginatedResponse) => {
-      this.tasks = response.content.map(prod => {
-        // Mapper les produits
-        const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
-          ? `${this.apiUrl}${prod.photo}`
-          : '';
-
-        let createdAt = '';
-        if (prod.createdAt) {
-          if (prod.createdAt.includes('à')) {
-            const [datePart, timePart] = prod.createdAt.split(' à ');
-            // format personnalisé si besoin
-          } else {
-            createdAt = new Date(prod.createdAt).toISOString();
-          }
-        }
-
-        return {
-          id: prod.id,
-          codeGenerique: prod.codeGenerique || '',
-          codeBare: prod.codeBare || '',
-          nom: prod.nom || 'Nom inconnu',
-          description: prod.description || '',
-          prixVente: prod.prixVente || 0,
-          prixAchat: prod.prixAchat || 0,
-          quantite: prod.quantite || 0,
-          seuilAlert: prod.seuilAlert || 0,
-          enStock: prod.enStock || false,
-          photo: fullImageUrl,
-          nomCategorie: prod.nomCategorie || '',
-          nomUnite: prod.nomUnite || '',
-          createdAt: createdAt,
-          categorieId: prod.categorieId || 0,
-          uniteId: prod.uniteId || 0,
-          typeProduit: prod.typeProduit || 'Non défini',
-          boutiques: prod.boutiques || []
-        } as Produit;
-      });
-
-      // Mettre à jour les informations de pagination
-      this.currentPage = response.pageNumber;
-      this.pageSize = response.pageSize;
-      this.totalElements = response.totalElements;
-      this.totalPages = response.totalPages;
-
-      this.productCounts[boutiqueId] = response.totalProduitsActifs;
-
-      this.dataSource.data = this.tasks;
-      if (this.paginator) {
-        this.dataSource.paginator = this.paginator;
-      }
-      this.isLoading = false;
-      this.allProducts = [...this.tasks];
-      this.resetFilters();
-      
-      this.showNoProductsMessage = this.tasks.length === 0;
-    },
-    error: (err) => {
-      this.isLoading = false;
-      
-      if (err.message === 'BOUTIQUE_DESACTIVEE') {
-        this.showSuspendedBoutiqueDialog();
-        this.selectedBoutique = this.previousSelectedBoutique;
-        return;
-      }
-      console.error("Erreur :", err);
-      this.showNoProductsMessage = this.tasks.length === 0;
+  loadProduitsPaginated(boutiqueId: number, page: number = 0, size: number = 20): void {
+    this.showNoProductsMessage = false;
+    
+    if (!boutiqueId) {
+      console.error('L\'ID de la boutique est manquant');
+      return;
     }
-  });
-}
+
+    const boutique = this.boutiques.find(b => b.id === boutiqueId);
+    if (boutique?.typeBoutique === 'ENTREPOT') {
+      this.tasks = [];
+      this.dataSource.data = [];
+      this.productCounts[boutiqueId] = 0;
+      this.showNoProductsMessage = true;
+      this.isLoading = false;
+      return;
+    }
+
+    this.isLoading = true;
+    
+    this.produitService.getProduitsEntreprisePaginated(boutiqueId, page, size).subscribe({
+      next: (response: ProduitStockPaginatedResponse) => {
+        this.tasks = response.content.map(prod => {
+          // Mapper les produits
+          const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
+            ? `${this.apiUrl}${prod.photo}`
+            : '';
+
+          let createdAt = '';
+          if (prod.createdAt) {
+            if (prod.createdAt.includes('à')) {
+              const [datePart, timePart] = prod.createdAt.split(' à ');
+              // format personnalisé si besoin
+            } else {
+              createdAt = new Date(prod.createdAt).toISOString();
+            }
+          }
+
+          return {
+            id: prod.id,
+            codeGenerique: prod.codeGenerique || '',
+            codeBare: prod.codeBare || '',
+            nom: prod.nom || 'Nom inconnu',
+            description: prod.description || '',
+            prixVente: prod.prixVente || 0,
+            prixAchat: prod.prixAchat || 0,
+            quantite: prod.quantite || 0,
+            seuilAlert: prod.seuilAlert || 0,
+            enStock: prod.enStock || false,
+            photo: fullImageUrl,
+            nomCategorie: prod.nomCategorie || '',
+            nomUnite: prod.nomUnite || '',
+            createdAt: createdAt,
+            categorieId: prod.categorieId || 0,
+            uniteId: prod.uniteId || 0,
+            typeProduit: prod.typeProduit || 'Non défini',
+            boutiques: prod.boutiques || []
+          } as Produit;
+        });
+
+        // Mettre à jour les informations de pagination
+        this.currentPage = response.pageNumber;
+        this.pageSize = response.pageSize;
+        this.totalElements = response.totalElements;
+        this.totalPages = response.totalPages;
+
+        this.productCounts[boutiqueId] = response.totalProduitsActifs;
+
+        this.dataSource.data = this.tasks;
+        if (this.paginator) {
+          this.dataSource.paginator = this.paginator;
+        }
+        this.isLoading = false;
+        this.allProducts = [...this.tasks];
+        this.resetFilters();
+        
+        this.showNoProductsMessage = this.tasks.length === 0;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        
+        if (err.message === 'BOUTIQUE_DESACTIVEE') {
+          this.showSuspendedBoutiqueDialog();
+          this.selectedBoutique = this.previousSelectedBoutique;
+          return;
+        }
+        console.error("Erreur :", err);
+        this.showNoProductsMessage = this.tasks.length === 0;
+      }
+    });
+  }
 
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
   loadProduits(boutiqueId: number, page: number = 0, size: number = 20): void {
@@ -893,11 +830,14 @@ loadProduitsPaginated(boutiqueId: number, page: number = 0, size: number = 20): 
     });
   }
 
-  rafraichirProduits(): void {
+  async rafraichirProduits(): Promise<void> {
     this.showNoProductsMessage = false;
+    
     if (this.selectedBoutique) {
       this.loadProduitsPaginated(this.selectedBoutique.id, this.currentPage, this.pageSize);
     } else {
+      // Rafraîchir les compteurs avant de charger les produits
+      await this.loadAllBoutiquesCounts();
       this.loadAllProduitsPaginated(this.currentPage, this.pageSize);
     }
   }
@@ -1276,9 +1216,9 @@ loadProduitsPaginated(boutiqueId: number, page: number = 0, size: number = 20): 
   }
 
   get totalAllProducts(): number {
+    if (this.isLoadingCounts) return 0;
     if (!this.boutiquesActivesSansEntrepots.length) return 0;
     
-    // Calculer la somme de tous les produits de toutes les boutiques
     return this.boutiquesActivesSansEntrepots
       .map(b => this.productCounts[b.id] || 0)
       .reduce((acc, curr) => acc + curr, 0);

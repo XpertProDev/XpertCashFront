@@ -138,15 +138,18 @@
     <div class="content_list_boutique">
         <div class="name_boutique">
             <div class="all_boutique" 
-              [class.name_boutique_active]="selectedBoutique === null"
-              (click)="selectBoutique(null)">
-              <p class="all_boutique" style="display: flex; align-items: center;">
-                Toutes les boutiques
-                <span *ngIf="totalAllProducts > 0" class="facture-count">
-                  {{ totalAllProducts }}
-                </span>
-              </p>
-          </div>
+                [class.name_boutique_active]="selectedBoutique === null"
+                (click)="selectBoutique(null)">
+                <p class="all_boutique" style="display: flex; align-items: center;">
+                  Toutes les boutiques
+                  <span *ngIf="!isLoadingCounts && totalAllProducts > 0" class="facture-count">
+                    {{ totalAllProducts }}
+                  </span>
+                  <span *ngIf="isLoadingCounts" class="facture-count">
+                    <i class="ri-loader-line ri-spin" style="font-size: 12px;"></i>
+                  </span>
+                </p>
+            </div>
         
             <ng-container *ngIf="(boutiques?.length || 0) > 0;">
                 <!-- <ng-container *ngFor="let boutique of boutiques || []; let i = index"> -->
