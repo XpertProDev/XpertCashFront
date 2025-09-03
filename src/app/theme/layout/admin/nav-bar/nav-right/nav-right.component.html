@@ -1,4 +1,18 @@
 <ul class="navbar-nav ms-auto">
+  <!-- Indicateur de statut WebSocket -->
+  <!-- <li class="nav-item me-2">
+    <div class="d-flex align-items-center">
+      <div class="websocket-status-indicator" 
+           [class.connected]="isWebSocketConnected"
+           [class.disconnected]="!isWebSocketConnected"
+           [title]="isWebSocketConnected ? 'WebSocket connecté' : 'WebSocket déconnecté'">
+        <i class="icon feather" 
+           [class.icon-wifi]="isWebSocketConnected"
+           [class.icon-wifi-off]="!isWebSocketConnected"></i>
+      </div>
+    </div>
+  </li> -->
+  
   <li>
     <div class="dropdown" ngbDropdown placement="auto">
       <a ngbDropdownToggle href="javascript:">

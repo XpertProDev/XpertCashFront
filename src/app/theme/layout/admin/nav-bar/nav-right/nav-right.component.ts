@@ -17,6 +17,7 @@ import { WebSocketService } from 'src/app/admin-page/SERVICES/websocket.service'
 import { GlobalNotificationDto } from 'src/app/admin-page/MODELS/global_notification.dto';
 import { BehaviorSubject, catchError, of, Subject, Subscription, switchMap, takeUntil } from 'rxjs';
 import { GlobalNotificationService } from 'src/app/admin-page/SERVICES/global_notification_service';
+import { NotificationManagerService } from 'src/app/admin-page/SERVICES/NotificationManagerService';
 
 @Component({
   selector: 'app-nav-right',
@@ -49,6 +50,7 @@ export class NavRightComponent implements OnInit, OnDestroy {
   photo: string | null = null;
   photoUrl: string | null = null;
   isLocked = false;
+  isWebSocketConnected = false; // Nouvelle propriété pour le statut WebSocket
   
   private boundUpdatePhotoListener = this.updatePhotoListener.bind(this);
   private notificationsSubject = new BehaviorSubject<GlobalNotificationDto | null>(null);
@@ -72,9 +74,13 @@ export class NavRightComponent implements OnInit, OnDestroy {
     private webSocketService: WebSocketService,
     private globalNotificationService: GlobalNotificationService,
     private cdr: ChangeDetectorRef,
+    private notificationManager: NotificationManagerService,
   ) {
     this.visibleUserList = false;
     this.chatMessage = false;
+    
+    // Vérifier que le service est bien injecté
+    console.log('🔧 NavRightComponent - NotificationManagerService injecté:', !!this.notificationManager);
   }
 
   private updatePhotoListener(event: Event): void {
@@ -95,8 +101,26 @@ export class NavRightComponent implements OnInit, OnDestroy {
     this.loadStockHistory();
     // this.setupNotificationSystem();
     // this.setupWebSocket();
-    this.loadInitialNotifications();
     this.initializeWebSocket();
+    
+    // S'abonner aux changements de notifications du NotificationManagerService
+    this.notificationManager.getNotifications().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(notifications => {
+      console.log('📡 Notifications mises à jour depuis NotificationManager:', notifications);
+      this.notificationsList = notifications;
+      this.cdr.detectChanges(); // Forcer la mise à jour de l'interface
+    });
+    
+    // S'abonner aux nouvelles notifications pour le badge clignotant
+    this.notificationManager.getNewNotifications().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(newNotif => {
+      console.log('🥳 Nouvelle notification reçue pour badge clignotant:', newNotif);
+      // Le badge sera mis à jour automatiquement via l'abonnement aux notifications
+      this.flashNotificationBadge();
+    });
+    
     // this.calculateUnreadCount();
     this.checkUserAccess();
   }
@@ -132,19 +156,30 @@ export class NavRightComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (frame) => {
         console.log('STOMP connecté :', frame);
-        // this.subscribeNotifications();
-        // on s'abonne à notre topic de notifications
-        this.webSocketService.subscribe(
-          '/user/queue/notifications',
-          (notif: GlobalNotificationDto) => {
-            notif.read = false; // Nouvelles notifications non lues
-            this.notificationsList = [notif, ...this.notificationsList];
-            // this.calculateUnreadCount();
-            this.flashNotificationBadge();
-          }
-        );
+        // La gestion des notifications est maintenant déléguée au NotificationManagerService
       },
-      error: (err) => console.error('Erreur de connexion WebSocket :', err)
+      error: (err) => {
+        console.error('Erreur de connexion WebSocket :', err);
+        // La reconnexion sera gérée automatiquement par le service
+      }
+    });
+
+    // 3) Surveiller le statut de la connexion
+    this.webSocketService.getConnectionStatus().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(isConnected => {
+      console.log('📡 Statut WebSocket:', isConnected ? '🟢 Connecté' : '🔴 Déconnecté');
+      this.isWebSocketConnected = isConnected; // Mettre à jour la propriété
+      // Les notifications seront rechargées automatiquement par le NotificationManagerService
+    });
+
+    // 4) S'abonner aux nouvelles notifications via le NotificationManagerService
+    this.notificationManager.getNewNotifications().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((newNotif: GlobalNotificationDto) => {
+      console.log('🥳 Nouvelle notification reçue via NotificationManager:', newNotif);
+      // Le badge sera mis à jour automatiquement via l'abonnement aux notifications
+      this.flashNotificationBadge();
     });
   }
 
@@ -171,14 +206,7 @@ export class NavRightComponent implements OnInit, OnDestroy {
   //   });
   // }
 
-private loadInitialNotifications() {
-    this.globalNotificationService.getAllForCurrentUser().pipe(
-        takeUntil(this.destroy$)
-    ).subscribe(notifications => {
-        this.notificationsList = notifications;
-        this.cdr.detectChanges();
-    });
-}
+
 
   private updatePhotoFromLocalStorage(): void {
     const savedPhoto = localStorage.getItem('photo');
@@ -215,6 +243,53 @@ private loadInitialNotifications() {
   //     takeUntil(this.destroy$)
   //   ).subscribe(list => this.notificationsList = list);
   // }
+
+  // Méthode de test pour vérifier les notifications
+  testNotification() {
+    console.log('🧪 Test des notifications...');
+    console.log('📊 Notifications actuelles:', this.notificationsList);
+    console.log('📊 Compteur non lues:', this.unreadCount);
+    console.log('📊 Statut WebSocket:', this.isWebSocketConnected);
+    
+    // Forcer la détection des changements
+    this.cdr.detectChanges();
+  }
+
+  // Méthode pour simuler une nouvelle notification (test)
+  simulateNewNotification() {
+    const testNotification: GlobalNotificationDto = {
+      id: Date.now(), // ID unique basé sur le timestamp
+      message: `Notification de test - ${new Date().toLocaleTimeString()}`,
+      senderName: 'Système de test',
+      createdAt: new Date().toISOString(),
+      read: false
+    };
+    
+    console.log('🧪 Simulation d\'une nouvelle notification:', testNotification);
+    
+    // Ajouter directement à la liste locale pour le test
+    this.notificationsList = [testNotification, ...this.notificationsList];
+    this.cdr.detectChanges();
+    
+    // Afficher le badge clignotant
+    this.flashNotificationBadge();
+  }
+
+  // Méthode pour tester la connexion WebSocket
+  testWebSocketConnection() {
+    console.log('🔌 Test de connexion WebSocket...');
+    console.log('📊 Statut actuel:', this.isWebSocketConnected);
+    
+    // Tester la connexion
+    this.webSocketService.connect().subscribe({
+      next: (frame) => {
+        console.log('✅ Test de connexion réussi:', frame);
+      },
+      error: (err) => {
+        console.error('❌ Test de connexion échoué:', err);
+      }
+    });
+  }
 
   private flashNotificationBadge() {
     const badge = document.querySelector('.notification-badge');

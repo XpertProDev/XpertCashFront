@@ -34,6 +34,7 @@ import { RouterModule } from '@angular/router';
 import { SessionExpiredModalComponent } from './theme/shared/session-expired-modal/session-expired-modal.component';
 import { WebSocketService } from './admin-page/SERVICES/websocket.service';
 import { ScannerService } from './admin-page/SERVICES/VenteService/scanner.service';
+import { NotificationManagerService } from './admin-page/SERVICES/NotificationManagerService';
 
 registerLocaleData(localeFr);
 
@@ -78,7 +79,8 @@ registerLocaleData(localeFr);
     provideHttpClient(),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true, },
     { provide: LOCALE_ID, useValue: 'fr-FR' },
-    ScannerService
+    ScannerService,
+    NotificationManagerService
   ],
   bootstrap: [AppComponent]
 })

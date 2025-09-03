@@ -18,6 +18,9 @@ import { FacturePreviewService } from '../../SERVICES/facture-preview-service';
 import { MatDialog } from '@angular/material/dialog';
 import { environment } from 'src/environments/environment';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { WebSocketService } from '../../SERVICES/websocket.service';
+import { GlobalNotificationDto } from '../../MODELS/global_notification.dto';
+import { NotificationManagerService } from '../../SERVICES/NotificationManagerService';
 
 // Ajouter cette interface pour les pièces jointes
 interface EmailAttachment {
@@ -181,6 +184,8 @@ confirmedLignes: {
       private entrepriseService: EntrepriseService,
       private previewService: FacturePreviewService,
       private dialog: MatDialog,
+      private webSocketService: WebSocketService,
+      private notificationManagerService: NotificationManagerService
     ) {}
 
   ngOnInit(): void {
@@ -879,6 +884,40 @@ get labelNom(): string {
     return this.isStatusTransitionAllowed(targetStatus);
   }
 
+  // Méthode pour vérifier si un statut doit déclencher une notification
+  private shouldSendNotification(statut: StatutFactureProForma): boolean {
+    // UNIQUEMENT le statut APPROBATION déclenche une notification
+    return statut === StatutFactureProForma.APPROBATION;
+  }
+
+  // Méthode pour envoyer une notification via WebSocket
+  private sendNotificationViaWebSocket(message: string, statut: StatutFactureProForma, type: string = 'STATUT_CHANGE') {
+    // Vérifier que c'est bien un statut qui déclenche une notification
+    if (!this.shouldSendNotification(statut)) {
+      console.log('ℹ️ Notification non envoyée - Statut non concerné:', statut);
+      return;
+    }
+
+    // Utiliser le NotificationManagerService qui gère la connexion WebSocket
+    if (this.notificationManagerService) {
+      // Créer la notification
+      const notification: GlobalNotificationDto = {
+        id: Date.now(),
+        message: message,
+        senderName: this.nom || 'Système',
+        createdAt: new Date().toISOString(),
+        read: false
+      };
+
+      // Envoyer la notification via le service
+      this.notificationManagerService.simulateNotification(message, this.nom || 'Système');
+      
+      console.log(`📢 Notification envoyée via NotificationManagerService pour ${statut}:`, notification);
+    } else {
+      console.warn('⚠️ NotificationManagerService non disponible');
+    }
+  }
+
   confirmStatusChange(): void {
     if (!this.pendingStatut) return;
     this.isMiniLoading = true;
@@ -919,11 +958,11 @@ get labelNom(): string {
               description: this.getStatusDescription(this.pendingStatut!),
               status: this.pendingStatut!
             };
-              // On retire l’éventuel event existant pour ce même statut…
+              // On retire l'éventuel event existant pour ce même statut…
             this.historicalEvents = this.historicalEvents
             .filter(e => e.status !== newEvent.status);
 
-            // …et on l’ajoute en tête
+            // …et on l'ajoute en tête
             this.historicalEvents.unshift(newEvent);
 
               // mise à jour locale
@@ -939,6 +978,12 @@ get labelNom(): string {
             this.pendingStatut = null;
             this.dateRelance = undefined;
 
+            // Envoyer une notification via WebSocket
+            if (newEvent.status) {
+              const message = `Facture ${this.factureProForma.numeroFacture} : ${this.getStatusDescription(newEvent.status)}`;
+              this.sendNotificationViaWebSocket(message, newEvent.status);
+            }
+
             this.isMiniLoading = false;
           },
           error: err => {
@@ -951,75 +996,7 @@ get labelNom(): string {
     }, 3000);
   }
 
-  // confirmStatusChange(): void {
-  //   if (!this.pendingStatut) return;
 
-  //   // Activer le spinner
-  //   this.isMiniLoading = true;
-
-  //   const selectedUsers = this.users.filter(u => u.selected).map(u => u.id);
-
-  //   // Préparez vos valeurs de remise & TVA
-  //   const remisePourKg = this.activeRemise ? this.remisePourcentage : 0;
-  //   const tvaFlag = this.activeTva;
-
-  //   // Construisez votre payload de statut
-  //   const modifications: Partial<FactureProForma> = {
-  //     statut: this.pendingStatut,
-  //     ...(this.pendingStatut === StatutFactureProForma.ENVOYE && this.dateRelance
-  //       ? { dateRelance: this.dateRelance }
-  //       : {}),
-  //     ...(this.pendingStatut !== StatutFactureProForma.APPROBATION && {
-  //       approbateurs: []
-  //     })
-  //   };
-
-  //   this.factureProFormaService.updateFactureProforma(
-  //     this.factureId,
-  //     remisePourKg,
-  //     tvaFlag,
-  //     modifications,
-  //     this.pendingStatut === StatutFactureProForma.APPROBATION ? selectedUsers : undefined
-  //   ).subscribe({
-  //     next: (updatedFacture) => {
-  //       // Mettre à jour l'historique immédiatement
-  //       const newEvent: HistoricalEvent = {
-  //         date: new Date(),
-  //         montant: this.factureProForma.totalHT,
-  //         user: this.getCurrentUser(),
-  //         type: this.getEventType(this.pendingStatut!),
-  //         description: this.getStatusDescription(this.pendingStatut!),
-  //         status: this.pendingStatut!
-  //       };
-
-  //       this.historicalEvents = this.historicalEvents
-  //         .filter(e => e.status !== newEvent.status);
-  //       this.historicalEvents.unshift(newEvent);
-
-  //       // Mise à jour locale
-  //       this.factureProForma = updatedFacture;
-  //       this.activeRemise = (updatedFacture.remise ?? 0) > 0;
-  //       this.remisePourcentage = this.activeRemise
-  //         ? ((updatedFacture.remise ?? 0) / (updatedFacture.totalHT || 1)) * 100
-  //         : 0;
-  //       this.activeTva = updatedFacture.tva;
-  //       this.showStatusConfirmation = false;
-  //       this.pendingStatut = null;
-  //       this.dateRelance = undefined;
-
-  //       // Désactiver le spinner après la réponse
-  //       this.isMiniLoading = false;
-  //     },
-  //     error: err => {
-  //       console.error('Erreur de mise à jour', err);
-  //       alert('Échec de la mise à jour du statut');
-  //       this.showStatusConfirmation = false;
-
-  //       // Désactiver le spinner en cas d'erreur
-  //       this.isMiniLoading = false;
-  //     }
-  //   });
-  // }
 
   private getStatusDescription(status: StatutFactureProForma): string {
     const descriptions = {
@@ -1070,7 +1047,7 @@ get labelNom(): string {
 
   loadUsersOfEntreprise(entrepriseId: number) {
     if (!entrepriseId) {
-      console.error('ID d’entreprise invalide:', entrepriseId);
+      console.error('ID d\'entreprise invalide:', entrepriseId);
       return;
     }
   
@@ -1477,7 +1454,7 @@ async confirmEmailSend() {
           doc.addImage(imgData, format, 15, 10, 47, 17);
       }
     } catch (imgErr) {
-      console.error('Erreur lors du chargement ou de l’ajout du logo :', imgErr);
+      console.error('Erreur lors du chargement ou de l\'ajout du logo :', imgErr);
     }
 
     /*************** ——— 1. INFOS SOCIÉTÉ ——— ****************/
@@ -2243,7 +2220,7 @@ confirmDeleteF(): void {
       }
       this.errorMessage = message;
 
-      this.isDeleting = false; // Arrêt du loader en cas d’erreur
+      this.isDeleting = false; // Arrêt du loader en cas d'erreur
 
       setTimeout(() => {
         this.errorMessage = null;
