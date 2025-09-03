@@ -791,22 +791,25 @@
 
         <!-- ✅ Liste des utilisateurs pour l'approbation -->
         <div *ngIf="pendingStatut === 'APPROBATION'" class="form-group">
-        <label style="font-size: 12px;">Sélectionnez les utilisateurs à notifier :</label>
-        <div *ngIf="users.length === 0">Aucun utilisateur à afficher</div>
-
-            <div *ngFor="let user of users" style="display: flex; align-items: center;">
-            <input
-                type="checkbox" 
+            <label style="font-size: 12px;">Sélectionnez les utilisateurs à notifier :</label>
+          
+            <!-- Message si la liste est vide -->
+            <div *ngIf="filteredUsers.length === 0">Aucun utilisateur à afficher</div>
+          
+            <!-- Liste des utilisateurs -->
+            <div *ngFor="let user of filteredUsers" style="display: flex; align-items: center;">
+              <input
+                type="checkbox"
                 [(ngModel)]="user.selected"
                 id="user_{{ user.id }}"
                 style="margin-right: 8px; margin-bottom: 8px;"
-            />
-            <label for="user_{{ user.id }}">
+              />
+              <label for="user_{{ user.id }}">
                 {{ user.nomComplet }} - {{ user.phone }}
-            </label>
+              </label>
             </div>
-
-        </div>
+          </div>
+          
 
         <!-- <div class="popup-actions">
         <button class="btn btn-secondary" (click)="cancelStatusChange()">Annuler</button>

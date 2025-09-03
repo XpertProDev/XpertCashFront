@@ -1068,38 +1068,54 @@ get labelNom(): string {
     return labels[statut];
   }
 
- loadUsersOfEntreprise(entrepriseId: number) {
-  if (entrepriseId == null) {
-    console.error('ID d’entreprise invalide:', entrepriseId);
-    return;
-  }
-
-  this.isLoading = true;
-
-  const token = this.usersService.getToken();
-  const currentUserId = token ? this.usersService.extractUserIdFromToken(token) : null;
-
-  this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
-    next: (data) => {
-      // Filtrer les utilisateurs pour exclure l'utilisateur connecté
-      this.users = data
-        .filter(user => user.id !== currentUserId)
+  loadUsersOfEntreprise(entrepriseId: number) {
+    if (!entrepriseId) {
+      console.error('ID d’entreprise invalide:', entrepriseId);
+      return;
+    }
+  
+    this.isLoading = true;
+  
+    const token = this.usersService.getToken();
+    let currentUserId: string | null = null;
+  
+    if (token) {
+      const extractedId = this.usersService.extractUserIdFromToken(token);
+      currentUserId = extractedId || null; // 'sub' est un UUID string
+    }
+  
+    this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
+      next: (data) => {
+        if (!Array.isArray(data)) {
+          console.error('Les données reçues ne sont pas valides:', data);
+          this.isLoading = false;
+          return;
+        }
+  
+        console.log('ID utilisateur courant:', currentUserId);
+        console.log('IDs reçus:', data.map(u => ({ id: u.id, type: typeof u.id })));
+  
+        // Filtrer les utilisateurs pour exclure l'utilisateur connecté si ID valide
+        this.users = data
+        .filter(user => currentUserId ? user.uuid !== currentUserId : true)
         .map(user => ({
           ...user,
           selected: false
         }));
-
-      this.filteredUsers = this.users;
-      this.isLoading = false;
-      console.log('Utilisateurs récupérés (sans le connecté):', this.users);
-    },
-    error: (err) => {
-      console.error('Erreur lors du chargement des utilisateurs', err);
-      this.isLoading = false;
-    }
-  });
-}
-
+  
+        this.filteredUsers = [...this.users];
+        this.isLoading = false;
+  
+        console.log('Utilisateurs récupérés (sans le connecté):', this.users);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des utilisateurs', err);
+        this.isLoading = false;
+      }
+    });
+  }
+  
+  
 
   // Méthode appelée au changement de <select>
   onProduitChange(produitId: number | null, ligne: any, index: number) {

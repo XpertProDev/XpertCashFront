@@ -178,15 +178,16 @@ private sessionExpiredHandled = false;
   }
     
     // Méthode pour extraire l'ID de l'utilisateur connecté depuis le token
-  extractUserIdFromToken(token: string): number | null {
-    try {
-      const decodedToken = JSON.parse(atob(token.split('.')[1])); // Décodage du payload du token
-      return decodedToken.sub ? parseInt(decodedToken.sub, 10) : null; // Assurez-vous que 'sub' contient l'ID
-    } catch (error) {
-      console.error('Erreur lors de l\'extraction de l\'ID depuis le token :', error);
-      return null;
+    extractUserIdFromToken(token: string): string | null {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1])); // Décodage du payload du token
+        return decodedToken.sub || null; // 'sub' est l'UUID de l'utilisateur
+      } catch (error) {
+        console.error('Erreur lors de l\'extraction de l\'ID depuis le token :', error);
+        return null;
+      }
     }
-  }
+    
 
   // addUserToEntreprise(userData: any, token: string): Observable<string> {
   //   const headers = { Authorization: `Bearer ${token}` };

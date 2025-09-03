@@ -197,18 +197,20 @@ loadRoles() {
   this.usersService.getAllUsersOfEntreprise(entrepriseId).subscribe({
     next: (data) => {
       // ⚠️ Exclure l'utilisateur connecté
-      const filteredData = data.filter(user => user.id !== connectedUserId);
+      const filteredData = data.filter(user => connectedUserId ? user.uuid !== connectedUserId : true);
+
 
       this.users = filteredData.map(user => ({
         ...user,
         flag: this.paysFlags[user.pays] || ''
       }));
-
+      
       this.filteredUsers = this.users;
       this.updatePaginatedUsers();
       this.isLoading = false;
-
+      
       console.log('Utilisateurs récupérés (hors connecté) :', this.users);
+      
     },
     error: (err) => {
       console.error('Erreur lors du chargement des utilisateurs', err);
