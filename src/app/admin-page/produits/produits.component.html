@@ -282,16 +282,16 @@
         <i class="ri-arrow-left-s-line"></i>
       </button>
       
-              <div class="page-numbers">
-          <button 
-            *ngFor="let page of getVisiblePages()" 
-            class="page-number"
-            [class.active]="page === currentPage"
-            (click)="goToPage(page)"
-            [disabled]="page === '...'">
-            {{ page }}
-          </button>
-        </div>
+      <div class="page-numbers">
+        <button 
+          *ngFor="let page of getVisiblePages()" 
+          class="page-number"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)"
+          [disabled]="page === '...'">
+          {{ page }}
+        </button>
+      </div>
       
       <button 
         class="pager-btn" 

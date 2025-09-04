@@ -1892,36 +1892,3 @@ img.roudel_detail{
       transform: translateY(2px); /* Le toast disparaît avec un léger mouvement vers le bas */
     }
   }  
-
-  .pager {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .o_pager_previous i,
-.o_pager_next i {
-  font-size: 20px;
-  padding: 0 5px;
-}
-
-.d-print-none button{
-  border: 1px solid #000;
-}
-
-.d-print-none .o_pager_previous {
-  border-top: 1px solid #000;
-  border-right: none;
-  border-bottom: 1px solid #000;
-  border-left: 1px solid #000;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-}
-
-.d-print-none .o_pager_next {
-  border-top: 1px solid #000;
-  border-left: 1px solid #000;
-  border-bottom: 1px solid #000;
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-}
