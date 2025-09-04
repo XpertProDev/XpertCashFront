@@ -259,7 +259,7 @@
                    [pageSizeOptions]="[5, 10, 25, 100]"
                    (page)="onPageChange($event)">
     </mat-paginator> -->
-    <mat-paginator *ngIf="(selectedBoutique ? totalElementsBoutique : totalElementsEnterprise) > pageSize"
+    <mat-paginator 
                [length]="selectedBoutique ? totalElementsBoutique : totalElementsEnterprise"
                [pageSize]="selectedBoutique ? pageSizeBoutique : pageSizeEnterprise"
                [pageIndex]="selectedBoutique ? currentPageBoutique : currentPageEnterprise"
