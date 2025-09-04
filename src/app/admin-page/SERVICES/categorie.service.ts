@@ -117,4 +117,30 @@ export class CategorieService {
     );
   }
 
+  /** Récupérer les compteurs de produits par catégorie */
+  getCategoriesWithCounts(): Observable<Categorie[]> {
+    return this.usersService.getValidAccessToken().pipe(
+      switchMap(token => {
+        if (!token) {
+          console.error('⚠️ Token vide ou non défini ! Vérifiez que l\'utilisateur est bien connecté.');
+          return throwError(() => new Error('Aucun token valide trouvé'));
+        }
+
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+        return this.http.get<Categorie[]>(`${this.apiUrl}/categories/count`, { headers }).pipe(
+          tap((categories) => {
+            console.log('📊 Compteurs de catégories récupérés:', categories);
+            // Met à jour le BehaviorSubject avec les catégories et leurs compteurs
+            this.categoriesSubject.next(categories);
+          })
+        );
+      }),
+      catchError(error => {
+        console.error('Erreur lors de la récupération des compteurs de catégories:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
 }

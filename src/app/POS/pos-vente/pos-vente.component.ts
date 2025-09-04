@@ -272,11 +272,11 @@ export class PosVenteComponent {
   // Gestion du clic/tape sur un produit
   ngOnInit() {
     this.loadUserRole();
-       // Charger toutes les catégories
-    this.categorieService.getCategories().subscribe({
+       // Charger toutes les catégories avec leurs compteurs
+    this.categorieService.getCategoriesWithCounts().subscribe({
       next: (categories) => {
         this.categories = categories;
-        console.log('Catégories chargées :', this.categories);
+        console.log('Catégories avec compteurs chargées :', this.categories);
         
         // Charger seulement la première page de chaque catégorie
         this.categories.forEach(categorie => {
@@ -381,9 +381,10 @@ export class PosVenteComponent {
   }
 
   private loadCategories(): void {
-    this.categorieService.getCategories().subscribe({
+    this.categorieService.getCategoriesWithCounts().subscribe({
       next: (categories) => {
         this.categories = categories;
+        console.log('Catégories avec compteurs chargées (loadCategories):', this.categories);
       },
       error: (error) => {
         console.error('Erreur lors du chargement des catégories:', error);
@@ -853,14 +854,14 @@ onScroll() {
   getCategoryProductCountForDisplay(category: any): number {
     if (!category) return 0;
     
-    // Vérifier si le cache est valide
-    if (this.lastBoutiqueId === this.selectedBoutiqueId && this.categoryCountCache.has(category.id)) {
-      return this.categoryCountCache.get(category.id)!;
-    }
-    
-    // Si aucune boutique sélectionnée, afficher le total
+    // Si aucune boutique sélectionnée, utiliser le compteur de l'API
     if (!this.selectedBoutiqueId) {
       return category.produitCount || 0;
+    }
+    
+    // Vérifier si le cache est valide pour cette boutique
+    if (this.lastBoutiqueId === this.selectedBoutiqueId && this.categoryCountCache.has(category.id)) {
+      return this.categoryCountCache.get(category.id)!;
     }
     
     // Si les produits ne sont pas encore chargés, retourner 0 temporairement
@@ -869,22 +870,11 @@ onScroll() {
       return 0;
     }
     
-    // Debug: afficher le nombre de produits par catégorie
-    const productsByCategory = this.allProducts.reduce((acc, p) => {
-      acc[p.categorieId] = (acc[p.categorieId] || 0) + 1;
-      return acc;
-    }, {} as { 
-      [key: number]: number 
-    });
-    
-    console.log(`📊 Total produits: ${this.allProducts.length} | Par catégorie:`, productsByCategory);
-    
-    // Sinon, calculer en temps réel depuis allProducts
+    // Calculer en temps réel depuis allProducts pour la boutique sélectionnée
     const filteredProducts = this.allProducts.filter((p: ProduitDetailsResponseDTO) => {
       const matchesCategory = p.categorieId === category.id;
       
       // Vérifier si le produit appartient à la boutique sélectionnée
-      // Utiliser d'abord boutiqueId, puis fallback sur boutiques
       let matchesBoutique = false;
       
       if (p.boutiqueId === this.selectedBoutiqueId) {
@@ -901,7 +891,7 @@ onScroll() {
     // Mettre en cache le résultat
     this.categoryCountCache.set(category.id, count);
     
-    console.log(`📊 Catégorie ${category.nom}: ${count} produits trouvés pour boutique ${this.selectedBoutiqueId}`);
+    console.log(`📊 Catégorie ${category.nom}: ${count} produits trouvés pour boutique ${this.selectedBoutiqueId} (sur ${category.produitCount || 0} au total)`);
     
     return count;
   }
