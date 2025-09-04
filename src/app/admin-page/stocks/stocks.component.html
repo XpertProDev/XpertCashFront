@@ -221,7 +221,7 @@
   </div>
 
   <!-- Pagination personnalisée -->
-  <div class="pager" aria-label="Pagination" *ngIf="totalElements > pageSize">
+  <div class="pager" aria-label="Pagination" *ngIf="totalProduitsEnStock > pageSize">
     <div class="pager-info">
       <span>Produits par page:</span>
       <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="page-size-select">

@@ -53,6 +53,7 @@ export class StocksComponent implements OnInit {
   pageSize = 20;
   totalElements = 0;
   totalPages = 0;
+  totalProduitsEnStock = 0; // Nombre total de produits en stock uniquement
   // Pagination personnalisée
   private _currentPage = 0;
   get currentPage(): number {
@@ -352,8 +353,8 @@ export class StocksComponent implements OnInit {
 
   getPageInfo(): string {
     const start = this.currentPage * this.pageSize + 1;
-    const end = Math.min((this.currentPage + 1) * this.pageSize, this.totalElements);
-    return `${start} - ${end} / ${this.totalElements}`;
+    const end = Math.min((this.currentPage + 1) * this.pageSize, this.totalProduitsEnStock);
+    return `${start} - ${end} / ${this.totalProduitsEnStock}`;
   }
 
   getVisiblePages(): (number | string)[] {
@@ -629,8 +630,11 @@ export class StocksComponent implements OnInit {
   
         // Mettre à jour info pagination serveur (mais NE PAS écraser currentPage)
         this.pageSize = response.pageSize;
-        this.totalElements = response.totalElements;
+        this.totalElements = response.totalElements; // Garder pour référence
         this.totalPages = response.totalPages;
+        // Utiliser le nombre de produits en stock pour la pagination
+        // Pour l'API entreprise, on doit calculer le total en stock
+        this.totalProduitsEnStock = this.totalAllProducts; // Utiliser le total calculé
   
         // NB: on **n'écrase pas** currentPage ici — on garde la page demandée (requestedPage)
         // Si requestedPage n'est pas fourni (appels non-UI), on se contente de clamp currentPage
@@ -706,8 +710,10 @@ export class StocksComponent implements OnInit {
   
         // Pagination info
         this.pageSize = response.pageSize;
-        this.totalElements = response.totalElements;
+        this.totalElements = response.totalElements; // Garder pour référence
         this.totalPages = response.totalPages;
+        // Utiliser le nombre de produits en stock pour la pagination
+        this.totalProduitsEnStock = response.totalProduitsEnStock; // Utiliser la valeur de l'API
   
         // Ne PAS assigner currentPage d'après response ; garder la page demandée (requestedPage)
         if (typeof requestedPage === 'number') {
