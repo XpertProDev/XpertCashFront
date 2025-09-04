@@ -602,16 +602,19 @@ loadProduitsByCategorie(categorieId: number, page: number = 0, size: number = 20
         
         // MAIS garder tous les produits dans allProducts et juste mettre à jour cette catégorie
         this.allProducts = this.allProducts.filter(p => p.categorieId !== this.selectedCategoryId);
-        this.allProducts.push(...mappedProducts);
+        this.addProductsWithoutDuplicates(mappedProducts);
       } else {
         // Sinon, ajouter à la suite (pour "Toutes les catégories" ou pages suivantes)
         this.displayedProducts.push(...mappedProducts);
-        this.allProducts.push(...mappedProducts);
+        this.addProductsWithoutDuplicates(mappedProducts);
       }
 
       // Mettre à jour les informations de pagination
       this.totalPages = res.totalPages;
       this.currentPage = page;
+      
+      // Nettoyer les doublons potentiels
+      this.removeDuplicateProducts();
       
       // Vider le cache car les produits ont changé
       this.clearCategoryCountCache();
@@ -874,7 +877,7 @@ onScroll() {
       [key: number]: number 
     });
     
-    console.log(`📊 Produits par catégorie:`, productsByCategory);
+    console.log(`📊 Total produits: ${this.allProducts.length} | Par catégorie:`, productsByCategory);
     
     // Sinon, calculer en temps réel depuis allProducts
     const filteredProducts = this.allProducts.filter((p: ProduitDetailsResponseDTO) => {
@@ -940,6 +943,35 @@ onScroll() {
         this.loadProduitsByCategorie(categorie.id!, 0, this.pageSize);
       }
     });
+  }
+
+  /** Éviter les doublons lors de l'ajout de produits */
+  private addProductsWithoutDuplicates(newProducts: ProduitDetailsResponseDTO[]): void {
+    // Créer un Set des IDs existants pour une vérification rapide
+    const existingIds = new Set(this.allProducts.map(p => p.id));
+    
+    // Filtrer les nouveaux produits pour éviter les doublons
+    const uniqueNewProducts = newProducts.filter(p => !existingIds.has(p.id));
+    
+    if (uniqueNewProducts.length > 0) {
+      this.allProducts.push(...uniqueNewProducts);
+      console.log(`✅ Ajout de ${uniqueNewProducts.length} nouveaux produits (${newProducts.length - uniqueNewProducts.length} doublons évités)`);
+    } else {
+      console.log(`⚠️ Tous les ${newProducts.length} produits étaient déjà présents`);
+    }
+  }
+
+  /** Nettoyer les doublons existants dans allProducts */
+  private removeDuplicateProducts(): void {
+    const beforeCount = this.allProducts.length;
+    const uniqueProducts = this.allProducts.filter((product, index, self) => 
+      index === self.findIndex(p => p.id === product.id)
+    );
+    
+    if (uniqueProducts.length !== beforeCount) {
+      this.allProducts = uniqueProducts;
+      console.log(`🧹 Nettoyage des doublons : ${beforeCount} → ${uniqueProducts.length} produits (${beforeCount - uniqueProducts.length} doublons supprimés)`);
+    }
   }
 
   /** Recalculer les compteurs produits par catégorie pour la boutique sélectionnée */
