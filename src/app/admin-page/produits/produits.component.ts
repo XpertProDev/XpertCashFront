@@ -80,6 +80,8 @@ export class ProduitsComponent implements OnInit {
   importSuccess = false;
   importErrors: string[] = [];
 
+  private _lastPageRequestId = 0;
+
   selectedBoutiquesForImport: number[] = [];
   isAllBoutiquesSelected = false;
 
@@ -98,7 +100,23 @@ export class ProduitsComponent implements OnInit {
   pageSizeBoutique: number = 20;
   totalElementsBoutique: number = 0;
 
-  currentPage = 0;
+ // Remplace : currentPage = 0;
+private _currentPage = 0;
+get currentPage(): number {
+  return this._currentPage;
+}
+set currentPage(value: number) {
+  // log utile pour debug — supprime après résolution
+  try {
+    // on capture une petite stack pour savoir d'où vient l'écriture
+    throw new Error();
+  } catch (err: any) {
+    console.log(`[pagination] currentPage <- ${value}`);
+    console.log(err.stack?.split('\n').slice(1,6).join('\n')); // affiche 5 lignes de stack
+  }
+  this._currentPage = value;
+}
+
   pageSize = 20;
   totalElements = 0;
   totalPages = 0;
@@ -215,11 +233,16 @@ export class ProduitsComponent implements OnInit {
     return "Recherche...";
   }
 
-  resetFilters(): void {
+  resetFilters(resetToFirstPage: boolean = false): void {
     this.selectedFilters = [];
     this.searchText = '';
     this.tasks = [...this.allProducts];
-    this.currentPage = 0;
+  
+    // Ne reset la page que si on le demande explicitement
+    if (resetToFirstPage) {
+      this.currentPage = 0;
+    }
+  
     this.showFilterDropdown = false;
   }
 
@@ -252,9 +275,24 @@ export class ProduitsComponent implements OnInit {
   // }
 
   filteredProducts(): Produit[] {
+    if (!this.tasks) return [];
+  
+    // Détecter si la pagination est gérée côté serveur :
+    // on considère que c'est le cas si totalPages > 1 ou si totalElements > pageSize.
+    const serverSidePagination = (typeof this.totalPages === 'number' && this.totalPages > 1)
+      || (typeof this.totalElements === 'number' && this.totalElements > this.pageSize);
+  
+    if (serverSidePagination) {
+      // tasks contient déjà le contenu de la page courante fourni par le serveur
+      // on retourne directement tasks (ou on peut encore appliquer un filtrage local si nécessaire)
+      return this.tasks;
+    }
+  
+    // Cas client-side pagination : tasks contient la liste complète, on slice normalement
     const startIndex = this.currentPage * this.pageSize;
     return this.tasks.slice(startIndex, startIndex + this.pageSize);
   }
+  
 
   // Affichage/Masquage du dropdown d'export
   toggleExportDropdown() {
@@ -398,24 +436,31 @@ export class ProduitsComponent implements OnInit {
 
   // Gestion de la pagination personnalisée
   goToPage(page: number | string): void {
-    // Ignorer les clics sur les points de suspension
-    if (page === '...') {
-      return;
-    }
-    
-    const pageNumber = page as number;
-    if (pageNumber >= 0 && pageNumber < this.totalPages) {
-      this.currentPage = pageNumber;
-      
-      if (this.selectedBoutique) {
-        // si vue boutique
-        this.loadProduitsPaginated(this.selectedBoutique.id, pageNumber, this.pageSize);
-      } else {
-        // vue "Toutes les boutiques"
-        this.loadAllProduitsPaginated(pageNumber, this.pageSize);
-      }
+    if (page === '...') return;
+    const requestedPage = Number(page);
+    if (isNaN(requestedPage)) return;
+    if (requestedPage < 0) return;
+    if (this.totalPages && requestedPage >= this.totalPages) return;
+  
+    // Mise à jour optimiste : UI réagit immédiatement
+    this.currentPage = requestedPage;
+    this.isLoading = true;
+  
+    // Générer un id unique pour cette requête de page
+    const reqId = ++this._lastPageRequestId;
+    console.log('[pagination] requestedPage=', requestedPage, 'reqId=', reqId);
+  
+    // Déclencher le chargement adapté à la vue (boutique ou toutes)
+    if (this.selectedBoutique) {
+      // selectedBoutique doit déjà être défini si on est en mode boutique
+      this.loadProduitsPaginated(this.selectedBoutique.id, requestedPage, this.pageSize, requestedPage, reqId);
+    } else {
+      this.loadAllProduitsPaginated(requestedPage, this.pageSize, requestedPage, reqId);
     }
   }
+  
+  
+  
 
   onPageSizeChange(): void {
     this.currentPage = 0; // Retourner à la première page
@@ -547,23 +592,20 @@ export class ProduitsComponent implements OnInit {
       this.showSuspendedBoutiqueDialog();
       return;
     }
-
+  
     this.previousSelectedBoutique = this.selectedBoutique;
-
+    this.selectedBoutique = boutique;
+  
     if (boutique === null) {
-      this.selectedBoutique = boutique;
       this.boutiqueActuelle = "Toutes les boutiques";
-      // Charger les compteurs avant d'afficher les produits
-      await this.loadAllBoutiquesCounts();
-      this.loadAllProduitsPaginated(0, this.pageSize);
     } else {
-      this.selectedBoutique = boutique;
       this.boutiqueActuelle = boutique.nomBoutique ? boutique.nomBoutique : "Boutique sans nom";
-      this.loadProduitsPaginated(boutique.id, 0, this.pageSize);
     }
-    
-    this.currentPage = 0;
+  
+    // Toujours passer par goToPage pour garder l'algorithme cohérent
+    this.goToPage(0);
   }
+  
 
   // Ajoutez cette nouvelle méthode
   loadAllProduits(): void {
@@ -662,67 +704,85 @@ export class ProduitsComponent implements OnInit {
   }
 
   // Pour le mode "Toutes les boutiques"
-  async loadAllProduitsPaginated(page: number = 0, size: number = 20): Promise<void> {
+  async loadAllProduitsPaginated(page: number = 0, size: number = 20, requestedPage?: number, reqId?: number): Promise<void> {
     this.showNoProductsMessage = false;
     if (!this.entrepriseId) {
       console.error('ID entreprise manquant');
+      this.isLoading = false;
       return;
     }
-
+  
+    // isLoading déjà activé par goToPage, sinon assurer true
     this.isLoading = true;
-
-    // Attendre que tous les compteurs soient chargés
+  
     await this.loadAllBoutiquesCounts();
-
+  
     this.produitService.getProduitsByEntrepriseIdPaginated(this.entrepriseId, page, size).subscribe({
       next: (response: ProduitEntreprisePaginatedResponse) => {
+        // Ignorer réponse obsolète
+        if (typeof reqId === 'number' && reqId !== this._lastPageRequestId) {
+          console.log('[pagination] Ignoring stale loadAllProduitsPaginated response reqId=', reqId, 'current=', this._lastPageRequestId);
+          return;
+        }
+  
+        console.log('[pagination] loadAllProduitsPaginated response pageNumber=', response.pageNumber, 'totalPages=', response.totalPages);
+  
         this.tasks = response.content.map(prod => {
           const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
             ? `${this.apiUrl}${prod.photo}`
             : '';
-
+  
           return {
             ...prod,
             photo: fullImageUrl,
             createdAt: this.formatDate(prod.createdAt?.toString() || ''),
           } as Produit;
         });
-
-        // Mettre à jour les informations de pagination
-        this.currentPage = response.pageNumber;
+  
+        // Mettre à jour info pagination serveur (mais NE PAS écraser currentPage)
         this.pageSize = response.pageSize;
         this.totalElements = response.totalElements;
         this.totalPages = response.totalPages;
-
-        // this.currentPageEnterprise = response.pageNumber;
-        // this.pageSizeEnterprise = response.pageSize;
-        // this.totalElementsEnterprise = response.totalElements;
-
+  
+        // NB: on **n'écrase pas** currentPage ici — on garde la page demandée (requestedPage)
+        // Si requestedPage n'est pas fourni (appels non-UI), on se contente de clamp currentPage
+        if (typeof requestedPage === 'number') {
+          // s'assurer que currentPage reste dans les bornes server-side
+          this.currentPage = Math.min(Math.max(0, requestedPage), Math.max(0, this.totalPages - 1));
+        } else {
+          this.currentPage = Math.min(Math.max(0, this.currentPage), Math.max(0, this.totalPages - 1));
+        }
+  
         this.dataSource.data = this.tasks;
-        // syncPaginator() supprimé car plus nécessaire avec la pagination personnalisée
-        
         this.showNoProductsMessage = this.tasks.length === 0;
         this.allProducts = [...this.tasks];
         this.resetFilters();
+  
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
+        if (typeof reqId === 'number' && reqId !== this._lastPageRequestId) {
+          console.log('[pagination] Ignoring stale error for reqId=', reqId);
+          return;
+        }
         console.error("Erreur :", err);
         this.showNoProductsMessage = this.tasks.length === 0;
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
-
-// Pour le mode boutique
-  loadProduitsPaginated(boutiqueId: number, page: number = 0, size: number = 20): void {
+  
+  loadProduitsPaginated(boutiqueId: number, page: number = 0, size: number = 20, requestedPage?: number, reqId?: number): void {
     this.showNoProductsMessage = false;
     
     if (!boutiqueId) {
       console.error('L\'ID de la boutique est manquant');
+      this.isLoading = false;
       return;
     }
-
+  
     const boutique = this.boutiques.find(b => b.id === boutiqueId);
     if (boutique?.typeBoutique === 'ENTREPOT') {
       this.tasks = [];
@@ -732,27 +792,32 @@ export class ProduitsComponent implements OnInit {
       this.isLoading = false;
       return;
     }
-
+  
     this.isLoading = true;
     
     this.produitService.getProduitsEntreprisePaginated(boutiqueId, page, size).subscribe({
       next: (response: ProduitStockPaginatedResponse) => {
+        if (typeof reqId === 'number' && reqId !== this._lastPageRequestId) {
+          console.log('[pagination] Ignoring stale loadProduitsPaginated response reqId=', reqId, 'current=', this._lastPageRequestId);
+          return;
+        }
+  
+        console.log('[pagination] loadProduitsPaginated response pageNumber=', response.pageNumber, 'totalPages=', response.totalPages);
+  
         this.tasks = response.content.map(prod => {
-          // Mapper les produits
           const fullImageUrl = (prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined')
             ? `${this.apiUrl}${prod.photo}`
             : '';
-
+  
           let createdAt = '';
           if (prod.createdAt) {
             if (prod.createdAt.includes('à')) {
               const [datePart, timePart] = prod.createdAt.split(' à ');
-              // format personnalisé si besoin
             } else {
               createdAt = new Date(prod.createdAt).toISOString();
             }
           }
-
+  
           return {
             id: prod.id,
             codeGenerique: prod.codeGenerique || '',
@@ -774,30 +839,34 @@ export class ProduitsComponent implements OnInit {
             boutiques: prod.boutiques || []
           } as Produit;
         });
-
-        // Mettre à jour les informations de pagination
-        this.currentPage = response.pageNumber;
+  
+        // Pagination info
         this.pageSize = response.pageSize;
         this.totalElements = response.totalElements;
         this.totalPages = response.totalPages;
-
-        // this.currentPageBoutique = response.pageNumber;
-        // this.pageSizeBoutique = response.pageSize;
-        // this.totalElementsBoutique = response.totalElements;
-
+  
+        // Ne PAS assigner currentPage d'après response ; garder la page demandée (requestedPage)
+        if (typeof requestedPage === 'number') {
+          this.currentPage = Math.min(Math.max(0, requestedPage), Math.max(0, this.totalPages - 1));
+        } else {
+          this.currentPage = Math.min(Math.max(0, this.currentPage), Math.max(0, this.totalPages - 1));
+        }
+  
         this.productCounts[boutiqueId] = response.totalProduitsActifs;
-
         this.dataSource.data = this.tasks;
-        // Configuration du paginator supprimée car plus nécessaire avec la pagination personnalisée
         this.isLoading = false;
         this.allProducts = [...this.tasks];
         this.resetFilters();
-        
         this.showNoProductsMessage = this.tasks.length === 0;
+        this.cdr.detectChanges();
       },
       error: (err) => {
+        if (typeof reqId === 'number' && reqId !== this._lastPageRequestId) {
+          console.log('[pagination] Ignoring stale error for reqId=', reqId);
+          return;
+        }
+  
         this.isLoading = false;
-        
         if (err.message === 'BOUTIQUE_DESACTIVEE') {
           this.showSuspendedBoutiqueDialog();
           this.selectedBoutique = this.previousSelectedBoutique;
@@ -805,9 +874,12 @@ export class ProduitsComponent implements OnInit {
         }
         console.error("Erreur :", err);
         this.showNoProductsMessage = this.tasks.length === 0;
+        this.cdr.detectChanges();
       }
     });
   }
+  
+  
 
   // Charge les produits depuis le backend et effectue le mapping pour l'affichage
   loadProduits(boutiqueId: number, page: number = 0, size: number = 20): void {
@@ -900,17 +972,25 @@ export class ProduitsComponent implements OnInit {
     });
   }
 
+  // async rafraichirProduits(): Promise<void> {
+  //   this.showNoProductsMessage = false;
+    
+  //   if (this.selectedBoutique) {
+  //     this.loadProduitsPaginated(this.selectedBoutique.id, this.currentPage, this.pageSize);
+  //   } else {
+  //     // Rafraîchir les compteurs avant de charger les produits
+  //     await this.loadAllBoutiquesCounts();
+  //     this.loadAllProduitsPaginated(this.currentPage, this.pageSize);
+  //   }
+  // }
+
   async rafraichirProduits(): Promise<void> {
     this.showNoProductsMessage = false;
-    
-    if (this.selectedBoutique) {
-      this.loadProduitsPaginated(this.selectedBoutique.id, this.currentPage, this.pageSize);
-    } else {
-      // Rafraîchir les compteurs avant de charger les produits
-      await this.loadAllBoutiquesCounts();
-      this.loadAllProduitsPaginated(this.currentPage, this.pageSize);
-    }
+    // Va relancer la page courante proprement via goToPage
+    // si on veut forcer refresh de la page courante
+    this.goToPage(this.currentPage);
   }
+  
   
   public showSuspendedBoutiqueDialog(): void {
     this.dialog.open(SuspendedBoutiqueDialogComponent, {
