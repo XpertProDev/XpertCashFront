@@ -674,12 +674,19 @@ async confirmCopyProducts(): Promise<void> {
           this.filteredProducts = [...this.productsInBoutique];
           this.totalPages = response.totalPages;
           
-          this.isLoadingMore = false;
+          // Délai de 3 secondes avant de masquer le loading
+          setTimeout(() => {
+            this.isLoadingMore = false;
+          }, 3000);
+          
           this.allProductsLoaded = this.currentPage >= response.totalPages - 1;
         },
         error: (err) => {
           console.error('Erreur chargement produits supplémentaires', err);
-          this.isLoadingMore = false;
+          // Délai de 3 secondes même en cas d'erreur
+          setTimeout(() => {
+            this.isLoadingMore = false;
+          }, 3000);
           this.currentPage--; // Revenir à la page précédente en cas d'erreur
         }
       });

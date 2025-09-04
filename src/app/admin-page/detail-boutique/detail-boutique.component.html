@@ -477,11 +477,13 @@
                         <!-- Chargement -->
                         <tr *ngIf="isLoadingProducts">
                             <td colspan="7" style="text-align: center; padding: 20px;">
-                                <div style="display: flex; justify-content: center; align-items: center;">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <span style="margin-left: 10px;">Chargement des produits...</span>
+                                <div style="text-align: center;">
+                                    <div class="mini-spinner" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <div class="text-loading">
+                                        <span style="margin-left: 10px;">Chargement des produits...</span>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -549,18 +551,18 @@
 
                         <!-- Après la boucle des produits dans le tableau -->
                         <tr *ngIf="isLoadingMore">
-                        <td colspan="7" style="text-align: center; padding: 20px;">
-                            <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <span style="margin-left: 10px;">Chargement de plus de produits...</span>
-                        </td>
+                            <td colspan="7" style="text-align: center; padding: 20px;">
+                                <div class="mini-spinner text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span style="margin-left: 10px;">Chargement de plus de produits...</span>
+                            </td>
                         </tr>
 
-                        <tr *ngIf="allProductsLoaded && productsInBoutique.length > 0">
-                        <td colspan="7" style="text-align: center; padding: 20px;">
-                            <p>Tous les produits ont été chargés</p>
-                        </td>
+                        <tr *ngIf="allProductsLoaded && productsInBoutique.length > 0 && !isLoadingMore">
+                            <td colspan="7" style="text-align: center; padding: 20px;">
+                                <p style="margin: 0;">Tous les produits ont été chargés</p>
+                            </td>
                         </tr>
 
                         <!-- Aucun produit -->
@@ -806,19 +808,19 @@
 
                         <!-- Dans le tableau, après la boucle des produits -->
                         <tr *ngIf="isLoadingMore">
-                        <td colspan="7" style="text-align: center; padding: 20px;">
-                            <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <span style="margin-left: 10px;">Chargement de plus de produits...</span>
-                        </td>
+                            <td colspan="7" style="text-align: center; padding: 20px;">
+                                <div class="mini-spinner text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span style="margin-left: 10px;">Chargement de plus de produits...</span>
+                            </td>
                         </tr>
 
-                        <tr *ngIf="allProductsLoaded && productsInBoutique.length > 0">
-                        <td colspan="7" style="text-align: center; padding: 20px;">
-                            <p>Tous les produits ont été chargés</p>
-                        </td>
-                        </tr>
+                        <!-- <tr *ngIf="allProductsLoaded && productsInBoutique.length > 0">
+                            <td colspan="7" style="text-align: center; padding: 20px;">
+                                <p>Tous les produits ont été chargés</p>
+                            </td>
+                        </tr> -->
                         
                         <tr *ngIf="allUsers.length === 0">
                             <td colspan="7" style="text-align: center; padding: 20px;">

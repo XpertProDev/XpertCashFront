@@ -1,9 +1,8 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CategorieService } from '../SERVICES/categorie.service';
-import { ProduitService } from '../SERVICES/produit.service';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { ProduitService, ProduitEntreprisePaginatedResponse, ProduitStockPaginatedResponse } from '../SERVICES/produit.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { CommonModule } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -15,7 +14,6 @@ import { Produit } from '../MODELS/produit.model';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
-import { ChangeDetectorRef } from '@angular/core';
 import { CustomNumberPipe } from '../MODELS/customNumberPipe';
 import { MatDialog } from '@angular/material/dialog';
 import { SuspendedBoutiqueDialogComponent } from '../produits/suspended-boutique-dialog.component';
@@ -32,8 +30,6 @@ import { environment } from 'src/environments/environment';
       MatFormFieldModule, 
       MatAutocompleteModule,
       MatInputModule,
-      //AsyncPipe,
-      MatPaginatorModule,
       RouterLink,
       CustomNumberPipe
   ],
@@ -54,9 +50,18 @@ export class StocksComponent implements OnInit {
   addressBoutique : string = '';
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  pageSize = 5;
-  currentPage = 0;
+  pageSize = 20;
+  totalElements = 0;
+  totalPages = 0;
+  totalProduitsEnStock = 0; // Nombre total de produits en stock uniquement
+  // Pagination personnalisée
+  private _currentPage = 0;
+  get currentPage(): number {
+    return this._currentPage;
+  }
+  set currentPage(value: number) {
+    this._currentPage = value;
+  }
   selectedBoutique: any = null;
   boutiques: any[] = [];
   // Dropdown pour l'export
@@ -79,7 +84,10 @@ export class StocksComponent implements OnInit {
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
   productCounts: { [boutiqueId: number]: number } = {};
-  totalAllProducts: number = 0;
+  isLoading = false;
+  isLoadingCounts = false;
+  private _lastPageRequestId = 0;
+  entrepriseId: number | null = null;
 
   // @HostListener('document:click', ['$event'])
   // onClick(event: MouseEvent): void {
@@ -118,7 +126,8 @@ export class StocksComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private usersService: UsersService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -153,17 +162,22 @@ export class StocksComponent implements OnInit {
   // }
 
   filteredProducts(): Produit[] {
-    // Exclure les produits liés à des entrepôts
-      const produitsSansEntrepots = this.tasks.filter(p => {
-        const boutique = this.boutiques.find(b => b.id === p.boutiqueId);
-        return boutique && boutique.typeBoutique !== 'ENTREPOT';
-      });
-    
-    const productsToShow = this.filteredProduct.length > 0 ? this.filteredProduct : this.tasks;
-    
+    if (!this.tasks) return [];
+  
+    // Détecter si la pagination est gérée côté serveur :
+    // on considère que c'est le cas si totalPages > 1 ou si totalElements > pageSize.
+    const serverSidePagination = (typeof this.totalPages === 'number' && this.totalPages > 1)
+      || (typeof this.totalElements === 'number' && this.totalElements > this.pageSize);
+  
+    if (serverSidePagination) {
+      // tasks contient déjà le contenu de la page courante fourni par le serveur
+      // on retourne directement tasks (ou on peut encore appliquer un filtrage local si nécessaire)
+      return this.tasks;
+    }
+  
+    // Cas client-side pagination : tasks contient la liste complète, on slice normalement
     const startIndex = this.currentPage * this.pageSize;
-    // return productsToShow.slice(startIndex, startIndex + this.pageSize);
-     return produitsSansEntrepots.slice(startIndex, startIndex + this.pageSize);
+    return this.tasks.slice(startIndex, startIndex + this.pageSize);
   }
 
   // Affichage/Masquage du dropdown d'export
@@ -300,10 +314,88 @@ export class StocksComponent implements OnInit {
     link.click();
   }
 
-  // Gestion de la pagination
-  onPageChange(event: any): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
+  // Gestion de la pagination personnalisée
+  goToPage(page: number | string): void {
+    if (page === '...') return;
+    const requestedPage = Number(page);
+    if (isNaN(requestedPage)) return;
+    if (requestedPage < 0) return;
+    if (this.totalPages && requestedPage >= this.totalPages) return;
+  
+    // Mise à jour optimiste : UI réagit immédiatement
+    this.currentPage = requestedPage;
+    this.isLoading = true;
+  
+    // Générer un id unique pour cette requête de page
+    const reqId = ++this._lastPageRequestId;
+    console.log('[pagination] requestedPage=', requestedPage, 'reqId=', reqId);
+  
+    // Déclencher le chargement adapté à la vue (boutique ou toutes)
+    if (this.selectedBoutique) {
+      // selectedBoutique doit déjà être défini si on est en mode boutique
+      this.loadProduitsPaginated(this.selectedBoutique.id, requestedPage, this.pageSize, requestedPage, reqId);
+    } else {
+      this.loadAllProduitsPaginated(requestedPage, this.pageSize, requestedPage, reqId);
+    }
+  }
+
+  onPageSizeChange(): void {
+    this.currentPage = 0; // Retourner à la première page
+    
+    if (this.selectedBoutique) {
+      // si vue boutique
+      this.loadProduitsPaginated(this.selectedBoutique.id, 0, this.pageSize);
+    } else {
+      // vue "Toutes les boutiques"
+      this.loadAllProduitsPaginated(0, this.pageSize);
+    }
+  }
+
+  getPageInfo(): string {
+    const start = this.currentPage * this.pageSize + 1;
+    const end = Math.min((this.currentPage + 1) * this.pageSize, this.totalProduitsEnStock);
+    return `${start} - ${end} / ${this.totalProduitsEnStock}`;
+  }
+
+  getVisiblePages(): (number | string)[] {
+    const pages: (number | string)[] = [];
+    const totalPages = this.totalPages;
+    const current = this.currentPage;
+    
+    if (totalPages <= 7) {
+      // Si moins de 7 pages, afficher toutes les pages
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Logique pour afficher les pages avec des points de suspension
+      if (current <= 3) {
+        // Début de la liste
+        for (let i = 0; i < 5; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages - 1);
+      } else if (current >= totalPages - 4) {
+        // Fin de la liste
+        pages.push(0);
+        pages.push('...');
+        for (let i = totalPages - 5; i < totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Milieu de la liste
+        pages.push(0);
+        pages.push('...');
+        for (let i = current - 1; i <= current + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages - 1);
+      }
+    }
+    
+    return pages;
   }
 
   // Gestion de l'upload d'image pour ajouter une photo
@@ -338,28 +430,39 @@ export class StocksComponent implements OnInit {
   // Récupère les informations utilisateur et stocke les données dans le localStorage
   getUserInfo(): void {
     this.usersService.getUserInfo().subscribe({
-      next: (user) => {
+      next: async (user) => {
+        console.log('Données reçues:', user);
         localStorage.setItem('user', JSON.stringify(user));
         this.userName = user.nomComplet;
         this.nomEntreprise = user.nomEntreprise;
-        this.boutiques = user.boutiques; // Récupération de toutes les boutiques
+        this.boutiques = user.boutiques ?? []; 
 
-        this.selectedBoutique = null;
+        // Récupération de l'ID entreprise
+        this.entrepriseId = user.entrepriseId;
+
+        // Charger les compteurs avant de sélectionner une boutique
+        await this.loadAllBoutiquesCounts();
+        this.selectBoutique(null);
+
+        if (!this.entrepriseId) {
+          console.error('Aucun ID entreprise trouvé !');
+          return;
+        }
+
+        this.addressBoutique = this.selectedBoutique?.adresse || 'Adresse non trouvée';
         
-        // Sélectionner la première boutique par défaut
-        // if (this.boutiques.length > 0) {
-        //   this.selectedBoutique = this.boutiques[0];
-        //   this.boutiqueName = this.selectedBoutique.nomBoutique;
-        //   this.addressBoutique = this.selectedBoutique.adresse;
-        //   this.loadProduits(this.selectedBoutique.id);
-        // }
-
-        this.showNoProductsMessage = false;
-        this.loadAllProduits();
+        setTimeout(() => {
+          this.showNoProductsMessage = this.tasks.length === 0;
+          this.cdr.detectChanges();
+        }, 500);
       },
       error: (err) => {
+        this.boutiques = [];
         console.error("Erreur lors de la récupération des informations utilisateur :", err);
-        this.showNoProductsMessage = true;
+        setTimeout(() => {
+          this.showNoProductsMessage = this.tasks.length === 0;
+          this.cdr.detectChanges();
+        }, 500);
       }
     });
   }
@@ -412,7 +515,6 @@ export class StocksComponent implements OnInit {
         this.productCounts[boutiqueId] = produits.filter(prod => prod.enStock).length;
         this.allProducts = [...this.tasks];
         this.dataSource.data = this.tasks;
-        this.dataSource.paginator = this.paginator;
         this.showNoProductsMessage = this.tasks.length === 0;
       },
       error: (err) => {
@@ -432,24 +534,21 @@ export class StocksComponent implements OnInit {
   // }
 
   selectBoutique(boutique: any | null): void {
-    this.showNoProductsMessage = false;
     if (boutique && !boutique.actif) {
       this.showSuspendedBoutiqueDialog();
-      return; // Ne pas changer la sélection si la boutique est désactivée
+      return;
     }
   
     this.selectedBoutique = boutique;
   
     if (boutique === null) {
-      // Charger tous les produits en stock de l'entreprise
-      this.loadAllProduits();
+      this.boutiqueName = "Toutes les boutiques";
     } else {
-      // Charger les produits pour la boutique sélectionnée
-      this.boutiqueName = boutique.nomBoutique;
-      this.addressBoutique = boutique.adresse;
-      this.loadProduits(boutique.id);
+      this.boutiqueName = boutique.nomBoutique ? boutique.nomBoutique : "Boutique sans nom";
     }
-    this.currentPage = 0;
+  
+    // Toujours passer par goToPage pour garder l'algorithme cohérent
+    this.goToPage(0);
   }
   
   toggleFilterDropdown(): void {
@@ -458,17 +557,66 @@ export class StocksComponent implements OnInit {
     this.showExportDropdown = false;
   }
 
-  loadAllProduits(): void {
+  private async loadAllBoutiquesCounts(): Promise<void> {
+    if (!this.entrepriseId) return;
+
+    this.isLoadingCounts = true;
+    
+    // Réinitialiser temporairement les compteurs pour éviter l'affichage de valeurs incorrectes
+    const previousCounts = { ...this.productCounts };
+    this.boutiquesActivesSansEntrepots.forEach(b => {
+      this.productCounts[b.id] = 0;
+    });
+
+    try {
+      const requests = this.boutiquesActivesSansEntrepots.map(boutique => 
+        this.produitService.getProduitsEntreprisePaginated(boutique.id, 0, 1).toPromise()
+      );
+
+      const responses = await Promise.all(requests);
+      
+      responses.forEach((response, index) => {
+        if (response) {
+          const boutiqueId = this.boutiquesActivesSansEntrepots[index].id;
+          this.productCounts[boutiqueId] = response.totalProduitsEnStock;
+        }
+      });
+      
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Erreur lors du chargement des compteurs:', err);
+      // Restaurer les anciennes valeurs en cas d'erreur
+      this.productCounts = previousCounts;
+    } finally {
+      this.isLoadingCounts = false;
+    }
+  }
+
+  // Pour le mode "Toutes les boutiques"
+  async loadAllProduitsPaginated(page: number = 0, size: number = 20, requestedPage?: number, reqId?: number): Promise<void> {
     this.showNoProductsMessage = false;
-    const entrepriseId = this.getEntrepriseId();
-    if (!entrepriseId) {
+    if (!this.entrepriseId) {
       console.error('ID entreprise manquant');
+      this.isLoading = false;
       return;
     }
 
-    this.produitService.getProduitsByEntrepriseId(entrepriseId).subscribe({
-      next: (produits: Produit[]) => {
-        this.tasks = produits
+    // isLoading déjà activé par goToPage, sinon assurer true
+    this.isLoading = true;
+  
+    await this.loadAllBoutiquesCounts();
+  
+    this.produitService.getProduitsByEntrepriseIdPaginated(this.entrepriseId, page, size).subscribe({
+      next: (response: ProduitEntreprisePaginatedResponse) => {
+        // Ignorer réponse obsolète
+        if (typeof reqId === 'number' && reqId !== this._lastPageRequestId) {
+          console.log('[pagination] Ignoring stale loadAllProduitsPaginated response reqId=', reqId, 'current=', this._lastPageRequestId);
+          return;
+        }
+  
+        console.log('[pagination] loadAllProduitsPaginated response pageNumber=', response.pageNumber, 'totalPages=', response.totalPages);
+  
+        this.tasks = response.content
           .filter(prod => prod.enStock)
           .map(prod => {
             const hasPhoto = prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined';
@@ -478,34 +626,125 @@ export class StocksComponent implements OnInit {
               photo: fullImageUrl ? fullImageUrl : this.generateLetterAvatar(prod.nom),
               boutiques: prod.boutiques || [],
             };
-          }).sort((a, b) => {
-            const dateA = new Date(a.createdAt ?? new Date().toISOString()).getTime();
-            const dateB = new Date(b.createdAt ?? new Date().toISOString()).getTime();
-            return dateB - dateA;
           });
-
-        const counts: { [id: number]: number } = {};
-        produits.forEach(prod => {
-          if (prod.enStock && prod.boutiques) {
-            prod.boutiques.forEach(b => {
-              counts[b.id] = (counts[b.id] || 0) + 1;
-            });
-          }
-        });
-        
-        this.productCounts = counts;
-        this.totalAllProducts = produits.filter(prod => prod.enStock).length;
-
-        this.dataSource.data = this.tasks;
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
+  
+        // Mettre à jour info pagination serveur (mais NE PAS écraser currentPage)
+        this.pageSize = response.pageSize;
+        this.totalElements = response.totalElements; // Garder pour référence
+        this.totalPages = response.totalPages;
+        // Utiliser le nombre de produits en stock pour la pagination
+        // Pour l'API entreprise, on doit calculer le total en stock
+        this.totalProduitsEnStock = this.totalAllProducts; // Utiliser le total calculé
+  
+        // NB: on **n'écrase pas** currentPage ici — on garde la page demandée (requestedPage)
+        // Si requestedPage n'est pas fourni (appels non-UI), on se contente de clamp currentPage
+        if (typeof requestedPage === 'number') {
+          // s'assurer que currentPage reste dans les bornes server-side
+          this.currentPage = Math.min(Math.max(0, requestedPage), Math.max(0, this.totalPages - 1));
+        } else {
+          this.currentPage = Math.min(Math.max(0, this.currentPage), Math.max(0, this.totalPages - 1));
         }
-        this.allProducts = [...this.tasks];
+  
+        this.dataSource.data = this.tasks;
         this.showNoProductsMessage = this.tasks.length === 0;
+        this.allProducts = [...this.tasks];
+        this.resetFilters();
+  
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error("Erreur lors de la récupération des produits", err);
+        if (typeof reqId === 'number' && reqId !== this._lastPageRequestId) {
+          console.log('[pagination] Ignoring stale error for reqId=', reqId);
+          return;
+        }
+        console.error("Erreur :", err);
         this.showNoProductsMessage = this.tasks.length === 0;
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadProduitsPaginated(boutiqueId: number, page: number = 0, size: number = 20, requestedPage?: number, reqId?: number): void {
+    this.showNoProductsMessage = false;
+    
+    if (!boutiqueId) {
+      console.error('L\'ID de la boutique est manquant');
+      this.isLoading = false;
+      return;
+    }
+  
+    const boutique = this.boutiques.find(b => b.id === boutiqueId);
+    if (boutique?.typeBoutique === 'ENTREPOT') {
+      this.tasks = [];
+      this.dataSource.data = [];
+      this.productCounts[boutiqueId] = 0;
+      this.showNoProductsMessage = true;
+      this.isLoading = false;
+      return;
+    }
+  
+    this.isLoading = true;
+    
+    this.produitService.getProduitsEntreprisePaginated(boutiqueId, page, size).subscribe({
+      next: (response: ProduitStockPaginatedResponse) => {
+        if (typeof reqId === 'number' && reqId !== this._lastPageRequestId) {
+          console.log('[pagination] Ignoring stale loadProduitsPaginated response reqId=', reqId, 'current=', this._lastPageRequestId);
+          return;
+        }
+  
+        console.log('[pagination] loadProduitsPaginated response pageNumber=', response.pageNumber, 'totalPages=', response.totalPages);
+  
+        this.tasks = response.content
+          .filter(prod => prod.enStock)
+          .map(prod => {
+            const hasPhoto = prod.photo && prod.photo !== 'null' && prod.photo !== 'undefined';
+            const fullImageUrl = hasPhoto ? `${this.apiUrl}${prod.photo}` : '';
+            return {
+              ...prod,
+              photo: fullImageUrl ? fullImageUrl : this.generateLetterAvatar(prod.nom),
+              boutiques: prod.boutiques || [],
+            };
+          });
+  
+        // Pagination info
+        this.pageSize = response.pageSize;
+        this.totalElements = response.totalElements; // Garder pour référence
+        this.totalPages = response.totalPages;
+        // Utiliser le nombre de produits en stock pour la pagination
+        this.totalProduitsEnStock = response.totalProduitsEnStock; // Utiliser la valeur de l'API
+  
+        // Ne PAS assigner currentPage d'après response ; garder la page demandée (requestedPage)
+        if (typeof requestedPage === 'number') {
+          this.currentPage = Math.min(Math.max(0, requestedPage), Math.max(0, this.totalPages - 1));
+        } else {
+          this.currentPage = Math.min(Math.max(0, this.currentPage), Math.max(0, this.totalPages - 1));
+        }
+  
+        this.productCounts[boutiqueId] = response.totalProduitsEnStock;
+        this.dataSource.data = this.tasks;
+        this.isLoading = false;
+        this.allProducts = [...this.tasks];
+        this.resetFilters();
+        this.showNoProductsMessage = this.tasks.length === 0;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        if (typeof reqId === 'number' && reqId !== this._lastPageRequestId) {
+          console.log('[pagination] Ignoring stale error for reqId=', reqId);
+          return;
+        }
+  
+        this.isLoading = false;
+        if (err.message === 'BOUTIQUE_DESACTIVEE') {
+          this.showSuspendedBoutiqueDialog();
+          this.selectedBoutique = null;
+          return;
+        }
+        console.error("Erreur :", err);
+        this.showNoProductsMessage = this.tasks.length === 0;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -601,12 +840,26 @@ export class StocksComponent implements OnInit {
     this.currentPage = 0;
   }
 
-  resetFilters(): void {
+  // resetFilters(): void {
+  //   this.selectedFilters = [];
+  //   this.searchText = '';
+  //   this.tasks = [...this.allProducts];
+  //   this.filteredProduct = [];
+  //   this.currentPage = 0;
+  //   this.showFilterDropdown = false;
+  // }
+
+  // Nouvelle version : n'écrase pas currentPage sauf si on le demande
+  resetFilters(resetToFirstPage: boolean = false): void {
     this.selectedFilters = [];
     this.searchText = '';
     this.tasks = [...this.allProducts];
-    this.filteredProduct = [];
-    this.currentPage = 0;
+
+    // Ne reset la page que si on le demande explicitement
+    if (resetToFirstPage) {
+      this.currentPage = 0;
+    }
+
     this.showFilterDropdown = false;
   }
 
@@ -665,5 +918,25 @@ export class StocksComponent implements OnInit {
   
   get boutiquesSansEntrepots(): any[] {
   return this.boutiques?.filter(b => b.typeBoutique !== 'ENTREPOT') || [];
+}
+
+  get boutiquesActivesSansEntrepots(): any[] {
+    return this.boutiques?.filter(b => b.typeBoutique !== 'ENTREPOT' && b.actif) || [];
+  }
+
+  get totalAllProducts(): number {
+    if (this.isLoadingCounts) return 0;
+    if (!this.boutiquesActivesSansEntrepots.length) return 0;
+    
+    return this.boutiquesActivesSansEntrepots
+      .map(b => this.productCounts[b.id] || 0)
+      .reduce((acc, curr) => acc + curr, 0);
+  }
+
+  async rafraichirProduits(): Promise<void> {
+    this.showNoProductsMessage = false;
+    // Va relancer la page courante proprement via goToPage
+    // si on veut forcer refresh de la page courante
+    this.goToPage(this.currentPage);
 }
 }

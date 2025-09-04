@@ -5,7 +5,8 @@
     <div class="actions">
       <button class="add-task" routerLink="/stock_ajustement" >Créer un ajustement de stock</button>
       <div class="contentIcon">
-        <i class="ri-refresh-line"></i>
+        <i class="ri-refresh-line" (click)="rafraichirProduits()" *ngIf="!isLoading"></i>
+        <i *ngIf="isLoading" class="ri-loader-line ri-spin"></i>
         <div class="bare"></div>
         <div class="export-container">
           <div class="iconDrop">
@@ -116,8 +117,11 @@
             <!-- <p class="all_boutique">Toutes les boutiques</p> -->
              <p class="all_boutique" style="display: flex; align-items: center;">
                 Toutes les boutiques
-                <span *ngIf="totalAllProducts > 0" class="facture-count">
+                <span *ngIf="!isLoadingCounts && totalAllProducts > 0" class="facture-count">
                   {{ totalAllProducts }}
+                </span>
+                <span *ngIf="isLoadingCounts" class="facture-count">
+                  <i class="ri-loader-line ri-spin" style="font-size: 12px;"></i>
                 </span>
               </p> 
           </div>
@@ -216,12 +220,62 @@
     <p style="color: red;">Vous n'avez pas de produit</p>
   </div>
 
-  <!-- Pagination -->
-  <div class="pagination">
-    <mat-paginator *ngIf="tasks.length > 5" [length]="tasks.length"
-                   [pageSize]="pageSize"
-                   [pageSizeOptions]="[5, 10, 25, 100]"
-                   (page)="onPageChange($event)">
-    </mat-paginator>
+  <!-- Pagination personnalisée -->
+  <div class="pager" aria-label="Pagination" *ngIf="totalProduitsEnStock > pageSize">
+    <div class="pager-info">
+      <span>Produits par page:</span>
+      <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="page-size-select">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+      </select>
+      <span class="page-info">{{ getPageInfo() }}</span>
+    </div>
+    
+    <div class="pager-navigation">
+      <button 
+        class="pager-btn" 
+        [disabled]="currentPage === 0"
+        (click)="goToPage(0)"
+        title="Première page">
+        <i class="ri-skip-back-line"></i>
+      </button>
+      
+      <button 
+        class="pager-btn" 
+        [disabled]="currentPage === 0"
+        (click)="goToPage(currentPage - 1)"
+        title="Page précédente">
+        <i class="ri-arrow-left-s-line"></i>
+      </button>
+      
+              <div class="page-numbers">
+          <button 
+            *ngFor="let page of getVisiblePages()" 
+            class="page-number"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)"
+            [disabled]="page === '...'">
+            {{ page }}
+          </button>
+        </div>
+      
+      <button 
+        class="pager-btn" 
+        [disabled]="currentPage >= totalPages - 1"
+        (click)="goToPage(currentPage + 1)"
+        title="Page suivante">
+        <i class="ri-arrow-right-s-line"></i>
+      </button>
+      
+      <button 
+        class="pager-btn" 
+        [disabled]="currentPage >= totalPages - 1"
+        (click)="goToPage(totalPages - 1)"
+        title="Dernière page">
+        <i class="ri-skip-forward-line"></i>
+      </button>
+    </div>
   </div>
 </div>
