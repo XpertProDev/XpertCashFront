@@ -559,11 +559,11 @@
                             </td>
                         </tr>
 
-                        <!-- <tr *ngIf="allProductsLoaded && productsInBoutique.length > 0">
+                        <tr *ngIf="allProductsLoaded && productsInBoutique.length > 0 && !isLoadingMore">
                             <td colspan="7" style="text-align: center; padding: 20px;">
-                                <p>Tous les produits ont été chargés</p>
+                                <p style="margin: 0;">Tous les produits ont été chargés</p>
                             </td>
-                        </tr> -->
+                        </tr>
 
                         <!-- Aucun produit -->
                         <tr *ngIf="!isLoadingProducts && productsInBoutique.length === 0 && boutique?.actif">
