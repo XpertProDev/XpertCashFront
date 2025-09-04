@@ -95,6 +95,7 @@ export class DetailBoutiqueComponent implements OnInit {
   totalPages = 0;
   isLoadingMore = false;
   allProductsLoaded = false;
+  totalProductsCount = 0;
   
   @ViewChild('tableScrollContainer') tableScrollContainer!: ElementRef;
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
@@ -634,6 +635,8 @@ async confirmCopyProducts(): Promise<void> {
             this.productsInBoutique = [...this.productsInBoutique, ...newProducts];
           } else {
             this.productsInBoutique = newProducts;
+            // Mettre à jour le compteur total avec la valeur de l'API
+            this.totalProductsCount = response.totalElements;
           }
 
           this.filteredProducts = [...this.productsInBoutique];

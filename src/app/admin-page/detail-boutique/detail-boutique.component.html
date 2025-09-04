@@ -265,8 +265,11 @@
                 <div class="section_title" style="display: flex; align-items: center;">
                     <div class="title" style="display: flex; align-items: center;">
                         <h6 style="margin-right: 8px;">Produits de {{ boutique?.typeBoutique === 'ENTREPOT' ? "l'entrepôt" : 'la boutique' }}</h6>
-                        <div class="facture-count" *ngIf="productsInBoutique.length > 0" style="position: relative; top: -4px; right: 2px;">
+                        <!-- <div class="facture-count" *ngIf="productsInBoutique.length > 0" style="position: relative; top: -4px; right: 2px;">
                             {{ productsInBoutique.length }}
+                        </div> -->
+                        <div class="facture-count" *ngIf="totalProductsCount > 0" style="position: relative; top: -4px; right: 2px;">
+                            {{ totalProductsCount }}
                         </div>
                     </div>
 
