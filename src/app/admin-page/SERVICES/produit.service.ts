@@ -29,6 +29,7 @@ export interface ProduitStockPaginatedResponse {
   pageSize: number;
   totalElements: number;
   totalPages: number;
+  number: number;
   hasNext: boolean;
   hasPrevious: boolean;
   isFirst: boolean;

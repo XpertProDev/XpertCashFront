@@ -1237,3 +1237,8 @@ table {
   position: relative;
   top: -5px;
 }
+
+.table-scroll-container {
+  max-height: 600px; /* ou la hauteur que vous préférez */
+  overflow-y: auto;
+}

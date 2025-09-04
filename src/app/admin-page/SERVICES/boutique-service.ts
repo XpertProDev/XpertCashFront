@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Boutique } from "../MODELS/boutique-model";
 import { catchError, map, Observable, switchMap, throwError } from "rxjs";
@@ -7,6 +7,7 @@ import { Produit } from "../MODELS/produit.model";
 import { Users } from "../MODELS/utilisateur.model";
 import { UsersService } from "./users.service";
 import { AssignerVendeurRequest } from "../MODELS/AssignerVendeurRequest";
+import { ProduitStockPaginatedResponse } from "./produit.service";
 
 @Injectable({
   providedIn: 'root'
@@ -302,6 +303,30 @@ getVendeursDeBoutique(boutiqueId: number): Observable<any> {
       return this.http.get(`${this.apiUrl}/vendeurs/${boutiqueId}`, { headers }).pipe(
         catchError(error => {
           console.error('Erreur lors de la récupération des vendeurs:', error);
+          return throwError(() => error);
+        })
+      );
+    })
+  );
+}
+
+// Remplacer l'ancienne méthode par celle-ci
+getProduitsBoutiquePaginated(boutiqueId: number, page: number = 0, size: number = 20): Observable<ProduitStockPaginatedResponse> {
+  return this.usersService.getValidAccessToken().pipe(
+    switchMap((token: string) => {
+      const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+      const params = new HttpParams()
+        .set('page', page.toString())
+        .set('size', size.toString());
+      
+      return this.http.get<ProduitStockPaginatedResponse>(
+        `${this.apiUrl}/boutique/${boutiqueId}/produits/paginated`, 
+        { headers, params }
+      ).pipe(
+        catchError(error => {
+          if (error.status === 400 && error.error?.error === 'Cette boutique est désactivée, ses produits ne sont pas accessibles !') {
+            return throwError(() => new Error('BOUTIQUE_DESACTIVEE'));
+          }
           return throwError(() => error);
         })
       );
