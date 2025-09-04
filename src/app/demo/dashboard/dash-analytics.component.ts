@@ -392,7 +392,7 @@ this.venteService.getMontantTotalEntreprise().subscribe(
 this.venteService.getMontantTotalEntrepriseMois().subscribe(
   (montantTotalMois: number) => {
     console.log('Montant total de l\'entreprise pour le mois:', montantTotalMois);
-    this.cards[2].no = montantTotalMois.toString();  // <-- ici
+    this.cards[2].no = montantTotalMois.toString();
   },
   (error) => {
     console.error('Erreur lors de la récupération du montant total de l\'entreprise pour le mois', error);

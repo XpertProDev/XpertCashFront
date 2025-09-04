@@ -16,7 +16,7 @@ import { environment } from 'src/environments/environment';
 export class PosPaiementComponent {
   private imgUrl = environment.imgUrl;
   logo?: string | null = null;
-  fallbackLogo = 'assets/img/TCHAKEDA.png';
+  fallbackLogo = 'assets/logo/reçu.png';
   vente?: VenteResponse | null = null;
   paymentAmount: number = 0;
   changeDue: number = 0;
