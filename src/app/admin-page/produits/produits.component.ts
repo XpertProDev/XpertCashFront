@@ -11,7 +11,7 @@ import { CategorieService } from '../SERVICES/categorie.service';
 import { ProduitEntreprisePaginatedResponse, ProduitService, ProduitStockPaginatedResponse } from '../SERVICES/produit.service';
 import { Boutique, Produit } from '../MODELS/produit.model';
 import { Categorie } from '../MODELS/categorie.model';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
 import autoTable from 'jspdf-autotable';
@@ -397,16 +397,21 @@ export class ProduitsComponent implements OnInit {
   }
 
   // Gestion de la pagination
-onPageChange(event: any): void {
-  this.currentPage = event.pageIndex;
-  this.pageSize = event.pageSize;
-  
-  if (this.selectedBoutique) {
-    this.loadProduitsPaginated(this.selectedBoutique.id, this.currentPage, this.pageSize);
-  } else {
-    this.loadAllProduitsPaginated(this.currentPage, this.pageSize);
+  onPageChange(event: PageEvent): void {
+    const pageIndex = event.pageIndex;
+    const pageSize = event.pageSize;
+
+    this.currentPage = pageIndex;
+    this.pageSize = pageSize;
+
+    if (this.selectedBoutique) {
+      // si vue boutique
+      this.loadProduitsPaginated(this.selectedBoutique.id, pageIndex, pageSize);
+    } else {
+      // vue "Toutes les boutiques"
+      this.loadAllProduitsPaginated(pageIndex, pageSize);
+    }
   }
-}
 
   // Gestion de l'upload d'image pour ajouter une photo
   // onFileSelected(event: Event): void {
@@ -626,6 +631,10 @@ onPageChange(event: any): void {
         this.totalElements = response.totalElements;
         this.totalPages = response.totalPages;
 
+        // this.currentPageEnterprise = response.pageNumber;
+        // this.pageSizeEnterprise = response.pageSize;
+        // this.totalElementsEnterprise = response.totalElements;
+
         this.dataSource.data = this.tasks;
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;
@@ -710,6 +719,10 @@ onPageChange(event: any): void {
         this.pageSize = response.pageSize;
         this.totalElements = response.totalElements;
         this.totalPages = response.totalPages;
+
+        // this.currentPageBoutique = response.pageNumber;
+        // this.pageSizeBoutique = response.pageSize;
+        // this.totalElementsBoutique = response.totalElements;
 
         this.productCounts[boutiqueId] = response.totalProduitsActifs;
 
