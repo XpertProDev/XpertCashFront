@@ -398,6 +398,7 @@ export class ProduitsComponent implements OnInit {
 
   // Gestion de la pagination
   onPageChange(event: PageEvent): void {
+    console.log('Page change event:', event);
     const pageIndex = event.pageIndex;
     const pageSize = event.pageSize;
 
@@ -410,6 +411,15 @@ export class ProduitsComponent implements OnInit {
     } else {
       // vue "Toutes les boutiques"
       this.loadAllProduitsPaginated(pageIndex, pageSize);
+    }
+  }
+
+  // Méthode pour synchroniser le paginator avec les données
+  private syncPaginator(): void {
+    if (this.paginator) {
+      this.paginator.pageIndex = this.currentPage;
+      this.paginator.pageSize = this.pageSize;
+      this.paginator.length = this.totalElements;
     }
   }
 
@@ -636,9 +646,7 @@ export class ProduitsComponent implements OnInit {
         // this.totalElementsEnterprise = response.totalElements;
 
         this.dataSource.data = this.tasks;
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
-        }
+        this.syncPaginator();
         
         this.showNoProductsMessage = this.tasks.length === 0;
         this.allProducts = [...this.tasks];

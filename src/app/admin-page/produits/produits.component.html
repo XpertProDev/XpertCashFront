@@ -263,7 +263,6 @@
     <mat-paginator *ngIf="totalElements > pageSize"
                   [length]="totalElements"
                   [pageSize]="pageSize"
-                  [pageIndex]="currentPage"
                   [pageSizeOptions]="[5, 10, 20, 50]"
                   (page)="onPageChange($event)">
     </mat-paginator>
