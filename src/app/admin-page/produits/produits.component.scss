@@ -552,9 +552,137 @@ tr:hover {
   margin-top: 20px;
 }
 
-mat-paginator {
-  background-color: #dcdcdc51;
-  border-radius: 5px;
+// Pagination personnalisée
+.pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  margin-top: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+
+  .pager-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #6c757d;
+
+    .page-size-select {
+      padding: 5px 10px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      background: white;
+      font-size: 14px;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+        border-color: #0671e4;
+        box-shadow: 0 0 0 2px rgba(6, 113, 228, 0.25);
+      }
+    }
+
+    .page-info {
+      font-weight: 500;
+      color: #495057;
+    }
+  }
+
+  .pager-navigation {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    .pager-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid #ced4da;
+      background: white;
+      color: #495057;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background: #0671e4;
+        color: white;
+        border-color: #0671e4;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #f8f9fa;
+      }
+
+      i {
+        font-size: 16px;
+      }
+    }
+
+    .page-numbers {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin: 0 10px;
+
+      .page-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        border: 1px solid #ced4da;
+        background: white;
+        color: #495057;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 14px;
+        font-weight: 500;
+
+        &:hover:not(:disabled) {
+          background: #e9ecef;
+          border-color: #adb5bd;
+        }
+
+        &.active {
+          background: #0671e4;
+          color: white;
+          border-color: #0671e4;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          background: #f8f9fa;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .pager {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+
+    .pager-info {
+      order: 2;
+    }
+
+    .pager-navigation {
+      order: 1;
+    }
+  }
 }
 
 .error-message {
@@ -1764,3 +1892,36 @@ img.roudel_detail{
       transform: translateY(2px); /* Le toast disparaît avec un léger mouvement vers le bas */
     }
   }  
+
+  .pager {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .o_pager_previous i,
+.o_pager_next i {
+  font-size: 20px;
+  padding: 0 5px;
+}
+
+.d-print-none button{
+  border: 1px solid #000;
+}
+
+.d-print-none .o_pager_previous {
+  border-top: 1px solid #000;
+  border-right: none;
+  border-bottom: 1px solid #000;
+  border-left: 1px solid #000;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+.d-print-none .o_pager_next {
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+  border-bottom: 1px solid #000;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}

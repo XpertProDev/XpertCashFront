@@ -11,7 +11,7 @@ import { CategorieService } from '../SERVICES/categorie.service';
 import { ProduitEntreprisePaginatedResponse, ProduitService, ProduitStockPaginatedResponse } from '../SERVICES/produit.service';
 import { Boutique, Produit } from '../MODELS/produit.model';
 import { Categorie } from '../MODELS/categorie.model';
-import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+// MatPaginator et PageEvent ne sont plus nécessaires avec la pagination personnalisée
 import { MatTableDataSource } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
 import autoTable from 'jspdf-autotable';
@@ -35,7 +35,7 @@ import { catchError } from 'rxjs';
     MatAutocompleteModule,
     // RouterLink,
     MatInputModule,
-    MatPaginatorModule,
+    // MatPaginatorModule n'est plus nécessaire avec la pagination personnalisée
     CustomNumberPipe,
     DragDropModule,
   ],
@@ -104,7 +104,7 @@ export class ProduitsComponent implements OnInit {
   totalPages = 0;
   // Pagination et tableau de données
   dataSource = new MatTableDataSource<Produit>();
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  // @ViewChild(MatPaginator) paginator!: MatPaginator; // Plus nécessaire avec la pagination personnalisée
   // Dropdown pour l'export
   showExportDropdown = false;
   // Gestion de l'image uploadée
@@ -396,32 +396,87 @@ export class ProduitsComponent implements OnInit {
     link.click();
   }
 
-  // Gestion de la pagination
-  onPageChange(event: PageEvent): void {
-    console.log('Page change event:', event);
-    const pageIndex = event.pageIndex;
-    const pageSize = event.pageSize;
+  // Gestion de la pagination personnalisée
+  goToPage(page: number | string): void {
+    // Ignorer les clics sur les points de suspension
+    if (page === '...') {
+      return;
+    }
+    
+    const pageNumber = page as number;
+    if (pageNumber >= 0 && pageNumber < this.totalPages) {
+      this.currentPage = pageNumber;
+      
+      if (this.selectedBoutique) {
+        // si vue boutique
+        this.loadProduitsPaginated(this.selectedBoutique.id, pageNumber, this.pageSize);
+      } else {
+        // vue "Toutes les boutiques"
+        this.loadAllProduitsPaginated(pageNumber, this.pageSize);
+      }
+    }
+  }
 
-    this.currentPage = pageIndex;
-    this.pageSize = pageSize;
-
+  onPageSizeChange(): void {
+    this.currentPage = 0; // Retourner à la première page
+    
     if (this.selectedBoutique) {
       // si vue boutique
-      this.loadProduitsPaginated(this.selectedBoutique.id, pageIndex, pageSize);
+      this.loadProduitsPaginated(this.selectedBoutique.id, 0, this.pageSize);
     } else {
       // vue "Toutes les boutiques"
-      this.loadAllProduitsPaginated(pageIndex, pageSize);
+      this.loadAllProduitsPaginated(0, this.pageSize);
     }
   }
 
-  // Méthode pour synchroniser le paginator avec les données
-  private syncPaginator(): void {
-    if (this.paginator) {
-      this.paginator.pageIndex = this.currentPage;
-      this.paginator.pageSize = this.pageSize;
-      this.paginator.length = this.totalElements;
-    }
+  getPageInfo(): string {
+    const start = this.currentPage * this.pageSize + 1;
+    const end = Math.min((this.currentPage + 1) * this.pageSize, this.totalElements);
+    return `${start} - ${end} / ${this.totalElements}`;
   }
+
+  getVisiblePages(): (number | string)[] {
+    const pages: (number | string)[] = [];
+    const totalPages = this.totalPages;
+    const current = this.currentPage;
+    
+    if (totalPages <= 7) {
+      // Si moins de 7 pages, afficher toutes les pages
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Logique pour afficher les pages avec des points de suspension
+      if (current <= 3) {
+        // Début de la liste
+        for (let i = 0; i < 5; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages - 1);
+      } else if (current >= totalPages - 4) {
+        // Fin de la liste
+        pages.push(0);
+        pages.push('...');
+        for (let i = totalPages - 5; i < totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Milieu de la liste
+        pages.push(0);
+        pages.push('...');
+        for (let i = current - 1; i <= current + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages - 1);
+      }
+    }
+    
+    return pages;
+  }
+
+  // Méthode syncPaginator supprimée car plus nécessaire avec la pagination personnalisée
 
   // Gestion de l'upload d'image pour ajouter une photo
   // onFileSelected(event: Event): void {
@@ -557,9 +612,7 @@ export class ProduitsComponent implements OnInit {
           this.productCounts = counts;
 
           this.dataSource.data = this.tasks;
-          if (this.paginator) {
-            this.dataSource.paginator = this.paginator;
-          }
+          // Configuration du paginator supprimée car plus nécessaire avec la pagination personnalisée
           
           this.showNoProductsMessage = this.tasks.length === 0;
           this.allProducts = [...this.tasks];
@@ -646,7 +699,7 @@ export class ProduitsComponent implements OnInit {
         // this.totalElementsEnterprise = response.totalElements;
 
         this.dataSource.data = this.tasks;
-        this.syncPaginator();
+        // syncPaginator() supprimé car plus nécessaire avec la pagination personnalisée
         
         this.showNoProductsMessage = this.tasks.length === 0;
         this.allProducts = [...this.tasks];
@@ -735,9 +788,7 @@ export class ProduitsComponent implements OnInit {
         this.productCounts[boutiqueId] = response.totalProduitsActifs;
 
         this.dataSource.data = this.tasks;
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
-        }
+        // Configuration du paginator supprimée car plus nécessaire avec la pagination personnalisée
         this.isLoading = false;
         this.allProducts = [...this.tasks];
         this.resetFilters();
@@ -828,9 +879,7 @@ export class ProduitsComponent implements OnInit {
         this.productCounts[boutiqueId] = response.totalProduitsActifs;
 
         this.dataSource.data = this.tasks;
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
-        }
+        // Configuration du paginator supprimée car plus nécessaire avec la pagination personnalisée
         this.isLoading = false;
         this.allProducts = [...this.tasks];
         this.resetFilters();
