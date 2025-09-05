@@ -1,10 +1,44 @@
 // @import '../pos-vente/pos-vente.component.scss';
 @use '../pos-vente/pos-vente.component.scss' as *;
 
+// Variables communes
+$primary-color: #0672E4;
+$primary-hover: #2980b9;
+$danger-color: #f44336;
+$danger-hover: #d32f2f;
+$success-color: #28a745;
+$border-color: #000;
+$bg-light: #f4f4f4;
+$bg-white: #ffffff;
+$text-dark: #333;
+$text-muted: #666;
+
+// Mixins communs
+@mixin button-base {
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin border-radius($radius: 4px) {
+  border-radius: $radius;
+}
+
 p {
     margin: 0;
 }
 
+// ========================================
+// LAYOUT & CONTAINERS
+// ========================================
 .btn_container {
     display: grid;
     grid-template-columns: 60px 1fr 60px;
@@ -34,22 +68,22 @@ p {
 }
 
 .icon_edit_quantite:hover {
-  color: #0672E4;
+  color: $primary-color;
 }
 
+// ========================================
+// BOUTONS & ACTIONS
+// ========================================
 .btn-payment {
-  width: 100%;
-}
-
-.btn-payment {
+    @include button-base;
     width: 100%;
-    //   padding: 30px 0;
     height: 80px;
     color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
+    background-color: $primary-color;
+    
+    &:hover {
+        background-color: $primary-hover;
+    }
 }
 
 .btn_content {
@@ -57,16 +91,10 @@ p {
 }
 
 .btn_delete,
-.btn_retourn
-{
+.btn_retourn {
+    @include button-base;
     width: 100%;
-    // padding: 23.13px 0;
-
     height: 80px;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
 }
 
 .btn_delete i {
@@ -79,19 +107,20 @@ p {
 
 .btn_delete {
     background-color: #F2ACAC;
-    color: #000;
+    color: $text-dark;
 }
 
 .btn_retourn {
-    background-color: #f4f4f4;
-    color: #000;
+    background-color: $bg-light;
+    color: $text-dark;
 }
 
-/////////////////////////////////
-
+// ========================================
+// LISTE DES COMMANDES
+// ========================================
 .section_list_commande {
     overflow-y: auto;
-    max-height: calc(100vh - 115px); // ajuste cette valeur selon la taille du header/recherche
+    max-height: calc(100vh - 115px); 
     padding-right: 5px;
 
     &::-webkit-scrollbar {
@@ -109,19 +138,15 @@ p {
 }
 
 .ul_commande {
-    display: flex;
-    align-items: center;
+    @include flex-center;
     justify-content: space-between;
     padding: 6px 10px;
-    margin-bottom: 10px;
-    margin-top: 10px;
+    margin: 10px 0;
     box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
-    // background-color: #EDEBEB;
-    background-color: #ffffff;
+    background-color: $bg-white;
 }
 
 .ul_commande_active {
-    // background-color: #E1E6EB;
     background-color: #CDE3FA;
 }
 
@@ -130,9 +155,9 @@ p {
 }
 
 .etat_commande p {
-    background-color: #f4f4f4;
+    background-color: $bg-light;
     padding: 3px 20px;
-    border-radius: 20px;
+    @include border-radius(20px);
 }
 
 .icon_delete_commande i,
@@ -145,11 +170,12 @@ p {
 }
 
 .icon_favory_commande i {
-    color: #0672E4;
+    color: $primary-color;
 }
 
-/* Styles de l’input de recherche */
-    
+// ========================================
+// RECHERCHE & FILTRES
+// ========================================
 .toolbar {
     display: grid;
     grid-template-columns: 45px 1fr 130px 180px;
@@ -161,40 +187,30 @@ p {
 }
 
 .icon_search {
+    @include flex-center;
     height: 45px;
-    background-color: #f4f4f4;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    // border: 1px solid #000;
-    border-left: 1px solid #000;
-    border-top: 1px solid #000;
-    border-bottom: 1px solid #000;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
+    background-color: $bg-light;
+    border: 1px solid $border-color;
+    border-right: none;
+    @include border-radius(5px 0 0 5px);
 }
 
 .search input {
     width: 100%;
     height: 45px;
-    border: 1px solid #000;
+    border: 1px solid $border-color;
     padding-left: 10px;
 }
 
 .btn_search_filtre .btn {
     height: 45px;
     width: 100%;
-    border-radius: 0;
-    border: 1px solid #000;
-    border-right: 1px solid #000;
-    border-top: 1px solid #000;
-    border-bottom: 1px solid #000;
-    border-left: 0px;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    background-color: #f4f4f4;
+    border: 1px solid $border-color;
+    border-left: 0;
+    @include border-radius(0 5px 5px 0);
+    background-color: $bg-light;
     font-size: 12px;
-    color: #000;
+    color: $text-dark;
 }
 
 .btn_search_filtre .btn i {
@@ -246,8 +262,11 @@ p {
   }
 }
 
+// ========================================
+// POPUPS & MODALES
+// ========================================
 .status-paid {
-  color: #28a745;
+  color: $success-color;
   font-weight: 500;
   background-color: rgba(40, 167, 69, 0.1) !important;
 }
@@ -268,9 +287,9 @@ p {
 
 .popup {
   position: relative;
-  background-color: white;
+  background-color: $bg-white;
   padding: 30px;
-  border-radius: 10px;
+  @include border-radius(10px);
   text-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   max-width: 400px;
@@ -288,39 +307,32 @@ p {
       color: #666;
     }
 
-      .titlh {
-      font-size: 16px;
-      font-family: poppins, sans-serif;
-      margin-bottom: 15px;
-      text-align: center;
-      color: #333;
-    }
-    
-    .titlp {
-      font-size: 12px;
-      font-family: poppins, sans-serif;
-      margin-bottom: 20px;
-      text-align: center;
-      color: #555;
-    }
+// Styles de texte communs
+.titlh, h6, .h6 {
+  font-size: 16px;
+  font-family: poppins, sans-serif;
+  margin-bottom: 15px;
+  text-align: center;
+  color: $text-dark;
+}
 
-    h6, .h6{
-      font-size: 16px;
-      font-family: poppins, sans-serif;
-      margin-bottom: 10px;
-      text-align: center;
-      color: #333;
-    }
-    textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      resize: vertical;
-      font-size: 12px;
-      margin-bottom: 15px;
-      box-sizing: border-box;
-    }
+.titlp {
+  font-size: 12px;
+  font-family: poppins, sans-serif;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #555;
+}
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  @include border-radius;
+  resize: vertical;
+  font-size: 12px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
 
 .pin-container {
   display: flex;
@@ -338,7 +350,7 @@ p {
     transition: all 0.3s;
     
     &:focus {
-      border-color: #0672E4;
+      border-color: $primary-color;
       outline: none;
       box-shadow: 0 0 5px rgba(52, 119, 219, 0.5);
     }
@@ -346,17 +358,14 @@ p {
 }
 
 button {
-  background-color: #0672E4;
+  @include button-base;
+  background-color: $primary-color;
   color: white;
-  border: none;
-  // padding: 12px 25px;
-  border-radius: 6px;
-  cursor: pointer;
+  @include border-radius(6px);
   font-size: 16px;
-  transition: background-color 0.3s;
   
   &:hover {
-    background-color: #2980b9;
+    background-color: $primary-hover;
   }
 }
 
@@ -399,14 +408,7 @@ button {
   }
 }
 
-textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  resize: vertical;
-}
+// Suppression de la duplication - déjà défini plus haut
 
 .btn-container {
   display: flex;
@@ -416,31 +418,29 @@ textarea {
 }
  
 .btn-cancel {
- background-color: #f44336;
+  @include button-base;
+  background-color: $danger-color;
   color: white;
-  border: none;
   padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  //hover
+  
   &:hover {
-    background-color: #d32f2f;
+    background-color: $danger-hover;
   }
 }
 
 .btn-confirm {
-  background-color: #0672E4;
+  @include button-base;
+  background-color: $primary-color;
   color: white;
-  border: none;
   padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
-/* From Svg */ 
+// ========================================
+// CHECKBOX CUSTOM
+// ========================================
 .cyber-checkbox {
     --checkbox-size: 15px;
-    --checkbox-color: #0672E4;
+    --checkbox-color: #{$primary-color};
     --checkbox-check-color: #ffffff;
     --checkbox-hover-color: #0360c3;
     --checkbox-spark-offset: -20px;
@@ -857,6 +857,9 @@ textarea {
     }
   }
 
+// ========================================
+// ÉTATS & INTERACTIONS
+// ========================================
 .li_list_produit_select.selected-item {
   background-color: rgba(255, 0, 0, 0.1);
   border-left: 3px solid #ff0000;
@@ -872,12 +875,12 @@ textarea {
   width: 50px;
   padding: 4px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  @include border-radius;
   text-align: center;
   
   &:focus {
     outline: none;
-    border-color: #4d90fe;
+    border-color: $primary-color;
   }
 }
 
@@ -885,13 +888,14 @@ textarea {
   cursor: pointer;
   
   &:hover {
-    color: #4d90fe;
+    color: $primary-color;
   }
 }
 
 
-//ici
-  /* Conteneur du toast */
+// ========================================
+// TOASTS & NOTIFICATIONS
+// ========================================
 .toast-container {
   position: fixed;
   top: 60px;
@@ -899,13 +903,12 @@ textarea {
   z-index: 9999;
 }
 
- // toast success
 .toast-message-success {
   background-color: #D5E6DE;
   border: 1px solid #ACCEBC;
-  color: #000;
+  color: $text-dark;
   padding: 10px;
-  border-radius: 8px;
+  @include border-radius(8px);
   font-size: 13px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   opacity: 0;
@@ -913,13 +916,12 @@ textarea {
   transform: translateY(-20px);
 }
 
-//toast success
 .toast-message-danger {
   background-color: #F3D8DA;
   border: 1px solid #E7B1B6;
-  color: #000;
+  color: $text-dark;
   padding: 10px;
-  border-radius: 8px;
+  @include border-radius(8px);
   font-size: 13px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   opacity: 0;
@@ -927,7 +929,6 @@ textarea {
   transform: translateY(-20px);
 }
 
-/* Animation pour faire apparaître et disparaître le toast */
 @keyframes fadeInOut {
   0% {
     opacity: 0;
@@ -942,13 +943,15 @@ textarea {
   }
   100% {
     opacity: 0;
-    transform: translateY(2px); /* Le toast disparaît avec un léger mouvement vers le bas */
+    transform: translateY(2px);
   }
 }
 
+// ========================================
+// PAGINATION & NAVIGATION
+// ========================================
 .error {
   color: red;
-  // font-size: 14px;
   font-weight: bold;
   margin-top: 10px;
 }
@@ -960,32 +963,23 @@ textarea {
 }
 
 .d-print-none button{
-  border: 1px solid #000;
+  border: 1px solid $border-color;
 }
 
 .d-print-none .o_pager_previous {
-  border-top: 1px solid #000;
+  border: 1px solid $border-color;
   border-right: none;
-  border-bottom: 1px solid #000;
-  border-left: 1px solid #000;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  @include border-radius(5px 0 0 5px);
   background-color: #ddd;
-  color: #000;
+  color: $text-dark;
 }
 
 .d-print-none .o_pager_next {
-  border-top: 1px solid #000;
-  border-left: 1px solid #000;
-  border-bottom: 1px solid #000;
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+  border: 1px solid $border-color;
+  border-left: 1px solid $border-color;
+  @include border-radius(0 5px 5px 0);
   background-color: #ddd;
-  color: #000;
+  color: $text-dark;
 }
 
 .pager {
