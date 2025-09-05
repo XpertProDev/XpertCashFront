@@ -73,6 +73,7 @@
             type="text"
             placeholder="Recherche...." 
             [(ngModel)]="searchText"
+            (input)="onSearchChange()"
           />
         </div>
 
@@ -348,15 +349,65 @@
       {{ messageNoEntreprise }}
     </div>
 
-    <!-- Pagination pour les entreprises -->
-    <div class="pagination" *ngIf="currentListType === 'clients'">
-      <mat-paginator *ngIf="clients.length > 6"
-        [length]="clients.length"
-        [pageIndex]="currentPageClients"
-        [pageSize]="pageSize"
-        [pageSizeOptions]="[6, 10, 25, 100]"
-        (page)="onPageChange($event)">
-      </mat-paginator>
+    <!-- Pagination pour les clients -->
+    <div class="pagination_global" *ngIf="currentListType === 'clients'">
+      <div class="pager" *ngIf="clients.length > 0">
+        <div class="pager-info">
+          <span>Clients par page:</span>
+          <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="page-size-select">
+            <option value="6">6</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          <span class="page-info">{{ getPageInfo() }}</span>
+        </div>
+        
+        <div class="pager-navigation">
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPageClients === 0"
+            (click)="goToPage(0)"
+            title="Première page">
+            <i class="ri-skip-back-line"></i>
+          </button>
+          
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPageClients === 0"
+            (click)="goToPage(currentPageClients - 1)"
+            title="Page précédente">
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+          
+          <div class="page-numbers">
+            <button 
+              *ngFor="let page of getVisiblePages()" 
+              class="page-number"
+              [class.active]="page === currentPageClients"
+              (click)="onPageClick(page)"
+              [disabled]="page === '...'">
+              {{ page }}
+            </button>
+          </div>
+          
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPageClients >= totalPages - 1"
+            (click)="goToPage(currentPageClients + 1)"
+            title="Page suivante">
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+          
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPageClients >= totalPages - 1"
+            (click)="goToPage(totalPages - 1)"
+            title="Dernière page">
+            <i class="ri-skip-forward-line"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Message quand il n'y a pas de client -->
@@ -364,15 +415,65 @@
       {{ messageNoClient }}
     </div>
 
-    <!-- Pagination -->
-    <div class="pagination" *ngIf="currentListType === 'entreprises'">
-      <mat-paginator *ngIf="entreprises.length > 6"
-        [length]="entreprises.length"
-        [pageIndex]="currentPageEntreprises"
-        [pageSize]="pageSize"
-        [pageSizeOptions]="[6, 10, 25, 100]"
-        (page)="onPageChange($event)">
-      </mat-paginator>
+    <!-- Pagination pour les entreprises -->
+    <div class="pagination_global" *ngIf="currentListType === 'entreprises'">
+      <div class="pager" *ngIf="entreprises.length > 0">
+        <div class="pager-info">
+          <span>Entreprises par page:</span>
+          <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="page-size-select">
+            <option value="6">6</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          <span class="page-info">{{ getPageInfo() }}</span>
+        </div>
+        
+        <div class="pager-navigation">
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPageEntreprises === 0"
+            (click)="goToPage(0)"
+            title="Première page">
+            <i class="ri-skip-back-line"></i>
+          </button>
+          
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPageEntreprises === 0"
+            (click)="goToPage(currentPageEntreprises - 1)"
+            title="Page précédente">
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+          
+          <div class="page-numbers">
+            <button 
+              *ngFor="let page of getVisiblePages()" 
+              class="page-number"
+              [class.active]="page === currentPageEntreprises"
+              (click)="onPageClick(page)"
+              [disabled]="page === '...'">
+              {{ page }}
+            </button>
+          </div>
+          
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPageEntreprises >= totalPages - 1"
+            (click)="goToPage(currentPageEntreprises + 1)"
+            title="Page suivante">
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+          
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPageEntreprises >= totalPages - 1"
+            (click)="goToPage(totalPages - 1)"
+            title="Dernière page">
+            <i class="ri-skip-forward-line"></i>
+          </button>
+        </div>
+      </div>
     </div>
     
   </div>
