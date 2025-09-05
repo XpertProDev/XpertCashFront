@@ -214,17 +214,25 @@
                                         (focus)="onFocus()" 
                                       >
                                       <mat-autocomplete #autoProduits="matAutocomplete" [displayWith]="displayProduit" (optionSelected)="onProduitSelected($event)">
-                                        <mat-option [value]="null">
-                                          <div style="display: flex; align-items: center; color: #0672E4;">
-                                            <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
-                                            <span style="margin-left: 8px;">Créer un produit</span>
+                                        <div #tableScrollContainer class="table-scroll-container" (scroll)="onTableScroll($event)">
+                                          <mat-option [value]="null">
+                                            <div style="display: flex; align-items: center; color: #0672E4;">
+                                              <i class="ri-add-circle-fill" style="font-size: 20px;"></i>
+                                              <span style="margin-left: 8px;">Créer un produit</span>
+                                            </div>
+                                          </mat-option>
+                                          <mat-option *ngFor="let produit of filteredProduits | async" [value]="produit">
+                                            <div class="option-content">
+                                              {{ produit.nom }}
+                                            </div>
+                                          </mat-option>
+                                          
+                                          <!-- Loading indicator pour le chargement de plus de produits -->
+                                          <div *ngIf="isLoadingMore" class="loading-more-products">
+                                            <div class="spinner-small"></div>
+                                            <span>Chargement de plus de produits...</span>
                                           </div>
-                                        </mat-option>
-                                        <mat-option *ngFor="let produit of filteredProduits | async" [value]="produit">
-                                          <div class="option-content">
-                                            {{ produit.nom }}
-                                          </div>
-                                        </mat-option>
+                                        </div>
                                       </mat-autocomplete>
                                     </div>
                                   </td>
