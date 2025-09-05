@@ -50,7 +50,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of users" (click)="openPermissionDetail(user.id)">
+        <tr *ngFor="let user of paginatedUsers" (click)="openPermissionDetail(user.id)">
           <td>{{ user.nomComplet }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.role?.name }}</td>
@@ -67,14 +67,65 @@
     {{ messageNoClient }}
   </div>
 
-  <!-- Pagination -->
-  <div class="pagination" *ngIf="filteredUsers.length > 0">
-    <mat-paginator
-      [length]="filteredUsers.length"
-      [pageSize]="pageSize"
-      [pageSizeOptions]="[5, 10, 25, 100]"
-      (page)="onPageChange($event)">
-    </mat-paginator>
+  <!-- Pagination pour les comptes -->
+  <div class="pagination_global" *ngIf="filteredUsers.length > 0">
+    <div class="pager">
+      <div class="pager-info">
+        <span>Utilisateurs par page:</span>
+        <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="page-size-select">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+        <span class="page-info">{{ getPageInfo() }}</span>
+      </div>
+      
+      <div class="pager-navigation">
+        <button 
+          class="pager-btn" 
+          [disabled]="currentPage === 0"
+          (click)="goToPage(0)"
+          title="Première page">
+          <i class="ri-skip-back-line"></i>
+        </button>
+        
+        <button 
+          class="pager-btn" 
+          [disabled]="currentPage === 0"
+          (click)="goToPage(currentPage - 1)"
+          title="Page précédente">
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
+        
+        <div class="page-numbers">
+          <button 
+            *ngFor="let page of getVisiblePages()" 
+            class="page-number"
+            [class.active]="page === currentPage"
+            (click)="onPageClick(page)"
+            [disabled]="page === '...'">
+            {{ page }}
+          </button>
+        </div>
+        
+        <button 
+          class="pager-btn" 
+          [disabled]="currentPage >= totalPages - 1"
+          (click)="goToPage(currentPage + 1)"
+          title="Page suivante">
+          <i class="ri-arrow-right-s-line"></i>
+        </button>
+        
+        <button 
+          class="pager-btn" 
+          [disabled]="currentPage >= totalPages - 1"
+          (click)="goToPage(totalPages - 1)"
+          title="Dernière page">
+          <i class="ri-skip-forward-line"></i>
+        </button>
+      </div>
+    </div>
   </div>
   
   </div>
