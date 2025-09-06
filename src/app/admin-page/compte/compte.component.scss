@@ -398,6 +398,11 @@ tr:hover {
   color: red;
 }
 
+.pagination_global {
+    justify-content: right;
+    margin-top: 30px;
+}
+
 .pagination {
     justify-content: right;
     margin-top: 30px;
@@ -412,4 +417,136 @@ tr:hover {
   border-radius: 8px;
   margin: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 10px;
+  margin-top: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+
+  .pager-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #6c757d;
+
+    .page-size-select {
+      padding: 5px 10px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      background: white;
+      font-size: 14px;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+        border-color: #0671e4;
+        box-shadow: 0 0 0 2px rgba(6, 113, 228, 0.25);
+      }
+    }
+
+    .page-info {
+      font-weight: 500;
+      color: #495057;
+    }
+  }
+
+  .pager-navigation {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    .pager-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid #ced4da;
+      background: white;
+      color: #495057;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background: #0671e4;
+        color: white;
+        border-color: #0671e4;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #f8f9fa;
+      }
+
+      i {
+        font-size: 16px;
+      }
+    }
+
+    .page-numbers {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin: 0 10px;
+
+      .page-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        border: 1px solid #ced4da;
+        background: white;
+        color: #495057;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 14px;
+        font-weight: 500;
+
+        &:hover:not(:disabled) {
+          background: #e9ecef;
+          border-color: #adb5bd;
+        }
+
+        &.active {
+          background: #0671e4;
+          color: white;
+          border-color: #0671e4;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          background: #f8f9fa;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .pager {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+
+    .pager-info {
+      order: 2;
+    }
+
+    .pager-navigation {
+      order: 1;
+    }
+  }
 }

@@ -86,6 +86,14 @@ export class AddfactureProformaComponent implements OnInit {
   productControl = new FormControl();
   filteredProduits: Observable<Produit[]>;
 
+  // Variables pour la pagination
+  currentPage = 0;
+  pageSize = 20;
+  totalPages = 0;
+  isLoadingMore = false;
+  allProductsLoaded = false;
+  totalProductsCount = 0;
+
   // Ajouter ces variables
   showProductFormPanel: boolean = false;
   panelAnimationState: 'hidden' | 'visible' = 'hidden';
@@ -399,7 +407,15 @@ export class AddfactureProformaComponent implements OnInit {
 }
 
 
-getProduits() {
+getProduits(loadMore: boolean = false) {
+  if (loadMore) {
+    this.isLoadingMore = true;
+  } else {
+    this.isLoading = true;
+    this.currentPage = 0;
+    this.allProductsLoaded = false;
+  }
+
   this.usersService.getValidAccessToken().subscribe({
     next: (token) => {
       if (!token) {
@@ -412,10 +428,18 @@ getProduits() {
         return;
       }
 
-      this.produitService.getProduitsParEntreprise(this.userEntrepriseId).subscribe({
-        next: (data: Produit[]) => {
-          console.log('Produits récupérés :', data);
-          this.produits = data;
+      this.produitService.getProduitsByEntrepriseIdPaginated(this.userEntrepriseId, this.currentPage, this.pageSize).subscribe({
+        next: (response) => {
+          console.log('Produits récupérés :', response);
+          
+          const newProducts = response.content;
+
+          if (loadMore) {
+            this.produits = [...this.produits, ...newProducts];
+          } else {
+            this.produits = newProducts;
+            this.totalProductsCount = response.totalElements;
+          }
 
           // Filtrer uniquement les produits liés à au moins une boutique non entrepôt
           const produitsBoutiques = this.produits.filter(p =>
@@ -436,12 +460,25 @@ getProduits() {
             })
           );
 
+          this.totalPages = response.totalPages;
+          this.isLoading = false;
+          this.isLoadingMore = false;
+          this.allProductsLoaded = this.currentPage >= response.totalPages - 1;
+
           console.log("Produits visibles dans autocomplete :", produitsBoutiques);
         },
-        error: (err) => console.error('Erreur récupération produits :', err)
+        error: (err) => {
+          console.error('Erreur récupération produits :', err);
+          this.isLoading = false;
+          this.isLoadingMore = false;
+        }
       });
     },
-    error: (err) => console.error('Erreur récupération token :', err)
+    error: (err) => {
+      console.error('Erreur récupération token :', err);
+      this.isLoading = false;
+      this.isLoadingMore = false;
+    }
   });
 }
 
@@ -981,5 +1018,85 @@ onProduitSelected(event: MatAutocompleteSelectedEvent) {
         }
       });
     }
+
+  // Méthode pour charger plus de produits
+  loadMoreProducts(): void {
+    if (this.isLoadingMore || this.allProductsLoaded || !this.userEntrepriseId) return;
+    
+    this.isLoadingMore = true;
+    this.currentPage++;
+    
+    this.usersService.getValidAccessToken().subscribe({
+      next: (token) => {
+        if (!token) {
+          console.error('Token manquant pour récupérer les produits');
+          this.isLoadingMore = false;
+          return;
+        }
+
+        this.produitService.getProduitsByEntrepriseIdPaginated(this.userEntrepriseId!, this.currentPage, this.pageSize)
+          .subscribe({
+            next: (response) => {
+              const newProducts = response.content;
+              this.produits = [...this.produits, ...newProducts];
+
+              // Filtrer uniquement les produits liés à au moins une boutique non entrepôt
+              const produitsBoutiques = this.produits.filter(p =>
+                Array.isArray(p.boutiques) &&
+                p.boutiques.some(b => (b.typeBoutique || '').toUpperCase() !== 'ENTREPOT')
+              );
+
+              // Mettre à jour filteredProduits pour l'autocomplete
+              this.filteredProduits = this.productControl.valueChanges.pipe(
+                startWith(null),
+                map(value => typeof value === 'string' ? value : value?.nom),
+                map(name => {
+                  if (!name) return produitsBoutiques;
+                  const lowerName = name.toLowerCase();
+                  return produitsBoutiques.filter(p =>
+                    p.nom?.toLowerCase().includes(lowerName)
+                  );
+                })
+              );
+
+              this.totalPages = response.totalPages;
+              
+              // Délai de 3 secondes avant de masquer le loading
+              setTimeout(() => {
+                this.isLoadingMore = false;
+              }, 3000);
+              
+              this.allProductsLoaded = this.currentPage >= response.totalPages - 1;
+            },
+            error: (err) => {
+              console.error('Erreur chargement produits supplémentaires', err);
+              // Délai de 3 secondes même en cas d'erreur
+              setTimeout(() => {
+                this.isLoadingMore = false;
+              }, 3000);
+              this.currentPage--; // Revenir à la page précédente en cas d'erreur
+            }
+          });
+      },
+      error: (err) => {
+        console.error('Erreur récupération token :', err);
+        this.isLoadingMore = false;
+      }
+    });
+  }
+
+  // Méthode pour gérer le scroll (à appeler depuis le template)
+  onTableScroll(event: any): void {
+    if (this.allProductsLoaded || this.isLoadingMore || !this.userEntrepriseId) return;
+
+    const threshold = 100;
+    const container = event.target;
+    const position = container.scrollTop + container.offsetHeight;
+    const height = container.scrollHeight;
+
+    if (position > height - threshold) {
+      this.loadMoreProducts();
+    }
+  }
   
 }

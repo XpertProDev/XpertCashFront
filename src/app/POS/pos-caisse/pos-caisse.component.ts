@@ -320,7 +320,7 @@ export class PosCaisseComponent {
     if (caisse.statut === 'OUVERTE') {
         return 'La caisse est ouverte';
     } else if (caisse.statut === 'FERMEE') {
-        return 'La caisse est fermer';
+        return 'La caisse est fermée';
     }
     return 'Action inconnue';
   }

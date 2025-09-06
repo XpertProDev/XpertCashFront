@@ -48,6 +48,7 @@ export class ClientsComponent implements OnInit  {
   currentPageEntreprises = 0;
   totalClients = 0;
   totalEntrepriseClients = 0;
+  totalPages = 0;
   clients: Clients[] = [];
   entrepriseClient: EntrepriseClient[] = [];
   sortField = 'nomComplet';
@@ -86,6 +87,7 @@ export class ClientsComponent implements OnInit  {
     // }
     this.getListClients();
     this.getListEntreprises();
+    this.updateTotalPages();
   }
 
   highlightMatch(text: string | null | undefined): SafeHtml {
@@ -105,19 +107,23 @@ export class ClientsComponent implements OnInit  {
     if (!this.searchText.trim()) return this.clients;
     
     const searchLower = this.searchText.toLowerCase().trim();
-    return this.clients.filter(client => 
+    const filtered = this.clients.filter(client => 
       (client.nomComplet?.toLowerCase().includes(searchLower)) ||
       (client.email?.toLowerCase().includes(searchLower)) ||
       (client.adresse?.toLowerCase().includes(searchLower)) ||
       (client.telephone?.includes(searchLower))
     );
+    
+    // Mettre à jour la pagination après filtrage
+    setTimeout(() => this.updateTotalPages(), 0);
+    return filtered;
   }
 
   get filteredEntreprises(): EntrepriseClient[] {
     if (!this.searchText.trim()) return this.entreprises;
     
     const searchLower = this.searchText.toLowerCase().trim();
-    return this.entreprises.filter(entreprise => 
+    const filtered = this.entreprises.filter(entreprise => 
       (entreprise.nom?.toLowerCase().includes(searchLower)) ||
       (entreprise.email?.toLowerCase().includes(searchLower)) ||
       (entreprise.adresse?.toLowerCase().includes(searchLower)) ||
@@ -126,6 +132,10 @@ export class ClientsComponent implements OnInit  {
       (entreprise.siege?.toLowerCase().includes(searchLower)) ||
       (entreprise.secteur?.toLowerCase().includes(searchLower))
     );
+    
+    // Mettre à jour la pagination après filtrage
+    setTimeout(() => this.updateTotalPages(), 0);
+    return filtered;
   }
 
   onPageChange(event: PageEvent): void {
@@ -143,6 +153,78 @@ export class ClientsComponent implements OnInit  {
       this.clientsLoaded = true;
       this.entreprisesLoaded = true;
     }, 0);
+  }
+
+  // Méthodes pour la pagination personnalisée
+  goToPage(page: number): void {
+    if (this.currentListType === 'clients') {
+      this.currentPageClients = page;
+      this.currentPage = page;
+    } else {
+      this.currentPageEntreprises = page;
+      this.currentPage = page;
+    }
+    this.updateTotalPages();
+  }
+
+  onPageSizeChange(): void {
+    // Réinitialiser à la première page quand on change la taille
+    if (this.currentListType === 'clients') {
+      this.currentPageClients = 0;
+    } else {
+      this.currentPageEntreprises = 0;
+    }
+    this.currentPage = 0;
+    this.updateTotalPages();
+  }
+
+  updateTotalPages(): void {
+    const totalItems = this.currentListType === 'clients' ? this.filteredClients.length : this.filteredEntreprises.length;
+    this.totalPages = Math.ceil(totalItems / this.pageSize);
+  }
+
+  getPageInfo(): string {
+    const totalItems = this.currentListType === 'clients' ? this.filteredClients.length : this.filteredEntreprises.length;
+    const currentPageIndex = this.currentListType === 'clients' ? this.currentPageClients : this.currentPageEntreprises;
+    const startItem = currentPageIndex * this.pageSize + 1;
+    const endItem = Math.min((currentPageIndex + 1) * this.pageSize, totalItems);
+    return `${startItem}-${endItem} sur ${totalItems}`;
+  }
+
+  getVisiblePages(): (number | string)[] {
+    const currentPageIndex = this.currentListType === 'clients' ? this.currentPageClients : this.currentPageEntreprises;
+    const pages: (number | string)[] = [];
+    const maxVisible = 6;
+    
+    if (this.totalPages <= maxVisible) {
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPageIndex <= 2) {
+        for (let i = 0; i < 4; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(this.totalPages - 1);
+      } else if (currentPageIndex >= this.totalPages - 3) {
+        pages.push(0);
+        pages.push('...');
+        for (let i = this.totalPages - 4; i < this.totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(0);
+        pages.push('...');
+        for (let i = currentPageIndex - 1; i <= currentPageIndex + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(this.totalPages - 1);
+      }
+    }
+    
+    return pages;
   }
 
   toggleView(viewType: 'list' | 'grid') {
@@ -164,11 +246,8 @@ export class ClientsComponent implements OnInit  {
     this.clientsLoaded = false;
     this.entreprisesLoaded = false;
     
-    // if (type === 'entreprises' && this.entreprises.length === 0) {
-    //   this.getListEntreprises();
-    // } else if (type === 'clients' && this.clients.length === 0) {
-    //   this.getListClients();
-    // }
+    // Mettre à jour le nombre total de pages
+    this.updateTotalPages();
 
     if (type === 'entreprises') {
       this.getListEntreprises();
@@ -193,6 +272,7 @@ export class ClientsComponent implements OnInit  {
       console.log('Entreprises récupérées:', data);
       this.entreprises = data.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
       this.entreprisesLoaded = true;
+      this.updateTotalPages();
     },
     error: (err) => {
       console.error('Erreur lors de la récupération des entreprises :', err);
@@ -277,6 +357,7 @@ export class ClientsComponent implements OnInit  {
       }
 
       this.clientsLoaded = true;
+      this.updateTotalPages();
     },
     error: (err) => {
       console.error('❌ Erreur récupération clients :', err);
@@ -320,6 +401,22 @@ export class ClientsComponent implements OnInit  {
   // Ouvre/ferme le popup choix d'ajoute client
   openPopup() { this.showPopup = true; }
   closePopup() { this.showPopup = false; }
+
+  // Méthode pour gérer le changement de recherche
+  onSearchChange(): void {
+    // Réinitialiser à la première page lors de la recherche
+    this.currentPageClients = 0;
+    this.currentPageEntreprises = 0;
+    this.currentPage = 0;
+    this.updateTotalPages();
+  }
+
+  // Méthode helper pour gérer le clic sur les numéros de page
+  onPageClick(page: number | string): void {
+    if (typeof page === 'number') {
+      this.goToPage(page);
+    }
+  }
 
 
 }

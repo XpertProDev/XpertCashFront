@@ -32,6 +32,11 @@ export class BoutiqueComponent implements OnInit {
   isAscending: boolean = true;
   searchTerm: string = '';
 
+  // Propriétés de pagination
+  pageSize = 5;
+  currentPage = 0;
+  totalPages = 0;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -110,6 +115,7 @@ export class BoutiqueComponent implements OnInit {
       next: (data) => {
         this.boutiques = data;
         this.filteredBoutiques = [...data];
+        this.updateTotalPages();
         console.log('Boutiques récupérées:', this.boutiques);
       },
       error: (err) => {
@@ -131,6 +137,10 @@ export class BoutiqueComponent implements OnInit {
 
     return matchTerm && matchType;
   });
+
+  // Réinitialiser à la première page lors du filtrage
+  this.currentPage = 0;
+  this.updateTotalPages();
 }
 
   
@@ -138,6 +148,8 @@ export class BoutiqueComponent implements OnInit {
   clearSearch(): void {
     this.searchTerm = '';
     this.filteredBoutiques = this.boutiques;
+    this.currentPage = 0;
+    this.updateTotalPages();
   }
 
   openBoutiqueDetail(boutiqueId: number): void {
@@ -157,6 +169,76 @@ filtrerParType(type: 'ALL' | 'BOUTIQUE' | 'ENTREPOT'): void {
   this.filtreType = type;
   this.showFiltreDropdown = false;
   this.filterBoutiques();
+}
+
+// Méthodes pour la pagination personnalisée
+goToPage(page: number): void {
+  this.currentPage = page;
+  this.updateTotalPages();
+}
+
+onPageSizeChange(): void {
+  // Réinitialiser à la première page quand on change la taille
+  this.currentPage = 0;
+  this.updateTotalPages();
+}
+
+updateTotalPages(): void {
+  this.totalPages = Math.ceil(this.filteredBoutiques.length / this.pageSize);
+}
+
+getPageInfo(): string {
+  const startItem = this.currentPage * this.pageSize + 1;
+  const endItem = Math.min((this.currentPage + 1) * this.pageSize, this.filteredBoutiques.length);
+  return `${startItem}-${endItem} sur ${this.filteredBoutiques.length}`;
+}
+
+getVisiblePages(): (number | string)[] {
+  const pages: (number | string)[] = [];
+  const maxVisible = 5;
+  
+  if (this.totalPages <= maxVisible) {
+    for (let i = 0; i < this.totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    if (this.currentPage <= 2) {
+      for (let i = 0; i < 4; i++) {
+        pages.push(i);
+      }
+      pages.push('...');
+      pages.push(this.totalPages - 1);
+    } else if (this.currentPage >= this.totalPages - 3) {
+      pages.push(0);
+      pages.push('...');
+      for (let i = this.totalPages - 4; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(0);
+      pages.push('...');
+      for (let i = this.currentPage - 1; i <= this.currentPage + 1; i++) {
+        pages.push(i);
+      }
+      pages.push('...');
+      pages.push(this.totalPages - 1);
+    }
+  }
+  
+  return pages;
+}
+
+// Méthode helper pour gérer le clic sur les numéros de page
+onPageClick(page: number | string): void {
+  if (typeof page === 'number') {
+    this.goToPage(page);
+  }
+}
+
+// Getter pour les boutiques paginées
+get paginatedBoutiques(): any[] {
+  const startIndex = this.currentPage * this.pageSize;
+  return this.filteredBoutiques.slice(startIndex, startIndex + this.pageSize);
 }
 
 

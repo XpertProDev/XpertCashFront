@@ -59,7 +59,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let boutique of filteredBoutiques" (click)="openBoutiqueDetail(boutique.id)">
+        <tr *ngFor="let boutique of paginatedBoutiques" (click)="openBoutiqueDetail(boutique.id)">
           <td>{{ boutique.nomBoutique }}</td>
           <td>{{ boutique.email || 'Non email' }}</td>
           <td>{{ boutique.adresse || 'Non adresse'  }}</td>
@@ -79,11 +79,6 @@
             </ng-template>
           </td>
 
-
-        
-
-
-
           <td class="content_statut_boutique">
             <span class="statut_boutique" 
                   [ngStyle]="{
@@ -97,6 +92,67 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Pagination pour les boutiques -->
+    <div class="pagination_global" *ngIf="boutiques.length > 0">
+      <div class="pager">
+        <div class="pager-info">
+          <span>Boutiques par page:</span>
+          <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="page-size-select">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          <span class="page-info">{{ getPageInfo() }}</span>
+        </div>
+        
+        <div class="pager-navigation">
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPage === 0"
+            (click)="goToPage(0)"
+            title="Première page">
+            <i class="ri-skip-back-line"></i>
+          </button>
+          
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPage === 0"
+            (click)="goToPage(currentPage - 1)"
+            title="Page précédente">
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+          
+          <div class="page-numbers">
+            <button 
+              *ngFor="let page of getVisiblePages()" 
+              class="page-number"
+              [class.active]="page === currentPage"
+              (click)="onPageClick(page)"
+              [disabled]="page === '...'">
+              {{ page }}
+            </button>
+          </div>
+          
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPage >= totalPages - 1"
+            (click)="goToPage(currentPage + 1)"
+            title="Page suivante">
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+          
+          <button 
+            class="pager-btn" 
+            [disabled]="currentPage >= totalPages - 1"
+            (click)="goToPage(totalPages - 1)"
+            title="Dernière page">
+            <i class="ri-skip-forward-line"></i>
+          </button>
+        </div>
+      </div>
+    </div>
   
 </div>
   
@@ -115,7 +171,7 @@
                 <input type="radio"
                       id="typeBoutique"
                       formControlName="type"
-                      name="typeBoutique"
+                      name="type"
                       value="BOUTIQUE"
                       class="radio-input">
                 <label for="typeBoutique" class="radio-label">
@@ -127,7 +183,7 @@
                 <input type="radio"
                       id="typeEntrepot"
                       formControlName="type"
-                      name="typeBoutique"
+                      name="type"
                       value="ENTREPOT"
                       class="radio-input">
                 <label for="typeEntrepot" class="radio-label">

@@ -108,3 +108,7 @@ mark {
   flex-grow: 0!important;
   padding: 0 20px;
 }
+
+div.mat-mdc-autocomplete-panel.mat-mdc-autocomplete-visible {
+  &::-webkit-scrollbar { width: 0.5px; height: 2px; } &::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.2); border-radius: 3px;} &::-webkit-scrollbar-track { background: transparent; } 
+}
