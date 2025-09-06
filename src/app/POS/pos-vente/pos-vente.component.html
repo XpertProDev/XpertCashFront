@@ -111,6 +111,11 @@
             <i class="ri-loader-4-line"></i> Chargement de plus de produits...
           </div>
           
+          <!-- Indicateur de chargement de catégorie -->
+          <div *ngIf="isLoadingCategory" class="loading-category-indicator">
+            <i class="ri-loader-4-line"></i> Chargement de la catégorie...
+          </div>
+          
        
 
         </div>
@@ -160,6 +165,11 @@
           <!-- Indicateur de chargement de plus de produits (mode liste) -->
           <div *ngIf="isLoadingMore && selectedCategoryId === null" class="loading-more-indicator">
             <i class="ri-loader-4-line"></i> Chargement de plus de produits...
+          </div>
+          
+          <!-- Indicateur de chargement de catégorie (mode liste) -->
+          <div *ngIf="isLoadingCategory" class="loading-category-indicator">
+            <i class="ri-loader-4-line"></i> Chargement de la catégorie...
           </div>
           
        

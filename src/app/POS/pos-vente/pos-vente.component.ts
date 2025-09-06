@@ -58,6 +58,7 @@ export class PosVenteComponent {
   pageSize: number = 20;
   totalPages: number = 0;
   isLoadingMore: boolean = false;
+  isLoadingCategory: boolean = false;
 
   scanInProgress = false;
 
@@ -617,8 +618,8 @@ loadProduitsByCategorie(categorieId: number, page: number = 0, size: number = 20
       // Nettoyer les doublons potentiels
       this.removeDuplicateProducts();
       
-      // Vider le cache car les produits ont changé
-      this.clearCategoryCountCache();
+      // Vider le cache seulement si nécessaire (pas à chaque chargement)
+      // this.clearCategoryCountCache(); // Supprimé pour éviter l'effet de flash
       
       // Indexer les produits pour le scanner
       this.indexProductsByBarcode();
@@ -631,9 +632,11 @@ loadProduitsByCategorie(categorieId: number, page: number = 0, size: number = 20
       
       // Désactiver l'indicateur de chargement
       this.isLoadingMore = false;
+      this.isLoadingCategory = false;
     },
     error: (err) => {
       this.isLoadingMore = false;
+      this.isLoadingCategory = false;
       console.error(`Erreur lors du chargement de la page ${page} pour la catégorie ${categorieId}`, err);
     }
   });
@@ -702,16 +705,19 @@ selectCategory(categoryId: number | undefined) {
   this.selectedCategoryId = categoryId;
   this.currentPage = 0; // Réinitialiser à la première page
   
-  // Vider le cache AVANT de charger les nouveaux produits
-  // pour éviter d'afficher des compteurs incorrects
-  this.clearCategoryCountCache();
+  // Vérifier si les produits de cette catégorie sont déjà chargés
+  const existingProducts = this.allProducts.filter(p => p.categorieId === categoryId);
   
-  // S'assurer que tous les produits de toutes les catégories sont chargés
-  this.ensureAllCategoriesLoaded();
-  
-  // Filtrer l'affichage pour la catégorie sélectionnée
-  const categoryProducts = this.allProducts.filter(p => p.categorieId === categoryId);
-  this.displayedProducts = categoryProducts;
+  if (existingProducts.length > 0) {
+    // ✅ Produits déjà chargés - affichage instantané
+    this.displayedProducts = existingProducts;
+    console.log(`⚡ Affichage instantané de ${existingProducts.length} produits pour la catégorie ${categoryId}`);
+  } else {
+    // 📦 Produits pas encore chargés - charger depuis l'API
+    console.log(`📦 Chargement des produits pour la catégorie ${categoryId}`);
+    this.isLoadingCategory = true;
+    this.loadProduitsByCategorie(categoryId, 0, this.pageSize);
+  }
   
   // Forcer la mise à jour de l'affichage
   this.cdr.detectChanges();
